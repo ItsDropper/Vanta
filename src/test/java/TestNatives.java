@@ -1,5 +1,3 @@
-package org.example;
-
 import org.example.launcher.NativeExtractor;
 
 import java.nio.file.Path;

@@ -1,0 +1,408 @@
+.root {
+    -fx-background-color: #090b0f;
+    -fx-font-family: "Segoe UI";
+}
+
+/* =========================================================
+   LAUNCHER
+========================================================= */
+
+.launcher {
+    -fx-background-color: #090b0f;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar {
+    -fx-background-color: #0e1116;
+    -fx-background-radius: 14px;
+    -fx-border-color: #1a1f27;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+}
+
+.sidebar-logo {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 23px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 4px;
+}
+
+.sidebar-subtitle {
+    -fx-text-fill: #555d69;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 1.5px;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #777f8c;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 14px;
+    -fx-cursor: hand;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #171b22;
+    -fx-text-fill: #ffffff;
+}
+
+.sidebar-button:pressed {
+    -fx-background-color: #1d222b;
+}
+
+/* =========================================================
+   PAGE
+========================================================= */
+
+.page {
+    -fx-background-color: transparent;
+}
+
+.page-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.page-subtitle {
+    -fx-text-fill: #707885;
+    -fx-font-size: 13px;
+}
+
+/* =========================================================
+   HOME
+========================================================= */
+
+.minecraft-version {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.loader-label {
+    -fx-text-fill: #626a77;
+    -fx-font-size: 12px;
+}
+
+.status-label {
+    -fx-text-fill: #69717e;
+    -fx-font-size: 12px;
+}
+
+/* =========================================================
+   BUTTONS
+========================================================= */
+
+.primary-button {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 9px;
+    -fx-text-fill: #090b0f;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 20px;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover {
+    -fx-background-color: #e8eaed;
+}
+
+.primary-button:pressed {
+    -fx-background-color: #d3d6da;
+}
+
+.primary-button:disabled {
+    -fx-opacity: 0.5;
+}
+
+.secondary-button {
+    -fx-background-color: #171b22;
+    -fx-background-radius: 9px;
+    -fx-border-color: #252b34;
+    -fx-border-radius: 9px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #c7cbd1;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 18px;
+    -fx-cursor: hand;
+}
+
+.secondary-button:hover {
+    -fx-background-color: #1d222a;
+    -fx-border-color: #343b46;
+    -fx-text-fill: #ffffff;
+}
+
+.danger-button {
+    -fx-background-color: #171215;
+    -fx-background-radius: 9px;
+    -fx-border-color: #332127;
+    -fx-border-radius: 9px;
+    -fx-text-fill: #d88491;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 18px;
+    -fx-cursor: hand;
+}
+
+.danger-button:hover {
+    -fx-background-color: #21171b;
+}
+
+/* =========================================================
+   ACCOUNT
+========================================================= */
+
+.account-panel {
+    -fx-background-color: #10141a;
+    -fx-background-radius: 14px;
+    -fx-border-color: #1e242d;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-max-width: 760px;
+}
+
+.account-name {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.account-detail {
+    -fx-text-fill: #636b77;
+    -fx-font-size: 12px;
+}
+
+.connected-label {
+    -fx-text-fill: #70c98b;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.disconnected-label {
+    -fx-text-fill: #d16e78;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.info-card,
+.account-card {
+    -fx-background-color: #10141a;
+    -fx-background-radius: 12px;
+    -fx-border-color: #1d222b;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+.info-card:hover,
+.account-card:hover {
+    -fx-background-color: #131820;
+    -fx-border-color: #292f39;
+}
+
+.card-title {
+    -fx-text-fill: #5f6773;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 1.5px;
+}
+
+.card-main {
+    -fx-text-fill: #f1f2f4;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.card-secondary {
+    -fx-text-fill: #707783;
+    -fx-font-size: 12px;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.hero-card {
+    -fx-background-color: #10141a;
+    -fx-background-radius: 16px;
+    -fx-border-color: #1d222b;
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+}
+
+.welcome-label {
+    -fx-text-fill: #747c88;
+    -fx-font-size: 14px;
+}
+
+.username-label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+}
+
+/* =========================================================
+   LOGIN WINDOW
+========================================================= */
+
+.login-window {
+    -fx-background-color: #0d1015;
+}
+
+.login-logo {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 4px;
+}
+
+.login-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.login-subtitle {
+    -fx-text-fill: #707884;
+    -fx-font-size: 13px;
+}
+
+.login-instruction {
+    -fx-text-fill: #9aa1ab;
+    -fx-font-size: 12px;
+}
+
+.verification-code {
+    -fx-background-color: #151920;
+    -fx-background-radius: 10px;
+    -fx-border-color: #252b34;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px;
+}
+
+.login-status {
+    -fx-text-fill: #555e6a;
+    -fx-font-size: 11px;
+}
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+    -fx-background-color: #0e1116;
+    -fx-border-color: #1a1f27;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.footer-label {
+    -fx-text-fill: #555d68;
+    -fx-font-size: 11px;
+}
+
+.connected-label {
+    -fx-text-fill: #65d98b;
+    -fx-font-weight: bold;
+}
+
+.disconnected-label {
+    -fx-text-fill: #8b929e;
+}
+
+/* =========================================================
+HOME
+========================================================= */
+
+.home-hero {
+    -fx-background-color: #11151b;
+    -fx-background-radius: 14px;
+    -fx-border-color: #202630;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+}
+
+.home-minecraft-title {
+    -fx-text-fill: #f3f4f6;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.home-version {
+    -fx-text-fill: #9aa2ad;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.home-loader {
+    -fx-background-color: #1b2028;
+    -fx-background-radius: 5px;
+    -fx-padding: 4px 8px;
+    -fx-text-fill: #aeb5bf;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.status-label {
+    -fx-text-fill: #68717d;
+    -fx-font-size: 12px;
+}
+
+/* =========================================================
+HOME CARDS
+========================================================= */
+
+.info-card {
+    -fx-background-color: #11151b;
+    -fx-background-radius: 12px;
+    -fx-border-color: #202630;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+
+.info-card:hover {
+    -fx-background-color: #141920;
+    -fx-border-color: #2a313c;
+}
+
+.ready-label {
+    -fx-text-fill: #82c995;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.account-status {
+    -fx-text-fill: #747d89;
+    -fx-font-size: 12px;
+}
+
+.account-connected {
+    -fx-text-fill: #82c995;
+}
+
+.primary-button:disabled {
+    -fx-opacity: 0.65;
+}
+
+.playing-button {
+    -fx-background-color: #b91c1c;
+    -fx-text-fill: white;
+}
+
+.playing-button:hover {
+    -fx-background-color: #dc2626;
+}

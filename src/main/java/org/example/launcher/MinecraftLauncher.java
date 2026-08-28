@@ -1,78 +1,91 @@
 package org.example.launcher;
 
-import org.example.launcher.auth.Account;
+import org.example.launcher.account.Account;
 
 import java.nio.file.Path;
 import java.util.List;
 
 public class MinecraftLauncher {
 
-    public static void launch(Account account) throws Exception {
+    public static Process launch(Account account) throws Exception {
 
+        Path minecraft =
+                MinecraftLocator.getMinecraftDirectory();
 
-        Path minecraft = MinecraftLocator.getMinecraftDirectory();
+        System.out.println("Building Minecraft classpath...");
 
-        List<Path> classpath = ClasspathBuilder.build(
-                minecraft,
-                "fabric-loader-0.19.3-1.21.11"
-        );
+        List<Path> classpath =
+                ClasspathBuilder.build(
+                        minecraft,
+                        "fabric-loader-0.19.3-1.21.11"
+                );
 
+        String cp =
+                ClasspathStringBuilder.build(classpath);
 
+        System.out.println("Extracting natives...");
 
-        String cp = ClasspathStringBuilder.build(classpath);
-
-        Path natives = minecraft.resolve("natives");
+        Path natives =
+                minecraft.resolve("natives");
 
         NativeExtractor.extractAll(
                 classpath,
                 natives
         );
 
-        ProcessBuilder processBuilder = new ProcessBuilder(
-                JavaLocator.getJava(),
+        System.out.println("Starting Minecraft...");
 
-                "-Djava.library.path=" + natives,
-                "-Dminecraft.assets.root=" + minecraft.resolve("assets"),
+        ProcessBuilder processBuilder =
+                new ProcessBuilder(
+                        JavaLocator.getJava(),
 
-                "-cp",
-                cp,
+                        "-Djava.library.path=" + natives,
 
-                "net.fabricmc.loader.impl.launch.knot.KnotClient",
+                        "-Dminecraft.assets.root="
+                                + minecraft.resolve("assets"),
 
-                "--gameDir",
-                minecraft.toString(),
+                        "-cp",
+                        cp,
 
-                "--assetsDir",
-                minecraft.resolve("assets").toString(),
+                        "net.fabricmc.loader.impl.launch.knot.KnotClient",
 
-                "--version",
-                "1.21.11",
+                        "--gameDir",
+                        minecraft.toString(),
 
-                "--assetIndex",
-                "26",
+                        "--assetsDir",
+                        minecraft.resolve("assets").toString(),
 
-                "--username",
-                account.username,
+                        "--version",
+                        "1.21.11",
 
-                "--uuid",
-                account.uuid.replace("-", ""),
+                        "--assetIndex",
+                        "26",
 
-                "--accessToken",
-                account.accessToken,
+                        "--username",
+                        account.getUsername(),
 
-                "--userType",
-                "msa"
-        );
-        Process process = processBuilder.start();
+                        "--uuid",
+                        account.getUuid().replace("-", ""),
+
+                        "--accessToken",
+                        account.getAccessToken(),
+
+                        "--userType",
+                        "msa"
+                );
 
         processBuilder.redirectErrorStream(true);
         processBuilder.inheritIO();
 
+        Process process =
+                processBuilder.start();
 
-        System.out.println("Started Minecraft with PID: " + process.pid());
+        System.out.println(
+                "Started Minecraft with PID: "
+                        + process.pid()
+        );
 
-        int exitCode = process.waitFor();
-
-        System.out.println("Minecraft exited with code: " + exitCode);
+        return process;
     }
 }
+

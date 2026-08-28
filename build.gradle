@@ -25,12 +25,15 @@ application {
 
 javafx {
     version = "21"
-    modules = ['javafx.controls']
+    modules = ['javafx.controls', 'javafx.web', 'javafx.swing']
 }
 
 dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
     implementation "net.raphimc:MinecraftAuth:4.1.0"
+
+    implementation 'net.java.dev.jna:jna:5.16.0'
+    implementation 'net.java.dev.jna:jna-platform:5.16.0'
 }
 
 shadowJar {

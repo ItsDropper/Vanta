@@ -2,73 +2,63 @@ package org.example;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import org.example.launcher.MinecraftLauncher;
-import org.example.launcher.account.AccountManager;
-import org.example.launcher.auth.Account;
-import org.example.launcher.auth.AuthManager;
+import org.example.ui.LauncherView;
 
 public class Main extends Application {
+
 
     @Override
     public void start(Stage stage) {
 
-        Button launchButton = new Button("Launch Minecraft");
+        LauncherView launcherView =
+                new LauncherView(stage);
 
-        launchButton.setOnAction(e -> {
-            System.out.println("BUTTON CLICKED");
+        Scene scene = new Scene(
+                launcherView.getRoot(),
+                1000,
+                650
+        );
 
-            new Thread(() -> {
-                try {
-                    Account account = AccountManager.loadAccount();
-
-                    if (account == null) {
-                        account = AuthManager.login();
-                    }
-
-                    MinecraftLauncher.launch(account);
-                } catch (Throwable ex) {
-                    ex.printStackTrace();
-
-                    javafx.application.Platform.runLater(() -> {
-                        new javafx.scene.control.Alert(
-                                javafx.scene.control.Alert.AlertType.ERROR,
-                                ex.toString()
-                        ).showAndWait();
-                    });
-
-                }
-            }).start();
-        });
-
-        StackPane root = new StackPane();
-        root.getChildren().add(launchButton);
-
-        Scene scene = new Scene(root, 500, 300);
+        scene.getStylesheets().add(
+                getClass()
+                        .getResource("/launcher.css")
+                        .toExternalForm()
+        );
 
         stage.setTitle("Vanta");
+        stage.setMinWidth(900);
+        stage.setMinHeight(600);
         stage.setScene(scene);
         stage.show();
     }
 
     public static void main(String[] args) {
+
         try {
-            System.out.println("Main started");
+
+            System.out.println("Vanta started");
+
             launch(args);
+
         } catch (Throwable t) {
+
             t.printStackTrace();
 
             try {
+
                 java.nio.file.Files.writeString(
                         java.nio.file.Path.of("launcher-crash.txt"),
                         t.toString()
                 );
-            } catch (Exception ignored) {}
+
+            } catch (Exception ignored) {
+            }
 
             throw t;
         }
     }
+
+
 }
