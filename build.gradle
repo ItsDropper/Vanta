@@ -1,0 +1,38 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+    id 'com.gradleup.shadow' version '8.3.5'
+}
+
+group = 'org.example'
+version = '1.0'
+
+repositories {
+    mavenCentral()
+    maven { url = "https://repo.raphimc.net/repository/maven-releases/" }
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    mainClass = 'org.example.Main'
+}
+
+javafx {
+    version = "21"
+    modules = ['javafx.controls']
+}
+
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
+    implementation "net.raphimc:MinecraftAuth:4.1.0"
+}
+
+shadowJar {
+    archiveClassifier = 'all'
+}
