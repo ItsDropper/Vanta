@@ -10,6 +10,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import org.example.launcher.account.Account;
+import org.example.launcher.model.Instance;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.LaunchService;
 import org.example.ui.components.AccountCard;
@@ -20,9 +21,19 @@ public class HomeView extends VBox {
     private final LaunchService launchService;
 
     private final AccountCard accountCard;
+
     private final Label accountLabel;
     private final Label statusLabel;
     private final Button playButton;
+
+    private Instance selectedInstance;
+
+    private final Label minecraftLabel;
+    private final HBox versionInfo;
+
+    private Label instanceNameLabel;
+    private Label instanceDetailsLabel;
+    private Label instanceStatusLabel;
 
     public HomeView(
             AccountService accountService,
@@ -66,7 +77,7 @@ public class HomeView extends VBox {
         // HERO
         // ---------------------------------------------------------
 
-        Label minecraftLabel =
+        minecraftLabel =
                 new Label("Minecraft");
 
         minecraftLabel.getStyleClass().add(
@@ -87,7 +98,7 @@ public class HomeView extends VBox {
                 "home-loader"
         );
 
-        HBox versionInfo =
+        versionInfo =
                 new HBox(
                         10,
                         versionLabel,
@@ -97,6 +108,10 @@ public class HomeView extends VBox {
         versionInfo.setAlignment(
                 Pos.CENTER
         );
+
+        // ---------------------------------------------------------
+        // PLAY BUTTON
+        // ---------------------------------------------------------
 
         playButton =
                 new Button("PLAY");
@@ -198,9 +213,9 @@ public class HomeView extends VBox {
         updateLaunchState();
     }
 
-// =============================================================
-// INSTANCE CARD
-// =============================================================
+    // =============================================================
+    // INSTANCE CARD
+    // =============================================================
 
     private VBox createInstanceCard() {
 
@@ -211,34 +226,36 @@ public class HomeView extends VBox {
                 "card-title"
         );
 
-        Label name =
-                new Label("Minecraft 1.21.11");
+        instanceNameLabel =
+                new Label("No instance selected");
 
-        name.getStyleClass().add(
+        instanceNameLabel.getStyleClass().add(
                 "card-main"
         );
 
-        Label details =
-                new Label("Fabric");
+        instanceDetailsLabel =
+                new Label(
+                        "Select an instance from the Instances page"
+                );
 
-        details.getStyleClass().add(
+        instanceDetailsLabel.getStyleClass().add(
                 "card-secondary"
         );
 
-        Label status =
-                new Label("● Ready");
+        instanceStatusLabel =
+                new Label("● No instance");
 
-        status.getStyleClass().add(
-                "ready-label"
+        instanceStatusLabel.getStyleClass().add(
+                "card-secondary"
         );
 
         VBox card =
                 new VBox(
                         8,
                         title,
-                        name,
-                        details,
-                        status
+                        instanceNameLabel,
+                        instanceDetailsLabel,
+                        instanceStatusLabel
                 );
 
         card.setPadding(
@@ -252,9 +269,9 @@ public class HomeView extends VBox {
         return card;
     }
 
-// =============================================================
-// ACCOUNT
-// =============================================================
+    // =============================================================
+    // ACCOUNT
+    // =============================================================
 
     public void refreshAccount() {
 
@@ -300,17 +317,119 @@ public class HomeView extends VBox {
         );
     }
 
-// =============================================================
-// LAUNCH
-// =============================================================
+    // =============================================================
+    // SELECTED INSTANCE
+    // =============================================================
+
+    public void setSelectedInstance(
+            Instance instance
+    ) {
+
+        this.selectedInstance = instance;
+
+        if (instance == null) {
+
+            minecraftLabel.setText(
+                    "Minecraft"
+            );
+
+            versionInfo.getChildren().clear();
+
+            Label version =
+                    new Label("1.21.11");
+
+            version.getStyleClass().add(
+                    "home-version"
+            );
+
+            Label loader =
+                    new Label("Fabric");
+
+            loader.getStyleClass().add(
+                    "home-loader"
+            );
+
+            versionInfo.getChildren().addAll(
+                    version,
+                    loader
+            );
+
+            instanceNameLabel.setText(
+                    "No instance selected"
+            );
+
+            instanceDetailsLabel.setText(
+                    "Select an instance from the Instances page"
+            );
+
+            instanceStatusLabel.setText(
+                    "● No instance"
+            );
+
+            return;
+        }
+
+        minecraftLabel.setText(
+                instance.getName()
+        );
+
+        versionInfo.getChildren().clear();
+
+        Label version =
+                new Label(
+                        instance.getMinecraftVersion()
+                );
+
+        version.getStyleClass().add(
+                "home-version"
+        );
+
+        Label loader =
+                new Label(
+                        instance.getDisplayLoader()
+                );
+
+        loader.getStyleClass().add(
+                "home-loader"
+        );
+
+        versionInfo.getChildren().addAll(
+                version,
+                loader
+        );
+
+        instanceNameLabel.setText(
+                instance.getName()
+        );
+
+        instanceDetailsLabel.setText(
+                instance.getMinecraftVersion()
+                        + " • "
+                        + instance.getDisplayLoader()
+        );
+
+        instanceStatusLabel.setText(
+                "● Ready"
+        );
+    }
+
+    // =============================================================
+    // LAUNCH
+    // =============================================================
 
     private void launchMinecraft() {
 
         // ---------------------------------------------------------
-        // CLOSE MINECRAFT
+        // CLOSE
         // ---------------------------------------------------------
 
         if (launchService.isRunning()) {
+
+            playButton.setDisable(true);
+
+            playButton.setText(
+                    "CLOSING..."
+            );
 
             statusLabel.setText(
                     "Closing Minecraft..."
@@ -318,17 +437,44 @@ public class HomeView extends VBox {
 
             launchService.close();
 
-            updateLaunchState();
+            waitForClose();
+
+            return;
+        }
+
+        // ---------------------------------------------------------
+        // IGNORE CLICKS WHILE LAUNCHING
+        // ---------------------------------------------------------
+
+        if (
+                launchService.getState()
+                        == LaunchService.LaunchState.PREPARING
+                        ||
+                        launchService.getState()
+                                == LaunchService.LaunchState.STARTING
+                        ||
+                        launchService.getState()
+                                == LaunchService.LaunchState.CLOSING
+        ) {
+
+            return;
+        }
+
+        // ---------------------------------------------------------
+        // VALIDATE INSTANCE
+        // ---------------------------------------------------------
+
+        if (selectedInstance == null) {
 
             statusLabel.setText(
-                    "Minecraft closed."
+                    "No instance selected."
             );
 
             return;
         }
 
         // ---------------------------------------------------------
-        // START MINECRAFT
+        // PREPARING
         // ---------------------------------------------------------
 
         playButton.setDisable(true);
@@ -341,10 +487,17 @@ public class HomeView extends VBox {
                 "Preparing Minecraft..."
         );
 
+        Instance instance =
+                selectedInstance;
+
         Thread thread =
                 new Thread(() -> {
 
                     try {
+
+                        // -------------------------------------------------
+                        // LAUNCH
+                        // -------------------------------------------------
 
                         Platform.runLater(() -> {
 
@@ -358,7 +511,13 @@ public class HomeView extends VBox {
                         });
 
                         var process =
-                                launchService.launch();
+                                launchService.launch(
+                                        instance
+                                );
+
+                        // -------------------------------------------------
+                        // RUNNING
+                        // -------------------------------------------------
 
                         Platform.runLater(() -> {
 
@@ -372,18 +531,26 @@ public class HomeView extends VBox {
                                     "primary-button"
                             );
 
-                            playButton.getStyleClass().add(
+                            if (!playButton.getStyleClass().contains(
                                     "playing-button"
-                            );
+                            )) {
+
+                                playButton.getStyleClass().add(
+                                        "playing-button"
+                                );
+                            }
 
                             statusLabel.setText(
                                     "Minecraft is running."
                             );
 
+                            instanceStatusLabel.setText(
+                                    "● Running"
+                            );
                         });
 
                         // -------------------------------------------------
-                        // WAIT FOR MINECRAFT TO CLOSE
+                        // WAIT
                         // -------------------------------------------------
 
                         while (process.isAlive()) {
@@ -391,25 +558,24 @@ public class HomeView extends VBox {
                             Thread.sleep(250);
                         }
 
+                        // -------------------------------------------------
+                        // CLOSED
+                        // -------------------------------------------------
+
                         Platform.runLater(() -> {
 
-                            playButton.setDisable(false);
-
-                            playButton.getStyleClass().remove(
-                                    "playing-button"
-                            );
-
-                            playButton.getStyleClass().add(
-                                    "primary-button"
-                            );
-
-                            playButton.setText(
-                                    "PLAY"
-                            );
+                            resetPlayButton();
 
                             statusLabel.setText(
                                     "Minecraft closed."
                             );
+
+                            if (selectedInstance != null) {
+
+                                instanceStatusLabel.setText(
+                                        "● Ready"
+                                );
+                            }
                         });
 
                     } catch (Throwable ex) {
@@ -418,67 +584,92 @@ public class HomeView extends VBox {
 
                         Platform.runLater(() -> {
 
-                            playButton.setDisable(false);
-
-                            playButton.getStyleClass().remove(
-                                    "playing-button"
-                            );
-
-                            playButton.getStyleClass().add(
-                                    "primary-button"
-                            );
-
-                            playButton.setText(
-                                    "PLAY"
-                            );
+                            resetPlayButton();
 
                             statusLabel.setText(
                                     ex.getMessage() != null
                                             ? ex.getMessage()
                                             : "Failed to launch Minecraft."
                             );
+
+                            if (selectedInstance != null) {
+
+                                instanceStatusLabel.setText(
+                                        "● Error"
+                                );
+                            }
                         });
                     }
 
                 });
 
         thread.setDaemon(true);
+
+        thread.setName(
+                "Vanta-Home-Launch"
+        );
+
         thread.start();
     }
 
-// =============================================================
-// STATE
-// =============================================================
+    // =============================================================
+    // WAIT FOR CLOSE
+    // =============================================================
 
-    private void updateLaunchState() {
+    private void waitForClose() {
 
-        if (launchService.isRunning()) {
+        Thread thread =
+                new Thread(() -> {
 
-            playButton.setDisable(false);
+                    while (
+                            launchService.isRunning()
+                    ) {
 
-            playButton.setText(
-                    "CLOSE"
-            );
+                        try {
 
-            playButton.getStyleClass().remove(
-                    "primary-button"
-            );
+                            Thread.sleep(100);
 
-            if (!playButton.getStyleClass().contains(
-                    "playing-button"
-            )) {
+                        } catch (InterruptedException e) {
 
-                playButton.getStyleClass().add(
-                        "playing-button"
-                );
-            }
+                            Thread.currentThread()
+                                    .interrupt();
 
-            statusLabel.setText(
-                    "Minecraft is running."
-            );
+                            return;
+                        }
+                    }
 
-            return;
-        }
+                    Platform.runLater(() -> {
+
+                        resetPlayButton();
+
+                        statusLabel.setText(
+                                "Minecraft closed."
+                        );
+
+                        if (selectedInstance != null) {
+
+                            instanceStatusLabel.setText(
+                                    "● Ready"
+                            );
+                        }
+                    });
+
+                });
+
+        thread.setDaemon(true);
+
+        thread.setName(
+                "Vanta-Home-Close-Monitor"
+        );
+
+        thread.start();
+    }
+
+    // =============================================================
+    // RESET BUTTON
+    // =============================================================
+
+    private void resetPlayButton() {
 
         playButton.setDisable(false);
 
@@ -499,4 +690,101 @@ public class HomeView extends VBox {
             );
         }
     }
+
+    // =============================================================
+    // STATE
+    // =============================================================
+
+    private void updateLaunchState() {
+
+        LaunchService.LaunchState state =
+                launchService.getState();
+
+        switch (state) {
+
+            case PREPARING -> {
+
+                playButton.setDisable(true);
+
+                playButton.setText(
+                        "PREPARING..."
+                );
+
+                statusLabel.setText(
+                        "Preparing Minecraft..."
+                );
+            }
+
+            case STARTING -> {
+
+                playButton.setDisable(true);
+
+                playButton.setText(
+                        "STARTING..."
+                );
+
+                statusLabel.setText(
+                        "Starting Minecraft..."
+                );
+            }
+
+            case RUNNING -> {
+
+                playButton.setDisable(false);
+
+                playButton.setText(
+                        "CLOSE"
+                );
+
+                playButton.getStyleClass().remove(
+                        "primary-button"
+                );
+
+                if (!playButton.getStyleClass().contains(
+                        "playing-button"
+                )) {
+
+                    playButton.getStyleClass().add(
+                            "playing-button"
+                    );
+                }
+
+                statusLabel.setText(
+                        "Minecraft is running."
+                );
+            }
+
+            case CLOSING -> {
+
+                playButton.setDisable(true);
+
+                playButton.setText(
+                        "CLOSING..."
+                );
+
+                statusLabel.setText(
+                        "Closing Minecraft..."
+                );
+            }
+
+            case ERROR -> {
+
+                resetPlayButton();
+
+                statusLabel.setText(
+                        "Minecraft failed to launch."
+                );
+            }
+
+            case IDLE -> {
+
+                resetPlayButton();
+
+                statusLabel.setText(
+                        "Ready to launch"
+                );
+            }
+        }
+    }
 }
+

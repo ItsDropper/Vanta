@@ -6,19 +6,83 @@ import java.nio.file.Paths;
 
 public class MinecraftLocator {
 
-    public static Path getMinecraftDirectory() {
-        String appData = System.getenv("APPDATA");
+    public static Path getVantaDirectory() {
+
+        String appData =
+                System.getenv("APPDATA");
 
         if (appData == null) {
-            return null;
+            throw new IllegalStateException(
+                    "APPDATA is not available."
+            );
         }
 
-        Path minecraft = Paths.get(appData, ".minecraft");
+        Path directory =
+                Paths.get(
+                        appData,
+                        "Vanta"
+                );
 
-        if (Files.exists(minecraft)) {
-            return minecraft;
+        try {
+
+            Files.createDirectories(
+                    directory
+            );
+
+        } catch (Exception e) {
+
+            throw new IllegalStateException(
+                    "Failed to create Vanta directory.",
+                    e
+            );
         }
 
-        return null;
+        return directory;
+    }
+
+    public static Path getInstancesDirectory() {
+
+        Path directory =
+                getVantaDirectory()
+                        .resolve("instances");
+
+        try {
+
+            Files.createDirectories(
+                    directory
+            );
+
+        } catch (Exception e) {
+
+            throw new IllegalStateException(
+                    "Failed to create instances directory.",
+                    e
+            );
+        }
+
+        return directory;
+    }
+
+    public static Path getLibrariesDirectory() {
+
+        Path directory =
+                getVantaDirectory()
+                        .resolve("libraries");
+
+        try {
+
+            Files.createDirectories(
+                    directory
+            );
+
+        } catch (Exception e) {
+
+            throw new IllegalStateException(
+                    "Failed to create libraries directory.",
+                    e
+            );
+        }
+
+        return directory;
     }
 }

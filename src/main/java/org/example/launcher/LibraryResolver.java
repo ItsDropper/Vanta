@@ -7,47 +7,145 @@ import java.nio.file.Path;
 
 public class LibraryResolver {
 
-    public static Path resolve(Path minecraftDirectory, Library library) {
+    public static Path resolve(
+            Path minecraftDirectory,
+            Library library
+    ) {
 
-        String[] parts = library.name.split(":");
-
-        String group = parts[0].replace(".", "/");
-        String artifact = parts[1];
-        String version = parts[2];
-
-        return minecraftDirectory
-                .resolve("libraries")
-                .resolve(group)
-                .resolve(artifact)
-                .resolve(version)
-                .resolve(artifact + "-" + version + ".jar");
-    }
-
-
-    public static Path resolveNative(Path minecraftDirectory, Library library) {
-
-        String[] parts = library.name.split(":");
-
-        if (parts.length < 4) {
-            return null;
+        if (library == null) {
+            throw new IllegalArgumentException(
+                    "Library cannot be null."
+            );
         }
 
-        String group = parts[0].replace(".", "/");
-        String artifact = parts[1];
-        String version = parts[2];
-        String classifier = parts[3];
+        Path librariesDirectory =
+                MinecraftLocator
+                        .getLibrariesDirectory();
 
-        Path nativeJar = minecraftDirectory
-                .resolve("libraries")
-                .resolve(group)
-                .resolve(artifact)
-                .resolve(version)
-                .resolve(artifact + "-" + version + "-" + classifier + ".jar");
+        // =========================================================
+        // MOJANG LIBRARY FORMAT
+        // =========================================================
 
-        if (Files.exists(nativeJar)) {
-            return nativeJar;
+        if (library.downloads != null
+                && library.downloads.artifact != null) {
+
+            String path =
+                    library.downloads.artifact.path;
+
+            if (path == null
+                    || path.isBlank()) {
+
+                return null;
+            }
+
+            Path jar =
+                    librariesDirectory
+                            .resolve(path);
+
+            if (!Files.exists(jar)) {
+
+                throw new IllegalStateException(
+                        "Library not found: "
+                                + jar
+                );
+            }
+
+            return jar;
+        }
+
+        // =========================================================
+        // FABRIC LIBRARY FORMAT
+        // =========================================================
+
+        if (library.name != null
+                && !library.name.isBlank()) {
+
+            String[] parts =
+                    library.name.split(":");
+
+            if (parts.length >= 3) {
+
+                String group =
+                        parts[0]
+                                .replace('.', '/');
+
+                String artifact =
+                        parts[1];
+
+                String version =
+                        parts[2];
+
+                Path jar =
+                        librariesDirectory
+                                .resolve(group)
+                                .resolve(artifact)
+                                .resolve(version)
+                                .resolve(
+                                        artifact
+                                                + "-"
+                                                + version
+                                                + ".jar"
+                                );
+
+                if (!Files.exists(jar)) {
+
+                    throw new IllegalStateException(
+                            "Library not found: "
+                                    + jar
+                    );
+                }
+
+                return jar;
+            }
         }
 
         return null;
+    }
+
+    public static Path resolveNative(
+            Path minecraftDirectory,
+            Library library
+    ) {
+
+        if (library == null
+                || library.downloads == null
+                || library.downloads.classifiers == null) {
+
+            return null;
+        }
+
+        Library.Artifact nativeArtifact =
+                library.downloads.classifiers.get(
+                        "natives-windows"
+                );
+
+        if (nativeArtifact == null
+                || nativeArtifact.path == null
+                || nativeArtifact.path.isBlank()) {
+
+            return null;
+        }
+
+        Path nativeJar =
+                librariesDirectory()
+                        .resolve(
+                                nativeArtifact.path
+                        );
+
+        if (!Files.exists(nativeJar)) {
+
+            throw new IllegalStateException(
+                    "Native library not found: "
+                            + nativeJar
+            );
+        }
+
+        return nativeJar;
+    }
+
+    private static Path librariesDirectory() {
+
+        return MinecraftLocator
+                .getLibrariesDirectory();
     }
 }

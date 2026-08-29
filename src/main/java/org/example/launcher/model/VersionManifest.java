@@ -14,4 +14,23 @@ public class VersionManifest {
     public String mainClass;
 
     public List<Library> libraries;
+
+    public JavaVersion javaVersion;
+
+    public AssetIndex assetIndex;
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class JavaVersion {
+
+        public int majorVersion;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class AssetIndex {
+
+        public String id;
+
+        public String url;
+    }
 }
+

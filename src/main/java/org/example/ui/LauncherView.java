@@ -7,19 +7,15 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import org.example.launcher.model.Instance;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.LaunchService;
 
 import org.example.ui.components.Sidebar;
 
-import org.example.ui.views.AccountsView;
-import org.example.ui.views.HomeView;
-import org.example.ui.views.InstancesView;
-import org.example.ui.views.ModsView;
-import org.example.ui.views.SettingsView;
+import org.example.ui.views.*;
 
 public class LauncherView {
-
 
     private final BorderPane root;
 
@@ -34,60 +30,100 @@ public class LauncherView {
     private final InstancesView instancesView;
     private final ModsView modsView;
     private final SettingsView settingsView;
+    private final CreateInstanceView createInstanceView;
+
+    private Instance selectedInstance;
+
+    private InstanceSettingsView instanceSettingsView;
 
     public LauncherView(Stage stage) {
 
         root = new BorderPane();
-        root.getStyleClass().add("launcher");
+
+        root.getStyleClass().add(
+                "launcher"
+        );
 
         // ---------------------------------------------------------
         // SERVICES
         // ---------------------------------------------------------
 
-        accountService = new AccountService();
+        accountService =
+                new AccountService();
 
-        launchService = new LaunchService(
-                accountService
-        );
+        launchService =
+                new LaunchService(
+                        accountService
+                );
 
         // ---------------------------------------------------------
         // SIDEBAR
         // ---------------------------------------------------------
 
-        sidebar = new Sidebar();
+        sidebar =
+                new Sidebar();
 
         BorderPane.setMargin(
                 sidebar,
                 new Insets(16)
         );
 
-        root.setLeft(sidebar);
+        root.setLeft(
+                sidebar
+        );
 
         // ---------------------------------------------------------
         // VIEWS
         // ---------------------------------------------------------
 
-        homeView = new HomeView(
-                accountService,
-                launchService
-        );
+        homeView =
+                new HomeView(
+                        accountService,
+                        launchService
+                );
 
-        accountsView = new AccountsView(
-                accountService
-        );
+        accountsView =
+                new AccountsView(
+                        accountService
+                );
 
-        instancesView = new InstancesView();
+        instancesView =
+                new InstancesView(
+                        launchService,
+                        this::showCreateInstanceView,
+                        this::selectInstance,
+                        this::showInstanceSettings
+                );
 
-        modsView = new ModsView();
+        createInstanceView =
+                new CreateInstanceView(
+                        this::showInstances,
+                        this::instanceCreated
+                );
 
-        settingsView = new SettingsView();
+        /*
+         * Global MODS page is kept for now.
+         *
+         * It is only used when an instance is selected.
+         * We will replace this with a proper instance-aware
+         * content system later.
+         */
+        modsView =
+                null;
+
+        settingsView =
+                new SettingsView();
 
         // ---------------------------------------------------------
         // CONTENT
         // ---------------------------------------------------------
 
-        content = new StackPane();
-        content.getStyleClass().add("content");
+        content =
+                new StackPane();
+
+        content.getStyleClass().add(
+                "content"
+        );
 
         content.setPadding(
                 new Insets(
@@ -98,7 +134,9 @@ public class LauncherView {
                 )
         );
 
-        root.setCenter(content);
+        root.setCenter(
+                content
+        );
 
         // ---------------------------------------------------------
         // NAVIGATION
@@ -113,68 +151,196 @@ public class LauncherView {
         );
 
         // ---------------------------------------------------------
-        // LOAD ACCOUNT
+        // ACCOUNT
         // ---------------------------------------------------------
 
         loadAccount();
     }
 
-    private void showPage(Sidebar.Page page) {
+    // =============================================================
+    // NAVIGATION
+    // =============================================================
 
+    private void showPage(
+            Sidebar.Page page
+    ) {
 
         switch (page) {
 
             case HOME ->
-                    content.getChildren().setAll(homeView);
+                    content.getChildren().setAll(
+                            homeView
+                    );
 
             case ACCOUNTS ->
-                    content.getChildren().setAll(accountsView);
+                    content.getChildren().setAll(
+                            accountsView
+                    );
 
             case INSTANCES ->
-                    content.getChildren().setAll(instancesView);
+                    content.getChildren().setAll(
+                            instancesView
+                    );
 
-            case MODS ->
-                    content.getChildren().setAll(modsView);
+            case MODS -> {
+
+                if (selectedInstance == null) {
+
+                    content.getChildren().setAll(
+                            instancesView
+                    );
+
+                    return;
+                }
+
+                showInstanceMods(
+                        selectedInstance
+                );
+            }
 
             case SETTINGS ->
-                    content.getChildren().setAll(settingsView);
+                    content.getChildren().setAll(
+                            settingsView
+                    );
         }
-
-
     }
 
+    // =============================================================
+    // INSTANCE MODS
+    // =============================================================
+
+    private void showInstanceMods(
+            Instance instance
+    ) {
+
+        ModsView view =
+                new ModsView(
+                        instance
+                );
+
+        content.getChildren().setAll(
+                view
+        );
+    }
+
+    // =============================================================
+    // CREATE INSTANCE
+    // =============================================================
+
+    private void showCreateInstanceView() {
+
+        content.getChildren().setAll(
+                createInstanceView
+        );
+    }
+
+    private void showInstances() {
+
+        content.getChildren().setAll(
+                instancesView
+        );
+    }
+
+    // =============================================================
+    // INSTANCE SELECTION
+    // =============================================================
+
+    private void selectInstance(
+            Instance instance
+    ) {
+
+        selectedInstance =
+                instance;
+
+        homeView.setSelectedInstance(
+                instance
+        );
+
+        showPage(
+                Sidebar.Page.HOME
+        );
+    }
+
+    // =============================================================
+    // INSTANCE CREATED
+    // =============================================================
+
+    private void instanceCreated() {
+
+        instancesView.refresh();
+
+        content.getChildren().setAll(
+                instancesView
+        );
+    }
+
+    // =============================================================
+    // INSTANCE SETTINGS
+    // =============================================================
+
+    private void showInstanceSettings(
+            Instance instance
+    ) {
+
+        selectedInstance =
+                instance;
+
+        instanceSettingsView =
+                new InstanceSettingsView(
+                        instance,
+                        this::showInstances,
+                        () -> showInstanceMods(
+                                instance
+                        )
+                );
+
+        content.getChildren().setAll(
+                instanceSettingsView
+        );
+    }
+
+    // =============================================================
+    // ACCOUNT
+    // =============================================================
 
     private void loadAccount() {
 
-        Thread thread = new Thread(() -> {
+        Thread thread =
+                new Thread(() -> {
 
-            try {
+                    try {
 
-                accountService.loadAccount();
+                        accountService.loadAccount();
 
-                Platform.runLater(() -> {
+                        Platform.runLater(() -> {
 
-                    homeView.setAccount(
-                            accountService.getCurrentAccount()
-                    );
+                            homeView.setAccount(
+                                    accountService
+                                            .getCurrentAccount()
+                            );
 
-                    accountsView.refresh();
+                            accountsView.refresh();
+                        });
+
+                    } catch (Throwable ex) {
+
+                        ex.printStackTrace();
+                    }
                 });
 
-            } catch (Throwable ex) {
+        thread.setDaemon(
+                true
+        );
 
-                ex.printStackTrace();
-            }
-
-        });
-
-        thread.setDaemon(true);
         thread.start();
     }
 
+    // =============================================================
+    // ROOT
+    // =============================================================
+
     public Parent getRoot() {
+
         return root;
     }
-
-
 }
