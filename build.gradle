@@ -34,6 +34,17 @@ dependencies {
 
     implementation 'net.java.dev.jna:jna:5.16.0'
     implementation 'net.java.dev.jna:jna-platform:5.16.0'
+
+    implementation 'com.twelvemonkeys.imageio:imageio-webp:3.12.0'
+
+    implementation "com.twelvemonkeys.imageio:imageio-core:3.12.0"
+
+    implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
+
+    implementation 'org.apache.xmlgraphics:batik-transcoder:1.18'
+    implementation 'org.apache.xmlgraphics:batik-codec:1.18'
+
+
 }
 
 shadowJar {

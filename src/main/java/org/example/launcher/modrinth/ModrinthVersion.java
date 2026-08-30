@@ -2,7 +2,6 @@ package org.example.launcher.modrinth;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.example.launcher.modrinth.ModrinthFile;
 
 import java.util.List;
 
@@ -38,6 +37,9 @@ public class ModrinthVersion {
 
     @JsonProperty("files")
     private List<ModrinthFile> files;
+
+    @JsonProperty("dependencies")
+    private List<ModrinthDependency> dependencies;
 
     // =============================================================
     // GETTERS
@@ -82,5 +84,8 @@ public class ModrinthVersion {
     public List<ModrinthFile> getFiles() {
         return files;
     }
-}
 
+    public List<ModrinthDependency> getDependencies() {
+        return dependencies;
+    }
+}

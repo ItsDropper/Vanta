@@ -6,35 +6,50 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 
 import org.example.launcher.model.Instance;
-import org.example.launcher.modrinth.ModrinthProject;
-import org.example.launcher.service.ModrinthService;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.jar.JarFile;
 
 public class ModsView extends VBox {
 
     private final Instance instance;
-    private final ModrinthService modrinthService;
 
-    private final TextField searchField;
-    private final VBox results;
+    private final Runnable onBrowseMods;
+    private final Runnable onInstanceSettings;
+
+    private final VBox modsList;
     private final Label statusLabel;
 
     public ModsView(
-            Instance instance
+            Instance instance,
+            Runnable onBrowseMods,
+            Runnable onInstanceSettings
     ) {
 
         this.instance =
                 instance;
 
-        this.modrinthService =
-                new ModrinthService();
+        this.onBrowseMods =
+                onBrowseMods;
+
+        this.onInstanceSettings =
+                onInstanceSettings;
 
         getStyleClass().add(
                 "page"
@@ -48,13 +63,13 @@ public class ModsView extends VBox {
                 20
         );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // HEADER
-        // ---------------------------------------------------------
+        // =========================================================
 
         Label title =
                 new Label(
-                        "Mods"
+                        "Installed Mods"
                 );
 
         title.getStyleClass().add(
@@ -74,77 +89,79 @@ public class ModsView extends VBox {
                 "page-subtitle"
         );
 
-        VBox header =
+        VBox headerText =
                 new VBox(
                         5,
                         title,
                         subtitle
                 );
 
-        // ---------------------------------------------------------
-        // SEARCH
-        // ---------------------------------------------------------
+        // =========================================================
+        // NAVIGATION
+        // =========================================================
 
-        searchField =
-                new TextField();
-
-        searchField.setPromptText(
-                "Search Modrinth..."
-        );
-
-        searchField.getStyleClass().add(
-                "create-field"
-        );
-
-        HBox.setHgrow(
-                searchField,
-                Priority.ALWAYS
-        );
-
-        Button searchButton =
+        Button browseButton =
                 new Button(
-                        "SEARCH"
+                        "BROWSE MODS"
                 );
 
-        searchButton.getStyleClass().add(
+        browseButton.getStyleClass().add(
                 "primary-button"
         );
 
-        searchButton.setOnAction(
-                event -> search()
+        browseButton.setOnAction(
+                event ->
+                        onBrowseMods.run()
         );
 
-        searchField.setOnAction(
-                event -> search()
-        );
-
-        HBox searchBar =
-                new HBox(
-                        10,
-                        searchField,
-                        searchButton
+        Button settingsButton =
+                new Button(
+                        "INSTANCE SETTINGS"
                 );
 
-        searchBar.setAlignment(
+        settingsButton.getStyleClass().add(
+                "secondary-button"
+        );
+
+        settingsButton.setOnAction(
+                event ->
+                        onInstanceSettings.run()
+        );
+
+        HBox navigation =
+                new HBox(
+                        10,
+                        browseButton,
+                        settingsButton
+                );
+
+        navigation.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        // ---------------------------------------------------------
-        // RESULTS
-        // ---------------------------------------------------------
+        VBox header =
+                new VBox(
+                        14,
+                        headerText,
+                        navigation
+                );
 
-        results =
+        // =========================================================
+        // MOD LIST
+        // =========================================================
+
+        modsList =
                 new VBox(
                         12
                 );
 
-        results.getStyleClass().add(
+        modsList.getStyleClass().add(
                 "instance-list"
         );
 
         ScrollPane scrollPane =
                 new ScrollPane(
-                        results
+                        modsList
                 );
 
         scrollPane.setFitToWidth(
@@ -168,203 +185,246 @@ public class ModsView extends VBox {
                 Priority.ALWAYS
         );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // STATUS
-        // ---------------------------------------------------------
+        // =========================================================
 
         statusLabel =
-                new Label(
-                        "Search Modrinth for compatible mods."
-                );
+                new Label();
 
         statusLabel.getStyleClass().add(
                 "instances-status"
         );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // BUILD
-        // ---------------------------------------------------------
+        // =========================================================
 
         getChildren().addAll(
                 header,
-                searchBar,
                 scrollPane,
                 statusLabel
         );
+
+        loadInstalledMods();
     }
 
     // =============================================================
-    // SEARCH
+    // LOAD INSTALLED MODS
     // =============================================================
 
-    private void search() {
+    private void loadInstalledMods() {
 
-        String query =
-                searchField
-                        .getText()
-                        .trim();
-
-        if (query.isBlank()) {
-
-            statusLabel.setText(
-                    "Enter a mod name to search."
-            );
-
-            return;
-        }
-
-        statusLabel.setText(
-                "Searching Modrinth..."
-        );
-
-        results
+        modsList
                 .getChildren()
                 .clear();
 
-        Thread thread =
-                new Thread(() -> {
+        Path modsDirectory =
+                instance.getDirectory()
+                        .resolve("mods");
 
-                    try {
+        try {
 
-                        List<ModrinthProject> projects =
-                                modrinthService.searchMods(
-                                        instance,
-                                        query
-                                );
+            Files.createDirectories(
+                    modsDirectory
+            );
 
-                        Platform.runLater(() ->
-                                showResults(projects)
+            List<Path> mods;
+
+            try (var stream =
+                         Files.list(
+                                 modsDirectory
+                         )) {
+
+                mods =
+                        stream
+                                .filter(
+                                        path ->
+                                                path.toString()
+                                                        .toLowerCase()
+                                                        .endsWith(".jar")
+                                )
+                                .sorted()
+                                .toList();
+            }
+
+            if (mods.isEmpty()) {
+
+                Label empty =
+                        new Label(
+                                "No mods installed."
                         );
 
-                    } catch (Throwable ex) {
+                empty.getStyleClass().add(
+                        "instances-status"
+                );
 
-                        ex.printStackTrace();
+                modsList
+                        .getChildren()
+                        .add(
+                                empty
+                        );
 
-                        Platform.runLater(() ->
-                                statusLabel.setText(
-                                        ex.getMessage() != null
-                                                ? ex.getMessage()
-                                                : "Failed to search Modrinth."
+                statusLabel.setText(
+                        "0 mods installed."
+                );
+
+                return;
+            }
+
+            for (Path mod : mods) {
+
+                modsList
+                        .getChildren()
+                        .add(
+                                createModCard(
+                                        mod
                                 )
                         );
-                    }
-                });
-
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    // =============================================================
-    // RESULTS
-    // =============================================================
-
-    private void showResults(
-            List<ModrinthProject> projects
-    ) {
-
-        results
-                .getChildren()
-                .clear();
-
-        if (projects == null
-                || projects.isEmpty()) {
+            }
 
             statusLabel.setText(
-                    "No compatible mods found."
+                    mods.size()
+                            + " mod"
+                            + (mods.size() == 1 ? "" : "s")
+                            + " installed."
             );
 
-            return;
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+            statusLabel.setText(
+                    "Failed to load installed mods."
+            );
         }
-
-        for (ModrinthProject project
-                : projects) {
-
-            results
-                    .getChildren()
-                    .add(
-                            createProjectCard(
-                                    project
-                            )
-                    );
-        }
-
-        statusLabel.setText(
-                projects.size()
-                        + " compatible projects found."
-        );
     }
 
     // =============================================================
-    // PROJECT CARD
+    // MOD CARD
     // =============================================================
 
-    private VBox createProjectCard(
-            ModrinthProject project
+    private VBox createModCard(
+            Path mod
     ) {
+
+        String filename =
+                mod.getFileName()
+                        .toString();
+
+        // =========================================================
+        // ICON
+        // =========================================================
+
+        ImageView icon =
+                new ImageView();
+
+        icon.setFitWidth(
+                52
+        );
+
+        icon.setFitHeight(
+                52
+        );
+
+        icon.setPreserveRatio(
+                true
+        );
+
+        icon.setSmooth(
+                true
+        );
+
+        Rectangle clip =
+                new Rectangle(
+                        52,
+                        52
+                );
+
+        clip.setArcWidth(
+                14
+        );
+
+        clip.setArcHeight(
+                14
+        );
+
+        icon.setClip(
+                clip
+        );
+
+        VBox iconBox =
+                new VBox(
+                        icon
+                );
+
+        iconBox.setAlignment(
+                Pos.CENTER
+        );
+
+        iconBox.setMinSize(
+                52,
+                52
+        );
+
+        iconBox.setPrefSize(
+                52,
+                52
+        );
+
+        iconBox.setMaxSize(
+                52,
+                52
+        );
+
+        iconBox.getStyleClass().add(
+                "mod-icon-box"
+        );
+
+        // ---------------------------------------------------------
+        // Load icon from JAR
+        // ---------------------------------------------------------
+
+        loadJarIcon(
+                mod,
+                icon
+        );
+
+        // =========================================================
+        // TITLE
+        // =========================================================
 
         Label title =
                 new Label(
-                        project.getTitle()
+                        cleanModName(
+                                filename
+                        )
                 );
 
         title.getStyleClass().add(
                 "instance-name"
         );
 
-        Label description =
-                new Label(
-                        project.getDescription()
-                                != null
-                                ? project.getDescription()
-                                : "No description."
-                );
-
-        description.setWrapText(
-                true
-        );
-
-        description.getStyleClass().add(
-                "instance-version"
-        );
+        // =========================================================
+        // METADATA
+        // =========================================================
 
         Label metadata =
                 new Label(
-                        "Modrinth • "
-                                + instance.getMinecraftVersion()
-                                + " • "
-                                + instance.getDisplayLoader()
+                        "JAR • "
+                                + formatSize(
+                                getFileSize(mod)
+                        )
                 );
 
         metadata.getStyleClass().add(
                 "instance-loader"
         );
 
-        Button installButton =
-                new Button(
-                        "INSTALL"
-                );
-
-        installButton.getStyleClass().add(
-                "instance-play-button"
-        );
-
-        installButton.setPrefWidth(
-                110
-        );
-
-        installButton.setOnAction(
-                event ->
-                        install(
-                                project,
-                                installButton
-                        )
-        );
-
         VBox information =
                 new VBox(
-                        6,
+                        5,
                         title,
-                        description,
                         metadata
                 );
 
@@ -373,16 +433,45 @@ public class ModsView extends VBox {
                 Priority.ALWAYS
         );
 
+        // =========================================================
+        // REMOVE
+        // =========================================================
+
+        Button removeButton =
+                new Button(
+                        "REMOVE"
+                );
+
+        removeButton.getStyleClass().add(
+                "secondary-button"
+        );
+
+        removeButton.setOnAction(
+                event ->
+                        removeMod(
+                                mod
+                        )
+        );
+
+        // =========================================================
+        // ROW
+        // =========================================================
+
         HBox row =
                 new HBox(
-                        18,
+                        16,
+                        iconBox,
                         information,
-                        installButton
+                        removeButton
                 );
 
         row.setAlignment(
                 Pos.CENTER_LEFT
         );
+
+        // =========================================================
+        // CARD
+        // =========================================================
 
         VBox card =
                 new VBox(
@@ -391,10 +480,10 @@ public class ModsView extends VBox {
 
         card.setPadding(
                 new Insets(
+                        16,
                         18,
-                        20,
-                        18,
-                        20
+                        16,
+                        18
                 )
         );
 
@@ -406,74 +495,305 @@ public class ModsView extends VBox {
     }
 
     // =============================================================
-    // INSTALL
+    // LOAD ICON FROM JAR
     // =============================================================
 
-    private void install(
-            ModrinthProject project,
-            Button button
+    private void loadJarIcon(
+            Path mod,
+            ImageView imageView
     ) {
-
-        button.setDisable(
-                true
-        );
-
-        button.setText(
-                "INSTALLING..."
-        );
-
-        statusLabel.setText(
-                "Installing "
-                        + project.getTitle()
-                        + "..."
-        );
 
         Thread thread =
                 new Thread(() -> {
 
                     try {
 
-                        modrinthService.installMod(
-                                instance,
-                                project
-                        );
+                        try (JarFile jar =
+                                     new JarFile(
+                                             mod.toFile()
+                                     )) {
 
-                        Platform.runLater(() -> {
+                            String iconPath =
+                                    findIconPath(
+                                            jar
+                                    );
 
-                            button.setText(
-                                    "INSTALLED"
+                            if (iconPath == null) {
+
+
+                                return;
+                            }
+
+                            var entry =
+                                    jar.getJarEntry(
+                                            iconPath
+                                    );
+
+                            if (entry == null) {
+
+                                return;
+                            }
+
+                            BufferedImage bufferedImage;
+
+                            try (InputStream input =
+                                         jar.getInputStream(
+                                                 entry
+                                         )) {
+
+                                bufferedImage =
+                                        ImageIO.read(
+                                                input
+                                        );
+                            }
+
+                            if (bufferedImage == null) {
+
+
+                                return;
+                            }
+
+                            ByteArrayOutputStream output =
+                                    new ByteArrayOutputStream();
+
+                            ImageIO.write(
+                                    bufferedImage,
+                                    "png",
+                                    output
                             );
 
-                            statusLabel.setText(
-                                    project.getTitle()
-                                            + " installed successfully."
-                            );
-                        });
+                            Image image =
+                                    new Image(
+                                            new ByteArrayInputStream(
+                                                    output.toByteArray()
+                                            )
+                                    );
+
+                            Platform.runLater(() -> {
+
+                                if (!image.isError()) {
+
+                                    imageView.setImage(
+                                            image
+                                    );
+                                }
+                            });
+                        }
 
                     } catch (Throwable ex) {
 
+
                         ex.printStackTrace();
-
-                        Platform.runLater(() -> {
-
-                            button.setDisable(
-                                    false
-                            );
-
-                            button.setText(
-                                    "INSTALL"
-                            );
-
-                            statusLabel.setText(
-                                    ex.getMessage() != null
-                                            ? ex.getMessage()
-                                            : "Failed to install mod."
-                            );
-                        });
                     }
                 });
 
-        thread.setDaemon(true);
+        thread.setDaemon(
+                true
+        );
+
         thread.start();
+    }
+
+    // =============================================================
+    // FIND ICON PATH
+    // =============================================================
+
+    private String findIconPath(
+            JarFile jar
+    ) {
+
+        try {
+
+            var fabricModJson =
+                    jar.getJarEntry(
+                            "fabric.mod.json"
+                    );
+
+            if (fabricModJson != null) {
+
+                try (InputStream input =
+                             jar.getInputStream(
+                                     fabricModJson
+                             )) {
+
+                    String json =
+                            new String(
+                                    input.readAllBytes(),
+                                    java.nio.charset.StandardCharsets.UTF_8
+                            );
+
+                    // -------------------------------------------------
+                    // Fabric's "icon" field
+                    // -------------------------------------------------
+
+                    java.util.regex.Pattern pattern =
+                            java.util.regex.Pattern.compile(
+                                    "\"icon\"\\s*:\\s*\"([^\"]+)\""
+                            );
+
+                    java.util.regex.Matcher matcher =
+                            pattern.matcher(
+                                    json
+                            );
+
+                    if (matcher.find()) {
+
+                        String icon =
+                                matcher.group(1);
+
+                        if (jar.getJarEntry(icon) != null) {
+
+                            return icon;
+                        }
+                    }
+
+                    // -------------------------------------------------
+                    // Fabric also supports icon as an object:
+                    //
+                    // "icon": {
+                    //     "16": "assets/mod/icon.png",
+                    //     "32": "assets/mod/icon.png"
+                    // }
+                    // -------------------------------------------------
+
+                    pattern =
+                            java.util.regex.Pattern.compile(
+                                    "\"(?:16|32|64|128)\"\\s*:\\s*\"([^\"]+)\""
+                            );
+
+                    matcher =
+                            pattern.matcher(
+                                    json
+                            );
+
+                    while (matcher.find()) {
+
+                        String icon =
+                                matcher.group(1);
+
+                        if (jar.getJarEntry(icon) != null) {
+
+                            return icon;
+                        }
+                    }
+                }
+            }
+
+        } catch (Throwable ex) {
+
+            ex.printStackTrace();
+        }
+
+        // =========================================================
+        // FALLBACK
+        // =========================================================
+
+        String[] commonNames = {
+                "icon.png",
+                "icon.jpg",
+                "icon.jpeg",
+                "assets/icon.png"
+        };
+
+        for (String name : commonNames) {
+
+            if (jar.getJarEntry(name) != null) {
+
+                return name;
+            }
+        }
+
+        return null;
+    }
+
+    // =============================================================
+    // CLEAN MOD NAME
+    // =============================================================
+
+    private String cleanModName(
+            String filename
+    ) {
+
+        if (filename.toLowerCase().endsWith(".jar")) {
+
+            filename =
+                    filename.substring(
+                            0,
+                            filename.length() - 4
+                    );
+        }
+
+        return filename;
+    }
+
+    // =============================================================
+    // REMOVE
+    // =============================================================
+
+    private void removeMod(
+            Path mod
+    ) {
+
+        try {
+
+            Files.deleteIfExists(
+                    mod
+            );
+
+            loadInstalledMods();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+
+            statusLabel.setText(
+                    "Failed to remove "
+                            + mod.getFileName()
+                            + "."
+            );
+        }
+    }
+
+    // =============================================================
+    // FILE SIZE
+    // =============================================================
+
+    private long getFileSize(
+            Path path
+    ) {
+
+        try {
+
+            return Files.size(
+                    path
+            );
+
+        } catch (IOException e) {
+
+            return 0;
+        }
+    }
+
+    private String formatSize(
+            long bytes
+    ) {
+
+        if (bytes < 1024) {
+
+            return bytes + " B";
+        }
+
+        if (bytes < 1024 * 1024) {
+
+            return String.format(
+                    "%.1f KB",
+                    bytes / 1024.0
+            );
+        }
+
+        return String.format(
+                "%.1f MB",
+                bytes / (1024.0 * 1024.0)
+        );
     }
 }

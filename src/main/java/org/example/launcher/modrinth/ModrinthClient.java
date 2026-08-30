@@ -9,6 +9,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.List;
 
 public class ModrinthClient {
@@ -22,7 +23,11 @@ public class ModrinthClient {
     public ModrinthClient() {
 
         httpClient =
-                HttpClient.newHttpClient();
+                HttpClient.newBuilder()
+                        .connectTimeout(
+                                Duration.ofSeconds(10)
+                        )
+                        .build();
 
         mapper =
                 new ObjectMapper();
@@ -76,6 +81,59 @@ public class ModrinthClient {
 
         HttpRequest request =
                 HttpRequest.newBuilder(uri)
+                        .timeout(
+                                Duration.ofSeconds(20)
+                        )
+                        .GET()
+                        .header(
+                                "User-Agent",
+                                "VantaLauncher/1.0"
+                        )
+                        .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString()
+                );
+
+        checkResponse(response);
+
+        return mapper.readValue(
+                response.body(),
+                ModrinthSearchResult.class
+        );
+    }
+
+    // =============================================================
+    // MOST DOWNLOADED
+    // =============================================================
+
+    public ModrinthSearchResult getMostDownloadedMods(
+            String loader,
+            String minecraftVersion
+    ) throws IOException, InterruptedException {
+
+        String facets =
+                buildFacets(
+                        loader,
+                        minecraftVersion
+                );
+
+        URI uri =
+                URI.create(
+                        API_URL
+                                + "/search?facets="
+                                + encode(facets)
+                                + "&index=downloads"
+                                + "&limit=10"
+                );
+
+        HttpRequest request =
+                HttpRequest.newBuilder(uri)
+                        .timeout(
+                                Duration.ofSeconds(20)
+                        )
                         .GET()
                         .header(
                                 "User-Agent",
@@ -107,7 +165,9 @@ public class ModrinthClient {
     ) {
 
         StringBuilder facets =
-                new StringBuilder("[[\"project_type:mod\"]");
+                new StringBuilder(
+                        "[[\"project_type:mod\"]"
+                );
 
         if (loader != null
                 && !loader.isBlank()) {
@@ -143,7 +203,9 @@ public class ModrinthClient {
             );
         }
 
-        facets.append("]");
+        facets.append(
+                "]"
+        );
 
         return facets.toString();
     }
@@ -153,8 +215,14 @@ public class ModrinthClient {
     ) {
 
         return value
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"");
+                .replace(
+                        "\\",
+                        "\\\\"
+                )
+                .replace(
+                        "\"",
+                        "\\\""
+                );
     }
 
     // =============================================================
@@ -162,11 +230,11 @@ public class ModrinthClient {
     // =============================================================
 
     public ModrinthProject getProject(
-            String idOrSlug
+            String projectId
     ) throws IOException, InterruptedException {
 
-        if (idOrSlug == null
-                || idOrSlug.isBlank()) {
+        if (projectId == null
+                || projectId.isBlank()) {
 
             throw new IllegalArgumentException(
                     "Project ID cannot be empty."
@@ -177,11 +245,14 @@ public class ModrinthClient {
                 URI.create(
                         API_URL
                                 + "/project/"
-                                + encode(idOrSlug)
+                                + encode(projectId)
                 );
 
         HttpRequest request =
                 HttpRequest.newBuilder(uri)
+                        .timeout(
+                                Duration.ofSeconds(20)
+                        )
                         .GET()
                         .header(
                                 "User-Agent",
@@ -230,6 +301,9 @@ public class ModrinthClient {
 
         HttpRequest request =
                 HttpRequest.newBuilder(uri)
+                        .timeout(
+                                Duration.ofSeconds(20)
+                        )
                         .GET()
                         .header(
                                 "User-Agent",
@@ -251,6 +325,106 @@ public class ModrinthClient {
                         .constructCollectionType(
                                 List.class,
                                 ModrinthVersion.class
+                        )
+        );
+    }
+
+    // =============================================================
+    // TEAM MEMBERS
+    // =============================================================
+
+    public List<ModrinthTeamMember> getTeamMembers(
+            String teamId
+    ) throws IOException, InterruptedException {
+
+        URI uri =
+                URI.create(
+                        API_URL
+                                + "/team/"
+                                + encode(teamId)
+                                + "/members"
+                );
+
+        HttpRequest request =
+                HttpRequest.newBuilder(uri)
+                        .timeout(
+                                Duration.ofSeconds(20)
+                        )
+                        .GET()
+                        .header(
+                                "User-Agent",
+                                "VantaLauncher/1.0"
+                        )
+                        .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString()
+                );
+
+        checkResponse(response);
+
+        return mapper.readValue(
+                response.body(),
+                mapper.getTypeFactory()
+                        .constructCollectionType(
+                                List.class,
+                                ModrinthTeamMember.class
+                        )
+        );
+    }
+
+    // =============================================================
+    // PROJECT TEAM MEMBERS
+    // =============================================================
+
+    public List<ModrinthTeamMember> getProjectTeamMembers(
+            String projectId
+    ) throws IOException, InterruptedException {
+
+        if (projectId == null
+                || projectId.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Project ID cannot be empty."
+            );
+        }
+
+        URI uri =
+                URI.create(
+                        API_URL
+                                + "/project/"
+                                + encode(projectId)
+                                + "/members"
+                );
+
+        HttpRequest request =
+                HttpRequest.newBuilder(uri)
+                        .timeout(
+                                Duration.ofSeconds(20)
+                        )
+                        .GET()
+                        .header(
+                                "User-Agent",
+                                "VantaLauncher/1.0"
+                        )
+                        .build();
+
+        HttpResponse<String> response =
+                httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofString()
+                );
+
+        checkResponse(response);
+
+        return mapper.readValue(
+                response.body(),
+                mapper.getTypeFactory()
+                        .constructCollectionType(
+                                List.class,
+                                ModrinthTeamMember.class
                         )
         );
     }
@@ -291,4 +465,3 @@ public class ModrinthClient {
         );
     }
 }
-

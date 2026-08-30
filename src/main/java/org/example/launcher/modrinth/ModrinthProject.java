@@ -8,24 +8,47 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ModrinthProject {
 
+    @JsonProperty("id")
+    private String id;
+
     @JsonProperty("project_id")
     private String projectId;
+
+    @JsonProperty("slug")
+    private String slug;
 
     @JsonProperty("project_type")
     private String projectType;
 
+    @JsonProperty("team")
+    private String team;
+
+    @JsonProperty("title")
     private String title;
+
+    @JsonProperty("description")
     private String description;
-    private String author;
 
-    private List<String> categories;
-    private List<String> versions;
-
-    private int downloads;
-    private int follows;
+    @JsonProperty("body")
+    private String body;
 
     @JsonProperty("icon_url")
     private String iconUrl;
+
+    @JsonProperty("downloads")
+    private int downloads;
+
+    @JsonProperty("followers")
+    private int followers;
+
+    @JsonProperty("categories")
+    private List<String> categories;
+
+    @JsonProperty("versions")
+    private List<String> versions;
+
+    @JsonProperty("loaders")
+    private List<String> loaders;
 
     @JsonProperty("date_created")
     private String dateCreated;
@@ -33,22 +56,44 @@ public class ModrinthProject {
     @JsonProperty("date_modified")
     private String dateModified;
 
-    @JsonProperty("latest_version")
-    private String latestVersion;
+    @JsonProperty("license")
+    private ModrinthLicense license;
 
-    private String license;
-    private String slug;
+    @JsonProperty("source_url")
+    private String sourceUrl;
 
-    // =============================================================
-    // GETTERS
-    // =============================================================
+    @JsonProperty("issues_url")
+    private String issuesUrl;
+
+    @JsonProperty("wiki_url")
+    private String wikiUrl;
+
+    @JsonProperty("discord_url")
+    private String discordUrl;
+
+    public ModrinthProject() {
+    }
+
+    public String getId() {
+        return id;
+    }
 
     public String getProjectId() {
-        return projectId;
+        return projectId != null
+                ? projectId
+                : id;
+    }
+
+    public String getSlug() {
+        return slug;
     }
 
     public String getProjectType() {
         return projectType;
+    }
+
+    public String getTeam() {
+        return team;
     }
 
     public String getTitle() {
@@ -59,8 +104,20 @@ public class ModrinthProject {
         return description;
     }
 
-    public String getAuthor() {
-        return author;
+    public String getBody() {
+        return body;
+    }
+
+    public String getIconUrl() {
+        return iconUrl;
+    }
+
+    public int getDownloads() {
+        return downloads;
+    }
+
+    public int getFollows() {
+        return followers;
     }
 
     public List<String> getCategories() {
@@ -71,16 +128,8 @@ public class ModrinthProject {
         return versions;
     }
 
-    public int getDownloads() {
-        return downloads;
-    }
-
-    public int getFollows() {
-        return follows;
-    }
-
-    public String getIconUrl() {
-        return iconUrl;
+    public List<String> getLoaders() {
+        return loaders;
     }
 
     public String getDateCreated() {
@@ -91,25 +140,23 @@ public class ModrinthProject {
         return dateModified;
     }
 
-    public String getLatestVersion() {
-        return latestVersion;
-    }
-
-    public String getLicense() {
+    public ModrinthLicense getLicense() {
         return license;
     }
 
-    public String getSlug() {
-        return slug;
+    public String getSourceUrl() {
+        return sourceUrl;
     }
 
-    // =============================================================
-    // DEBUG
-    // =============================================================
+    public String getIssuesUrl() {
+        return issuesUrl;
+    }
 
-    @Override
-    public String toString() {
-        return title;
+    public String getWikiUrl() {
+        return wikiUrl;
+    }
+
+    public String getDiscordUrl() {
+        return discordUrl;
     }
 }
-

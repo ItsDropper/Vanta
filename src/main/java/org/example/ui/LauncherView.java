@@ -8,11 +8,11 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import org.example.launcher.model.Instance;
+import org.example.launcher.modrinth.ModrinthProject;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.LaunchService;
 
 import org.example.ui.components.Sidebar;
-
 import org.example.ui.views.*;
 
 public class LauncherView {
@@ -28,25 +28,30 @@ public class LauncherView {
     private final HomeView homeView;
     private final AccountsView accountsView;
     private final InstancesView instancesView;
-    private final ModsView modsView;
+
+    // Global Modrinth browser
+    private final GlobalModsView globalModsView;
+
     private final SettingsView settingsView;
     private final CreateInstanceView createInstanceView;
 
     private Instance selectedInstance;
+    private BrowseModsView browseModsView;
 
-    private InstanceSettingsView instanceSettingsView;
+
 
     public LauncherView(Stage stage) {
 
-        root = new BorderPane();
+        root =
+                new BorderPane();
 
         root.getStyleClass().add(
                 "launcher"
         );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // SERVICES
-        // ---------------------------------------------------------
+        // =========================================================
 
         accountService =
                 new AccountService();
@@ -56,9 +61,9 @@ public class LauncherView {
                         accountService
                 );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // SIDEBAR
-        // ---------------------------------------------------------
+        // =========================================================
 
         sidebar =
                 new Sidebar();
@@ -72,9 +77,9 @@ public class LauncherView {
                 sidebar
         );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // VIEWS
-        // ---------------------------------------------------------
+        // =========================================================
 
         homeView =
                 new HomeView(
@@ -92,7 +97,7 @@ public class LauncherView {
                         launchService,
                         this::showCreateInstanceView,
                         this::selectInstance,
-                        this::showInstanceSettings
+                        this::showInstanceMods
                 );
 
         createInstanceView =
@@ -102,21 +107,24 @@ public class LauncherView {
                 );
 
         /*
-         * Global MODS page is kept for now.
+         * GLOBAL MODS
          *
-         * It is only used when an instance is selected.
-         * We will replace this with a proper instance-aware
-         * content system later.
+         * This page does not require an instance.
+         *
+         * It is completely separate from the
+         * instance-specific Installed Mods page.
          */
-        modsView =
-                null;
+        globalModsView =
+                new GlobalModsView(
+                        this::showGlobalModDetails
+                );
 
         settingsView =
                 new SettingsView();
 
-        // ---------------------------------------------------------
+        // =========================================================
         // CONTENT
-        // ---------------------------------------------------------
+        // =========================================================
 
         content =
                 new StackPane();
@@ -138,9 +146,9 @@ public class LauncherView {
                 content
         );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // NAVIGATION
-        // ---------------------------------------------------------
+        // =========================================================
 
         sidebar.setOnPageSelected(
                 this::showPage
@@ -150,15 +158,15 @@ public class LauncherView {
                 Sidebar.Page.HOME
         );
 
-        // ---------------------------------------------------------
+        // =========================================================
         // ACCOUNT
-        // ---------------------------------------------------------
+        // =========================================================
 
         loadAccount();
     }
 
     // =============================================================
-    // NAVIGATION
+    // GLOBAL NAVIGATION
     // =============================================================
 
     private void showPage(
@@ -167,61 +175,103 @@ public class LauncherView {
 
         switch (page) {
 
-            case HOME ->
-                    content.getChildren().setAll(
-                            homeView
-                    );
+            case HOME -> {
 
-            case ACCOUNTS ->
-                    content.getChildren().setAll(
-                            accountsView
-                    );
-
-            case INSTANCES ->
-                    content.getChildren().setAll(
-                            instancesView
-                    );
-
-            case MODS -> {
-
-                if (selectedInstance == null) {
-
-                    content.getChildren().setAll(
-                            instancesView
-                    );
-
-                    return;
-                }
-
-                showInstanceMods(
-                        selectedInstance
+                content.getChildren().setAll(
+                        homeView
                 );
             }
 
-            case SETTINGS ->
-                    content.getChildren().setAll(
-                            settingsView
-                    );
+            case ACCOUNTS -> {
+
+                content.getChildren().setAll(
+                        accountsView
+                );
+            }
+
+            case INSTANCES -> {
+
+                content.getChildren().setAll(
+                        instancesView
+                );
+            }
+
+            case MODS -> {
+
+                /*
+                 * GLOBAL MODS
+                 *
+                 * No instance selection required.
+                 */
+                content.getChildren().setAll(
+                        globalModsView
+                );
+            }
+
+            case SETTINGS -> {
+
+                content.getChildren().setAll(
+                        settingsView
+                );
+            }
         }
     }
 
     // =============================================================
-    // INSTANCE MODS
+    // INSTANCE INSTALLED MODS
     // =============================================================
 
     private void showInstanceMods(
             Instance instance
     ) {
 
+        selectedInstance =
+                instance;
+
         ModsView view =
                 new ModsView(
-                        instance
+                        instance,
+                        () -> showBrowseMods(
+                                instance
+                        ),
+                        () -> showInstanceSettings(
+                                instance
+                        )
                 );
 
         content.getChildren().setAll(
                 view
         );
     }
+
+    // =============================================================
+    // INSTANCE BROWSE MODS
+    // =============================================================
+
+
+    private void showBrowseMods(
+            Instance instance
+    ) {
+
+        browseModsView =
+                new BrowseModsView(
+                        instance,
+                        () -> showInstanceMods(
+                                instance
+                        ),
+                        project ->
+                                showModDetails(
+                                        instance,
+                                        project
+                                )
+                );
+
+        content.getChildren().setAll(
+                browseModsView
+        );
+    }
+
+
 
     // =============================================================
     // CREATE INSTANCE
@@ -285,10 +335,24 @@ public class LauncherView {
         selectedInstance =
                 instance;
 
-        instanceSettingsView =
+        InstanceSettingsView instanceSettingsView =
                 new InstanceSettingsView(
                         instance,
-                        this::showInstances,
+
+                        /*
+                         * BACK
+                         *
+                         * Always returns to Installed Mods.
+                         */
+                        () -> showInstanceMods(
+                                instance
+                        ),
+
+                        /*
+                         * MODS
+                         *
+                         * Also returns to Installed Mods.
+                         */
                         () -> showInstanceMods(
                                 instance
                         )
@@ -343,4 +407,51 @@ public class LauncherView {
 
         return root;
     }
+
+
+    private void showModDetails(
+            Instance instance,
+            ModrinthProject project
+    ) {
+
+        content.getChildren().setAll(
+                new ModDetailsView(
+                        instance,
+                        project.getProjectId(),
+                        () -> {
+
+                            if (browseModsView != null) {
+
+                                content.getChildren().setAll(
+                                        browseModsView
+                                );
+
+                            } else {
+
+                                showBrowseMods(
+                                        instance
+                                );
+                            }
+                        }
+                )
+        );
+    }
+
+    private void showGlobalModDetails(
+            String projectId
+    ) {
+
+        content.getChildren().setAll(
+                new ModDetailsView(
+                        projectId,
+                        () ->
+                                content.getChildren().setAll(
+                                        globalModsView
+                                )
+                )
+        );
+    }
+
+
 }
+
