@@ -17,8 +17,8 @@ public class Main extends Application {
         Scene scene =
                 new Scene(
                         launcherView.getRoot(),
-                        1000,
-                        650
+                        1180,
+                        760
                 );
 
         scene.getStylesheets().add(
@@ -28,8 +28,8 @@ public class Main extends Application {
         );
 
         stage.setTitle("Vanta");
-        stage.setMinWidth(900);
-        stage.setMinHeight(600);
+        stage.setMinWidth(1024);
+        stage.setMinHeight(680);
         stage.setScene(scene);
         stage.show();
     }

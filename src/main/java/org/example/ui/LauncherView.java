@@ -173,6 +173,10 @@ public class LauncherView {
             Sidebar.Page page
     ) {
 
+        sidebar.setSelectedPage(
+                page
+        );
+
         switch (page) {
 
             case HOME -> {

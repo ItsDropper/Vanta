@@ -4,8 +4,12 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class Sidebar extends VBox {
@@ -19,6 +23,8 @@ public class Sidebar extends VBox {
     }
 
     private Consumer<Page> pageListener;
+    private final Map<Page, Button> navigationButtons =
+            new EnumMap<>(Page.class);
 
     public Sidebar() {
 
@@ -91,6 +97,18 @@ public class Sidebar extends VBox {
                 Page.MODS
         );
 
+        Region spacer =
+                new Region();
+
+        VBox.setVgrow(
+                spacer,
+                Priority.ALWAYS
+        );
+
+        getChildren().add(
+                spacer
+        );
+
         addButton(
                 "ACCOUNTS",
                 Page.ACCOUNTS
@@ -122,8 +140,17 @@ public class Sidebar extends VBox {
                 "sidebar-button"
         );
 
+        navigationButtons.put(
+                page,
+                button
+        );
+
         button.setOnAction(
                 event -> {
+
+                    setSelectedPage(
+                            page
+                    );
 
                     if (pageListener != null) {
                         pageListener.accept(page);
@@ -141,5 +168,40 @@ public class Sidebar extends VBox {
     ) {
 
         this.pageListener = listener;
+
+        setSelectedPage(
+                Page.HOME
+        );
+    }
+
+    public void setSelectedPage(
+            Page selectedPage
+    ) {
+
+        for (
+                Map.Entry<Page, Button> entry
+                : navigationButtons.entrySet()
+        ) {
+
+            entry.getValue()
+                    .getStyleClass()
+                    .remove(
+                            "sidebar-button-active"
+                    );
+        }
+
+        Button selectedButton =
+                navigationButtons.get(
+                        selectedPage
+                );
+
+        if (selectedButton != null) {
+
+            selectedButton
+                    .getStyleClass()
+                    .add(
+                            "sidebar-button-active"
+                    );
+        }
     }
 }

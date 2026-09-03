@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import org.example.launcher.account.Account;
@@ -134,17 +135,52 @@ public class HomeView extends VBox {
                 "status-label"
         );
 
-        VBox hero =
+        Label quickLaunchLabel =
+                new Label(
+                        "QUICK LAUNCH"
+                );
+
+        quickLaunchLabel.getStyleClass().add(
+                "card-title"
+        );
+
+        VBox launchInformation =
                 new VBox(
-                        12,
+                        8,
+                        quickLaunchLabel,
                         minecraftLabel,
-                        versionInfo,
+                        versionInfo
+                );
+
+        VBox launchAction =
+                new VBox(
+                        8,
                         playButton,
                         statusLabel
                 );
 
+        launchAction.setAlignment(
+                Pos.CENTER_RIGHT
+        );
+
+        Region heroSpacer =
+                new Region();
+
+        HBox.setHgrow(
+                heroSpacer,
+                Priority.ALWAYS
+        );
+
+        HBox hero =
+                new HBox(
+                        28,
+                        launchInformation,
+                        heroSpacer,
+                        launchAction
+                );
+
         hero.setAlignment(
-                Pos.CENTER
+                Pos.CENTER_LEFT
         );
 
         hero.setPadding(

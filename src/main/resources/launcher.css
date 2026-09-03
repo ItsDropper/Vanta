@@ -1,7 +1,7 @@
 
-    /* =========================================================
-       VANTA — GLOBAL
-    ========================================================= */
+/* =========================================================
+   VANTA — GLOBAL
+========================================================= */
 
 .root {
     -fx-background-color: #090b0f;
@@ -974,360 +974,669 @@
 }
 
 
-    /* =========================================================
-       MOD ICON
-    ========================================================= */
+/* =========================================================
+   MOD ICON
+========================================================= */
 
-    .mod-icon-box {
-        -fx-background-color: #171c23;
-        -fx-background-radius: 12px;
-        -fx-border-color: #252c35;
-        -fx-border-width: 1px;
-        -fx-border-radius: 12px;
+.mod-icon-box {
+    -fx-background-color: #171c23;
+    -fx-background-radius: 12px;
+    -fx-border-color: #252c35;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
 
-        -fx-min-width: 52px;
-        -fx-pref-width: 52px;
-        -fx-max-width: 52px;
+    -fx-min-width: 52px;
+    -fx-pref-width: 52px;
+    -fx-max-width: 52px;
 
-        -fx-min-height: 52px;
-        -fx-pref-height: 52px;
-        -fx-max-height: 52px;
-    }
-
-
-
-    html, body {
-        background: transparent;
-    }
-
-    body {
-        color: #ffffff;
-        font-family: "Segoe UI", Arial, sans-serif;
-        font-size: 15px;
-        line-height: 1.7;
-        margin: 0;
-        padding: 0;
-    }
-
-    h1, h2, h3, h4, h5, h6 {
-        color: #ffffff;
-        margin-top: 28px;
-        margin-bottom: 12px;
-        font-weight: 700;
-    }
-
-    h1 {
-        font-size: 30px;
-    }
-
-    h2 {
-        font-size: 24px;
-    }
-
-    h3 {
-        font-size: 20px;
-    }
-
-    p {
-        margin: 0 0 18px 0;
-    }
-
-    a {
-        color: #8ab4ff;
-        text-decoration: none;
-    }
-
-    a:hover {
-        text-decoration: underline;
-    }
-
-    strong {
-        font-weight: 700;
-    }
-
-    em {
-        font-style: italic;
-    }
-
-    code {
-        background: rgba(255,255,255,0.08);
-        padding: 3px 6px;
-        border-radius: 5px;
-        font-family: Consolas, monospace;
-        font-size: 13px;
-    }
-
-    pre {
-        background: rgba(255,255,255,0.06);
-        border-radius: 8px;
-        padding: 16px;
-        overflow-x: auto;
-    }
-
-    pre code {
-        background: transparent;
-        padding: 0;
-    }
-
-    blockquote {
-        border-left: 3px solid rgba(255,255,255,0.25);
-        margin: 18px 0;
-        padding-left: 16px;
-        color: rgba(255,255,255,0.75);
-    }
-
-    ul, ol {
-        margin-top: 8px;
-        margin-bottom: 18px;
-        padding-left: 30px;
-    }
-
-    li {
-        margin-bottom: 6px;
-    }
-
-    img {
-        display: block;
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-        margin: 18px 0;
-    }
-
-    hr {
-        border: 0;
-        border-top: 1px solid rgba(255,255,255,0.12);
-        margin: 28px 0;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 18px 0;
-    }
-
-    th, td {
-        border: 1px solid rgba(255,255,255,0.12);
-        padding: 9px 11px;
-        text-align: left;
-    }
-
-    th {
-        background: rgba(255,255,255,0.06);
-    }
+    -fx-min-height: 52px;
+    -fx-pref-height: 52px;
+    -fx-max-height: 52px;
+}
 
 
 
-    /* =========================================================
-       MOD DESCRIPTION
-    ========================================================= */
+html, body {
+    background: transparent;
+}
 
-    .mod-description-text {
-        -fx-fill: #c5cad2;
-        -fx-font-size: 14px;
-    }
+body {
+    color: #ffffff;
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    margin: 0;
+    padding: 0;
+}
 
-    .mod-description-paragraph {
-        -fx-fill: #c5cad2;
-        -fx-font-size: 14px;
-    }
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff;
+    margin-top: 28px;
+    margin-bottom: 12px;
+    font-weight: 700;
+}
 
-    .mod-description-bold {
-        -fx-fill: #f1f3f5;
-        -fx-font-size: 14px;
-        -fx-font-weight: bold;
-    }
+h1 {
+    font-size: 30px;
+}
 
-    .mod-description-italic {
-        -fx-fill: #c5cad2;
-        -fx-font-size: 14px;
-        -fx-font-style: italic;
-    }
+h2 {
+    font-size: 24px;
+}
 
-    .mod-description-heading {
-        -fx-text-fill: #f1f3f5;
-        -fx-font-size: 18px;
-        -fx-font-weight: bold;
-    }
+h3 {
+    font-size: 20px;
+}
 
-    .mod-description-h1 {
-        -fx-text-fill: #ffffff;
-        -fx-font-size: 28px;
-        -fx-font-weight: bold;
-    }
+p {
+    margin: 0 0 18px 0;
+}
 
-    .mod-description-h2 {
-        -fx-text-fill: #f5f6f8;
-        -fx-font-size: 23px;
-        -fx-font-weight: bold;
-    }
+a {
+    color: #8ab4ff;
+    text-decoration: none;
+}
 
-    .mod-description-h3 {
-        -fx-text-fill: #f1f3f5;
-        -fx-font-size: 19px;
-        -fx-font-weight: bold;
-    }
+a:hover {
+    text-decoration: underline;
+}
 
-    .mod-description-link {
-        -fx-text-fill: #8f7bea;
-        -fx-border-width: 0;
-        -fx-padding: 0;
-    }
+strong {
+    font-weight: 700;
+}
 
-    .mod-description-link:hover {
-        -fx-text-fill: #aa99f2;
-        -fx-underline: true;
-    }
+em {
+    font-style: italic;
+}
 
-    .mod-description-code {
-        -fx-fill: #d6d9df;
-        -fx-font-family: "Consolas";
-        -fx-font-size: 13px;
-    }
+code {
+    background: rgba(255,255,255,0.08);
+    padding: 3px 6px;
+    border-radius: 5px;
+    font-family: Consolas, monospace;
+    font-size: 13px;
+}
 
-    .mod-description-bullet {
-        -fx-text-fill: #8f7bea;
-        -fx-font-size: 14px;
-        -fx-font-weight: bold;
-    }
+pre {
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+}
 
-    .mod-description-list {
-        -fx-padding: 4px 0 8px 8px;
-    }
+pre code {
+    background: transparent;
+    padding: 0;
+}
 
-    .mod-description-divider {
-        -fx-background-color: #252b34;
-        -fx-pref-height: 1px;
-        -fx-min-height: 1px;
-        -fx-max-height: 1px;
-    }
+blockquote {
+    border-left: 3px solid rgba(255,255,255,0.25);
+    margin: 18px 0;
+    padding-left: 16px;
+    color: rgba(255,255,255,0.75);
+}
 
-    .mod-details-title {
-        -fx-text-fill: white;
-        -fx-font-size: 30px;
-        -fx-font-weight: bold;
-    }
+ul, ol {
+    margin-top: 8px;
+    margin-bottom: 18px;
+    padding-left: 30px;
+}
 
-    .mod-details-author {
-        -fx-text-fill: white;
-        -fx-font-size: 16px;
-    }
+li {
+    margin-bottom: 6px;
+}
 
-    .mod-details-description {
-        -fx-text-fill: white;
-        -fx-font-size: 16px;
-        -fx-line-spacing: 2px;
-    }
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 18px 0;
+}
 
-    .mod-details-stat-value {
-        -fx-text-fill: white;
-        -fx-font-size: 22px;
-        -fx-font-weight: bold;
-    }
+hr {
+    border: 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    margin: 28px 0;
+}
 
-    .mod-details-stat-label {
-        -fx-text-fill: white;
-        -fx-font-size: 11px;
-        -fx-font-weight: bold;
-        -fx-opacity: 0.75;
-    }
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 18px 0;
+}
 
-    /* =========================================================
-   PROJECT INFORMATION
+th, td {
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 9px 11px;
+    text-align: left;
+}
+
+th {
+    background: rgba(255,255,255,0.06);
+}
+
+
+
+/* =========================================================
+   MOD DESCRIPTION
+========================================================= */
+
+.mod-description-text {
+    -fx-fill: #c5cad2;
+    -fx-font-size: 14px;
+}
+
+.mod-description-paragraph {
+    -fx-fill: #c5cad2;
+    -fx-font-size: 14px;
+}
+
+.mod-description-bold {
+    -fx-fill: #f1f3f5;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.mod-description-italic {
+    -fx-fill: #c5cad2;
+    -fx-font-size: 14px;
+    -fx-font-style: italic;
+}
+
+.mod-description-heading {
+    -fx-text-fill: #f1f3f5;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.mod-description-h1 {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.mod-description-h2 {
+    -fx-text-fill: #f5f6f8;
+    -fx-font-size: 23px;
+    -fx-font-weight: bold;
+}
+
+.mod-description-h3 {
+    -fx-text-fill: #f1f3f5;
+    -fx-font-size: 19px;
+    -fx-font-weight: bold;
+}
+
+.mod-description-link {
+    -fx-text-fill: #8f7bea;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.mod-description-link:hover {
+    -fx-text-fill: #aa99f2;
+    -fx-underline: true;
+}
+
+.mod-description-code {
+    -fx-fill: #d6d9df;
+    -fx-font-family: "Consolas";
+    -fx-font-size: 13px;
+}
+
+.mod-description-bullet {
+    -fx-text-fill: #8f7bea;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.mod-description-list {
+    -fx-padding: 4px 0 8px 8px;
+}
+
+.mod-description-divider {
+    -fx-background-color: #252b34;
+    -fx-pref-height: 1px;
+    -fx-min-height: 1px;
+    -fx-max-height: 1px;
+}
+
+.mod-details-title {
+    -fx-text-fill: white;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.mod-details-author {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}
+
+.mod-details-description {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-line-spacing: 2px;
+}
+
+.mod-details-stat-value {
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.mod-details-stat-label {
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-opacity: 0.75;
+}
+
+/* =========================================================
+PROJECT INFORMATION
+========================================================= */
+
+.mod-details-card {
+    -fx-background-color: #151515;
+    -fx-background-radius: 14px;
+    -fx-border-color: #292929;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 22px;
+}
+
+
+/* Section title */
+
+.mod-details-card .settings-section-title {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+
+/* Information labels */
+
+.mod-details-card .instance-setting-label {
+    -fx-text-fill: #8f8f8f;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+
+/* Information values */
+
+.mod-details-card .mod-details-info-value {
+    -fx-text-fill: white;
+    -fx-font-size: 15px;
+}
+
+
+/* =========================================================
+   HEADER
    ========================================================= */
 
-    .mod-details-card {
-        -fx-background-color: #151515;
-        -fx-background-radius: 14px;
-        -fx-border-color: #292929;
-        -fx-border-radius: 14px;
-        -fx-border-width: 1px;
-        -fx-padding: 22px;
-    }
+.mod-details-header {
+    -fx-background-color: #151515;
+    -fx-background-radius: 16px;
+    -fx-border-color: #292929;
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+}
 
 
-    /* Section title */
+/* =========================================================
+   TITLE
+   ========================================================= */
 
-    .mod-details-card .settings-section-title {
-        -fx-text-fill: white;
-        -fx-font-size: 13px;
-        -fx-font-weight: bold;
-    }
-
-
-    /* Information labels */
-
-    .mod-details-card .instance-setting-label {
-        -fx-text-fill: #8f8f8f;
-        -fx-font-size: 11px;
-        -fx-font-weight: bold;
-    }
+.mod-details-title {
+    -fx-text-fill: white;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
 
 
-    /* Information values */
+/* =========================================================
+   AUTHOR
+   ========================================================= */
 
-    .mod-details-card .mod-details-info-value {
-        -fx-text-fill: white;
-        -fx-font-size: 15px;
-    }
-
-
-    /* =========================================================
-       HEADER
-       ========================================================= */
-
-    .mod-details-header {
-        -fx-background-color: #151515;
-        -fx-background-radius: 16px;
-        -fx-border-color: #292929;
-        -fx-border-radius: 16px;
-        -fx-border-width: 1px;
-    }
+.mod-details-author {
+    -fx-text-fill: #bdbdbd;
+    -fx-font-size: 15px;
+}
 
 
-    /* =========================================================
-       TITLE
-       ========================================================= */
+/* =========================================================
+   SHORT DESCRIPTION
+   ========================================================= */
 
-    .mod-details-title {
-        -fx-text-fill: white;
-        -fx-font-size: 30px;
-        -fx-font-weight: bold;
-    }
-
-
-    /* =========================================================
-       AUTHOR
-       ========================================================= */
-
-    .mod-details-author {
-        -fx-text-fill: #bdbdbd;
-        -fx-font-size: 15px;
-    }
+.mod-details-description {
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+}
 
 
-    /* =========================================================
-       SHORT DESCRIPTION
-       ========================================================= */
+/* =========================================================
+   STATS
+   ========================================================= */
 
-    .mod-details-description {
-        -fx-text-fill: white;
-        -fx-font-size: 16px;
-    }
+.mod-details-stat-value {
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
 
+.mod-details-stat-label {
+    -fx-text-fill: #858585;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
 
-    /* =========================================================
-       STATS
-       ========================================================= */
+/* =========================================================
+   VANTA VISUAL SYSTEM — CONSOLIDATED OVERRIDES
+   Keep this block last: it replaces the old mixed gray styles.
+========================================================= */
 
-    .mod-details-stat-value {
-        -fx-text-fill: white;
-        -fx-font-size: 22px;
-        -fx-font-weight: bold;
-    }
+.root,
+.launcher {
+    -fx-background-color: #0b0d0c;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
 
-    .mod-details-stat-label {
-        -fx-text-fill: #858585;
-        -fx-font-size: 10px;
-        -fx-font-weight: bold;
-    }
+.content {
+    -fx-background-color: transparent;
+}
+
+.page {
+    -fx-background-color: transparent;
+}
+
+/* Navigation */
+.sidebar {
+    -fx-background-color: #111411;
+    -fx-background-radius: 14px;
+    -fx-border-color: #292e2a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+}
+
+.sidebar-logo {
+    -fx-text-fill: #fcfcff;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.sidebar-subtitle {
+    -fx-text-fill: #89948a;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10px;
+    -fx-text-fill: #9aa39a;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 12px 14px;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #1b211c;
+    -fx-text-fill: #f0f4f0;
+}
+
+.sidebar-button-active,
+.sidebar-button-active:hover {
+    -fx-background-color: #203225;
+    -fx-border-color: transparent transparent transparent #79dd7f;
+    -fx-border-width: 0 0 0 3px;
+    -fx-border-radius: 10px;
+    -fx-text-fill: #effff1;
+}
+
+/* Type and hierarchy */
+.page-title {
+    -fx-text-fill: #fbfbff;
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+}
+
+.page-subtitle {
+    -fx-text-fill: #9299ad;
+    -fx-font-size: 13px;
+}
+
+.card-title,
+.create-section-title,
+.settings-section-title,
+.instances-count {
+    -fx-text-fill: #89c78e;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+/* Buttons */
+.primary-button,
+.instance-create-button,
+.instance-play-button {
+    -fx-background-color: #78d47b;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #0a160c;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.primary-button:hover,
+.instance-create-button:hover,
+.instance-play-button:hover {
+    -fx-background-color: #91e994;
+}
+
+.primary-button:pressed,
+.instance-create-button:pressed,
+.instance-play-button:pressed {
+    -fx-background-color: #59ad5d;
+}
+
+.secondary-button,
+.settings-back-button,
+.instance-settings-button {
+    -fx-background-color: #1a1e1a;
+    -fx-background-radius: 8px;
+    -fx-border-color: #363d37;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #d3d9d3;
+}
+
+.secondary-button:hover,
+.settings-back-button:hover,
+.instance-settings-button:hover {
+    -fx-background-color: #242a24;
+    -fx-border-color: #59655a;
+    -fx-text-fill: #ffffff;
+}
+
+.danger-button {
+    -fx-background-color: #271821;
+    -fx-border-color: #623143;
+    -fx-text-fill: #ffb3c0;
+}
+
+.danger-button:hover {
+    -fx-background-color: #3a1d2a;
+    -fx-border-color: #99445c;
+}
+
+/* Surfaces */
+.home-hero {
+    -fx-background-color: #151b16;
+    -fx-background-radius: 14px;
+    -fx-border-color: #344636;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+}
+
+.info-card,
+.account-card,
+.account-panel,
+.instance-card,
+.instance-empty,
+.create-panel,
+.instance-settings-card,
+.mod-details-card,
+.mod-details-header {
+    -fx-background-color: #141714;
+    -fx-background-radius: 10px;
+    -fx-border-color: #2a302a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.info-card:hover,
+.account-card:hover,
+.instance-card:hover {
+    -fx-background-color: #1a1f1a;
+    -fx-border-color: #465148;
+}
+
+.selected-instance {
+    -fx-background-color: #1d2b1e;
+    -fx-border-color: #75c979;
+}
+
+.instance-settings-danger-card {
+    -fx-background-color: #24171f;
+    -fx-border-color: #593040;
+}
+
+/* Home */
+.home-minecraft-title,
+.account-name,
+.card-main,
+.instance-name,
+.mod-details-title {
+    -fx-text-fill: #fcfcff;
+}
+
+.home-loader,
+.instance-loader {
+    -fx-background-color: #202920;
+    -fx-background-radius: 7px;
+    -fx-text-fill: #b5dcb8;
+}
+
+.home-version,
+.instance-version,
+.card-secondary,
+.account-detail,
+.instance-directory,
+.mod-details-author,
+.mod-details-description {
+    -fx-text-fill: #9da79e;
+}
+
+.ready-label,
+.account-connected,
+.connected-label,
+.instance-ready {
+    -fx-text-fill: #8ce692;
+}
+
+/* Forms */
+.create-field,
+.text-area,
+.create-combo {
+    -fx-background-color: #0d100d;
+    -fx-background-radius: 8px;
+    -fx-border-color: #353b35;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #f2f5f2;
+    -fx-prompt-text-fill: #747d75;
+}
+
+.create-field:hover,
+.text-area:hover,
+.create-combo:hover {
+    -fx-border-color: #59635a;
+}
+
+.create-field:focused,
+.text-area:focused,
+.create-combo:focused {
+    -fx-background-color: #111511;
+    -fx-border-color: #7bdc80;
+}
+
+.text-area .content {
+    -fx-background-color: #0d100d;
+}
+
+.create-combo .list-cell {
+    -fx-background-color: #171c17;
+    -fx-text-fill: #e6ece6;
+}
+
+.create-combo .list-cell:hover,
+.create-combo .list-cell:filled:selected {
+    -fx-background-color: #243125;
+}
+
+.settings-checkbox:selected .box,
+.slider .thumb {
+    -fx-background-color: #79d67e;
+    -fx-border-color: #79d67e;
+}
+
+.slider .track {
+    -fx-background-color: #303a31;
+}
+
+/* Scrollbars and mod detail consistency */
+.instances-scroll .scroll-bar:vertical .thumb,
+.settings-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #3a4056;
+}
+
+.instances-scroll .scroll-bar:vertical .thumb:hover,
+.settings-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #626a89;
+}
+
+.mod-icon-box,
+.instance-icon-box {
+    -fx-background-color: #202720;
+    -fx-border-color: #394439;
+}
+
+.mod-description-text,
+.mod-description-paragraph,
+.mod-description-italic,
+.mod-description-code {
+    -fx-fill: #c4c8d7;
+}
+
+.mod-description-bold,
+.mod-description-heading,
+.mod-description-h1,
+.mod-description-h2,
+.mod-description-h3,
+.mod-details-stat-value,
+.mod-details-card .settings-section-title,
+.mod-details-card .mod-details-info-value {
+    -fx-text-fill: #fbfbff;
+    -fx-fill: #fbfbff;
+}
+
+.mod-description-link,
+.mod-description-bullet {
+    -fx-text-fill: #8cda91;
+    -fx-fill: #8cda91;
+}
+
+.mod-details-stat-label,
+.mod-details-card .instance-setting-label {
+    -fx-text-fill: #8d94aa;
+}

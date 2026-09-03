@@ -5,7 +5,9 @@ build/
 !**/src/test/**/build/
 .kotlin
 /build.ps1
+/installer.nsi
 /.idea/
+/tools/
 /DropperLauncher/
 /config/
 /launcher-crash.txt
