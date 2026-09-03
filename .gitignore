@@ -5,9 +5,9 @@ build/
 !**/src/test/**/build/
 .kotlin
 /build.ps1
-.idea
-/DropperLauncher
-/config
+/.idea/
+/DropperLauncher/
+/config/
 /launcher-crash.txt
 
 
