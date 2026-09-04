@@ -1,0 +1,40 @@
+.info-card,
+.account-card,
+.account-panel,
+.instance-card,
+.instance-empty,
+.create-panel,
+.instance-settings-card,
+.mod-details-card,
+.mod-details-header {
+    -fx-background-color: #141714;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: #2a302a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.info-card:hover,
+.account-card:hover,
+.instance-card:hover {
+    -fx-background-color: #1a1f1a;
+    -fx-border-color: #465148;
+}
+
+.card-title {
+    -fx-text-fill: #89c78e;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.card-main {
+    -fx-text-fill: #fcfcff;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.card-secondary {
+    -fx-text-fill: #9da79e;
+    -fx-font-size: 12px;
+}

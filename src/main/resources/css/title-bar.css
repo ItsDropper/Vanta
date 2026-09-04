@@ -1,0 +1,302 @@
+/* =========================================================
+   VANTA TITLE BAR
+   ========================================================= */
+
+.title-bar {
+    -fx-background-color: #080a09;
+
+    -fx-min-height: 40px;
+    -fx-pref-height: 40px;
+    -fx-max-height: 40px;
+
+    -fx-background-radius: 12px 12px 0 0;
+
+    -fx-padding: 0 5px 0 12px;
+}
+
+
+/* =========================================================
+   WINDOW BUTTONS
+   ========================================================= */
+
+.title-bar-button,
+.title-bar-close {
+
+    -fx-background-color: transparent;
+
+    -fx-min-width: 44px;
+    -fx-pref-width: 44px;
+    -fx-max-width: 44px;
+
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+
+    -fx-padding: 0;
+
+    -fx-background-radius: 6px;
+}
+
+
+/* =========================================================
+   NORMAL ICONS
+   ========================================================= */
+
+.title-bar-button SVGPath,
+.title-bar-close SVGPath {
+
+    -fx-fill: transparent;
+
+    -fx-stroke: #89948a;
+
+    -fx-stroke-width: 1.25px;
+
+    -fx-stroke-line-cap: ROUND;
+
+    -fx-stroke-line-join: ROUND;
+}
+
+
+/* =========================================================
+   HOVER
+   ========================================================= */
+
+.title-bar-button:hover {
+
+    -fx-background-color: #171b18;
+}
+
+.title-bar-button:hover SVGPath {
+
+    -fx-stroke: #f0f4f0;
+}
+
+
+/* =========================================================
+   CLOSE
+   ========================================================= */
+
+.title-bar-close:hover {
+
+    -fx-background-color: #c42b2b;
+}
+
+.title-bar-close:hover SVGPath {
+
+    -fx-stroke: #ffffff;
+}
+
+
+/* =========================================================
+   PRESS
+   ========================================================= */
+
+.title-bar-button:pressed {
+
+    -fx-background-color: #222722;
+}
+
+.title-bar-close:pressed {
+
+    -fx-background-color: #a52222;
+}
+
+/* =========================================================
+   ACCOUNT SWITCHER
+   ========================================================= */
+
+.account-switcher {
+    -fx-background-color: #121612;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: #252d26;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-cursor: hand;
+}
+
+.account-switcher:hover {
+    -fx-background-color: #171c17;
+    -fx-border-color: #39443a;
+}
+
+.account-switcher:pressed {
+    -fx-background-color: #1d241d;
+}
+
+
+/* Player head */
+
+.account-switcher-head {
+    -fx-background-radius: 4px;
+}
+
+
+/* Username */
+
+.account-switcher-name {
+    -fx-text-fill: #e5ebe5;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+
+/* Arrow */
+
+.account-switcher-arrow {
+    -fx-text-fill: #778078;
+    -fx-font-size: 10px;
+}
+
+
+/* =========================================================
+   ACCOUNT POPUP
+   ========================================================= */
+
+.account-popup {
+    -fx-background-color: #101410;
+
+    -fx-background-radius: 11px;
+
+    -fx-border-color: #293129;
+    -fx-border-width: 1px;
+    -fx-border-radius: 11px;
+
+    -fx-min-width: 270px;
+    -fx-pref-width: 270px;
+
+    -fx-effect:
+            dropshadow(
+                    gaussian,
+                    rgba(0, 0, 0, 0.55),
+                    22,
+                    0.18,
+                    0,
+                    7
+            );
+}
+
+
+/* Header */
+
+.account-popup-header {
+    -fx-text-fill: #687268;
+
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 1px 4px 6px 4px;
+}
+
+
+/* =========================================================
+   ACCOUNT ROW
+   ========================================================= */
+
+.account-popup-account {
+    -fx-background-color: transparent;
+
+    -fx-background-radius: 8px;
+
+    -fx-padding: 7px;
+
+    -fx-cursor: hand;
+}
+
+.account-popup-account:hover {
+    -fx-background-color: #1a201a;
+}
+
+.account-popup-account.active {
+    -fx-background-color: #182119;
+}
+
+.account-popup-account.active:hover {
+    -fx-background-color: #1c271d;
+}
+
+
+/* Head */
+
+.account-popup-head {
+    -fx-background-radius: 5px;
+}
+
+
+/* Username */
+
+.account-popup-username {
+    -fx-text-fill: #e2e8e2;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+
+/* Active */
+
+.account-popup-active {
+    -fx-text-fill: #70c77b;
+
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+
+/* =========================================================
+   SEPARATOR
+   ========================================================= */
+
+.account-popup-separator {
+    -fx-background-color: #242b24;
+
+    -fx-min-height: 1px;
+    -fx-pref-height: 1px;
+    -fx-max-height: 1px;
+
+    -fx-margin: 3px 0;
+}
+
+
+/* =========================================================
+   ADD ACCOUNT
+   ========================================================= */
+
+.account-popup-add {
+    -fx-background-color: transparent;
+
+    -fx-background-radius: 8px;
+
+    -fx-padding: 8px;
+
+    -fx-cursor: hand;
+
+    -fx-alignment: CENTER_LEFT;
+}
+
+.account-popup-add:hover {
+    -fx-background-color: #1a201a;
+}
+
+.account-popup-plus {
+    -fx-text-fill: #7b867c;
+
+    -fx-font-size: 17px;
+    -fx-font-weight: normal;
+}
+
+.account-popup-add-text {
+    -fx-text-fill: #9ca69d;
+
+    -fx-font-size: 11px;
+}
+
+.account-popup-add:hover .account-popup-plus {
+    -fx-text-fill: #79d181;
+}
+
+.account-popup-add:hover .account-popup-add-text {
+    -fx-text-fill: #e3e9e3;
+}

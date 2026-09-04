@@ -1,0 +1,88 @@
+.settings-page {
+    -fx-background-color: transparent;
+}
+
+.settings-header {
+    -fx-padding: 0 0 4px 0;
+}
+
+.settings-section-title {
+    -fx-text-fill: #89c78e;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+
+.instance-setting-label {
+    -fx-text-fill: #7d8693;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.instance-setting-value {
+    -fx-text-fill: #f1f2f4;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.instance-directory {
+    -fx-text-fill: #777f8b;
+    -fx-font-size: 12px;
+    -fx-wrap-text: true;
+}
+
+.instance-settings-divider {
+    -fx-background-color: #202630;
+
+    -fx-min-height: 1px;
+    -fx-pref-height: 1px;
+    -fx-max-height: 1px;
+}
+
+
+.instance-settings-danger-card {
+    -fx-background-color: #24171f;
+    -fx-background-radius: 13px;
+
+    -fx-border-color: #593040;
+    -fx-border-width: 1px;
+    -fx-border-radius: 13px;
+}
+
+.instance-settings-danger-title {
+    -fx-text-fill: #d88491;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.instance-settings-danger-description {
+    -fx-text-fill: #75626a;
+    -fx-font-size: 11px;
+    -fx-wrap-text: true;
+}
+
+
+/* Settings checkbox */
+
+.settings-checkbox {
+    -fx-text-fill: #f2f4f8;
+    -fx-font-size: 12px;
+}
+
+.settings-checkbox .box {
+    -fx-background-color: #171c23;
+
+    -fx-border-color: #363c49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.settings-checkbox:hover .box {
+    -fx-border-color: #4a5260;
+}
+
+.settings-checkbox:selected .box {
+    -fx-background-color: #79d67e;
+    -fx-border-color: #79d67e;
+}

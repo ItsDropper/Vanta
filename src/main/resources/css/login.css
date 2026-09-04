@@ -1,0 +1,125 @@
+/* =========================================================
+   VANTA LOGIN WINDOW
+   ========================================================= */
+
+.login-window {
+    -fx-background-color: #0a0d0b;
+    -fx-background-radius: 16px;
+    -fx-border-color: #1d251f;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+}
+
+
+/* =========================================================
+   LOGO
+   ========================================================= */
+
+.login-logo {
+    -fx-text-fill: #e9eee9;
+    -fx-font-size: 17px;
+    -fx-font-weight: bold;
+    -fx-letter-spacing: 5px;
+}
+
+
+/* =========================================================
+   TITLE
+   ========================================================= */
+
+.login-title {
+    -fx-text-fill: #f5f7f5;
+    -fx-font-size: 25px;
+    -fx-font-weight: bold;
+}
+
+
+/* =========================================================
+   SUBTITLE
+   ========================================================= */
+
+.login-subtitle {
+    -fx-text-fill: #788178;
+    -fx-font-size: 13px;
+}
+
+
+/* =========================================================
+   INSTRUCTIONS
+   ========================================================= */
+
+.login-instruction {
+    -fx-text-fill: #a2aaa3;
+    -fx-font-size: 12px;
+}
+
+
+/* =========================================================
+   VERIFICATION CODE
+   ========================================================= */
+
+.verification-code {
+    -fx-background-color: #111611;
+    -fx-background-radius: 12px;
+
+    -fx-border-color: #29332b;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+
+    -fx-text-fill: #f1f5f1;
+
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 13px 20px;
+
+    -fx-alignment: CENTER;
+
+    -fx-effect:
+            dropshadow(
+                    gaussian,
+                    rgba(0, 0, 0, 0.35),
+                    14,
+                    0.15,
+                    0,
+                    4
+            );
+}
+
+
+/* =========================================================
+   CODE HOVER / FOCUS
+   ========================================================= */
+
+.verification-code:hover {
+    -fx-background-color: #141a14;
+    -fx-border-color: #39483c;
+}
+
+.verification-code:focused {
+    -fx-border-color: #5f8f67;
+}
+
+
+/* =========================================================
+   STATUS
+   ========================================================= */
+
+.login-status {
+    -fx-text-fill: #687269;
+    -fx-font-size: 11px;
+}
+
+
+/* =========================================================
+   SUCCESS / ACTIVE STATUS
+   ========================================================= */
+
+.login-status.active {
+    -fx-text-fill: #78c982;
+}
+
+.login-status.error {
+    -fx-text-fill: #d66d75;
+}
+

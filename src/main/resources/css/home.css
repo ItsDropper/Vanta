@@ -1,0 +1,68 @@
+.home-hero {
+    -fx-background-color: #151b16;
+    -fx-background-radius: 14px;
+
+    -fx-border-color: #344636;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+}
+
+.home-minecraft-title {
+    -fx-text-fill: #fcfcff;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.home-version {
+    -fx-text-fill: #9da79e;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.home-loader {
+    -fx-background-color: #202920;
+    -fx-background-radius: 7px;
+
+    -fx-text-fill: #b5dcb8;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 5px 9px;
+}
+
+.status-label {
+    -fx-text-fill: #68717d;
+    -fx-font-size: 12px;
+}
+
+.ready-label,
+.account-connected {
+    -fx-text-fill: #8ce692;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.account-status {
+    -fx-text-fill: #747d89;
+    -fx-font-size: 12px;
+}
+
+.playing-button {
+    -fx-background-color: #b91c1c;
+    -fx-text-fill: #ffffff;
+}
+
+.playing-button:hover {
+    -fx-background-color: #dc2626;
+}
+
+.selected-instance {
+    -fx-background-color: #1d2b1e;
+    -fx-border-color: #75c979;
+    -fx-border-width: 1px;
+}
+
+.selected-instance:hover {
+    -fx-background-color: #233325;
+}

@@ -5,6 +5,8 @@ import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
 
+import net.lenni0451.commons.httpclient.HttpClient;
+
 import org.example.launcher.account.Account;
 import org.example.launcher.account.AccountManager;
 import org.example.ui.LoginPopup;
@@ -17,28 +19,57 @@ public class AuthManager {
                     .withScope("service::user.auth.xboxlive.com::MBI_SSL")
                     .deviceCode()
                     .withDeviceToken("Win32")
-                    .sisuTitleAuthentication("rp://api.minecraftservices.com/")
+                    .sisuTitleAuthentication(
+                            "rp://api.minecraftservices.com/"
+                    )
                     .buildMinecraftJavaProfileStep(true);
 
-    public static Account login() throws Exception {
+    private static final HttpClient HTTP =
+            MinecraftAuth.createHttpClient();
 
-        Account savedAccount = AccountManager.loadAccount();
+    // =============================================================
+    // LOGIN
+    // =============================================================
 
+    public static Account login(
+            Account savedAccount
+    ) throws Exception {
+
+        /*
+         * Try to refresh the already-loaded account.
+         */
         if (savedAccount != null) {
 
-            System.out.println("Found saved Minecraft account.");
-            System.out.println("Refreshing authentication...");
+            System.out.println(
+                    "Found saved Minecraft account."
+            );
+
+            System.out.println(
+                    "Refreshing authentication..."
+            );
 
             try {
+
+                System.out.println(
+                        "Starting authentication refresh request..."
+                );
+
                 StepFullJavaSession.FullJavaSession session =
                         LOGIN.refresh(
-                                MinecraftAuth.createHttpClient(),
+                                HTTP,
                                 savedAccount.getSession()
                         );
 
-                Account refreshedAccount = new Account(session);
+                System.out.println(
+                        "Authentication refresh request completed."
+                );
 
-                AccountManager.saveAccount(refreshedAccount);
+                Account refreshedAccount =
+                        new Account(session);
+
+                AccountManager.saveAccount(
+                        refreshedAccount
+                );
 
                 System.out.println(
                         "Logged in automatically as: "
@@ -54,40 +85,49 @@ public class AuthManager {
                 );
 
                 System.out.println(
-                        "Starting Microsoft login again..."
+                        "Starting Microsoft login again."
                 );
 
                 ex.printStackTrace();
             }
         }
 
+        // =========================================================
+        // MICROSOFT LOGIN
+        // =========================================================
+
         StepFullJavaSession.FullJavaSession session =
                 LOGIN.getFromInput(
-                        MinecraftAuth.createHttpClient(),
-                        new StepMsaDeviceCode.MsaDeviceCodeCallback(deviceCode -> {
+                        HTTP,
+                        new StepMsaDeviceCode.MsaDeviceCodeCallback(
+                                deviceCode -> {
 
-                            System.out.println(
-                                    "Microsoft login code: "
-                                            + deviceCode.getUserCode()
-                            );
+                                    System.out.println(
+                                            "Microsoft login code: "
+                                                    + deviceCode.getUserCode()
+                                    );
 
-                            System.out.println(
-                                    "Verification URL: "
-                                            + deviceCode.getVerificationUri()
-                            );
+                                    System.out.println(
+                                            "Verification URL: "
+                                                    + deviceCode.getVerificationUri()
+                                    );
 
-                            LoginPopup.show(
-                                    deviceCode.getVerificationUri(),
-                                    deviceCode.getUserCode()
-                            );
-                        })
+                                    LoginPopup.show(
+                                            deviceCode.getVerificationUri(),
+                                            deviceCode.getUserCode()
+                                    );
+                                }
+                        )
                 );
 
         LoginPopup.close();
 
-        Account account = new Account(session);
+        Account account =
+                new Account(session);
 
-        AccountManager.saveAccount(account);
+        AccountManager.saveAccount(
+                account
+        );
 
         System.out.println(
                 "Logged in as: "

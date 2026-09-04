@@ -1,8 +1,5 @@
 package org.example.launcher.service;
 
-import net.raphimc.minecraftauth.MinecraftAuth;
-import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
-
 import org.example.launcher.account.Account;
 import org.example.launcher.account.AccountManager;
 import org.example.launcher.auth.AuthManager;
@@ -10,72 +7,219 @@ import org.example.launcher.auth.AuthManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class AccountService {
 
-
     private Account currentAccount;
+
+    private final List<Account> accounts =
+            new ArrayList<>();
+
+    private final ReentrantLock accountLock =
+            new ReentrantLock();
 
     private final List<AccountListener> listeners =
             new ArrayList<>();
 
-// =============================================================
-// ACCOUNT LOADING
-// =============================================================
+    // =============================================================
+    // ACCOUNT LOADING
+    // =============================================================
 
     public Account loadAccount() throws Exception {
 
-        Account account =
-                AccountManager.loadAccount();
+        accountLock.lock();
 
-        if (account == null) {
+        try {
 
-            setCurrentAccount(null);
+            accounts.clear();
 
-            return null;
-        }
+            accounts.addAll(
+                    AccountManager.loadAccounts()
+            );
 
-        StepFullJavaSession.FullJavaSession session =
-                account.getSession();
+            if (accounts.isEmpty()) {
 
-        session =
-                MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(
-                        MinecraftAuth.createHttpClient(),
-                        session
+                setCurrentAccount(null);
+
+                return null;
+            }
+
+            String activeId =
+                    AccountManager.getActiveAccountId();
+
+            Account activeAccount = null;
+
+            if (activeId != null) {
+
+                for (Account account : accounts) {
+
+                    if (account.getUuid()
+                            .equals(activeId)) {
+
+                        activeAccount = account;
+                        break;
+                    }
+                }
+            }
+
+            /*
+             * If there is no valid active account,
+             * use the first available account.
+             */
+            if (activeAccount == null) {
+
+                activeAccount =
+                        accounts.get(0);
+
+                AccountManager.setActiveAccount(
+                        activeAccount.getUuid()
                 );
+            }
 
-        account =
-                new Account(session);
+            /*
+             * Refresh only the active account.
+             */
+            Account refreshedAccount =
+                    AuthManager.login(
+                            activeAccount
+                    );
 
-        AccountManager.saveAccount(account);
+            replaceAccount(
+                    refreshedAccount
+            );
 
-        setCurrentAccount(account);
+            setCurrentAccount(
+                    refreshedAccount
+            );
 
-        return account;
+            return refreshedAccount;
+
+        } finally {
+
+            accountLock.unlock();
+        }
     }
 
-// =============================================================
-// LOGIN
-// =============================================================
+    // =============================================================
+    // LOGIN / ADD ACCOUNT
+    // =============================================================
 
     public Account login() throws Exception {
 
-        Account account =
-                AuthManager.login();
+        accountLock.lock();
 
-        setCurrentAccount(account);
+        try {
 
-        return account;
+            /*
+             * AuthManager.login(null) starts
+             * Microsoft device-code authentication.
+             */
+            Account account =
+                    AuthManager.login(null);
+
+            /*
+             * Add the new account to the collection.
+             */
+            replaceAccount(account);
+
+            /*
+             * Make the newly-added account active.
+             */
+            AccountManager.setActiveAccount(
+                    account.getUuid()
+            );
+
+            setCurrentAccount(account);
+
+            return account;
+
+        } finally {
+
+            accountLock.unlock();
+        }
     }
 
-// =============================================================
-// CURRENT ACCOUNT
-// =============================================================
+    // =============================================================
+    // SWITCH ACCOUNT
+    // =============================================================
+
+    public void switchAccount(
+            String uuid
+    ) throws Exception {
+
+        accountLock.lock();
+
+        try {
+
+            Account account =
+                    findAccount(uuid);
+
+            if (account == null) {
+
+                throw new IllegalArgumentException(
+                        "Account not found: "
+                                + uuid
+                );
+            }
+
+            /*
+             * Authenticate first.
+             *
+             * Only make the account active after
+             * authentication succeeds.
+             */
+            Account refreshedAccount =
+                    AuthManager.login(
+                            account
+                    );
+
+            replaceAccount(
+                    refreshedAccount
+            );
+
+            AccountManager.setActiveAccount(
+                    refreshedAccount.getUuid()
+            );
+
+            setCurrentAccount(
+                    refreshedAccount
+            );
+
+        } finally {
+
+            accountLock.unlock();
+        }
+    }
+
+    // =============================================================
+    // ACCOUNTS
+    // =============================================================
+
+    public List<Account> getAccounts() {
+
+        accountLock.lock();
+
+        try {
+
+            return List.copyOf(
+                    accounts
+            );
+
+        } finally {
+
+            accountLock.unlock();
+        }
+    }
 
     public Account getCurrentAccount() {
 
         return currentAccount;
     }
+
+    // =============================================================
+    // CURRENT ACCOUNT
+    // =============================================================
 
     private void setCurrentAccount(
             Account account
@@ -86,20 +230,100 @@ public class AccountService {
         notifyListeners();
     }
 
-// =============================================================
-// LOGOUT
-// =============================================================
+    // =============================================================
+    // LOGOUT / REMOVE ACCOUNT
+    // =============================================================
 
     public void logout() throws IOException {
 
-        AccountManager.clearAccount();
+        accountLock.lock();
 
-        setCurrentAccount(null);
+        try {
+
+            if (currentAccount == null) {
+
+                return;
+            }
+
+            String uuid =
+                    currentAccount.getUuid();
+
+            /*
+             * Remove the current account completely.
+             */
+            AccountManager.deleteAccount(
+                    uuid
+            );
+
+            accounts.removeIf(
+                    account ->
+                            account.getUuid()
+                                    .equals(uuid)
+            );
+
+            /*
+             * Choose another account if one exists.
+             */
+            if (!accounts.isEmpty()) {
+
+                Account nextAccount =
+                        accounts.get(0);
+
+                AccountManager.setActiveAccount(
+                        nextAccount.getUuid()
+                );
+
+                setCurrentAccount(
+                        nextAccount
+                );
+
+            } else {
+
+                setCurrentAccount(null);
+            }
+
+        } finally {
+
+            accountLock.unlock();
+        }
     }
 
-// =============================================================
-// LISTENERS
-// =============================================================
+    // =============================================================
+    // INTERNAL ACCOUNT MANAGEMENT
+    // =============================================================
+
+    private Account findAccount(
+            String uuid
+    ) {
+
+        for (Account account : accounts) {
+
+            if (account.getUuid()
+                    .equals(uuid)) {
+
+                return account;
+            }
+        }
+
+        return null;
+    }
+
+    private void replaceAccount(
+            Account account
+    ) {
+
+        accounts.removeIf(
+                existing ->
+                        existing.getUuid()
+                                .equals(account.getUuid())
+        );
+
+        accounts.add(account);
+    }
+
+    // =============================================================
+    // LISTENERS
+    // =============================================================
 
     public void addListener(
             AccountListener listener
@@ -107,8 +331,6 @@ public class AccountService {
 
         listeners.add(listener);
 
-        // Immediately give the listener
-        // the current state.
         listener.onAccountChanged(
                 currentAccount
         );
@@ -123,7 +345,8 @@ public class AccountService {
 
     private void notifyListeners() {
 
-        for (AccountListener listener : listeners) {
+        for (AccountListener listener :
+                listeners) {
 
             listener.onAccountChanged(
                     currentAccount
@@ -131,9 +354,9 @@ public class AccountService {
         }
     }
 
-// =============================================================
-// LISTENER INTERFACE
-// =============================================================
+    // =============================================================
+    // LISTENER INTERFACE
+    // =============================================================
 
     public interface AccountListener {
 
@@ -141,6 +364,4 @@ public class AccountService {
                 Account account
         );
     }
-
-
 }

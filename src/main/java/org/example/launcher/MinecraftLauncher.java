@@ -1,10 +1,10 @@
 package org.example.launcher;
 
 import org.example.launcher.account.Account;
+import org.example.launcher.java.JavaLocator;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class MinecraftLauncher {
@@ -327,8 +327,68 @@ public class MinecraftLauncher {
             return List.of();
         }
 
-        return Arrays.asList(
-                arguments.trim().split("\\s+")
-        );
+        List<String> result =
+                new ArrayList<>();
+
+        StringBuilder current =
+                new StringBuilder();
+
+        boolean insideQuotes = false;
+        char quote = 0;
+
+        for (int i = 0;
+             i < arguments.length();
+             i++) {
+
+            char c =
+                    arguments.charAt(i);
+
+            if ((c == '"' || c == '\'')
+                    && (i == 0
+                    || arguments.charAt(i - 1) != '\\')) {
+
+                if (insideQuotes) {
+
+                    if (c == quote) {
+                        insideQuotes = false;
+                    } else {
+                        current.append(c);
+                    }
+
+                } else {
+
+                    insideQuotes = true;
+                    quote = c;
+                }
+
+                continue;
+            }
+
+            if (Character.isWhitespace(c)
+                    && !insideQuotes) {
+
+                if (!current.isEmpty()) {
+
+                    result.add(
+                            current.toString()
+                    );
+
+                    current.setLength(0);
+                }
+
+                continue;
+            }
+
+            current.append(c);
+        }
+
+        if (!current.isEmpty()) {
+
+            result.add(
+                    current.toString()
+            );
+        }
+
+        return result;
     }
 }

@@ -3,6 +3,8 @@ package org.example;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.scene.paint.Color;
+import javafx.stage.StageStyle;
 
 import org.example.ui.LauncherView;
 
@@ -10,6 +12,8 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+
+        stage.initStyle(StageStyle.TRANSPARENT);
 
         LauncherView launcherView =
                 new LauncherView(stage);
@@ -21,11 +25,41 @@ public class Main extends Application {
                         760
                 );
 
-        scene.getStylesheets().add(
-                getClass()
-                        .getResource("/launcher.css")
-                        .toExternalForm()
-        );
+        scene.setFill(Color.TRANSPARENT);
+
+        String[] stylesheets = {
+                "/css/global.css",
+                "/css/typography.css",
+                "/css/sidebar.css",
+                "/css/buttons.css",
+                "/css/cards.css",
+                "/css/home.css",
+                "/css/accounts.css",
+                "/css/instances.css",
+                "/css/instance-settings.css",
+                "/css/forms.css",
+                "/css/login.css",
+                "/css/scrollbars.css",
+                "/css/modrinth.css",
+                "/css/markdown.css",
+                "/css/title-bar.css"
+        };
+
+        for (String stylesheet : stylesheets) {
+
+            var resource =
+                    getClass().getResource(stylesheet);
+
+            if (resource == null) {
+                throw new IllegalStateException(
+                        "Missing CSS resource: " + stylesheet
+                );
+            }
+
+            scene.getStylesheets().add(
+                    resource.toExternalForm()
+            );
+        }
 
         stage.setTitle("Vanta");
         stage.setMinWidth(1024);

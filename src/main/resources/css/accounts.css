@@ -1,0 +1,58 @@
+.account-panel {
+    -fx-max-width: 760px;
+}
+
+.account-name {
+    -fx-text-fill: #fcfcff;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.account-detail {
+    -fx-text-fill: #9da79e;
+    -fx-font-size: 12px;
+}
+
+.connected-label {
+    -fx-text-fill: #70c98b;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.disconnected-label {
+    -fx-text-fill: #d16e78;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+
+/* Account switcher */
+
+.account-switcher {
+    -fx-background-color: #141714;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: #2a302a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-text-fill: #f1f3f1;
+
+    -fx-cursor: hand;
+}
+
+.account-switcher:hover {
+    -fx-background-color: #1a1f1a;
+    -fx-border-color: #465148;
+}
+
+.account-switcher-name {
+    -fx-text-fill: #f1f3f1;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.account-switcher-arrow {
+    -fx-text-fill: #7f887f;
+    -fx-font-size: 10px;
+}

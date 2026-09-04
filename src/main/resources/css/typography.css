@@ -1,0 +1,24 @@
+.page-title {
+    -fx-text-fill: #fbfbff;
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+}
+
+.page-subtitle {
+    -fx-text-fill: #9299ad;
+    -fx-font-size: 13px;
+}
+
+.card-title,
+.create-section-title,
+.settings-section-title,
+.instances-count {
+    -fx-text-fill: #89c78e;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.footer-label {
+    -fx-text-fill: #555d68;
+    -fx-font-size: 11px;
+}

@@ -231,6 +231,13 @@ public class AccountsView extends VBox {
         }).start();
     }
 
+    public void updateAccountDisplay() {
+
+        updateAccount(
+                accountService.getCurrentAccount()
+        );
+    }
+
     private void logout() {
 
         try {

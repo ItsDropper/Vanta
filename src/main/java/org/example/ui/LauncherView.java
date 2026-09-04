@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import org.example.launcher.model.Instance;
@@ -17,7 +18,8 @@ import org.example.ui.views.*;
 
 public class LauncherView {
 
-    private final BorderPane root;
+    private final StackPane root;
+    private final BorderPane window;
 
     private final AccountService accountService;
     private final LaunchService launchService;
@@ -39,14 +41,67 @@ public class LauncherView {
     private BrowseModsView browseModsView;
 
 
-
     public LauncherView(Stage stage) {
 
+        // =========================================================
+        // ROOT / WINDOW
+        // =========================================================
+
         root =
+                new StackPane();
+
+        window =
                 new BorderPane();
 
-        root.getStyleClass().add(
+        window.getStyleClass().add(
                 "launcher"
+        );
+
+        root.getChildren().add(
+                window
+        );
+
+        window.prefWidthProperty().bind(
+                root.widthProperty()
+        );
+
+        window.prefHeightProperty().bind(
+                root.heightProperty()
+        );
+
+        window.maxWidthProperty().bind(
+                root.widthProperty()
+        );
+
+        window.maxHeightProperty().bind(
+                root.heightProperty()
+        );
+
+        // =========================================================
+        // ROUNDED WINDOW
+        // =========================================================
+
+        Rectangle clip =
+                new Rectangle();
+
+        clip.setArcWidth(
+                24
+        );
+
+        clip.setArcHeight(
+                24
+        );
+
+        clip.widthProperty().bind(
+                root.widthProperty()
+        );
+
+        clip.heightProperty().bind(
+                root.heightProperty()
+        );
+
+        window.setClip(
+                clip
         );
 
         // =========================================================
@@ -62,6 +117,20 @@ public class LauncherView {
                 );
 
         // =========================================================
+        // TITLE BAR
+        // =========================================================
+
+        TitleBar titleBar =
+                new TitleBar(
+                        stage,
+                        accountService
+                );
+
+        window.setTop(
+                titleBar
+        );
+
+        // =========================================================
         // SIDEBAR
         // =========================================================
 
@@ -73,8 +142,32 @@ public class LauncherView {
                 new Insets(16)
         );
 
-        root.setLeft(
+        window.setLeft(
                 sidebar
+        );
+
+        // =========================================================
+        // CONTENT
+        // =========================================================
+
+        content =
+                new StackPane();
+
+        content.getStyleClass().add(
+                "content"
+        );
+
+        content.setPadding(
+                new Insets(
+                        16,
+                        16,
+                        16,
+                        0
+                )
+        );
+
+        window.setCenter(
+                content
         );
 
         // =========================================================
@@ -123,30 +216,6 @@ public class LauncherView {
                 new SettingsView();
 
         // =========================================================
-        // CONTENT
-        // =========================================================
-
-        content =
-                new StackPane();
-
-        content.getStyleClass().add(
-                "content"
-        );
-
-        content.setPadding(
-                new Insets(
-                        16,
-                        16,
-                        16,
-                        0
-                )
-        );
-
-        root.setCenter(
-                content
-        );
-
-        // =========================================================
         // NAVIGATION
         // =========================================================
 
@@ -164,6 +233,7 @@ public class LauncherView {
 
         loadAccount();
     }
+
 
     // =============================================================
     // GLOBAL NAVIGATION
@@ -221,6 +291,7 @@ public class LauncherView {
         }
     }
 
+
     // =============================================================
     // INSTANCE INSTALLED MODS
     // =============================================================
@@ -248,10 +319,10 @@ public class LauncherView {
         );
     }
 
+
     // =============================================================
     // INSTANCE BROWSE MODS
     // =============================================================
-
 
     private void showBrowseMods(
             Instance instance
@@ -276,7 +347,6 @@ public class LauncherView {
     }
 
 
-
     // =============================================================
     // CREATE INSTANCE
     // =============================================================
@@ -294,6 +364,7 @@ public class LauncherView {
                 instancesView
         );
     }
+
 
     // =============================================================
     // INSTANCE SELECTION
@@ -315,6 +386,7 @@ public class LauncherView {
         );
     }
 
+
     // =============================================================
     // INSTANCE CREATED
     // =============================================================
@@ -327,6 +399,7 @@ public class LauncherView {
                 instancesView
         );
     }
+
 
     // =============================================================
     // INSTANCE SETTINGS
@@ -367,6 +440,7 @@ public class LauncherView {
         );
     }
 
+
     // =============================================================
     // ACCOUNT
     // =============================================================
@@ -387,7 +461,7 @@ public class LauncherView {
                                             .getCurrentAccount()
                             );
 
-                            accountsView.refresh();
+                            accountsView.updateAccountDisplay();
                         });
 
                     } catch (Throwable ex) {
@@ -403,6 +477,7 @@ public class LauncherView {
         thread.start();
     }
 
+
     // =============================================================
     // ROOT
     // =============================================================
@@ -412,6 +487,10 @@ public class LauncherView {
         return root;
     }
 
+
+    // =============================================================
+    // MOD DETAILS
+    // =============================================================
 
     private void showModDetails(
             Instance instance,
@@ -441,6 +520,7 @@ public class LauncherView {
         );
     }
 
+
     private void showGlobalModDetails(
             String projectId
     ) {
@@ -455,7 +535,4 @@ public class LauncherView {
                 )
         );
     }
-
-
 }
-

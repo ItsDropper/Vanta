@@ -1,0 +1,14 @@
+.root,
+.launcher {
+    -fx-background-color: #0b0d0c;
+    -fx-background-radius: 12px;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.content {
+    -fx-background-color: transparent;
+}
+
+.page {
+    -fx-background-color: transparent;
+}

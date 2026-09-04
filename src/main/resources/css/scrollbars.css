@@ -1,0 +1,47 @@
+.instances-scroll,
+.settings-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+.instances-scroll > .viewport,
+.settings-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.settings-scroll > .corner {
+    -fx-background-color: transparent;
+}
+
+
+.instances-scroll .scroll-bar:vertical,
+.settings-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 0 6px;
+}
+
+.instances-scroll .scroll-bar:vertical .track,
+.settings-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.instances-scroll .scroll-bar:vertical .thumb,
+.settings-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: #3a4056;
+    -fx-background-radius: 6px;
+}
+
+.instances-scroll .scroll-bar:vertical .thumb:hover,
+.settings-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #626a89;
+}
+
+.instances-scroll .scroll-bar:vertical .increment-button,
+.instances-scroll .scroll-bar:vertical .decrement-button,
+.settings-scroll .scroll-bar:vertical .increment-button,
+.settings-scroll .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}

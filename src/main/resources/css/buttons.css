@@ -1,0 +1,104 @@
+.primary-button,
+.instance-create-button,
+.instance-play-button {
+    -fx-background-color: #78d47b;
+    -fx-background-radius: 8px;
+
+    -fx-text-fill: #0a160c;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+
+    -fx-padding: 11px 17px;
+
+    -fx-cursor: hand;
+}
+
+.primary-button:hover,
+.instance-create-button:hover,
+.instance-play-button:hover {
+    -fx-background-color: #91e994;
+}
+
+.primary-button:pressed,
+.instance-create-button:pressed,
+.instance-play-button:pressed {
+    -fx-background-color: #59ad5d;
+}
+
+.primary-button:disabled {
+    -fx-opacity: 0.55;
+}
+
+
+.secondary-button,
+.settings-back-button,
+.instance-settings-button {
+    -fx-background-color: #1a1e1a;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: #363d37;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: #d3d9d3;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 11px 17px;
+
+    -fx-cursor: hand;
+}
+
+.secondary-button:hover,
+.settings-back-button:hover,
+.instance-settings-button:hover {
+    -fx-background-color: #242a24;
+    -fx-border-color: #59655a;
+    -fx-text-fill: #ffffff;
+}
+
+.secondary-button:pressed,
+.settings-back-button:pressed,
+.instance-settings-button:pressed {
+    -fx-background-color: #2a302a;
+}
+
+
+.instance-settings-button {
+    -fx-font-size: 10px;
+
+    -fx-padding: 9px 13px;
+
+    -fx-min-width: 86px;
+    -fx-pref-width: 86px;
+}
+
+
+.danger-button {
+    -fx-background-color: #271821;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: #623143;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: #ffb3c0;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 11px 17px;
+
+    -fx-cursor: hand;
+}
+
+.danger-button:hover {
+    -fx-background-color: #3a1d2a;
+    -fx-border-color: #99445c;
+}
+
+.danger-button:pressed {
+    -fx-background-color: #462130;
+}

@@ -1,0 +1,78 @@
+.mod-icon-box {
+    -fx-background-color: #202720;
+    -fx-background-radius: 12px;
+
+    -fx-border-color: #394439;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+
+    -fx-min-width: 52px;
+    -fx-pref-width: 52px;
+    -fx-max-width: 52px;
+
+    -fx-min-height: 52px;
+    -fx-pref-height: 52px;
+    -fx-max-height: 52px;
+}
+
+
+.mod-details-header,
+.mod-details-card {
+    -fx-background-color: #141714;
+    -fx-background-radius: 14px;
+
+    -fx-border-color: #2a302a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+}
+
+.mod-details-card {
+    -fx-padding: 22px;
+}
+
+
+.mod-details-title {
+    -fx-text-fill: #fbfbff;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+}
+
+.mod-details-author {
+    -fx-text-fill: #9da79e;
+    -fx-font-size: 15px;
+}
+
+.mod-details-description {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 16px;
+}
+
+.mod-details-stat-value {
+    -fx-text-fill: #fbfbff;
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+}
+
+.mod-details-stat-label {
+    -fx-text-fill: #8d94aa;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+
+.mod-details-card .settings-section-title {
+    -fx-text-fill: #fbfbff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.mod-details-card .instance-setting-label {
+    -fx-text-fill: #8d94aa;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.mod-details-card .mod-details-info-value {
+    -fx-text-fill: #fbfbff;
+    -fx-font-size: 15px;
+}

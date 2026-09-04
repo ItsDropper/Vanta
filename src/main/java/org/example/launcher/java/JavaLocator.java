@@ -1,32 +1,20 @@
-package org.example.launcher;
+package org.example.launcher.java;
+
+import org.example.launcher.MinecraftLocator;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class JavaLocator {
-
-    private static final HttpClient HTTP =
-            HttpClient.newBuilder()
-                    .followRedirects(
-                            HttpClient.Redirect.NORMAL
-                    )
-                    .build();
 
     // =============================================================
     // GET JAVA
     // =============================================================
 
-    public static String getJava(int requiredVersion)
-            throws Exception {
+    public static String getJava(
+            int requiredVersion
+    ) throws Exception {
 
         if (requiredVersion <= 0) {
             throw new IllegalArgumentException(
@@ -45,7 +33,9 @@ public class JavaLocator {
 
             Path java =
                     Path.of(
-                                    System.getProperty("java.home")
+                                    System.getProperty(
+                                            "java.home"
+                                    )
                             )
                             .resolve("bin")
                             .resolve("java.exe");
@@ -77,7 +67,7 @@ public class JavaLocator {
         }
 
         /*
-         * Finally use Vanta's own managed runtime.
+         * Then check Vanta's own managed runtime.
          */
         Path managed =
                 getManagedJava(
@@ -97,7 +87,7 @@ public class JavaLocator {
         }
 
         /*
-         * Nothing exists, so download it.
+         * Nothing exists, so install it.
          */
         System.out.println(
                 "Java "
@@ -105,9 +95,11 @@ public class JavaLocator {
                         + " not found."
         );
 
-        return downloadJava(
-                requiredVersion
-        ).toString();
+        return JavaInstaller
+                .install(
+                        requiredVersion
+                )
+                .toString();
     }
 
     // =============================================================
@@ -267,146 +259,6 @@ public class JavaLocator {
     }
 
     // =============================================================
-    // DOWNLOAD JAVA
-    // =============================================================
-
-    private static Path downloadJava(
-            int version
-    ) throws Exception {
-
-        Path javaDirectory =
-                MinecraftLocator
-                        .getVantaDirectory()
-                        .resolve("java")
-                        .resolve(
-                                String.valueOf(version)
-                        );
-
-        Files.createDirectories(
-                javaDirectory
-        );
-
-        Path existing =
-                findJavaExecutable(
-                        javaDirectory
-                );
-
-        if (existing != null) {
-            return existing;
-        }
-
-        /*
-         * Adoptium API:
-         *
-         * Windows
-         * x64
-         * JDK
-         * HotSpot
-         * Latest GA release
-         */
-        String url =
-                "https://api.adoptium.net/v3/binary/latest/"
-                        + version
-                        + "/ga/windows/x64/jdk/hotspot/normal/eclipse";
-
-        System.out.println(
-                "Downloading Temurin Java "
-                        + version
-                        + "..."
-        );
-
-        Path zip =
-                javaDirectory.resolve(
-                        "java.zip"
-                );
-
-        HttpRequest request =
-                HttpRequest.newBuilder(
-                                URI.create(url)
-                        )
-                        .GET()
-                        .build();
-
-        HttpResponse<InputStream> response =
-                HTTP.send(
-                        request,
-                        HttpResponse.BodyHandlers
-                                .ofInputStream()
-                );
-
-        if (response.statusCode() < 200
-                || response.statusCode() >= 300) {
-
-            response.body().close();
-
-            throw new IOException(
-                    "Failed to download Java "
-                            + version
-                            + ". HTTP "
-                            + response.statusCode()
-            );
-        }
-
-        try (InputStream input =
-                     response.body()) {
-
-            Files.copy(
-                    input,
-                    zip,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
-        }
-
-        System.out.println(
-                "Extracting Java "
-                        + version
-                        + "..."
-        );
-
-        extractZip(
-                zip,
-                javaDirectory
-        );
-
-        Files.deleteIfExists(
-                zip
-        );
-
-        Path java =
-                findJavaExecutable(
-                        javaDirectory
-                );
-
-        if (java == null) {
-
-            throw new IllegalStateException(
-                    "Java "
-                            + version
-                            + " was downloaded, "
-                            + "but java.exe could not "
-                            + "be found."
-            );
-        }
-
-        /*
-         * Verify that the downloaded runtime actually
-         * works before giving it to Minecraft.
-         */
-        verifyJava(
-                java,
-                version
-        );
-
-        System.out.println(
-                "Java "
-                        + version
-                        + " installed successfully."
-        );
-
-        return java;
-    }
-
-    // =============================================================
     // FIND JAVA EXECUTABLE
     // =============================================================
 
@@ -449,107 +301,4 @@ public class JavaLocator {
             return null;
         }
     }
-
-    // =============================================================
-    // EXTRACT ZIP
-    // =============================================================
-
-    private static void extractZip(
-            Path zipFile,
-            Path destination
-    ) throws IOException {
-
-        try (ZipInputStream zip =
-                     new ZipInputStream(
-                             Files.newInputStream(
-                                     zipFile
-                             )
-                     )) {
-
-            ZipEntry entry;
-
-            while ((entry =
-                    zip.getNextEntry()) != null) {
-
-                Path target =
-                        destination.resolve(
-                                entry.getName()
-                        ).normalize();
-
-                /*
-                 * Prevent ZIP path traversal.
-                 */
-                if (!target.startsWith(
-                        destination.normalize()
-                )) {
-
-                    throw new IOException(
-                            "Unsafe ZIP entry: "
-                                    + entry.getName()
-                    );
-                }
-
-                if (entry.isDirectory()) {
-
-                    Files.createDirectories(
-                            target
-                    );
-
-                    continue;
-                }
-
-                Files.createDirectories(
-                        target.getParent()
-                );
-
-                Files.copy(
-                        zip,
-                        target,
-                        StandardCopyOption.REPLACE_EXISTING
-                );
-            }
-        }
-    }
-
-    // =============================================================
-    // VERIFY JAVA
-    // =============================================================
-
-    private static void verifyJava(
-            Path java,
-            int expectedVersion
-    ) throws Exception {
-
-        Process process =
-                new ProcessBuilder(
-                        java.toString(),
-                        "-version"
-                )
-                        .redirectErrorStream(true)
-                        .start();
-
-        String output =
-                new String(
-                        process.getInputStream()
-                                .readAllBytes()
-                );
-
-        int exitCode =
-                process.waitFor();
-
-        if (exitCode != 0) {
-
-            throw new IllegalStateException(
-                    "Downloaded Java failed verification:\n"
-                            + output
-            );
-        }
-
-        System.out.println(
-                "Java verification successful:"
-                        + "\n"
-                        + output.trim()
-        );
-    }
 }
-

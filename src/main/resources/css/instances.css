@@ -1,0 +1,105 @@
+.instances-page {
+    -fx-background-color: transparent;
+}
+
+.instances-count {
+    -fx-text-fill: #89c78e;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+
+.instance-card {
+    -fx-cursor: hand;
+}
+
+.instance-card:selected {
+    -fx-background-color: #151a15;
+}
+
+
+.instance-icon-box {
+    -fx-background-color: #202720;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: #394439;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-min-width: 46px;
+    -fx-pref-width: 46px;
+    -fx-max-width: 46px;
+
+    -fx-min-height: 46px;
+    -fx-pref-height: 46px;
+    -fx-max-height: 46px;
+}
+
+.instance-icon {
+    -fx-text-fill: #89929e;
+    -fx-font-size: 22px;
+}
+
+
+.instance-name {
+    -fx-text-fill: #fcfcff;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.instance-version {
+    -fx-text-fill: #9da79e;
+    -fx-font-size: 11px;
+}
+
+.instance-loader {
+    -fx-background-color: #202920;
+    -fx-background-radius: 7px;
+
+    -fx-text-fill: #b5dcb8;
+
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 4px 8px;
+}
+
+.instance-ready {
+    -fx-text-fill: #79c98d;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+
+.instance-actions {
+    -fx-spacing: 8px;
+}
+
+
+.instances-status {
+    -fx-text-fill: #505965;
+    -fx-font-size: 11px;
+}
+
+
+/* Empty state */
+
+.instance-empty {
+    -fx-background-color: #141714;
+}
+
+.instance-empty-icon {
+    -fx-text-fill: #414955;
+    -fx-font-size: 34px;
+}
+
+.instance-empty-title {
+    -fx-text-fill: #dfe2e6;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.instance-empty-description {
+    -fx-text-fill: #646d79;
+    -fx-font-size: 12px;
+}
