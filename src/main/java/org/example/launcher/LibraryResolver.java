@@ -54,6 +54,19 @@ public class LibraryResolver {
         }
 
         // =========================================================
+        // NATIVES-ONLY LIBRARY
+        // =========================================================
+
+        if (library.downloads != null
+                && library.downloads.artifact == null
+                && library.downloads.classifiers != null
+                && library.natives != null
+                && !library.natives.isEmpty()) {
+
+            return null;
+        }
+
+        // =========================================================
         // FABRIC LIBRARY FORMAT
         // =========================================================
 
