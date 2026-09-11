@@ -20,6 +20,9 @@ public class InstanceManager {
             new ObjectMapper()
                     .enable(SerializationFeature.INDENT_OUTPUT);
 
+    private static final String INSTALLING_MARKER =
+            ".installing";
+
     // =============================================================
     // DISCOVER
     // =============================================================
@@ -36,11 +39,29 @@ public class InstanceManager {
             return instances;
         }
 
-        try {
+        try (var stream = Files.list(instancesDirectory)) {
 
-            Files.list(instancesDirectory)
+            stream
                     .filter(Files::isDirectory)
                     .forEach(directory -> {
+
+                        Path installingMarker =
+                                directory.resolve(
+                                        INSTALLING_MARKER
+                                );
+
+                        /*
+                         * An installation was interrupted or is
+                         * still in progress. Do not expose it as
+                         * a usable instance.
+                         */
+                        if (Files.exists(installingMarker)) {
+                            System.out.println(
+                                    "Skipping incomplete instance: "
+                                            + directory
+                            );
+                            return;
+                        }
 
                         Path metadata =
                                 directory.resolve(
@@ -141,6 +162,17 @@ public class InstanceManager {
                 directory
         );
 
+        /*
+         * Mark the instance as incomplete immediately.
+         *
+         * If Vanta crashes, loses power, or is force-closed
+         * during installation, discoverInstances() will ignore
+         * this directory on the next startup.
+         */
+        markInstallationStarted(
+                directory
+        );
+
         // ---------------------------------------------------------
         // INSTANCE DIRECTORIES
         // ---------------------------------------------------------
@@ -180,6 +212,73 @@ public class InstanceManager {
         );
 
         return instance;
+    }
+
+    // =============================================================
+    // INSTALLATION STATE
+    // =============================================================
+
+    public static void markInstallationStarted(
+            Instance instance
+    ) throws IOException {
+
+        if (instance == null) {
+            throw new IllegalArgumentException(
+                    "Instance cannot be null."
+            );
+        }
+
+        markInstallationStarted(
+                instance.getDirectory()
+        );
+    }
+
+    private static void markInstallationStarted(
+            Path directory
+    ) throws IOException {
+
+        Files.createFile(
+                directory.resolve(
+                        INSTALLING_MARKER
+                )
+        );
+    }
+
+    public static void markInstallationComplete(
+            Instance instance
+    ) throws IOException {
+
+        if (instance == null) {
+            throw new IllegalArgumentException(
+                    "Instance cannot be null."
+            );
+        }
+
+        Path marker =
+                instance.getDirectory()
+                        .resolve(
+                                INSTALLING_MARKER
+                        );
+
+        Files.deleteIfExists(
+                marker
+        );
+    }
+
+    public static boolean isInstallationInProgress(
+            Instance instance
+    ) {
+
+        if (instance == null) {
+            return false;
+        }
+
+        return Files.exists(
+                instance.getDirectory()
+                        .resolve(
+                                INSTALLING_MARKER
+                        )
+        );
     }
 
     // =============================================================
@@ -311,27 +410,30 @@ public class InstanceManager {
             return;
         }
 
-        Files.walk(directory)
-                .sorted(
-                        Comparator.reverseOrder()
-                )
-                .forEach(path -> {
+        try (var stream = Files.walk(directory)) {
 
-                    try {
+            stream
+                    .sorted(
+                            Comparator.reverseOrder()
+                    )
+                    .forEach(path -> {
 
-                        Files.deleteIfExists(
-                                path
-                        );
+                        try {
 
-                    } catch (IOException e) {
+                            Files.deleteIfExists(
+                                    path
+                            );
 
-                        throw new RuntimeException(
-                                "Failed to delete: "
-                                        + path,
-                                e
-                        );
-                    }
-                });
+                        } catch (IOException e) {
+
+                            throw new RuntimeException(
+                                    "Failed to delete: "
+                                            + path,
+                                    e
+                            );
+                        }
+                    });
+        }
     }
 
     // =============================================================

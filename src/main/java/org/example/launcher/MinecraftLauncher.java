@@ -297,10 +297,15 @@ public class MinecraftLauncher {
                         command
                 );
 
-        processBuilder
-                .redirectErrorStream(true);
-
-        processBuilder.inheritIO();
+        /*
+         * Do NOT use inheritIO() here.
+         *
+         * LaunchService needs to read Minecraft's output so it can
+         * determine when Minecraft has actually finished starting.
+         */
+        processBuilder.redirectErrorStream(
+                true
+        );
 
         Process process =
                 processBuilder.start();

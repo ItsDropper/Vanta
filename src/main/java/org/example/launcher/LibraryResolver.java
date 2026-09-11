@@ -20,7 +20,9 @@ public class LibraryResolver {
 
         Path librariesDirectory =
                 MinecraftLocator
-                        .getLibrariesDirectory();
+                        .getLibrariesDirectory()
+                        .toAbsolutePath()
+                        .normalize();
 
         // =========================================================
         // MOJANG LIBRARY FORMAT
@@ -35,20 +37,22 @@ public class LibraryResolver {
             if (path == null
                     || path.isBlank()) {
 
-                return null;
+                throw new IllegalStateException(
+                        "Library artifact path is missing."
+                );
             }
 
             Path jar =
-                    librariesDirectory
-                            .resolve(path);
+                    resolveSafePath(
+                            librariesDirectory,
+                            path,
+                            "Library"
+                    );
 
-            if (!Files.exists(jar)) {
-
-                throw new IllegalStateException(
-                        "Library not found: "
-                                + jar
-                );
-            }
+            requireRegularFile(
+                    jar,
+                    "Library"
+            );
 
             return jar;
         }
@@ -63,57 +67,67 @@ public class LibraryResolver {
                 && library.natives != null
                 && !library.natives.isEmpty()) {
 
+            /*
+             * This library only provides native classifiers.
+             * Its native JAR is handled separately by resolveNative().
+             */
             return null;
         }
 
         // =========================================================
-        // FABRIC LIBRARY FORMAT
+        // MAVEN / FABRIC LIBRARY FORMAT
         // =========================================================
 
         if (library.name != null
                 && !library.name.isBlank()) {
 
-            String[] parts =
-                    library.name.split(":");
-
-            if (parts.length >= 3) {
-
-                String group =
-                        parts[0]
-                                .replace('.', '/');
-
-                String artifact =
-                        parts[1];
-
-                String version =
-                        parts[2];
-
-                Path jar =
-                        librariesDirectory
-                                .resolve(group)
-                                .resolve(artifact)
-                                .resolve(version)
-                                .resolve(
-                                        artifact
-                                                + "-"
-                                                + version
-                                                + ".jar"
-                                );
-
-                if (!Files.exists(jar)) {
-
-                    throw new IllegalStateException(
-                            "Library not found: "
-                                    + jar
+            MavenCoordinate coordinate =
+                    parseCoordinate(
+                            library.name
                     );
-                }
 
-                return jar;
-            }
+            Path jar =
+                    librariesDirectory
+                            .resolve(
+                                    coordinate.groupPath
+                            )
+                            .resolve(
+                                    coordinate.artifact
+                            )
+                            .resolve(
+                                    coordinate.version
+                            )
+                            .resolve(
+                                    coordinate.fileName()
+                            )
+                            .normalize();
+
+            requireInsideDirectory(
+                    librariesDirectory,
+                    jar,
+                    "Library"
+            );
+
+            requireRegularFile(
+                    jar,
+                    "Library"
+            );
+
+            return jar;
         }
 
+        /*
+         * There is no usable classpath artifact.
+         *
+         * Do not silently manufacture a path from incomplete
+         * metadata.
+         */
         return null;
     }
+
+    // =============================================================
+    // NATIVE
+    // =============================================================
 
     public static Path resolveNative(
             Path minecraftDirectory,
@@ -132,33 +146,270 @@ public class LibraryResolver {
                         "natives-windows"
                 );
 
-        if (nativeArtifact == null
-                || nativeArtifact.path == null
-                || nativeArtifact.path.isBlank()) {
-
+        if (nativeArtifact == null) {
             return null;
         }
 
-        Path nativeJar =
-                librariesDirectory()
-                        .resolve(
-                                nativeArtifact.path
-                        );
+        String path =
+                nativeArtifact.path;
 
-        if (!Files.exists(nativeJar)) {
+        if (path == null
+                || path.isBlank()) {
 
             throw new IllegalStateException(
-                    "Native library not found: "
-                            + nativeJar
+                    "Native library path is missing."
             );
         }
+
+        Path librariesDirectory =
+                librariesDirectory();
+
+        Path nativeJar =
+                resolveSafePath(
+                        librariesDirectory,
+                        path,
+                        "Native library"
+                );
+
+        requireRegularFile(
+                nativeJar,
+                "Native library"
+        );
 
         return nativeJar;
     }
 
+    // =============================================================
+    // PATH SAFETY
+    // =============================================================
+
+    private static Path resolveSafePath(
+            Path baseDirectory,
+            String relativePath,
+            String description
+    ) {
+
+        /*
+         * Manifest paths should always use forward slashes.
+         * Reject Windows separators as well so a malformed
+         * manifest cannot escape through platform-specific paths.
+         */
+        if (relativePath.contains("\\")
+                || relativePath.startsWith("/")
+                || relativePath.startsWith("\\")) {
+
+            throw new IllegalStateException(
+                    "Unsafe "
+                            + description.toLowerCase()
+                            + " path: "
+                            + relativePath
+            );
+        }
+
+        Path resolved =
+                baseDirectory
+                        .resolve(relativePath)
+                        .normalize();
+
+        requireInsideDirectory(
+                baseDirectory,
+                resolved,
+                description
+        );
+
+        return resolved;
+    }
+
+    private static void requireInsideDirectory(
+            Path baseDirectory,
+            Path path,
+            String description
+    ) {
+
+        if (!path.startsWith(baseDirectory)) {
+
+            throw new IllegalStateException(
+                    description
+                            + " path escapes libraries directory: "
+                            + path
+            );
+        }
+    }
+
+    private static void requireRegularFile(
+            Path path,
+            String description
+    ) {
+
+        if (!Files.isRegularFile(path)) {
+
+            throw new IllegalStateException(
+                    description
+                            + " not found or is not a regular file: "
+                            + path
+            );
+        }
+    }
+
+    // =============================================================
+    // MAVEN COORDINATES
+    // =============================================================
+
+    private static MavenCoordinate parseCoordinate(
+            String name
+    ) {
+
+        String[] parts =
+                name.trim()
+                        .split(":");
+
+        if (parts.length < 3
+                || parts.length > 4) {
+
+            throw new IllegalStateException(
+                    "Invalid library Maven coordinate: "
+                            + name
+            );
+        }
+
+        String group =
+                parts[0].trim();
+
+        String artifact =
+                parts[1].trim();
+
+        String version =
+                parts[2].trim();
+
+        String classifier =
+                parts.length == 4
+                        ? parts[3].trim()
+                        : null;
+
+        if (group.isBlank()
+                || artifact.isBlank()
+                || version.isBlank()) {
+
+            throw new IllegalStateException(
+                    "Invalid library Maven coordinate: "
+                            + name
+            );
+        }
+
+        String groupPath =
+                group.replace(
+                        '.',
+                        '/'
+                );
+
+        /*
+         * Prevent malformed coordinates from creating paths outside
+         * the shared libraries directory.
+         */
+        if (groupPath.startsWith("/")
+                || groupPath.contains("..")
+                || artifact.contains("/")
+                || artifact.contains("\\")
+                || artifact.contains("..")
+                || version.contains("/")
+                || version.contains("\\")
+                || version.contains("..")
+                || (classifier != null
+                && (classifier.contains("/")
+                || classifier.contains("\\")
+                || classifier.contains("..")))) {
+
+            throw new IllegalStateException(
+                    "Unsafe library Maven coordinate: "
+                            + name
+            );
+        }
+
+        return new MavenCoordinate(
+                groupPath,
+                artifact,
+                version,
+                classifier
+        );
+    }
+
+    // =============================================================
+    // LIBRARIES DIRECTORY
+    // =============================================================
+
     private static Path librariesDirectory() {
 
         return MinecraftLocator
-                .getLibrariesDirectory();
+                .getLibrariesDirectory()
+                .toAbsolutePath()
+                .normalize();
+    }
+
+    // =============================================================
+    // MAVEN COORDINATE
+    // =============================================================
+
+    private static final class MavenCoordinate {
+
+        private final String groupPath;
+        private final String artifact;
+        private final String version;
+        private final String classifier;
+
+        private MavenCoordinate(
+                String groupPath,
+                String artifact,
+                String version,
+                String classifier
+        ) {
+
+            this.groupPath =
+                    groupPath;
+
+            this.artifact =
+                    artifact;
+
+            this.version =
+                    version;
+
+            this.classifier =
+                    classifier;
+        }
+
+        private String fileName() {
+
+            StringBuilder file =
+                    new StringBuilder();
+
+            file.append(
+                    artifact
+            );
+
+            file.append(
+                    "-"
+            );
+
+            file.append(
+                    version
+            );
+
+            if (classifier != null
+                    && !classifier.isBlank()) {
+
+                file.append(
+                        "-"
+                );
+
+                file.append(
+                        classifier
+                );
+            }
+
+            file.append(
+                    ".jar"
+            );
+
+            return file.toString();
+        }
     }
 }

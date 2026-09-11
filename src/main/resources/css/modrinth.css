@@ -76,3 +76,60 @@
     -fx-text-fill: #fbfbff;
     -fx-font-size: 15px;
 }
+
+.mod-details-header .instance-play-button {
+    -fx-background-color: #263d2a;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: #45664b;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: #b9f0c0;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+
+    -fx-padding: 10px 16px;
+
+    -fx-alignment: center;
+
+    -fx-min-width: 120px;
+    -fx-pref-width: 120px;
+    -fx-max-width: 120px;
+
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-max-height: 38px;
+
+    -fx-cursor: hand;
+}
+
+.mod-details-header .instance-play-button:hover {
+    -fx-background-color: #304c35;
+    -fx-border-color: #5b8162;
+}
+
+.mod-details-header .instance-play-button:pressed {
+    -fx-background-color: #3a5d40;
+}
+
+.mod-details-header .instance-play-button:disabled {
+    -fx-opacity: 0.55;
+}
+
+.mod-details-header-container {
+    -fx-background-color: #141714;
+    -fx-background-radius: 14px;
+    -fx-border-color: #2a302a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+}
+
+.mod-details-header-container .instance-play-button {
+    -fx-min-width: 120px;
+    -fx-pref-width: 120px;
+    -fx-max-width: 120px;
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-max-height: 38px;
+}

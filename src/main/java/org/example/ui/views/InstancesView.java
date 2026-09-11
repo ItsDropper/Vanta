@@ -15,6 +15,7 @@ import org.example.launcher.model.Instance;
 import org.example.launcher.service.LaunchService;
 import org.example.ui.components.InstanceCard;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -47,16 +48,17 @@ public class InstancesView extends VBox {
         this.onInstanceSettings =
                 onInstanceSettings;
 
-        // ---------------------------------------------------------
-        // PAGE
-        // ---------------------------------------------------------
-
         getStyleClass().add(
                 "instances-page"
         );
 
         setPadding(
-                new Insets(36, 36, 36, 36)
+                new Insets(
+                        36,
+                        36,
+                        36,
+                        36
+                )
         );
 
         setSpacing(
@@ -101,7 +103,7 @@ public class InstancesView extends VBox {
 
         Button createButton =
                 new Button(
-                        "+  CREATE INSTANCE"
+                        "CREATE"
                 );
 
         createButton.getStyleClass().add(
@@ -131,7 +133,7 @@ public class InstancesView extends VBox {
         );
 
         // ---------------------------------------------------------
-        // LIST CONTAINER
+        // LIST
         // ---------------------------------------------------------
 
         instanceList =
@@ -142,10 +144,6 @@ public class InstancesView extends VBox {
         instanceList.getStyleClass().add(
                 "instance-list"
         );
-
-        // ---------------------------------------------------------
-        // SCROLL
-        // ---------------------------------------------------------
 
         ScrollPane scrollPane =
                 new ScrollPane(
@@ -194,6 +192,14 @@ public class InstancesView extends VBox {
                 header,
                 scrollPane,
                 statusLabel
+        );
+
+        // ---------------------------------------------------------
+        // LAUNCH LISTENER
+        // ---------------------------------------------------------
+
+        launchService.addStateListener(
+                this::onLaunchStateChanged
         );
 
         refresh();
@@ -256,19 +262,12 @@ public class InstancesView extends VBox {
                                         : "S")
                         );
 
-                        // -------------------------------------------------
-                        // EMPTY STATE
-                        // -------------------------------------------------
-
                         if (instances.isEmpty()) {
-
-                            VBox emptyState =
-                                    createEmptyState();
 
                             instanceList
                                     .getChildren()
                                     .add(
-                                            emptyState
+                                            createEmptyState()
                                     );
 
                             statusLabel.setText(
@@ -278,11 +277,10 @@ public class InstancesView extends VBox {
                             return;
                         }
 
-                        // -------------------------------------------------
-                        // INSTANCE CARDS
-                        // -------------------------------------------------
-
-                        for (Instance instance : instances) {
+                        for (
+                                Instance instance
+                                : instances
+                        ) {
 
                             InstanceCard card =
                                     new InstanceCard(
@@ -308,6 +306,8 @@ public class InstancesView extends VBox {
                                     );
                         }
 
+                        updateCards();
+
                         statusLabel.setText(
                                 "Select an instance to use it on the home screen."
                         );
@@ -315,7 +315,61 @@ public class InstancesView extends VBox {
                 });
 
         thread.setDaemon(true);
+
+        thread.setName(
+                "Vanta-Instance-Refresh"
+        );
+
         thread.start();
+    }
+
+    // =============================================================
+    // LAUNCH STATE
+    // =============================================================
+
+    private void onLaunchStateChanged(
+            LaunchService.LaunchState state
+    ) {
+
+        Platform.runLater(
+                this::updateCards
+        );
+    }
+
+    private void updateCards() {
+
+        LaunchService.LaunchState state =
+                launchService.getState();
+
+        Instance runningInstance =
+                launchService.getRunningInstance();
+
+        for (
+                javafx.scene.Node node
+                : instanceList.getChildren()
+        ) {
+
+            if (!(node instanceof InstanceCard card)) {
+                continue;
+            }
+
+            Instance cardInstance =
+                    card.getInstance();
+
+            boolean isThisInstance =
+                    runningInstance != null
+                            && cardInstance != null
+                            && runningInstance
+                            .getId()
+                            .equals(
+                                    cardInstance.getId()
+                            );
+
+            card.setLaunchState(
+                    state,
+                    isThisInstance
+            );
+        }
     }
 
     // =============================================================
@@ -420,11 +474,33 @@ public class InstancesView extends VBox {
             Instance instance
     ) {
 
-        if (launchService.isRunning()) {
+        LaunchService.LaunchState state =
+                launchService.getState();
 
-            statusLabel.setText(
-                    "Minecraft is already running."
-            );
+        if (state == LaunchService.LaunchState.RUNNING) {
+
+            Instance running =
+                    launchService.getRunningInstance();
+
+            if (running != null
+                    && running.getId()
+                    .equals(instance.getId())) {
+
+                launchService.close();
+
+            } else {
+
+                statusLabel.setText(
+                        "Minecraft is already running."
+                );
+            }
+
+            return;
+        }
+
+        if (state == LaunchService.LaunchState.PREPARING
+                || state == LaunchService.LaunchState.STARTING
+                || state == LaunchService.LaunchState.CLOSING) {
 
             return;
         }
@@ -444,12 +520,6 @@ public class InstancesView extends VBox {
                                 instance
                         );
 
-                        Platform.runLater(() ->
-                                statusLabel.setText(
-                                        "Minecraft is running."
-                                )
-                        );
-
                     } catch (Throwable ex) {
 
                         ex.printStackTrace();
@@ -465,6 +535,11 @@ public class InstancesView extends VBox {
                 });
 
         thread.setDaemon(true);
+
+        thread.setName(
+                "Vanta-Instance-Launch"
+        );
+
         thread.start();
     }
 }

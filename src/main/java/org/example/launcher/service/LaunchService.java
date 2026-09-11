@@ -6,6 +6,8 @@ import org.example.launcher.MinecraftLauncher;
 import org.example.launcher.account.Account;
 import org.example.launcher.model.Instance;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -29,13 +31,14 @@ public class LaunchService {
 
     private Process minecraftProcess;
 
+    private Instance runningInstance;
+
     private LaunchState state =
             LaunchState.IDLE;
 
     public LaunchService(
             AccountService accountService
     ) {
-
         this.accountService =
                 accountService;
     }
@@ -48,17 +51,28 @@ public class LaunchService {
             Consumer<LaunchState> listener
     ) {
 
-        stateListeners.add(listener);
+        if (listener == null) {
+            throw new IllegalArgumentException(
+                    "Listener cannot be null."
+            );
+        }
 
-        // Immediately give the listener the current state.
-        listener.accept(getState());
+        stateListeners.add(
+                listener
+        );
+
+        listener.accept(
+                getState()
+        );
     }
 
     public void removeStateListener(
             Consumer<LaunchState> listener
     ) {
 
-        stateListeners.remove(listener);
+        stateListeners.remove(
+                listener
+        );
     }
 
     // =============================================================
@@ -73,65 +87,178 @@ public class LaunchService {
             return minecraftProcess;
         }
 
-        if (instance == null) {
+        if (state == LaunchState.PREPARING
+                || state == LaunchState.STARTING
+                || state == LaunchState.CLOSING) {
 
+            throw new IllegalStateException(
+                    "Minecraft is already starting or closing."
+            );
+        }
+
+        if (instance == null) {
             throw new IllegalArgumentException(
                     "No Minecraft instance selected."
             );
         }
 
-        setState(
-                LaunchState.PREPARING
-        );
+        try {
 
-        Account account =
-                accountService.getCurrentAccount();
+            setState(
+                    LaunchState.PREPARING
+            );
 
-        if (account == null) {
+            Account account =
+                    accountService.getCurrentAccount();
 
-            account =
-                    accountService.login();
+            if (account == null) {
+
+                account =
+                        accountService.login();
+            }
+
+            System.out.println(
+                    "Launching instance: "
+                            + instance.getName()
+            );
+
+            System.out.println(
+                    "Minecraft version: "
+                            + instance.getMinecraftVersion()
+            );
+
+            System.out.println(
+                    "Loader: "
+                            + instance.getDisplayLoader()
+            );
+
+            LaunchData launchData =
+                    LaunchDataBuilder.build(
+                            instance
+                    );
+
+            setState(
+                    LaunchState.STARTING
+            );
+
+            Process process =
+                    MinecraftLauncher.launch(
+                            account,
+                            launchData
+                    );
+
+            if (process == null) {
+
+                throw new IllegalStateException(
+                        "Minecraft process was not created."
+                );
+            }
+
+            if (!process.isAlive()) {
+
+                throw new IllegalStateException(
+                        "Minecraft exited immediately."
+                );
+            }
+
+            minecraftProcess =
+                    process;
+
+            runningInstance =
+                    instance;
+
+            /*
+             * The Minecraft process successfully exists and is alive.
+             *
+             * We intentionally do NOT wait for a specific Minecraft
+             * console line here. Different Minecraft versions,
+             * loaders, Java versions and environments can produce
+             * different startup logs.
+             *
+             * The process itself is Vanta's source of truth.
+             */
+
+            setState(
+                    LaunchState.RUNNING
+            );
+
+            monitorProcess(
+                    process
+            );
+
+            monitorOutput(
+                    process
+            );
+
+            return process;
+
+        } catch (Exception e) {
+
+            minecraftProcess =
+                    null;
+
+            runningInstance =
+                    null;
+
+            setState(
+                    LaunchState.ERROR
+            );
+
+            throw e;
         }
+    }
 
-        System.out.println(
-                "Launching instance: "
-                        + instance.getName()
+    // =============================================================
+    // PROCESS OUTPUT
+    // =============================================================
+
+    private void monitorOutput(
+            Process process
+    ) {
+
+        Thread outputThread =
+                new Thread(() -> {
+
+                    try (
+                            BufferedReader reader =
+                                    new BufferedReader(
+                                            new InputStreamReader(
+                                                    process.getInputStream()
+                                            )
+                                    )
+                    ) {
+
+                        String line;
+
+                        while (
+                                (line = reader.readLine())
+                                        != null
+                        ) {
+
+                            System.out.println(
+                                    "[Minecraft] "
+                                            + line
+                            );
+                        }
+
+                    } catch (Exception e) {
+
+                        if (process.isAlive()) {
+
+                            e.printStackTrace();
+                        }
+                    }
+                });
+
+        outputThread.setDaemon(
+                true
         );
 
-        System.out.println(
-                "Minecraft version: "
-                        + instance.getMinecraftVersion()
+        outputThread.setName(
+                "Vanta-Minecraft-Output"
         );
 
-        System.out.println(
-                "Loader: "
-                        + instance.getDisplayLoader()
-        );
-
-        LaunchData launchData =
-                LaunchDataBuilder.build(
-                        instance
-                );
-
-        setState(
-                LaunchState.STARTING
-        );
-
-        minecraftProcess =
-                MinecraftLauncher.launch(
-                        account,
-                        launchData
-                );
-
-        setState(
-                LaunchState.RUNNING
-        );
-
-        monitorProcess(
-                minecraftProcess
-        );
-
-        return minecraftProcess;
+        outputThread.start();
     }
 
     // =============================================================
@@ -158,10 +285,20 @@ public class LaunchService {
 
                         synchronized (this) {
 
-                            if (minecraftProcess == process) {
+                            if (minecraftProcess ==
+                                    process) {
 
                                 minecraftProcess =
                                         null;
+
+                                runningInstance =
+                                        null;
+
+                                /*
+                                 * The Minecraft process is gone.
+                                 * Regardless of how it exited,
+                                 * Vanta is no longer running it.
+                                 */
 
                                 if (state !=
                                         LaunchState.ERROR) {
@@ -175,7 +312,9 @@ public class LaunchService {
                     }
                 });
 
-        monitor.setDaemon(true);
+        monitor.setDaemon(
+                true
+        );
 
         monitor.setName(
                 "Vanta-Minecraft-Monitor"
@@ -193,6 +332,9 @@ public class LaunchService {
         if (!isRunning()) {
 
             minecraftProcess =
+                    null;
+
+            runningInstance =
                     null;
 
             setState(
@@ -241,6 +383,9 @@ public class LaunchService {
                                 minecraftProcess =
                                         null;
 
+                                runningInstance =
+                                        null;
+
                                 setState(
                                         LaunchState.IDLE
                                 );
@@ -249,7 +394,9 @@ public class LaunchService {
                     }
                 });
 
-        cleanup.setDaemon(true);
+        cleanup.setDaemon(
+                true
+        );
 
         cleanup.setName(
                 "Vanta-Minecraft-Cleanup"
@@ -271,6 +418,11 @@ public class LaunchService {
     public synchronized Process getProcess() {
 
         return minecraftProcess;
+    }
+
+    public synchronized Instance getRunningInstance() {
+
+        return runningInstance;
     }
 
     public synchronized LaunchState getState() {

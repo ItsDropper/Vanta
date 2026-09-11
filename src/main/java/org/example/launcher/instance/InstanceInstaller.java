@@ -34,6 +34,10 @@ public class InstanceInstaller {
 
         try {
 
+            // -----------------------------------------------------
+            // VANILLA FILES
+            // -----------------------------------------------------
+
             MinecraftFileInstaller.installClient(
                     instance,
                     metadata
@@ -53,9 +57,21 @@ public class InstanceInstaller {
                     metadata
             );
 
+            // -----------------------------------------------------
+            // METADATA
+            // -----------------------------------------------------
+
             MinecraftVersionResolver.saveMetadata(
                     instance,
                     metadata
+            );
+
+            // -----------------------------------------------------
+            // COMPLETE
+            // -----------------------------------------------------
+
+            InstanceManager.markInstallationComplete(
+                    instance
             );
 
             System.out.println(
@@ -169,6 +185,14 @@ public class InstanceInstaller {
                     merged
             );
 
+            // -----------------------------------------------------
+            // COMPLETE
+            // -----------------------------------------------------
+
+            InstanceManager.markInstallationComplete(
+                    instance
+            );
+
             System.out.println(
                     "Fabric installation complete."
             );
@@ -188,4 +212,3 @@ public class InstanceInstaller {
         }
     }
 }
-

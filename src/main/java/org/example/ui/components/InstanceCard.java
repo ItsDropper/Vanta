@@ -34,10 +34,6 @@ public class InstanceCard extends HBox {
         this.instance =
                 instance;
 
-        // ---------------------------------------------------------
-        // CARD
-        // ---------------------------------------------------------
-
         setSpacing(18);
 
         setPadding(
@@ -161,13 +157,13 @@ public class InstanceCard extends HBox {
                 "instance-play-button"
         );
 
-        playButton.setPrefWidth(
-                110
-        );
+        playButton.setMinWidth(110);
+        playButton.setPrefWidth(110);
+        playButton.setMaxWidth(110);
 
-        playButton.setPrefHeight(
-                38
-        );
+        playButton.setMinHeight(38);
+        playButton.setPrefHeight(38);
+        playButton.setMaxHeight(38);
 
         playButton.setOnAction(
                 event -> {
@@ -184,7 +180,7 @@ public class InstanceCard extends HBox {
 
         settingsButton =
                 new Button(
-                        "SETTINGS"
+                        "OPTIONS"
                 );
 
         settingsButton.getStyleClass().add(
@@ -208,7 +204,6 @@ public class InstanceCard extends HBox {
                 }
         );
 
-        // Prevent buttons from selecting the card.
         playButton.setOnMouseClicked(
                 event -> event.consume()
         );
@@ -243,10 +238,6 @@ public class InstanceCard extends HBox {
                 right
         );
 
-        // ---------------------------------------------------------
-        // SELECT
-        // ---------------------------------------------------------
-
         setOnMouseClicked(
                 event -> onSelect.run()
         );
@@ -279,7 +270,8 @@ public class InstanceCard extends HBox {
     // =============================================================
 
     public void setLaunchState(
-            LaunchService.LaunchState state
+            LaunchService.LaunchState state,
+            boolean isThisInstance
     ) {
 
         Platform.runLater(() -> {
@@ -288,10 +280,7 @@ public class InstanceCard extends HBox {
 
                 case IDLE -> {
 
-                    playButton.setDisable(false);
-                    playButton.setText("PLAY");
-
-                    setPlayingStyle(false);
+                    resetToReady();
 
                     statusLabel.setText(
                             "● READY"
@@ -299,6 +288,11 @@ public class InstanceCard extends HBox {
                 }
 
                 case PREPARING -> {
+
+                    if (!isThisInstance) {
+                        resetToReady();
+                        return;
+                    }
 
                     playButton.setDisable(true);
                     playButton.setText(
@@ -314,6 +308,11 @@ public class InstanceCard extends HBox {
 
                 case STARTING -> {
 
+                    if (!isThisInstance) {
+                        resetToReady();
+                        return;
+                    }
+
                     playButton.setDisable(true);
                     playButton.setText(
                             "STARTING..."
@@ -328,7 +327,13 @@ public class InstanceCard extends HBox {
 
                 case RUNNING -> {
 
+                    if (!isThisInstance) {
+                        resetToReady();
+                        return;
+                    }
+
                     playButton.setDisable(false);
+
                     playButton.setText(
                             "CLOSE"
                     );
@@ -342,7 +347,13 @@ public class InstanceCard extends HBox {
 
                 case CLOSING -> {
 
+                    if (!isThisInstance) {
+                        resetToReady();
+                        return;
+                    }
+
                     playButton.setDisable(true);
+
                     playButton.setText(
                             "CLOSING..."
                     );
@@ -354,7 +365,14 @@ public class InstanceCard extends HBox {
                     );
                 }
 
+
+
                 case ERROR -> {
+
+                    if (!isThisInstance) {
+                        resetToReady();
+                        return;
+                    }
 
                     playButton.setDisable(false);
                     playButton.setText(
@@ -371,28 +389,33 @@ public class InstanceCard extends HBox {
         });
     }
 
+    private void resetToReady() {
+
+        playButton.setDisable(false);
+
+        playButton.setText(
+                "PLAY"
+        );
+
+        setPlayingStyle(false);
+
+        statusLabel.setText(
+                "● READY"
+        );
+    }
+
     private void setPlayingStyle(
             boolean playing
     ) {
 
         playButton.getStyleClass().remove(
-                "playing-button"
-        );
-
-        playButton.getStyleClass().remove(
-                "instance-play-button"
+                "instance-playing-button"
         );
 
         if (playing) {
 
             playButton.getStyleClass().add(
-                    "playing-button"
-            );
-
-        } else {
-
-            playButton.getStyleClass().add(
-                    "instance-play-button"
+                    "instance-playing-button"
             );
         }
     }

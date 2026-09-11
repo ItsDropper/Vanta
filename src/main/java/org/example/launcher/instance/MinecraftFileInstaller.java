@@ -42,6 +42,9 @@ public class MinecraftFileInstaller {
                         .get("url")
                         .asText();
 
+        String sha1 =
+                getSha1(client);
+
         Path minecraftDirectory =
                 instance
                         .getDirectory()
@@ -56,9 +59,10 @@ public class MinecraftFileInstaller {
                         "client.jar"
                 );
 
-        DownloadUtil.downloadFile(
+        downloadIfNeeded(
                 url,
-                target
+                target,
+                sha1
         );
     }
 
@@ -111,22 +115,19 @@ public class MinecraftFileInstaller {
                                 .get("path")
                                 .asText();
 
+                String sha1 =
+                        getSha1(artifact);
+
                 Path target =
                         librariesDirectory.resolve(
                                 path
                         );
 
-                if (!Files.exists(target)) {
-
-                    Files.createDirectories(
-                            target.getParent()
-                    );
-
-                    DownloadUtil.downloadFile(
-                            url,
-                            target
-                    );
-                }
+                downloadIfNeeded(
+                        url,
+                        target,
+                        sha1
+                );
             }
 
             // -----------------------------------------------------
@@ -159,22 +160,145 @@ public class MinecraftFileInstaller {
                             .get("path")
                             .asText();
 
+            String sha1 =
+                    getSha1(windows);
+
             Path target =
                     librariesDirectory.resolve(
                             path
                     );
 
-            if (!Files.exists(target)) {
+            downloadIfNeeded(
+                    url,
+                    target,
+                    sha1
+            );
+        }
+    }
 
-                Files.createDirectories(
-                        target.getParent()
+    // =============================================================
+    // DOWNLOAD / VERIFY
+    // =============================================================
+
+    private static void downloadIfNeeded(
+            String url,
+            Path target,
+            String expectedSha1
+    ) throws Exception {
+
+        if (Files.exists(target)) {
+
+            if (expectedSha1 == null
+                    || expectedSha1.isBlank()) {
+
+                return;
+            }
+
+            String actualSha1 =
+                    calculateSha1(target);
+
+            if (actualSha1.equalsIgnoreCase(
+                    expectedSha1
+            )) {
+
+                return;
+            }
+
+            System.out.println(
+                    "Checksum mismatch. Re-downloading: "
+                            + target
+            );
+
+            Files.deleteIfExists(
+                    target
+            );
+        }
+
+        DownloadUtil.downloadFile(
+                url,
+                target,
+                expectedSha1
+        );
+    }
+
+    // =============================================================
+    // SHA-1
+    // =============================================================
+
+    private static String calculateSha1(
+            Path file
+    ) throws Exception {
+
+        java.security.MessageDigest digest =
+                java.security.MessageDigest.getInstance(
+                        "SHA-1"
                 );
 
-                DownloadUtil.downloadFile(
-                        url,
-                        target
+        try (java.io.InputStream input =
+                     Files.newInputStream(file)) {
+
+            byte[] buffer =
+                    new byte[8192];
+
+            int read;
+
+            while ((read = input.read(buffer)) != -1) {
+
+                digest.update(
+                        buffer,
+                        0,
+                        read
                 );
             }
         }
+
+        byte[] hash =
+                digest.digest();
+
+        StringBuilder result =
+                new StringBuilder(
+                        hash.length * 2
+                );
+
+        for (byte value : hash) {
+
+            result.append(
+                    String.format(
+                            "%02x",
+                            value & 0xff
+                    )
+            );
+        }
+
+        return result.toString();
+    }
+
+    // =============================================================
+    // METADATA
+    // =============================================================
+
+    private static String getSha1(
+            JsonNode node
+    ) {
+
+        JsonNode sha1 =
+                node.get("sha1");
+
+        if (sha1 == null
+                || sha1.isNull()) {
+
+            return null;
+        }
+
+        String value =
+                sha1.asText();
+
+        if (value == null
+                || value.isBlank()) {
+
+            return null;
+        }
+
+        return value;
     }
 }

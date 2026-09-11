@@ -40,7 +40,13 @@ public class JavaLocator {
                             .resolve("bin")
                             .resolve("java.exe");
 
-            if (Files.exists(java)) {
+            if (Files.isRegularFile(java)) {
+
+                JavaVerifier.verify(
+                        java,
+                        requiredVersion
+                );
+
                 return java.toString();
             }
         }
@@ -63,6 +69,11 @@ public class JavaLocator {
                             + installed
             );
 
+            JavaVerifier.verify(
+                    installed,
+                    requiredVersion
+            );
+
             return installed.toString();
         }
 
@@ -83,6 +94,11 @@ public class JavaLocator {
                             + managed
             );
 
+            JavaVerifier.verify(
+                    managed,
+                    requiredVersion
+            );
+
             return managed.toString();
         }
 
@@ -95,11 +111,17 @@ public class JavaLocator {
                         + " not found."
         );
 
-        return JavaInstaller
-                .install(
+        Path installedJava =
+                JavaInstaller.install(
                         requiredVersion
-                )
-                .toString();
+                );
+
+        JavaVerifier.verify(
+                installedJava,
+                requiredVersion
+        );
+
+        return installedJava.toString();
     }
 
     // =============================================================
@@ -185,6 +207,7 @@ public class JavaLocator {
 
             if (location == null
                     || !Files.isDirectory(location)) {
+
                 continue;
             }
 
@@ -221,32 +244,16 @@ public class JavaLocator {
 
                 return stream
                         .filter(Files::isDirectory)
-                        .filter(path -> {
-
-                            Path fileName =
-                                    path.resolve(
-                                            "bin"
-                                    ).resolve(
-                                            "java.exe"
-                                    );
-
-                            if (!Files.exists(fileName)) {
-                                return false;
-                            }
-
-                            String name =
-                                    path.getFileName()
-                                            .toString();
-
-                            return name.contains(
-                                    String.valueOf(
-                                            requiredVersion
-                                    )
-                            );
-                        })
                         .map(path ->
                                 path.resolve("bin")
                                         .resolve("java.exe")
+                        )
+                        .filter(Files::isRegularFile)
+                        .filter(path ->
+                                isCorrectJavaVersion(
+                                        path,
+                                        requiredVersion
+                                )
                         )
                         .findFirst()
                         .orElse(null);
@@ -255,6 +262,30 @@ public class JavaLocator {
         } catch (IOException ignored) {
 
             return null;
+        }
+    }
+
+    // =============================================================
+    // VERSION CHECK
+    // =============================================================
+
+    private static boolean isCorrectJavaVersion(
+            Path java,
+            int requiredVersion
+    ) {
+
+        try {
+
+            JavaVerifier.verify(
+                    java,
+                    requiredVersion
+            );
+
+            return true;
+
+        } catch (Exception ignored) {
+
+            return false;
         }
     }
 

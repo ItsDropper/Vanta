@@ -12,6 +12,8 @@ import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.time.Duration;
 
 public class DownloadUtil {
 
@@ -19,7 +21,15 @@ public class DownloadUtil {
             new ObjectMapper();
 
     private static final HttpClient HTTP =
-            HttpClient.newHttpClient();
+            HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(15))
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .build();
+
+    private static final Duration REQUEST_TIMEOUT =
+            Duration.ofMinutes(5);
+
+    private static final int MAX_RETRIES = 3;
 
     // =============================================================
     // JSON
@@ -29,32 +39,58 @@ public class DownloadUtil {
             String url
     ) throws Exception {
 
-        HttpRequest request =
-                HttpRequest.newBuilder(
-                                URI.create(url)
-                        )
-                        .GET()
-                        .build();
+        Exception lastException = null;
 
-        HttpResponse<String> response =
-                HTTP.send(
-                        request,
-                        HttpResponse.BodyHandlers.ofString()
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+
+            try {
+
+                HttpRequest request =
+                        HttpRequest.newBuilder(
+                                        URI.create(url)
+                                )
+                                .timeout(REQUEST_TIMEOUT)
+                                .GET()
+                                .build();
+
+                HttpResponse<String> response =
+                        HTTP.send(
+                                request,
+                                HttpResponse.BodyHandlers.ofString()
+                        );
+
+                if (response.statusCode() < 200
+                        || response.statusCode() >= 300) {
+
+                    throw new IOException(
+                            "HTTP "
+                                    + response.statusCode()
+                                    + " while downloading "
+                                    + url
+                    );
+                }
+
+                return MAPPER.readTree(
+                        response.body()
                 );
 
-        if (response.statusCode() < 200
-                || response.statusCode() >= 300) {
+            } catch (Exception e) {
 
-            throw new IOException(
-                    "HTTP "
-                            + response.statusCode()
-                            + " while downloading "
-                            + url
-            );
+                lastException = e;
+
+                if (attempt < MAX_RETRIES) {
+
+                    sleepBeforeRetry(attempt);
+                }
+            }
         }
 
-        return MAPPER.readTree(
-                response.body()
+        throw new IOException(
+                "Failed to download JSON after "
+                        + MAX_RETRIES
+                        + " attempts: "
+                        + url,
+                lastException
         );
     }
 
@@ -67,61 +103,244 @@ public class DownloadUtil {
             Path target
     ) throws Exception {
 
-        System.out.println(
-                "Downloading: "
-                        + url
+        downloadFile(
+                url,
+                target,
+                null
         );
+    }
 
-        HttpRequest request =
-                HttpRequest.newBuilder(
-                                URI.create(url)
-                        )
-                        .GET()
-                        .build();
+    // =============================================================
+    // FILE WITH SHA-1 VERIFICATION
+    // =============================================================
 
-        HttpResponse<InputStream> response =
-                HTTP.send(
-                        request,
-                        HttpResponse.BodyHandlers.ofInputStream()
+    public static void downloadFile(
+            String url,
+            Path target,
+            String expectedSha1
+    ) throws Exception {
+
+        Exception lastException = null;
+
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+
+            Path temporary =
+                    target.resolveSibling(
+                            target.getFileName()
+                                    + ".download"
+                    );
+
+            try {
+
+                System.out.println(
+                        "Downloading (attempt "
+                                + attempt
+                                + "/"
+                                + MAX_RETRIES
+                                + "): "
+                                + url
                 );
 
-        if (response.statusCode() < 200
-                || response.statusCode() >= 300) {
+                if (target.getParent() != null) {
 
-            response.body().close();
+                    Files.createDirectories(
+                            target.getParent()
+                    );
+                }
 
-            throw new IOException(
-                    "HTTP "
-                            + response.statusCode()
-                            + " while downloading "
-                            + url
-            );
+                HttpRequest request =
+                        HttpRequest.newBuilder(
+                                        URI.create(url)
+                                )
+                                .timeout(REQUEST_TIMEOUT)
+                                .GET()
+                                .build();
+
+                HttpResponse<InputStream> response =
+                        HTTP.send(
+                                request,
+                                HttpResponse.BodyHandlers.ofInputStream()
+                        );
+
+                if (response.statusCode() < 200
+                        || response.statusCode() >= 300) {
+
+                    try {
+                        response.body().close();
+                    } catch (IOException ignored) {
+                    }
+
+                    throw new IOException(
+                            "HTTP "
+                                    + response.statusCode()
+                                    + " while downloading "
+                                    + url
+                    );
+                }
+
+                try (InputStream input =
+                             response.body()) {
+
+                    Files.copy(
+                            input,
+                            temporary,
+                            StandardCopyOption.REPLACE_EXISTING
+                    );
+                }
+
+                // -------------------------------------------------
+                // VERIFY SHA-1
+                // -------------------------------------------------
+
+                if (expectedSha1 != null
+                        && !expectedSha1.isBlank()) {
+
+                    String actualSha1 =
+                            calculateSha1(
+                                    temporary
+                            );
+
+                    if (!actualSha1.equalsIgnoreCase(
+                            expectedSha1
+                    )) {
+
+                        throw new IOException(
+                                "SHA-1 verification failed for "
+                                        + target.getFileName()
+                                        + ". Expected "
+                                        + expectedSha1
+                                        + " but got "
+                                        + actualSha1
+                        );
+                    }
+                }
+
+                // -------------------------------------------------
+                // ATOMIC REPLACEMENT
+                // -------------------------------------------------
+
+                try {
+
+                    Files.move(
+                            temporary,
+                            target,
+                            StandardCopyOption.ATOMIC_MOVE,
+                            StandardCopyOption.REPLACE_EXISTING
+                    );
+
+                } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+
+                    Files.move(
+                            temporary,
+                            target,
+                            StandardCopyOption.REPLACE_EXISTING
+                    );
+                }
+
+                return;
+
+            } catch (Exception e) {
+
+                lastException = e;
+
+                try {
+                    Files.deleteIfExists(
+                            temporary
+                    );
+                } catch (IOException ignored) {
+                }
+
+                if (attempt < MAX_RETRIES) {
+
+                    sleepBeforeRetry(attempt);
+                }
+            }
         }
 
-        Files.createDirectories(
-                target.getParent()
+        throw new IOException(
+                "Failed to download file after "
+                        + MAX_RETRIES
+                        + " attempts: "
+                        + url,
+                lastException
         );
+    }
 
-        Path temporary =
-                target.resolveSibling(
-                        target.getFileName()
-                                + ".download"
+    // =============================================================
+    // SHA-1
+    // =============================================================
+
+    private static String calculateSha1(
+            Path file
+    ) throws Exception {
+
+        MessageDigest digest =
+                MessageDigest.getInstance(
+                        "SHA-1"
                 );
 
         try (InputStream input =
-                     response.body()) {
+                     Files.newInputStream(file)) {
 
-            Files.copy(
-                    input,
-                    temporary,
-                    StandardCopyOption.REPLACE_EXISTING
+            byte[] buffer =
+                    new byte[8192];
+
+            int read;
+
+            while ((read = input.read(buffer)) != -1) {
+
+                digest.update(
+                        buffer,
+                        0,
+                        read
+                );
+            }
+        }
+
+        byte[] hash =
+                digest.digest();
+
+        StringBuilder result =
+                new StringBuilder(
+                        hash.length * 2
+                );
+
+        for (byte value : hash) {
+
+            result.append(
+                    String.format(
+                            "%02x",
+                            value & 0xff
+                    )
             );
         }
 
-        Files.move(
-                temporary,
-                target,
-                StandardCopyOption.REPLACE_EXISTING
-        );
+        return result.toString();
+    }
+
+    // =============================================================
+    // RETRY
+    // =============================================================
+
+    private static void sleepBeforeRetry(
+            int attempt
+    ) {
+
+        try {
+
+            long delay =
+                    1000L * attempt;
+
+            Thread.sleep(delay);
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
+
+            throw new RuntimeException(
+                    "Download retry interrupted.",
+                    e
+            );
+        }
     }
 }

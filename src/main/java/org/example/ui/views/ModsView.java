@@ -102,7 +102,7 @@ public class ModsView extends VBox {
 
         Button browseButton =
                 new Button(
-                        "BROWSE MODS"
+                        "MODRINTH"
                 );
 
         browseButton.getStyleClass().add(
