@@ -14,12 +14,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import org.example.launcher.instance.FabricInstaller;
 import org.example.launcher.instance.InstanceInstaller;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class CreateInstanceView extends VBox {
 
@@ -43,6 +45,17 @@ public class CreateInstanceView extends VBox {
 
     private final Runnable onBack;
     private final Runnable onCreated;
+
+    /*
+     * Every version change gets a new check ID.
+     *
+     * If the user changes versions quickly, an older Fabric
+     * check is ignored when it finishes.
+     */
+    private final AtomicInteger fabricCheckId =
+            new AtomicInteger();
+
+    private volatile boolean fabricCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -171,6 +184,15 @@ public class CreateInstanceView extends VBox {
                 "create-combo"
         );
 
+        /*
+         * When the Minecraft version changes, check whether
+         * Fabric supports that exact version.
+         */
+        versionBox.valueProperty().addListener(
+                (observable, oldValue, newValue) ->
+                        checkFabricAvailability(newValue)
+        );
+
         // =========================================================
         // LOADER
         // =========================================================
@@ -181,13 +203,18 @@ public class CreateInstanceView extends VBox {
         loaderBox =
                 new ComboBox<>();
 
-        loaderBox.getItems().addAll(
-                "Vanilla",
-                "Fabric"
+        /*
+         * Vanilla is always valid.
+         *
+         * Fabric is added only after we verify that Fabric
+         * supports the selected Minecraft version.
+         */
+        loaderBox.getItems().add(
+                "Vanilla"
         );
 
         loaderBox.getSelectionModel()
-                .select("Fabric");
+                .select("Vanilla");
 
         loaderBox.setMaxWidth(
                 Double.MAX_VALUE
@@ -256,7 +283,8 @@ public class CreateInstanceView extends VBox {
         );
 
         backButton.setOnAction(
-                event -> onBack.run()
+                event ->
+                        onBack.run()
         );
 
         createButton =
@@ -277,7 +305,8 @@ public class CreateInstanceView extends VBox {
         );
 
         createButton.setOnAction(
-                event -> createInstance()
+                event ->
+                        createInstance()
         );
 
         HBox actions =
@@ -371,8 +400,18 @@ public class CreateInstanceView extends VBox {
                                         response.body()
                                 );
 
-                        for (JsonNode version :
-                                manifest.get("versions")) {
+                        JsonNode versions =
+                                manifest.get("versions");
+
+                        if (versions == null
+                                || !versions.isArray()) {
+
+                            throw new IllegalStateException(
+                                    "Invalid Minecraft version manifest."
+                            );
+                        }
+
+                        for (JsonNode version : versions) {
 
                             String id =
                                     version
@@ -401,6 +440,18 @@ public class CreateInstanceView extends VBox {
                                     .getItems()
                                     .isEmpty()) {
 
+                                versionBox.setDisable(
+                                        true
+                                );
+
+                                loaderBox.setDisable(
+                                        true
+                                );
+
+                                createButton.setDisable(
+                                        true
+                                );
+
                                 statusLabel.setText(
                                         "No Minecraft versions found."
                                 );
@@ -413,7 +464,7 @@ public class CreateInstanceView extends VBox {
                                     .selectFirst();
 
                             statusLabel.setText(
-                                    "Ready to create instance."
+                                    "Checking Fabric support..."
                             );
                         });
 
@@ -424,6 +475,10 @@ public class CreateInstanceView extends VBox {
                         Platform.runLater(() -> {
 
                             versionBox.setDisable(
+                                    true
+                            );
+
+                            loaderBox.setDisable(
                                     true
                             );
 
@@ -444,10 +499,177 @@ public class CreateInstanceView extends VBox {
     }
 
     // =============================================================
+    // FABRIC AVAILABILITY
+    // =============================================================
+
+    private void checkFabricAvailability(
+            String minecraftVersion
+    ) {
+
+        if (minecraftVersion == null
+                || minecraftVersion.isBlank()) {
+
+            return;
+        }
+
+        int checkId =
+                fabricCheckId.incrementAndGet();
+
+        fabricCheckRunning =
+                true;
+
+        Platform.runLater(() -> {
+
+            /*
+             * Vanilla stays available while Fabric is being
+             * checked.
+             */
+            loaderBox.getItems().setAll(
+                    "Vanilla"
+            );
+
+            loaderBox.getSelectionModel()
+                    .select("Vanilla");
+
+            loaderBox.setDisable(
+                    true
+            );
+
+            createButton.setDisable(
+                    true
+            );
+
+            statusLabel.setText(
+                    "Checking Fabric support for Minecraft "
+                            + minecraftVersion
+                            + "..."
+            );
+        });
+
+        Thread thread =
+                new Thread(() -> {
+
+                    boolean fabricAvailable =
+                            false;
+
+                    try {
+
+                        /*
+                         * This uses the existing Fabric API
+                         * integration already present in Vanta.
+                         *
+                         * If no loader exists for this Minecraft
+                         * version, FabricInstaller throws.
+                         */
+                        FabricInstaller.findLatestLoaderVersion(
+                                minecraftVersion
+                        );
+
+                        fabricAvailable =
+                                true;
+
+                    } catch (Throwable ex) {
+
+                        /*
+                         * No Fabric version for this Minecraft
+                         * version is a normal result.
+                         *
+                         * Do not treat it as a launcher error.
+                         */
+                        fabricAvailable =
+                                false;
+                    }
+
+                    final boolean available =
+                            fabricAvailable;
+
+                    Platform.runLater(() -> {
+
+                        /*
+                         * Ignore this result if the user already
+                         * selected another Minecraft version.
+                         */
+                        if (checkId
+                                != fabricCheckId.get()) {
+
+                            return;
+                        }
+
+                        fabricCheckRunning =
+                                false;
+
+                        loaderBox.getItems().clear();
+
+                        /*
+                         * Vanilla is ALWAYS available.
+                         */
+                        loaderBox.getItems().add(
+                                "Vanilla"
+                        );
+
+                        if (available) {
+
+                            loaderBox.getItems().add(
+                                    "Fabric"
+                            );
+
+                            /*
+                             * Fabric is the preferred loader
+                             * when it is actually supported.
+                             */
+                            loaderBox.getSelectionModel()
+                                    .select("Fabric");
+
+                            statusLabel.setText(
+                                    "Fabric is available for Minecraft "
+                                            + minecraftVersion
+                                            + "."
+                            );
+
+                        } else {
+
+                            loaderBox.getSelectionModel()
+                                    .select("Vanilla");
+
+                            statusLabel.setText(
+                                    "Fabric is not available for Minecraft "
+                                            + minecraftVersion
+                                            + ". Vanilla only."
+                            );
+                        }
+
+                        loaderBox.setDisable(
+                                false
+                        );
+
+                        createButton.setDisable(
+                                false
+                        );
+                    });
+
+                });
+
+        thread.setDaemon(
+                true
+        );
+
+        thread.start();
+    }
+
+    // =============================================================
     // CREATE
     // =============================================================
 
     private void createInstance() {
+
+        if (fabricCheckRunning) {
+
+            statusLabel.setText(
+                    "Still checking Fabric support..."
+            );
+
+            return;
+        }
 
         String name =
                 nameField
@@ -493,6 +715,34 @@ public class CreateInstanceView extends VBox {
             );
 
             return;
+        }
+
+        /*
+         * Extra safety check:
+         *
+         * Even if the UI somehow contains Fabric, do not allow
+         * installation unless the current Fabric check succeeded.
+         */
+        if ("Fabric".equals(loader)) {
+
+            /*
+             * The only way Fabric gets into loaderBox is through
+             * checkFabricAvailability(), so reaching this point
+             * means the current version was verified.
+             */
+            if (!loaderBox.getItems().contains("Fabric")) {
+
+                loaderBox.getSelectionModel()
+                        .select("Vanilla");
+
+                statusLabel.setText(
+                        "Fabric is not available for Minecraft "
+                                + version
+                                + "."
+                );
+
+                return;
+            }
         }
 
         // ---------------------------------------------------------
@@ -578,3 +828,4 @@ public class CreateInstanceView extends VBox {
         thread.start();
     }
 }
+

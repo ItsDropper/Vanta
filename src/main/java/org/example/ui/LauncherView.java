@@ -383,9 +383,15 @@ public class LauncherView {
 
     private void showImportInstanceView() {
 
-        /*
-         * Import support will be implemented here.
-         */
+        ImportInstanceView importInstanceView =
+                new ImportInstanceView(
+                        this::showCreateInstanceView,
+                        this::instanceCreated
+                );
+
+        content.getChildren().setAll(
+                importInstanceView
+        );
     }
 
     private void showPresetInstanceView() {
