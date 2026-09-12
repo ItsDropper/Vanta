@@ -56,3 +56,38 @@
     -fx-text-fill: #7f887f;
     -fx-font-size: 10px;
 }
+
+/* Account sign out */
+
+.account-sign-out-button {
+    -fx-background-color: #211719;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: #4a2a2e;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: #d98a92;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 9px 16px;
+
+    -fx-cursor: hand;
+}
+
+.account-sign-out-button:hover {
+    -fx-background-color: #2d1c1f;
+    -fx-border-color: #713c43;
+    -fx-text-fill: #ef9da5;
+}
+
+.account-sign-out-button:pressed {
+    -fx-background-color: #391f23;
+    -fx-border-color: #8b4b54;
+    -fx-text-fill: #f3abb2;
+}
+
+.account-sign-out-button:disabled {
+    -fx-opacity: 0.55;
+}

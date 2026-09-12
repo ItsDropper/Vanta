@@ -35,11 +35,10 @@ public class LauncherView {
     private final GlobalModsView globalModsView;
 
     private final SettingsView settingsView;
-    private final CreateInstanceView createInstanceView;
+    private final CreateInstanceTypeView createInstanceTypeView;
 
     private Instance selectedInstance;
     private BrowseModsView browseModsView;
-
 
     public LauncherView(Stage stage) {
 
@@ -193,10 +192,13 @@ public class LauncherView {
                         this::showInstanceMods
                 );
 
-        createInstanceView =
-                new CreateInstanceView(
+        createInstanceTypeView =
+                new CreateInstanceTypeView(
                         this::showInstances,
-                        this::instanceCreated
+                        this::showCustomCreateInstanceView,
+                        this::showImportInstanceView,
+                        this::showPresetInstanceView,
+                        this::showModrinthModpackView
                 );
 
         /*
@@ -233,7 +235,6 @@ public class LauncherView {
 
         loadAccount();
     }
-
 
     // =============================================================
     // GLOBAL NAVIGATION
@@ -291,7 +292,6 @@ public class LauncherView {
         }
     }
 
-
     // =============================================================
     // INSTANCE INSTALLED MODS
     // =============================================================
@@ -319,7 +319,6 @@ public class LauncherView {
         );
     }
 
-
     // =============================================================
     // INSTANCE BROWSE MODS
     // =============================================================
@@ -346,7 +345,6 @@ public class LauncherView {
         );
     }
 
-
     // =============================================================
     // CREATE INSTANCE
     // =============================================================
@@ -354,8 +352,54 @@ public class LauncherView {
     private void showCreateInstanceView() {
 
         content.getChildren().setAll(
+                createInstanceTypeView
+        );
+    }
+
+    private void showCustomCreateInstanceView() {
+
+        /*
+         * IMPORTANT:
+         *
+         * Create a fresh CreateInstanceView every time.
+         *
+         * This prevents the previous INSTALLING... state
+         * from surviving when the user creates another instance.
+         */
+        CreateInstanceView createInstanceView =
+                new CreateInstanceView(
+                        this::showCreateInstanceView,
+                        this::instanceCreated
+                );
+
+        content.getChildren().setAll(
                 createInstanceView
         );
+    }
+
+    // =============================================================
+    // FUTURE CREATE OPTIONS
+    // =============================================================
+
+    private void showImportInstanceView() {
+
+        /*
+         * Import support will be implemented here.
+         */
+    }
+
+    private void showPresetInstanceView() {
+
+        /*
+         * Preset support will be implemented here.
+         */
+    }
+
+    private void showModrinthModpackView() {
+
+        /*
+         * Modrinth modpack browsing will be implemented here.
+         */
     }
 
     private void showInstances() {
@@ -364,7 +408,6 @@ public class LauncherView {
                 instancesView
         );
     }
-
 
     // =============================================================
     // INSTANCE SELECTION
@@ -386,7 +429,6 @@ public class LauncherView {
         );
     }
 
-
     // =============================================================
     // INSTANCE CREATED
     // =============================================================
@@ -399,7 +441,6 @@ public class LauncherView {
                 instancesView
         );
     }
-
 
     // =============================================================
     // INSTANCE SETTINGS
@@ -440,7 +481,6 @@ public class LauncherView {
         );
     }
 
-
     // =============================================================
     // ACCOUNT
     // =============================================================
@@ -477,7 +517,6 @@ public class LauncherView {
         thread.start();
     }
 
-
     // =============================================================
     // ROOT
     // =============================================================
@@ -486,7 +525,6 @@ public class LauncherView {
 
         return root;
     }
-
 
     // =============================================================
     // MOD DETAILS
@@ -519,7 +557,6 @@ public class LauncherView {
                 )
         );
     }
-
 
     private void showGlobalModDetails(
             String projectId

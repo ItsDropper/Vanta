@@ -89,10 +89,6 @@ public class AccountManager {
                 "Session encrypted."
         );
 
-        System.out.println(
-                "Encrypted data length: "
-                        + encrypted.length()
-        );
 
         JsonObject json =
                 new JsonObject();

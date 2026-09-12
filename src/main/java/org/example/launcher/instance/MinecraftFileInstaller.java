@@ -243,7 +243,7 @@ public class MinecraftFileInstaller {
         boolean hasAllowRule =
                 false;
 
-        boolean allowed =
+        boolean matchedAllowRule =
                 false;
 
         for (JsonNode rule : rules) {
@@ -263,25 +263,43 @@ public class MinecraftFileInstaller {
                 continue;
             }
 
-            if (!ruleMatchesCurrentPlatform(rule)) {
-                continue;
-            }
+            boolean matches =
+                    ruleMatchesCurrentPlatform(rule);
 
             if ("allow".equalsIgnoreCase(action)) {
 
+                /*
+                 * The existence of an allow rule means the library
+                 * must match at least one allow rule.
+                 *
+                 * This must be set BEFORE checking whether the rule
+                 * matches the current platform.
+                 */
                 hasAllowRule = true;
-                allowed = true;
+
+                if (matches) {
+                    matchedAllowRule = true;
+                }
 
             } else if ("disallow".equalsIgnoreCase(action)) {
 
-                return false;
+                if (matches) {
+                    return false;
+                }
             }
         }
 
+        /*
+         * If allow rules exist, at least one of them must match.
+         */
         if (hasAllowRule) {
-            return allowed;
+            return matchedAllowRule;
         }
 
+        /*
+         * No allow rules means the library is allowed unless a
+         * matching disallow rule rejected it above.
+         */
         return true;
     }
 

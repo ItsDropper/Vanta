@@ -94,15 +94,38 @@ public class CreateInstanceView extends VBox {
                 );
 
         // =========================================================
-        // INSTANCE DETAILS
+        // INSTANCE PANEL
         // =========================================================
 
-        Label detailsTitle =
-                new Label("INSTANCE DETAILS");
+        VBox panel =
+                new VBox(16);
 
-        detailsTitle.getStyleClass().add(
-                "create-section-title"
+        panel.getStyleClass().add(
+                "create-instance-panel"
         );
+
+        panel.setPadding(
+                new Insets(28)
+        );
+
+        panel.setMaxWidth(
+                680
+        );
+
+        // =========================================================
+        // PANEL TITLE
+        // =========================================================
+
+        Label panelTitle =
+                new Label("CREATE INSTANCE");
+
+        panelTitle.getStyleClass().add(
+                "card-title"
+        );
+
+        // =========================================================
+        // NAME
+        // =========================================================
 
         Label nameLabel =
                 createLabel("Name");
@@ -187,17 +210,7 @@ public class CreateInstanceView extends VBox {
                         12
                 );
 
-        form.getStyleClass().add(
-                "create-panel"
-        );
-
-        form.setMaxWidth(
-                680
-        );
-
         form.getChildren().addAll(
-                detailsTitle,
-
                 nameLabel,
                 nameField,
 
@@ -278,34 +291,24 @@ public class CreateInstanceView extends VBox {
                 Pos.CENTER_RIGHT
         );
 
-        HBox.setHgrow(
-                actions,
-                Priority.ALWAYS
+        // =========================================================
+        // PANEL BUILD
+        // =========================================================
+
+        panel.getChildren().addAll(
+                panelTitle,
+                form,
+                statusLabel,
+                actions
         );
 
         // =========================================================
-        // ACTION PANEL
-        // =========================================================
-
-        VBox bottom =
-                new VBox(
-                        12,
-                        statusLabel,
-                        actions
-                );
-
-        bottom.setMaxWidth(
-                680
-        );
-
-        // =========================================================
-        // BUILD
+        // BUILD PAGE
         // =========================================================
 
         getChildren().addAll(
                 header,
-                form,
-                bottom
+                panel
         );
 
         loadVersions();
@@ -496,25 +499,11 @@ public class CreateInstanceView extends VBox {
         // LOCK UI
         // ---------------------------------------------------------
 
-        createButton.setDisable(
-                true
-        );
-
-        backButton.setDisable(
-                true
-        );
-
-        nameField.setDisable(
-                true
-        );
-
-        versionBox.setDisable(
-                true
-        );
-
-        loaderBox.setDisable(
-                true
-        );
+        createButton.setDisable(true);
+        backButton.setDisable(true);
+        nameField.setDisable(true);
+        versionBox.setDisable(true);
+        loaderBox.setDisable(true);
 
         createButton.setText(
                 "INSTALLING..."
@@ -565,25 +554,11 @@ public class CreateInstanceView extends VBox {
 
                         Platform.runLater(() -> {
 
-                            createButton.setDisable(
-                                    false
-                            );
-
-                            backButton.setDisable(
-                                    false
-                            );
-
-                            nameField.setDisable(
-                                    false
-                            );
-
-                            versionBox.setDisable(
-                                    false
-                            );
-
-                            loaderBox.setDisable(
-                                    false
-                            );
+                            createButton.setDisable(false);
+                            backButton.setDisable(false);
+                            nameField.setDisable(false);
+                            versionBox.setDisable(false);
+                            loaderBox.setDisable(false);
 
                             createButton.setText(
                                     "CREATE INSTANCE"

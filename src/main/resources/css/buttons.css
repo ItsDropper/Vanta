@@ -151,3 +151,47 @@
     -fx-pref-height: 38px;
     -fx-max-height: 38px;
 }
+
+/* =============================================================
+   DANGER / SIGN OUT BUTTON
+   ============================================================= */
+
+.danger-button {
+    -fx-background-color: #21191b;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: #4a3033;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: #d98a92;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 11px 17px;
+
+    -fx-cursor: hand;
+
+    -fx-alignment: center;
+}
+
+.danger-button:hover {
+    -fx-background-color: #2b1d20;
+
+    -fx-border-color: #704148;
+
+    -fx-text-fill: #f0a1a8;
+}
+
+.danger-button:pressed {
+    -fx-background-color: #351f23;
+
+    -fx-border-color: #8a5058;
+
+    -fx-text-fill: #f5b0b6;
+}
+
+.danger-button:disabled {
+    -fx-opacity: 0.55;
+}
