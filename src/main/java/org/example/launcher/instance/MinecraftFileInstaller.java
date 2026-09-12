@@ -89,6 +89,14 @@ public class MinecraftFileInstaller {
 
         for (JsonNode library : libraries) {
 
+            // -----------------------------------------------------
+            // PLATFORM RULES
+            // -----------------------------------------------------
+
+            if (!isAllowedOnCurrentPlatform(library)) {
+                continue;
+            }
+
             JsonNode downloads =
                     library.get("downloads");
 
@@ -131,37 +139,75 @@ public class MinecraftFileInstaller {
             }
 
             // -----------------------------------------------------
-            // WINDOWS NATIVES
+            // NATIVES
             // -----------------------------------------------------
 
             JsonNode classifiers =
                     downloads.get("classifiers");
 
-            if (classifiers == null) {
+            JsonNode natives =
+                    library.get("natives");
+
+            if (classifiers == null
+                    || natives == null
+                    || !natives.isObject()) {
+
                 continue;
             }
 
-            JsonNode windows =
-                    classifiers.get(
-                            "natives-windows"
+            JsonNode windowsClassifier =
+                    natives.get("windows");
+
+            if (windowsClassifier == null
+                    || windowsClassifier.isNull()) {
+
+                continue;
+            }
+
+            String classifier =
+                    windowsClassifier.asText();
+
+            if (classifier == null
+                    || classifier.isBlank()) {
+
+                continue;
+            }
+
+            classifier =
+                    classifier.replace(
+                            "${arch}",
+                            getArchitecture()
                     );
 
-            if (windows == null) {
-                continue;
+            JsonNode nativeArtifact =
+                    classifiers.get(
+                            classifier
+                    );
+
+            if (nativeArtifact == null) {
+
+                throw new IllegalStateException(
+                        "Native classifier not found: "
+                                + classifier
+                                + " for "
+                                + library
+                                .path("name")
+                                .asText()
+                );
             }
 
             String url =
-                    windows
+                    nativeArtifact
                             .get("url")
                             .asText();
 
             String path =
-                    windows
+                    nativeArtifact
                             .get("path")
                             .asText();
 
             String sha1 =
-                    getSha1(windows);
+                    getSha1(nativeArtifact);
 
             Path target =
                     librariesDirectory.resolve(
@@ -174,6 +220,243 @@ public class MinecraftFileInstaller {
                     sha1
             );
         }
+    }
+
+    // =============================================================
+    // PLATFORM RULES
+    // =============================================================
+
+    private static boolean isAllowedOnCurrentPlatform(
+            JsonNode library
+    ) {
+
+        JsonNode rules =
+                library.get("rules");
+
+        if (rules == null
+                || !rules.isArray()
+                || rules.isEmpty()) {
+
+            return true;
+        }
+
+        boolean hasAllowRule =
+                false;
+
+        boolean allowed =
+                false;
+
+        for (JsonNode rule : rules) {
+
+            if (rule == null
+                    || !rule.isObject()) {
+
+                continue;
+            }
+
+            String action =
+                    rule
+                            .path("action")
+                            .asText();
+
+            if (action.isBlank()) {
+                continue;
+            }
+
+            if (!ruleMatchesCurrentPlatform(rule)) {
+                continue;
+            }
+
+            if ("allow".equalsIgnoreCase(action)) {
+
+                hasAllowRule = true;
+                allowed = true;
+
+            } else if ("disallow".equalsIgnoreCase(action)) {
+
+                return false;
+            }
+        }
+
+        if (hasAllowRule) {
+            return allowed;
+        }
+
+        return true;
+    }
+
+    private static boolean ruleMatchesCurrentPlatform(
+            JsonNode rule
+    ) {
+
+        JsonNode os =
+                rule.get("os");
+
+        if (os == null
+                || !os.isObject()) {
+
+            return true;
+        }
+
+        // ---------------------------------------------------------
+        // OS NAME
+        // ---------------------------------------------------------
+
+        String requiredName =
+                os
+                        .path("name")
+                        .asText();
+
+        if (!requiredName.isBlank()) {
+
+            String currentOs =
+                    getOperatingSystem();
+
+            if (!requiredName.equalsIgnoreCase(
+                    currentOs
+            )) {
+
+                return false;
+            }
+        }
+
+        // ---------------------------------------------------------
+        // ARCHITECTURE
+        // ---------------------------------------------------------
+
+        String requiredArch =
+                os
+                        .path("arch")
+                        .asText();
+
+        if (!requiredArch.isBlank()) {
+
+            String actualArch =
+                    System.getProperty(
+                            "os.arch",
+                            ""
+                    );
+
+            if (!matchesArchitecture(
+                    requiredArch,
+                    actualArch
+            )) {
+
+                return false;
+            }
+        }
+
+        // ---------------------------------------------------------
+        // VERSION
+        // ---------------------------------------------------------
+
+        String requiredVersion =
+                os
+                        .path("version")
+                        .asText();
+
+        if (!requiredVersion.isBlank()) {
+
+            String actualVersion =
+                    System.getProperty(
+                            "os.version",
+                            ""
+                    );
+
+            if (!actualVersion.matches(
+                    requiredVersion
+            )) {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static String getOperatingSystem() {
+
+        String os =
+                System.getProperty(
+                        "os.name",
+                        ""
+                ).toLowerCase();
+
+        if (os.contains("win")) {
+            return "windows";
+        }
+
+        if (os.contains("mac")
+                || os.contains("darwin")) {
+
+            return "osx";
+        }
+
+        if (os.contains("linux")) {
+            return "linux";
+        }
+
+        return os;
+    }
+
+    private static String getArchitecture() {
+
+        String arch =
+                System.getProperty(
+                        "os.arch",
+                        ""
+                ).toLowerCase();
+
+        if (arch.equals("amd64")
+                || arch.equals("x86_64")
+                || arch.equals("x64")) {
+
+            return "64";
+        }
+
+        return "32";
+    }
+
+    private static boolean matchesArchitecture(
+            String required,
+            String actual
+    ) {
+
+        String requiredNormalized =
+                required
+                        .toLowerCase()
+                        .trim();
+
+        String actualNormalized =
+                actual
+                        .toLowerCase()
+                        .trim();
+
+        if ("x86_64".equals(requiredNormalized)
+                || "amd64".equals(requiredNormalized)
+                || "64".equals(requiredNormalized)) {
+
+            return actualNormalized.equals("amd64")
+                    || actualNormalized.equals("x86_64")
+                    || actualNormalized.equals("x86-64")
+                    || actualNormalized.contains("64");
+        }
+
+        if ("x86".equals(requiredNormalized)
+                || "32".equals(requiredNormalized)
+                || "x86_32".equals(requiredNormalized)) {
+
+            return actualNormalized.equals("x86")
+                    || actualNormalized.equals("i386")
+                    || actualNormalized.equals("i486")
+                    || actualNormalized.equals("i586")
+                    || actualNormalized.equals("i686")
+                    || actualNormalized.contains("32");
+        }
+
+        return requiredNormalized.equals(
+                actualNormalized
+        );
     }
 
     // =============================================================

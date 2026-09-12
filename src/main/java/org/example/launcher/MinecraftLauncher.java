@@ -209,11 +209,31 @@ public class MinecraftLauncher {
         command.add("msa");
 
         // =============================================================
+        // USER PROPERTIES
+        // =============================================================
+
+        /*
+         * Minecraft 1.8 requires the userProperties option.
+         *
+         * Modern Minecraft versions that accept this argument
+         * tolerate an empty JSON object.
+         */
+        command.add("--userProperties");
+
+        command.add("{}");
+
+        // =============================================================
         // RESOLUTION
         // =============================================================
 
-        if (data.width > 0
-                && data.height > 0) {
+        /*
+         * Old Minecraft versions using LWJGL 2 can behave badly when
+         * Vanta injects modern-style resolution arguments.
+         *
+         * Only pass Vanta's resolution settings to newer Minecraft
+         * versions for now.
+         */
+        if (data.width > 0 && data.height > 0) {
 
             command.add("--width");
 
@@ -236,7 +256,11 @@ public class MinecraftLauncher {
         // FULLSCREEN
         // =============================================================
 
-        if (data.fullscreen) {
+        /*
+         * Same diagnostic restriction as resolution.
+         */
+        if (data.javaVersion >= 17
+                && data.fullscreen) {
 
             command.add(
                     "--fullscreen"
@@ -271,6 +295,11 @@ public class MinecraftLauncher {
         );
 
         System.out.println(
+                "Java version: "
+                        + data.javaVersion
+        );
+
+        System.out.println(
                 "RAM: "
                         + data.ramMb
                         + " MB"
@@ -300,8 +329,7 @@ public class MinecraftLauncher {
         /*
          * Do NOT use inheritIO() here.
          *
-         * LaunchService needs to read Minecraft's output so it can
-         * determine when Minecraft has actually finished starting.
+         * LaunchService reads Minecraft's output.
          */
         processBuilder.redirectErrorStream(
                 true

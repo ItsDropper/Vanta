@@ -148,9 +148,10 @@ public class LaunchDataBuilder {
         // ---------------------------------------------------------
 
         data.javaVersion =
-                manifest.javaVersion != null
-                        ? manifest.javaVersion.majorVersion
-                        : 21;
+                resolveJavaVersion(
+                        manifest,
+                        data.version
+                );
 
         // =========================================================
         // SETTINGS
@@ -178,6 +179,97 @@ public class LaunchDataBuilder {
                 settings.getJavaPath();
 
         return data;
+    }
+
+    // =============================================================
+    // JAVA VERSION
+    // =============================================================
+
+    private static int resolveJavaVersion(
+            VersionManifest manifest,
+            String minecraftVersion
+    ) {
+
+        /*
+         * Modern Minecraft metadata explicitly tells us which
+         * Java version is required. Always prefer that value.
+         */
+        if (manifest.javaVersion != null
+                && manifest.javaVersion.majorVersion > 0) {
+
+            return manifest.javaVersion.majorVersion;
+        }
+
+        /*
+         * Older Minecraft metadata does not contain javaVersion.
+         *
+         * Fall back based on the Minecraft version instead of
+         * blindly using Java 21.
+         */
+
+        if (minecraftVersion == null
+                || minecraftVersion.isBlank()) {
+
+            return 8;
+        }
+
+        String version =
+                minecraftVersion.trim();
+
+        /*
+         * Snapshot / Alpha / Beta / Classic and other very old
+         * versions are safest on Java 8.
+         */
+        if (version.startsWith("a")
+                || version.startsWith("b")
+                || version.startsWith("c")
+                || version.startsWith("rd-")
+                || version.startsWith("inf-")) {
+
+            return 8;
+        }
+
+        /*
+         * Versions before 1.17 use Java 8.
+         */
+        if (version.startsWith("1.")) {
+
+            String[] parts =
+                    version.substring(2).split("\\.");
+
+            try {
+
+                int minor =
+                        Integer.parseInt(parts[0]);
+
+                if (minor <= 16) {
+                    return 8;
+                }
+
+                if (minor == 17) {
+                    return 16;
+                }
+
+                /*
+                 * 1.18+ normally uses Java 17 unless its metadata
+                 * explicitly specifies something else.
+                 */
+                if (minor >= 18) {
+                    return 17;
+                }
+
+            } catch (NumberFormatException ignored) {
+                // Fall through to the safe legacy default.
+            }
+        }
+
+        /*
+         * Unknown metadata without a Java requirement.
+         *
+         * Java 8 is preferable to assuming a modern runtime for
+         * an unknown legacy version.
+         */
+        return 8;
     }
 }
 

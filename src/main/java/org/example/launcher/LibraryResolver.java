@@ -18,6 +18,10 @@ public class LibraryResolver {
             );
         }
 
+        if (!isAllowedOnCurrentPlatform(library)) {
+            return null;
+        }
+
         Path librariesDirectory =
                 MinecraftLocator
                         .getLibrariesDirectory()
@@ -67,10 +71,6 @@ public class LibraryResolver {
                 && library.natives != null
                 && !library.natives.isEmpty()) {
 
-            /*
-             * This library only provides native classifiers.
-             * Its native JAR is handled separately by resolveNative().
-             */
             return null;
         }
 
@@ -116,12 +116,6 @@ public class LibraryResolver {
             return jar;
         }
 
-        /*
-         * There is no usable classpath artifact.
-         *
-         * Do not silently manufacture a path from incomplete
-         * metadata.
-         */
         return null;
     }
 
@@ -135,19 +129,42 @@ public class LibraryResolver {
     ) {
 
         if (library == null
+                || !isAllowedOnCurrentPlatform(library)
                 || library.downloads == null
-                || library.downloads.classifiers == null) {
+                || library.downloads.classifiers == null
+                || library.natives == null) {
 
             return null;
         }
 
+        String nativeClassifier =
+                library.natives.get("windows");
+
+        if (nativeClassifier == null
+                || nativeClassifier.isBlank()) {
+
+            return null;
+        }
+
+        nativeClassifier =
+                nativeClassifier.replace(
+                        "${arch}",
+                        getArchitecture()
+                );
+
         Library.Artifact nativeArtifact =
                 library.downloads.classifiers.get(
-                        "natives-windows"
+                        nativeClassifier
                 );
 
         if (nativeArtifact == null) {
-            return null;
+
+            throw new IllegalStateException(
+                    "Native classifier not found: "
+                            + nativeClassifier
+                            + " for "
+                            + library.name
+            );
         }
 
         String path =
@@ -180,6 +197,234 @@ public class LibraryResolver {
     }
 
     // =============================================================
+    // PLATFORM RULES
+    // =============================================================
+
+    private static boolean isAllowedOnCurrentPlatform(
+            Library library
+    ) {
+
+        if (library.rules == null
+                || library.rules.isEmpty()) {
+
+            return true;
+        }
+
+        boolean hasAllowRule = false;
+        boolean matchedAllowRule = false;
+
+        for (Library.Rule rule :
+                library.rules) {
+
+            if (rule == null
+                    || rule.action == null) {
+
+                continue;
+            }
+
+            String action =
+                    rule.action.trim();
+
+            // -----------------------------------------------------
+            // IMPORTANT:
+            // A rule without an OS restriction matches every
+            // platform.
+            // -----------------------------------------------------
+
+            boolean matches =
+                    ruleMatchesCurrentPlatform(rule);
+
+            if ("allow".equalsIgnoreCase(action)) {
+
+                hasAllowRule = true;
+
+                if (matches) {
+                    matchedAllowRule = true;
+                }
+
+            } else if ("disallow".equalsIgnoreCase(action)) {
+
+                if (matches) {
+                    return false;
+                }
+            }
+        }
+
+        /*
+         * Mojang's rule semantics:
+         *
+         * If allow rules exist, the library is only allowed when
+         * at least one allow rule matches the current platform.
+         */
+        if (hasAllowRule) {
+            return matchedAllowRule;
+        }
+
+        /*
+         * If there are no allow rules, the library is allowed unless
+         * a matching disallow rule rejected it above.
+         */
+        return true;
+    }
+
+    private static boolean ruleMatchesCurrentPlatform(
+            Library.Rule rule
+    ) {
+
+        if (rule.os == null) {
+            return true;
+        }
+
+        // ---------------------------------------------------------
+        // OPERATING SYSTEM
+        // ---------------------------------------------------------
+
+        if (rule.os.name != null
+                && !rule.os.name.isBlank()) {
+
+            String currentOs =
+                    getOperatingSystem();
+
+            if (!rule.os.name.equalsIgnoreCase(
+                    currentOs
+            )) {
+
+                return false;
+            }
+        }
+
+        // ---------------------------------------------------------
+        // ARCHITECTURE
+        // ---------------------------------------------------------
+
+        if (rule.os.arch != null
+                && !rule.os.arch.isBlank()) {
+
+            String currentArch =
+                    System.getProperty(
+                            "os.arch",
+                            ""
+                    );
+
+            if (!matchesArchitecture(
+                    rule.os.arch,
+                    currentArch
+            )) {
+
+                return false;
+            }
+        }
+
+        // ---------------------------------------------------------
+        // VERSION
+        // ---------------------------------------------------------
+
+        if (rule.os.version != null
+                && !rule.os.version.isBlank()) {
+
+            String currentVersion =
+                    System.getProperty(
+                            "os.version",
+                            ""
+                    );
+
+            if (!currentVersion.matches(
+                    rule.os.version
+            )) {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static boolean matchesArchitecture(
+            String required,
+            String actual
+    ) {
+
+        String requiredNormalized =
+                required
+                        .toLowerCase()
+                        .trim();
+
+        String actualNormalized =
+                actual
+                        .toLowerCase()
+                        .trim();
+
+        if ("x86".equals(requiredNormalized)
+                || "32".equals(requiredNormalized)
+                || "x86_32".equals(requiredNormalized)) {
+
+            return actualNormalized.equals("x86")
+                    || actualNormalized.equals("i386")
+                    || actualNormalized.equals("i486")
+                    || actualNormalized.equals("i586")
+                    || actualNormalized.equals("i686")
+                    || actualNormalized.contains("32");
+        }
+
+        if ("x86_64".equals(requiredNormalized)
+                || "amd64".equals(requiredNormalized)
+                || "64".equals(requiredNormalized)) {
+
+            return actualNormalized.equals("amd64")
+                    || actualNormalized.equals("x86_64")
+                    || actualNormalized.equals("x86-64")
+                    || actualNormalized.contains("64");
+        }
+
+        return requiredNormalized.equals(
+                actualNormalized
+        );
+    }
+
+    private static String getOperatingSystem() {
+
+        String os =
+                System.getProperty(
+                        "os.name",
+                        ""
+                ).toLowerCase();
+
+        if (os.contains("win")) {
+            return "windows";
+        }
+
+        if (os.contains("mac")
+                || os.contains("darwin")) {
+
+            return "osx";
+        }
+
+        if (os.contains("linux")) {
+            return "linux";
+        }
+
+        return os;
+    }
+
+    private static String getArchitecture() {
+
+        String arch =
+                System.getProperty(
+                        "os.arch",
+                        ""
+                ).toLowerCase();
+
+        if (arch.equals("amd64")
+                || arch.equals("x86_64")
+                || arch.equals("x64")) {
+
+            return "64";
+        }
+
+        return "32";
+    }
+
+    // =============================================================
     // PATH SAFETY
     // =============================================================
 
@@ -189,11 +434,6 @@ public class LibraryResolver {
             String description
     ) {
 
-        /*
-         * Manifest paths should always use forward slashes.
-         * Reject Windows separators as well so a malformed
-         * manifest cannot escape through platform-specific paths.
-         */
         if (relativePath.contains("\\")
                 || relativePath.startsWith("/")
                 || relativePath.startsWith("\\")) {
@@ -302,10 +542,6 @@ public class LibraryResolver {
                         '/'
                 );
 
-        /*
-         * Prevent malformed coordinates from creating paths outside
-         * the shared libraries directory.
-         */
         if (groupPath.startsWith("/")
                 || groupPath.contains("..")
                 || artifact.contains("/")

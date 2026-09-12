@@ -5,7 +5,7 @@ build/
 !**/src/test/**/build/
 .kotlin
 /build.ps1
-/installer.nsi
+/VantaSetup.nsi
 /.idea/
 /tools/
 /DropperLauncher/
