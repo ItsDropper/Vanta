@@ -1,3 +1,35 @@
+
+    /* =============================================================
+       HOME
+       ============================================================= */
+
+.home-page {
+    -fx-background-color: transparent;
+}
+
+/* =============================================================
+   HEADER
+   ============================================================= */
+
+.home-header {
+    -fx-spacing: 4px;
+}
+
+.home-title {
+    -fx-text-fill: #f0f2f0;
+    -fx-font-size: 22px;
+    -fx-font-weight: 700;
+}
+
+.home-account-label {
+    -fx-text-fill: #747d76;
+    -fx-font-size: 11px;
+}
+
+/* =============================================================
+   MAIN HERO / LAUNCH CARD
+   ============================================================= */
+
 .home-hero {
     -fx-background-color: #151b16;
     -fx-background-radius: 14px;
@@ -5,6 +37,31 @@
     -fx-border-color: #344636;
     -fx-border-width: 1px;
     -fx-border-radius: 14px;
+}
+
+.home-launch-card {
+    -fx-background-color: #151b16;
+    -fx-background-radius: 12px;
+
+    -fx-border-color: #2d392f;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.home-launch-information {
+    -fx-min-width: 0;
+}
+
+.home-eyebrow {
+    -fx-text-fill: #6f9d75;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+
+.home-selected-label {
+    -fx-text-fill: #697169;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
 }
 
 .home-minecraft-title {
@@ -31,9 +88,18 @@
     -fx-padding: 5px 9px;
 }
 
+/* =============================================================
+   LAUNCH STATUS
+   ============================================================= */
+
 .status-label {
     -fx-text-fill: #68717d;
     -fx-font-size: 12px;
+}
+
+.home-launch-status {
+    -fx-text-fill: #68717d;
+    -fx-font-size: 10px;
 }
 
 .ready-label,
@@ -74,6 +140,40 @@
 
 .play-control:disabled {
     -fx-opacity: 0.55;
+}
+
+.home-play-button {
+    -fx-background-color: #78b97f;
+
+    -fx-background-radius: 7px;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: #0d120e;
+
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+
+    -fx-padding: 0 18px;
+
+    -fx-cursor: hand;
+}
+
+.home-play-button:hover {
+    -fx-background-color: #89c98f;
+}
+
+.home-play-button:pressed {
+    -fx-background-color: #68a970;
+}
+
+.home-play-button:disabled {
+    -fx-background-color: #334136;
+    -fx-text-fill: #788279;
+    -fx-opacity: 1;
+    -fx-cursor: default;
 }
 
 /* =============================================================
@@ -124,6 +224,47 @@
 }
 
 /* =============================================================
+   LOWER INFORMATION CARDS
+   ============================================================= */
+
+.home-info-card {
+    -fx-background-color: #141814;
+
+    -fx-background-radius: 10px;
+
+    -fx-border-color: #282e29;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.home-card-eyebrow {
+    -fx-text-fill: #697269;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+
+.home-card-title {
+    -fx-text-fill: #e8ebe8;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+}
+
+.home-card-description {
+    -fx-text-fill: #737c75;
+    -fx-font-size: 10px;
+}
+
+.home-card-status {
+    -fx-text-fill: #79b982;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+
+.home-account-card {
+    -fx-min-height: 128px;
+}
+
+/* =============================================================
    INSTANCE
    ============================================================= */
 
@@ -137,3 +278,4 @@
 .selected-instance:hover {
     -fx-background-color: #233325;
 }
+

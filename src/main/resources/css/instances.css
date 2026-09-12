@@ -9,11 +9,15 @@
 }
 
 
+/* =============================================================
+   INSTANCE CARDS
+   ============================================================= */
+
 .instance-card {
     -fx-cursor: hand;
 }
 
-.instance-card:selected {
+.instance-card.selected-instance {
     -fx-background-color: #151a15;
 }
 
@@ -71,10 +75,196 @@
 }
 
 
+/* =============================================================
+   INSTANCE ACTIONS
+   ============================================================= */
+
+.instance-play-button {
+    -fx-background-color: #78b97f;
+    -fx-background-radius: 7px;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: #0d120e;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+
+    -fx-padding: 0 14px;
+
+    -fx-cursor: hand;
+}
+
+.instance-play-button:hover {
+    -fx-background-color: #89c98f;
+}
+
+.instance-play-button:pressed {
+    -fx-background-color: #68a970;
+}
+
+.instance-play-button:disabled {
+    -fx-background-color: #334136;
+    -fx-text-fill: #788279;
+    -fx-opacity: 1;
+    -fx-cursor: default;
+}
+
+
+/* =============================================================
+   PLAYING / CLOSE BUTTON
+   ============================================================= */
+
+.instance-playing-button {
+    -fx-background-color: #252b27;
+
+    -fx-border-color: #465148;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: #d3d9d3;
+}
+
+.instance-playing-button:hover {
+    -fx-background-color: #2d342f;
+    -fx-border-color: #586359;
+}
+
+.instance-playing-button:pressed {
+    -fx-background-color: #202620;
+}
+
+
+/* =============================================================
+   OPTIONS BUTTON
+   ============================================================= */
+
+.instance-settings-button {
+    -fx-background-color: #181d19;
+    -fx-background-radius: 7px;
+
+    -fx-border-color: #303830;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: #aeb7ae;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+
+    -fx-padding: 0 12px;
+
+    -fx-cursor: hand;
+}
+
+.instance-settings-button:hover {
+    -fx-background-color: #202620;
+    -fx-border-color: #414b42;
+    -fx-text-fill: #d4dbd4;
+}
+
+.instance-settings-button:pressed {
+    -fx-background-color: #151a16;
+    -fx-border-color: #4c584d;
+}
+
+
+/* =============================================================
+   THREE-DOT MENU
+   ============================================================= */
+
+.instance-menu-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+
+    -fx-text-fill: #737c74;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 0;
+
+    -fx-alignment: center;
+
+    -fx-cursor: hand;
+}
+
+.instance-menu-button:hover {
+    -fx-background-color: #202620;
+    -fx-border-color: #303830;
+    -fx-text-fill: #c1c9c1;
+}
+
+.instance-menu-button:pressed {
+    -fx-background-color: #282e28;
+    -fx-border-color: #3e483f;
+    -fx-text-fill: #e0e5e0;
+}
+
+.instance-menu-button:disabled {
+    -fx-opacity: 0.45;
+    -fx-cursor: default;
+}
+
+
+/* =============================================================
+   INSTANCE MENU
+   ============================================================= */
+
+.context-menu {
+    -fx-background-color: #151915;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: #303730;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-padding: 5px;
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+
+    -fx-padding: 8px 12px;
+
+    -fx-text-fill: #d7ddd7;
+    -fx-font-size: 11px;
+}
+
+.context-menu .menu-item:hover {
+    -fx-background-color: #202620;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: #202620;
+}
+
+.context-menu .menu-item:pressed {
+    -fx-background-color: #282e28;
+}
+
+.context-menu .instance-delete-menu-item {
+    -fx-text-fill: #d58b8b;
+}
+
+.context-menu .instance-delete-menu-item:hover,
+.context-menu .instance-delete-menu-item:focused {
+    -fx-background-color: #2a1d1d;
+    -fx-text-fill: #e5a0a0;
+}
+
+
+/* =============================================================
+   INSTANCE STATUS
+   ============================================================= */
+
 .instance-actions {
     -fx-spacing: 8px;
 }
-
 
 .instances-status {
     -fx-text-fill: #505965;
@@ -82,7 +272,9 @@
 }
 
 
-/* Empty state */
+/* =============================================================
+   EMPTY STATE
+   ============================================================= */
 
 .instance-empty {
     -fx-background-color: #141714;
@@ -103,6 +295,7 @@
     -fx-text-fill: #646d79;
     -fx-font-size: 12px;
 }
+
 
 /* =============================================================
    CREATE INSTANCE PANEL
@@ -189,10 +382,13 @@
 .create-option {
     -fx-background-color: #141714;
     -fx-background-radius: 10px;
+
     -fx-border-color: #2a302a;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
+
     -fx-padding: 14px 16px;
+
     -fx-cursor: hand;
     -fx-alignment: center-left;
 }
@@ -233,4 +429,81 @@
 
 .create-option:hover .create-option-arrow {
     -fx-text-fill: #aab2aa;
+}
+
+/* =============================================================
+   DELETE INSTANCE DIALOG
+   ============================================================= */
+
+.delete-dialog {
+    -fx-background-color: #141714;
+    -fx-background-radius: 12px;
+
+    -fx-border-color: #2a302a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+
+    -fx-padding: 22px;
+}
+
+.delete-dialog-title {
+    -fx-text-fill: #f1f3f1;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.delete-dialog-message {
+    -fx-text-fill: #858e86;
+    -fx-font-size: 11px;
+    -fx-wrap-text: true;
+}
+
+.delete-dialog-cancel {
+    -fx-background-color: #1b201c;
+    -fx-background-radius: 7px;
+
+    -fx-border-color: #303830;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: #c3cac3;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 9px 16px;
+
+    -fx-cursor: hand;
+}
+
+.delete-dialog-cancel:hover {
+    -fx-background-color: #222822;
+    -fx-border-color: #414b42;
+    -fx-text-fill: #e0e5e0;
+}
+
+.delete-dialog-delete {
+    -fx-background-color: #422323;
+    -fx-background-radius: 7px;
+
+    -fx-border-color: #663838;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: #e3a1a1;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 9px 16px;
+
+    -fx-cursor: hand;
+}
+
+.delete-dialog-delete:hover {
+    -fx-background-color: #513030;
+    -fx-border-color: #784444;
+    -fx-text-fill: #f0b5b5;
+}
+
+.delete-dialog-delete:pressed {
+    -fx-background-color: #362020;
 }

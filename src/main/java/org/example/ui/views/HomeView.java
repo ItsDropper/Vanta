@@ -41,165 +41,109 @@ public class HomeView extends VBox {
             LaunchService launchService
     ) {
 
-        this.accountService =
-                accountService;
+        this.accountService = accountService;
+        this.launchService = launchService;
 
-        this.launchService =
-                launchService;
+        getStyleClass().add("page");
+        getStyleClass().add("home-page");
 
-        getStyleClass().add(
-                "page"
-        );
-
-        setPadding(
-                new Insets(36)
-        );
-
-        setSpacing(
-                24
-        );
+        setPadding(new Insets(32, 36, 36, 36));
+        setSpacing(22);
 
         // ---------------------------------------------------------
         // HEADER
         // ---------------------------------------------------------
 
         Label title =
-                new Label(
-                        "Welcome back"
-                );
+                new Label("Home");
 
-        title.getStyleClass().add(
-                "page-title"
-        );
+        title.getStyleClass().add("home-title");
 
         accountLabel =
-                new Label(
-                        "Checking account..."
-                );
+                new Label("Checking account...");
 
-        accountLabel.getStyleClass().add(
-                "page-subtitle"
-        );
+        accountLabel.getStyleClass().add("home-account-label");
 
         VBox header =
                 new VBox(
-                        6,
+                        4,
                         title,
                         accountLabel
                 );
 
+        header.getStyleClass().add("home-header");
+
         // ---------------------------------------------------------
-        // HERO
+        // MAIN LAUNCH AREA
         // ---------------------------------------------------------
+
+        Label eyebrow =
+                new Label("PLAY");
+
+        eyebrow.getStyleClass().add("home-eyebrow");
 
         minecraftLabel =
-                new Label(
-                        "Minecraft"
-                );
+                new Label("Minecraft");
 
-        minecraftLabel.getStyleClass().add(
-                "home-minecraft-title"
-        );
-
-        Label versionLabel =
-                new Label(
-                        "1.21.11"
-                );
-
-        versionLabel.getStyleClass().add(
-                "home-version"
-        );
-
-        Label loaderLabel =
-                new Label(
-                        "Fabric"
-                );
-
-        loaderLabel.getStyleClass().add(
-                "home-loader"
-        );
+        minecraftLabel.getStyleClass().add("home-minecraft-title");
 
         versionInfo =
-                new HBox(
-                        10,
-                        versionLabel,
-                        loaderLabel
+                new HBox(8);
+
+        versionInfo.setAlignment(Pos.CENTER_LEFT);
+
+
+        Label selectedLabel =
+                new Label("SELECTED INSTANCE");
+
+        selectedLabel.getStyleClass().add(
+                "home-selected-label"
+        );
+
+        VBox launchInformation =
+                new VBox(
+                        7,
+                        eyebrow,
+                        minecraftLabel,
+                        versionInfo
                 );
 
-        versionInfo.setAlignment(
-                Pos.CENTER
+        launchInformation.getStyleClass().add(
+                "home-launch-information"
         );
 
         // ---------------------------------------------------------
-        // PLAY BUTTON
+        // PLAY CONTROL
         // ---------------------------------------------------------
 
         playButton =
-                new Button(
-                        "▶"
-                );
+                new Button("PLAY");
 
         playButton.getStyleClass().add(
-                "primary-button"
+                "home-play-button"
         );
 
-        playButton.getStyleClass().add(
-                "play-control"
-        );
+        playButton.setPrefWidth(118);
+        playButton.setMinWidth(118);
+        playButton.setPrefHeight(42);
+        playButton.setMinHeight(42);
 
-        playButton.setPrefWidth(
-                64
-        );
-
-        playButton.setPrefHeight(
-                56
-        );
-
-        playButton.setMinWidth(
-                64
-        );
-
-        playButton.setMinHeight(
-                56
-        );
-
-        playButton.setFocusTraversable(
-                false
-        );
+        playButton.setFocusTraversable(false);
 
         playButton.setOnAction(
                 event -> handlePlayButton()
         );
 
         statusLabel =
-                new Label(
-                        "Ready to launch"
-                );
+                new Label("Ready to launch");
 
         statusLabel.getStyleClass().add(
-                "status-label"
+                "home-launch-status"
         );
-
-        Label quickLaunchLabel =
-                new Label(
-                        "QUICK LAUNCH"
-                );
-
-        quickLaunchLabel.getStyleClass().add(
-                "card-title"
-        );
-
-        VBox launchInformation =
-                new VBox(
-                        8,
-                        quickLaunchLabel,
-                        minecraftLabel,
-                        versionInfo
-                );
 
         VBox launchAction =
                 new VBox(
-                        8,
+                        7,
                         playButton,
                         statusLabel
                 );
@@ -208,74 +152,64 @@ public class HomeView extends VBox {
                 Pos.CENTER_RIGHT
         );
 
-        Region heroSpacer =
+        Region spacer =
                 new Region();
 
         HBox.setHgrow(
-                heroSpacer,
+                spacer,
                 Priority.ALWAYS
         );
 
-        HBox hero =
+        HBox launchRow =
                 new HBox(
-                        28,
+                        20,
                         launchInformation,
-                        heroSpacer,
+                        spacer,
                         launchAction
                 );
 
-        hero.setAlignment(
+        launchRow.setAlignment(
                 Pos.CENTER_LEFT
         );
 
+        VBox hero =
+                new VBox(
+                        0,
+                        launchRow
+                );
+
         hero.setPadding(
-                new Insets(34)
+                new Insets(26, 28, 26, 28)
         );
 
         hero.getStyleClass().add(
-                "home-hero"
+                "home-launch-card"
         );
 
         // ---------------------------------------------------------
-        // ACCOUNT LISTENER
-        // ---------------------------------------------------------
-
-        accountService.addListener(
-                this::onAccountChanged
-        );
-
-        // ---------------------------------------------------------
-        // LAUNCH LISTENER
-        // ---------------------------------------------------------
-
-        launchService.addStateListener(
-                this::onLaunchStateChanged
-        );
-
-        // ---------------------------------------------------------
-        // INSTANCE CARD
+        // LOWER INFORMATION
         // ---------------------------------------------------------
 
         VBox instanceCard =
                 createInstanceCard();
 
-        // ---------------------------------------------------------
-        // ACCOUNT CARD
-        // ---------------------------------------------------------
-
         accountCard =
                 new AccountCard();
 
-        // ---------------------------------------------------------
-        // CARDS
-        // ---------------------------------------------------------
+        accountCard.getStyleClass().add(
+                "home-account-card"
+        );
 
         HBox cards =
                 new HBox(
-                        16,
+                        14,
                         instanceCard,
                         accountCard
                 );
+
+        cards.setAlignment(
+                Pos.TOP_LEFT
+        );
 
         HBox.setHgrow(
                 instanceCard,
@@ -285,6 +219,18 @@ public class HomeView extends VBox {
         HBox.setHgrow(
                 accountCard,
                 Priority.ALWAYS
+        );
+
+        // ---------------------------------------------------------
+        // LISTENERS
+        // ---------------------------------------------------------
+
+        accountService.addListener(
+                this::onAccountChanged
+        );
+
+        launchService.addStateListener(
+                this::onLaunchStateChanged
         );
 
         // ---------------------------------------------------------
@@ -311,21 +257,17 @@ public class HomeView extends VBox {
     private VBox createInstanceCard() {
 
         Label title =
-                new Label(
-                        "INSTANCE"
-                );
+                new Label("INSTANCE");
 
         title.getStyleClass().add(
-                "card-title"
+                "home-card-eyebrow"
         );
 
         instanceNameLabel =
-                new Label(
-                        "No instance selected"
-                );
+                new Label("No instance selected");
 
         instanceNameLabel.getStyleClass().add(
-                "card-main"
+                "home-card-title"
         );
 
         instanceDetailsLabel =
@@ -334,16 +276,14 @@ public class HomeView extends VBox {
                 );
 
         instanceDetailsLabel.getStyleClass().add(
-                "card-secondary"
+                "home-card-description"
         );
 
         instanceStatusLabel =
-                new Label(
-                        "● No instance"
-                );
+                new Label("● No instance");
 
         instanceStatusLabel.getStyleClass().add(
-                "card-secondary"
+                "home-card-status"
         );
 
         VBox card =
@@ -355,12 +295,13 @@ public class HomeView extends VBox {
                         instanceStatusLabel
                 );
 
+        card.setMinHeight(128);
         card.setPadding(
-                new Insets(20)
+                new Insets(18, 20, 18, 20)
         );
 
         card.getStyleClass().add(
-                "info-card"
+                "home-info-card"
         );
 
         return card;
@@ -375,9 +316,7 @@ public class HomeView extends VBox {
         Account account =
                 accountService.getCurrentAccount();
 
-        setAccount(
-                account
-        );
+        setAccount(account);
     }
 
     public void setAccount(
@@ -402,17 +341,15 @@ public class HomeView extends VBox {
                 "Signed in as " + username
         );
 
-        accountCard.setAccount(
-                account
-        );
+        accountCard.setAccount(account);
     }
 
     private void onAccountChanged(
             Account account
     ) {
 
-        Platform.runLater(() ->
-                setAccount(account)
+        Platform.runLater(
+                () -> setAccount(account)
         );
     }
 
@@ -424,8 +361,7 @@ public class HomeView extends VBox {
             Instance instance
     ) {
 
-        this.selectedInstance =
-                instance;
+        this.selectedInstance = instance;
 
         if (instance == null) {
 
@@ -433,30 +369,26 @@ public class HomeView extends VBox {
                     "Minecraft"
             );
 
-            versionInfo.getChildren().clear();
+            if (instance == null) {
 
-            Label version =
-                    new Label(
-                            "1.21.11"
-                    );
+                minecraftLabel.setText("No instance selected");
 
-            version.getStyleClass().add(
-                    "home-version"
-            );
+                versionInfo.getChildren().clear();
 
-            Label loader =
-                    new Label(
-                            "Fabric"
-                    );
+                instanceNameLabel.setText(
+                        "No instance selected"
+                );
 
-            loader.getStyleClass().add(
-                    "home-loader"
-            );
+                instanceDetailsLabel.setText(
+                        "Select an instance from the Instances page"
+                );
 
-            versionInfo.getChildren().addAll(
-                    version,
-                    loader
-            );
+                instanceStatusLabel.setText(
+                        "● No instance"
+                );
+
+                return;
+            }
 
             instanceNameLabel.setText(
                     "No instance selected"
@@ -477,29 +409,9 @@ public class HomeView extends VBox {
                 instance.getName()
         );
 
-        versionInfo.getChildren().clear();
-
-        Label version =
-                new Label(
-                        instance.getMinecraftVersion()
-                );
-
-        version.getStyleClass().add(
-                "home-version"
-        );
-
-        Label loader =
-                new Label(
-                        instance.getDisplayLoader()
-                );
-
-        loader.getStyleClass().add(
-                "home-loader"
-        );
-
-        versionInfo.getChildren().addAll(
-                version,
-                loader
+        setVersionInfo(
+                instance.getMinecraftVersion(),
+                instance.getDisplayLoader()
         );
 
         instanceNameLabel.setText(
@@ -517,6 +429,33 @@ public class HomeView extends VBox {
         );
     }
 
+    private void setVersionInfo(
+            String version,
+            String loader
+    ) {
+
+        versionInfo.getChildren().clear();
+
+        Label versionLabel =
+                new Label(version);
+
+        versionLabel.getStyleClass().add(
+                "home-version"
+        );
+
+        Label loaderLabel =
+                new Label(loader);
+
+        loaderLabel.getStyleClass().add(
+                "home-loader"
+        );
+
+        versionInfo.getChildren().addAll(
+                versionLabel,
+                loaderLabel
+        );
+    }
+
     // =============================================================
     // PLAY / STOP
     // =============================================================
@@ -526,16 +465,20 @@ public class HomeView extends VBox {
         LaunchService.LaunchState state =
                 launchService.getState();
 
-        if (state == LaunchService.LaunchState.RUNNING) {
+        if (state ==
+                LaunchService.LaunchState.RUNNING) {
 
             launchService.close();
 
             return;
         }
 
-        if (state == LaunchService.LaunchState.PREPARING
-                || state == LaunchService.LaunchState.STARTING
-                || state == LaunchService.LaunchState.CLOSING) {
+        if (state ==
+                LaunchService.LaunchState.PREPARING
+                || state ==
+                LaunchService.LaunchState.STARTING
+                || state ==
+                LaunchService.LaunchState.CLOSING) {
 
             return;
         }
@@ -580,9 +523,7 @@ public class HomeView extends VBox {
                     }
                 });
 
-        thread.setDaemon(
-                true
-        );
+        thread.setDaemon(true);
 
         thread.setName(
                 "Vanta-Home-Launch"
@@ -599,8 +540,8 @@ public class HomeView extends VBox {
             LaunchService.LaunchState state
     ) {
 
-        Platform.runLater(() ->
-                updateLaunchState(state)
+        Platform.runLater(
+                () -> updateLaunchState(state)
         );
     }
 
@@ -618,13 +559,9 @@ public class HomeView extends VBox {
 
             case PREPARING -> {
 
-                playButton.setDisable(
-                        true
-                );
+                playButton.setDisable(true);
 
-                playButton.setText(
-                        "…"
-                );
+                playButton.setText("...");
 
                 statusLabel.setText(
                         "Preparing Minecraft..."
@@ -637,13 +574,9 @@ public class HomeView extends VBox {
 
             case STARTING -> {
 
-                playButton.setDisable(
-                        true
-                );
+                playButton.setDisable(true);
 
-                playButton.setText(
-                        "…"
-                );
+                playButton.setText("...");
 
                 statusLabel.setText(
                         "Starting Minecraft..."
@@ -656,21 +589,17 @@ public class HomeView extends VBox {
 
             case RUNNING -> {
 
-                playButton.setDisable(
-                        false
-                );
+                playButton.setDisable(false);
 
-                playButton.setText(
-                        "CLOSE"
-                );
+                playButton.setText("CLOSE");
 
-                playButton.getStyleClass().remove(
-                        "home-playing-button"
-                );
+                if (!playButton.getStyleClass()
+                        .contains("home-playing-button")) {
 
-                playButton.getStyleClass().add(
-                        "home-playing-button"
-                );
+                    playButton.getStyleClass().add(
+                            "home-playing-button"
+                    );
+                }
 
                 statusLabel.setText(
                         "Minecraft is running."
@@ -683,13 +612,9 @@ public class HomeView extends VBox {
 
             case CLOSING -> {
 
-                playButton.setDisable(
-                        true
-                );
+                playButton.setDisable(true);
 
-                playButton.setText(
-                        "…"
-                );
+                playButton.setText("...");
 
                 statusLabel.setText(
                         "Closing Minecraft..."
@@ -730,13 +655,9 @@ public class HomeView extends VBox {
 
     private void resetPlayButton() {
 
-        playButton.setDisable(
-                false
-        );
+        playButton.setDisable(false);
 
-        playButton.setText(
-                "▶"
-        );
+        playButton.setText("PLAY");
 
         playButton.getStyleClass().remove(
                 "home-playing-button"
@@ -755,3 +676,4 @@ public class HomeView extends VBox {
         }
     }
 }
+

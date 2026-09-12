@@ -3,11 +3,14 @@ package org.example.ui.views;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import org.example.launcher.instance.InstanceManager;
@@ -70,7 +73,9 @@ public class InstancesView extends VBox {
         // ---------------------------------------------------------
 
         Label title =
-                new Label("Instances");
+                new Label(
+                        "Instances"
+                );
 
         title.getStyleClass().add(
                 "page-title"
@@ -287,7 +292,8 @@ public class InstancesView extends VBox {
                                             instance,
                                             () -> launch(instance),
                                             () -> selectInstance(instance),
-                                            () -> onInstanceSettings.accept(instance)
+                                            () -> onInstanceSettings.accept(instance),
+                                            () -> deleteInstance(instance)
                                     );
 
                             card.setSelected(
@@ -314,10 +320,122 @@ public class InstancesView extends VBox {
                     });
                 });
 
-        thread.setDaemon(true);
+        thread.setDaemon(
+                true
+        );
 
         thread.setName(
                 "Vanta-Instance-Refresh"
+        );
+
+        thread.start();
+    }
+
+    // =============================================================
+    // DELETE
+    // =============================================================
+
+    private void deleteInstance(
+            Instance instance
+    ) {
+
+        if (instance == null) {
+            return;
+        }
+
+        LaunchService.LaunchState state =
+                launchService.getState();
+
+        if (state == LaunchService.LaunchState.PREPARING
+                || state == LaunchService.LaunchState.STARTING
+                || state == LaunchService.LaunchState.CLOSING) {
+
+            statusLabel.setText(
+                    "Wait until Minecraft has finished starting or closing."
+            );
+
+            return;
+        }
+
+        if (state == LaunchService.LaunchState.RUNNING) {
+
+            Instance running =
+                    launchService.getRunningInstance();
+
+            if (running != null
+                    && running.getId()
+                    .equals(
+                            instance.getId()
+                    )) {
+
+                statusLabel.setText(
+                        "You cannot delete a running instance."
+                );
+
+                return;
+            }
+        }
+
+        statusLabel.setText(
+                "Deleting "
+                        + instance.getName()
+                        + "..."
+        );
+
+        Thread thread =
+                new Thread(() -> {
+
+                    try {
+
+                        InstanceManager.deleteInstance(
+                                instance
+                        );
+
+                        Platform.runLater(() -> {
+
+                            if (selectedInstance != null
+                                    && selectedInstance
+                                    .getId()
+                                    .equals(
+                                            instance.getId()
+                                    )) {
+
+                                selectedInstance =
+                                        null;
+
+                                onInstanceSelected.accept(
+                                        null
+                                );
+                            }
+
+                            statusLabel.setText(
+                                    "Deleted "
+                                            + instance.getName()
+                            );
+
+                            refresh();
+                        });
+
+                    } catch (Throwable ex) {
+
+                        ex.printStackTrace();
+
+                        Platform.runLater(() ->
+                                statusLabel.setText(
+                                        ex.getMessage() != null
+                                                ? ex.getMessage()
+                                                : "Failed to delete instance."
+                                )
+                        );
+                    }
+                });
+
+        thread.setDaemon(
+                true
+        );
+
+        thread.setName(
+                "Vanta-Instance-Delete"
         );
 
         thread.start();
@@ -418,7 +536,9 @@ public class InstancesView extends VBox {
         );
 
         empty.setPadding(
-                new Insets(70)
+                new Insets(
+                        70
+                )
         );
 
         empty.getStyleClass().add(
@@ -484,7 +604,9 @@ public class InstancesView extends VBox {
 
             if (running != null
                     && running.getId()
-                    .equals(instance.getId())) {
+                    .equals(
+                            instance.getId()
+                    )) {
 
                 launchService.close();
 
@@ -534,7 +656,9 @@ public class InstancesView extends VBox {
                     }
                 });
 
-        thread.setDaemon(true);
+        thread.setDaemon(
+                true
+        );
 
         thread.setName(
                 "Vanta-Instance-Launch"
