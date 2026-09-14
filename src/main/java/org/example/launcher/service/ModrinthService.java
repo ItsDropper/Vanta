@@ -191,6 +191,24 @@ public class ModrinthService {
     }
 
     // =============================================================
+    // GET PROJECT BY SLUG
+    // =============================================================
+
+    public ModrinthProject getProjectBySlug(
+            String slug
+    ) throws IOException, InterruptedException {
+
+        if (slug == null || slug.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Modrinth project slug cannot be empty."
+            );
+        }
+
+        return client.getProject(slug);
+    }
+
+    // =============================================================
     // INSTALL MOD
     // =============================================================
 

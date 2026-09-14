@@ -5,6 +5,7 @@ build/
 !**/src/test/**/build/
 .kotlin
 /build.ps1
+/newbuild.ps1
 /VantaSetup.nsi
 /.idea/
 /tools/
@@ -13,6 +14,8 @@ build/
 /launcher-crash.txt
 /VantaSetup.exe
 /Vanta-1.0.0.zip.sha256
+/Vanta-1.0.1.zip.sha256
+/Vanta-1.0.1.zip
 
 
 # Logs

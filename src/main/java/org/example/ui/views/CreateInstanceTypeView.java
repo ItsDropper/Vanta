@@ -121,7 +121,7 @@ public class CreateInstanceTypeView extends VBox {
                 createOption(
                         "CHOOSE A PRESET",
                         "Start with a predefined Vanta instance configuration.",
-                        true
+                        false
                 );
 
         presetButton.setOnAction(

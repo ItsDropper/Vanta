@@ -8,11 +8,14 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
+import org.example.launcher.instance.InstanceInstaller;
 import org.example.launcher.model.Instance;
+import org.example.launcher.model.InstancePreset;
 import org.example.launcher.modrinth.ModrinthProject;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.LaunchService;
-
+import org.example.launcher.service.ModrinthService;
+import org.example.ui.components.NotificationManager;
 import org.example.ui.components.Sidebar;
 import org.example.ui.views.*;
 
@@ -30,196 +33,101 @@ public class LauncherView {
     private final HomeView homeView;
     private final AccountsView accountsView;
     private final InstancesView instancesView;
-
-    // Global Modrinth browser
     private final GlobalModsView globalModsView;
-
     private final SettingsView settingsView;
     private final CreateInstanceTypeView createInstanceTypeView;
+
+    private final NotificationManager notifications;
 
     private Instance selectedInstance;
     private BrowseModsView browseModsView;
 
     public LauncherView(Stage stage) {
 
-        // =========================================================
-        // ROOT / WINDOW
-        // =========================================================
+        root = new StackPane();
 
-        root =
-                new StackPane();
+        window = new BorderPane();
+        window.getStyleClass().add("launcher");
 
-        window =
-                new BorderPane();
+        root.getChildren().add(window);
 
-        window.getStyleClass().add(
-                "launcher"
+        // Notification overlay must be created after the window.
+        notifications = new NotificationManager(root);
+
+
+        window.prefWidthProperty().bind(root.widthProperty());
+        window.prefHeightProperty().bind(root.heightProperty());
+        window.maxWidthProperty().bind(root.widthProperty());
+        window.maxHeightProperty().bind(root.heightProperty());
+
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(24);
+        clip.setArcHeight(24);
+        clip.widthProperty().bind(root.widthProperty());
+        clip.heightProperty().bind(root.heightProperty());
+
+        window.setClip(clip);
+
+        accountService = new AccountService();
+
+        launchService = new LaunchService(
+                accountService
         );
 
-        root.getChildren().add(
-                window
+        TitleBar titleBar = new TitleBar(
+                stage,
+                accountService
         );
 
-        window.prefWidthProperty().bind(
-                root.widthProperty()
-        );
+        window.setTop(titleBar);
 
-        window.prefHeightProperty().bind(
-                root.heightProperty()
-        );
-
-        window.maxWidthProperty().bind(
-                root.widthProperty()
-        );
-
-        window.maxHeightProperty().bind(
-                root.heightProperty()
-        );
-
-        // =========================================================
-        // ROUNDED WINDOW
-        // =========================================================
-
-        Rectangle clip =
-                new Rectangle();
-
-        clip.setArcWidth(
-                24
-        );
-
-        clip.setArcHeight(
-                24
-        );
-
-        clip.widthProperty().bind(
-                root.widthProperty()
-        );
-
-        clip.heightProperty().bind(
-                root.heightProperty()
-        );
-
-        window.setClip(
-                clip
-        );
-
-        // =========================================================
-        // SERVICES
-        // =========================================================
-
-        accountService =
-                new AccountService();
-
-        launchService =
-                new LaunchService(
-                        accountService
-                );
-
-        // =========================================================
-        // TITLE BAR
-        // =========================================================
-
-        TitleBar titleBar =
-                new TitleBar(
-                        stage,
-                        accountService
-                );
-
-        window.setTop(
-                titleBar
-        );
-
-        // =========================================================
-        // SIDEBAR
-        // =========================================================
-
-        sidebar =
-                new Sidebar();
+        sidebar = new Sidebar();
 
         BorderPane.setMargin(
                 sidebar,
                 new Insets(16)
         );
 
-        window.setLeft(
-                sidebar
-        );
+        window.setLeft(sidebar);
 
-        // =========================================================
-        // CONTENT
-        // =========================================================
-
-        content =
-                new StackPane();
-
-        content.getStyleClass().add(
-                "content"
-        );
+        content = new StackPane();
+        content.getStyleClass().add("content");
 
         content.setPadding(
-                new Insets(
-                        16,
-                        16,
-                        16,
-                        0
-                )
+                new Insets(16, 16, 16, 0)
         );
 
-        window.setCenter(
-                content
+        window.setCenter(content);
+
+        homeView = new HomeView(
+                accountService,
+                launchService
         );
 
-        // =========================================================
-        // VIEWS
-        // =========================================================
+        accountsView = new AccountsView(
+                accountService
+        );
 
-        homeView =
-                new HomeView(
-                        accountService,
-                        launchService
-                );
+        instancesView = new InstancesView(
+                launchService,
+                this::showCreateInstanceView,
+                this::selectInstance,
+                this::showInstanceMods
+        );
 
-        accountsView =
-                new AccountsView(
-                        accountService
-                );
+        createInstanceTypeView = new CreateInstanceTypeView(
+                this::showInstances,
+                this::showCustomCreateInstanceView,
+                this::showImportInstanceView,
+                this::showPresetInstanceView,
+                this::showModrinthModpackView
+        );
 
-        instancesView =
-                new InstancesView(
-                        launchService,
-                        this::showCreateInstanceView,
-                        this::selectInstance,
-                        this::showInstanceMods
-                );
+        globalModsView = new GlobalModsView(
+                this::showGlobalModDetails
+        );
 
-        createInstanceTypeView =
-                new CreateInstanceTypeView(
-                        this::showInstances,
-                        this::showCustomCreateInstanceView,
-                        this::showImportInstanceView,
-                        this::showPresetInstanceView,
-                        this::showModrinthModpackView
-                );
-
-        /*
-         * GLOBAL MODS
-         *
-         * This page does not require an instance.
-         *
-         * It is completely separate from the
-         * instance-specific Installed Mods page.
-         */
-        globalModsView =
-                new GlobalModsView(
-                        this::showGlobalModDetails
-                );
-
-        settingsView =
-                new SettingsView();
-
-        // =========================================================
-        // NAVIGATION
-        // =========================================================
+        settingsView = new SettingsView();
 
         sidebar.setOnPageSelected(
                 this::showPage
@@ -229,125 +137,65 @@ public class LauncherView {
                 Sidebar.Page.HOME
         );
 
-        // =========================================================
-        // ACCOUNT
-        // =========================================================
-
         loadAccount();
     }
 
-    // =============================================================
-    // GLOBAL NAVIGATION
-    // =============================================================
+    private void showPage(Sidebar.Page page) {
 
-    private void showPage(
-            Sidebar.Page page
-    ) {
-
-        sidebar.setSelectedPage(
-                page
-        );
+        sidebar.setSelectedPage(page);
 
         switch (page) {
 
-            case HOME -> {
+            case HOME -> content.getChildren().setAll(
+                    homeView
+            );
 
-                content.getChildren().setAll(
-                        homeView
-                );
-            }
+            case ACCOUNTS -> content.getChildren().setAll(
+                    accountsView
+            );
 
-            case ACCOUNTS -> {
+            case INSTANCES -> content.getChildren().setAll(
+                    instancesView
+            );
 
-                content.getChildren().setAll(
-                        accountsView
-                );
-            }
+            case MODS -> content.getChildren().setAll(
+                    globalModsView
+            );
 
-            case INSTANCES -> {
-
-                content.getChildren().setAll(
-                        instancesView
-                );
-            }
-
-            case MODS -> {
-
-                /*
-                 * GLOBAL MODS
-                 *
-                 * No instance selection required.
-                 */
-                content.getChildren().setAll(
-                        globalModsView
-                );
-            }
-
-            case SETTINGS -> {
-
-                content.getChildren().setAll(
-                        settingsView
-                );
-            }
+            case SETTINGS -> content.getChildren().setAll(
+                    settingsView
+            );
         }
     }
 
-    // =============================================================
-    // INSTANCE INSTALLED MODS
-    // =============================================================
+    private void showInstanceMods(Instance instance) {
 
-    private void showInstanceMods(
-            Instance instance
-    ) {
+        selectedInstance = instance;
 
-        selectedInstance =
-                instance;
-
-        ModsView view =
-                new ModsView(
-                        instance,
-                        () -> showBrowseMods(
-                                instance
-                        ),
-                        () -> showInstanceSettings(
-                                instance
-                        )
-                );
-
-        content.getChildren().setAll(
-                view
+        ModsView view = new ModsView(
+                instance,
+                () -> showBrowseMods(instance),
+                () -> showInstanceSettings(instance)
         );
+
+        content.getChildren().setAll(view);
     }
 
-    // =============================================================
-    // INSTANCE BROWSE MODS
-    // =============================================================
+    private void showBrowseMods(Instance instance) {
 
-    private void showBrowseMods(
-            Instance instance
-    ) {
-
-        browseModsView =
-                new BrowseModsView(
+        browseModsView = new BrowseModsView(
+                instance,
+                () -> showInstanceMods(instance),
+                project -> showModDetails(
                         instance,
-                        () -> showInstanceMods(
-                                instance
-                        ),
-                        project ->
-                                showModDetails(
-                                        instance,
-                                        project
-                                )
-                );
+                        project
+                )
+        );
 
         content.getChildren().setAll(
                 browseModsView
         );
     }
-
-    // =============================================================
-    // CREATE INSTANCE
-    // =============================================================
 
     private void showCreateInstanceView() {
 
@@ -358,14 +206,6 @@ public class LauncherView {
 
     private void showCustomCreateInstanceView() {
 
-        /*
-         * IMPORTANT:
-         *
-         * Create a fresh CreateInstanceView every time.
-         *
-         * This prevents the previous INSTALLING... state
-         * from surviving when the user creates another instance.
-         */
         CreateInstanceView createInstanceView =
                 new CreateInstanceView(
                         this::showCreateInstanceView,
@@ -376,10 +216,6 @@ public class LauncherView {
                 createInstanceView
         );
     }
-
-    // =============================================================
-    // FUTURE CREATE OPTIONS
-    // =============================================================
 
     private void showImportInstanceView() {
 
@@ -396,16 +232,162 @@ public class LauncherView {
 
     private void showPresetInstanceView() {
 
-        /*
-         * Preset support will be implemented here.
-         */
+        InstancePresetView presetView =
+                new InstancePresetView(
+                        this::showPresetConfigurationView,
+                        this::showCreateInstanceView
+                );
+
+        content.getChildren().setAll(
+                presetView
+        );
+    }
+
+    private void showPresetConfigurationView(
+            InstancePreset preset
+    ) {
+
+        PresetConfigurationView configurationView =
+                new PresetConfigurationView(
+                        preset,
+                        this::createPresetInstance,
+                        this::showPresetInstanceView
+                );
+
+        content.getChildren().setAll(
+                configurationView
+        );
+    }
+
+    private void createPresetInstance(
+            InstancePreset preset,
+            String name
+    ) {
+
+        System.out.println("NOTIFICATION TEST: createPresetInstance reached");
+
+        notifications.showProgress(
+                "Installing " + preset.getName(),
+                "Preparing Minecraft..."
+        );
+
+        notifications.showProgress(
+                "Installing " + preset.getName(),
+                "Preparing Minecraft..."
+        );
+
+        Thread thread = new Thread(() -> {
+
+            try {
+
+                notifications.updateProgress(
+                        "Installing Minecraft "
+                                + preset.getMinecraftVersion()
+                                + "..."
+                );
+
+                Instance instance;
+
+                if ("Fabric".equalsIgnoreCase(
+                        preset.getLoader()
+                )) {
+
+                    instance =
+                            InstanceInstaller.installFabric(
+                                    name,
+                                    preset.getMinecraftVersion()
+                            );
+
+                } else {
+
+                    instance =
+                            InstanceInstaller.installVanilla(
+                                    name,
+                                    preset.getMinecraftVersion()
+                            );
+                }
+
+                ModrinthService modrinthService =
+                        new ModrinthService();
+
+                for (String modSlug : preset.getMods()) {
+
+                    notifications.updateProgress(
+                            "Installing "
+                                    + modSlug
+                                    + "..."
+                    );
+
+                    ModrinthProject project =
+                            modrinthService.getProjectBySlug(
+                                    modSlug
+                            );
+
+                    modrinthService.installMod(
+                            instance,
+                            project
+                    );
+                }
+
+                notifications.success(
+                        "Installation complete",
+                        preset.getName()
+                                + " is ready to play."
+                );
+
+                Platform.runLater(
+                        this::instanceCreated
+                );
+
+            } catch (Throwable ex) {
+
+                ex.printStackTrace();
+
+                notifications.error(
+                        "Installation failed",
+                        getErrorMessage(ex)
+                );
+
+                Platform.runLater(() ->
+                        showPresetConfigurationView(
+                                preset
+                        )
+                );
+            }
+
+        });
+
+        thread.setName(
+                "Vanta-Preset-Installer"
+        );
+
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private String getErrorMessage(
+            Throwable throwable
+    ) {
+
+        Throwable current = throwable;
+
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+
+        String message = current.getMessage();
+
+        if (message == null || message.isBlank()) {
+            return current
+                    .getClass()
+                    .getSimpleName();
+        }
+
+        return message;
     }
 
     private void showModrinthModpackView() {
-
-        /*
-         * Modrinth modpack browsing will be implemented here.
-         */
+        // Modrinth modpack browsing will be implemented here.
     }
 
     private void showInstances() {
@@ -415,16 +397,11 @@ public class LauncherView {
         );
     }
 
-    // =============================================================
-    // INSTANCE SELECTION
-    // =============================================================
-
     private void selectInstance(
             Instance instance
     ) {
 
-        selectedInstance =
-                instance;
+        selectedInstance = instance;
 
         homeView.setSelectedInstance(
                 instance
@@ -435,10 +412,6 @@ public class LauncherView {
         );
     }
 
-    // =============================================================
-    // INSTANCE CREATED
-    // =============================================================
-
     private void instanceCreated() {
 
         instancesView.refresh();
@@ -448,38 +421,17 @@ public class LauncherView {
         );
     }
 
-    // =============================================================
-    // INSTANCE SETTINGS
-    // =============================================================
-
     private void showInstanceSettings(
             Instance instance
     ) {
 
-        selectedInstance =
-                instance;
+        selectedInstance = instance;
 
         InstanceSettingsView instanceSettingsView =
                 new InstanceSettingsView(
                         instance,
-
-                        /*
-                         * BACK
-                         *
-                         * Always returns to Installed Mods.
-                         */
-                        () -> showInstanceMods(
-                                instance
-                        ),
-
-                        /*
-                         * MODS
-                         *
-                         * Also returns to Installed Mods.
-                         */
-                        () -> showInstanceMods(
-                                instance
-                        )
+                        () -> showInstanceMods(instance),
+                        () -> showInstanceMods(instance)
                 );
 
         content.getChildren().setAll(
@@ -487,54 +439,37 @@ public class LauncherView {
         );
     }
 
-    // =============================================================
-    // ACCOUNT
-    // =============================================================
-
     private void loadAccount() {
 
-        Thread thread =
-                new Thread(() -> {
+        Thread thread = new Thread(() -> {
 
-                    try {
+            try {
 
-                        accountService.loadAccount();
+                accountService.loadAccount();
 
-                        Platform.runLater(() -> {
+                Platform.runLater(() -> {
 
-                            homeView.setAccount(
-                                    accountService
-                                            .getCurrentAccount()
-                            );
+                    homeView.setAccount(
+                            accountService.getCurrentAccount()
+                    );
 
-                            accountsView.updateAccountDisplay();
-                        });
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-                    }
+                    accountsView.updateAccountDisplay();
                 });
 
-        thread.setDaemon(
-                true
-        );
+            } catch (Throwable ex) {
 
+                ex.printStackTrace();
+            }
+
+        });
+
+        thread.setDaemon(true);
         thread.start();
     }
 
-    // =============================================================
-    // ROOT
-    // =============================================================
-
     public Parent getRoot() {
-
         return root;
     }
-
-    // =============================================================
-    // MOD DETAILS
-    // =============================================================
 
     private void showModDetails(
             Instance instance,
@@ -555,9 +490,7 @@ public class LauncherView {
 
                             } else {
 
-                                showBrowseMods(
-                                        instance
-                                );
+                                showBrowseMods(instance);
                             }
                         }
                 )
@@ -571,11 +504,11 @@ public class LauncherView {
         content.getChildren().setAll(
                 new ModDetailsView(
                         projectId,
-                        () ->
-                                content.getChildren().setAll(
-                                        globalModsView
-                                )
+                        () -> content.getChildren().setAll(
+                                globalModsView
+                        )
                 )
         );
     }
 }
+
