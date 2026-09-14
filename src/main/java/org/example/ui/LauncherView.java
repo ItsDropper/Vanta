@@ -51,20 +51,36 @@ public class LauncherView {
 
         root.getChildren().add(window);
 
-        // Notification overlay must be created after the window.
         notifications = new NotificationManager(root);
 
+        window.prefWidthProperty().bind(
+                root.widthProperty()
+        );
 
-        window.prefWidthProperty().bind(root.widthProperty());
-        window.prefHeightProperty().bind(root.heightProperty());
-        window.maxWidthProperty().bind(root.widthProperty());
-        window.maxHeightProperty().bind(root.heightProperty());
+        window.prefHeightProperty().bind(
+                root.heightProperty()
+        );
+
+        window.maxWidthProperty().bind(
+                root.widthProperty()
+        );
+
+        window.maxHeightProperty().bind(
+                root.heightProperty()
+        );
 
         Rectangle clip = new Rectangle();
+
         clip.setArcWidth(24);
         clip.setArcHeight(24);
-        clip.widthProperty().bind(root.widthProperty());
-        clip.heightProperty().bind(root.heightProperty());
+
+        clip.widthProperty().bind(
+                root.widthProperty()
+        );
+
+        clip.heightProperty().bind(
+                root.heightProperty()
+        );
 
         window.setClip(clip);
 
@@ -74,12 +90,15 @@ public class LauncherView {
                 accountService
         );
 
-        TitleBar titleBar = new TitleBar(
-                stage,
-                accountService
-        );
+        TitleBar titleBar =
+                new TitleBar(
+                        stage,
+                        accountService
+                );
 
-        window.setTop(titleBar);
+        window.setTop(
+                titleBar
+        );
 
         sidebar = new Sidebar();
 
@@ -88,46 +107,58 @@ public class LauncherView {
                 new Insets(16)
         );
 
-        window.setLeft(sidebar);
+        window.setLeft(
+                sidebar
+        );
 
         content = new StackPane();
-        content.getStyleClass().add("content");
+        content.getStyleClass().add(
+                "content"
+        );
 
         content.setPadding(
                 new Insets(16, 16, 16, 0)
         );
 
-        window.setCenter(content);
-
-        homeView = new HomeView(
-                accountService,
-                launchService
+        window.setCenter(
+                content
         );
 
-        accountsView = new AccountsView(
-                accountService
-        );
+        homeView =
+                new HomeView(
+                        accountService,
+                        launchService
+                );
 
-        instancesView = new InstancesView(
-                launchService,
-                this::showCreateInstanceView,
-                this::selectInstance,
-                this::showInstanceMods
-        );
+        accountsView =
+                new AccountsView(
+                        accountService
+                );
 
-        createInstanceTypeView = new CreateInstanceTypeView(
-                this::showInstances,
-                this::showCustomCreateInstanceView,
-                this::showImportInstanceView,
-                this::showPresetInstanceView,
-                this::showModrinthModpackView
-        );
+        instancesView =
+                new InstancesView(
+                        launchService,
+                        this::showCreateInstanceView,
+                        this::selectInstance,
+                        this::showInstanceMods
+                );
 
-        globalModsView = new GlobalModsView(
-                this::showGlobalModDetails
-        );
+        createInstanceTypeView =
+                new CreateInstanceTypeView(
+                        this::showInstances,
+                        this::showCustomCreateInstanceView,
+                        this::showImportInstanceView,
+                        this::showPresetInstanceView,
+                        this::showModrinthModpackView
+                );
 
-        settingsView = new SettingsView();
+        globalModsView =
+                new GlobalModsView(
+                        this::showGlobalModDetails
+                );
+
+        settingsView =
+                new SettingsView();
 
         sidebar.setOnPageSelected(
                 this::showPage
@@ -140,9 +171,13 @@ public class LauncherView {
         loadAccount();
     }
 
-    private void showPage(Sidebar.Page page) {
+    private void showPage(
+            Sidebar.Page page
+    ) {
 
-        sidebar.setSelectedPage(page);
+        sidebar.setSelectedPage(
+                page
+        );
 
         switch (page) {
 
@@ -168,29 +203,38 @@ public class LauncherView {
         }
     }
 
-    private void showInstanceMods(Instance instance) {
+    private void showInstanceMods(
+            Instance instance
+    ) {
 
-        selectedInstance = instance;
+        selectedInstance =
+                instance;
 
-        ModsView view = new ModsView(
-                instance,
-                () -> showBrowseMods(instance),
-                () -> showInstanceSettings(instance)
+        ModsView view =
+                new ModsView(
+                        instance,
+                        () -> showBrowseMods(instance),
+                        () -> showInstanceSettings(instance)
+                );
+
+        content.getChildren().setAll(
+                view
         );
-
-        content.getChildren().setAll(view);
     }
 
-    private void showBrowseMods(Instance instance) {
+    private void showBrowseMods(
+            Instance instance
+    ) {
 
-        browseModsView = new BrowseModsView(
-                instance,
-                () -> showInstanceMods(instance),
-                project -> showModDetails(
+        browseModsView =
+                new BrowseModsView(
                         instance,
-                        project
-                )
-        );
+                        () -> showInstanceMods(instance),
+                        project -> showModDetails(
+                                instance,
+                                project
+                        )
+                );
 
         content.getChildren().setAll(
                 browseModsView
@@ -261,107 +305,117 @@ public class LauncherView {
 
     private void createPresetInstance(
             InstancePreset preset,
-            String name
+            String name,
+            String minecraftVersion
     ) {
 
-        System.out.println("NOTIFICATION TEST: createPresetInstance reached");
-
         notifications.showProgress(
                 "Installing " + preset.getName(),
-                "Preparing Minecraft..."
+                "Preparing Minecraft "
+                        + minecraftVersion
+                        + "..."
         );
 
-        notifications.showProgress(
-                "Installing " + preset.getName(),
-                "Preparing Minecraft..."
-        );
+        Thread thread =
+                new Thread(() -> {
 
-        Thread thread = new Thread(() -> {
+                    try {
 
-            try {
+                        notifications.updateProgress(
+                                "Installing Minecraft "
+                                        + minecraftVersion
+                                        + "..."
+                        );
 
-                notifications.updateProgress(
-                        "Installing Minecraft "
-                                + preset.getMinecraftVersion()
-                                + "..."
-                );
+                        Instance instance;
 
-                Instance instance;
+                        if ("Fabric".equalsIgnoreCase(
+                                preset.getLoader()
+                        )) {
 
-                if ("Fabric".equalsIgnoreCase(
-                        preset.getLoader()
-                )) {
+                            instance =
+                                    InstanceInstaller.installFabric(
+                                            name,
+                                            minecraftVersion
+                                    );
 
-                    instance =
-                            InstanceInstaller.installFabric(
-                                    name,
-                                    preset.getMinecraftVersion()
-                            );
+                        } else {
 
-                } else {
+                            instance =
+                                    InstanceInstaller.installVanilla(
+                                            name,
+                                            minecraftVersion
+                                    );
+                        }
 
-                    instance =
-                            InstanceInstaller.installVanilla(
-                                    name,
-                                    preset.getMinecraftVersion()
-                            );
-                }
+                        ModrinthService modrinthService =
+                                new ModrinthService();
 
-                ModrinthService modrinthService =
-                        new ModrinthService();
+                        if (preset.getMods() != null) {
 
-                for (String modSlug : preset.getMods()) {
+                            for (String modSlug :
+                                    preset.getMods()) {
 
-                    notifications.updateProgress(
-                            "Installing "
-                                    + modSlug
-                                    + "..."
-                    );
+                                notifications.updateProgress(
+                                        "Installing "
+                                                + modSlug
+                                                + "..."
+                                );
 
-                    ModrinthProject project =
-                            modrinthService.getProjectBySlug(
-                                    modSlug
-                            );
+                                System.out.println(
+                                        "Resolving preset mod: " + modSlug
+                                );
 
-                    modrinthService.installMod(
-                            instance,
-                            project
-                    );
-                }
+                                ModrinthProject project =
+                                        modrinthService.getProjectBySlug(
+                                                modSlug
+                                        );
 
-                notifications.success(
-                        "Installation complete",
-                        preset.getName()
-                                + " is ready to play."
-                );
+                                modrinthService.installMod(
+                                        instance,
+                                        project
+                                );
+                            }
+                        }
 
-                Platform.runLater(
-                        this::instanceCreated
-                );
+                        notifications.success(
+                                "Installation complete",
+                                preset.getName()
+                                        + " ("
+                                        + minecraftVersion
+                                        + ") is ready to play."
+                        );
 
-            } catch (Throwable ex) {
+                        Platform.runLater(
+                                this::instanceCreated
+                        );
 
-                ex.printStackTrace();
+                    } catch (Throwable ex) {
 
-                notifications.error(
-                        "Installation failed",
-                        getErrorMessage(ex)
-                );
+                        ex.printStackTrace();
 
-                Platform.runLater(() ->
-                        showPresetConfigurationView(
-                                preset
-                        )
-                );
-            }
+                        notifications.error(
+                                "Installation failed",
+                                getErrorMessage(ex)
+                        );
 
-        });
+                        Platform.runLater(() ->
+                                showPresetConfigurationView(
+                                        preset
+                                )
+                        );
+                    }
+
+                });
 
         thread.setName(
                 "Vanta-Preset-Installer"
         );
 
-        thread.setDaemon(true);
+        thread.setDaemon(
+                true
+        );
+
         thread.start();
     }
 
@@ -369,15 +423,21 @@ public class LauncherView {
             Throwable throwable
     ) {
 
-        Throwable current = throwable;
+        Throwable current =
+                throwable;
 
         while (current.getCause() != null) {
-            current = current.getCause();
+
+            current =
+                    current.getCause();
         }
 
-        String message = current.getMessage();
+        String message =
+                current.getMessage();
 
-        if (message == null || message.isBlank()) {
+        if (message == null
+                || message.isBlank()) {
+
             return current
                     .getClass()
                     .getSimpleName();
@@ -387,6 +447,7 @@ public class LauncherView {
     }
 
     private void showModrinthModpackView() {
+
         // Modrinth modpack browsing will be implemented here.
     }
 
@@ -401,7 +462,8 @@ public class LauncherView {
             Instance instance
     ) {
 
-        selectedInstance = instance;
+        selectedInstance =
+                instance;
 
         homeView.setSelectedInstance(
                 instance
@@ -425,7 +487,8 @@ public class LauncherView {
             Instance instance
     ) {
 
-        selectedInstance = instance;
+        selectedInstance =
+                instance;
 
         InstanceSettingsView instanceSettingsView =
                 new InstanceSettingsView(
@@ -441,33 +504,38 @@ public class LauncherView {
 
     private void loadAccount() {
 
-        Thread thread = new Thread(() -> {
+        Thread thread =
+                new Thread(() -> {
 
-            try {
+                    try {
 
-                accountService.loadAccount();
+                        accountService.loadAccount();
 
-                Platform.runLater(() -> {
+                        Platform.runLater(() -> {
 
-                    homeView.setAccount(
-                            accountService.getCurrentAccount()
-                    );
+                            homeView.setAccount(
+                                    accountService.getCurrentAccount()
+                            );
 
-                    accountsView.updateAccountDisplay();
+                            accountsView.updateAccountDisplay();
+                        });
+
+                    } catch (Throwable ex) {
+
+                        ex.printStackTrace();
+                    }
+
                 });
 
-            } catch (Throwable ex) {
+        thread.setDaemon(
+                true
+        );
 
-                ex.printStackTrace();
-            }
-
-        });
-
-        thread.setDaemon(true);
         thread.start();
     }
 
     public Parent getRoot() {
+
         return root;
     }
 
@@ -490,7 +558,9 @@ public class LauncherView {
 
                             } else {
 
-                                showBrowseMods(instance);
+                                showBrowseMods(
+                                        instance
+                                );
                             }
                         }
                 )

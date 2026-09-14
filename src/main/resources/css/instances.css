@@ -507,3 +507,140 @@
 .delete-dialog-delete:pressed {
     -fx-background-color: #362020;
 }
+
+
+       /* =============================================================
+          PRESET CONFIGURATION
+          ============================================================= */
+
+   .preset-config-scroll {
+       -fx-background-color: transparent;
+       -fx-background: transparent;
+       -fx-border-color: transparent;
+       -fx-padding: 0;
+   }
+
+.preset-config-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.preset-config-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.preset-config-scroll > .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4px;
+}
+
+.preset-config-scroll > .scroll-bar:vertical .thumb {
+    -fx-background-color: #303830;
+    -fx-background-radius: 4px;
+}
+
+.preset-config-scroll > .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #465148;
+}
+
+.preset-config-scroll > .scroll-bar:vertical .increment-button,
+.preset-config-scroll > .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+
+/* =============================================================
+   PRESET ENVIRONMENT
+   ============================================================= */
+
+.preset-environment {
+    -fx-background-color: #101310;
+    -fx-background-radius: 9px;
+
+    -fx-border-color: #292f29;
+    -fx-border-width: 1px;
+    -fx-border-radius: 9px;
+
+    -fx-padding: 14px 16px;
+}
+
+.preset-environment-value {
+    -fx-text-fill: #e0e5e0;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.preset-environment-secondary {
+    -fx-text-fill: #858e86;
+    -fx-font-size: 10px;
+}
+
+
+/* =============================================================
+   PRESET VERSION LIST
+   ============================================================= */
+
+.preset-version-list {
+    -fx-text-fill: #858e86;
+    -fx-font-size: 11px;
+    -fx-line-spacing: 2px;
+}
+
+
+/* =============================================================
+   PRESET MOD LIST
+   ============================================================= */
+
+.preset-mods-scroll {
+    -fx-background-color: #0f120f;
+    -fx-background: #0f120f;
+
+    -fx-border-color: #2a302a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-background-radius: 8px;
+}
+
+.preset-mods-scroll > .viewport {
+    -fx-background-color: #0f120f;
+    -fx-background-radius: 8px;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 7px;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical .thumb {
+    -fx-background-color: #303730;
+    -fx-background-radius: 4px;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: #465148;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical .increment-button,
+.preset-mods-scroll > .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+
+/* =============================================================
+   PRESET ACTIONS
+   ============================================================= */
+
+.preset-actions {
+    -fx-padding: 16px 0 0 0;
+
+    -fx-border-color: #292f29 transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+

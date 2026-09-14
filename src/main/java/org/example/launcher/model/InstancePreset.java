@@ -7,7 +7,7 @@ public class InstancePreset {
     private final String id;
     private final String name;
     private final String description;
-    private final String minecraftVersion;
+    private final List<String> minecraftVersions;
     private final String loader;
     private final List<String> mods;
 
@@ -15,14 +15,14 @@ public class InstancePreset {
             String id,
             String name,
             String description,
-            String minecraftVersion,
+            List<String> minecraftVersions,
             String loader,
             List<String> mods
     ) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.minecraftVersion = minecraftVersion;
+        this.minecraftVersions = minecraftVersions;
         this.loader = loader;
         this.mods = mods;
     }
@@ -39,8 +39,8 @@ public class InstancePreset {
         return description;
     }
 
-    public String getMinecraftVersion() {
-        return minecraftVersion;
+    public List<String> getMinecraftVersions() {
+        return minecraftVersions;
     }
 
     public String getLoader() {
@@ -51,3 +51,4 @@ public class InstancePreset {
         return mods;
     }
 }
+

@@ -177,7 +177,7 @@ public class InstancePresetView extends VBox {
 
         Label details =
                 new Label(
-                        preset.getMinecraftVersion()
+                        preset.getMinecraftVersions().get(0)
                                 + " • "
                                 + preset.getLoader()
                                 + " • "
