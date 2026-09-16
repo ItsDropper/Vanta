@@ -8,13 +8,20 @@ import javafx.scene.layout.Priority;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 
+import java.util.function.Consumer;
+
 import org.example.launcher.service.AccountService;
+import org.example.launcher.update.UpdateInfo;
 import org.example.ui.components.AccountSwitcher;
 
 public class TitleBar extends HBox {
 
     private double dragX;
     private double dragY;
+
+    private final Button updateButton;
+    private Consumer<UpdateInfo> updateAction;
+    private UpdateInfo currentUpdate;
 
     public TitleBar(
             Stage stage,
@@ -37,6 +44,37 @@ public class TitleBar extends HBox {
                 new AccountSwitcher(
                         accountService
                 );
+
+        // =========================================================
+        // UPDATE BUTTON
+        // =========================================================
+
+        updateButton =
+                new Button(
+                        "Update available"
+                );
+
+        updateButton.getStyleClass().add(
+                "title-bar-update"
+        );
+
+        updateButton.setOnAction(event -> {
+
+            if (updateAction != null) {
+
+                updateAction.accept(
+                        currentUpdate
+                );
+            }
+        });
+
+        updateButton.setVisible(
+                false
+        );
+
+        updateButton.setManaged(
+                false
+        );
 
         // =========================================================
         // WINDOW ICONS
@@ -151,6 +189,7 @@ public class TitleBar extends HBox {
         getChildren().addAll(
                 spacer,
                 accountSwitcher,
+                updateButton,
                 minimize,
                 maximize,
                 close
@@ -186,5 +225,33 @@ public class TitleBar extends HBox {
                 );
             }
         });
+    }
+
+    public void showUpdate(
+            UpdateInfo updateInfo
+    ) {
+
+        currentUpdate =
+                updateInfo;
+
+        updateButton.setText(
+                "Update"
+        );
+
+        updateButton.setVisible(
+                true
+        );
+
+        updateButton.setManaged(
+                true
+        );
+    }
+
+    public void setUpdateAction(
+            Consumer<UpdateInfo> action
+    ) {
+
+        updateAction =
+                action;
     }
 }

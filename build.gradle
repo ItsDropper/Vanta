@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'org.example'
-version = '1.0'
+version = '1.0.3'
 
 repositories {
     mavenCentral()
@@ -23,6 +23,14 @@ java {
 
 application {
     mainClass = 'org.example.Main'
+}
+
+processResources {
+    filesMatching('version.properties') {
+        expand(
+                version: project.version
+        )
+    }
 }
 
 javafx {
@@ -61,4 +69,22 @@ shadowJar {
     // Do NOT use minimize().
     // MinecraftAuth, Jackson, JNA and JavaFX-related code
     // can rely on reflection/runtime discovery.
+}
+
+tasks.register('updaterJar', Jar) {
+    archiveBaseName = 'VantaUpdater'
+    archiveVersion = project.version.toString()
+
+    destinationDirectory = layout.buildDirectory.dir('updater')
+
+    from sourceSets.main.output
+
+    include 'org/example/launcher/update/UpdaterMain.class'
+    include 'org/example/launcher/update/UpdaterMain$*.class'
+
+    manifest {
+        attributes(
+                'Main-Class': 'org.example.launcher.update.UpdaterMain'
+        )
+    }
 }

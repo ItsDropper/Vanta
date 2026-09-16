@@ -16,9 +16,14 @@ import org.example.launcher.modrinth.ModrinthProject;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.LaunchService;
 import org.example.launcher.service.ModrinthService;
+import org.example.launcher.update.*;
 import org.example.ui.components.NotificationManager;
 import org.example.ui.components.Sidebar;
 import org.example.ui.views.*;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 
 public class LauncherView {
 
@@ -39,6 +44,8 @@ public class LauncherView {
     private final CreateInstanceTypeView createInstanceTypeView;
 
     private final NotificationManager notifications;
+
+    private final TitleBar titleBar;
 
     private Instance selectedInstance;
 
@@ -110,7 +117,7 @@ public class LauncherView {
                         accountService
                 );
 
-        TitleBar titleBar =
+        titleBar =
                 new TitleBar(
                         stage,
                         accountService
@@ -119,6 +126,7 @@ public class LauncherView {
         window.setTop(
                 titleBar
         );
+
 
         sidebar =
                 new Sidebar();
@@ -199,6 +207,7 @@ public class LauncherView {
         );
 
         loadAccount();
+        checkForUpdates();
     }
 
     private void showPage(
@@ -646,6 +655,42 @@ public class LauncherView {
         thread.start();
     }
 
+    private void checkForUpdates() {
+
+        UpdateChecker updateChecker =
+                new UpdateChecker();
+
+        updateChecker
+                .check()
+                .thenAccept(updateInfo -> {
+
+                    if (!updateInfo.isUpdateAvailable()) {
+                        return;
+                    }
+
+                    Platform.runLater(() ->
+                            titleBar.showUpdate(
+                                    updateInfo
+                            )
+                    );
+
+                    titleBar.setUpdateAction(
+                            this::performUpdate
+                    );
+
+                })
+                .exceptionally(error -> {
+
+                    System.err.println(
+                            "Failed to check for Vanta updates:"
+                    );
+
+                    error.printStackTrace();
+
+                    return null;
+                });
+    }
+
     // =============================================================
     // ROOT
     // =============================================================
@@ -672,5 +717,76 @@ public class LauncherView {
                                 )
                 )
         );
+    }
+
+    private void performUpdate(
+            UpdateInfo updateInfo
+    ) {
+
+        Thread updateThread =
+                new Thread(() -> {
+
+                    try {
+
+                        UpdateDownloader downloader =
+                                new UpdateDownloader();
+
+                        Path updateZip =
+                                downloader.downloadAndVerify(
+                                        updateInfo
+                                );
+
+                        Path applicationDirectory =
+                                ApplicationLocator.getApplicationDirectory();
+
+                        UpdaterLauncher.start(
+                                ProcessHandle.current().pid(),
+                                updateZip,
+                                applicationDirectory
+                        );
+
+                        Platform.exit();
+
+                    } catch (Exception e) {
+
+                        try {
+
+                            Path log =
+                                    Path.of(
+                                            System.getProperty("java.io.tmpdir"),
+                                            "Vanta-update-error.log"
+                                    );
+
+                            Files.writeString(
+                                    log,
+                                    e.toString() +
+                                            System.lineSeparator(),
+                                    StandardOpenOption.CREATE,
+                                    StandardOpenOption.TRUNCATE_EXISTING
+                            );
+
+                            try (var writer =
+                                         Files.newBufferedWriter(
+                                                 log,
+                                                 StandardOpenOption.APPEND
+                                         )) {
+
+                                e.printStackTrace(
+                                        new java.io.PrintWriter(
+                                                writer
+                                        )
+                                );
+                            }
+
+                        } catch (Exception ignored) {
+                        }
+                    }
+                });
+
+        updateThread.setDaemon(
+                true
+        );
+
+        updateThread.start();
     }
 }
