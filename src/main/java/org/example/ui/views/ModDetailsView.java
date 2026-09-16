@@ -17,7 +17,9 @@ import org.example.ui.markdown.MarkdownRenderer;
 
 import org.example.launcher.model.Instance;
 import org.example.launcher.modrinth.ModrinthClient;
+import org.example.launcher.modrinth.ModrinthContentType;
 import org.example.launcher.modrinth.ModrinthProject;
+import org.example.launcher.service.ModrinthContentService;
 import org.example.launcher.service.ModrinthService;
 import org.example.launcher.modrinth.ModrinthTeamMember;
 
@@ -35,11 +37,16 @@ import java.util.List;
 public class ModDetailsView extends VBox {
 
     private final Instance instance;
+
     private final ModrinthClient modrinthClient;
     private final ModrinthService modrinthService;
+    private final ModrinthContentService contentService;
+
     private final HttpClient httpClient;
 
     private final String projectId;
+    private final ModrinthContentType contentType;
+
     private final Runnable onBack;
 
     private final VBox content;
@@ -49,9 +56,11 @@ public class ModDetailsView extends VBox {
             String projectId,
             Runnable onBack
     ) {
+
         this(
                 null,
                 projectId,
+                ModrinthContentType.MOD,
                 onBack
         );
     }
@@ -61,32 +70,71 @@ public class ModDetailsView extends VBox {
             String projectId,
             Runnable onBack
     ) {
+
+        this(
+                instance,
+                projectId,
+                ModrinthContentType.MOD,
+                onBack
+        );
+    }
+
+    public ModDetailsView(
+            Instance instance,
+            String projectId,
+            ModrinthContentType contentType,
+            Runnable onBack
+    ) {
+
         this.instance = instance;
         this.projectId = projectId;
+        this.contentType = contentType;
         this.onBack = onBack;
 
-        this.modrinthClient = new ModrinthClient();
-        this.modrinthService = new ModrinthService();
-        this.httpClient = HttpClient.newHttpClient();
+        this.modrinthClient =
+                new ModrinthClient();
 
-        getStyleClass().add("page");
+        this.modrinthService =
+                new ModrinthService();
 
-        setPadding(new Insets(36));
-        setSpacing(20);
+        this.contentService =
+                new ModrinthContentService();
+
+        this.httpClient =
+                HttpClient.newBuilder()
+                        .followRedirects(
+                                HttpClient.Redirect.NORMAL
+                        )
+                        .build();
+
+        getStyleClass().add(
+                "page"
+        );
+
+        setPadding(
+                new Insets(36)
+        );
+
+        setSpacing(
+                20
+        );
 
         // =========================================================
         // BACK
         // =========================================================
 
         Button backButton =
-                new Button("← BACK");
+                new Button(
+                        "← BACK"
+                );
 
         backButton.getStyleClass().add(
                 "secondary-button"
         );
 
         backButton.setOnAction(
-                event -> onBack.run()
+                event ->
+                        onBack.run()
         );
 
         // =========================================================
@@ -94,7 +142,9 @@ public class ModDetailsView extends VBox {
         // =========================================================
 
         content =
-                new VBox(20);
+                new VBox(
+                        20
+                );
 
         content.setPadding(
                 new Insets(
@@ -110,9 +160,13 @@ public class ModDetailsView extends VBox {
         // =========================================================
 
         ScrollPane scrollPane =
-                new ScrollPane(content);
+                new ScrollPane(
+                        content
+                );
 
-        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToWidth(
+                true
+        );
 
         scrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
@@ -136,7 +190,13 @@ public class ModDetailsView extends VBox {
         // =========================================================
 
         statusLabel =
-                new Label("Loading mod...");
+                new Label(
+                        "Loading "
+                                + contentType
+                                .getDisplayName()
+                                .toLowerCase()
+                                + "..."
+                );
 
         statusLabel.getStyleClass().add(
                 "instances-status"
@@ -155,9 +215,9 @@ public class ModDetailsView extends VBox {
         loadProject();
     }
 
-// =============================================================
-// LOAD PROJECT
-// =============================================================
+    // =============================================================
+    // LOAD PROJECT
+    // =============================================================
 
     private void loadProject() {
 
@@ -177,7 +237,9 @@ public class ModDetailsView extends VBox {
                                 );
 
                         String author =
-                                findAuthor(teamMembers);
+                                findAuthor(
+                                        teamMembers
+                                );
 
                         Platform.runLater(
                                 () ->
@@ -195,19 +257,26 @@ public class ModDetailsView extends VBox {
                                 statusLabel.setText(
                                         ex.getMessage() != null
                                                 ? ex.getMessage()
-                                                : "Failed to load mod."
+                                                : "Failed to load "
+                                                  + contentType
+                                                .getDisplayName()
+                                                .toLowerCase()
+                                                  + "."
                                 )
                         );
                     }
                 });
 
-        thread.setDaemon(true);
+        thread.setDaemon(
+                true
+        );
+
         thread.start();
     }
 
-// =============================================================
-// SHOW PROJECT
-// =============================================================
+    // =============================================================
+    // SHOW PROJECT
+    // =============================================================
 
     private void showProject(
             ModrinthProject project,
@@ -223,10 +292,21 @@ public class ModDetailsView extends VBox {
         ImageView icon =
                 new ImageView();
 
-        icon.setFitWidth(96);
-        icon.setFitHeight(96);
-        icon.setPreserveRatio(true);
-        icon.setSmooth(true);
+        icon.setFitWidth(
+                96
+        );
+
+        icon.setFitHeight(
+                96
+        );
+
+        icon.setPreserveRatio(
+                true
+        );
+
+        icon.setSmooth(
+                true
+        );
 
         Rectangle clip =
                 new Rectangle(
@@ -234,21 +314,41 @@ public class ModDetailsView extends VBox {
                         96
                 );
 
-        clip.setArcWidth(22);
-        clip.setArcHeight(22);
+        clip.setArcWidth(
+                22
+        );
 
-        icon.setClip(clip);
+        clip.setArcHeight(
+                22
+        );
+
+        icon.setClip(
+                clip
+        );
 
         VBox iconBox =
-                new VBox(icon);
+                new VBox(
+                        icon
+                );
 
         iconBox.setAlignment(
                 Pos.CENTER
         );
 
-        iconBox.setMinSize(96, 96);
-        iconBox.setPrefSize(96, 96);
-        iconBox.setMaxSize(96, 96);
+        iconBox.setMinSize(
+                96,
+                96
+        );
+
+        iconBox.setPrefSize(
+                96,
+                96
+        );
+
+        iconBox.setMaxSize(
+                96,
+                96
+        );
 
         iconBox.getStyleClass().add(
                 "mod-details-icon"
@@ -267,7 +367,9 @@ public class ModDetailsView extends VBox {
                 new Label(
                         safe(
                                 project.getTitle(),
-                                "Unknown Mod"
+                                "Unknown "
+                                        + contentType
+                                        .getDisplayName()
                         )
                 );
 
@@ -304,7 +406,9 @@ public class ModDetailsView extends VBox {
                         )
                 );
 
-        shortDescription.setWrapText(true);
+        shortDescription.setWrapText(
+                true
+        );
 
         shortDescription.getStyleClass().add(
                 "mod-details-description"
@@ -326,7 +430,9 @@ public class ModDetailsView extends VBox {
         );
 
         Label downloadsLabel =
-                new Label("DOWNLOADS");
+                new Label(
+                        "DOWNLOADS"
+                );
 
         downloadsLabel.getStyleClass().add(
                 "mod-details-stat-label"
@@ -355,7 +461,9 @@ public class ModDetailsView extends VBox {
         );
 
         Label followersLabel =
-                new Label("FOLLOWERS");
+                new Label(
+                        "FOLLOWERS"
+                );
 
         followersLabel.getStyleClass().add(
                 "mod-details-stat-label"
@@ -396,7 +504,9 @@ public class ModDetailsView extends VBox {
                         metadata
                 );
 
-        headerInformation.setFillWidth(true);
+        headerInformation.setFillWidth(
+                true
+        );
 
         HBox.setHgrow(
                 headerInformation,
@@ -418,26 +528,46 @@ public class ModDetailsView extends VBox {
                 Pos.TOP_LEFT
         );
 
-        projectHeader.setFillHeight(true);
+        projectHeader.setFillHeight(
+                true
+        );
 
         // =========================================================
         // INSTALL
         // =========================================================
 
         Button installButton =
-                new Button("INSTALL");
+                new Button(
+                        "INSTALL"
+                );
 
         installButton.getStyleClass().add(
                 "instance-play-button"
         );
 
-        installButton.setMinWidth(120);
-        installButton.setPrefWidth(120);
-        installButton.setMaxWidth(120);
+        installButton.setMinWidth(
+                120
+        );
 
-        installButton.setMinHeight(38);
-        installButton.setPrefHeight(38);
-        installButton.setMaxHeight(38);
+        installButton.setPrefWidth(
+                120
+        );
+
+        installButton.setMaxWidth(
+                120
+        );
+
+        installButton.setMinHeight(
+                38
+        );
+
+        installButton.setPrefHeight(
+                38
+        );
+
+        installButton.setMaxHeight(
+                38
+        );
 
         installButton.setAlignment(
                 Pos.CENTER
@@ -451,10 +581,19 @@ public class ModDetailsView extends VBox {
                         )
         );
 
-        if (instance == null) {
+        if (instance == null
+                || contentType == ModrinthContentType.MODPACK) {
 
-            installButton.setVisible(false);
-            installButton.setManaged(false);
+            if (instance == null) {
+
+                installButton.setVisible(
+                        false
+                );
+
+                installButton.setManaged(
+                        false
+                );
+            }
         }
 
         // =========================================================
@@ -468,10 +607,14 @@ public class ModDetailsView extends VBox {
                         installButton
                 );
 
-        headerContainer.setFillWidth(true);
+        headerContainer.setFillWidth(
+                true
+        );
 
         headerContainer.setPadding(
-                new Insets(22)
+                new Insets(
+                        22
+                )
         );
 
         headerContainer.getStyleClass().add(
@@ -483,7 +626,9 @@ public class ModDetailsView extends VBox {
         // =========================================================
 
         VBox descriptionCard =
-                createDescriptionCard(project);
+                createDescriptionCard(
+                        project
+                );
 
         // =========================================================
         // INFORMATION
@@ -505,19 +650,23 @@ public class ModDetailsView extends VBox {
                 informationCard
         );
 
-        statusLabel.setText("");
+        statusLabel.setText(
+                ""
+        );
     }
 
-// =============================================================
-// DESCRIPTION
-// =============================================================
+    // =============================================================
+    // DESCRIPTION
+    // =============================================================
 
     private VBox createDescriptionCard(
             ModrinthProject project
     ) {
 
         Label sectionTitle =
-                new Label("DESCRIPTION");
+                new Label(
+                        "DESCRIPTION"
+                );
 
         sectionTitle.getStyleClass().add(
                 "settings-section-title"
@@ -526,15 +675,27 @@ public class ModDetailsView extends VBox {
         String body =
                 project.getBody();
 
-        if (body == null || body.isBlank()) {
-            body = project.getDescription();
+        if (body == null
+                || body.isBlank()) {
+
+            body =
+                    project.getDescription();
+        }
+
+        if (body == null
+                || body.isBlank()) {
+
+            body =
+                    "No description available.";
         }
 
         MarkdownRenderer renderer =
                 new MarkdownRenderer();
 
         VBox description =
-                renderer.render(body);
+                renderer.render(
+                        body
+                );
 
         VBox card =
                 new VBox(
@@ -555,9 +716,9 @@ public class ModDetailsView extends VBox {
         return card;
     }
 
-// =============================================================
-// PROJECT INFORMATION
-// =============================================================
+    // =============================================================
+    // PROJECT INFORMATION
+    // =============================================================
 
     private VBox createInformationCard(
             ModrinthProject project,
@@ -574,7 +735,9 @@ public class ModDetailsView extends VBox {
         );
 
         VBox information =
-                new VBox(12);
+                new VBox(
+                        12
+                );
 
         addInformationRow(
                 information,
@@ -588,18 +751,23 @@ public class ModDetailsView extends VBox {
                 project.getSlug()
         );
 
-        String license = null;
+        String license =
+                null;
 
         if (project.getLicense() != null) {
 
             license =
-                    project.getLicense().getName();
+                    project
+                            .getLicense()
+                            .getName();
 
             if (license == null
                     || license.isBlank()) {
 
                 license =
-                        project.getLicense().getId();
+                        project
+                                .getLicense()
+                                .getId();
             }
         }
 
@@ -639,7 +807,9 @@ public class ModDetailsView extends VBox {
                 );
 
         card.setPadding(
-                new Insets(22)
+                new Insets(
+                        22
+                )
         );
 
         card.getStyleClass().add(
@@ -649,9 +819,9 @@ public class ModDetailsView extends VBox {
         return card;
     }
 
-// =============================================================
-// INFORMATION ROW
-// =============================================================
+    // =============================================================
+    // INFORMATION ROW
+    // =============================================================
 
     private void addInformationRow(
             VBox parent,
@@ -660,7 +830,9 @@ public class ModDetailsView extends VBox {
     ) {
 
         Label label =
-                new Label(labelText);
+                new Label(
+                        labelText
+                );
 
         label.getStyleClass().add(
                 "instance-setting-label"
@@ -674,7 +846,9 @@ public class ModDetailsView extends VBox {
                         )
                 );
 
-        value.setWrapText(true);
+        value.setWrapText(
+                true
+        );
 
         value.getStyleClass().add(
                 "mod-details-info-value"
@@ -687,12 +861,14 @@ public class ModDetailsView extends VBox {
                         value
                 );
 
-        parent.getChildren().add(row);
+        parent.getChildren().add(
+                row
+        );
     }
 
-// =============================================================
-// INSTALL
-// =============================================================
+    // =============================================================
+    // INSTALL
+    // =============================================================
 
     private void install(
             ModrinthProject project,
@@ -703,8 +879,13 @@ public class ModDetailsView extends VBox {
             return;
         }
 
-        button.setDisable(true);
-        button.setText("INSTALLING...");
+        button.setDisable(
+                true
+        );
+
+        button.setText(
+                "INSTALLING..."
+        );
 
         statusLabel.setText(
                 "Installing "
@@ -717,10 +898,37 @@ public class ModDetailsView extends VBox {
 
                     try {
 
-                        modrinthService.installMod(
-                                instance,
-                                project
-                        );
+                        if (contentType ==
+                                ModrinthContentType.MOD) {
+
+                            modrinthService.installMod(
+                                    instance,
+                                    project
+                            );
+
+                        } else if (contentType ==
+                                ModrinthContentType.RESOURCE_PACK) {
+
+                            contentService.installResourcePack(
+                                    instance,
+                                    project
+                            );
+
+                        } else if (contentType ==
+                                ModrinthContentType.SHADER) {
+
+                            contentService.installShader(
+                                    instance,
+                                    project
+                            );
+
+                        } else {
+
+                            throw new IllegalStateException(
+                                    "Unsupported content type: "
+                                            + contentType
+                            );
+                        }
 
                         Platform.runLater(() -> {
 
@@ -740,25 +948,35 @@ public class ModDetailsView extends VBox {
 
                         Platform.runLater(() -> {
 
-                            button.setDisable(false);
-                            button.setText("INSTALL");
+                            button.setDisable(
+                                    false
+                            );
+
+                            button.setText(
+                                    "INSTALL"
+                            );
 
                             statusLabel.setText(
                                     ex.getMessage() != null
                                             ? ex.getMessage()
-                                            : "Failed to install mod."
+                                            : "Failed to install "
+                                              + project.getTitle()
+                                              + "."
                             );
                         });
                     }
                 });
 
-        thread.setDaemon(true);
+        thread.setDaemon(
+                true
+        );
+
         thread.start();
     }
 
-// =============================================================
-// LOAD ICON
-// =============================================================
+    // =============================================================
+    // LOAD ICON
+    // =============================================================
 
     private void loadIcon(
             ModrinthProject project,
@@ -781,7 +999,9 @@ public class ModDetailsView extends VBox {
 
                         HttpRequest request =
                                 HttpRequest.newBuilder(
-                                                URI.create(iconUrl)
+                                                URI.create(
+                                                        iconUrl
+                                                )
                                         )
                                         .GET()
                                         .header(
@@ -801,6 +1021,7 @@ public class ModDetailsView extends VBox {
                                 || response.statusCode() >= 300) {
 
                             response.body().close();
+
                             return;
                         }
 
@@ -810,7 +1031,9 @@ public class ModDetailsView extends VBox {
                                      response.body()) {
 
                             bufferedImage =
-                                    ImageIO.read(input);
+                                    ImageIO.read(
+                                            input
+                                    );
                         }
 
                         if (bufferedImage == null) {
@@ -833,13 +1056,15 @@ public class ModDetailsView extends VBox {
                                         )
                                 );
 
-                        Platform.runLater(() -> {
+                        if (image.isError()) {
+                            return;
+                        }
 
-                            if (!image.isError()) {
-
-                                imageView.setImage(image);
-                            }
-                        });
+                        Platform.runLater(() ->
+                                imageView.setImage(
+                                        image
+                                )
+                        );
 
                     } catch (Throwable ex) {
 
@@ -847,13 +1072,16 @@ public class ModDetailsView extends VBox {
                     }
                 });
 
-        thread.setDaemon(true);
+        thread.setDaemon(
+                true
+        );
+
         thread.start();
     }
 
-// =============================================================
-// SAFE
-// =============================================================
+    // =============================================================
+    // SAFE
+    // =============================================================
 
     private String safe(
             String value,
@@ -869,9 +1097,9 @@ public class ModDetailsView extends VBox {
         return value;
     }
 
-// =============================================================
-// FORMAT NUMBER
-// =============================================================
+    // =============================================================
+    // FORMAT NUMBER
+    // =============================================================
 
     private String formatNumber(
             int number
@@ -893,12 +1121,14 @@ public class ModDetailsView extends VBox {
             );
         }
 
-        return String.valueOf(number);
+        return String.valueOf(
+                number
+        );
     }
 
-// =============================================================
-// FIND AUTHOR
-// =============================================================
+    // =============================================================
+    // FIND AUTHOR
+    // =============================================================
 
     private String findAuthor(
             List<ModrinthTeamMember> members
@@ -909,10 +1139,6 @@ public class ModDetailsView extends VBox {
 
             return null;
         }
-
-        // ---------------------------------------------------------
-        // PREFER OWNER
-        // ---------------------------------------------------------
 
         for (
                 ModrinthTeamMember member
@@ -957,10 +1183,6 @@ public class ModDetailsView extends VBox {
             }
         }
 
-        // ---------------------------------------------------------
-        // FALLBACK TO FIRST VALID MEMBER
-        // ---------------------------------------------------------
-
         for (
                 ModrinthTeamMember member
                 : members
@@ -997,6 +1219,4 @@ public class ModDetailsView extends VBox {
 
         return null;
     }
-
-
 }

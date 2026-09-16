@@ -79,24 +79,11 @@ public class InstanceSettingsView extends VBox {
                 event -> onBack.run()
         );
 
-        Button modsButton =
-                new Button(
-                        "MODS"
-                );
-
-        modsButton.getStyleClass().add(
-                "primary-button"
-        );
-
-        modsButton.setOnAction(
-                event -> onMods.run()
-        );
 
         HBox navigation =
                 new HBox(
                         10,
-                        backButton,
-                        modsButton
+                        backButton
                 );
 
         Label title =

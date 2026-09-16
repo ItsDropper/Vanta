@@ -135,8 +135,8 @@ public class CreateInstanceTypeView extends VBox {
         Button modrinthButton =
                 createOption(
                         "BROWSE MODRINTH",
-                        "Find and install a modpack from Modrinth.",
-                        true
+                        "Browse and install modpacks from Modrinth.",
+                        false
                 );
 
         modrinthButton.setOnAction(
@@ -263,3 +263,4 @@ public class CreateInstanceTypeView extends VBox {
         return button;
     }
 }
+

@@ -21,35 +21,51 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ModsView extends VBox {
 
     private final Instance instance;
 
-    private final Runnable onBrowseMods;
+    private final Runnable onBrowseContent;
     private final Runnable onInstanceSettings;
 
-    private final VBox modsList;
+    private final VBox contentList;
     private final Label statusLabel;
+
+    private ContentType selectedType;
+
+    private enum ContentType {
+        MODS,
+        RESOURCE_PACKS,
+        SHADERS
+    }
 
     public ModsView(
             Instance instance,
-            Runnable onBrowseMods,
+            Runnable onBrowseContent,
             Runnable onInstanceSettings
     ) {
 
         this.instance =
                 instance;
 
-        this.onBrowseMods =
-                onBrowseMods;
+        this.onBrowseContent =
+                onBrowseContent;
 
         this.onInstanceSettings =
                 onInstanceSettings;
+
+        this.selectedType =
+                ContentType.MODS;
 
         getStyleClass().add(
                 "page"
@@ -69,7 +85,7 @@ public class ModsView extends VBox {
 
         Label title =
                 new Label(
-                        "Installed Mods"
+                        "Installed Content"
                 );
 
         title.getStyleClass().add(
@@ -100,18 +116,40 @@ public class ModsView extends VBox {
         // NAVIGATION
         // =========================================================
 
+        Button modsButton =
+                new Button(
+                        "MODS"
+                );
+
+        modsButton.getStyleClass().add(
+                "primary-button"
+        );
+
+        Button packsButton =
+                new Button(
+                        "PACKS"
+                );
+
+        packsButton.getStyleClass().add(
+                "secondary-button"
+        );
+
+        Button shadersButton =
+                new Button(
+                        "SHADERS"
+                );
+
+        shadersButton.getStyleClass().add(
+                "secondary-button"
+        );
+
         Button browseButton =
                 new Button(
-                        "MODRINTH"
+                        "BROWSE CONTENT"
                 );
 
         browseButton.getStyleClass().add(
                 "primary-button"
-        );
-
-        browseButton.setOnAction(
-                event ->
-                        onBrowseMods.run()
         );
 
         Button settingsButton =
@@ -123,6 +161,41 @@ public class ModsView extends VBox {
                 "secondary-button"
         );
 
+        modsButton.setOnAction(
+                event ->
+                        showContent(
+                                ContentType.MODS,
+                                modsButton,
+                                packsButton,
+                                shadersButton
+                        )
+        );
+
+        packsButton.setOnAction(
+                event ->
+                        showContent(
+                                ContentType.RESOURCE_PACKS,
+                                modsButton,
+                                packsButton,
+                                shadersButton
+                        )
+        );
+
+        shadersButton.setOnAction(
+                event ->
+                        showContent(
+                                ContentType.SHADERS,
+                                modsButton,
+                                packsButton,
+                                shadersButton
+                        )
+        );
+
+        browseButton.setOnAction(
+                event ->
+                        onBrowseContent.run()
+        );
+
         settingsButton.setOnAction(
                 event ->
                         onInstanceSettings.run()
@@ -131,6 +204,9 @@ public class ModsView extends VBox {
         HBox navigation =
                 new HBox(
                         10,
+                        modsButton,
+                        packsButton,
+                        shadersButton,
                         browseButton,
                         settingsButton
                 );
@@ -147,21 +223,21 @@ public class ModsView extends VBox {
                 );
 
         // =========================================================
-        // MOD LIST
+        // CONTENT LIST
         // =========================================================
 
-        modsList =
+        contentList =
                 new VBox(
                         12
                 );
 
-        modsList.getStyleClass().add(
+        contentList.getStyleClass().add(
                 "instance-list"
         );
 
         ScrollPane scrollPane =
                 new ScrollPane(
-                        modsList
+                        contentList
                 );
 
         scrollPane.setFitToWidth(
@@ -206,87 +282,211 @@ public class ModsView extends VBox {
                 statusLabel
         );
 
-        loadInstalledMods();
+        loadInstalledContent();
     }
 
     // =============================================================
-    // LOAD INSTALLED MODS
+    // SHOW CONTENT
     // =============================================================
 
-    private void loadInstalledMods() {
+    private void showContent(
+            ContentType type,
+            Button modsButton,
+            Button packsButton,
+            Button shadersButton
+    ) {
 
-        modsList
+        selectedType =
+                type;
+
+        setButtonStyle(
+                modsButton,
+                type == ContentType.MODS
+        );
+
+        setButtonStyle(
+                packsButton,
+                type == ContentType.RESOURCE_PACKS
+        );
+
+        setButtonStyle(
+                shadersButton,
+                type == ContentType.SHADERS
+        );
+
+        loadInstalledContent();
+    }
+
+    private void setButtonStyle(
+            Button button,
+            boolean selected
+    ) {
+
+        button.getStyleClass().remove(
+                "primary-button"
+        );
+
+        button.getStyleClass().remove(
+                "secondary-button"
+        );
+
+        button.getStyleClass().add(
+                selected
+                        ? "primary-button"
+                        : "secondary-button"
+        );
+    }
+
+    // =============================================================
+    // LOAD CONTENT
+    // =============================================================
+
+    private void loadInstalledContent() {
+
+        contentList
                 .getChildren()
                 .clear();
 
-        Path modsDirectory =
-                instance.getDirectory()
-                        .resolve("mods");
+        Path directory;
+
+        String emptyMessage;
+
+        String statusName;
+
+        switch (selectedType) {
+
+            case MODS -> {
+
+                directory =
+                        instance.getDirectory()
+                                .resolve("mods");
+
+                emptyMessage =
+                        "No mods installed.";
+
+                statusName =
+                        "mod";
+            }
+
+            case RESOURCE_PACKS -> {
+
+                directory =
+                        instance.getDirectory()
+                                .resolve("resourcepacks");
+
+                emptyMessage =
+                        "No resource packs installed.";
+
+                statusName =
+                        "resource pack";
+            }
+
+            case SHADERS -> {
+
+                directory =
+                        instance.getDirectory()
+                                .resolve("shaderpacks");
+
+                emptyMessage =
+                        "No shaders installed.";
+
+                statusName =
+                        "shader";
+            }
+
+            default -> {
+                return;
+            }
+        }
 
         try {
 
             Files.createDirectories(
-                    modsDirectory
+                    directory
             );
 
-            List<Path> mods;
+            List<Path> files;
 
             try (var stream =
                          Files.list(
-                                 modsDirectory
+                                 directory
                          )) {
 
-                mods =
+                files =
                         stream
                                 .filter(
                                         path ->
-                                                path.toString()
-                                                        .toLowerCase()
-                                                        .endsWith(".jar")
+                                                !Files.isDirectory(
+                                                        path
+                                                )
+                                )
+                                .filter(
+                                        this::isValidContentFile
                                 )
                                 .sorted()
                                 .toList();
             }
 
-            if (mods.isEmpty()) {
+            if (files.isEmpty()) {
 
                 Label empty =
                         new Label(
-                                "No mods installed."
+                                emptyMessage
                         );
 
                 empty.getStyleClass().add(
                         "instances-status"
                 );
 
-                modsList
+                contentList
                         .getChildren()
                         .add(
                                 empty
                         );
 
                 statusLabel.setText(
-                        "0 mods installed."
+                        "0 "
+                                + statusName
+                                + "s installed."
                 );
 
                 return;
             }
 
-            for (Path mod : mods) {
+            for (Path file : files) {
 
-                modsList
-                        .getChildren()
-                        .add(
-                                createModCard(
-                                        mod
-                                )
-                        );
+                if (selectedType ==
+                        ContentType.MODS) {
+
+                    contentList
+                            .getChildren()
+                            .add(
+                                    createModCard(
+                                            file
+                                    )
+                            );
+
+                } else {
+
+                    contentList
+                            .getChildren()
+                            .add(
+                                    createFileCard(
+                                            file
+                                    )
+                            );
+                }
             }
 
             statusLabel.setText(
-                    mods.size()
-                            + " mod"
-                            + (mods.size() == 1 ? "" : "s")
+                    files.size()
+                            + " "
+                            + statusName
+                            + (
+                            files.size() == 1
+                                    ? ""
+                                    : "s"
+                    )
                             + " installed."
             );
 
@@ -295,9 +495,30 @@ public class ModsView extends VBox {
             e.printStackTrace();
 
             statusLabel.setText(
-                    "Failed to load installed mods."
+                    "Failed to load installed "
+                            + statusName
+                            + "s."
             );
         }
+    }
+
+    private boolean isValidContentFile(
+            Path file
+    ) {
+
+        String name =
+                file.getFileName()
+                        .toString()
+                        .toLowerCase();
+
+        return switch (selectedType) {
+
+            case MODS ->
+                    name.endsWith(".jar");
+
+            case RESOURCE_PACKS, SHADERS ->
+                    name.endsWith(".zip");
+        };
     }
 
     // =============================================================
@@ -312,9 +533,228 @@ public class ModsView extends VBox {
                 mod.getFileName()
                         .toString();
 
-        // =========================================================
-        // ICON
-        // =========================================================
+        ImageView icon =
+                createIcon();
+
+        VBox iconBox =
+                createIconBox();
+
+        iconBox.getChildren().add(
+                icon
+        );
+
+        loadJarIcon(
+                mod,
+                icon
+        );
+
+        Label title =
+                new Label(
+                        cleanName(
+                                filename
+                        )
+                );
+
+        title.getStyleClass().add(
+                "instance-name"
+        );
+
+        Label metadata =
+                new Label(
+                        "JAR • "
+                                + formatSize(
+                                getFileSize(mod)
+                        )
+                );
+
+        metadata.getStyleClass().add(
+                "instance-loader"
+        );
+
+        VBox information =
+                new VBox(
+                        5,
+                        title,
+                        metadata
+                );
+
+        HBox.setHgrow(
+                information,
+                Priority.ALWAYS
+        );
+
+        Button removeButton =
+                new Button(
+                        "REMOVE"
+                );
+
+        removeButton.getStyleClass().add(
+                "secondary-button"
+        );
+
+        removeButton.setOnAction(
+                event ->
+                        removeFile(
+                                mod
+                        )
+        );
+
+        HBox row =
+                new HBox(
+                        16,
+                        iconBox,
+                        information,
+                        removeButton
+                );
+
+        row.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        VBox card =
+                new VBox(
+                        row
+                );
+
+        card.setPadding(
+                new Insets(
+                        16,
+                        18,
+                        16,
+                        18
+                )
+        );
+
+        card.getStyleClass().add(
+                "instance-card"
+        );
+
+        return card;
+    }
+
+    // =============================================================
+    // RESOURCE PACK / SHADER CARD
+    // =============================================================
+
+    private VBox createFileCard(
+            Path file
+    ) {
+
+        String filename =
+                file.getFileName()
+                        .toString();
+
+        ImageView icon =
+                createIcon();
+
+        VBox iconBox =
+                createIconBox();
+
+        iconBox.getChildren().add(
+                icon
+        );
+
+        loadZipIcon(
+                file,
+                icon
+        );
+
+        Label title =
+                new Label(
+                        cleanName(
+                                filename
+                        )
+                );
+
+        title.getStyleClass().add(
+                "instance-name"
+        );
+
+        String typeName =
+                selectedType ==
+                        ContentType.RESOURCE_PACKS
+                        ? "RESOURCE PACK"
+                        : "SHADER";
+
+        Label metadata =
+                new Label(
+                        typeName
+                                + " • "
+                                + formatSize(
+                                getFileSize(file)
+                        )
+                );
+
+        metadata.getStyleClass().add(
+                "instance-loader"
+        );
+
+        VBox information =
+                new VBox(
+                        5,
+                        title,
+                        metadata
+                );
+
+        HBox.setHgrow(
+                information,
+                Priority.ALWAYS
+        );
+
+        Button removeButton =
+                new Button(
+                        "REMOVE"
+                );
+
+        removeButton.getStyleClass().add(
+                "secondary-button"
+        );
+
+        removeButton.setOnAction(
+                event ->
+                        removeFile(
+                                file
+                        )
+        );
+
+        HBox row =
+                new HBox(
+                        16,
+                        iconBox,
+                        information,
+                        removeButton
+                );
+
+        row.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
+        VBox card =
+                new VBox(
+                        row
+                );
+
+        card.setPadding(
+                new Insets(
+                        16,
+                        18,
+                        16,
+                        18
+                )
+        );
+
+        card.getStyleClass().add(
+                "instance-card"
+        );
+
+        return card;
+    }
+
+    // =============================================================
+    // ICON
+    // =============================================================
+
+    private ImageView createIcon() {
 
         ImageView icon =
                 new ImageView();
@@ -353,10 +793,13 @@ public class ModsView extends VBox {
                 clip
         );
 
+        return icon;
+    }
+
+    private VBox createIconBox() {
+
         VBox iconBox =
-                new VBox(
-                        icon
-                );
+                new VBox();
 
         iconBox.setAlignment(
                 Pos.CENTER
@@ -381,121 +824,11 @@ public class ModsView extends VBox {
                 "mod-icon-box"
         );
 
-        // ---------------------------------------------------------
-        // Load icon from JAR
-        // ---------------------------------------------------------
-
-        loadJarIcon(
-                mod,
-                icon
-        );
-
-        // =========================================================
-        // TITLE
-        // =========================================================
-
-        Label title =
-                new Label(
-                        cleanModName(
-                                filename
-                        )
-                );
-
-        title.getStyleClass().add(
-                "instance-name"
-        );
-
-        // =========================================================
-        // METADATA
-        // =========================================================
-
-        Label metadata =
-                new Label(
-                        "JAR • "
-                                + formatSize(
-                                getFileSize(mod)
-                        )
-                );
-
-        metadata.getStyleClass().add(
-                "instance-loader"
-        );
-
-        VBox information =
-                new VBox(
-                        5,
-                        title,
-                        metadata
-                );
-
-        HBox.setHgrow(
-                information,
-                Priority.ALWAYS
-        );
-
-        // =========================================================
-        // REMOVE
-        // =========================================================
-
-        Button removeButton =
-                new Button(
-                        "REMOVE"
-                );
-
-        removeButton.getStyleClass().add(
-                "secondary-button"
-        );
-
-        removeButton.setOnAction(
-                event ->
-                        removeMod(
-                                mod
-                        )
-        );
-
-        // =========================================================
-        // ROW
-        // =========================================================
-
-        HBox row =
-                new HBox(
-                        16,
-                        iconBox,
-                        information,
-                        removeButton
-                );
-
-        row.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        // =========================================================
-        // CARD
-        // =========================================================
-
-        VBox card =
-                new VBox(
-                        row
-                );
-
-        card.setPadding(
-                new Insets(
-                        16,
-                        18,
-                        16,
-                        18
-                )
-        );
-
-        card.getStyleClass().add(
-                "instance-card"
-        );
-
-        return card;
+        return iconBox;
     }
 
     // =============================================================
-    // LOAD ICON FROM JAR
+    // LOAD MOD ICON
     // =============================================================
 
     private void loadJarIcon(
@@ -519,8 +852,6 @@ public class ModsView extends VBox {
                                     );
 
                             if (iconPath == null) {
-
-
                                 return;
                             }
 
@@ -530,7 +861,6 @@ public class ModsView extends VBox {
                                     );
 
                             if (entry == null) {
-
                                 return;
                             }
 
@@ -548,25 +878,12 @@ public class ModsView extends VBox {
                             }
 
                             if (bufferedImage == null) {
-
-
                                 return;
                             }
 
-                            ByteArrayOutputStream output =
-                                    new ByteArrayOutputStream();
-
-                            ImageIO.write(
-                                    bufferedImage,
-                                    "png",
-                                    output
-                            );
-
                             Image image =
-                                    new Image(
-                                            new ByteArrayInputStream(
-                                                    output.toByteArray()
-                                            )
+                                    bufferedImageToImage(
+                                            bufferedImage
                                     );
 
                             Platform.runLater(() -> {
@@ -582,7 +899,6 @@ public class ModsView extends VBox {
 
                     } catch (Throwable ex) {
 
-
                         ex.printStackTrace();
                     }
                 });
@@ -595,7 +911,203 @@ public class ModsView extends VBox {
     }
 
     // =============================================================
-    // FIND ICON PATH
+    // LOAD ZIP ICON
+    // =============================================================
+
+    private void loadZipIcon(
+            Path file,
+            ImageView imageView
+    ) {
+
+        Thread thread =
+                new Thread(() -> {
+
+                    try {
+
+                        try (ZipFile zip =
+                                     new ZipFile(
+                                             file.toFile()
+                                     )) {
+
+                            String iconPath =
+                                    findZipIconPath(
+                                            zip
+                                    );
+
+                            if (iconPath == null) {
+                                return;
+                            }
+
+                            ZipEntry entry =
+                                    zip.getEntry(
+                                            iconPath
+                                    );
+
+                            if (entry == null) {
+                                return;
+                            }
+
+                            BufferedImage bufferedImage;
+
+                            try (InputStream input =
+                                         zip.getInputStream(
+                                                 entry
+                                         )) {
+
+                                bufferedImage =
+                                        ImageIO.read(
+                                                input
+                                        );
+                            }
+
+                            if (bufferedImage == null) {
+                                return;
+                            }
+
+                            Image image =
+                                    bufferedImageToImage(
+                                            bufferedImage
+                                    );
+
+                            Platform.runLater(() -> {
+
+                                if (!image.isError()) {
+
+                                    imageView.setImage(
+                                            image
+                                    );
+                                }
+                            });
+                        }
+
+                    } catch (Throwable ex) {
+
+                        ex.printStackTrace();
+                    }
+                });
+
+        thread.setDaemon(
+                true
+        );
+
+        thread.start();
+    }
+
+    private Image bufferedImageToImage(
+            BufferedImage bufferedImage
+    ) throws IOException {
+
+        ByteArrayOutputStream output =
+                new ByteArrayOutputStream();
+
+        ImageIO.write(
+                bufferedImage,
+                "png",
+                output
+        );
+
+        return new Image(
+                new ByteArrayInputStream(
+                        output.toByteArray()
+                )
+        );
+    }
+
+    // =============================================================
+    // FIND ZIP ICON
+    // =============================================================
+
+    private String findZipIconPath(
+            ZipFile zip
+    ) {
+
+        if (selectedType ==
+                ContentType.RESOURCE_PACKS) {
+
+            String[] resourcePackIcons = {
+                    "pack.png",
+                    "assets/minecraft/pack.png",
+                    "icon.png"
+            };
+
+            for (String path :
+                    resourcePackIcons) {
+
+                ZipEntry entry =
+                        zip.getEntry(
+                                path
+                        );
+
+                if (entry != null
+                        && !entry.isDirectory()) {
+
+                    return path;
+                }
+            }
+
+            return findAnyPng(
+                    zip
+            );
+        }
+
+        String[] shaderIcons = {
+                "shaders/icon.png",
+                "icon.png",
+                "preview.png",
+                "thumbnail.png"
+        };
+
+        for (String path :
+                shaderIcons) {
+
+            ZipEntry entry =
+                    zip.getEntry(
+                            path
+                    );
+
+            if (entry != null
+                    && !entry.isDirectory()) {
+
+                return path;
+            }
+        }
+
+        return findAnyPng(
+                zip
+        );
+    }
+
+    private String findAnyPng(
+            ZipFile zip
+    ) {
+
+        var entries =
+                zip.entries();
+
+        while (entries.hasMoreElements()) {
+
+            ZipEntry entry =
+                    entries.nextElement();
+
+            if (entry.isDirectory()) {
+                continue;
+            }
+
+            String name =
+                    entry.getName()
+                            .toLowerCase();
+
+            if (name.endsWith(".png")) {
+
+                return entry.getName();
+            }
+        }
+
+        return null;
+    }
+
+    // =============================================================
+    // FIND JAR ICON
     // =============================================================
 
     private String findIconPath(
@@ -619,19 +1131,15 @@ public class ModsView extends VBox {
                     String json =
                             new String(
                                     input.readAllBytes(),
-                                    java.nio.charset.StandardCharsets.UTF_8
+                                    StandardCharsets.UTF_8
                             );
 
-                    // -------------------------------------------------
-                    // Fabric's "icon" field
-                    // -------------------------------------------------
-
-                    java.util.regex.Pattern pattern =
-                            java.util.regex.Pattern.compile(
+                    Pattern pattern =
+                            Pattern.compile(
                                     "\"icon\"\\s*:\\s*\"([^\"]+)\""
                             );
 
-                    java.util.regex.Matcher matcher =
+                    Matcher matcher =
                             pattern.matcher(
                                     json
                             );
@@ -642,22 +1150,12 @@ public class ModsView extends VBox {
                                 matcher.group(1);
 
                         if (jar.getJarEntry(icon) != null) {
-
                             return icon;
                         }
                     }
 
-                    // -------------------------------------------------
-                    // Fabric also supports icon as an object:
-                    //
-                    // "icon": {
-                    //     "16": "assets/mod/icon.png",
-                    //     "32": "assets/mod/icon.png"
-                    // }
-                    // -------------------------------------------------
-
                     pattern =
-                            java.util.regex.Pattern.compile(
+                            Pattern.compile(
                                     "\"(?:16|32|64|128)\"\\s*:\\s*\"([^\"]+)\""
                             );
 
@@ -672,7 +1170,6 @@ public class ModsView extends VBox {
                                 matcher.group(1);
 
                         if (jar.getJarEntry(icon) != null) {
-
                             return icon;
                         }
                     }
@@ -684,10 +1181,6 @@ public class ModsView extends VBox {
             ex.printStackTrace();
         }
 
-        // =========================================================
-        // FALLBACK
-        // =========================================================
-
         String[] commonNames = {
                 "icon.png",
                 "icon.jpg",
@@ -695,10 +1188,10 @@ public class ModsView extends VBox {
                 "assets/icon.png"
         };
 
-        for (String name : commonNames) {
+        for (String name :
+                commonNames) {
 
             if (jar.getJarEntry(name) != null) {
-
                 return name;
             }
         }
@@ -707,40 +1200,20 @@ public class ModsView extends VBox {
     }
 
     // =============================================================
-    // CLEAN MOD NAME
-    // =============================================================
-
-    private String cleanModName(
-            String filename
-    ) {
-
-        if (filename.toLowerCase().endsWith(".jar")) {
-
-            filename =
-                    filename.substring(
-                            0,
-                            filename.length() - 4
-                    );
-        }
-
-        return filename;
-    }
-
-    // =============================================================
     // REMOVE
     // =============================================================
 
-    private void removeMod(
-            Path mod
+    private void removeFile(
+            Path file
     ) {
 
         try {
 
             Files.deleteIfExists(
-                    mod
+                    file
             );
 
-            loadInstalledMods();
+            loadInstalledContent();
 
         } catch (IOException e) {
 
@@ -748,10 +1221,33 @@ public class ModsView extends VBox {
 
             statusLabel.setText(
                     "Failed to remove "
-                            + mod.getFileName()
+                            + file.getFileName()
                             + "."
             );
         }
+    }
+
+    // =============================================================
+    // NAME
+    // =============================================================
+
+    private String cleanName(
+            String filename
+    ) {
+
+        String lower =
+                filename.toLowerCase();
+
+        if (lower.endsWith(".jar")
+                || lower.endsWith(".zip")) {
+
+            return filename.substring(
+                    0,
+                    filename.length() - 4
+            );
+        }
+
+        return filename;
     }
 
     // =============================================================

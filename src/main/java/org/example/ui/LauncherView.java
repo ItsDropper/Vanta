@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import org.example.launcher.instance.InstanceInstaller;
 import org.example.launcher.model.Instance;
 import org.example.launcher.model.InstancePreset;
+import org.example.launcher.modrinth.ModrinthContentType;
 import org.example.launcher.modrinth.ModrinthProject;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.LaunchService;
@@ -40,18 +41,27 @@ public class LauncherView {
     private final NotificationManager notifications;
 
     private Instance selectedInstance;
-    private BrowseModsView browseModsView;
 
     public LauncherView(Stage stage) {
 
-        root = new StackPane();
+        root =
+                new StackPane();
 
-        window = new BorderPane();
-        window.getStyleClass().add("launcher");
+        window =
+                new BorderPane();
 
-        root.getChildren().add(window);
+        window.getStyleClass().add(
+                "launcher"
+        );
 
-        notifications = new NotificationManager(root);
+        root.getChildren().add(
+                window
+        );
+
+        notifications =
+                new NotificationManager(
+                        root
+                );
 
         window.prefWidthProperty().bind(
                 root.widthProperty()
@@ -69,10 +79,16 @@ public class LauncherView {
                 root.heightProperty()
         );
 
-        Rectangle clip = new Rectangle();
+        Rectangle clip =
+                new Rectangle();
 
-        clip.setArcWidth(24);
-        clip.setArcHeight(24);
+        clip.setArcWidth(
+                24
+        );
+
+        clip.setArcHeight(
+                24
+        );
 
         clip.widthProperty().bind(
                 root.widthProperty()
@@ -82,13 +98,17 @@ public class LauncherView {
                 root.heightProperty()
         );
 
-        window.setClip(clip);
-
-        accountService = new AccountService();
-
-        launchService = new LaunchService(
-                accountService
+        window.setClip(
+                clip
         );
+
+        accountService =
+                new AccountService();
+
+        launchService =
+                new LaunchService(
+                        accountService
+                );
 
         TitleBar titleBar =
                 new TitleBar(
@@ -100,24 +120,34 @@ public class LauncherView {
                 titleBar
         );
 
-        sidebar = new Sidebar();
+        sidebar =
+                new Sidebar();
 
         BorderPane.setMargin(
                 sidebar,
-                new Insets(16)
+                new Insets(
+                        16
+                )
         );
 
         window.setLeft(
                 sidebar
         );
 
-        content = new StackPane();
+        content =
+                new StackPane();
+
         content.getStyleClass().add(
                 "content"
         );
 
         content.setPadding(
-                new Insets(16, 16, 16, 0)
+                new Insets(
+                        16,
+                        16,
+                        16,
+                        0
+                )
         );
 
         window.setCenter(
@@ -145,7 +175,7 @@ public class LauncherView {
 
         createInstanceTypeView =
                 new CreateInstanceTypeView(
-                        this::showInstances,
+                        this::showCreateInstanceView,
                         this::showCustomCreateInstanceView,
                         this::showImportInstanceView,
                         this::showPresetInstanceView,
@@ -203,6 +233,10 @@ public class LauncherView {
         }
     }
 
+    // =============================================================
+    // INSTALLED CONTENT
+    // =============================================================
+
     private void showInstanceMods(
             Instance instance
     ) {
@@ -213,8 +247,15 @@ public class LauncherView {
         ModsView view =
                 new ModsView(
                         instance,
-                        () -> showBrowseMods(instance),
-                        () -> showInstanceSettings(instance)
+                        () ->
+                                showBrowseContent(
+                                        instance,
+                                        ModrinthContentType.MOD
+                                ),
+                        () ->
+                                showInstanceSettings(
+                                        instance
+                                )
                 );
 
         content.getChildren().setAll(
@@ -222,24 +263,63 @@ public class LauncherView {
         );
     }
 
-    private void showBrowseMods(
-            Instance instance
+    // =============================================================
+    // BROWSE CONTENT
+    // =============================================================
+
+    private void showBrowseContent(
+            Instance instance,
+            ModrinthContentType contentType
     ) {
 
-        browseModsView =
-                new BrowseModsView(
+        ContentBrowserView view =
+                new ContentBrowserView(
                         instance,
-                        () -> showInstanceMods(instance),
-                        project -> showModDetails(
-                                instance,
-                                project
-                        )
+                        contentType,
+                        () ->
+                                showInstanceMods(
+                                        instance
+                                ),
+                        project ->
+                                showContentDetails(
+                                        instance,
+                                        project,
+                                        contentType
+                                )
                 );
 
         content.getChildren().setAll(
-                browseModsView
+                view
         );
     }
+
+    // =============================================================
+    // CONTENT DETAILS
+    // =============================================================
+
+    private void showContentDetails(
+            Instance instance,
+            ModrinthProject project,
+            ModrinthContentType contentType
+    ) {
+
+        content.getChildren().setAll(
+                new ModDetailsView(
+                        instance,
+                        project.getProjectId(),
+                        contentType,
+                        () ->
+                                showBrowseContent(
+                                        instance,
+                                        contentType
+                                )
+                )
+        );
+    }
+
+    // =============================================================
+    // CREATE INSTANCE
+    // =============================================================
 
     private void showCreateInstanceView() {
 
@@ -363,7 +443,8 @@ public class LauncherView {
                                 );
 
                                 System.out.println(
-                                        "Resolving preset mod: " + modSlug
+                                        "Resolving preset mod: "
+                                                + modSlug
                                 );
 
                                 ModrinthProject project =
@@ -446,17 +527,27 @@ public class LauncherView {
         return message;
     }
 
+    // =============================================================
+    // MODRINTH MODPACKS
+    // =============================================================
+
     private void showModrinthModpackView() {
 
-        // Modrinth modpack browsing will be implemented here.
-    }
-
-    private void showInstances() {
+        ModpackBrowserView modpackBrowserView =
+                new ModpackBrowserView(
+                        "1.21.11",
+                        this::showCreateInstanceView,
+                        this::instanceCreated
+                );
 
         content.getChildren().setAll(
-                instancesView
+                modpackBrowserView
         );
     }
+
+    // =============================================================
+    // INSTANCE
+    // =============================================================
 
     private void selectInstance(
             Instance instance
@@ -483,6 +574,17 @@ public class LauncherView {
         );
     }
 
+    private void showInstances() {
+
+        content.getChildren().setAll(
+                instancesView
+        );
+    }
+
+    // =============================================================
+    // INSTANCE SETTINGS
+    // =============================================================
+
     private void showInstanceSettings(
             Instance instance
     ) {
@@ -493,14 +595,24 @@ public class LauncherView {
         InstanceSettingsView instanceSettingsView =
                 new InstanceSettingsView(
                         instance,
-                        () -> showInstanceMods(instance),
-                        () -> showInstanceMods(instance)
+                        () ->
+                                showInstanceMods(
+                                        instance
+                                ),
+                        () ->
+                                showInstanceMods(
+                                        instance
+                                )
                 );
 
         content.getChildren().setAll(
                 instanceSettingsView
         );
     }
+
+    // =============================================================
+    // ACCOUNT
+    // =============================================================
 
     private void loadAccount() {
 
@@ -534,38 +646,18 @@ public class LauncherView {
         thread.start();
     }
 
+    // =============================================================
+    // ROOT
+    // =============================================================
+
     public Parent getRoot() {
 
         return root;
     }
 
-    private void showModDetails(
-            Instance instance,
-            ModrinthProject project
-    ) {
-
-        content.getChildren().setAll(
-                new ModDetailsView(
-                        instance,
-                        project.getProjectId(),
-                        () -> {
-
-                            if (browseModsView != null) {
-
-                                content.getChildren().setAll(
-                                        browseModsView
-                                );
-
-                            } else {
-
-                                showBrowseMods(
-                                        instance
-                                );
-                            }
-                        }
-                )
-        );
-    }
+    // =============================================================
+    // GLOBAL MOD DETAILS
+    // =============================================================
 
     private void showGlobalModDetails(
             String projectId
@@ -574,11 +666,11 @@ public class LauncherView {
         content.getChildren().setAll(
                 new ModDetailsView(
                         projectId,
-                        () -> content.getChildren().setAll(
-                                globalModsView
-                        )
+                        () ->
+                                content.getChildren().setAll(
+                                        globalModsView
+                                )
                 )
         );
     }
 }
-

@@ -28,6 +28,8 @@ import com.vladsch.flexmark.ast.StrongEmphasis;
 import com.vladsch.flexmark.ast.ThematicBreak;
 import com.vladsch.flexmark.parser.Parser;
 import com.vladsch.flexmark.util.data.MutableDataSet;
+import com.vladsch.flexmark.ast.HtmlInline;
+import com.vladsch.flexmark.ast.HtmlBlock;
 
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
@@ -41,6 +43,8 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+
+import static com.vladsch.flexmark.html.renderer.CoreNodeRenderer.renderHtmlBlock;
 
 public class MarkdownRenderer {
 
@@ -182,6 +186,14 @@ public class MarkdownRenderer {
             return divider;
         }
 
+        if (node instanceof HtmlBlock htmlBlock) {
+            return renderHtmlBlock(htmlBlock);
+        }
+
+        if (node instanceof HtmlInline htmlInline) {
+            return renderHtmlInlineBlock(htmlInline);
+        }
+
         return null;
     }
 
@@ -312,6 +324,101 @@ public class MarkdownRenderer {
         }
     }
 
+    private Node renderHtmlBlock(HtmlBlock htmlBlock) {
+        String html = htmlBlock.getChars().toString();
+
+        FlowPane flow = new FlowPane();
+        flow.setHgap(6);
+        flow.setVgap(6);
+        flow.setPrefWrapLength(850);
+        flow.setMaxWidth(Double.MAX_VALUE);
+        flow.getStyleClass().add("mod-description-paragraph");
+
+        renderHtmlImages(html, flow);
+
+        if (flow.getChildren().isEmpty()) {
+            return null;
+        }
+
+        return flow;
+    }
+
+    private Node renderHtmlInlineBlock(HtmlInline htmlInline) {
+        String html = htmlInline.getChars().toString();
+
+        FlowPane flow = new FlowPane();
+        flow.setHgap(6);
+        flow.setVgap(6);
+        flow.setPrefWrapLength(850);
+        flow.setMaxWidth(Double.MAX_VALUE);
+        flow.getStyleClass().add("mod-description-paragraph");
+
+        renderHtmlImages(html, flow);
+
+        if (flow.getChildren().isEmpty()) {
+            return null;
+        }
+
+        return flow;
+    }
+
+    private void renderHtmlImages(
+            String html,
+            FlowPane flow
+    ) {
+        if (html == null || html.isBlank()) {
+            return;
+        }
+
+        java.util.regex.Pattern pattern =
+                java.util.regex.Pattern.compile(
+                        "<img\\b[^>]*?\\bsrc\\s*=\\s*(?:\"([^\"]+)\"|'([^']+)'|([^\\s>]+))",
+                        java.util.regex.Pattern.CASE_INSENSITIVE
+                );
+
+        java.util.regex.Matcher matcher =
+                pattern.matcher(html);
+
+        while (matcher.find()) {
+            String imageUrl = matcher.group(1);
+
+            if (imageUrl == null) {
+                imageUrl = matcher.group(2);
+            }
+
+            if (imageUrl == null) {
+                imageUrl = matcher.group(3);
+            }
+
+            if (imageUrl == null || imageUrl.isBlank()) {
+                continue;
+            }
+
+            ImageView imageView = new ImageView();
+
+            imageView.setPreserveRatio(true);
+            imageView.setSmooth(true);
+            imageView.setCache(true);
+            imageView.setOpacity(0);
+            imageView.setCursor(javafx.scene.Cursor.HAND);
+
+            String finalImageUrl = imageUrl;
+
+            imageView.setOnMouseClicked(
+                    event -> openUrl(finalImageUrl)
+            );
+
+            loadImage(
+                    imageUrl,
+                    imageView
+            );
+
+            flow.getChildren().add(
+                    imageView
+            );
+        }
+    }
+
     // =============================================================
     // FLOW NODE
     // =============================================================
@@ -415,46 +522,48 @@ public class MarkdownRenderer {
 
         if (current instanceof Link link) {
 
-            /*
-             * This is the important fix.
-             *
-             * Modrinth commonly has:
-             *
-             * [image](https://img.shields.io/...)
-             *
-             * Flexmark parses this as:
-             *
-             * Link
-             *   └── Image
-             *
-             * Previously we converted the entire Link to a
-             * Hyperlink and therefore lost the image.
-             *
-             * If the link contains an Image, render the Image.
-             */
+            String url = link.getUrl().toString();
 
-            com.vladsch.flexmark.util.ast.Node child =
-                    link.getFirstChild();
+            // A normal Markdown image wrapped in a link:
+            // [![alt](image.png)](target)
+            if (containsImage(link)) {
+                renderFlowChildren(link.getFirstChild(), flow);
+                return;
+            }
 
-            boolean containsImage =
-                    containsImage(
-                            link
-                    );
+            // Modrinth descriptions also commonly use:
+            // [image](https://imgur.com/example.png)
+            //
+            // Treat image URLs as images instead of hyperlinks.
+            if (isImageUrl(url)) {
 
-            if (containsImage) {
+                ImageView imageView = new ImageView();
 
-                renderFlowChildren(
-                        child,
-                        flow
+                imageView.setFitWidth(100);
+                imageView.setFitHeight(BADGE_MAX_HEIGHT);
+                imageView.setPreserveRatio(true);
+                imageView.setSmooth(true);
+                imageView.setCache(true);
+
+                imageView.setCursor(
+                        javafx.scene.Cursor.HAND
+                );
+
+                imageView.setOnMouseClicked(
+                        event -> openUrl(url)
+                );
+
+                flow.getChildren().add(imageView);
+
+                loadImage(
+                        url,
+                        imageView
                 );
 
                 return;
             }
 
-            /*
-             * Normal text link.
-             */
-
+            // Normal hyperlink
             Hyperlink hyperlink =
                     new Hyperlink(
                             link.getText().toString()
@@ -464,18 +573,13 @@ public class MarkdownRenderer {
                     "mod-description-link"
             );
 
-            String url =
-                    link.getUrl().toString();
-
             hyperlink.setOnAction(
-                    event ->
-                            openUrl(url)
+                    event -> openUrl(url)
             );
 
             flow.getChildren().add(
                     hyperlink
             );
-
             return;
         }
 
@@ -489,6 +593,21 @@ public class MarkdownRenderer {
                     renderInlineImage(
                             image
                     )
+            );
+
+            return;
+        }
+
+        // ---------------------------------------------------------
+        // RAW HTML
+        // ---------------------------------------------------------
+
+        if (current instanceof HtmlInline html) {
+            String htmlText = html.getChars().toString();
+
+            renderHtmlImages(
+                    htmlText,
+                    flow
             );
 
             return;
@@ -564,6 +683,30 @@ public class MarkdownRenderer {
         );
 
         return imageView;
+    }
+
+    private String extractImageUrl(
+            String html
+    ) {
+
+        if (html == null
+                || html.isBlank()) {
+
+            return null;
+        }
+
+        java.util.regex.Matcher matcher =
+                java.util.regex.Pattern.compile(
+                                "<img\\b[^>]*\\bsrc\\s*=\\s*[\"']([^\"']+)[\"']",
+                                java.util.regex.Pattern.CASE_INSENSITIVE
+                        )
+                        .matcher(html);
+
+        if (!matcher.find()) {
+            return null;
+        }
+
+        return matcher.group(1);
     }
 
     // =============================================================
@@ -824,43 +967,41 @@ public class MarkdownRenderer {
 
                         Platform.runLater(() -> {
 
-                            imageView.setImage(
-                                    image
+                            imageView.setImage(image);
+
+                            System.out.println(
+                                    "[MarkdownRenderer] VIEW BEFORE: "
+                                            + imageView.getBoundsInParent()
+                                            + " fit="
+                                            + imageView.getFitWidth()
+                                            + "x"
+                                            + imageView.getFitHeight()
                             );
 
-                            double width =
-                                    image.getWidth();
+                            double width = image.getWidth();
+                            double height = image.getHeight();
 
-                            double height =
-                                    image.getHeight();
+                            if (width <= 0 || height <= 0) {
+                                return;
+                            }
 
                             /*
-                             * Small images/badges:
+                             * Small images / badges.
                              *
-                             * Limit their height so badges don't become
-                             * enormous.
+                             * Only set the height. With preserveRatio enabled,
+                             * JavaFX calculates the correct width automatically.
                              */
-
-                            if (height > 0
-                                    && height <= 100) {
-
-                                double scale =
-                                        BADGE_MAX_HEIGHT
-                                                / height;
+                            if (height <= 100) {
 
                                 imageView.setFitHeight(
                                         BADGE_MAX_HEIGHT
                                 );
 
                                 imageView.setFitWidth(
-                                        width * scale
+                                        0
                                 );
 
                             } else {
-
-                                /*
-                                 * Large screenshots.
-                                 */
 
                                 double finalWidth =
                                         Math.min(
@@ -877,9 +1018,7 @@ public class MarkdownRenderer {
                                 );
                             }
 
-                            imageView.setOpacity(
-                                    1
-                            );
+                            imageView.setOpacity(1);
                         });
 
                     } catch (Throwable ex) {
@@ -1361,5 +1500,33 @@ public class MarkdownRenderer {
         } catch (Exception ignored) {
             // Ignore unsupported/broken links.
         }
+    }
+    private boolean isImageUrl(String url) {
+
+        if (url == null || url.isBlank()) {
+            return false;
+        }
+
+        String cleanUrl =
+                url.toLowerCase();
+
+        int queryIndex =
+                cleanUrl.indexOf('?');
+
+        if (queryIndex >= 0) {
+            cleanUrl =
+                    cleanUrl.substring(
+                            0,
+                            queryIndex
+                    );
+        }
+
+        return cleanUrl.endsWith(".png")
+                || cleanUrl.endsWith(".jpg")
+                || cleanUrl.endsWith(".jpeg")
+                || cleanUrl.endsWith(".gif")
+                || cleanUrl.endsWith(".webp")
+                || cleanUrl.endsWith(".svg")
+                || cleanUrl.contains("imgur.com/");
     }
 }

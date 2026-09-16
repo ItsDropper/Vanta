@@ -27,6 +27,9 @@ public class ModrinthClient {
                         .connectTimeout(
                                 Duration.ofSeconds(10)
                         )
+                        .followRedirects(
+                                HttpClient.Redirect.NORMAL
+                        )
                         .build();
 
         mapper =
@@ -43,6 +46,7 @@ public class ModrinthClient {
 
         return search(
                 query,
+                ModrinthContentType.MOD,
                 null,
                 null
         );
@@ -54,6 +58,21 @@ public class ModrinthClient {
             String minecraftVersion
     ) throws IOException, InterruptedException {
 
+        return search(
+                query,
+                ModrinthContentType.MOD,
+                loader,
+                minecraftVersion
+        );
+    }
+
+    public ModrinthSearchResult search(
+            String query,
+            ModrinthContentType contentType,
+            String loader,
+            String minecraftVersion
+    ) throws IOException, InterruptedException {
+
         if (query == null || query.isBlank()) {
 
             throw new IllegalArgumentException(
@@ -61,11 +80,16 @@ public class ModrinthClient {
             );
         }
 
+        if (contentType == null) {
+            contentType = ModrinthContentType.MOD;
+        }
+
         String encodedQuery =
                 encode(query);
 
         String facets =
                 buildFacets(
+                        contentType,
                         loader,
                         minecraftVersion
                 );
@@ -114,8 +138,26 @@ public class ModrinthClient {
             String minecraftVersion
     ) throws IOException, InterruptedException {
 
+        return getMostDownloaded(
+                ModrinthContentType.MOD,
+                loader,
+                minecraftVersion
+        );
+    }
+
+    public ModrinthSearchResult getMostDownloaded(
+            ModrinthContentType contentType,
+            String loader,
+            String minecraftVersion
+    ) throws IOException, InterruptedException {
+
+        if (contentType == null) {
+            contentType = ModrinthContentType.MOD;
+        }
+
         String facets =
                 buildFacets(
+                        contentType,
                         loader,
                         minecraftVersion
                 );
@@ -160,17 +202,21 @@ public class ModrinthClient {
     // =============================================================
 
     private String buildFacets(
+            ModrinthContentType contentType,
             String loader,
             String minecraftVersion
     ) {
 
         StringBuilder facets =
                 new StringBuilder(
-                        "[[\"project_type:mod\"]"
+                        "[[\"project_type:"
+                                + contentType.getApiValue()
+                                + "\"]"
                 );
 
         if (loader != null
-                && !loader.isBlank()) {
+                && !loader.isBlank()
+                && contentType == ModrinthContentType.MOD) {
 
             facets.append(
                     ",[\"categories:"

@@ -1,17 +1,12 @@
 package org.example.launcher.service;
 
+import org.example.launcher.instance.DownloadUtil;
 import org.example.launcher.modrinth.*;
 import org.example.launcher.model.Instance;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,46 +15,29 @@ import java.util.Set;
 public class ModrinthService {
 
     private final ModrinthClient client;
-    private final HttpClient httpClient;
 
     public ModrinthService() {
-
-        client =
-                new ModrinthClient();
-
-        httpClient =
-                HttpClient.newHttpClient();
+        client = new ModrinthClient();
     }
 
     // =============================================================
-    // GLOBAL SEARCH
+    // GLOBAL MOD SEARCH
     // =============================================================
 
     public List<ModrinthProject> searchMods(
             String query
     ) throws IOException, InterruptedException {
 
-        if (query == null || query.isBlank()) {
-
-            throw new IllegalArgumentException(
-                    "Search query cannot be empty."
-            );
-        }
-
-        List<ModrinthSearchHit> hits =
-                client.search(
-                        query,
-                        null,
-                        null
-                ).getHits();
-
-        return resolveProjects(
-                hits
+        return search(
+                query,
+                ModrinthContentType.MOD,
+                null,
+                null
         );
     }
 
     // =============================================================
-    // INSTANCE SEARCH
+    // INSTANCE MOD SEARCH
     // =============================================================
 
     public List<ModrinthProject> searchMods(
@@ -68,34 +46,45 @@ public class ModrinthService {
     ) throws IOException, InterruptedException {
 
         if (instance == null) {
-
             throw new IllegalArgumentException(
                     "Instance cannot be null."
             );
         }
 
-        if (query == null || query.isBlank()) {
+        return search(
+                query,
+                ModrinthContentType.MOD,
+                normalizeLoader(instance.getLoader()),
+                instance.getMinecraftVersion()
+        );
+    }
 
+    // =============================================================
+    // GENERIC SEARCH
+    // =============================================================
+
+    public List<ModrinthProject> search(
+            String query,
+            ModrinthContentType contentType,
+            String loader,
+            String minecraftVersion
+    ) throws IOException, InterruptedException {
+
+        if (query == null || query.isBlank()) {
             throw new IllegalArgumentException(
                     "Search query cannot be empty."
             );
         }
 
-        String loader =
-                normalizeLoader(
-                        instance.getLoader()
-                );
-
         List<ModrinthSearchHit> hits =
                 client.search(
                         query,
+                        contentType,
                         loader,
-                        instance.getMinecraftVersion()
+                        minecraftVersion
                 ).getHits();
 
-        return resolveProjects(
-                hits
-        );
+        return resolveProjects(hits);
     }
 
     // =============================================================
@@ -107,87 +96,87 @@ public class ModrinthService {
     ) throws IOException, InterruptedException {
 
         if (instance == null) {
-
             throw new IllegalArgumentException(
                     "Instance cannot be null."
             );
         }
 
-        String loader =
-                normalizeLoader(
-                        instance.getLoader()
-                );
-
-        String minecraftVersion =
-                instance.getMinecraftVersion();
-
-        List<ModrinthSearchHit> hits =
-                client.getMostDownloadedMods(
-                        loader,
-                        minecraftVersion
-                ).getHits();
-
-        return resolveProjects(
-                hits
+        return getMostDownloaded(
+                ModrinthContentType.MOD,
+                normalizeLoader(instance.getLoader()),
+                instance.getMinecraftVersion()
         );
     }
 
     // =============================================================
-    // RESOLVE SEARCH HITS
+    // MOST DOWNLOADED
     // =============================================================
 
-    private List<ModrinthProject> resolveProjects(
-            List<ModrinthSearchHit> hits
+    public List<ModrinthProject> getMostDownloaded(
+            ModrinthContentType contentType,
+            String loader,
+            String minecraftVersion
     ) throws IOException, InterruptedException {
 
-        List<ModrinthProject> projects =
-                new ArrayList<>();
+        List<ModrinthSearchHit> hits =
+                client.getMostDownloaded(
+                        contentType,
+                        loader,
+                        minecraftVersion
+                ).getHits();
 
-        if (hits == null
-                || hits.isEmpty()) {
+        return resolveProjects(hits);
+    }
 
-            return projects;
-        }
+    // =============================================================
+    // RESOURCE PACK SEARCH
+    // =============================================================
 
-        for (
-                ModrinthSearchHit hit
-                : hits
-        ) {
+    public List<ModrinthProject> searchResourcePacks(
+            String query,
+            String minecraftVersion
+    ) throws IOException, InterruptedException {
 
-            if (hit == null) {
-                continue;
-            }
+        return search(
+                query,
+                ModrinthContentType.RESOURCE_PACK,
+                null,
+                minecraftVersion
+        );
+    }
 
-            String projectId =
-                    hit.getProjectId();
+    // =============================================================
+    // SHADER SEARCH
+    // =============================================================
 
-            if (projectId == null
-                    || projectId.isBlank()) {
+    public List<ModrinthProject> searchShaders(
+            String query,
+            String minecraftVersion
+    ) throws IOException, InterruptedException {
 
-                continue;
-            }
+        return search(
+                query,
+                ModrinthContentType.SHADER,
+                null,
+                minecraftVersion
+        );
+    }
 
-            try {
+    // =============================================================
+    // MODPACK SEARCH
+    // =============================================================
 
-                ModrinthProject project =
-                        client.getProject(
-                                projectId
-                        );
+    public List<ModrinthProject> searchModpacks(
+            String query,
+            String minecraftVersion
+    ) throws IOException, InterruptedException {
 
-                if (project != null) {
-
-                    projects.add(
-                            project
-                    );
-                }
-
-            } catch (IOException ex) {
-
-                ex.printStackTrace();
-            }
-        }
-
-        return projects;
+        return search(
+                query,
+                ModrinthContentType.MODPACK,
+                null,
+                minecraftVersion
+        );
     }
 
     // =============================================================
@@ -199,7 +188,6 @@ public class ModrinthService {
     ) throws IOException, InterruptedException {
 
         if (slug == null || slug.isBlank()) {
-
             throw new IllegalArgumentException(
                     "Modrinth project slug cannot be empty."
             );
@@ -218,23 +206,30 @@ public class ModrinthService {
     ) throws IOException, InterruptedException {
 
         if (instance == null) {
-
             throw new IllegalArgumentException(
                     "Instance cannot be null."
             );
         }
 
         if (project == null) {
-
             throw new IllegalArgumentException(
                     "Project cannot be null."
+            );
+        }
+
+        if (!ModrinthContentType.MOD
+                .getApiValue()
+                .equals(project.getProjectType())) {
+
+            throw new IOException(
+                    "Project is not a mod."
             );
         }
 
         Set<String> resolvingProjects =
                 new HashSet<>();
 
-        return installProject(
+        return installModProject(
                 instance,
                 project.getProjectId(),
                 resolvingProjects
@@ -242,10 +237,10 @@ public class ModrinthService {
     }
 
     // =============================================================
-    // INSTALL PROJECT
+    // INSTALL MOD PROJECT
     // =============================================================
 
-    private Path installProject(
+    private Path installModProject(
             Instance instance,
             String projectId,
             Set<String> resolvingProjects
@@ -259,13 +254,7 @@ public class ModrinthService {
             );
         }
 
-        /*
-         * Prevent dependency loops such as:
-         *
-         * A -> B -> A
-         */
         if (!resolvingProjects.add(projectId)) {
-
             throw new IOException(
                     "Circular Modrinth dependency detected: "
                             + projectId
@@ -282,14 +271,8 @@ public class ModrinthService {
             String minecraftVersion =
                     instance.getMinecraftVersion();
 
-            // -----------------------------------------------------
-            // GET VERSIONS
-            // -----------------------------------------------------
-
             List<ModrinthVersion> versions =
-                    client.getVersions(
-                            projectId
-                    );
+                    client.getVersions(projectId);
 
             ModrinthVersion compatibleVersion =
                     findCompatibleVersion(
@@ -299,9 +282,8 @@ public class ModrinthService {
                     );
 
             if (compatibleVersion == null) {
-
                 throw new IOException(
-                        "No compatible version found for dependency "
+                        "No compatible version found for "
                                 + projectId
                                 + " for Minecraft "
                                 + minecraftVersion
@@ -319,45 +301,30 @@ public class ModrinthService {
 
             if (dependencies != null) {
 
-                for (
-                        ModrinthDependency dependency
-                        : dependencies
-                ) {
+                for (ModrinthDependency dependency
+                        : dependencies) {
 
                     if (dependency == null) {
                         continue;
                     }
 
-                    /*
-                     * Incompatible dependencies are never
-                     * automatically installed.
-                     */
                     if (dependency.isIncompatible()) {
                         continue;
                     }
 
-                    /*
-                     * Optional dependencies are deliberately
-                     * not installed automatically.
-                     */
                     if (dependency.isOptional()) {
                         continue;
                     }
 
-                    /*
-                     * Required dependency must have a
-                     * Modrinth project ID.
-                     */
                     String dependencyProjectId =
                             dependency.getProjectId();
 
                     if (dependencyProjectId == null
                             || dependencyProjectId.isBlank()) {
-
                         continue;
                     }
 
-                    installProject(
+                    installModProject(
                             instance,
                             dependencyProjectId,
                             resolvingProjects
@@ -366,7 +333,7 @@ public class ModrinthService {
             }
 
             // -----------------------------------------------------
-            // FIND FILE
+            // FILE
             // -----------------------------------------------------
 
             ModrinthFile file =
@@ -375,62 +342,16 @@ public class ModrinthService {
                     );
 
             if (file == null) {
-
                 throw new IOException(
                         "Modrinth version has no downloadable file."
                 );
             }
 
-            // -----------------------------------------------------
-            // MODS DIRECTORY
-            // -----------------------------------------------------
-
-            Path modsDirectory =
-                    instance.getDirectory()
-                            .resolve("mods");
-
-            Files.createDirectories(
-                    modsDirectory
-            );
-
-            // -----------------------------------------------------
-            // FILENAME
-            // -----------------------------------------------------
-
-            String filename =
-                    sanitizeFilename(
-                            file.getFilename()
-                    );
-
-            Path destination =
-                    modsDirectory.resolve(
-                            filename
-                    );
-
-            // -----------------------------------------------------
-            // DUPLICATE CHECK
-            // -----------------------------------------------------
-
-            if (Files.exists(destination)) {
-
-                System.out.println(
-                        "Skipping already installed mod: "
-                                + filename
-                );
-
-                return destination;
-            }
-
-            // -----------------------------------------------------
-            // DOWNLOAD
-            // -----------------------------------------------------
-
-            downloadFile(
+            return installFile(
                     file,
-                    destination
+                    instance.getDirectory()
+                            .resolve("mods")
             );
-
-            return destination;
 
         } finally {
 
@@ -441,7 +362,206 @@ public class ModrinthService {
     }
 
     // =============================================================
-    // FIND COMPATIBLE VERSION
+    // INSTALL RESOURCE PACK
+    // =============================================================
+
+    public Path installResourcePack(
+            Instance instance,
+            ModrinthProject project
+    ) throws IOException, InterruptedException {
+
+        return installContent(
+                instance,
+                project,
+                ModrinthContentType.RESOURCE_PACK,
+                "resourcepacks"
+        );
+    }
+
+    // =============================================================
+    // INSTALL SHADER
+    // =============================================================
+
+    public Path installShader(
+            Instance instance,
+            ModrinthProject project
+    ) throws IOException, InterruptedException {
+
+        return installContent(
+                instance,
+                project,
+                ModrinthContentType.SHADER,
+                "shaderpacks"
+        );
+    }
+
+    // =============================================================
+    // INSTALL CONTENT
+    // =============================================================
+
+    private Path installContent(
+            Instance instance,
+            ModrinthProject project,
+            ModrinthContentType contentType,
+            String directoryName
+    ) throws IOException, InterruptedException {
+
+        if (instance == null) {
+            throw new IllegalArgumentException(
+                    "Instance cannot be null."
+            );
+        }
+
+        if (project == null) {
+            throw new IllegalArgumentException(
+                    "Project cannot be null."
+            );
+        }
+
+        if (!contentType.getApiValue()
+                .equals(project.getProjectType())) {
+
+            throw new IOException(
+                    "Project is not a "
+                            + contentType.getDisplayName()
+                            + "."
+            );
+        }
+
+        List<ModrinthVersion> versions =
+                client.getVersions(
+                        project.getProjectId()
+                );
+
+        ModrinthVersion compatibleVersion =
+                findContentVersion(
+                        versions,
+                        instance.getMinecraftVersion()
+                );
+
+        if (compatibleVersion == null) {
+            throw new IOException(
+                    "No compatible "
+                            + contentType.getDisplayName()
+                            + " version found for Minecraft "
+                            + instance.getMinecraftVersion()
+            );
+        }
+
+        ModrinthFile file =
+                findPrimaryFile(
+                        compatibleVersion
+                );
+
+        if (file == null) {
+            throw new IOException(
+                    "Modrinth version has no downloadable file."
+            );
+        }
+
+        return installFile(
+                file,
+                instance.getDirectory()
+                        .resolve(directoryName)
+        );
+    }
+
+    // =============================================================
+    // INSTALL FILE
+    // =============================================================
+
+    private Path installFile(
+            ModrinthFile file,
+            Path directory
+    ) throws IOException {
+
+        if (file.getUrl() == null
+                || file.getUrl().isBlank()) {
+
+            throw new IOException(
+                    "Modrinth file has no download URL."
+            );
+        }
+
+        Files.createDirectories(directory);
+
+        String filename =
+                sanitizeFilename(
+                        file.getFilename()
+                );
+
+        Path destination =
+                directory.resolve(filename);
+
+        if (Files.exists(destination)) {
+            return destination;
+        }
+
+        try {
+            DownloadUtil.downloadFile(
+                    file.getUrl(),
+                    destination
+            );
+        } catch (Exception e) {
+            throw new IOException(
+                    "Failed to download Modrinth file: "
+                            + file.getFilename(),
+                    e
+            );
+        }
+
+        return destination;
+    }
+
+    // =============================================================
+    // RESOLVE SEARCH HITS
+    // =============================================================
+
+    private List<ModrinthProject> resolveProjects(
+            List<ModrinthSearchHit> hits
+    ) throws IOException, InterruptedException {
+
+        List<ModrinthProject> projects =
+                new ArrayList<>();
+
+        if (hits == null || hits.isEmpty()) {
+            return projects;
+        }
+
+        for (ModrinthSearchHit hit : hits) {
+
+            if (hit == null) {
+                continue;
+            }
+
+            String projectId =
+                    hit.getProjectId();
+
+            if (projectId == null
+                    || projectId.isBlank()) {
+                continue;
+            }
+
+            try {
+
+                ModrinthProject project =
+                        client.getProject(projectId);
+
+                if (project != null) {
+                    projects.add(project);
+                }
+
+            } catch (IOException ignored) {
+                // One broken project should not destroy
+                // the entire search result.
+            }
+        }
+
+        return projects;
+    }
+
+    // =============================================================
+    // FIND MOD VERSION
     // =============================================================
 
     private ModrinthVersion findCompatibleVersion(
@@ -452,13 +572,8 @@ public class ModrinthService {
 
         if (versions == null
                 || versions.isEmpty()) {
-
             return null;
         }
-
-        // ---------------------------------------------------------
-        // PREFER RELEASE
-        // ---------------------------------------------------------
 
         ModrinthVersion release =
                 versions.stream()
@@ -481,16 +596,57 @@ public class ModrinthService {
             return release;
         }
 
-        // ---------------------------------------------------------
-        // FALLBACK
-        // ---------------------------------------------------------
-
         return versions.stream()
                 .filter(version ->
                         isCompatible(
                                 version,
                                 minecraftVersion,
                                 loader
+                        )
+                )
+                .findFirst()
+                .orElse(null);
+    }
+
+    // =============================================================
+    // FIND RESOURCE PACK / SHADER VERSION
+    // =============================================================
+
+    private ModrinthVersion findContentVersion(
+            List<ModrinthVersion> versions,
+            String minecraftVersion
+    ) {
+
+        if (versions == null
+                || versions.isEmpty()) {
+            return null;
+        }
+
+        ModrinthVersion release =
+                versions.stream()
+                        .filter(version ->
+                                isGameVersionCompatible(
+                                        version,
+                                        minecraftVersion
+                                )
+                        )
+                        .filter(version ->
+                                "release".equalsIgnoreCase(
+                                        version.getVersionType()
+                                )
+                        )
+                        .findFirst()
+                        .orElse(null);
+
+        if (release != null) {
+            return release;
+        }
+
+        return versions.stream()
+                .filter(version ->
+                        isGameVersionCompatible(
+                                version,
+                                minecraftVersion
                         )
                 )
                 .findFirst()
@@ -507,16 +663,10 @@ public class ModrinthService {
             String loader
     ) {
 
-        if (version == null) {
-            return false;
-        }
-
-        if (version.getGameVersions() == null
-                || !version.getGameVersions()
-                .contains(
-                        minecraftVersion
-                )) {
-
+        if (!isGameVersionCompatible(
+                version,
+                minecraftVersion
+        )) {
             return false;
         }
 
@@ -526,12 +676,19 @@ public class ModrinthService {
 
         return version.getLoaders()
                 .stream()
-                .map(
-                        this::normalizeLoader
-                )
-                .anyMatch(
-                        loader::equals
-                );
+                .map(this::normalizeLoader)
+                .anyMatch(loader::equals);
+    }
+
+    private boolean isGameVersionCompatible(
+            ModrinthVersion version,
+            String minecraftVersion
+    ) {
+
+        return version != null
+                && version.getGameVersions() != null
+                && version.getGameVersions()
+                .contains(minecraftVersion);
     }
 
     // =============================================================
@@ -545,97 +702,16 @@ public class ModrinthService {
         if (version == null
                 || version.getFiles() == null
                 || version.getFiles().isEmpty()) {
-
             return null;
         }
 
         return version.getFiles()
                 .stream()
-                .filter(
-                        ModrinthFile::isPrimary
-                )
+                .filter(ModrinthFile::isPrimary)
                 .findFirst()
                 .orElse(
                         version.getFiles().get(0)
                 );
-    }
-
-    // =============================================================
-    // DOWNLOAD
-    // =============================================================
-
-    private void downloadFile(
-            ModrinthFile file,
-            Path destination
-    ) throws IOException, InterruptedException {
-
-        if (file.getUrl() == null
-                || file.getUrl().isBlank()) {
-
-            throw new IOException(
-                    "Modrinth file has no download URL."
-            );
-        }
-
-        HttpRequest request =
-                HttpRequest.newBuilder(
-                                URI.create(
-                                        file.getUrl()
-                                )
-                        )
-                        .GET()
-                        .header(
-                                "User-Agent",
-                                "VantaLauncher/1.0"
-                        )
-                        .build();
-
-        HttpResponse<InputStream> response =
-                httpClient.send(
-                        request,
-                        HttpResponse.BodyHandlers
-                                .ofInputStream()
-                );
-
-        if (response.statusCode() < 200
-                || response.statusCode() >= 300) {
-
-            response.body().close();
-
-            throw new IOException(
-                    "Modrinth file download failed: HTTP "
-                            + response.statusCode()
-            );
-        }
-
-        /*
-         * Download to a temporary file first.
-         *
-         * This prevents a partially downloaded JAR from
-         * being left in the mods directory if the connection
-         * dies halfway through.
-         */
-        Path temporaryFile =
-                destination.resolveSibling(
-                        destination.getFileName()
-                                + ".download"
-                );
-
-        try (InputStream input =
-                     response.body()) {
-
-            Files.copy(
-                    input,
-                    temporaryFile,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
-        }
-
-        Files.move(
-                temporaryFile,
-                destination,
-                StandardCopyOption.REPLACE_EXISTING
-        );
     }
 
     // =============================================================

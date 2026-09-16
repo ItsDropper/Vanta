@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 2,
+  "timestamp": 1789484890453,
+  "modsCount": 1,
+  "status": "CLOSED_WITHOUT_CRASH_AFTER_JOIN",
+  "mods": [
+    {
+      "jarName": "fabric-loader-0.19.5.jar (modloader)",
+      "modId": "fabric",
+      "name": "fabric",
+      "version": "fabric-loader-0.19.5.jar",
+      "mixinConfigs": [],
+      "jarJarMods": []
+    }
+  ]
+}
