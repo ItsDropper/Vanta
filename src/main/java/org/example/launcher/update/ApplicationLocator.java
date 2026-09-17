@@ -1,5 +1,7 @@
 package org.example.launcher.update;
 
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public final class ApplicationLocator {
@@ -10,7 +12,6 @@ public final class ApplicationLocator {
     public static Path getApplicationDirectory() {
 
         try {
-
             Path location =
                     Path.of(
                                     ApplicationLocator.class
@@ -22,40 +23,32 @@ public final class ApplicationLocator {
                             .toAbsolutePath()
                             .normalize();
 
-            Path appDirectory =
-                    location;
+            Path appDirectory = Files.isRegularFile(location)
+                    ? location.getParent()
+                    : location;
 
             while (appDirectory != null) {
 
                 Path executable =
-                        appDirectory.resolve(
-                                "Vanta.exe"
-                        );
+                        appDirectory.resolve("Vanta.exe");
 
                 Path runtime =
-                        appDirectory.resolve(
-                                "runtime"
-                        );
+                        appDirectory.resolve("runtime");
 
-                if (java.nio.file.Files.isRegularFile(
-                        executable
-                ) && java.nio.file.Files.isDirectory(
-                        runtime
-                )) {
+                if (Files.isRegularFile(executable)
+                        && Files.isDirectory(runtime)) {
 
                     return appDirectory;
                 }
 
-                appDirectory =
-                        appDirectory.getParent();
+                appDirectory = appDirectory.getParent();
             }
 
             throw new IllegalStateException(
                     "Could not locate Vanta installation."
             );
 
-        } catch (Exception e) {
-
+        } catch (URISyntaxException e) {
             throw new IllegalStateException(
                     "Failed to locate Vanta installation.",
                     e
@@ -63,3 +56,4 @@ public final class ApplicationLocator {
         }
     }
 }
+

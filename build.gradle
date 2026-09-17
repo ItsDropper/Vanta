@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'org.example'
-version = '1.0.3'
+version = '1.1.0'
 
 repositories {
     mavenCentral()
@@ -72,6 +72,8 @@ shadowJar {
 }
 
 tasks.register('updaterJar', Jar) {
+    dependsOn tasks.named('classes')
+
     archiveBaseName = 'VantaUpdater'
     archiveVersion = project.version.toString()
 

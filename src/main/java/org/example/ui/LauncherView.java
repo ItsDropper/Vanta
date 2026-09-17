@@ -127,7 +127,6 @@ public class LauncherView {
                 titleBar
         );
 
-
         sidebar =
                 new Sidebar();
 
@@ -518,8 +517,7 @@ public class LauncherView {
 
         while (current.getCause() != null) {
 
-            current =
-                    current.getCause();
+            current = current.getCause();
         }
 
         String message =
@@ -644,6 +642,11 @@ public class LauncherView {
                     } catch (Throwable ex) {
 
                         ex.printStackTrace();
+
+                        notifications.error(
+                                "Account error",
+                                getErrorMessage(ex)
+                        );
                     }
 
                 });
@@ -678,17 +681,271 @@ public class LauncherView {
                             this::performUpdate
                     );
 
+                    titleBar.setTestUpdateAction( this::simulateUpdate );
+
                 })
                 .exceptionally(error -> {
 
-                    System.err.println(
-                            "Failed to check for Vanta updates:"
-                    );
-
                     error.printStackTrace();
+
+                    notifications.error(
+                            "Update check failed",
+                            "Vanta could not check for updates."
+                    );
 
                     return null;
                 });
+    }
+
+    // =============================================================
+    // UPDATE
+    // =============================================================
+
+
+    private void performUpdate(
+            UpdateInfo updateInfo
+    ) {
+
+        notifications.showProgress(
+                "Updating Vanta",
+                "Preparing update..."
+        );
+
+        notifications.setProgress(0.0);
+
+        Thread thread =
+                new Thread(() -> {
+
+                    try {
+
+                        String version =
+                                updateInfo
+                                        .getLatestVersion()
+                                        .replaceFirst(
+                                                "^[vV]",
+                                                ""
+                                        );
+
+                        UpdateDownloader downloader =
+                                new UpdateDownloader();
+
+                        notifications.updateProgress(
+                                "Downloading Vanta "
+                                        + version
+                                        + "..."
+                        );
+
+                        Path updateZip =
+                                downloader.downloadAndVerify(
+                                        updateInfo,
+                                        notifications::updateProgress,
+                                        notifications::setProgress
+                                );
+
+                        notifications.updateProgress(
+                                "Preparing Vanta "
+                                        + version
+                                        + "..."
+                        );
+
+                        notifications.setProgress(
+                                -1.0
+                        );
+
+                        Path applicationDirectory =
+                                ApplicationLocator
+                                        .getApplicationDirectory();
+
+                        notifications.updateProgress(
+                                "Restarting Vanta..."
+                        );
+
+                        notifications.setProgress(
+                                -1.0
+                        );
+
+                        UpdaterLauncher.start(
+                                ProcessHandle
+                                        .current()
+                                        .pid(),
+                                updateZip,
+                                applicationDirectory
+                        );
+
+                        Platform.exit();
+
+                    } catch (InterruptedException e) {
+
+                        Thread.currentThread()
+                                .interrupt();
+
+                        logUpdateError(e);
+
+                        notifications.error(
+                                "Update failed",
+                                "The update was interrupted."
+                        );
+
+                    } catch (Exception e) {
+
+                        logUpdateError(e);
+
+                        notifications.error(
+                                "Update failed",
+                                getUpdateErrorMessage(e)
+                        );
+                    }
+
+                });
+
+        thread.setName(
+                "Vanta-Update"
+        );
+
+        thread.setDaemon(
+                true
+        );
+
+        thread.start();
+    }
+
+
+
+    private void simulateUpdate() {
+
+        notifications.showProgress(
+                "Updating Vanta",
+                "Downloading Vanta 1.0.6..."
+        );
+
+        notifications.setProgress(0);
+
+        Thread thread =
+                new Thread(() -> {
+
+                    try {
+
+                        for (int i = 0; i <= 100; i += 2) {
+
+                            notifications.setProgress(
+                                    i / 100.0
+                            );
+
+                            notifications.updateProgress(
+                                    "Downloading Vanta 1.0.6... "
+                                            + i
+                                            + "%"
+                            );
+
+                            Thread.sleep(40);
+                        }
+
+                        notifications.updateProgress(
+                                "Verifying update..."
+                        );
+
+                        Thread.sleep(1200);
+
+                        notifications.updateProgress(
+                                "Preparing Vanta 1.0.6..."
+                        );
+
+                        Thread.sleep(1200);
+
+                        notifications.updateProgress(
+                                "Restarting Vanta..."
+                        );
+
+                        Thread.sleep(1200);
+
+                        notifications.success(
+                                "Update simulation complete",
+                                "Vanta would restart now."
+                        );
+
+                    } catch (InterruptedException e) {
+
+                        Thread.currentThread().interrupt();
+
+                        notifications.error(
+                                "Update simulation failed",
+                                "The simulation was interrupted."
+                        );
+                    }
+
+                });
+
+        thread.setName(
+                "Vanta-Fake-Update"
+        );
+
+        thread.setDaemon(
+                true
+        );
+
+        thread.start();
+    }
+
+    private String getUpdateErrorMessage(
+            Throwable throwable
+    ) {
+
+        Throwable current =
+                throwable;
+
+        while (current.getCause() != null) {
+            current = current.getCause();
+        }
+
+        String message =
+                current.getMessage();
+
+        if (message == null
+                || message.isBlank()) {
+
+            return "Vanta could not complete the update.";
+        }
+
+        return message;
+    }
+
+    private void logUpdateError(
+            Throwable throwable
+    ) {
+
+        try {
+
+            Path log =
+                    Path.of(
+                            System.getProperty(
+                                    "java.io.tmpdir"
+                            ),
+                            "Vanta-update-error.log"
+                    );
+
+            Files.writeString(
+                    log,
+                    throwable.toString()
+                            + System.lineSeparator(),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.TRUNCATE_EXISTING
+            );
+
+            try (var writer =
+                         Files.newBufferedWriter(
+                                 log,
+                                 StandardOpenOption.APPEND
+                         )) {
+
+                throwable.printStackTrace(
+                        new java.io.PrintWriter(
+                                writer
+                        )
+                );
+            }
+
+        } catch (Exception ignored) {
+        }
     }
 
     // =============================================================
@@ -718,75 +975,5 @@ public class LauncherView {
                 )
         );
     }
-
-    private void performUpdate(
-            UpdateInfo updateInfo
-    ) {
-
-        Thread updateThread =
-                new Thread(() -> {
-
-                    try {
-
-                        UpdateDownloader downloader =
-                                new UpdateDownloader();
-
-                        Path updateZip =
-                                downloader.downloadAndVerify(
-                                        updateInfo
-                                );
-
-                        Path applicationDirectory =
-                                ApplicationLocator.getApplicationDirectory();
-
-                        UpdaterLauncher.start(
-                                ProcessHandle.current().pid(),
-                                updateZip,
-                                applicationDirectory
-                        );
-
-                        Platform.exit();
-
-                    } catch (Exception e) {
-
-                        try {
-
-                            Path log =
-                                    Path.of(
-                                            System.getProperty("java.io.tmpdir"),
-                                            "Vanta-update-error.log"
-                                    );
-
-                            Files.writeString(
-                                    log,
-                                    e.toString() +
-                                            System.lineSeparator(),
-                                    StandardOpenOption.CREATE,
-                                    StandardOpenOption.TRUNCATE_EXISTING
-                            );
-
-                            try (var writer =
-                                         Files.newBufferedWriter(
-                                                 log,
-                                                 StandardOpenOption.APPEND
-                                         )) {
-
-                                e.printStackTrace(
-                                        new java.io.PrintWriter(
-                                                writer
-                                        )
-                                );
-                            }
-
-                        } catch (Exception ignored) {
-                        }
-                    }
-                });
-
-        updateThread.setDaemon(
-                true
-        );
-
-        updateThread.start();
-    }
 }
+

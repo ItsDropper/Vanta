@@ -195,3 +195,31 @@
 .danger-button:disabled {
     -fx-opacity: 0.55;
 }
+
+/* =============================================================
+   NOTIFICATION PROGRESS BAR
+   ============================================================= */
+
+.notification-progress {
+    -fx-pref-height: 5px;
+    -fx-min-height: 5px;
+    -fx-max-height: 5px;
+
+    -fx-background-color: #252932;
+    -fx-background-radius: 3px;
+
+    -fx-control-inner-background: #252932;
+}
+
+.notification-progress > .bar {
+    -fx-background-color: #4d8dff;
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.notification-progress > .track {
+    -fx-background-color: #252932;
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+}

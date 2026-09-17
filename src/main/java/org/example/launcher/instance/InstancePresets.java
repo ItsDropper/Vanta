@@ -27,7 +27,8 @@ public final class InstancePresets {
             createPerformancePreset(),
             createVanillaPlusPreset(),
             createShadersPreset(),
-            createMinimalPreset()
+            createMinimalPreset(),
+            createBuildingPreset()
     );
 
     private InstancePresets() {
@@ -140,6 +141,29 @@ public final class InstancePresets {
                         "iris",
                         "modmenu",
                         "dynamic-fps"
+                )
+        );
+    }
+
+    private static InstancePreset createBuildingPreset() {
+        return new InstancePreset(
+                "building",
+                "Building",
+                "A creative Fabric setup with tools for building, schematics, world editing, and construction.",
+                DEFAULT_VERSIONS,
+                "Fabric",
+                List.of(
+                        "sodium",
+                        "sodium-extra",
+                        "reeses-sodium-options",
+                        "lithium",
+                        "ferrite-core",
+                        "immediatelyfast",
+                        "entityculling",
+                        "modmenu",
+                        "litematica",
+                        "axiom",
+                        "worldedit"
                 )
         );
     }

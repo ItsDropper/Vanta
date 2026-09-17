@@ -85,6 +85,22 @@ public class NotificationManager {
         });
     }
 
+    public void setProgress(
+            double progress
+    ) {
+
+        runOnFxThread(() -> {
+
+            if (currentNotification == null) {
+                return;
+            }
+
+            currentNotification.setProgress(
+                    progress
+            );
+        });
+    }
+
     public void success(
             String title,
             String message

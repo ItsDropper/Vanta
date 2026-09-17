@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -11,6 +12,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 public class NotificationView extends VBox {
+
 
     public enum Type {
         PROGRESS,
@@ -21,6 +23,7 @@ public class NotificationView extends VBox {
     private final Label titleLabel;
     private final Label messageLabel;
     private final ProgressIndicator progressIndicator;
+    private final ProgressBar progressBar;
     private final Button closeButton;
     private final Rectangle accent;
 
@@ -93,6 +96,30 @@ public class NotificationView extends VBox {
                 22
         );
 
+        progressBar =
+                new ProgressBar(0);
+
+        progressBar.getStyleClass().add(
+                "notification-progress"
+        );
+
+        progressBar.setMaxWidth(
+                Double.MAX_VALUE
+        );
+
+        progressBar.setPrefHeight(
+                5
+        );
+
+        progressBar.setMinHeight(
+                5
+        );
+
+        progressBar.setMaxHeight(
+                5
+        );
+
+
         closeButton =
                 new Button("×");
 
@@ -125,9 +152,8 @@ public class NotificationView extends VBox {
             }
         });
 
-        VBox text = new VBox(
-                3
-        );
+        VBox text =
+                new VBox(3);
 
         text.getChildren().addAll(
                 titleLabel,
@@ -153,8 +179,9 @@ public class NotificationView extends VBox {
                 closeButton
         );
 
-        getChildren().add(
-                header
+        getChildren().addAll(
+                header,
+                progressBar
         );
 
         setType(type);
@@ -178,6 +205,21 @@ public class NotificationView extends VBox {
         );
     }
 
+    public void setProgress(
+            double progress
+    ) {
+
+        progressBar.setProgress(
+                Math.max(
+                        0,
+                        Math.min(
+                                1,
+                                progress
+                        )
+                )
+        );
+    }
+
     public void setType(
             Type type
     ) {
@@ -191,6 +233,14 @@ public class NotificationView extends VBox {
                 );
 
                 progressIndicator.setManaged(
+                        true
+                );
+
+                progressBar.setVisible(
+                        true
+                );
+
+                progressBar.setManaged(
                         true
                 );
 
@@ -222,6 +272,14 @@ public class NotificationView extends VBox {
                         false
                 );
 
+                progressBar.setVisible(
+                        false
+                );
+
+                progressBar.setManaged(
+                        false
+                );
+
                 closeButton.setVisible(
                         false
                 );
@@ -250,6 +308,14 @@ public class NotificationView extends VBox {
                         false
                 );
 
+                progressBar.setVisible(
+                        false
+                );
+
+                progressBar.setManaged(
+                        false
+                );
+
                 closeButton.setVisible(
                         true
                 );
@@ -269,5 +335,6 @@ public class NotificationView extends VBox {
             }
         }
     }
-}
 
+
+}
