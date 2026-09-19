@@ -13,9 +13,7 @@ import org.example.launcher.model.Instance;
 import org.example.launcher.model.InstancePreset;
 import org.example.launcher.modrinth.ModrinthContentType;
 import org.example.launcher.modrinth.ModrinthProject;
-import org.example.launcher.service.AccountService;
-import org.example.launcher.service.LaunchService;
-import org.example.launcher.service.ModrinthService;
+import org.example.launcher.service.*;
 import org.example.launcher.update.*;
 import org.example.ui.components.NotificationManager;
 import org.example.ui.components.Sidebar;
@@ -24,6 +22,7 @@ import org.example.ui.views.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.List;
 
 public class LauncherView {
 
@@ -164,7 +163,8 @@ public class LauncherView {
         homeView =
                 new HomeView(
                         accountService,
-                        launchService
+                        launchService,
+                        this::showRepairView
                 );
 
         accountsView =
@@ -976,6 +976,45 @@ public class LauncherView {
                                         globalModsView
                                 )
                 )
+        );
+    }
+
+    private void showRepairView(
+            LaunchFailure failure
+    ) {
+
+        Instance instance =
+                selectedInstance;
+
+        if (instance == null) {
+
+            return;
+        }
+
+        List<RepairView.RepairIssue> issues =
+                LaunchFailureParser.parse(
+                        failure.details()
+                );
+
+        RepairView repairView =
+                new RepairView(
+                        instance,
+                        failure.title(),
+                        failure.description(),
+                        issues,
+                        () -> showPage(
+                                Sidebar.Page.HOME
+                        ),
+                        () -> {
+                            notifications.success(
+                                    "Repair",
+                                    "Automatic repair is not implemented yet."
+                            );
+                        }
+                );
+
+        content.getChildren().setAll(
+                repairView
         );
     }
 }

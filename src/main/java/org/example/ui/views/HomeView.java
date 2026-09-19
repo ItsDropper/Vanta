@@ -15,6 +15,9 @@ import org.example.launcher.model.Instance;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.LaunchService;
 import org.example.ui.components.AccountCard;
+import org.example.launcher.service.LaunchFailure;
+
+import java.util.function.Consumer;
 
 public class HomeView extends VBox {
 
@@ -36,13 +39,18 @@ public class HomeView extends VBox {
     private Label instanceDetailsLabel;
     private Label instanceStatusLabel;
 
+    private final Consumer<LaunchFailure> onLaunchFailure;
+
     public HomeView(
             AccountService accountService,
-            LaunchService launchService
+            LaunchService launchService,
+            Consumer<LaunchFailure> onLaunchFailure
     ) {
 
         this.accountService = accountService;
         this.launchService = launchService;
+        this.onLaunchFailure =
+                onLaunchFailure;
 
         getStyleClass().add("page");
         getStyleClass().add("home-page");
@@ -510,15 +518,24 @@ public class HomeView extends VBox {
 
                         Platform.runLater(() -> {
 
-                            String message =
-                                    ex.getMessage();
+                            LaunchFailure failure =
+                                    launchService.getLastFailure();
 
-                            statusLabel.setText(
-                                    message != null
-                                            && !message.isBlank()
-                                            ? message
-                                            : "Failed to launch Minecraft."
-                            );
+                            if (failure != null) {
+
+                                onLaunchFailure.accept(
+                                        failure
+                                );
+
+                            } else {
+
+                                statusLabel.setText(
+                                        ex.getMessage() != null
+                                                && !ex.getMessage().isBlank()
+                                                ? ex.getMessage()
+                                                : "Failed to launch Minecraft."
+                                );
+                            }
                         });
                     }
                 });

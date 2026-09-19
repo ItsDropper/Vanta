@@ -5,6 +5,7 @@ import org.example.launcher.LaunchDataBuilder;
 import org.example.launcher.MinecraftLauncher;
 import org.example.launcher.account.Account;
 import org.example.launcher.model.Instance;
+import org.example.ui.views.RepairView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -35,6 +36,11 @@ public class LaunchService {
 
     private LaunchState state =
             LaunchState.IDLE;
+
+    private final StringBuilder outputBuffer =
+            new StringBuilder();
+
+    private LaunchFailure lastFailure;
 
     public LaunchService(
             AccountService accountService
@@ -102,6 +108,9 @@ public class LaunchService {
             );
         }
 
+        outputBuffer.setLength(0);
+        lastFailure = null;
+
         try {
 
             setState(
@@ -154,51 +163,45 @@ public class LaunchService {
                 );
             }
 
-            if (!process.isAlive()) {
-
-                throw new IllegalStateException(
-                        "Minecraft exited immediately."
-                );
-            }
-
             minecraftProcess =
                     process;
 
             runningInstance =
                     instance;
 
-            /*
-             * The Minecraft process successfully exists and is alive.
-             *
-             * We intentionally do NOT wait for a specific Minecraft
-             * console line here. Different Minecraft versions,
-             * loaders, Java versions and environments can produce
-             * different startup logs.
-             *
-             * The process itself is Vanta's source of truth.
-             */
-
-            setState(
-                    LaunchState.RUNNING
+            monitorOutput(
+                    process
             );
 
             monitorProcess(
                     process
             );
 
-            monitorOutput(
-                    process
+            /*
+             * Do not immediately declare the process failed just
+             * because it has not finished starting yet.
+             *
+             * Minecraft can take several seconds to initialize.
+             */
+            setState(
+                    LaunchState.RUNNING
             );
 
             return process;
 
         } catch (Exception e) {
 
-            minecraftProcess =
-                    null;
+            minecraftProcess = null;
+            runningInstance = null;
 
-            runningInstance =
-                    null;
+            lastFailure =
+                    new LaunchFailure(
+                            "Minecraft could not be started",
+                            "Vanta was unable to start this Minecraft instance.",
+                            buildDetails(
+                                    e
+                            )
+                    );
 
             setState(
                     LaunchState.ERROR
@@ -234,6 +237,30 @@ public class LaunchService {
                                 (line = reader.readLine())
                                         != null
                         ) {
+
+                            synchronized (outputBuffer) {
+
+                                outputBuffer.append(
+                                        line
+                                ).append(
+                                        '\n'
+                                );
+
+                                /*
+                                 * Keep the buffer bounded.
+                                 * We only need recent startup/crash
+                                 * information for the repair screen.
+                                 */
+                                if (outputBuffer.length()
+                                        > 100_000) {
+
+                                    outputBuffer.delete(
+                                            0,
+                                            outputBuffer.length()
+                                                    - 100_000
+                                    );
+                                }
+                            }
 
                             System.out.println(
                                     "[Minecraft] "
@@ -274,41 +301,68 @@ public class LaunchService {
 
                     try {
 
-                        process.waitFor();
+                        int exitCode =
+                                process.waitFor();
+
+                        synchronized (this) {
+
+                            if (minecraftProcess !=
+                                    process) {
+
+                                return;
+                            }
+
+                            minecraftProcess =
+                                    null;
+
+                            runningInstance =
+                                    null;
+
+                            if (exitCode != 0) {
+
+                                String output =
+                                        getRecentOutput();
+
+                                List<RepairView.RepairIssue> issues =
+                                        LaunchFailureParser.parse(
+                                                output
+                                        );
+
+                                String title =
+                                        issues.isEmpty()
+                                                ? "Minecraft stopped unexpectedly"
+                                                : "Minecraft could not start";
+
+                                String description =
+                                        issues.isEmpty()
+                                                ? "Minecraft closed with an error while starting or running."
+                                                : "Vanta found a problem that may be repairable.";
+
+                                lastFailure =
+                                        new LaunchFailure(
+                                                title,
+                                                description,
+                                                output
+                                        );
+
+                                setState(
+                                        LaunchState.ERROR
+                                );
+
+
+                            } else {
+
+                                setState(
+                                        LaunchState.IDLE
+                                );
+                            }
+                        }
 
                     } catch (InterruptedException e) {
 
                         Thread.currentThread()
                                 .interrupt();
 
-                    } finally {
-
-                        synchronized (this) {
-
-                            if (minecraftProcess ==
-                                    process) {
-
-                                minecraftProcess =
-                                        null;
-
-                                runningInstance =
-                                        null;
-
-                                /*
-                                 * The Minecraft process is gone.
-                                 * Regardless of how it exited,
-                                 * Vanta is no longer running it.
-                                 */
-
-                                if (state !=
-                                        LaunchState.ERROR) {
-
-                                    setState(
-                                            LaunchState.IDLE
-                                    );
-                                }
-                            }
-                        }
                     }
                 });
 
@@ -324,6 +378,40 @@ public class LaunchService {
     }
 
     // =============================================================
+    // FAILURE
+    // =============================================================
+
+    public synchronized LaunchFailure getLastFailure() {
+
+        return lastFailure;
+    }
+
+    public String getRecentOutput() {
+
+        synchronized (outputBuffer) {
+
+            return outputBuffer.toString();
+        }
+    }
+
+    private String buildDetails(
+            Exception exception
+    ) {
+
+        String output =
+                getRecentOutput();
+
+        if (output.isBlank()) {
+
+            return exception.getMessage() != null
+                    ? exception.getMessage()
+                    : exception.toString();
+        }
+
+        return output;
+    }
+
+    // =============================================================
     // CLOSE
     // =============================================================
 
@@ -331,11 +419,8 @@ public class LaunchService {
 
         if (!isRunning()) {
 
-            minecraftProcess =
-                    null;
-
-            runningInstance =
-                    null;
+            minecraftProcess = null;
+            runningInstance = null;
 
             setState(
                     LaunchState.IDLE
@@ -380,11 +465,8 @@ public class LaunchService {
                             if (minecraftProcess ==
                                     process) {
 
-                                minecraftProcess =
-                                        null;
-
-                                runningInstance =
-                                        null;
+                                minecraftProcess = null;
+                                runningInstance = null;
 
                                 setState(
                                         LaunchState.IDLE

@@ -644,3 +644,54 @@
     -fx-border-width: 1px 0 0 0;
 }
 
+/* =============================================================
+   REPAIR VIEW
+   ============================================================= */
+
+.repair-issue-card {
+    -fx-background-color: #141714;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: #3a302f;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-padding: 20px;
+}
+
+.repair-issue-type {
+    -fx-text-fill: #c98282;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+
+.repair-issue-title {
+    -fx-text-fill: #f1f3f1;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.repair-issue-details {
+    -fx-text-fill: #858e86;
+    -fx-font-size: 11px;
+}
+
+.repair-empty {
+    -fx-text-fill: #858e86;
+    -fx-font-size: 11px;
+
+    -fx-background-color: #141714;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: #2a302a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-padding: 20px;
+}
+
+.repair-status {
+    -fx-text-fill: #697269;
+    -fx-font-size: 10px;
+}
+
