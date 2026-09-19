@@ -280,7 +280,10 @@ public class LauncherView {
             ModrinthContentType contentType
     ) {
 
-        ContentBrowserView view =
+        final ContentBrowserView[] viewHolder =
+                new ContentBrowserView[1];
+
+        viewHolder[0] =
                 new ContentBrowserView(
                         instance,
                         contentType,
@@ -292,12 +295,12 @@ public class LauncherView {
                                 showContentDetails(
                                         instance,
                                         project,
-                                        contentType
+                                        viewHolder[0].getContentType()
                                 )
                 );
 
         content.getChildren().setAll(
-                view
+                viewHolder[0]
         );
     }
 

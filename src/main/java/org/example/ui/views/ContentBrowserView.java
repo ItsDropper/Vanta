@@ -1376,4 +1376,8 @@ public class ContentBrowserView extends VBox {
                 downloads
         );
     }
+
+    public ModrinthContentType getContentType() {
+        return contentType;
+    }
 }

@@ -1,6 +1,8 @@
 package org.example.launcher.service;
 
 import org.example.launcher.instance.DownloadUtil;
+import org.example.launcher.instance.InstalledModManager;
+import org.example.launcher.instance.InstalledModRecord;
 import org.example.launcher.modrinth.*;
 import org.example.launcher.model.Instance;
 
@@ -15,9 +17,11 @@ import java.util.Set;
 public class ModrinthService {
 
     private final ModrinthClient client;
+    private final InstalledModScanner installedModScanner;
 
     public ModrinthService() {
         client = new ModrinthClient();
+        installedModScanner = new InstalledModScanner();
     }
 
     // =============================================================
@@ -237,6 +241,141 @@ public class ModrinthService {
     }
 
     // =============================================================
+    // INSTALL SPECIFIC MOD VERSION
+    // =============================================================
+
+    private Path installModVersion(
+            Instance instance,
+            String projectId,
+            ModrinthVersion version,
+            Set<String> resolvingProjects
+    ) throws IOException, InterruptedException {
+
+        if (projectId == null
+                || projectId.isBlank()
+                || version == null) {
+
+            throw new IOException(
+                    "Invalid dependency version."
+            );
+        }
+
+        String resolveKey =
+                projectId + ":" + version.getId();
+
+        if (!resolvingProjects.add(resolveKey)) {
+            throw new IOException(
+                    "Circular dependency detected: "
+                            + projectId
+            );
+        }
+
+        try {
+
+            List<ModrinthDependency> dependencies =
+                    version.getDependencies();
+
+            if (dependencies != null) {
+
+                for (ModrinthDependency dependency :
+                        dependencies) {
+
+                    if (dependency == null
+                            || dependency.isOptional()
+                            || dependency.isIncompatible()) {
+                        continue;
+                    }
+
+                    String dependencyProjectId =
+                            dependency.getProjectId();
+
+                    if (dependencyProjectId == null
+                            || dependencyProjectId.isBlank()) {
+                        continue;
+                    }
+
+                    if (hasCompatibleInstalledDependency(
+                            instance,
+                            dependency,
+                            version
+                    )) {
+
+                        System.out.println(
+                                "[Vanta] Skipping compatible dependency: "
+                                        + dependencyProjectId
+                        );
+
+                        continue;
+                    }
+
+                    ModrinthVersion dependencyVersion =
+                            resolveDependencyVersion(
+                                    instance,
+                                    dependency
+                            );
+
+                    if (dependencyVersion == null) {
+                        throw new IOException(
+                                "No compatible version found for dependency "
+                                        + dependencyProjectId
+                        );
+                    }
+
+                    installModVersion(
+                            instance,
+                            dependencyProjectId,
+                            dependencyVersion,
+                            resolvingProjects
+                    );
+                }
+            }
+
+            ModrinthFile file =
+                    findPrimaryFile(version);
+
+            if (file == null) {
+                throw new IOException(
+                        "Modrinth version has no downloadable file."
+                );
+            }
+
+            Path installedFile =
+                    installFile(
+                            file,
+                            instance.getDirectory()
+                                    .resolve("mods")
+                    );
+
+            InstalledMod installedMod =
+                    installedModScanner.scanFile(
+                            installedFile
+                    );
+
+            InstalledModManager.add(
+                    instance,
+                    new InstalledModRecord(
+                            projectId,
+                            version.getId(),
+                            installedMod != null
+                                    ? installedMod.getModId()
+                                    : null,
+                            installedMod != null
+                                    ? installedMod.getVersion()
+                                    : version.getVersionNumber(),
+                            installedFile.getFileName()
+                                    .toString()
+                    )
+            );
+
+            return installedFile;
+
+        } finally {
+
+            resolvingProjects.remove(resolveKey);
+        }
+    }
+
+    // =============================================================
     // INSTALL MOD PROJECT
     // =============================================================
 
@@ -292,27 +431,17 @@ public class ModrinthService {
                 );
             }
 
-            // -----------------------------------------------------
-            // DEPENDENCIES
-            // -----------------------------------------------------
-
             List<ModrinthDependency> dependencies =
                     compatibleVersion.getDependencies();
 
             if (dependencies != null) {
 
-                for (ModrinthDependency dependency
-                        : dependencies) {
+                for (ModrinthDependency dependency :
+                        dependencies) {
 
-                    if (dependency == null) {
-                        continue;
-                    }
-
-                    if (dependency.isIncompatible()) {
-                        continue;
-                    }
-
-                    if (dependency.isOptional()) {
+                    if (dependency == null
+                            || dependency.isOptional()
+                            || dependency.isIncompatible()) {
                         continue;
                     }
 
@@ -324,17 +453,52 @@ public class ModrinthService {
                         continue;
                     }
 
-                    installModProject(
+                    System.out.println(
+                            "[Vanta] Dependency: "
+                                    + dependencyProjectId
+                                    + " versionId="
+                                    + dependency.getVersionId()
+                                    + " fileName="
+                                    + dependency.getFileName()
+                                    + " type="
+                                    + dependency.getDependencyType()
+                    );
+
+                    if (hasCompatibleInstalledDependency(
+                            instance,
+                            dependency,
+                            compatibleVersion
+                    )) {
+
+                        System.out.println(
+                                "[Vanta] Skipping already compatible dependency: "
+                                        + dependencyProjectId
+                        );
+
+                        continue;
+                    }
+
+                    ModrinthVersion dependencyVersion =
+                            resolveDependencyVersion(
+                                    instance,
+                                    dependency
+                            );
+
+                    if (dependencyVersion == null) {
+                        throw new IOException(
+                                "No compatible version found for dependency "
+                                        + dependencyProjectId
+                        );
+                    }
+
+                    installModVersion(
                             instance,
                             dependencyProjectId,
+                            dependencyVersion,
                             resolvingProjects
                     );
                 }
             }
-
-            // -----------------------------------------------------
-            // FILE
-            // -----------------------------------------------------
 
             ModrinthFile file =
                     findPrimaryFile(
@@ -347,17 +511,336 @@ public class ModrinthService {
                 );
             }
 
-            return installFile(
-                    file,
-                    instance.getDirectory()
-                            .resolve("mods")
+            Path installedFile =
+                    installFile(
+                            file,
+                            instance.getDirectory()
+                                    .resolve("mods")
+                    );
+
+            InstalledMod installedMod =
+                    installedModScanner.scanFile(
+                            installedFile
+                    );
+
+            InstalledModManager.add(
+                    instance,
+                    new InstalledModRecord(
+                            projectId,
+                            compatibleVersion.getId(),
+                            installedMod != null
+                                    ? installedMod.getModId()
+                                    : null,
+                            installedMod != null
+                                    ? installedMod.getVersion()
+                                    : compatibleVersion.getVersionNumber(),
+                            installedFile.getFileName()
+                                    .toString()
+                    )
             );
+
+            return installedFile;
 
         } finally {
 
-            resolvingProjects.remove(
-                    projectId
-            );
+            resolvingProjects.remove(projectId);
+        }
+    }
+
+    // =============================================================
+    // FIND FABRIC MOD ID
+    // =============================================================
+
+    private String findFabricModId(
+            Instance instance,
+            String projectId
+    ) throws IOException, InterruptedException {
+
+        if (projectId == null
+                || projectId.isBlank()) {
+
+            return null;
+        }
+
+        List<ModrinthVersion> versions =
+                client.getVersions(projectId);
+
+        String loader = "fabric";
+
+        for (ModrinthVersion version : versions) {
+
+            if (!isCompatible(
+                    version,
+                    instance.getMinecraftVersion(),
+                    loader
+            )) {
+                continue;
+            }
+
+            ModrinthFile file =
+                    findPrimaryFile(version);
+
+            if (file == null
+                    || file.getUrl() == null
+                    || file.getUrl().isBlank()) {
+                continue;
+            }
+
+            Path tempFile =
+                    Files.createTempFile(
+                            "vanta-mod-",
+                            ".jar"
+                    );
+
+            try {
+
+                try {
+
+                    DownloadUtil.downloadFile(
+                            file.getUrl(),
+                            tempFile
+                    );
+
+                } catch (Exception e) {
+
+                    throw new IOException(
+                            "Failed to download dependency metadata.",
+                            e
+                    );
+                }
+
+                InstalledMod installed =
+                        installedModScanner.scanFile(
+                                tempFile
+                        );
+
+                if (installed != null) {
+                    return installed.getModId();
+                }
+
+            } finally {
+
+                Files.deleteIfExists(tempFile);
+            }
+        }
+
+        return null;
+    }
+
+    // =============================================================
+    // CHECK INSTALLED DEPENDENCY
+    // =============================================================
+
+    private boolean hasCompatibleInstalledDependency(
+            Instance instance,
+            ModrinthDependency dependency,
+            ModrinthVersion requestingVersion
+    ) throws IOException, InterruptedException {
+
+        String dependencyProjectId =
+                dependency.getProjectId();
+
+        if (dependencyProjectId == null
+                || dependencyProjectId.isBlank()) {
+
+            return false;
+        }
+
+        InstalledMod dependencyMod =
+                findInstalledDependencyMod(
+                        instance,
+                        dependencyProjectId
+                );
+
+        if (dependencyMod == null
+                || dependencyMod.getVersion() == null
+                || dependencyMod.getVersion().isBlank()) {
+
+            return false;
+        }
+
+        /*
+         * Get the actual Fabric dependency ID and version constraint
+         * from the requesting mod's fabric.mod.json.
+         */
+        DependencyRequirement requirement =
+                findDependencyRequirement(
+                        instance,
+                        requestingVersion,
+                        dependencyMod.getModId()
+                );
+
+        if (requirement == null) {
+            return false;
+        }
+
+        boolean compatible =
+                VersionConstraintChecker.matches(
+                        dependencyMod.getVersion(),
+                        requirement.getVersionConstraint()
+                );
+
+        System.out.println(
+                "[Vanta] Dependency check: "
+                        + dependencyMod.getModId()
+                        + " "
+                        + dependencyMod.getVersion()
+                        + " against "
+                        + requirement.getVersionConstraint()
+                        + " -> "
+                        + compatible
+        );
+
+        return compatible;
+    }
+
+    private InstalledMod findInstalledModByFilename(
+            Instance instance,
+            String filename
+    ) throws IOException {
+
+        if (filename == null
+                || filename.isBlank()) {
+
+            return null;
+        }
+
+        Path file =
+                instance.getDirectory()
+                        .resolve("mods")
+                        .resolve(filename);
+
+        if (!Files.isRegularFile(file)) {
+            return null;
+        }
+
+        return installedModScanner.scanFile(file);
+    }
+
+    private InstalledMod findInstalledDependencyMod(
+            Instance instance,
+            String projectId
+    ) throws IOException, InterruptedException {
+
+        InstalledModRecord record =
+                InstalledModManager.findByProjectId(
+                        instance,
+                        projectId
+                );
+
+        if (record != null) {
+
+            InstalledMod installed =
+                    findInstalledModByFilename(
+                            instance,
+                            record.getFilename()
+                    );
+
+            if (installed != null) {
+                return installed;
+            }
+        }
+
+        /*
+         * Also check manually installed mods.
+         */
+        String fabricModId =
+                findFabricModId(
+                        instance,
+                        projectId
+                );
+
+        if (fabricModId == null
+                || fabricModId.isBlank()) {
+
+            return null;
+        }
+
+        for (InstalledMod installed :
+                installedModScanner.scan(instance)) {
+
+            if (fabricModId.equals(
+                    installed.getModId()
+            )) {
+
+                return installed;
+            }
+        }
+
+        return null;
+    }
+
+    private DependencyRequirement findDependencyRequirement(
+            Instance instance,
+            ModrinthVersion requestingVersion,
+            String dependencyModId
+    ) throws IOException {
+
+        if (requestingVersion == null
+                || dependencyModId == null
+                || dependencyModId.isBlank()) {
+
+            return null;
+        }
+
+        ModrinthFile file =
+                findPrimaryFile(requestingVersion);
+
+        if (file == null
+                || file.getUrl() == null
+                || file.getUrl().isBlank()) {
+
+            return null;
+        }
+
+        Path tempFile =
+                Files.createTempFile(
+                        "vanta-requesting-mod-",
+                        ".jar"
+                );
+
+        try {
+
+            try {
+
+                DownloadUtil.downloadFile(
+                        file.getUrl(),
+                        tempFile
+                );
+
+            } catch (Exception e) {
+
+                throw new IOException(
+                        "Failed to inspect mod dependency metadata.",
+                        e
+                );
+            }
+
+            InstalledMod requestingMod =
+                    installedModScanner.scanFile(
+                            tempFile
+                    );
+
+            if (requestingMod == null) {
+                return null;
+            }
+
+            for (DependencyRequirement requirement :
+                    requestingMod.getDependencies()) {
+
+                if (dependencyModId.equals(
+                        requirement.getModId()
+                )) {
+
+                    return requirement;
+                }
+            }
+
+            return null;
+
+        } finally {
+
+            Files.deleteIfExists(tempFile);
         }
     }
 
@@ -494,15 +977,24 @@ public class ModrinthService {
                 directory.resolve(filename);
 
         if (Files.exists(destination)) {
+
+            System.out.println(
+                    "[Vanta] File already exists: "
+                            + filename
+            );
+
             return destination;
         }
 
         try {
+
             DownloadUtil.downloadFile(
                     file.getUrl(),
                     destination
             );
+
         } catch (Exception e) {
+
             throw new IOException(
                     "Failed to download Modrinth file: "
                             + file.getFilename(),
@@ -572,6 +1064,7 @@ public class ModrinthService {
 
         if (versions == null
                 || versions.isEmpty()) {
+
             return null;
         }
 
@@ -619,6 +1112,7 @@ public class ModrinthService {
 
         if (versions == null
                 || versions.isEmpty()) {
+
             return null;
         }
 
@@ -702,6 +1196,7 @@ public class ModrinthService {
         if (version == null
                 || version.getFiles() == null
                 || version.getFiles().isEmpty()) {
+
             return null;
         }
 
@@ -762,5 +1257,72 @@ public class ModrinthService {
         }
 
         return safe;
+    }
+
+    // =============================================================
+    // RESOLVE DEPENDENCY VERSION
+    // =============================================================
+
+    private ModrinthVersion resolveDependencyVersion(
+            Instance instance,
+            ModrinthDependency dependency
+    ) throws IOException, InterruptedException {
+
+        String projectId =
+                dependency.getProjectId();
+
+        if (projectId == null
+                || projectId.isBlank()) {
+
+            return null;
+        }
+
+        List<ModrinthVersion> versions =
+                client.getVersions(projectId);
+
+        /*
+         * If Modrinth explicitly specifies a version ID,
+         * prefer that version when it is compatible with
+         * the current instance.
+         */
+        String requiredVersionId =
+                dependency.getVersionId();
+
+        if (requiredVersionId != null
+                && !requiredVersionId.isBlank()) {
+
+            for (ModrinthVersion version : versions) {
+
+                if (!requiredVersionId.equals(
+                        version.getId()
+                )) {
+                    continue;
+                }
+
+                if (isCompatible(
+                        version,
+                        instance.getMinecraftVersion(),
+                        normalizeLoader(
+                                instance.getLoader()
+                        )
+                )) {
+
+                    return version;
+                }
+
+                return null;
+            }
+        }
+
+        /*
+         * Otherwise select the newest compatible release.
+         */
+        return findCompatibleVersion(
+                versions,
+                instance.getMinecraftVersion(),
+                normalizeLoader(
+                        instance.getLoader()
+                )
+        );
     }
 }

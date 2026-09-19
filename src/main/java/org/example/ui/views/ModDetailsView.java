@@ -89,6 +89,7 @@ public class ModDetailsView extends VBox {
         this.instance = instance;
         this.projectId = projectId;
         this.contentType = contentType;
+        System.out.println("DETAILS DEBUG: contentType=" + contentType);
         this.onBack = onBack;
 
         this.modrinthClient =
