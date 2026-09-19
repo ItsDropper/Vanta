@@ -339,8 +339,31 @@ public class RepairView extends VBox {
     public record RepairIssue(
             String type,
             String title,
-            String details
+            String details,
+            String repairProjectId,
+            List<String> repairVersions
     ) {
+
+        public RepairIssue(
+                String type,
+                String title,
+                String details
+        ) {
+            this(
+                    type,
+                    title,
+                    details,
+                    null,
+                    List.of()
+            );
+        }
+
+        public boolean canRepair() {
+            return repairProjectId != null
+                    && !repairProjectId.isBlank()
+                    && repairVersions != null
+                    && !repairVersions.isEmpty();
+        }
     }
 
 

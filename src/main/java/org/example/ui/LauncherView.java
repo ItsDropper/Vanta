@@ -984,9 +984,20 @@ public class LauncherView {
     ) {
 
         Instance instance =
-                selectedInstance;
+                launchService.getRunningInstance();
 
         if (instance == null) {
+
+            instance =
+                    selectedInstance;
+        }
+
+        if (instance == null) {
+
+            notifications.error(
+                    "Repair unavailable",
+                    "Vanta could not determine which instance failed."
+            );
 
             return;
         }
@@ -996,26 +1007,122 @@ public class LauncherView {
                         failure.details()
                 );
 
+        final Instance repairInstance = instance;
         RepairView repairView =
                 new RepairView(
-                        instance,
+                        repairInstance,
                         failure.title(),
                         failure.description(),
                         issues,
                         () -> showPage(
                                 Sidebar.Page.HOME
                         ),
-                        () -> {
-                            notifications.success(
-                                    "Repair",
-                                    "Automatic repair is not implemented yet."
-                            );
-                        }
+                        () -> repairIssues(
+                                repairInstance,
+                                issues
+                        )
                 );
 
         content.getChildren().setAll(
                 repairView
         );
+    }
+
+    private void repairIssues(
+            Instance instance,
+            List<RepairView.RepairIssue> issues
+    ) {
+
+        notifications.showProgress(
+                "Repairing instance",
+                "Resolving dependencies..."
+        );
+
+        Thread thread =
+                new Thread(() -> {
+
+                    try {
+
+                        ModrinthService modrinthService =
+                                new ModrinthService();
+
+                        boolean repaired =
+                                false;
+
+                        for (RepairView.RepairIssue issue :
+                                issues) {
+
+                            if (!issue.canRepair()) {
+                                continue;
+                            }
+
+                            notifications.updateProgress(
+                                    "Installing "
+                                            + issue.repairProjectId()
+                                            + " "
+                                            + String.join(
+                                            " or ",
+                                            issue.repairVersions()
+                                    )
+                                            + "..."
+                            );
+
+                            ModrinthProject project =
+                                    modrinthService.getProjectBySlug(
+                                            issue.repairProjectId()
+                                    );
+
+                            modrinthService.repairModDependency(
+                                    instance,
+                                    project.getProjectId(),
+                                    issue.repairVersions()
+                            );
+
+                            repaired = true;
+                        }
+
+                        if (!repaired) {
+
+                            notifications.error(
+                                    "Repair failed",
+                                    "No automatically repairable dependencies were found."
+                            );
+
+                            return;
+                        }
+
+                        notifications.success(
+                                "Repair complete",
+                                "The required dependencies were installed."
+                        );
+
+                        Platform.runLater(() ->
+                                showPage(
+                                        Sidebar.Page.HOME
+                                )
+                        );
+
+                    } catch (Throwable ex) {
+
+                        ex.printStackTrace();
+
+                        notifications.error(
+                                "Repair failed",
+                                getErrorMessage(ex)
+                        );
+                    }
+
+                });
+
+        thread.setName(
+                "Vanta-Dependency-Repair"
+        );
+
+        thread.setDaemon(
+                true
+        );
+
+        thread.start();
     }
 }
 

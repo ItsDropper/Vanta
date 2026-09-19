@@ -3,25 +3,21 @@ package org.example.launcher.service;
 import org.example.ui.views.RepairView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LaunchFailureParser {
 
-    private static final Pattern INCOMPATIBLE_MOD =
+    private static final Pattern MISSING_DEPENDENCY =
             Pattern.compile(
-                    "mod '([^']+)' \\(([^)]+)\\) ([^ ]+) with version ([^ ]+)"
+                    "Mod '([^']+)' \\(([^)]+)\\) .*?requires version (.+?) of ([^,]+), which is missing!"
             );
 
-    private static final Pattern REQUIRES_VERSION =
+    private static final Pattern WRONG_VERSION =
             Pattern.compile(
-                    "([^ ]+) .* requires version (.+?) of mod '([^']+)' \\(([^)]+)\\), but only the wrong version is present: ([^!]+)!"
-            );
-
-    private static final Pattern MISSING_MOD =
-            Pattern.compile(
-                    "Mod '([^']+)' \\(([^)]+)\\) is required"
+                    "([^ ]+) .*?requires version (.+?) of mod '([^']+)' \\(([^)]+)\\), but only the wrong version is present: ([^!]+)!"
             );
 
     public static List<RepairView.RepairIssue> parse(
@@ -35,51 +31,95 @@ public class LaunchFailureParser {
             return issues;
         }
 
-        Matcher incompatible =
-                INCOMPATIBLE_MOD.matcher(output);
+        /*
+         * Example:
+         *
+         * Mod 'Nvidium' (nvidium) requires version
+         * 0.8.11 or version 0.8.12 of sodium,
+         * which is missing!
+         */
+        Matcher missing =
+                MISSING_DEPENDENCY.matcher(output);
 
-        if (incompatible.find()) {
+        while (missing.find()) {
 
-            String modName =
-                    incompatible.group(1);
+            String requestingMod =
+                    missing.group(1);
 
-            String modId =
-                    incompatible.group(2);
+            String requestingModId =
+                    missing.group(2);
 
-            String installedVersion =
-                    incompatible.group(4);
+            String requiredVersions =
+                    missing.group(3).trim();
+
+            String dependencyProjectId =
+                    missing.group(4).trim();
+
+            List<String> versions =
+                    extractVersions(
+                            requiredVersions
+                    );
+
+            String details =
+                    "Recommended version: "
+                            + formatVersions(versions)
+                            + "\nDependency: "
+                            + dependencyProjectId
+                            + "\nMod ID: "
+                            + requestingModId;
 
             issues.add(
                     new RepairView.RepairIssue(
-                            "INCOMPATIBLE MOD",
-                            modName
-                                    + " (" + modId + ")",
-                            "Installed version "
-                                    + installedVersion
-                                    + " is incompatible with another mod."
+                            "MISSING DEPENDENCY",
+                            requestingMod
+                                    + " requires "
+                                    + dependencyProjectId,
+                            details,
+                            dependencyProjectId,
+                            versions
                     )
             );
         }
 
-        Matcher requires =
-                REQUIRES_VERSION.matcher(output);
+        /*
+         * Example:
+         *
+         * Nvidium requires version 0.8.11 of mod
+         * 'Sodium' (sodium), but only the wrong version
+         * is present: 0.8.14!
+         */
+        Matcher wrong =
+                WRONG_VERSION.matcher(output);
 
-        if (requires.find()) {
+        while (wrong.find()) {
 
             String requestingMod =
-                    requires.group(1);
+                    wrong.group(1);
 
             String requiredVersions =
-                    requires.group(2);
+                    wrong.group(2).trim();
 
             String dependencyName =
-                    requires.group(3);
+                    wrong.group(3);
 
             String dependencyId =
-                    requires.group(4);
+                    wrong.group(4);
 
             String installedVersion =
-                    requires.group(5).trim();
+                    wrong.group(5).trim();
+
+            List<String> versions =
+                    extractVersions(
+                            requiredVersions
+                    );
+
+            String details =
+                    "Required version: "
+                            + formatVersions(versions)
+                            + "\nInstalled version: "
+                            + installedVersion
+                            + "\nMod ID: "
+                            + dependencyId;
 
             issues.add(
                     new RepairView.RepairIssue(
@@ -87,38 +127,63 @@ public class LaunchFailureParser {
                             requestingMod
                                     + " requires "
                                     + dependencyName,
-                            "Required: "
-                                    + requiredVersions
-                                    + "\nInstalled: "
-                                    + installedVersion
-                                    + "\nMod ID: "
-                                    + dependencyId
-                    )
-            );
-        }
-
-        Matcher missing =
-                MISSING_MOD.matcher(output);
-
-        if (missing.find()) {
-
-            String modName =
-                    missing.group(1);
-
-            String modId =
-                    missing.group(2);
-
-            issues.add(
-                    new RepairView.RepairIssue(
-                            "MISSING DEPENDENCY",
-                            modName,
-                            "Required mod "
-                                    + modId
-                                    + " is not installed."
+                            details,
+                            dependencyId,
+                            versions
                     )
             );
         }
 
         return issues;
+    }
+
+    private static List<String> extractVersions(
+            String text
+    ) {
+
+        if (text == null || text.isBlank()) {
+            return List.of();
+        }
+
+        return Arrays.stream(
+                        text.split("\\s+or\\s+")
+                )
+                .map(String::trim)
+                .map(version ->
+                        version.replaceFirst(
+                                "^version\\s+",
+                                ""
+                        )
+                )
+                .filter(version ->
+                        !version.isBlank()
+                )
+                .toList();
+    }
+
+    private static String formatVersions(
+            List<String> versions
+    ) {
+
+        if (versions == null
+                || versions.isEmpty()) {
+
+            return "Unknown";
+        }
+
+        if (versions.size() == 1) {
+            return versions.get(0);
+        }
+
+        if (versions.size() == 2) {
+            return versions.get(0)
+                    + " or "
+                    + versions.get(1);
+        }
+
+        return String.join(
+                ", ",
+                versions
+        );
     }
 }

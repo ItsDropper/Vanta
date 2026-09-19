@@ -653,6 +653,16 @@ public class HomeView extends VBox {
                 setInstanceStatus(
                         "● Error"
                 );
+
+                LaunchFailure failure =
+                        launchService.getLastFailure();
+
+                if (failure != null) {
+
+                    onLaunchFailure.accept(
+                            failure
+                    );
+                }
             }
 
             case IDLE -> {

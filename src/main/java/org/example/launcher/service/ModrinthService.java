@@ -565,6 +565,7 @@ public class ModrinthService {
         List<ModrinthVersion> versions =
                 client.getVersions(projectId);
 
+
         String loader = "fabric";
 
         for (ModrinthVersion version : versions) {
@@ -842,6 +843,114 @@ public class ModrinthService {
 
             Files.deleteIfExists(tempFile);
         }
+    }
+
+    // =============================================================
+    // REPAIR MOD DEPENDENCY
+    // =============================================================
+
+    public Path repairModDependency(
+            Instance instance,
+            String projectId,
+            List<String> requiredVersions
+    ) throws IOException, InterruptedException {
+
+        if (instance == null) {
+            throw new IllegalArgumentException(
+                    "Instance cannot be null."
+            );
+        }
+
+        if (projectId == null
+                || projectId.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Modrinth project ID cannot be empty."
+            );
+        }
+
+        if (requiredVersions == null
+                || requiredVersions.isEmpty()) {
+
+            throw new IOException(
+                    "No compatible dependency versions were provided."
+            );
+        }
+
+        List<ModrinthVersion> versions =
+                client.getVersions(
+                        projectId
+                );
+
+        for (String requiredVersion :
+                requiredVersions) {
+
+            if (requiredVersion == null
+                    || requiredVersion.isBlank()) {
+                continue;
+            }
+
+            for (ModrinthVersion version :
+                    versions) {
+
+                String versionNumber =
+                        version.getVersionNumber();
+
+                boolean versionMatches =
+                        versionNumber != null
+                                && (
+                                versionNumber.equals(
+                                        requiredVersion
+                                )
+                                        || versionNumber.contains(
+                                        "-" + requiredVersion + "-"
+                                )
+                                        || versionNumber.endsWith(
+                                        "-" + requiredVersion
+                                )
+                        );
+
+                if (!versionMatches) {
+                    continue;
+                }
+
+                if (!isCompatible(
+                        version,
+                        instance.getMinecraftVersion(),
+                        normalizeLoader(
+                                instance.getLoader()
+                        )
+                )) {
+                    continue;
+                }
+
+                System.out.println(
+                        "[Vanta] Repairing dependency: "
+                                + projectId
+                                + " "
+                                + requiredVersion
+                                + " -> "
+                                + versionNumber
+                );
+
+                return installModVersion(
+                        instance,
+                        projectId,
+                        version,
+                        new HashSet<>()
+                );
+            }
+        }
+
+        throw new IOException(
+                "Could not find a compatible Modrinth version for "
+                        + projectId
+                        + ": "
+                        + String.join(
+                        " or ",
+                        requiredVersions
+                )
+        );
     }
 
     // =============================================================

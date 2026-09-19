@@ -34,6 +34,8 @@ public class LaunchService {
 
     private Instance runningInstance;
 
+    private Instance failedInstance;
+
     private LaunchState state =
             LaunchState.IDLE;
 
@@ -42,9 +44,12 @@ public class LaunchService {
 
     private LaunchFailure lastFailure;
 
+    private boolean failureHandled;
+
     public LaunchService(
             AccountService accountService
     ) {
+
         this.accountService =
                 accountService;
     }
@@ -103,13 +108,19 @@ public class LaunchService {
         }
 
         if (instance == null) {
+
             throw new IllegalArgumentException(
                     "No Minecraft instance selected."
             );
         }
 
         outputBuffer.setLength(0);
+
         lastFailure = null;
+
+        failedInstance = null;
+
+        failureHandled = false;
 
         try {
 
@@ -178,10 +189,9 @@ public class LaunchService {
             );
 
             /*
-             * Do not immediately declare the process failed just
-             * because it has not finished starting yet.
-             *
              * Minecraft can take several seconds to initialize.
+             * Do not wait for the process to finish before marking
+             * it as running.
              */
             setState(
                     LaunchState.RUNNING
@@ -192,7 +202,10 @@ public class LaunchService {
         } catch (Exception e) {
 
             minecraftProcess = null;
+
             runningInstance = null;
+
+            failedInstance = instance;
 
             lastFailure =
                     new LaunchFailure(
@@ -246,11 +259,6 @@ public class LaunchService {
                                         '\n'
                                 );
 
-                                /*
-                                 * Keep the buffer bounded.
-                                 * We only need recent startup/crash
-                                 * information for the repair screen.
-                                 */
                                 if (outputBuffer.length()
                                         > 100_000) {
 
@@ -265,6 +273,10 @@ public class LaunchService {
                             System.out.println(
                                     "[Minecraft] "
                                             + line
+                            );
+
+                            checkForRepairableFailure(
+                                    process
                             );
                         }
 
@@ -286,6 +298,70 @@ public class LaunchService {
         );
 
         outputThread.start();
+    }
+
+    private void checkForRepairableFailure(
+            Process process
+    ) {
+
+        synchronized (this) {
+
+            if (minecraftProcess != process) {
+                return;
+            }
+
+            if (failureHandled) {
+                return;
+            }
+
+            String output =
+                    getRecentOutput();
+
+            List<RepairView.RepairIssue> issues =
+                    LaunchFailureParser.parse(
+                            output
+                    );
+
+            if (issues.isEmpty()) {
+                return;
+            }
+
+            failureHandled = true;
+
+            /*
+             * Preserve the instance before the process monitor
+             * clears runningInstance.
+             */
+
+            System.out.println(
+                    "[Vanta DEBUG] Failure detected. Running instance: "
+                            + runningInstance
+            );
+
+            failedInstance =
+                    runningInstance;
+
+            lastFailure =
+                    new LaunchFailure(
+                            "Minecraft could not start",
+                            "Vanta found a problem with this instance and stopped Minecraft before the Fabric error screen appeared.",
+                            output
+                    );
+
+            System.out.println(
+                    "[Vanta] Detected Minecraft startup failure."
+            );
+
+            /*
+             * Stop Minecraft so its own Fabric error screen
+             * does not remain visible.
+             */
+            process.destroy();
+
+            setState(
+                    LaunchState.ERROR
+            );
+        }
     }
 
     // =============================================================
@@ -318,37 +394,58 @@ public class LaunchService {
                             runningInstance =
                                     null;
 
+                            /*
+                             * If the output monitor already detected
+                             * a Fabric/dependency failure, it owns
+                             * the failure state.
+                             */
+                            if (failureHandled) {
+
+                                return;
+                            }
+
                             if (exitCode != 0) {
 
-                                String output =
-                                        getRecentOutput();
+                                /*
+                                 * Preserve the instance that failed.
+                                 */
+                                if (failedInstance == null) {
 
-                                List<RepairView.RepairIssue> issues =
-                                        LaunchFailureParser.parse(
-                                                output
-                                        );
+                                    failedInstance =
+                                            runningInstance;
+                                }
 
-                                String title =
-                                        issues.isEmpty()
-                                                ? "Minecraft stopped unexpectedly"
-                                                : "Minecraft could not start";
+                                if (lastFailure == null) {
 
-                                String description =
-                                        issues.isEmpty()
-                                                ? "Minecraft closed with an error while starting or running."
-                                                : "Vanta found a problem that may be repairable.";
+                                    String output =
+                                            getRecentOutput();
 
-                                lastFailure =
-                                        new LaunchFailure(
-                                                title,
-                                                description,
-                                                output
-                                        );
+                                    List<RepairView.RepairIssue> issues =
+                                            LaunchFailureParser.parse(
+                                                    output
+                                            );
+
+                                    String title =
+                                            issues.isEmpty()
+                                                    ? "Minecraft stopped unexpectedly"
+                                                    : "Minecraft could not start";
+
+                                    String description =
+                                            issues.isEmpty()
+                                                    ? "Minecraft closed with an error while starting or running."
+                                                    : "Vanta found a problem that may be repairable.";
+
+                                    lastFailure =
+                                            new LaunchFailure(
+                                                    title,
+                                                    description,
+                                                    output
+                                            );
+                                }
 
                                 setState(
                                         LaunchState.ERROR
                                 );
-
 
                             } else {
 
@@ -386,6 +483,11 @@ public class LaunchService {
         return lastFailure;
     }
 
+    public synchronized Instance getFailedInstance() {
+
+        return failedInstance;
+    }
+
     public String getRecentOutput() {
 
         synchronized (outputBuffer) {
@@ -420,6 +522,7 @@ public class LaunchService {
         if (!isRunning()) {
 
             minecraftProcess = null;
+
             runningInstance = null;
 
             setState(
@@ -466,6 +569,7 @@ public class LaunchService {
                                     process) {
 
                                 minecraftProcess = null;
+
                                 runningInstance = null;
 
                                 setState(
