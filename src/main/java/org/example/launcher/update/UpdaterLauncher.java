@@ -20,23 +20,10 @@ public final class UpdaterLauncher {
 
     public static Path getUpdaterDirectory() {
 
-        String localAppData =
-                System.getenv("LOCALAPPDATA");
-
-        if (localAppData == null
-                || localAppData.isBlank()) {
-
-            throw new IllegalStateException(
-                    "LOCALAPPDATA environment variable is missing."
-            );
-        }
-
         Path directory =
-                Path.of(
-                        localAppData,
-                        "Vanta",
-                        "updater"
-                );
+                ApplicationLocator
+                        .getApplicationDirectory()
+                        .resolve("updater");
 
         log(
                 "getUpdaterDirectory() -> "
