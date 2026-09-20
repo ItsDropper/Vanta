@@ -9,8 +9,8 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Iterator;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -140,11 +140,43 @@ public class InstalledModScanner {
                     }
                 }
 
+                List<DependencyRequirement> breaks =
+                        new ArrayList<>();
+
+                JsonNode breaksNode =
+                        root.get("breaks");
+
+                if (breaksNode != null
+                        && breaksNode.isObject()) {
+
+                    Iterator<String> breakNames =
+                            breaksNode.fieldNames();
+
+                    while (breakNames.hasNext()) {
+
+                        String dependencyId =
+                                breakNames.next();
+
+                        JsonNode requirement =
+                                breaksNode.get(
+                                        dependencyId
+                                );
+
+                        breaks.add(
+                                new DependencyRequirement(
+                                        dependencyId,
+                                        requirement.asText()
+                                )
+                        );
+                    }
+                }
+
                 return new InstalledMod(
                         modId,
                         version,
                         file.getFileName().toString(),
-                        dependencies
+                        dependencies,
+                        breaks
                 );
             }
 

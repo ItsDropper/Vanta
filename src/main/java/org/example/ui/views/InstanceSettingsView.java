@@ -79,7 +79,6 @@ public class InstanceSettingsView extends VBox {
                 event -> onBack.run()
         );
 
-
         HBox navigation =
                 new HBox(
                         10,
@@ -531,14 +530,15 @@ public class InstanceSettingsView extends VBox {
                     settings.getRamMb();
 
             ramSlider.setValue(
-                    clampRam(ram)
+                    clampRam(
+                            ram
+                    )
             );
 
             ramValueLabel.setText(
                     snapRam(
                             ramSlider.getValue()
-                    )
-                            + " MB"
+                    ) + " MB"
             );
 
             widthField.setText(

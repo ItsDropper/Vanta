@@ -91,4 +91,25 @@ public class InstalledModManager {
                 .findFirst()
                 .orElse(null);
     }
+
+    public static void removeByProjectId(
+            Instance instance,
+            String projectId
+    ) throws IOException {
+
+        List<InstalledModRecord> mods =
+                load(instance);
+
+        mods.removeIf(
+                mod ->
+                        projectId.equals(
+                                mod.getProjectId()
+                        )
+        );
+
+        save(
+                instance,
+                mods
+        );
+    }
 }

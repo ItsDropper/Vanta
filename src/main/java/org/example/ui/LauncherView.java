@@ -19,9 +19,11 @@ import org.example.ui.components.NotificationManager;
 import org.example.ui.components.Sidebar;
 import org.example.ui.views.*;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LauncherView {
@@ -263,6 +265,10 @@ public class LauncherView {
                         () ->
                                 showInstanceSettings(
                                         instance
+                                ),
+                        () ->
+                                showScreenshots(
+                                        instance
                                 )
                 );
 
@@ -442,6 +448,9 @@ public class LauncherView {
                         ModrinthService modrinthService =
                                 new ModrinthService();
 
+                        List<String> skippedMods =
+                                new ArrayList<>();
+
                         if (preset.getMods() != null) {
 
                             for (String modSlug :
@@ -458,25 +467,90 @@ public class LauncherView {
                                                 + modSlug
                                 );
 
-                                ModrinthProject project =
-                                        modrinthService.getProjectBySlug(
+                                try {
+
+                                    ModrinthProject project =
+                                            modrinthService.getProjectBySlug(
+                                                    modSlug
+                                            );
+
+                                    if (project == null) {
+
+                                        skippedMods.add(
                                                 modSlug
                                         );
 
-                                modrinthService.installMod(
-                                        instance,
-                                        project
-                                );
+                                        System.out.println(
+                                                "[Vanta] Skipping preset mod "
+                                                        + modSlug
+                                                        + ": project not found."
+                                        );
+
+                                        continue;
+                                    }
+
+                                    modrinthService.installMod(
+                                            instance,
+                                            project
+                                    );
+
+                                } catch (IOException
+                                         | InterruptedException e) {
+
+                                    String message =
+                                            e.getMessage();
+
+                                    if (message != null
+                                            && message.contains(
+                                            "No compatible version found"
+                                    )) {
+
+                                        skippedMods.add(
+                                                modSlug
+                                        );
+
+                                        System.out.println(
+                                                "[Vanta] Skipping preset mod "
+                                                        + modSlug
+                                                        + ": no compatible version found."
+                                        );
+
+                                        continue;
+                                    }
+
+                                    throw e;
+                                }
                             }
                         }
 
-                        notifications.success(
-                                "Installation complete",
-                                preset.getName()
-                                        + " ("
-                                        + minecraftVersion
-                                        + ") is ready to play."
-                        );
+                        if (skippedMods.isEmpty()) {
+
+                            notifications.success(
+                                    "Installation complete",
+                                    preset.getName()
+                                            + " ("
+                                            + minecraftVersion
+                                            + ") is ready to play."
+                            );
+
+                        } else {
+
+                            String skipped =
+                                    String.join(
+                                            ", ",
+                                            skippedMods
+                                    );
+
+                            notifications.success(
+                                    "Installation complete",
+                                    preset.getName()
+                                            + " ("
+                                            + minecraftVersion
+                                            + ") is ready. "
+                                            + "No compatible versions found for: "
+                                            + skipped
+                            );
+                        }
 
                         Platform.runLater(
                                 this::instanceCreated
@@ -617,6 +691,27 @@ public class LauncherView {
 
         content.getChildren().setAll(
                 instanceSettingsView
+        );
+    }
+
+    private void showScreenshots(
+            Instance instance
+    ) {
+
+        selectedInstance =
+                instance;
+
+        ScreenshotsView screenshotsView =
+                new ScreenshotsView(
+                        instance,
+                        () ->
+                                showInstanceSettings(
+                                        instance
+                                )
+                );
+
+        content.getChildren().setAll(
+                screenshotsView
         );
     }
 
@@ -983,13 +1078,10 @@ public class LauncherView {
             LaunchFailure failure
     ) {
 
-        Instance instance =
-                launchService.getRunningInstance();
+        Instance instance = launchService.getFailedInstance();
 
         if (instance == null) {
-
-            instance =
-                    selectedInstance;
+            instance = selectedInstance;
         }
 
         if (instance == null) {

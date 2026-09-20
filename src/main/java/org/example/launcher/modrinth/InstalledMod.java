@@ -8,17 +8,20 @@ public class InstalledMod {
     private final String version;
     private final String filename;
     private final List<DependencyRequirement> dependencies;
+    private final List<DependencyRequirement> breaks;
 
     public InstalledMod(
             String modId,
             String version,
             String filename,
-            List<DependencyRequirement> dependencies
+            List<DependencyRequirement> dependencies,
+            List<DependencyRequirement> breaks
     ) {
         this.modId = modId;
         this.version = version;
         this.filename = filename;
         this.dependencies = dependencies;
+        this.breaks = breaks;
     }
 
     public String getModId() {
@@ -35,5 +38,9 @@ public class InstalledMod {
 
     public List<DependencyRequirement> getDependencies() {
         return dependencies;
+    }
+
+    public List<DependencyRequirement> getBreaks() {
+        return breaks;
     }
 }

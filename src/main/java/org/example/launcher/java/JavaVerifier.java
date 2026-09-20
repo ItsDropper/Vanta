@@ -1,8 +1,15 @@
+
 package org.example.launcher.java;
 
 import java.nio.file.Path;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class JavaVerifier {
+
+    // =============================================================
+    // VERIFY
+    // =============================================================
 
     public static void verify(
             Path java,
@@ -59,12 +66,16 @@ public class JavaVerifier {
         );
     }
 
+    // =============================================================
+    // PARSE VERSION
+    // =============================================================
+
     public static int parseVersion(
             String output
     ) {
 
-        java.util.regex.Matcher matcher =
-                java.util.regex.Pattern
+        Matcher matcher =
+                Pattern
                         .compile(
                                 "version \"(?:1\\.)?(\\d+)"
                         )
@@ -83,3 +94,4 @@ public class JavaVerifier {
         );
     }
 }
+

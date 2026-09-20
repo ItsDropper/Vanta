@@ -24,7 +24,45 @@ public class JavaLocator {
         }
 
         /*
-         * First check the Java currently running Vanta.
+         * Minecraft 26.1+ requires Java 25.
+         *
+         * Always use Vanta's managed Java 25 instead of whatever
+         * Java 25 happens to be installed on the machine.
+         */
+        if (requiredVersion == 25) {
+
+            Path managed =
+                    getManagedJava(requiredVersion);
+
+            if (managed == null) {
+
+                System.out.println(
+                        "Vanta Java 25 not found. "
+                                + "Installing managed Java 25..."
+                );
+
+                managed =
+                        JavaInstaller.install(
+                                requiredVersion
+                        );
+            }
+
+            JavaVerifier.verify(
+                    managed,
+                    requiredVersion
+            );
+
+            System.out.println(
+                    "Using Vanta-managed Java 25: "
+                            + managed
+            );
+
+            return managed.toString();
+        }
+
+        /*
+         * For older Java versions, first check the Java currently
+         * running Vanta.
          */
         int currentVersion =
                 getCurrentJavaVersion();
@@ -52,32 +90,6 @@ public class JavaLocator {
         }
 
         /*
-         * Then check Java installations already
-         * present on the machine.
-         */
-        Path installed =
-                findInstalledJava(
-                        requiredVersion
-                );
-
-        if (installed != null) {
-
-            System.out.println(
-                    "Found installed Java "
-                            + requiredVersion
-                            + ": "
-                            + installed
-            );
-
-            JavaVerifier.verify(
-                    installed,
-                    requiredVersion
-            );
-
-            return installed.toString();
-        }
-
-        /*
          * Then check Vanta's own managed runtime.
          */
         Path managed =
@@ -100,6 +112,32 @@ public class JavaLocator {
             );
 
             return managed.toString();
+        }
+
+        /*
+         * Then check Java installations already present on the
+         * machine.
+         */
+        Path installed =
+                findInstalledJava(
+                        requiredVersion
+                );
+
+        if (installed != null) {
+
+            System.out.println(
+                    "Found installed Java "
+                            + requiredVersion
+                            + ": "
+                            + installed
+            );
+
+            JavaVerifier.verify(
+                    installed,
+                    requiredVersion
+            );
+
+            return installed.toString();
         }
 
         /*
@@ -156,9 +194,16 @@ public class JavaLocator {
             return null;
         }
 
-        return findJavaExecutable(
-                javaDirectory
-        );
+        Path java =
+                findJavaExecutable(
+                        javaDirectory
+                );
+
+        if (java == null) {
+            return null;
+        }
+
+        return java;
     }
 
     // =============================================================
@@ -207,7 +252,6 @@ public class JavaLocator {
 
             if (location == null
                     || !Files.isDirectory(location)) {
-
                 continue;
             }
 
@@ -333,3 +377,4 @@ public class JavaLocator {
         }
     }
 }
+

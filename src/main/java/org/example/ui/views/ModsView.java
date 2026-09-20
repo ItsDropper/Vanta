@@ -37,6 +37,7 @@ public class ModsView extends VBox {
 
     private final Runnable onBrowseContent;
     private final Runnable onInstanceSettings;
+    private final Runnable onScreenshots;
 
     private final VBox contentList;
     private final Label statusLabel;
@@ -52,7 +53,8 @@ public class ModsView extends VBox {
     public ModsView(
             Instance instance,
             Runnable onBrowseContent,
-            Runnable onInstanceSettings
+            Runnable onInstanceSettings,
+            Runnable onScreenshots
     ) {
 
         this.instance =
@@ -63,6 +65,9 @@ public class ModsView extends VBox {
 
         this.onInstanceSettings =
                 onInstanceSettings;
+
+        this.onScreenshots =
+                onScreenshots;
 
         this.selectedType =
                 ContentType.MODS;
@@ -152,6 +157,15 @@ public class ModsView extends VBox {
                 "primary-button"
         );
 
+        Button screenshotsButton =
+                new Button(
+                        "SCREENSHOTS"
+                );
+
+        screenshotsButton.getStyleClass().add(
+                "secondary-button"
+        );
+
         Button settingsButton =
                 new Button(
                         "INSTANCE SETTINGS"
@@ -196,6 +210,11 @@ public class ModsView extends VBox {
                         onBrowseContent.run()
         );
 
+        screenshotsButton.setOnAction(
+                event ->
+                        onScreenshots.run()
+        );
+
         settingsButton.setOnAction(
                 event ->
                         onInstanceSettings.run()
@@ -208,6 +227,7 @@ public class ModsView extends VBox {
                         packsButton,
                         shadersButton,
                         browseButton,
+                        screenshotsButton,
                         settingsButton
                 );
 

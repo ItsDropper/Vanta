@@ -101,6 +101,10 @@ public class MinecraftLauncher {
             );
         }
 
+        if (data.javaVersion == 25 && "26.3".equals(data.version)) {
+            command.add("-XX:-TieredCompilation");
+        }
+
         // =============================================================
         // JAVA LIBRARY PATH
         // =============================================================
@@ -127,6 +131,10 @@ public class MinecraftLauncher {
         // =============================================================
         // CLASSPATH
         // =============================================================
+
+        if (data.javaVersion >= 22) {
+            command.add("--enable-native-access=ALL-UNNAMED");
+        }
 
         command.add("-cp");
 

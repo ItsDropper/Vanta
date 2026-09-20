@@ -2,7 +2,6 @@ package org.example.launcher.instance;
 
 import org.example.launcher.model.InstancePreset;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,17 +38,26 @@ public final class InstancePresets {
         return BUILT_IN_PRESETS;
     }
 
-    public static Optional<InstancePreset> getPresetById(String id) {
+    public static Optional<InstancePreset> getPresetById(
+            String id
+    ) {
+
         if (id == null || id.isBlank()) {
             return Optional.empty();
         }
 
         return BUILT_IN_PRESETS.stream()
-                .filter(preset -> id.equalsIgnoreCase(preset.getId()))
+                .filter(
+                        preset ->
+                                id.equalsIgnoreCase(
+                                        preset.getId()
+                                )
+                )
                 .findFirst();
     }
 
     private static InstancePreset createPvpPreset() {
+
         return new InstancePreset(
                 "pvp",
                 "PvP",
@@ -77,6 +85,7 @@ public final class InstancePresets {
     }
 
     private static InstancePreset createPerformancePreset() {
+
         return new InstancePreset(
                 "performance",
                 "Performance",
@@ -99,6 +108,7 @@ public final class InstancePresets {
     }
 
     private static InstancePreset createVanillaPlusPreset() {
+
         return new InstancePreset(
                 "vanilla-plus",
                 "Vanilla+",
@@ -123,6 +133,7 @@ public final class InstancePresets {
     }
 
     private static InstancePreset createShadersPreset() {
+
         return new InstancePreset(
                 "shaders",
                 "Shaders",
@@ -146,6 +157,7 @@ public final class InstancePresets {
     }
 
     private static InstancePreset createBuildingPreset() {
+
         return new InstancePreset(
                 "building",
                 "Building",
@@ -169,6 +181,7 @@ public final class InstancePresets {
     }
 
     private static InstancePreset createMinimalPreset() {
+
         return new InstancePreset(
                 "minimal",
                 "Minimal",

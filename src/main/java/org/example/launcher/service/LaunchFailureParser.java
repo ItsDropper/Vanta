@@ -20,6 +20,11 @@ public class LaunchFailureParser {
                     "([^ ]+) .*?requires version (.+?) of mod '([^']+)' \\(([^)]+)\\), but only the wrong version is present: ([^!]+)!"
             );
 
+    private static final Pattern INCOMPATIBLE_MODS =
+            Pattern.compile(
+                    "Mod '([^']+)' \\(([^)]+)\\) .*?is incompatible with version (.+?) of mod '([^']+)' \\(([^)]+)\\), yet a conflicting version is present: ([^!]+)!"
+            );
+
     public static List<RepairView.RepairIssue> parse(
             String output
     ) {
@@ -129,6 +134,71 @@ public class LaunchFailureParser {
                                     + dependencyName,
                             details,
                             dependencyId,
+                            versions
+                    )
+            );
+        }
+
+        /*
+         * Example:
+         *
+         * Mod 'Sodium' (sodium) 0.8.14+mc1.21.11 is
+         * incompatible with version 1.10.7 or earlier of
+         * mod 'Iris' (iris), yet a conflicting version is
+         * present: 1.10.7+mc1.21.11!
+         */
+        Matcher incompatible =
+                INCOMPATIBLE_MODS.matcher(output);
+
+        while (incompatible.find()) {
+
+            String requestingMod =
+                    incompatible.group(1);
+
+            String requestingModId =
+                    incompatible.group(2);
+
+            String requiredVersions =
+                    incompatible.group(3).trim();
+
+            String conflictingMod =
+                    incompatible.group(4);
+
+            String conflictingModId =
+                    incompatible.group(5);
+
+            String installedVersion =
+                    incompatible.group(6).trim();
+
+            List<String> versions =
+                    extractVersions(
+                            requiredVersions
+                    );
+
+            String details =
+                    "Incompatible with: "
+                            + conflictingMod
+                            + "\n"
+                            + "Installed version: "
+                            + installedVersion
+                            + "\n"
+                            + "Required version: "
+                            + formatVersions(versions)
+                            + "\n"
+                            + "Mod ID: "
+                            + requestingModId
+                            + "\n"
+                            + "Conflicting Mod ID: "
+                            + conflictingModId;
+
+            issues.add(
+                    new RepairView.RepairIssue(
+                            "MOD INCOMPATIBILITY",
+                            requestingMod
+                                    + " conflicts with "
+                                    + conflictingMod,
+                            details,
+                            conflictingModId,
                             versions
                     )
             );

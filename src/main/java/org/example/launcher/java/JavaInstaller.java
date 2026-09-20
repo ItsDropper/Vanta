@@ -49,6 +49,7 @@ public class JavaInstaller {
                 );
 
         if (existing != null) {
+
             JavaVerifier.verify(
                     existing,
                     version
@@ -142,8 +143,8 @@ public class JavaInstaller {
         }
 
         /*
-         * Verify that the downloaded runtime actually
-         * works and is the expected Java version.
+         * Verify that the downloaded runtime actually works and is
+         * the expected Java version.
          */
         JavaVerifier.verify(
                 java,
@@ -212,6 +213,11 @@ public class JavaInstaller {
             Path destination
     ) throws IOException {
 
+        Path normalizedDestination =
+                destination
+                        .toAbsolutePath()
+                        .normalize();
+
         try (ZipInputStream zip =
                      new ZipInputStream(
                              Files.newInputStream(
@@ -225,15 +231,17 @@ public class JavaInstaller {
                     zip.getNextEntry()) != null) {
 
                 Path target =
-                        destination.resolve(
-                                entry.getName()
-                        ).normalize();
+                        normalizedDestination
+                                .resolve(
+                                        entry.getName()
+                                )
+                                .normalize();
 
                 /*
                  * Prevent ZIP path traversal.
                  */
                 if (!target.startsWith(
-                        destination.normalize()
+                        normalizedDestination
                 )) {
 
                     throw new IOException(
@@ -251,9 +259,12 @@ public class JavaInstaller {
                     continue;
                 }
 
-                Files.createDirectories(
-                        target.getParent()
-                );
+                if (target.getParent() != null) {
+
+                    Files.createDirectories(
+                            target.getParent()
+                    );
+                }
 
                 Files.copy(
                         zip,
@@ -264,3 +275,4 @@ public class JavaInstaller {
         }
     }
 }
+

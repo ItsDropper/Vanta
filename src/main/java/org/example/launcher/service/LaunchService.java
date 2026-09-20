@@ -332,7 +332,6 @@ public class LaunchService {
              * Preserve the instance before the process monitor
              * clears runningInstance.
              */
-
             System.out.println(
                     "[Vanta DEBUG] Failure detected. Running instance: "
                             + runningInstance
@@ -356,7 +355,7 @@ public class LaunchService {
              * Stop Minecraft so its own Fabric error screen
              * does not remain visible.
              */
-            process.destroy();
+            process.destroyForcibly();
 
             setState(
                     LaunchState.ERROR
@@ -388,6 +387,16 @@ public class LaunchService {
                                 return;
                             }
 
+                            /*
+                             * Preserve the instance that failed
+                             * before clearing the running state.
+                             */
+                            if (failedInstance == null) {
+
+                                failedInstance =
+                                        runningInstance;
+                            }
+
                             minecraftProcess =
                                     null;
 
@@ -405,15 +414,6 @@ public class LaunchService {
                             }
 
                             if (exitCode != 0) {
-
-                                /*
-                                 * Preserve the instance that failed.
-                                 */
-                                if (failedInstance == null) {
-
-                                    failedInstance =
-                                            runningInstance;
-                                }
 
                                 if (lastFailure == null) {
 
