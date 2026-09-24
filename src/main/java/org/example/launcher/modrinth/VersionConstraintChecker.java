@@ -13,10 +13,12 @@ public final class VersionConstraintChecker {
             return false;
         }
 
-        version = version.trim();
+        version = normalize(version);
         constraint = constraint.trim();
 
-        if (constraint.isEmpty() || "*".equals(constraint)) {
+        if (constraint.isEmpty()
+                || "*".equals(constraint)) {
+
             return true;
         }
 
@@ -25,7 +27,7 @@ public final class VersionConstraintChecker {
 
         for (String alternative : alternatives) {
 
-            if (matchesSingle(
+            if (matchesAnd(
                     version,
                     alternative.trim()
             )) {
@@ -36,7 +38,7 @@ public final class VersionConstraintChecker {
         return false;
     }
 
-    private static boolean matchesSingle(
+    private static boolean matchesAnd(
             String version,
             String constraint
     ) {
@@ -44,10 +46,6 @@ public final class VersionConstraintChecker {
             return true;
         }
 
-        /*
-         * Fabric constraints can contain multiple
-         * space-separated requirements.
-         */
         String[] parts =
                 constraint.split("\\s+");
 
@@ -72,7 +70,14 @@ public final class VersionConstraintChecker {
             String version,
             String requirement
     ) {
-        requirement = requirement.trim();
+        requirement =
+                normalizeConstraint(requirement);
+
+        if (requirement.isBlank()
+                || "*".equals(requirement)) {
+
+            return true;
+        }
 
         if (requirement.contains("x")
                 || requirement.contains("X")
@@ -133,7 +138,10 @@ public final class VersionConstraintChecker {
             );
         }
 
-        return version.equals(requirement);
+        return compare(
+                version,
+                requirement
+        ) == 0;
     }
 
     private static boolean matchesWildcard(
@@ -149,7 +157,9 @@ public final class VersionConstraintChecker {
                         .replace('X', 'x')
                         .split("\\.");
 
-        for (int i = 0; i < requirementParts.length; i++) {
+        for (int i = 0;
+             i < requirementParts.length;
+             i++) {
 
             String required =
                     requirementParts[i];
@@ -169,8 +179,7 @@ public final class VersionConstraintChecker {
             }
         }
 
-        return versionParts.length ==
-                requirementParts.length;
+        return true;
     }
 
     private static boolean matchesCaret(
@@ -188,7 +197,8 @@ public final class VersionConstraintChecker {
             return false;
         }
 
-        int major = number(parts[0]);
+        int major =
+                number(parts[0]);
 
         if (major > 0) {
             return compare(
@@ -198,7 +208,9 @@ public final class VersionConstraintChecker {
         }
 
         if (parts.length > 1) {
-            int minor = number(parts[1]);
+
+            int minor =
+                    number(parts[1]);
 
             if (minor > 0) {
                 return compare(
@@ -209,7 +221,9 @@ public final class VersionConstraintChecker {
         }
 
         if (parts.length > 2) {
-            int patch = number(parts[2]);
+
+            int patch =
+                    number(parts[2]);
 
             return compare(
                     version,
@@ -238,8 +252,11 @@ public final class VersionConstraintChecker {
             ) < 0;
         }
 
-        int major = number(parts[0]);
-        int minor = number(parts[1]);
+        int major =
+                number(parts[0]);
+
+        int minor =
+                number(parts[1]);
 
         return compare(
                 version,
@@ -251,15 +268,13 @@ public final class VersionConstraintChecker {
             String a,
             String b
     ) {
-        if (a == null || b == null) {
-            return 0;
-        }
-
         String[] aParts =
-                a.trim().split("\\.");
+                normalize(a)
+                        .split("\\.");
 
         String[] bParts =
-                b.trim().split("\\.");
+                normalize(b)
+                        .split("\\.");
 
         int length =
                 Math.max(
@@ -267,7 +282,9 @@ public final class VersionConstraintChecker {
                         bParts.length
                 );
 
-        for (int i = 0; i < length; i++) {
+        for (int i = 0;
+             i < length;
+             i++) {
 
             int aValue =
                     i < aParts.length
@@ -293,14 +310,17 @@ public final class VersionConstraintChecker {
     private static int number(
             String value
     ) {
-        if (value == null || value.isBlank()) {
+        if (value == null
+                || value.isBlank()) {
+
             return 0;
         }
 
         StringBuilder digits =
                 new StringBuilder();
 
-        for (char c : value.toCharArray()) {
+        for (char c :
+                value.toCharArray()) {
 
             if (Character.isDigit(c)) {
                 digits.append(c);
@@ -320,5 +340,84 @@ public final class VersionConstraintChecker {
         } catch (NumberFormatException ignored) {
             return 0;
         }
+    }
+
+    private static String normalize(
+            String version
+    ) {
+        if (version == null) {
+            return "";
+        }
+
+        String result =
+                version.trim();
+
+        int plus =
+                result.indexOf('+');
+
+        if (plus >= 0) {
+            result =
+                    result.substring(
+                            0,
+                            plus
+                    );
+        }
+
+        return result;
+    }
+
+    private static String normalizeConstraint(
+            String constraint
+    ) {
+        if (constraint == null) {
+            return "";
+        }
+
+        constraint =
+                constraint.trim();
+
+        if (constraint.startsWith(">=")) {
+            return ">=" + normalize(
+                    constraint.substring(2)
+            );
+        }
+
+        if (constraint.startsWith("<=")) {
+            return "<=" + normalize(
+                    constraint.substring(2)
+            );
+        }
+
+        if (constraint.startsWith(">")) {
+            return ">" + normalize(
+                    constraint.substring(1)
+            );
+        }
+
+        if (constraint.startsWith("<")) {
+            return "<" + normalize(
+                    constraint.substring(1)
+            );
+        }
+
+        if (constraint.startsWith("=")) {
+            return "=" + normalize(
+                    constraint.substring(1)
+            );
+        }
+
+        if (constraint.startsWith("^")) {
+            return "^" + normalize(
+                    constraint.substring(1)
+            );
+        }
+
+        if (constraint.startsWith("~")) {
+            return "~" + normalize(
+                    constraint.substring(1)
+            );
+        }
+
+        return normalize(constraint);
     }
 }

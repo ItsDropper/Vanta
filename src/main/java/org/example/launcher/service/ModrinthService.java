@@ -31,6 +31,7 @@ public class ModrinthService {
     private final Map<String, InstalledMod> fabricMetadataCache =
             new HashMap<>();
 
+
     public ModrinthService() {
         client = new ModrinthClient();
         installedModScanner = new InstalledModScanner();
@@ -258,7 +259,9 @@ public class ModrinthService {
 
     public List<ResolvedMod> resolveModGraph(
             Instance instance,
-            List<ModrinthProject> rootProjects
+            List<ModrinthProject> rootProjects,
+            String requiredProjectId,
+            List<String> requiredVersions
     ) throws IOException, InterruptedException {
 
         if (instance == null) {
@@ -267,62 +270,65 @@ public class ModrinthService {
             );
         }
 
-        if (rootProjects == null
-                || rootProjects.isEmpty()) {
-
+        if (rootProjects == null || rootProjects.isEmpty()) {
             return List.of();
         }
 
         fabricMetadataCache.clear();
+        versionCache.clear();
 
-        LinkedHashMap<String, ModrinthVersion> resolved =
-                new LinkedHashMap<>();
-
-        Set<String> roots =
+        LinkedHashSet<String> roots =
                 new LinkedHashSet<>();
 
         for (ModrinthProject project : rootProjects) {
-
             if (project == null
                     || project.getProjectId() == null
                     || project.getProjectId().isBlank()) {
-
                 continue;
             }
 
             roots.add(project.getProjectId());
         }
 
-        /*
-         * Resolve every root against the same graph.
-         */
-        for (String rootProjectId : roots) {
+        if (roots.isEmpty()) {
+            return List.of();
+        }
 
-            Map<String, ModrinthVersion> working =
-                    new LinkedHashMap<>(resolved);
+        if (requiredProjectId != null
+                && !requiredProjectId.isBlank()
+                && roots.remove(requiredProjectId)) {
 
-            Set<String> resolving =
-                    new HashSet<>();
+            LinkedHashSet<String> orderedRoots =
+                    new LinkedHashSet<>();
 
-            boolean success =
-                    resolveProject(
-                            instance,
-                            rootProjectId,
-                            null,
-                            working,
-                            resolving
-                    );
+            orderedRoots.add(requiredProjectId);
+            orderedRoots.addAll(roots);
 
-            if (!success) {
-                throw new IOException(
-                        "Could not resolve compatible dependency graph "
-                                + "for preset mod "
-                                + rootProjectId
+            roots = orderedRoots;
+        }
+
+        LinkedHashMap<String, ModrinthVersion> resolved =
+                new LinkedHashMap<>();
+
+        List<String> rootList =
+                new ArrayList<>(roots);
+
+        boolean success =
+                resolveRoots(
+                        instance,
+                        rootList,
+                        requiredProjectId,
+                        requiredVersions,
+                        resolved,
+                        new HashSet<>()
                 );
-            }
 
-            resolved.clear();
-            resolved.putAll(working);
+        if (!success) {
+            throw new IOException(
+                    "Could not resolve compatible dependency graph. "
+                            + "Check the Vanta debug log for the "
+                            + "specific dependency conflict."
+            );
         }
 
         List<ResolvedMod> result =
@@ -342,29 +348,164 @@ public class ModrinthService {
         return result;
     }
 
-    private boolean resolveProject(
+    private boolean resolveRoots(
             Instance instance,
-            String projectId,
-            ModrinthDependency requestedBy,
+            List<String> roots,
+            String requiredProjectId,
+            List<String> requiredVersions,
             Map<String, ModrinthVersion> resolved,
             Set<String> resolving
     ) throws IOException, InterruptedException {
 
-        if (projectId == null
-                || projectId.isBlank()) {
+        if (resolved.keySet().containsAll(roots)) {
+            return true;
+        }
 
+        String selectedRoot = null;
+        List<ModrinthVersion> selectedCandidates = null;
+
+        for (String rootProjectId : roots) {
+            if (resolved.containsKey(rootProjectId)) continue;
+
+            List<ModrinthVersion> candidates =
+                    getCompatibleCandidates(instance, rootProjectId);
+
+            List<ModrinthVersion> compatibleCandidates =
+                    new ArrayList<>();
+
+            String lastConflictReason = null;
+
+            for (ModrinthVersion candidate : candidates) {
+                if (requiredProjectId != null
+                        && requiredProjectId.equals(rootProjectId)) {
+
+                    if (!matchesRequiredVersions(
+                            candidate,
+                            requiredVersions
+                    )) {
+                        lastConflictReason =
+                                "does not match the required version";
+
+                        continue;
+                    }
+                }
+
+                CompatibilityResult compatibility =
+                        isCompatibleWithResolvedGraph(
+                                instance,
+                                rootProjectId,
+                                candidate,
+                                resolved
+                        );
+
+                if (!compatibility.compatible()) {
+                    lastConflictReason = compatibility.reason();
+                    continue;
+                }
+
+                compatibleCandidates.add(candidate);
+            }
+
+            if (compatibleCandidates.isEmpty()) {
+                System.out.println(
+                        "[Vanta DEBUG] Root "
+                                + rootProjectId
+                                + " has no compatible candidates "
+                                + "with the current graph."
+                );
+
+                if (lastConflictReason != null) {
+                    System.out.println(
+                            "[Vanta DEBUG] Last conflict: "
+                                    + lastConflictReason
+                    );
+                }
+
+                return false;
+            }
+
+            if (selectedCandidates == null
+                    || compatibleCandidates.size()
+                    < selectedCandidates.size()) {
+
+                selectedRoot = rootProjectId;
+                selectedCandidates = compatibleCandidates;
+            }
+        }
+
+        if (selectedRoot == null || selectedCandidates == null) {
+            return true;
+        }
+
+        for (ModrinthVersion candidate : selectedCandidates) {
+            System.out.println(
+                    "[Vanta DEBUG] Trying root "
+                            + selectedRoot
+                            + " -> "
+                            + candidate.getVersionNumber()
+            );
+
+            Map<String, ModrinthVersion> branch =
+                    new LinkedHashMap<>(resolved);
+
+            branch.put(selectedRoot, candidate);
+
+            if (!resolveDependencies(
+                    instance,
+                    candidate,
+                    branch,
+                    resolving
+            )) {
+                continue;
+            }
+
+            if (!resolveRoots(
+                    instance,
+                    roots,
+                    requiredProjectId,
+                    requiredVersions,
+                    branch,
+                    resolving
+            )) {
+                continue;
+            }
+
+            if (!isGraphConsistent(instance, branch)) {
+                System.out.println(
+                        "[Vanta DEBUG] Rejected complete graph after root "
+                                + selectedRoot
+                                + " "
+                                + candidate.getVersionNumber()
+                );
+
+                continue;
+            }
+
+            resolved.clear();
+            resolved.putAll(branch);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private boolean resolveProject(
+            Instance instance,
+            String projectId,
+            ModrinthDependency requestedBy,
+            List<String> requiredVersions,
+            Map<String, ModrinthVersion> resolved,
+            Set<String> resolving
+    ) throws IOException, InterruptedException {
+
+        if (projectId == null || projectId.isBlank()) {
             return false;
         }
 
-        /*
-         * If the project is already selected, validate that the
-         * selected version satisfies the new requirement.
-         */
-        ModrinthVersion selected =
-                resolved.get(projectId);
+        ModrinthVersion selected = resolved.get(projectId);
 
         if (selected != null) {
-
             return satisfiesDependency(
                     instance,
                     selected,
@@ -389,9 +530,15 @@ public class ModrinthService {
         resolving.add(projectId);
 
         try {
+            for (ModrinthVersion candidate : candidates) {
 
-            for (ModrinthVersion candidate :
-                    candidates) {
+                if (requiredVersions != null
+                        && !matchesRequiredVersions(
+                        candidate,
+                        requiredVersions
+                )) {
+                    continue;
+                }
 
                 if (!satisfiesDependency(
                         instance,
@@ -401,22 +548,31 @@ public class ModrinthService {
                     continue;
                 }
 
-                if (!isCompatibleWithResolvedGraph(
-                        instance,
-                        projectId,
-                        candidate,
-                        resolved
-                )) {
+                CompatibilityResult compatibility =
+                        isCompatibleWithResolvedGraph(
+                                instance,
+                                projectId,
+                                candidate,
+                                resolved
+                        );
+
+                if (!compatibility.compatible()) {
+                    System.out.println(
+                            "[Vanta DEBUG] Rejected "
+                                    + projectId
+                                    + " "
+                                    + candidate.getVersionNumber()
+                                    + ": "
+                                    + compatibility.reason()
+                    );
+
                     continue;
                 }
 
                 Map<String, ModrinthVersion> branch =
                         new LinkedHashMap<>(resolved);
 
-                branch.put(
-                        projectId,
-                        candidate
-                );
+                branch.put(projectId, candidate);
 
                 if (!resolveDependencies(
                         instance,
@@ -463,12 +619,19 @@ public class ModrinthService {
             return true;
         }
 
+        System.out.println(
+                "[Vanta DEBUG] Resolving dependencies for "
+                        + version.getVersionNumber()
+        );
+
         for (ModrinthDependency dependency :
                 dependencies) {
 
-            if (dependency == null
-                    || dependency.isOptional()) {
+            if (dependency == null) {
+                continue;
+            }
 
+            if (dependency.isOptional()) {
                 continue;
             }
 
@@ -485,35 +648,69 @@ public class ModrinthService {
                 continue;
             }
 
+            System.out.println(
+                    "[Vanta DEBUG]   Dependency: "
+                            + dependencyProjectId
+                            + " versionId="
+                            + dependency.getVersionId()
+            );
+
             /*
              * If an existing selected dependency doesn't satisfy
              * this requirement, this branch is invalid.
              */
-            if (resolved.containsKey(dependencyProjectId)) {
+            if (resolved.containsKey(
+                    dependencyProjectId
+            )) {
 
                 ModrinthVersion selected =
                         resolved.get(
                                 dependencyProjectId
                         );
 
-                if (!satisfiesDependency(
-                        instance,
-                        selected,
-                        dependency
-                )) {
+                boolean satisfies =
+                        satisfiesDependency(
+                                instance,
+                                selected,
+                                dependency
+                        );
+
+                System.out.println(
+                        "[Vanta DEBUG]   Existing dependency "
+                                + selected.getVersionNumber()
+                                + " satisfies="
+                                + satisfies
+                );
+
+                if (!satisfies) {
+                    System.out.println(
+                            "[Vanta DEBUG]   FAILED existing dependency: "
+                                    + dependencyProjectId
+                    );
+
                     return false;
                 }
 
                 continue;
             }
 
-            if (!resolveProject(
-                    instance,
-                    dependencyProjectId,
-                    dependency,
-                    resolved,
-                    resolving
-            )) {
+            boolean success =
+                    resolveProject(
+                            instance,
+                            dependencyProjectId,
+                            dependency,
+                            null,
+                            resolved,
+                            resolving
+                    );
+
+            if (!success) {
+
+                System.out.println(
+                        "[Vanta DEBUG]   FAILED dependency: "
+                                + dependencyProjectId
+                );
+
                 return false;
             }
         }
@@ -525,18 +722,37 @@ public class ModrinthService {
     // CANDIDATES
     // =============================================================
 
+    private final Map<String, List<ModrinthVersion>> versionCache =
+            new HashMap<>();
+
     private List<ModrinthVersion> getCompatibleCandidates(
             Instance instance,
             String projectId
     ) throws IOException, InterruptedException {
 
         List<ModrinthVersion> versions =
-                client.getVersions(projectId);
+                versionCache.get(projectId);
 
-        if (versions == null
-                || versions.isEmpty()) {
+        if (versions == null) {
 
-            return List.of();
+            versions =
+                    client.getVersions(projectId);
+
+            if (versions == null
+                    || versions.isEmpty()) {
+
+                versionCache.put(
+                        projectId,
+                        List.of()
+                );
+
+                return List.of();
+            }
+
+            versionCache.put(
+                    projectId,
+                    versions
+            );
         }
 
         List<ModrinthVersion> candidates =
@@ -550,7 +766,8 @@ public class ModrinthService {
                         instance.getLoader()
                 );
 
-        for (ModrinthVersion version : versions) {
+        for (ModrinthVersion version :
+                versions) {
 
             if (!isCompatible(
                     version,
@@ -913,7 +1130,7 @@ public class ModrinthService {
     // GRAPH COMPATIBILITY
     // =============================================================
 
-    private boolean isCompatibleWithResolvedGraph(
+    private CompatibilityResult isCompatibleWithResolvedGraph(
             Instance instance,
             String projectId,
             ModrinthVersion candidate,
@@ -923,56 +1140,67 @@ public class ModrinthService {
         for (Map.Entry<String, ModrinthVersion> entry :
                 resolved.entrySet()) {
 
-            String otherProjectId =
-                    entry.getKey();
+            String otherProjectId = entry.getKey();
+            ModrinthVersion otherVersion = entry.getValue();
 
-            ModrinthVersion otherVersion =
-                    entry.getValue();
-
-            if (hasExplicitIncompatibility(
-                    candidate,
-                    otherProjectId
-            )) {
-                return false;
+            if (hasExplicitIncompatibility(candidate, otherProjectId)) {
+                return CompatibilityResult.conflict(
+                        candidate.getVersionNumber()
+                                + " explicitly conflicts with "
+                                + otherProjectId
+                );
             }
 
-            if (hasExplicitIncompatibility(
-                    otherVersion,
-                    projectId
-            )) {
-                return false;
+            if (hasExplicitIncompatibility(otherVersion, projectId)) {
+                return CompatibilityResult.conflict(
+                        otherVersion.getVersionNumber()
+                                + " explicitly conflicts with "
+                                + projectId
+                );
             }
 
-            if (!fabricDependencyAcceptsVersion(
-                    candidate,
-                    otherVersion
-            )) {
-                return false;
+            if (hasFabricBreakConflict(otherVersion, candidate)) {
+                return CompatibilityResult.conflict(
+                        otherVersion.getVersionNumber()
+                                + " breaks "
+                                + projectId
+                );
             }
 
-            if (!fabricDependencyAcceptsVersion(
-                    otherVersion,
-                    candidate
-            )) {
-                return false;
+            if (hasFabricBreakConflict(candidate, otherVersion)) {
+                return CompatibilityResult.conflict(
+                        candidate.getVersionNumber()
+                                + " breaks "
+                                + otherProjectId
+                );
             }
 
-            if (hasFabricBreakConflict(
-                    candidate,
-                    otherVersion
-            )) {
-                return false;
+            if (!fabricDependencyAcceptsVersion(candidate, otherVersion)) {
+                return CompatibilityResult.conflict(
+                        projectId
+                                + " "
+                                + candidate.getVersionNumber()
+                                + " does not accept "
+                                + otherProjectId
+                                + " "
+                                + otherVersion.getVersionNumber()
+                );
             }
 
-            if (hasFabricBreakConflict(
-                    otherVersion,
-                    candidate
-            )) {
-                return false;
+            if (!fabricDependencyAcceptsVersion(otherVersion, candidate)) {
+                return CompatibilityResult.conflict(
+                        otherProjectId
+                                + " "
+                                + otherVersion.getVersionNumber()
+                                + " does not accept "
+                                + projectId
+                                + " "
+                                + candidate.getVersionNumber()
+                );
             }
         }
 
-        return true;
+        return CompatibilityResult.ok();
     }
 
     private boolean isGraphConsistent(
@@ -1148,33 +1376,32 @@ public class ModrinthService {
     private boolean hasFabricBreakConflict(
             ModrinthVersion breakingVersion,
             ModrinthVersion otherVersion
-    ) throws IOException {
+    ) throws IOException, InterruptedException {
+
+        if (breakingVersion == null
+                || otherVersion == null) {
+            return false;
+        }
 
         InstalledMod breaking =
                 readFabricMetadata(
                         breakingVersion
                 );
 
+        if (breaking == null
+                || breaking.getBreaks() == null
+                || breaking.getBreaks().isEmpty()) {
+            return false;
+        }
+
         InstalledMod other =
                 readFabricMetadata(
                         otherVersion
                 );
 
-        if (breaking == null
-                || other == null) {
-
-            return false;
-        }
-
-        String otherModId =
-                other.getModId();
-
-        String otherVersionNumber =
-                other.getVersion();
-
-        if (otherModId == null
-                || otherVersionNumber == null) {
-
+        if (other == null
+                || other.getModId() == null
+                || other.getVersion() == null) {
             return false;
         }
 
@@ -1185,19 +1412,16 @@ public class ModrinthService {
                 continue;
             }
 
-            if (!otherModId.equals(
+            if (!other.getModId().equals(
                     requirement.getModId()
             )) {
                 continue;
             }
 
-            boolean matches =
-                    matchesFabricConstraint(
-                            otherVersionNumber,
-                            requirement.getVersionConstraint()
-                    );
-
-            if (matches) {
+            if (matchesFabricConstraint(
+                    other.getVersion(),
+                    requirement.getVersionConstraint()
+            )) {
 
                 System.out.println(
                         "[Vanta] Fabric break conflict: "
@@ -1205,9 +1429,9 @@ public class ModrinthService {
                                 + " "
                                 + breaking.getVersion()
                                 + " breaks "
-                                + otherModId
+                                + other.getModId()
                                 + " "
-                                + otherVersionNumber
+                                + other.getVersion()
                                 + " ["
                                 + requirement.getVersionConstraint()
                                 + "]"
@@ -1890,6 +2114,7 @@ public class ModrinthService {
     // REPAIR MOD DEPENDENCY
     // =============================================================
 
+
     public Path repairModDependency(
             Instance instance,
             String projectId,
@@ -1909,62 +2134,277 @@ public class ModrinthService {
         }
 
         fabricMetadataCache.clear();
+        versionCache.clear();
 
         /*
-         * IMPORTANT:
-         * Do not treat every currently-installed mod as immutable.
+         * Build the installed root set.
          *
-         * The old repair logic did:
-         *
-         * Iris -> fixed Sodium -> fixed Sodium Extra
-         *
-         * which makes a valid replacement impossible when one of
-         * those dependencies also needs to change.
-         *
-         * Instead, resolve the repaired mod as a fresh dependency
-         * graph.
+         * Every installed mod starts as a root candidate. During repair,
+         * we first try keeping every root. If that is impossible, we test
+         * removing exactly one root at a time.
          */
+        List<InstalledModRecord> installedMods =
+                InstalledModManager.load(instance);
+
         List<ModrinthProject> roots =
                 new ArrayList<>();
 
-        ModrinthProject root =
-                client.getProject(projectId);
+        Map<String, InstalledModRecord> installedByProject =
+                new LinkedHashMap<>();
 
-        if (root == null) {
-            throw new IOException(
-                    "Could not find Modrinth project: "
-                            + projectId
+        for (InstalledModRecord record : installedMods) {
+
+            if (record == null
+                    || record.getProjectId() == null
+                    || record.getProjectId().isBlank()) {
+                continue;
+            }
+
+            String installedProjectId =
+                    record.getProjectId();
+
+            installedByProject.put(
+                    installedProjectId,
+                    record
             );
+
+            ModrinthProject installedProject =
+                    client.getProject(
+                            installedProjectId
+                    );
+
+            if (installedProject == null) {
+                continue;
+            }
+
+            roots.add(installedProject);
         }
 
-        roots.add(root);
+        /*
+         * Make sure the project being repaired is a root.
+         */
+        boolean alreadyPresent = false;
 
-        List<ResolvedMod> resolved =
-                resolveModGraph(
-                        instance,
-                        roots
+        for (ModrinthProject root : roots) {
+
+            if (root != null
+                    && projectId.equals(
+                    root.getProjectId()
+            )) {
+
+                alreadyPresent = true;
+                break;
+            }
+        }
+
+        if (!alreadyPresent) {
+
+            ModrinthProject repairedProject =
+                    client.getProject(projectId);
+
+            if (repairedProject == null) {
+                throw new IOException(
+                        "Could not find Modrinth project: "
+                                + projectId
+                );
+            }
+
+            roots.add(repairedProject);
+        }
+
+        /*
+         * First attempt:
+         *
+         * Keep every installed root and solve the complete graph.
+         */
+        List<ResolvedMod> resolved = null;
+
+        try {
+
+            resolved =
+                    resolveModGraph(
+                            instance,
+                            roots,
+                            projectId,
+                            requiredVersions
+                    );
+
+        } catch (IOException fullGraphFailure) {
+
+            System.out.println(
+                    "[Vanta] Full repair graph could not be resolved."
+            );
+
+            /*
+             * The full graph is impossible.
+             *
+             * Now test whether exactly one installed root needs to be
+             * removed from the root set.
+             *
+             * Important:
+             * Removing a root does NOT necessarily remove the mod.
+             * If another mod depends on it, the dependency resolver will
+             * add it back and choose a compatible version.
+             */
+            List<ModrinthProject> successfulRoots = null;
+            List<ResolvedMod> successfulResolution = null;
+            String removedProjectId = null;
+
+            for (ModrinthProject candidateToRemove : roots) {
+
+                if (candidateToRemove == null
+                        || candidateToRemove.getProjectId() == null
+                        || candidateToRemove.getProjectId().isBlank()) {
+                    continue;
+                }
+
+                String candidateProjectId =
+                        candidateToRemove.getProjectId();
+
+                /*
+                 * Never remove the project we were explicitly asked to
+                 * repair.
+                 */
+                if (projectId.equals(candidateProjectId)) {
+                    continue;
+                }
+
+                List<ModrinthProject> reducedRoots =
+                        new ArrayList<>();
+
+                for (ModrinthProject root : roots) {
+
+                    if (root == null
+                            || root.getProjectId() == null) {
+                        continue;
+                    }
+
+                    if (candidateProjectId.equals(
+                            root.getProjectId()
+                    )) {
+                        continue;
+                    }
+
+                    reducedRoots.add(root);
+                }
+
+                System.out.println(
+                        "[Vanta] Testing repair without root "
+                                + candidateProjectId
                 );
 
-        if (resolved == null || resolved.isEmpty()) {
-            throw new IOException(
-                    "Could not resolve a compatible dependency graph for "
-                            + projectId
+                /*
+                 * Clear metadata caches between attempts so a failed
+                 * branch cannot influence a later repair attempt.
+                 */
+                fabricMetadataCache.clear();
+                versionCache.clear();
+
+                try {
+
+                    List<ResolvedMod> candidateResolution =
+                            resolveModGraph(
+                                    instance,
+                                    reducedRoots,
+                                    projectId,
+                                    requiredVersions
+                            );
+
+                    /*
+                     * We found one possible repair.
+                     */
+                    if (successfulResolution == null) {
+
+                        successfulRoots =
+                                reducedRoots;
+
+                        successfulResolution =
+                                candidateResolution;
+
+                        removedProjectId =
+                                candidateProjectId;
+
+                    } else {
+
+                        /*
+                         * More than one root can be removed to make the
+                         * graph valid. That is ambiguous, so do not
+                         * silently choose one.
+                         */
+                        throw new IOException(
+                                "Vanta found multiple possible "
+                                        + "repair resolutions. "
+                                        + "Manual intervention is required."
+                        );
+                    }
+
+                } catch (IOException ignored) {
+
+                    /*
+                     * This root did not solve the conflict.
+                     * Try the next root.
+                     */
+                }
+            }
+
+            if (successfulResolution == null) {
+
+                throw new IOException(
+                        "Vanta could not safely repair "
+                                + projectId
+                                + ": the dependency graph is "
+                                + "unsatisfiable and no single installed "
+                                + "root can be removed to resolve it.",
+                        fullGraphFailure
+                );
+            }
+
+            resolved =
+                    successfulResolution;
+
+            System.out.println(
+                    "[Vanta] Repair requires removing root "
+                            + removedProjectId
             );
         }
 
+        if (resolved == null || resolved.isEmpty()) {
+
+            throw new IOException(
+                    "Vanta could not safely repair "
+                            + projectId
+                            + ": the dependency graph is empty."
+            );
+        }
+
+        /*
+         * Make sure the requested project actually exists in the
+         * resulting graph.
+         */
         ResolvedMod repaired = null;
 
         for (ResolvedMod mod : resolved) {
-            if (projectId.equals(mod.projectId())) {
+
+            if (mod == null) {
+                continue;
+            }
+
+            if (projectId.equals(
+                    mod.projectId()
+            )) {
+
                 repaired = mod;
                 break;
             }
         }
 
         if (repaired == null) {
+
             throw new IOException(
-                    "Resolver did not produce a version for "
+                    "Vanta could not safely repair "
                             + projectId
+                            + ": the resolver did not produce "
+                            + "a version for the repaired project."
             );
         }
 
@@ -1976,10 +2416,77 @@ public class ModrinthService {
         );
 
         /*
-         * Remove the old versions of every mod that the newly
-         * resolved graph wants to replace.
+         * Determine which currently installed mods are no longer present
+         * in the final resolved graph.
+         *
+         * These are the roots that the successful repair determined
+         * cannot remain in the environment.
+         */
+        Set<String> resolvedProjectIds =
+                new HashSet<>();
+
+        for (ResolvedMod mod : resolved) {
+
+            if (mod == null
+                    || mod.projectId() == null) {
+                continue;
+            }
+
+            resolvedProjectIds.add(
+                    mod.projectId()
+            );
+        }
+
+        /*
+         * Remove installed mods that are not part of the final graph.
+         *
+         * This is done only after the entire graph has successfully
+         * resolved, so a failed repair never partially modifies the
+         * instance.
+         */
+        for (InstalledModRecord record :
+                installedMods) {
+
+            if (record == null
+                    || record.getProjectId() == null
+                    || record.getProjectId().isBlank()) {
+                continue;
+            }
+
+            String installedProjectId =
+                    record.getProjectId();
+
+            if (projectId.equals(installedProjectId)) {
+                continue;
+            }
+
+            if (!resolvedProjectIds.contains(
+                    installedProjectId
+            )) {
+
+                System.out.println(
+                        "[Vanta] Removing incompatible mod "
+                                + installedProjectId
+                );
+
+                removeInstalledMod(
+                        instance,
+                        installedProjectId
+                );
+            }
+        }
+
+        /*
+         * Remove installed versions that are being replaced by the
+         * resolved graph.
          */
         for (ResolvedMod mod : resolved) {
+
+            if (mod == null
+                    || mod.projectId() == null
+                    || mod.version() == null) {
+                continue;
+            }
 
             InstalledModRecord existing =
                     InstalledModManager.findByProjectId(
@@ -1995,6 +2502,7 @@ public class ModrinthService {
                     && existing.getVersionId().equals(
                     mod.version().getId()
             )) {
+
                 continue;
             }
 
@@ -2014,22 +2522,22 @@ public class ModrinthService {
                 );
 
         /*
-         * Locate the repaired mod.
+         * Locate the repaired mod through the installed-mod registry.
          */
-        InstalledModRecord record =
+        InstalledModRecord repairedRecord =
                 InstalledModManager.findByProjectId(
                         instance,
                         projectId
                 );
 
-        if (record != null
-                && record.getFilename() != null) {
+        if (repairedRecord != null
+                && repairedRecord.getFilename() != null) {
 
             Path repairedFile =
                     instance.getDirectory()
                             .resolve("mods")
                             .resolve(
-                                    record.getFilename()
+                                    repairedRecord.getFilename()
                             );
 
             if (Files.isRegularFile(repairedFile)) {
@@ -2038,44 +2546,50 @@ public class ModrinthService {
         }
 
         /*
-         * Fallback: inspect everything that was installed.
+         * Fallback: inspect the files installed by this repair.
          */
-        for (Path path : installed) {
+        InstalledMod repairedMetadata =
+                readFabricMetadata(
+                        repaired.version()
+                );
 
-            if (!Files.isRegularFile(path)) {
-                continue;
-            }
+        if (repairedMetadata != null
+                && repairedMetadata.getModId() != null) {
 
-            InstalledMod mod =
-                    installedModScanner.scanFile(path);
+            for (Path path : installed) {
 
-            if (mod == null) {
-                continue;
-            }
+                if (!Files.isRegularFile(path)) {
+                    continue;
+                }
 
-            /*
-             * Compare the Fabric mod ID against the repaired
-             * project's metadata.
-             */
-            InstalledMod repairedMetadata =
-                    readFabricMetadata(
-                            repaired.version()
-                    );
+                InstalledMod installedMod =
+                        installedModScanner.scanFile(
+                                path
+                        );
 
-            if (repairedMetadata != null
-                    && repairedMetadata.getModId() != null
-                    && repairedMetadata.getModId().equals(
-                    mod.getModId()
-            )) {
-                return path;
+                if (installedMod == null
+                        || installedMod.getModId() == null) {
+                    continue;
+                }
+
+                if (repairedMetadata.getModId().equals(
+                        installedMod.getModId()
+                )) {
+
+                    return path;
+                }
             }
         }
 
         throw new IOException(
-                "Repair resolved successfully, but the repaired mod "
-                        + "could not be located after installation."
+                "Vanta repaired "
+                        + projectId
+                        + " successfully, but could not locate "
+                        + "the repaired mod after installation."
         );
     }
+
+
 
     private LinkedHashMap<String, ModrinthVersion> loadInstalledGraph(
             Instance instance,
@@ -2703,4 +3217,118 @@ public class ModrinthService {
             ModrinthVersion version
     ) {
     }
+
+    private boolean matchesRequiredVersions(
+            ModrinthVersion candidate,
+            List<String> requiredVersions
+    ) {
+
+        if (requiredVersions == null
+                || requiredVersions.isEmpty()) {
+            return true;
+        }
+
+        String candidateVersion =
+                candidate.getVersionNumber();
+
+        if (candidateVersion == null
+                || candidateVersion.isBlank()) {
+            return false;
+        }
+
+        String normalizedCandidate =
+                normalizeModrinthVersion(
+                        candidateVersion
+                );
+
+        for (String required :
+                requiredVersions) {
+
+            if (required == null
+                    || required.isBlank()) {
+                continue;
+            }
+
+            String normalizedRequired =
+                    normalizeVersionForComparison(
+                            required
+                    );
+
+            if (normalizedCandidate.equals(
+                    normalizedRequired
+            )) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String normalizeModrinthVersion(
+            String version
+    ) {
+
+        if (version == null
+                || version.isBlank()) {
+            return "";
+        }
+
+        // Modrinth:
+        // mc1.21.11-0.8.14-fabric
+        //
+        // Fabric:
+        // 0.8.14+mc1.21.11
+
+        if (version.startsWith("mc")
+                && version.endsWith("-fabric")) {
+
+            String body =
+                    version.substring(
+                            2,
+                            version.length() - "-fabric".length()
+                    );
+
+            int separator =
+                    body.indexOf('-');
+
+            if (separator > 0
+                    && separator < body.length() - 1) {
+
+                String minecraftVersion =
+                        body.substring(
+                                0,
+                                separator
+                        );
+
+                String modVersion =
+                        body.substring(
+                                separator + 1
+                        );
+
+                return normalizeVersionForComparison(
+                        modVersion
+                                + "+mc"
+                                + minecraftVersion
+                );
+            }
+        }
+
+        return normalizeVersionForComparison(
+                version
+        );
+    }
+
+    private record CompatibilityResult(
+            boolean compatible,
+            String reason
+    ) {
+        static CompatibilityResult ok() {
+            return new CompatibilityResult(true, null);
+        }
+
+        static CompatibilityResult conflict(String reason) {
+            return new CompatibilityResult(false, reason);
+        }
+    }
+
 }
