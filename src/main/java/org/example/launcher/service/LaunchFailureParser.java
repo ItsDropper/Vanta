@@ -50,6 +50,12 @@ public class LaunchFailureParser {
                             + "\\s+but only the wrong version is present:\\s*([^!]+)!"
             );
 
+    private static final Pattern MISSING_DEPENDENCY_ANY_VERSION =
+            Pattern.compile(
+                    "Mod '([^']+)' \\(([^)]+)\\).*?"
+                            + "requires any version of ([^,]+), which is missing!"
+            );
+
     public static List<RepairView.RepairIssue> parse(
             String output
     ) {
@@ -287,6 +293,40 @@ public class LaunchFailureParser {
                             null,
                             List.of(),
                             requiredVersion
+                    )
+            );
+        }
+
+        Matcher missingAnyVersion =
+                MISSING_DEPENDENCY_ANY_VERSION.matcher(output);
+
+        while (missingAnyVersion.find()) {
+
+            String requestingMod =
+                    missingAnyVersion.group(1);
+
+            String requestingModId =
+                    missingAnyVersion.group(2);
+
+            String dependencyProjectId =
+                    missingAnyVersion.group(3).trim();
+
+            String details =
+                    "Recommended version: Any compatible version"
+                            + "\nDependency: "
+                            + dependencyProjectId
+                            + "\nMod ID: "
+                            + requestingModId;
+
+            issues.add(
+                    new RepairView.RepairIssue(
+                            "MISSING DEPENDENCY",
+                            requestingMod
+                                    + " requires "
+                                    + dependencyProjectId,
+                            details,
+                            dependencyProjectId,
+                            List.of()
                     )
             );
         }

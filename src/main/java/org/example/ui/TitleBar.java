@@ -20,10 +20,8 @@ public class TitleBar extends HBox {
     private double dragY;
 
     private final Button updateButton;
-    private final Button testUpdateButton;
 
     private Consumer<UpdateInfo> updateAction;
-    private Runnable testUpdateAction;
 
     private UpdateInfo currentUpdate;
 
@@ -80,26 +78,6 @@ public class TitleBar extends HBox {
                 false
         );
 
-        // =========================================================
-        // TEST UPDATE BUTTON
-        // =========================================================
-
-        testUpdateButton =
-                new Button(
-                        "Test Update"
-                );
-
-        testUpdateButton.getStyleClass().add(
-                "title-bar-update"
-        );
-
-        testUpdateButton.setOnAction(event -> {
-
-            if (testUpdateAction != null) {
-
-                testUpdateAction.run();
-            }
-        });
 
         // =========================================================
         // WINDOW ICONS
@@ -215,7 +193,6 @@ public class TitleBar extends HBox {
                 spacer,
                 accountSwitcher,
                 updateButton,
-                testUpdateButton,
                 minimize,
                 maximize,
                 close
@@ -281,11 +258,4 @@ public class TitleBar extends HBox {
                 action;
     }
 
-    public void setTestUpdateAction(
-            Runnable action
-    ) {
-
-        testUpdateAction =
-                action;
-    }
 }

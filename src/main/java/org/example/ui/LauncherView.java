@@ -400,6 +400,7 @@ public class LauncherView {
         );
     }
 
+
     private void createPresetInstance(
             InstancePreset preset,
             String name,
@@ -450,6 +451,13 @@ public class LauncherView {
 
                         List<String> skippedMods =
                                 new ArrayList<>();
+
+                        List<String> skippedShaders =
+                                new ArrayList<>();
+
+                        // =====================================================
+                        // INSTALL MODS
+                        // =====================================================
 
                         if (preset.getMods() != null) {
 
@@ -523,7 +531,98 @@ public class LauncherView {
                             }
                         }
 
-                        if (skippedMods.isEmpty()) {
+                        // =====================================================
+                        // INSTALL SHADERS
+                        // =====================================================
+
+                        if (preset.getShaders() != null) {
+
+                            for (String shaderSlug :
+                                    preset.getShaders()) {
+
+                                notifications.updateProgress(
+                                        "Installing shader "
+                                                + shaderSlug
+                                                + "..."
+                                );
+
+                                System.out.println(
+                                        "Resolving preset shader: "
+                                                + shaderSlug
+                                );
+
+                                try {
+
+                                    ModrinthProject project =
+                                            modrinthService.getProjectBySlug(
+                                                    shaderSlug
+                                            );
+
+                                    if (project == null) {
+
+                                        skippedShaders.add(
+                                                shaderSlug
+                                        );
+
+                                        System.out.println(
+                                                "[Vanta] Skipping preset shader "
+                                                        + shaderSlug
+                                                        + ": project not found."
+                                        );
+
+                                        continue;
+                                    }
+
+                                    modrinthService.installShader(
+                                            instance,
+                                            project
+                                    );
+
+                                } catch (IOException
+                                         | InterruptedException e) {
+
+                                    String message =
+                                            e.getMessage();
+
+                                    if (message != null
+                                            && message.contains(
+                                            "No compatible shader version found"
+                                    )) {
+
+                                        skippedShaders.add(
+                                                shaderSlug
+                                        );
+
+                                        System.out.println(
+                                                "[Vanta] Skipping preset shader "
+                                                        + shaderSlug
+                                                        + ": no compatible version found."
+                                        );
+
+                                        continue;
+                                    }
+
+                                    throw e;
+                                }
+                            }
+                        }
+
+                        // =====================================================
+                        // RESULT
+                        // =====================================================
+
+                        List<String> skipped =
+                                new ArrayList<>();
+
+                        skipped.addAll(
+                                skippedMods
+                        );
+
+                        skipped.addAll(
+                                skippedShaders
+                        );
+
+                        if (skipped.isEmpty()) {
 
                             notifications.success(
                                     "Installation complete",
@@ -535,10 +634,10 @@ public class LauncherView {
 
                         } else {
 
-                            String skipped =
+                            String skippedText =
                                     String.join(
                                             ", ",
-                                            skippedMods
+                                            skipped
                                     );
 
                             notifications.success(
@@ -547,8 +646,8 @@ public class LauncherView {
                                             + " ("
                                             + minecraftVersion
                                             + ") is ready. "
-                                            + "No compatible versions found for: "
-                                            + skipped
+                                            + "Could not install: "
+                                            + skippedText
                             );
                         }
 
@@ -584,6 +683,8 @@ public class LauncherView {
 
         thread.start();
     }
+
+
 
     private String getErrorMessage(
             Throwable throwable
@@ -779,7 +880,6 @@ public class LauncherView {
                             this::performUpdate
                     );
 
-                    titleBar.setTestUpdateAction( this::simulateUpdate );
 
                 })
                 .exceptionally(error -> {
@@ -908,81 +1008,6 @@ public class LauncherView {
     }
 
 
-
-    private void simulateUpdate() {
-
-        notifications.showProgress(
-                "Updating Vanta",
-                "Downloading Vanta 1.0.6..."
-        );
-
-        notifications.setProgress(0);
-
-        Thread thread =
-                new Thread(() -> {
-
-                    try {
-
-                        for (int i = 0; i <= 100; i += 2) {
-
-                            notifications.setProgress(
-                                    i / 100.0
-                            );
-
-                            notifications.updateProgress(
-                                    "Downloading Vanta 1.0.6... "
-                                            + i
-                                            + "%"
-                            );
-
-                            Thread.sleep(40);
-                        }
-
-                        notifications.updateProgress(
-                                "Verifying update..."
-                        );
-
-                        Thread.sleep(1200);
-
-                        notifications.updateProgress(
-                                "Preparing Vanta 1.0.6..."
-                        );
-
-                        Thread.sleep(1200);
-
-                        notifications.updateProgress(
-                                "Restarting Vanta..."
-                        );
-
-                        Thread.sleep(1200);
-
-                        notifications.success(
-                                "Update simulation complete",
-                                "Vanta would restart now."
-                        );
-
-                    } catch (InterruptedException e) {
-
-                        Thread.currentThread().interrupt();
-
-                        notifications.error(
-                                "Update simulation failed",
-                                "The simulation was interrupted."
-                        );
-                    }
-
-                });
-
-        thread.setName(
-                "Vanta-Fake-Update"
-        );
-
-        thread.setDaemon(
-                true
-        );
-
-        thread.start();
-    }
 
     private String getUpdateErrorMessage(
             Throwable throwable

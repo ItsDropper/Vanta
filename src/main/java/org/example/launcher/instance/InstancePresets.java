@@ -80,7 +80,8 @@ public final class InstancePresets {
                         "dynamic-fps",
                         "anchor",
                         "marlow-crystal-optimizer"
-                )
+                ),
+                List.of()
         );
     }
 
@@ -103,7 +104,8 @@ public final class InstancePresets {
                         "moreculling",
                         "krypton",
                         "dynamic-fps"
-                )
+                ),
+                List.of()
         );
     }
 
@@ -128,7 +130,8 @@ public final class InstancePresets {
                         "appleskin",
                         "shulkerboxtooltip",
                         "dynamic-fps"
-                )
+                ),
+                List.of()
         );
     }
 
@@ -137,7 +140,7 @@ public final class InstancePresets {
         return new InstancePreset(
                 "shaders",
                 "Shaders",
-                "A performance-focused Fabric setup with Iris for shader support.",
+                "A performance-focused Fabric setup with Iris and Complementary Reimagined.",
                 DEFAULT_VERSIONS,
                 "Fabric",
                 List.of(
@@ -152,6 +155,9 @@ public final class InstancePresets {
                         "iris",
                         "modmenu",
                         "dynamic-fps"
+                ),
+                List.of(
+                        "complementary-reimagined"
                 )
         );
     }
@@ -176,7 +182,8 @@ public final class InstancePresets {
                         "litematica",
                         "axiom",
                         "worldedit"
-                )
+                ),
+                List.of()
         );
     }
 
@@ -192,7 +199,9 @@ public final class InstancePresets {
                         "sodium",
                         "lithium",
                         "modmenu"
-                )
+                ),
+                List.of()
         );
     }
 }
+

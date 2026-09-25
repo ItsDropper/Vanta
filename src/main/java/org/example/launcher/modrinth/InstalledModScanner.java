@@ -186,6 +186,153 @@ public class InstalledModScanner {
         }
     }
 
+    public boolean containsFabricModId(
+            Path file,
+            String targetModId
+    ) {
+
+        if (file == null
+                || targetModId == null
+                || targetModId.isBlank()) {
+
+            return false;
+        }
+
+        try (JarFile jar =
+                     new JarFile(file.toFile())) {
+
+            return containsFabricModId(
+                    jar,
+                    targetModId
+            );
+
+        } catch (Exception ignored) {
+
+            return false;
+        }
+    }
+
+    private boolean containsFabricModId(
+            JarFile jar,
+            String targetModId
+    ) {
+
+        try {
+
+            /*
+             * Check the main fabric.mod.json first.
+             */
+            JarEntry metadataEntry =
+                    jar.getJarEntry(
+                            "fabric.mod.json"
+                    );
+
+            if (metadataEntry != null) {
+
+                try (InputStream input =
+                             jar.getInputStream(
+                                     metadataEntry
+                             )) {
+
+                    JsonNode root =
+                            objectMapper.readTree(input);
+
+                    JsonNode idNode =
+                            root.get("id");
+
+                    if (idNode != null
+                            && targetModId.equals(
+                            idNode.asText()
+                    )) {
+
+                        return true;
+                    }
+
+                    /*
+                     * Fabric API lists its bundled modules in the
+                     * "jars" array. Inspect those nested JARs.
+                     */
+                    JsonNode jarsNode =
+                            root.get("jars");
+
+                    if (jarsNode != null
+                            && jarsNode.isArray()) {
+
+                        for (JsonNode jarNode :
+                                jarsNode) {
+
+                            JsonNode fileNode =
+                                    jarNode.get("file");
+
+                            if (fileNode == null) {
+                                continue;
+                            }
+
+                            String nestedPath =
+                                    fileNode.asText();
+
+                            if (nestedPath == null
+                                    || nestedPath.isBlank()) {
+                                continue;
+                            }
+
+                            JarEntry nestedEntry =
+                                    jar.getJarEntry(
+                                            nestedPath
+                                    );
+
+                            if (nestedEntry == null) {
+                                continue;
+                            }
+
+                            Path tempNestedJar =
+                                    Files.createTempFile(
+                                            "vanta-fabric-api-",
+                                            ".jar"
+                                    );
+
+                            try {
+
+                                try (InputStream nestedInput =
+                                             jar.getInputStream(
+                                                     nestedEntry
+                                             )) {
+
+                                    Files.copy(
+                                            nestedInput,
+                                            tempNestedJar,
+                                            java.nio.file.StandardCopyOption
+                                                    .REPLACE_EXISTING
+                                    );
+                                }
+
+                                if (containsFabricModId(
+                                        tempNestedJar,
+                                        targetModId
+                                )) {
+
+                                    return true;
+                                }
+
+                            } finally {
+
+                                Files.deleteIfExists(
+                                        tempNestedJar
+                                );
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+
+        } catch (Exception ignored) {
+
+            return false;
+        }
+    }
+
     public InstalledMod scanFile(
             Path file
     ) {

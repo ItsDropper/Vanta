@@ -15,13 +15,15 @@ public final class RepairDiagnosticEngine {
 
     private static final Pattern MISSING_FILE =
             Pattern.compile(
-                    "(could not find|cannot find|file not found|no such file)",
+                    "\\[(?:[^\\]]+/)?ERROR\\].*"
+                            + "(could not find|cannot find|file not found|no such file)",
                     Pattern.CASE_INSENSITIVE
             );
 
     private static final Pattern CLASS_NOT_FOUND =
             Pattern.compile(
-                    "(classnotfoundexception|noclassdeffounderror)",
+                    "\\[(?:[^\\]]+/)?ERROR\\].*"
+                            + "(classnotfoundexception|noclassdeffounderror)",
                     Pattern.CASE_INSENSITIVE
             );
 
@@ -67,9 +69,19 @@ public final class RepairDiagnosticEngine {
                     Pattern.CASE_INSENSITIVE
             );
 
-    private static final Pattern FABRIC_LOADER =
+    /*
+     * Do NOT match the normal presence of Fabric Loader.
+     *
+     * A successful Minecraft startup contains lines such as:
+     *
+     * Loading Minecraft 1.21.11 with Fabric Loader 0.19.5
+     *
+     * That is not a loader failure.
+     */
+    private static final Pattern FABRIC_LOADER_ERROR =
             Pattern.compile(
-                    "(fabric loader|fabric-loader)",
+                    "(fabric loader.*(error|failed|exception|could not|unable)"
+                            + "|(error|failed|exception|could not|unable).*fabric loader)",
                     Pattern.CASE_INSENSITIVE
             );
 
@@ -79,9 +91,50 @@ public final class RepairDiagnosticEngine {
                     Pattern.CASE_INSENSITIVE
             );
 
+    /*
+     * Configuration errors must contain an actual failure condition.
+     *
+     * Do NOT match generic words such as:
+     *
+     *   config
+     *   configuration
+     *   json
+     *   parse
+     *
+     * by themselves.
+     *
+     * Minecraft/mod startup logs commonly contain those words in
+     * perfectly valid library names, for example:
+     *
+     *   org_spongepowered_configurate-core
+     *
+     * which must never be diagnosed as a configuration failure.
+     */
     private static final Pattern CONFIGURATION =
             Pattern.compile(
-                    "(invalid.*configuration|malformed.*json|json.*parse|parse.*json|invalid.*config)",
+                    "("
+                            + "(invalid|malformed|corrupt|broken|bad)"
+                            + "\\s+.{0,80}\\s+config(?:uration)?"
+                            + "|"
+                            + "(config(?:uration)?|config(?:uration)? file)"
+                            + "\\s+.{0,80}\\s+"
+                            + "(invalid|malformed|corrupt|broken|failed|error)"
+                            + "|"
+                            + "(failed|error|unable|could not|cannot)"
+                            + "\\s+.{0,80}\\s+"
+                            + "(load|read|parse|open)"
+                            + "\\s+.{0,80}\\s+"
+                            + "(config(?:uration)?|json)"
+                            + "|"
+                            + "(failed|error|unable|could not|cannot)"
+                            + "\\s+.{0,80}\\s+"
+                            + "(parse|read)"
+                            + "\\s+.{0,80}\\s+json"
+                            + "|"
+                            + "(json|hocon|toml|yaml|yml)"
+                            + "\\s+.{0,80}\\s+"
+                            + "(parse error|parsing error|malformed|invalid)"
+                            + ")",
                     Pattern.CASE_INSENSITIVE
             );
 
@@ -317,7 +370,7 @@ public final class RepairDiagnosticEngine {
          * =========================================================
          */
 
-        if (FABRIC_LOADER.matcher(text).find()) {
+        if (FABRIC_LOADER_ERROR.matcher(text).find()) {
 
             diagnoses.add(
                     new RepairDiagnosis(
@@ -328,7 +381,9 @@ public final class RepairDiagnosticEngine {
                             findEvidence(
                                     output,
                                     "fabric loader",
-                                    "fabric-loader"
+                                    "fabric-loader",
+                                    "failed",
+                                    "exception"
                             ),
                             List.of(
                                     "Verify the configured loader version.",
@@ -382,9 +437,10 @@ public final class RepairDiagnosticEngine {
                             "A configuration file appears to be invalid or malformed.",
                             findEvidence(
                                     output,
-                                    "configuration",
+                                    "invalid",
                                     "malformed",
-                                    "json",
+                                    "failed",
+                                    "error",
                                     "parse"
                             ),
                             List.of(

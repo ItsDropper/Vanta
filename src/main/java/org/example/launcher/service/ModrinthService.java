@@ -31,6 +31,9 @@ public class ModrinthService {
     private final Map<String, InstalledMod> fabricMetadataCache =
             new HashMap<>();
 
+    private final Map<String, String> fabricModIdProjectCache =
+            new HashMap<>();
+
 
     public ModrinthService() {
         client = new ModrinthClient();
@@ -276,6 +279,7 @@ public class ModrinthService {
 
         fabricMetadataCache.clear();
         versionCache.clear();
+        fabricModIdProjectCache.clear();
 
         LinkedHashSet<String> roots =
                 new LinkedHashSet<>();
@@ -610,96 +614,276 @@ public class ModrinthService {
             Set<String> resolving
     ) throws IOException, InterruptedException {
 
+        if (version == null) {
+            return true;
+        }
+
+        /*
+         * ---------------------------------------------------------
+         * --------------------------------------------------------
+         * FIRST: Resolve dependencies declared by Modrinth.
+         * ---------------------------------------------------------
+         */
+
         List<ModrinthDependency> dependencies =
                 version.getDependencies();
 
-        if (dependencies == null
-                || dependencies.isEmpty()) {
+        if (dependencies != null
+                && !dependencies.isEmpty()) {
+
+            System.out.println(
+                    "[Vanta DEBUG] Resolving Modrinth dependencies for "
+                            + version.getVersionNumber()
+            );
+
+            for (ModrinthDependency dependency :
+                    dependencies) {
+
+                if (dependency == null) {
+                    continue;
+                }
+
+                if (dependency.isOptional()) {
+                    continue;
+                }
+
+                if (dependency.isIncompatible()) {
+                    continue;
+                }
+
+                String dependencyProjectId =
+                        dependency.getProjectId();
+
+                if (dependencyProjectId == null
+                        || dependencyProjectId.isBlank()) {
+
+                    continue;
+                }
+
+                System.out.println(
+                        "[Vanta DEBUG]   Modrinth dependency: "
+                                + dependencyProjectId
+                                + " versionId="
+                                + dependency.getVersionId()
+                );
+
+                /*
+                 * If an existing selected dependency doesn't satisfy
+                 * this requirement, this branch is invalid.
+                 */
+                if (resolved.containsKey(
+                        dependencyProjectId
+                )) {
+
+                    ModrinthVersion selected =
+                            resolved.get(
+                                    dependencyProjectId
+                            );
+
+                    boolean satisfies =
+                            satisfiesDependency(
+                                    instance,
+                                    selected,
+                                    dependency
+                            );
+
+                    System.out.println(
+                            "[Vanta DEBUG]   Existing dependency "
+                                    + selected.getVersionNumber()
+                                    + " satisfies="
+                                    + satisfies
+                    );
+
+                    if (!satisfies) {
+                        System.out.println(
+                                "[Vanta DEBUG]   FAILED existing dependency: "
+                                        + dependencyProjectId
+                        );
+
+                        return false;
+                    }
+
+                    continue;
+                }
+
+                boolean success =
+                        resolveProject(
+                                instance,
+                                dependencyProjectId,
+                                dependency,
+                                null,
+                                resolved,
+                                resolving
+                        );
+
+                if (!success) {
+
+                    System.out.println(
+                            "[Vanta DEBUG]   FAILED Modrinth dependency: "
+                                    + dependencyProjectId
+                    );
+
+                    return false;
+                }
+            }
+        }
+
+        /*
+         * ---------------------------------------------------------
+         * SECOND: Inspect the actual Fabric JAR.
+         *
+         * This catches dependencies that the Modrinth project failed
+         * to declare in its Modrinth metadata.
+         * ---------------------------------------------------------
+         */
+
+        InstalledMod fabricMetadata =
+                readFabricMetadata(version);
+
+        if (fabricMetadata == null) {
+            return true;
+        }
+
+        List<DependencyRequirement> fabricDependencies =
+                fabricMetadata.getDependencies();
+
+        if (fabricDependencies == null
+                || fabricDependencies.isEmpty()) {
 
             return true;
         }
 
         System.out.println(
-                "[Vanta DEBUG] Resolving dependencies for "
-                        + version.getVersionNumber()
+                "[Vanta DEBUG] Inspecting Fabric dependencies for "
+                        + fabricMetadata.getModId()
+                        + " "
+                        + fabricMetadata.getVersion()
         );
 
-        for (ModrinthDependency dependency :
-                dependencies) {
+        for (DependencyRequirement requirement :
+                fabricDependencies) {
 
-            if (dependency == null) {
-                continue;
-            }
-
-            if (dependency.isOptional()) {
-                continue;
-            }
-
-            if (dependency.isIncompatible()) {
-                continue;
-            }
-
-            String dependencyProjectId =
-                    dependency.getProjectId();
-
-            if (dependencyProjectId == null
-                    || dependencyProjectId.isBlank()) {
+            if (requirement == null
+                    || requirement.getModId() == null
+                    || requirement.getModId().isBlank()) {
 
                 continue;
             }
+
+            String fabricDependencyModId =
+                    requirement.getModId();
+
+            String constraint =
+                    requirement.getVersionConstraint();
 
             System.out.println(
-                    "[Vanta DEBUG]   Dependency: "
-                            + dependencyProjectId
-                            + " versionId="
-                            + dependency.getVersionId()
+                    "[Vanta DEBUG]   Fabric dependency: "
+                            + fabricDependencyModId
+                            + " ["
+                            + constraint
+                            + "]"
             );
 
             /*
-             * If an existing selected dependency doesn't satisfy
-             * this requirement, this branch is invalid.
+             * Some Fabric dependencies are provided by the environment
+             * itself rather than by another mod.
              */
-            if (resolved.containsKey(
-                    dependencyProjectId
+            if (isEnvironmentDependencySatisfied(
+                    instance,
+                    fabricDependencyModId,
+                    constraint
             )) {
 
-                ModrinthVersion selected =
-                        resolved.get(
-                                dependencyProjectId
+                continue;
+            }
+
+            /*
+             * Fabric API contains multiple internal API modules that
+             * appear as individual Fabric dependencies.
+             */
+            if (isProvidedByFabricApi(
+                    resolved,
+                    fabricDependencyModId,
+                    constraint
+            )) {
+
+                continue;
+            }
+
+            /*
+             * See whether this Fabric mod is already represented
+             * somewhere in the resolved graph.
+             */
+            ModrinthVersion resolvedDependency =
+                    findResolvedFabricDependency(
+                            resolved,
+                            fabricDependencyModId
+                    );
+
+            if (resolvedDependency != null) {
+
+                InstalledMod dependencyMetadata =
+                        readFabricMetadata(
+                                resolvedDependency
                         );
 
+                if (dependencyMetadata == null
+                        || dependencyMetadata.getVersion() == null) {
+
+                    return false;
+                }
+
                 boolean satisfies =
-                        satisfiesDependency(
-                                instance,
-                                selected,
-                                dependency
+                        matchesFabricConstraint(
+                                dependencyMetadata.getVersion(),
+                                constraint
                         );
 
                 System.out.println(
-                        "[Vanta DEBUG]   Existing dependency "
-                                + selected.getVersionNumber()
+                        "[Vanta DEBUG]   Existing Fabric dependency "
+                                + fabricDependencyModId
+                                + " "
+                                + dependencyMetadata.getVersion()
                                 + " satisfies="
                                 + satisfies
                 );
 
                 if (!satisfies) {
-                    System.out.println(
-                            "[Vanta DEBUG]   FAILED existing dependency: "
-                                    + dependencyProjectId
-                    );
-
                     return false;
                 }
 
                 continue;
             }
 
+            /*
+             * The dependency exists in fabric.mod.json but is not
+             * currently represented in the graph.
+             *
+             * Find its Modrinth project and resolve it.
+             */
+            String dependencyProjectId =
+                    findModrinthProjectForFabricModId(
+                            instance,
+                            fabricDependencyModId
+                    );
+
+            if (dependencyProjectId == null
+                    || dependencyProjectId.isBlank()) {
+
+                System.out.println(
+                        "[Vanta DEBUG]   Could not find Modrinth project for Fabric mod "
+                                + fabricDependencyModId
+                );
+
+                return false;
+            }
+
             boolean success =
-                    resolveProject(
+                    resolveFabricDependency(
                             instance,
                             dependencyProjectId,
-                            dependency,
-                            null,
+                            fabricDependencyModId,
+                            constraint,
                             resolved,
                             resolving
                     );
@@ -707,8 +891,11 @@ public class ModrinthService {
             if (!success) {
 
                 System.out.println(
-                        "[Vanta DEBUG]   FAILED dependency: "
-                                + dependencyProjectId
+                        "[Vanta DEBUG]   FAILED Fabric dependency: "
+                                + fabricDependencyModId
+                                + " ["
+                                + constraint
+                                + "]"
                 );
 
                 return false;
@@ -716,6 +903,541 @@ public class ModrinthService {
         }
 
         return true;
+    }
+
+
+    private boolean isEnvironmentDependencySatisfied(
+            Instance instance,
+            String dependencyModId,
+            String constraint
+    ) {
+
+        if (instance == null
+                || dependencyModId == null
+                || dependencyModId.isBlank()) {
+
+            return false;
+        }
+
+        /*
+         * Fabric Loader is provided by the Minecraft instance.
+         */
+        if ("fabricloader".equalsIgnoreCase(
+                dependencyModId
+        )) {
+
+            if (!"fabric".equalsIgnoreCase(
+                    instance.getLoader()
+            )) {
+
+                return false;
+            }
+
+            String loaderVersion =
+                    instance.getLoaderVersion();
+
+            if (loaderVersion == null
+                    || loaderVersion.isBlank()) {
+
+                return false;
+            }
+
+            boolean satisfies =
+                    matchesFabricConstraint(
+                            loaderVersion,
+                            constraint
+                    );
+
+            System.out.println(
+                    "[Vanta DEBUG]   Environment dependency: "
+                            + "fabricloader "
+                            + loaderVersion
+                            + " ["
+                            + constraint
+                            + "] = "
+                            + satisfies
+            );
+
+            return satisfies;
+        }
+
+        /*
+         * Minecraft is provided by the instance itself.
+         */
+        if ("minecraft".equalsIgnoreCase(dependencyModId)) {
+
+            String minecraftVersion =
+                    instance.getMinecraftVersion();
+
+            if (minecraftVersion == null
+                    || minecraftVersion.isBlank()) {
+
+                return false;
+            }
+
+            boolean satisfies =
+                    matchesFabricConstraint(
+                            minecraftVersion,
+                            constraint
+                    );
+
+            System.out.println(
+                    "[Vanta DEBUG]   Environment dependency: "
+                            + "minecraft "
+                            + minecraftVersion
+                            + " ["
+                            + constraint
+                            + "] = "
+                            + satisfies
+            );
+
+            return satisfies;
+        }
+
+        /*
+         * Java is provided by the Java runtime used to launch
+         * the Minecraft instance. It is not a Modrinth mod.
+         *
+         * Fabric dependency constraints use the Java major version,
+         * e.g. >=21.
+         */
+        if ("java".equalsIgnoreCase(
+                dependencyModId
+        )) {
+
+            int javaMajorVersion =
+                    Runtime.version().feature();
+
+            String javaVersion =
+                    Integer.toString(
+                            javaMajorVersion
+                    );
+
+            boolean satisfies =
+                    matchesFabricConstraint(
+                            javaVersion,
+                            constraint
+                    );
+
+            System.out.println(
+                    "[Vanta DEBUG]   Environment dependency: "
+                            + "java "
+                            + javaVersion
+                            + " ["
+                            + constraint
+                            + "] = "
+                            + satisfies
+            );
+
+            return satisfies;
+        }
+
+        return false;
+    }
+
+
+
+    private ModrinthVersion findResolvedFabricDependency(
+            Map<String, ModrinthVersion> resolved,
+            String fabricModId
+    ) throws IOException {
+
+        if (resolved == null
+                || fabricModId == null
+                || fabricModId.isBlank()) {
+
+            return null;
+        }
+
+        for (ModrinthVersion version :
+                resolved.values()) {
+
+            if (version == null) {
+                continue;
+            }
+
+            InstalledMod metadata =
+                    readFabricMetadata(
+                            version
+                    );
+
+            if (metadata == null
+                    || metadata.getModId() == null) {
+
+                continue;
+            }
+
+            if (fabricModId.equals(
+                    metadata.getModId()
+            )) {
+
+                return version;
+            }
+        }
+
+        return null;
+    }
+
+    private String findModrinthProjectForFabricModId(
+            Instance instance,
+            String fabricModId
+    ) throws IOException, InterruptedException {
+
+        if (fabricModId == null
+                || fabricModId.isBlank()) {
+
+            return null;
+        }
+
+        String cached =
+                fabricModIdProjectCache.get(
+                        fabricModId
+                );
+
+        if (cached != null) {
+            return cached;
+        }
+
+        /*
+         * Fabric API contains a number of modules inside its JAR.
+         * Check Fabric API directly before searching Modrinth.
+         */
+        List<ModrinthVersion> fabricApiVersions =
+                getCompatibleCandidates(
+                        instance,
+                        "P7dR8mSH"
+                );
+
+        for (ModrinthVersion version :
+                fabricApiVersions) {
+
+            ModrinthFile file =
+                    findPrimaryFile(version);
+
+            if (file == null
+                    || file.getUrl() == null
+                    || file.getUrl().isBlank()) {
+
+                continue;
+            }
+
+            Path tempFile =
+                    Files.createTempFile(
+                            "vanta-fabric-api-check-",
+                            ".jar"
+                    );
+
+            try {
+
+                try {
+
+                    DownloadUtil.downloadFile(
+                            file.getUrl(),
+                            tempFile
+                    );
+
+                } catch (Exception e) {
+
+                    throw new IOException(
+                            "Failed to download Fabric API "
+                                    + version.getVersionNumber()
+                                    + " for dependency inspection.",
+                            e
+                    );
+                }
+
+                if (installedModScanner.containsFabricModId(
+                        tempFile,
+                        fabricModId
+                )) {
+
+                    fabricModIdProjectCache.put(
+                            fabricModId,
+                            "P7dR8mSH"
+                    );
+
+                    System.out.println(
+                            "[Vanta DEBUG] Fabric API provides "
+                                    + fabricModId
+                                    + " -> fabric-api"
+                    );
+
+                    return "P7dR8mSH";
+                }
+
+            } finally {
+
+                try {
+                    Files.deleteIfExists(
+                            tempFile
+                    );
+                } catch (IOException ignored) {
+                }
+            }
+        }
+
+        /*
+         * If Fabric API does not provide it, search Modrinth
+         * for a standalone project.
+         */
+        List<ModrinthSearchHit> hits =
+                client.search(
+                        fabricModId,
+                        ModrinthContentType.MOD,
+                        normalizeLoader(
+                                instance.getLoader()
+                        ),
+                        instance.getMinecraftVersion()
+                ).getHits();
+
+        if (hits == null
+                || hits.isEmpty()) {
+
+            return null;
+        }
+
+        for (ModrinthSearchHit hit :
+                hits) {
+
+            if (hit == null
+                    || hit.getProjectId() == null
+                    || hit.getProjectId().isBlank()) {
+
+                continue;
+            }
+
+            String projectId =
+                    hit.getProjectId();
+
+            List<ModrinthVersion> versions =
+                    getCompatibleCandidates(
+                            instance,
+                            projectId
+                    );
+
+            for (ModrinthVersion version :
+                    versions) {
+
+                InstalledMod metadata =
+                        readFabricMetadata(
+                                version
+                        );
+
+                if (metadata == null
+                        || metadata.getModId() == null) {
+
+                    continue;
+                }
+
+                if (!fabricModId.equals(
+                        metadata.getModId()
+                )) {
+
+                    continue;
+                }
+
+                fabricModIdProjectCache.put(
+                        fabricModId,
+                        projectId
+                );
+
+                System.out.println(
+                        "[Vanta DEBUG] Mapped Fabric mod "
+                                + fabricModId
+                                + " -> Modrinth project "
+                                + projectId
+                );
+
+                return projectId;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean resolveFabricDependency(
+            Instance instance,
+            String projectId,
+            String fabricModId,
+            String constraint,
+            Map<String, ModrinthVersion> resolved,
+            Set<String> resolving
+    ) throws IOException, InterruptedException {
+
+        if (projectId == null
+                || projectId.isBlank()
+                || fabricModId == null
+                || fabricModId.isBlank()) {
+
+            return false;
+        }
+
+        /*
+         * Prevent circular dependency resolution.
+         */
+        String resolveKey =
+                "fabric:"
+                        + fabricModId;
+
+        if (!resolving.add(resolveKey)) {
+            return true;
+        }
+
+        try {
+
+            List<ModrinthVersion> candidates =
+                    getCompatibleCandidates(
+                            instance,
+                            projectId
+                    );
+
+            if (candidates == null
+                    || candidates.isEmpty()) {
+
+                return false;
+            }
+
+            for (ModrinthVersion candidate :
+                    candidates) {
+
+                InstalledMod metadata =
+                        readFabricMetadata(
+                                candidate
+                        );
+
+                if (metadata == null
+                        || metadata.getModId() == null
+                        || metadata.getVersion() == null) {
+
+                    continue;
+                }
+
+                /*
+                 * Make absolutely sure the Modrinth project we found
+                 * actually corresponds to the Fabric dependency.
+                 */
+                if (!fabricModId.equals(
+                        metadata.getModId()
+                )) {
+
+                    continue;
+                }
+
+                if (!matchesFabricConstraint(
+                        metadata.getVersion(),
+                        constraint
+                )) {
+
+                    System.out.println(
+                            "[Vanta DEBUG] Rejected Fabric dependency candidate "
+                                    + candidate.getVersionNumber()
+                                    + " for "
+                                    + fabricModId
+                                    + " ["
+                                    + constraint
+                                    + "]"
+                    );
+
+                    continue;
+                }
+
+                if (resolved.containsKey(
+                        projectId
+                )) {
+
+                    ModrinthVersion existing =
+                            resolved.get(
+                                    projectId
+                            );
+
+                    InstalledMod existingMetadata =
+                            readFabricMetadata(
+                                    existing
+                            );
+
+                    if (existingMetadata != null
+                            && fabricModId.equals(
+                            existingMetadata.getModId()
+                    )
+                            && existingMetadata.getVersion() != null
+                            && matchesFabricConstraint(
+                            existingMetadata.getVersion(),
+                            constraint
+                    )) {
+
+                        return true;
+                    }
+
+                    continue;
+                }
+
+                CompatibilityResult compatibility =
+                        isCompatibleWithResolvedGraph(
+                                instance,
+                                projectId,
+                                candidate,
+                                resolved
+                        );
+
+                if (!compatibility.compatible()) {
+
+                    System.out.println(
+                            "[Vanta DEBUG] Rejected Fabric dependency candidate "
+                                    + candidate.getVersionNumber()
+                                    + ": "
+                                    + compatibility.reason()
+                    );
+
+                    continue;
+                }
+
+                Map<String, ModrinthVersion> branch =
+                        new LinkedHashMap<>(
+                                resolved
+                        );
+
+                branch.put(
+                        projectId,
+                        candidate
+                );
+
+                if (!resolveDependencies(
+                        instance,
+                        candidate,
+                        branch,
+                        resolving
+                )) {
+
+                    continue;
+                }
+
+                if (!isGraphConsistent(
+                        instance,
+                        branch
+                )) {
+
+                    continue;
+                }
+
+                resolved.clear();
+                resolved.putAll(branch);
+
+                System.out.println(
+                        "[Vanta DEBUG] Resolved Fabric dependency "
+                                + fabricModId
+                                + " -> "
+                                + candidate.getVersionNumber()
+                );
+
+                return true;
+            }
+
+            return false;
+
+        } finally {
+
+            resolving.remove(resolveKey);
+        }
     }
 
     // =============================================================
@@ -963,6 +1685,20 @@ public class ModrinthService {
             return true;
         }
 
+        /*
+         * Fabric commonly expresses Minecraft ranges like:
+         *
+         * >=1.21.11- <1.21.12-
+         *
+         * The trailing '-' is part of Fabric's version-range
+         * syntax and must not be treated as part of the version.
+         */
+        constraint =
+                constraint.replaceAll(
+                        "(\\d+(?:\\.\\d+)+)-",
+                        "$1"
+                );
+
         String[] alternatives =
                 constraint.split("\\|\\|");
 
@@ -973,6 +1709,7 @@ public class ModrinthService {
                     version,
                     alternative.trim()
             )) {
+
                 return true;
             }
         }
@@ -2137,11 +2874,13 @@ public class ModrinthService {
         versionCache.clear();
 
         /*
-         * Build the installed root set.
+         * Build a narrow root set.
          *
-         * Every installed mod starts as a root candidate. During repair,
-         * we first try keeping every root. If that is impossible, we test
-         * removing exactly one root at a time.
+         * Keep:
+         * 1. The project being repaired.
+         * 2. Installed mods that directly depend on it.
+         *
+         * Transitive dependencies are handled by resolveModGraph().
          */
         List<InstalledModRecord> installedMods =
                 InstalledModManager.load(instance);
@@ -2149,73 +2888,118 @@ public class ModrinthService {
         List<ModrinthProject> roots =
                 new ArrayList<>();
 
-        Map<String, InstalledModRecord> installedByProject =
-                new LinkedHashMap<>();
+        ModrinthProject repairedProject =
+                client.getProject(projectId);
 
+        if (repairedProject == null) {
+            throw new IOException(
+                    "Could not find Modrinth project: "
+                            + projectId
+            );
+        }
+
+        roots.add(repairedProject);
+
+        /*
+         * Find installed mods whose Modrinth version directly
+         * depends on the project being repaired.
+         */
         for (InstalledModRecord record : installedMods) {
 
             if (record == null
                     || record.getProjectId() == null
-                    || record.getProjectId().isBlank()) {
+                    || record.getProjectId().isBlank()
+                    || record.getVersionId() == null
+                    || record.getVersionId().isBlank()) {
                 continue;
             }
 
-            String installedProjectId =
-                    record.getProjectId();
+            /*
+             * The repaired project is already a root.
+             */
+            if (projectId.equals(
+                    record.getProjectId()
+            )) {
+                continue;
+            }
 
-            installedByProject.put(
-                    installedProjectId,
-                    record
-            );
+            ModrinthVersion installedVersion = null;
 
-            ModrinthProject installedProject =
-                    client.getProject(
-                            installedProjectId
+            List<ModrinthVersion> installedVersions =
+                    client.getVersions(
+                            record.getProjectId()
                     );
 
-            if (installedProject == null) {
+            for (ModrinthVersion version : installedVersions) {
+
+                if (version == null
+                        || version.getId() == null) {
+                    continue;
+                }
+
+                if (record.getVersionId().equals(
+                        version.getId()
+                )) {
+                    installedVersion = version;
+                    break;
+                }
+            }
+
+            if (installedVersion == null) {
                 continue;
             }
 
-            roots.add(installedProject);
-        }
-
-        /*
-         * Make sure the project being repaired is a root.
-         */
-        boolean alreadyPresent = false;
-
-        for (ModrinthProject root : roots) {
-
-            if (root != null
-                    && projectId.equals(
-                    root.getProjectId()
-            )) {
-
-                alreadyPresent = true;
-                break;
-            }
-        }
-
-        if (!alreadyPresent) {
-
-            ModrinthProject repairedProject =
-                    client.getProject(projectId);
-
-            if (repairedProject == null) {
-                throw new IOException(
-                        "Could not find Modrinth project: "
-                                + projectId
-                );
+            if (installedVersion == null
+                    || installedVersion.getDependencies() == null) {
+                continue;
             }
 
-            roots.add(repairedProject);
+            boolean dependsOnRepairedProject = false;
+
+            for (ModrinthDependency dependency :
+                    installedVersion.getDependencies()) {
+
+                if (dependency == null
+                        || !dependency.isRequired()) {
+                    continue;
+                }
+
+                if (projectId.equals(
+                        dependency.getProjectId()
+                )) {
+                    dependsOnRepairedProject = true;
+                    break;
+                }
+            }
+
+            if (!dependsOnRepairedProject) {
+                continue;
+            }
+
+            ModrinthProject dependentProject =
+                    client.getProject(
+                            record.getProjectId()
+                    );
+
+            if (dependentProject == null) {
+                continue;
+            }
+
+            roots.add(dependentProject);
+
+            System.out.println(
+                    "[Vanta Repair] Keeping dependent root "
+                            + record.getProjectId()
+                            + " -> "
+                            + record.getModId()
+            );
         }
 
         /*
          * First attempt:
          *
-         * Keep every installed root and solve the complete graph.
+         * Keep the repaired project and all installed mods that
+         * directly depend on it.
          */
         List<ResolvedMod> resolved = null;
 
@@ -2232,13 +3016,13 @@ public class ModrinthService {
         } catch (IOException fullGraphFailure) {
 
             System.out.println(
-                    "[Vanta] Full repair graph could not be resolved."
+                    "[Vanta] Narrow repair graph could not be resolved."
             );
 
             /*
-             * The full graph is impossible.
+             * The narrow graph is impossible.
              *
-             * Now test whether exactly one installed root needs to be
+             * Now test whether exactly one dependent root needs to be
              * removed from the root set.
              *
              * Important:
@@ -2354,7 +3138,8 @@ public class ModrinthService {
                                 + projectId
                                 + ": the dependency graph is "
                                 + "unsatisfiable and no single installed "
-                                + "root can be removed to resolve it.",
+                                + "dependent root can be removed to "
+                                + "resolve it.",
                         fullGraphFailure
                 );
             }
@@ -2418,9 +3203,6 @@ public class ModrinthService {
         /*
          * Determine which currently installed mods are no longer present
          * in the final resolved graph.
-         *
-         * These are the roots that the successful repair determined
-         * cannot remain in the environment.
          */
         Set<String> resolvedProjectIds =
                 new HashSet<>();
@@ -3151,10 +3933,47 @@ public class ModrinthService {
             String minecraftVersion
     ) {
 
-        return version != null
-                && version.getGameVersions() != null
-                && version.getGameVersions()
-                .contains(minecraftVersion);
+        if (version == null
+                || version.getGameVersions() == null
+                || minecraftVersion == null
+                || minecraftVersion.isBlank()) {
+
+            return false;
+        }
+
+        /*
+         * Exact match first.
+         */
+        if (version.getGameVersions().contains(
+                minecraftVersion
+        )) {
+            return true;
+        }
+
+        /*
+         * Minecraft 26.1.x versions are represented by Vanta
+         * as 26.1, while Modrinth may tag individual releases as
+         * 26.1.1, 26.1.2, etc.
+         *
+         * Treat 26.1 as the same minor release family.
+         */
+        String prefix =
+                minecraftVersion + ".";
+
+        for (String gameVersion :
+                version.getGameVersions()) {
+
+            if (gameVersion == null
+                    || gameVersion.isBlank()) {
+                continue;
+            }
+
+            if (gameVersion.startsWith(prefix)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // =============================================================
@@ -3301,6 +4120,8 @@ public class ModrinthService {
     ) {
     }
 
+
+
     private boolean matchesRequiredVersions(
             ModrinthVersion candidate,
             List<String> requiredVersions
@@ -3324,8 +4145,23 @@ public class ModrinthService {
                         candidateVersion
                 );
 
-        for (String required :
-                requiredVersions) {
+        /*
+         * The crash parser represents:
+         *
+         *   "0.9.1 or later"
+         *
+         * as:
+         *
+         *   ["0.9.1", "later"]
+         *
+         * Reconstruct that as a lower-bound constraint.
+         */
+        for (int i = 0;
+             i < requiredVersions.size();
+             i++) {
+
+            String required =
+                    requiredVersions.get(i);
 
             if (required == null
                     || required.isBlank()) {
@@ -3337,15 +4173,124 @@ public class ModrinthService {
                             required
                     );
 
+            /*
+             * Exact version.
+             */
             if (normalizedCandidate.equals(
                     normalizedRequired
             )) {
                 return true;
             }
+
+            /*
+             * "X or later"
+             */
+            if (i + 1 < requiredVersions.size()
+                    && "later".equalsIgnoreCase(
+                    requiredVersions.get(i + 1)
+            )) {
+
+                if (compareSimpleVersions(
+                        normalizedCandidate,
+                        normalizedRequired
+                ) >= 0) {
+                    return true;
+                }
+            }
+
+            /*
+             * Wildcard such as 0.9.x.
+             */
+            if (normalizedRequired.endsWith(".x")) {
+
+                String prefix =
+                        normalizedRequired.substring(
+                                0,
+                                normalizedRequired.length() - 2
+                        );
+
+                if (normalizedCandidate.equals(prefix)
+                        || normalizedCandidate.startsWith(
+                        prefix + "."
+                )) {
+                    return true;
+                }
+            }
         }
 
         return false;
     }
+
+
+
+
+    private int compareSimpleVersions(
+            String first,
+            String second
+    ) {
+
+        String[] firstParts =
+                first.split("\\.");
+
+        String[] secondParts =
+                second.split("\\.");
+
+        int length =
+                Math.max(
+                        firstParts.length,
+                        secondParts.length
+                );
+
+        for (int i = 0; i < length; i++) {
+
+            int firstValue =
+                    i < firstParts.length
+                            ? parseVersionPart(
+                            firstParts[i]
+                    )
+                            : 0;
+
+            int secondValue =
+                    i < secondParts.length
+                            ? parseVersionPart(
+                            secondParts[i]
+                    )
+                            : 0;
+
+            if (firstValue != secondValue) {
+                return Integer.compare(
+                        firstValue,
+                        secondValue
+                );
+            }
+        }
+
+        return 0;
+    }
+
+    private int parseVersionPart(
+            String value
+    ) {
+
+        String numeric =
+                numericPrefix(value);
+
+        if (numeric.isEmpty()) {
+            return 0;
+        }
+
+        try {
+            return Integer.parseInt(numeric);
+        } catch (NumberFormatException ignored) {
+            return 0;
+        }
+    }
+
+
+
+
+
+
 
     private String normalizeModrinthVersion(
             String version
@@ -3415,5 +4360,80 @@ public class ModrinthService {
     }
 
 
+    private boolean isProvidedByFabricApi(
+            Map<String, ModrinthVersion> resolved,
+            String fabricDependencyModId,
+            String constraint
+    ) throws IOException, InterruptedException {
+
+        if (resolved == null
+                || fabricDependencyModId == null
+                || fabricDependencyModId.isBlank()) {
+
+            return false;
+        }
+
+        /*
+         * Fabric API modules use the "fabric-" namespace.
+         * Do not assume every fabric-* ID is provided by Fabric API.
+         */
+        if (!fabricDependencyModId.startsWith("fabric-")) {
+            return false;
+        }
+
+        /*
+         * Find the Fabric API project in the resolved graph.
+         */
+        ModrinthVersion fabricApi =
+                resolved.get("fabric-api");
+
+        if (fabricApi == null) {
+            return false;
+        }
+
+        /*
+         * Verify that the selected Fabric API version itself is
+         * compatible with the requested Fabric API module version.
+         *
+         * Fabric API modules use "*" in most cases, meaning any
+         * compatible Fabric API version is acceptable.
+         */
+        if (constraint == null
+                || constraint.isBlank()
+                || "*".equals(constraint)) {
+
+            System.out.println(
+                    "[Vanta DEBUG]   Fabric API provides module "
+                            + fabricDependencyModId
+            );
+
+            return true;
+        }
+
+        /*
+         * For a versioned module dependency, do not blindly assume
+         * that any Fabric API version satisfies it.
+         */
+        InstalledMod fabricApiMetadata =
+                readFabricMetadata(fabricApi);
+
+        if (fabricApiMetadata == null) {
+            return false;
+        }
+
+        System.out.println(
+                "[Vanta DEBUG]   Fabric API selected for module "
+                        + fabricDependencyModId
+                        + " ["
+                        + constraint
+                        + "]"
+        );
+
+        /*
+         * Fabric API is the provider. The module itself does not have
+         * to exist as a separate Modrinth project.
+         */
+        return true;
+    }
 
 }
