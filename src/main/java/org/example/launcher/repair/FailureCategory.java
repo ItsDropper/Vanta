@@ -1,0 +1,31 @@
+package org.example.launcher.repair;
+
+public enum FailureCategory {
+
+    MOD_DEPENDENCY,
+    MOD_CONFLICT,
+    DUPLICATE_MOD,
+
+    MISSING_LIBRARY,
+    CORRUPT_LIBRARY,
+    MISSING_ASSET,
+
+    JAVA_RUNTIME,
+    JAVA_VERSION,
+    JVM_ARGUMENTS,
+
+    LOADER,
+    MINECRAFT_VERSION,
+
+    NATIVE,
+    CLASSPATH,
+
+    CONFIGURATION,
+    INSTALLATION,
+
+    DISK_SPACE,
+    PERMISSION,
+    NETWORK,
+
+    UNKNOWN
+}

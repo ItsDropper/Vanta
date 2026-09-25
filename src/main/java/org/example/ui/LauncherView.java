@@ -1087,7 +1087,7 @@ public class LauncherView {
         if (instance == null) {
 
             notifications.error(
-                    "Repair unavailable",
+                    "Minecraft failed to launch",
                     "Vanta could not determine which instance failed."
             );
 
@@ -1099,7 +1099,30 @@ public class LauncherView {
                         failure.details()
                 );
 
+        boolean hasAutomaticRepair =
+                issues.stream()
+                        .anyMatch(
+                                RepairView.RepairIssue::canRepair
+                        );
+
+        if (hasAutomaticRepair) {
+
+            attemptAutomaticRepair(
+                    instance,
+                    issues
+            );
+
+            return;
+        }
+
+// Show the actual launch error as a notification.
+        notifications.error(
+                failure.title(),
+                failure.description()
+        );
+
         final Instance repairInstance = instance;
+
         RepairView repairView =
                 new RepairView(
                         repairInstance,
@@ -1119,6 +1142,279 @@ public class LauncherView {
                 repairView
         );
     }
+
+    private void attemptAutomaticRepair(
+            Instance instance,
+            List<RepairView.RepairIssue> issues
+    ) {
+
+        RepairView.RepairIssue repairIssue = null;
+
+        for (RepairView.RepairIssue issue : issues) {
+
+            if (issue == null) {
+                continue;
+            }
+
+            if (issue.canRepair()) {
+                repairIssue = issue;
+                break;
+            }
+        }
+
+        if (repairIssue == null) {
+
+            System.out.println(
+                    "[Vanta Repair] No deterministic automatic repair found."
+            );
+
+            Platform.runLater(() ->
+                    showPage(
+                            Sidebar.Page.HOME
+                    )
+            );
+
+            return;
+        }
+
+        RepairView.RepairIssue selectedIssue =
+                repairIssue;
+
+        // =========================================================
+        // MINECRAFT VERSION REPAIR
+        // =========================================================
+
+        if (selectedIssue.canRepairMinecraftVersion()) {
+
+            String targetVersion =
+                    selectedIssue.repairMinecraftVersion();
+
+            notifications.showProgress(
+                    "Repairing Minecraft",
+                    "Installing Minecraft "
+                            + targetVersion
+                            + "..."
+            );
+
+            Thread thread =
+                    new Thread(() -> {
+
+                        try {
+
+                            System.out.println(
+                                    "[Vanta Repair] Minecraft version repair started."
+                            );
+
+                            System.out.println(
+                                    "[Vanta Repair] Current version: "
+                                            + instance.getMinecraftVersion()
+                            );
+
+                            System.out.println(
+                                    "[Vanta Repair] Target version: "
+                                            + targetVersion
+                            );
+
+                            Instance updatedInstance =
+                                    InstanceInstaller.updateMinecraftVersion(
+                                            instance,
+                                            targetVersion
+                                    );
+
+                            System.out.println(
+                                    "[Vanta Repair] Minecraft version repair completed."
+                            );
+
+                            notifications.success(
+                                    "Repair complete",
+                                    "Minecraft was updated to "
+                                            + targetVersion
+                            );
+
+                            Platform.runLater(() -> {
+
+                                try {
+
+                                    launchService.launch(
+                                            updatedInstance
+                                    );
+
+                                } catch (Exception ex) {
+
+                                    ex.printStackTrace();
+
+                                    notifications.error(
+                                            "Minecraft still failed",
+                                            getErrorMessage(ex)
+                                    );
+                                }
+                            });
+
+                        } catch (Throwable ex) {
+
+                            ex.printStackTrace();
+
+                            System.out.println(
+                                    "[Vanta Repair] Minecraft version repair failed."
+                            );
+
+                            notifications.error(
+                                    "Automatic repair failed",
+                                    getErrorMessage(ex)
+                            );
+
+                            Platform.runLater(() ->
+                                    showPage(
+                                            Sidebar.Page.HOME
+                                    )
+                            );
+                        }
+
+                    });
+
+            thread.setName(
+                    "Vanta-Minecraft-Version-Repair"
+            );
+
+            thread.setDaemon(
+                    true
+            );
+
+            thread.start();
+
+            return;
+        }
+
+        // =========================================================
+        // MOD DEPENDENCY REPAIR
+        // =========================================================
+
+        if (selectedIssue.repairProjectId() == null
+                || selectedIssue.repairProjectId().isBlank()) {
+
+            System.out.println(
+                    "[Vanta Repair] Repair issue had no valid Modrinth project."
+            );
+
+            Platform.runLater(() ->
+                    showPage(
+                            Sidebar.Page.HOME
+                    )
+            );
+
+            return;
+        }
+
+        notifications.showProgress(
+                "Repairing Minecraft",
+                "Resolving "
+                        + selectedIssue.repairProjectId()
+                        + "..."
+        );
+
+        Thread thread =
+                new Thread(() -> {
+
+                    try {
+
+                        ModrinthService modrinthService =
+                                new ModrinthService();
+
+                        System.out.println(
+                                "[Vanta Repair] Automatic dependency repair started."
+                        );
+
+                        System.out.println(
+                                "[Vanta Repair] Project: "
+                                        + selectedIssue.repairProjectId()
+                        );
+
+                        System.out.println(
+                                "[Vanta Repair] Required versions: "
+                                        + selectedIssue.repairVersions()
+                        );
+
+                        ModrinthProject project =
+                                modrinthService.getProjectBySlug(
+                                        selectedIssue.repairProjectId()
+                                );
+
+                        if (project == null) {
+
+                            throw new IOException(
+                                    "Could not find Modrinth project: "
+                                            + selectedIssue.repairProjectId()
+                            );
+                        }
+
+                        modrinthService.repairModDependency(
+                                instance,
+                                project.getProjectId(),
+                                selectedIssue.repairVersions()
+                        );
+
+                        System.out.println(
+                                "[Vanta Repair] Automatic dependency repair completed."
+                        );
+
+                        notifications.success(
+                                "Repair complete",
+                                "Vanta repaired the Minecraft dependency."
+                        );
+
+                        Platform.runLater(() -> {
+
+                            try {
+
+                                launchService.launch(
+                                        instance
+                                );
+
+                            } catch (Exception ex) {
+
+                                ex.printStackTrace();
+
+                                notifications.error(
+                                        "Minecraft still failed",
+                                        getErrorMessage(ex)
+                                );
+                            }
+                        });
+
+                    } catch (Throwable ex) {
+
+                        ex.printStackTrace();
+
+                        System.out.println(
+                                "[Vanta Repair] Automatic dependency repair failed."
+                        );
+
+                        notifications.error(
+                                "Automatic repair failed",
+                                getErrorMessage(ex)
+                        );
+
+                        Platform.runLater(() ->
+                                showPage(
+                                        Sidebar.Page.HOME
+                                )
+                        );
+                    }
+
+                });
+
+        thread.setName(
+                "Vanta-Automatic-Repair"
+        );
+
+        thread.setDaemon(
+                true
+        );
+
+        thread.start();
+    }
+
+
 
     private void repairIssues(
             Instance instance,

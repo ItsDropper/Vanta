@@ -486,110 +486,29 @@ public final class UpdaterMain {
     ) throws InterruptedException {
 
         log(
-                "Waiting for Windows to release Vanta files..."
+                "Waiting briefly for Windows to release Vanta files..."
         );
 
-        long start =
-                System.currentTimeMillis();
+        /*
+         * The updater is now running completely outside
+         * VantaLauncher, including its Java runtime.
+         *
+         * Vanta itself has already terminated before this method
+         * is called. There is therefore no reason to repeatedly
+         * rename the entire application directory just to test
+         * whether Windows has released it.
+         *
+         * A short settling period is enough. The real replacement
+         * operation below still has its own retry/rollback logic.
+         */
 
-        while (true) {
+        TimeUnit.MILLISECONDS.sleep(
+                500
+        );
 
-            /*
-             * We test whether Windows allows us to rename the
-             * application directory. This is the same operation
-             * used by the actual updater.
-             */
-            Path testDirectory =
-                    applicationDirectory
-                            .resolveSibling(
-                                    applicationDirectory.getFileName()
-                                            + ".release-test"
-                            );
-
-            try {
-
-                Files.move(
-                        applicationDirectory,
-                        testDirectory
-                );
-
-                Files.move(
-                        testDirectory,
-                        applicationDirectory
-                );
-
-                log(
-                        "Windows released the application directory."
-                );
-
-                return;
-
-            } catch (IOException e) {
-
-                /*
-                 * If the first move succeeded but the second
-                 * failed, attempt to restore the original name.
-                 */
-                if (Files.exists(testDirectory)
-                        && !Files.exists(
-                        applicationDirectory
-                )) {
-
-                    try {
-
-                        Files.move(
-                                testDirectory,
-                                applicationDirectory
-                        );
-
-                    } catch (IOException restoreError) {
-
-                        log(
-                                "WARNING: Could not restore "
-                                        + "release-test directory: "
-                                        + restoreError
-                        );
-                    }
-                }
-
-                long elapsed =
-                        System.currentTimeMillis()
-                                - start;
-
-                if (elapsed >=
-                        FILE_RELEASE_TIMEOUT_MS) {
-
-                    /*
-                     * Do NOT throw here.
-                     *
-                     * The actual replacement method has its own
-                     * retry mechanism. This method only prevents
-                     * immediately racing Windows after process exit.
-                     */
-                    log(
-                            "Windows has not released all Vanta "
-                                    + "handles after 30 seconds."
-                    );
-
-                    log(
-                            "Continuing to replacement with retries."
-                    );
-
-                    return;
-                }
-
-                log(
-                        "Vanta installation is still locked. "
-                                + "Retrying in "
-                                + RETRY_DELAY_MS
-                                + " ms."
-                );
-
-                TimeUnit.MILLISECONDS.sleep(
-                        RETRY_DELAY_MS
-                );
-            }
-        }
+        log(
+                "Finished waiting for Windows file handles to settle."
+        );
     }
 
     private static void verifyExtractedApplication(

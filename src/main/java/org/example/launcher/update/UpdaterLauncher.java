@@ -1,9 +1,11 @@
 package org.example.launcher.update;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
 
@@ -13,6 +15,12 @@ public final class UpdaterLauncher {
             Path.of(
                     System.getProperty("java.io.tmpdir"),
                     "Vanta-updater-launcher.log"
+            );
+
+    private static final Path TEMP_UPDATER_ROOT =
+            Path.of(
+                    System.getProperty("java.io.tmpdir"),
+                    "Vanta-updater"
             );
 
     private UpdaterLauncher() {
@@ -120,9 +128,6 @@ public final class UpdaterLauncher {
                         + System.getProperty("java.io.tmpdir")
         );
 
-        Path updaterDirectory =
-                getUpdaterDirectory();
-
         Path updaterJar =
                 getUpdaterJar();
 
@@ -136,25 +141,7 @@ public final class UpdaterLauncher {
                         .toAbsolutePath()
                         .normalize();
 
-        String javaHome = System.getenv("JAVA_HOME");
-
-        Path javaExecutable;
-
-        if (javaHome != null && !javaHome.isBlank()) {
-            javaExecutable =
-                    Path.of(javaHome, "bin", "java.exe")
-                            .toAbsolutePath()
-                            .normalize();
-        } else {
-            javaExecutable = Path.of("java.exe");
-        }
-
         log("---------- PATHS ----------");
-
-        log(
-                "Updater directory: "
-                        + updaterDirectory
-        );
 
         log(
                 "Updater JAR: "
@@ -171,24 +158,7 @@ public final class UpdaterLauncher {
                         + absoluteApplication
         );
 
-        log(
-                "Updater Java: "
-                        + javaExecutable
-        );
-
         log("---------- VALIDATION ----------");
-
-        if (!Files.isDirectory(updaterDirectory)) {
-
-            log(
-                    "Updater directory does not exist. "
-                            + "Creating it."
-            );
-
-            Files.createDirectories(
-                    updaterDirectory
-            );
-        }
 
         if (!Files.isRegularFile(updaterJar)) {
 
@@ -226,17 +196,6 @@ public final class UpdaterLauncher {
             );
         }
 
-        if (!Files.isRegularFile(javaExecutable)) {
-            log(
-                    "FAIL: system Java runtime does not exist."
-            );
-
-            throw new IllegalStateException(
-                    "System Java runtime was not found: "
-                            + javaExecutable
-            );
-        }
-
         log(
                 "Updater JAR size: "
                         + Files.size(updaterJar)
@@ -249,26 +208,102 @@ public final class UpdaterLauncher {
                         + " bytes"
         );
 
+        /*
+         * IMPORTANT:
+         *
+         * The updater must NOT run from inside VantaLauncher.
+         *
+         * Vanta is currently running from the bundled runtime
+         * inside VantaLauncher. If we launch the updater using
+         * that same runtime, Windows can keep the runtime files
+         * locked and prevent the entire VantaLauncher directory
+         * from being renamed.
+         *
+         * Therefore we create a completely external temporary
+         * updater environment containing:
+         *
+         *   %TEMP%\Vanta-updater\<id>\
+         *       updater\
+         *           VantaUpdater.jar
+         *       runtime\
+         *           ...
+         *
+         * The updater process then runs entirely from there.
+         */
+
+        Path tempUpdaterDirectory =
+                createTemporaryUpdaterDirectory();
+
+        Path tempUpdaterJar =
+                tempUpdaterDirectory
+                        .resolve("VantaUpdater.jar");
+
+        Path tempRuntimeDirectory =
+                tempUpdaterDirectory
+                        .resolve("runtime");
+
+        Path tempJavaExecutable =
+                tempRuntimeDirectory
+                        .resolve("bin")
+                        .resolve("java.exe");
+
+        log("---------- PREPARING EXTERNAL UPDATER ----------");
+
         log(
-                "Application directory exists: "
-                        + Files.isDirectory(
-                        absoluteApplication
+                "External updater directory: "
+                        + tempUpdaterDirectory
+        );
+
+        log(
+                "External updater JAR: "
+                        + tempUpdaterJar
+        );
+
+        log(
+                "External runtime directory: "
+                        + tempRuntimeDirectory
+        );
+
+        log(
+                "External Java: "
+                        + tempJavaExecutable
+        );
+
+        copyUpdaterJar(
+                updaterJar,
+                tempUpdaterJar
+        );
+
+        copyBundledRuntime(
+                absoluteApplication,
+                tempRuntimeDirectory
+        );
+
+        if (!Files.isRegularFile(
+                tempJavaExecutable
+        )) {
+
+            throw new IllegalStateException(
+                    "External updater Java was not created: "
+                            + tempJavaExecutable
+            );
+        }
+
+        log(
+                "External updater environment prepared successfully."
+        );
+
+        log(
+                "External Java exists: "
+                        + Files.isRegularFile(
+                        tempJavaExecutable
                 )
         );
 
         log(
-                "Vanta.exe exists: "
+                "External updater JAR exists: "
                         + Files.isRegularFile(
-                        absoluteApplication.resolve(
-                                "Vanta.exe"
-                        )
-                )
-        );
-
-        log(
-                "Bundled Java exists: "
-                        + Files.isRegularFile(
-                        javaExecutable
+                        tempUpdaterJar
                 )
         );
 
@@ -276,9 +311,9 @@ public final class UpdaterLauncher {
 
         List<String> command =
                 List.of(
-                        javaExecutable.toString(),
+                        tempJavaExecutable.toString(),
                         "-jar",
-                        updaterJar.toString(),
+                        tempUpdaterJar.toString(),
                         Long.toString(processId),
                         absoluteZip.toString(),
                         absoluteApplication.toString()
@@ -295,7 +330,11 @@ public final class UpdaterLauncher {
         }
 
         log(
-                "Starting updater directly using bundled Java."
+                "Starting updater using the external temporary runtime."
+        );
+
+        log(
+                "The updater process will NOT use files inside VantaLauncher."
         );
 
         log(
@@ -309,7 +348,7 @@ public final class UpdaterLauncher {
             Process process =
                     new ProcessBuilder(command)
                             .directory(
-                                    updaterDirectory.toFile()
+                                    tempUpdaterDirectory.toFile()
                             )
                             .redirectErrorStream(true)
                             .start();
@@ -427,6 +466,157 @@ public final class UpdaterLauncher {
         log("========================================");
     }
 
+    private static Path createTemporaryUpdaterDirectory()
+            throws IOException {
+
+        Files.createDirectories(
+                TEMP_UPDATER_ROOT
+        );
+
+        Path directory =
+                Files.createTempDirectory(
+                        TEMP_UPDATER_ROOT,
+                        "session-"
+                );
+
+        log(
+                "Created temporary updater directory: "
+                        + directory
+        );
+
+        return directory;
+    }
+
+    private static void copyUpdaterJar(
+            Path source,
+            Path destination
+    ) throws IOException {
+
+        log(
+                "Copying updater JAR:"
+        );
+
+        log(
+                "  FROM: "
+                        + source
+        );
+
+        log(
+                "  TO:   "
+                        + destination
+        );
+
+        Path parent =
+                destination.getParent();
+
+        if (parent != null) {
+
+            Files.createDirectories(
+                    parent
+            );
+        }
+
+        Files.copy(
+                source,
+                destination,
+                StandardCopyOption.REPLACE_EXISTING
+        );
+
+        log(
+                "Updater JAR copied successfully."
+        );
+
+        log(
+                "Copied JAR size: "
+                        + Files.size(destination)
+                        + " bytes"
+        );
+    }
+
+    private static void copyBundledRuntime(
+            Path applicationDirectory,
+            Path destination
+    ) throws IOException {
+
+        Path source =
+                applicationDirectory
+                        .resolve("runtime");
+
+        log(
+                "Copying bundled Java runtime:"
+        );
+
+        log(
+                "  FROM: "
+                        + source
+        );
+
+        log(
+                "  TO:   "
+                        + destination
+        );
+
+        if (!Files.isDirectory(source)) {
+
+            throw new IOException(
+                    "Bundled Java runtime directory does not exist: "
+                            + source
+            );
+        }
+
+        Files.walk(source)
+                .forEach(sourcePath -> {
+
+                    try {
+
+                        Path relative =
+                                source.relativize(
+                                        sourcePath
+                                );
+
+                        Path destinationPath =
+                                destination.resolve(
+                                        relative
+                                );
+
+                        if (Files.isDirectory(sourcePath)) {
+
+                            Files.createDirectories(
+                                    destinationPath
+                            );
+
+                        } else {
+
+                            Path parent =
+                                    destinationPath.getParent();
+
+                            if (parent != null) {
+
+                                Files.createDirectories(
+                                        parent
+                                );
+                            }
+
+                            Files.copy(
+                                    sourcePath,
+                                    destinationPath,
+                                    StandardCopyOption.REPLACE_EXISTING
+                            );
+                        }
+
+                    } catch (IOException e) {
+
+                        throw new RuntimeCopyException(
+                                e
+                        );
+                    }
+                });
+
+        log(
+                "Bundled Java runtime copied successfully."
+        );
+    }
+
     private static Path getUpdaterOutputLog() {
 
         return Path.of(
@@ -459,5 +649,19 @@ public final class UpdaterLauncher {
             // Logging must never prevent updating.
         }
     }
-}
 
+    private static final class RuntimeCopyException
+            extends RuntimeException {
+
+        private RuntimeCopyException(
+                IOException cause
+        ) {
+            super(cause);
+        }
+
+        @Override
+        public synchronized IOException getCause() {
+            return (IOException) super.getCause();
+        }
+    }
+}

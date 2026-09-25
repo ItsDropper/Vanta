@@ -2513,6 +2513,17 @@ public class ModrinthService {
         }
 
         /*
+         * Remove every existing version of the mod being repaired.
+         *
+         * This is necessary because the instance may contain the old
+         * incompatible JAR even if the registry points at the new version.
+         */
+        removeInstalledMod(
+                instance,
+                projectId
+        );
+
+        /*
          * Install the complete resolved graph.
          */
         List<Path> installed =
@@ -2684,48 +2695,120 @@ public class ModrinthService {
             String projectId
     ) throws IOException, InterruptedException {
 
-        InstalledModRecord record =
-                InstalledModManager.findByProjectId(
-                        instance,
-                        projectId
-                );
-
-        String modId =
-                record != null
-                        ? record.getModId()
-                        : null;
-
         Path modsDirectory =
                 instance.getDirectory()
                         .resolve("mods");
 
-        if (Files.exists(modsDirectory)
-                && modId != null
+        if (!Files.isDirectory(modsDirectory)) {
+            InstalledModManager.removeByProjectId(
+                    instance,
+                    projectId
+            );
+            return;
+        }
+
+        /*
+         * First get the Fabric mod ID from the registry.
+         */
+        String modId = null;
+
+        List<InstalledModRecord> records =
+                InstalledModManager.load(instance);
+
+        if (records != null) {
+
+            for (InstalledModRecord record : records) {
+
+                if (record == null
+                        || !projectId.equals(
+                        record.getProjectId()
+                )) {
+                    continue;
+                }
+
+                if (record.getModId() != null
+                        && !record.getModId().isBlank()) {
+
+                    modId = record.getModId();
+                    break;
+                }
+            }
+        }
+
+        /*
+         * Delete every physical JAR belonging to that Fabric mod ID.
+         */
+        if (modId != null
                 && !modId.isBlank()) {
 
             List<InstalledMod> installed =
                     installedModScanner.scan(instance);
 
-            for (InstalledMod mod : installed) {
+            if (installed != null) {
 
-                if (mod == null
-                        || !modId.equals(
-                        mod.getModId()
-                )) {
+                for (InstalledMod mod : installed) {
+
+                    if (mod == null
+                            || !modId.equals(
+                            mod.getModId()
+                    )
+                            || mod.getFilename() == null) {
+
+                        continue;
+                    }
+
+                    Path file =
+                            modsDirectory.resolve(
+                                    sanitizeFilename(
+                                            mod.getFilename()
+                                    )
+                            );
+
+                    if (Files.isRegularFile(file)) {
+
+                        System.out.println(
+                                "[Vanta Repair] Deleting old mod: "
+                                        + file.getFileName()
+                        );
+
+                        Files.deleteIfExists(file);
+                    }
+                }
+            }
+        }
+
+        /*
+         * Also delete any files tracked by the Modrinth project.
+         */
+        if (records != null) {
+
+            for (InstalledModRecord record : records) {
+
+                if (record == null
+                        || !projectId.equals(
+                        record.getProjectId()
+                )
+                        || record.getFilename() == null) {
+
                     continue;
                 }
 
                 Path file =
                         modsDirectory.resolve(
-                                mod.getFilename()
+                                sanitizeFilename(
+                                        record.getFilename()
+                                )
                         );
 
-                System.out.println(
-                        "[Vanta] Removing conflicting mod: "
-                                + file.getFileName()
-                );
+                if (Files.isRegularFile(file)) {
 
-                Files.deleteIfExists(file);
+                    System.out.println(
+                            "[Vanta Repair] Deleting tracked mod: "
+                                    + file.getFileName()
+                    );
+
+                    Files.deleteIfExists(file);
+                }
             }
         }
 
@@ -3330,5 +3413,7 @@ public class ModrinthService {
             return new CompatibilityResult(false, reason);
         }
     }
+
+
 
 }

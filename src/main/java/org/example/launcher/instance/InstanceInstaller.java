@@ -211,4 +211,149 @@ public class InstanceInstaller {
             throw e;
         }
     }
+
+    public static Instance updateMinecraftVersion(
+            Instance instance,
+            String minecraftVersion
+    ) throws Exception {
+
+        if (instance == null) {
+            throw new IllegalArgumentException(
+                    "Instance cannot be null."
+            );
+        }
+
+        if (minecraftVersion == null
+                || minecraftVersion.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Minecraft version cannot be empty."
+            );
+        }
+
+        minecraftVersion =
+                minecraftVersion.trim();
+
+        System.out.println(
+                "[Vanta Repair] Updating Minecraft version: "
+                        + instance.getMinecraftVersion()
+                        + " -> "
+                        + minecraftVersion
+        );
+
+        /*
+         * ---------------------------------------------------------
+         * 1. DOWNLOAD TARGET MINECRAFT METADATA
+         * ---------------------------------------------------------
+         */
+
+        JsonNode vanillaMetadata =
+                MinecraftVersionResolver.downloadMetadata(
+                        minecraftVersion
+                );
+
+        /*
+         * ---------------------------------------------------------
+         * 2. INSTALL TARGET MINECRAFT RUNTIME
+         * ---------------------------------------------------------
+         *
+         * These methods are SHA-1 verified and only replace files
+         * when the existing file does not match the target metadata.
+         */
+
+        MinecraftFileInstaller.installClient(
+                instance,
+                vanillaMetadata
+        );
+
+        MinecraftFileInstaller.installLibraries(
+                vanillaMetadata
+        );
+
+        NativeInstaller.extract(
+                instance,
+                vanillaMetadata
+        );
+
+        AssetInstaller.install(
+                instance,
+                vanillaMetadata
+        );
+
+        /*
+         * ---------------------------------------------------------
+         * 3. REBUILD LOADER PROFILE
+         * ---------------------------------------------------------
+         */
+
+        JsonNode finalMetadata =
+                vanillaMetadata;
+
+        String loader =
+                instance.getLoader();
+
+        String loaderVersion =
+                instance.getLoaderVersion();
+
+        if ("Fabric".equalsIgnoreCase(loader)) {
+
+            if (loaderVersion == null
+                    || loaderVersion.isBlank()) {
+
+                throw new IllegalStateException(
+                        "Fabric Loader version is missing."
+                );
+            }
+
+            System.out.println(
+                    "[Vanta Repair] Using Fabric Loader "
+                            + loaderVersion
+            );
+
+            JsonNode fabricProfile =
+                    FabricInstaller.downloadProfile(
+                            minecraftVersion,
+                            loaderVersion
+                    );
+
+            FabricInstaller.installLibraries(
+                    fabricProfile
+            );
+
+            finalMetadata =
+                    FabricInstaller.mergeProfile(
+                            vanillaMetadata,
+                            fabricProfile
+                    );
+        }
+
+        /*
+         * ---------------------------------------------------------
+         * 4. SAVE FINAL VERSION METADATA
+         * ---------------------------------------------------------
+         */
+
+        MinecraftVersionResolver.saveMetadata(
+                instance,
+                finalMetadata
+        );
+
+        /*
+         * ---------------------------------------------------------
+         * 5. UPDATE INSTANCE METADATA
+         * ---------------------------------------------------------
+         */
+
+        Instance updatedInstance =
+                InstanceManager.updateMinecraftVersion(
+                        instance,
+                        minecraftVersion
+                );
+
+        System.out.println(
+                "[Vanta Repair] Minecraft version updated successfully."
+        );
+
+        return updatedInstance;
+    }
 }

@@ -281,6 +281,42 @@ public class InstanceManager {
         );
     }
 
+    public static Instance updateMinecraftVersion(
+            Instance instance,
+            String minecraftVersion
+    ) throws IOException {
+
+        if (instance == null) {
+            throw new IllegalArgumentException(
+                    "Instance cannot be null."
+            );
+        }
+
+        if (minecraftVersion == null
+                || minecraftVersion.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Minecraft version cannot be empty."
+            );
+        }
+
+        Instance updatedInstance =
+                new Instance(
+                        instance.getId(),
+                        instance.getName(),
+                        minecraftVersion,
+                        instance.getLoader(),
+                        instance.getLoaderVersion(),
+                        instance.getDirectory()
+                );
+
+        saveInstance(
+                updatedInstance
+        );
+
+        return updatedInstance;
+    }
+
     // =============================================================
     // SAVE INSTANCE
     // =============================================================

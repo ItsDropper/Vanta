@@ -175,7 +175,7 @@ public class RepairView extends VBox {
 
         Button repairButton =
                 new Button(
-                        "REPAIR AUTOMATICALLY"
+                        "REPAIR"
                 );
 
         repairButton.getStyleClass().add(
@@ -341,7 +341,8 @@ public class RepairView extends VBox {
             String title,
             String details,
             String repairProjectId,
-            List<String> repairVersions
+            List<String> repairVersions,
+            String repairMinecraftVersion
     ) {
 
         public RepairIssue(
@@ -354,15 +355,42 @@ public class RepairView extends VBox {
                     title,
                     details,
                     null,
-                    List.of()
+                    List.of(),
+                    null
+            );
+        }
+
+        public RepairIssue(
+                String type,
+                String title,
+                String details,
+                String repairProjectId,
+                List<String> repairVersions
+        ) {
+            this(
+                    type,
+                    title,
+                    details,
+                    repairProjectId,
+                    repairVersions,
+                    null
             );
         }
 
         public boolean canRepair() {
-            return repairProjectId != null
-                    && !repairProjectId.isBlank()
-                    && repairVersions != null
-                    && !repairVersions.isEmpty();
+            return (
+                    repairProjectId != null
+                            && !repairProjectId.isBlank()
+            ) || (
+                    repairMinecraftVersion != null
+                            && !repairMinecraftVersion.isBlank()
+            );
+        }
+
+        public boolean canRepairMinecraftVersion() {
+
+            return repairMinecraftVersion != null
+                    && !repairMinecraftVersion.isBlank();
         }
     }
 

@@ -12,7 +12,7 @@ public class LaunchFailureParser {
 
     private static final Pattern MISSING_DEPENDENCY =
             Pattern.compile(
-                    "Mod '([^']+)' \\(([^)]+)\\) .*?requires version (.+?) of ([^,]+), which is missing!"
+                    "Mod '([^']+)' \\(([^)]+)\\).*?requires version (.+?) of ([^,]+), which is missing!"
             );
 
     private static final Pattern WRONG_VERSION =
@@ -22,12 +22,39 @@ public class LaunchFailureParser {
 
     private static final Pattern INCOMPATIBLE_MODS =
             Pattern.compile(
-                    "Mod '([^']+)' \\(([^)]+)\\) .*?is incompatible with version (.+?) of mod '([^']+)' \\(([^)]+)\\), yet a conflicting version is present: ([^!]+)!"
+                    "Mod '([^']+)' \\(([^)]+)\\).*?"
+                            + "is incompatible with version (.+?) of mod '([^']+)' \\(([^)]+)\\),"
+                            + " yet a conflicting version is present: ([^!]+)!"
+            );
+
+    private static final Pattern MINECRAFT_VERSION_CONFLICT =
+            Pattern.compile(
+                    "Mod '([^']+)' \\(([^)]+)\\)\\s+[^ ]+"
+                            + "\\s+requires any version between "
+                            + "([0-9]+\\.[0-9]+\\.[0-9]+)-"
+                            + ".*?of 'Minecraft' \\(minecraft\\),"
+                            + " but only the wrong version is present: ([^!]+)!"
+            );
+
+    private static final Pattern MOD_REQUIRES_MINECRAFT_VERSION =
+            Pattern.compile(
+                    "Mod '([^']+)' \\(([^)]+)\\).*?"
+                            + "requires .*? of 'Minecraft' \\(minecraft\\),"
+                            + " but only the wrong version is present: ([^!]+)!"
+            );
+
+    private static final Pattern MOD_MINECRAFT_VERSION_CONFLICT =
+            Pattern.compile(
+                    "Mod '([^']+)' \\(([^)]+)\\)\\s+([^\\s]+)"
+                            + "\\s+requires .*?'Minecraft' \\(minecraft\\),"
+                            + "\\s+but only the wrong version is present:\\s*([^!]+)!"
             );
 
     public static List<RepairView.RepairIssue> parse(
             String output
     ) {
+
+
 
         List<RepairView.RepairIssue> issues =
                 new ArrayList<>();
@@ -37,12 +64,48 @@ public class LaunchFailureParser {
         }
 
         /*
-         * Example:
+         * Fabric Loader:
          *
-         * Mod 'Nvidium' (nvidium) requires version
-         * 0.8.11 or version 0.8.12 of sodium,
-         * which is missing!
+         * Mod 'Fabric API' (fabric-api) 0.155.3+26.1.2
+         * requires any 26.1.x version of 'Minecraft' (minecraft),
+         * but only the wrong version is present: 1.21.11!
+         *
+         * The safe repair here is to repair the mod, not upgrade
+         * the instance's Minecraft version.
          */
+        Matcher modMinecraftVersion =
+                MOD_MINECRAFT_VERSION_CONFLICT.matcher(output);
+
+        while (modMinecraftVersion.find()) {
+
+            String requestingMod =
+                    modMinecraftVersion.group(1);
+
+            String requestingModId =
+                    modMinecraftVersion.group(2);
+
+            String installedMinecraft =
+                    modMinecraftVersion.group(4).trim();
+
+            String details =
+                    modMinecraftVersion.group(0)
+                            + "\nMod ID: "
+                            + requestingModId
+                            + "\nInstalled Minecraft: "
+                            + installedMinecraft;
+
+            issues.add(
+                    new RepairView.RepairIssue(
+                            "MOD DEPENDENCY",
+                            requestingMod
+                                    + " is incompatible with Minecraft",
+                            details,
+                            requestingModId,
+                            List.of()
+                    )
+            );
+        }
+
         Matcher missing =
                 MISSING_DEPENDENCY.matcher(output);
 
@@ -86,13 +149,6 @@ public class LaunchFailureParser {
             );
         }
 
-        /*
-         * Example:
-         *
-         * Nvidium requires version 0.8.11 of mod
-         * 'Sodium' (sodium), but only the wrong version
-         * is present: 0.8.14!
-         */
         Matcher wrong =
                 WRONG_VERSION.matcher(output);
 
@@ -139,14 +195,6 @@ public class LaunchFailureParser {
             );
         }
 
-        /*
-         * Example:
-         *
-         * Mod 'Sodium' (sodium) 0.8.14+mc1.21.11 is
-         * incompatible with version 1.10.7 or earlier of
-         * mod 'Iris' (iris), yet a conflicting version is
-         * present: 1.10.7+mc1.21.11!
-         */
         Matcher incompatible =
                 INCOMPATIBLE_MODS.matcher(output);
 
@@ -200,6 +248,45 @@ public class LaunchFailureParser {
                             details,
                             conflictingModId,
                             versions
+                    )
+            );
+        }
+
+        Matcher minecraftVersion =
+                MINECRAFT_VERSION_CONFLICT.matcher(output);
+
+        while (minecraftVersion.find()) {
+
+            String requestingMod =
+                    minecraftVersion.group(1);
+
+            String requestingModId =
+                    minecraftVersion.group(2);
+
+            String requiredVersion =
+                    minecraftVersion.group(3).trim();
+
+            String installedVersion =
+                    minecraftVersion.group(4).trim();
+
+            String details =
+                    "Required Minecraft version: "
+                            + requiredVersion
+                            + "\nInstalled Minecraft version: "
+                            + installedVersion
+                            + "\nMod ID: "
+                            + requestingModId;
+
+            issues.add(
+                    new RepairView.RepairIssue(
+                            "MINECRAFT VERSION CONFLICT",
+                            requestingMod
+                                    + " requires Minecraft "
+                                    + requiredVersion,
+                            details,
+                            null,
+                            List.of(),
+                            requiredVersion
                     )
             );
         }

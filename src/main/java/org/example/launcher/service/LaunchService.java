@@ -5,6 +5,9 @@ import org.example.launcher.LaunchDataBuilder;
 import org.example.launcher.MinecraftLauncher;
 import org.example.launcher.account.Account;
 import org.example.launcher.model.Instance;
+import org.example.launcher.repair.FailureCategory;
+import org.example.launcher.repair.RepairDiagnosis;
+import org.example.launcher.repair.RepairDiagnosticEngine;
 import org.example.ui.views.RepairView;
 
 import java.io.BufferedReader;
@@ -188,11 +191,6 @@ public class LaunchService {
                     process
             );
 
-            /*
-             * Minecraft can take several seconds to initialize.
-             * Do not wait for the process to finish before marking
-             * it as running.
-             */
             setState(
                     LaunchState.RUNNING
             );
@@ -317,50 +315,254 @@ public class LaunchService {
             String output =
                     getRecentOutput();
 
+            /*
+             * ---------------------------------------------------------
+             * FIRST: Look for specific Fabric/mod resolution errors.
+             *
+             * This parser must always get first access to the complete
+             * Fabric Loader failure because the generic diagnostic engine
+             * can incorrectly classify an early dependency line before
+             * Fabric has printed the actual solution.
+             * ---------------------------------------------------------
+             */
+
             List<RepairView.RepairIssue> issues =
                     LaunchFailureParser.parse(
                             output
                     );
 
-            if (issues.isEmpty()) {
+            if (!issues.isEmpty()) {
+
+                RepairView.RepairIssue issue =
+                        issues.get(0);
+
+                failureHandled = true;
+
+                System.out.println(
+                        "[Vanta Repair] Specific failure detected: "
+                                + issue.title()
+                );
+
+                System.out.println(
+                        "[Vanta Repair] "
+                                + issue.type()
+                );
+
+                if (issue.details() != null
+                        && !issue.details().isBlank()) {
+
+                    System.out.println(
+                            "[Vanta Repair] Details: "
+                                    + issue.details()
+                    );
+                }
+
+                /*
+                 * Preserve the failed instance before the
+                 * process monitor clears runningInstance.
+                 */
+                failedInstance =
+                        runningInstance;
+
+                String description =
+                        issue.details();
+
+                if (description == null
+                        || description.isBlank()) {
+
+                    description =
+                            issue.title();
+                }
+
+                lastFailure =
+                        new LaunchFailure(
+                                issue.title(),
+                                description,
+                                output
+                        );
+
+                /*
+                 * Stop Minecraft immediately.
+                 *
+                 * Vanta already understands this failure, so there is
+                 * no reason to leave the Fabric error screen open.
+                 */
+                process.destroyForcibly();
+
+                setState(
+                        LaunchState.ERROR
+                );
+
+                return;
+            }
+
+            /*
+             * ---------------------------------------------------------
+             * IMPORTANT:
+             *
+             * Fabric Loader prints mod-resolution errors over multiple
+             * lines. The generic diagnostic engine can detect an early
+             * line such as:
+             *
+             *   Fabric API requires Java 25
+             *
+             * before Fabric has printed the actual mod/Minecraft
+             * incompatibility.
+             *
+             * Do NOT allow the generic engine to claim the failure while
+             * Fabric is still producing its detailed resolution output.
+             * ---------------------------------------------------------
+             */
+
+            boolean fabricModResolutionFailure =
+                    output.contains(
+                            "Mod resolution failed"
+                    )
+                            || output.contains(
+                            "Incompatible mods found!"
+                    );
+
+            if (fabricModResolutionFailure) {
+                return;
+            }
+
+            /*
+             * ---------------------------------------------------------
+             * SECOND: Fall back to the generic diagnostic engine.
+             *
+             * This handles failures that LaunchFailureParser does not
+             * specifically understand.
+             * ---------------------------------------------------------
+             */
+
+            List<RepairDiagnosis> diagnoses =
+                    RepairDiagnosticEngine.diagnose(
+                            output
+                    );
+
+            RepairDiagnosis diagnosis =
+                    findActionableDiagnosis(
+                            diagnoses
+                    );
+
+            if (diagnosis == null) {
                 return;
             }
 
             failureHandled = true;
 
-            /*
-             * Preserve the instance before the process monitor
-             * clears runningInstance.
-             */
             System.out.println(
-                    "[Vanta DEBUG] Failure detected. Running instance: "
-                            + runningInstance
+                    "[Vanta Repair] Known failure detected: "
+                            + diagnosis.title()
             );
+
+            System.out.println(
+                    "[Vanta Repair] "
+                            + diagnosis.category()
+                            + " | "
+                            + diagnosis.confidence()
+            );
+
+            if (!diagnosis.evidence().isBlank()) {
+
+                System.out.println(
+                        "[Vanta Repair] Evidence: "
+                                + diagnosis.evidence()
+                );
+            }
 
             failedInstance =
                     runningInstance;
 
+            String description =
+                    diagnosis.description();
+
+            if (description == null
+                    || description.isBlank()) {
+
+                description =
+                        diagnosis.evidence();
+            }
+
             lastFailure =
                     new LaunchFailure(
-                            "Minecraft could not start",
-                            "Vanta found a problem with this instance and stopped Minecraft before the Fabric error screen appeared.",
-                            output
+                            diagnosis.title(),
+                            description,
+                            diagnosis.evidence().isBlank()
+                                    ? output
+                                    : diagnosis.evidence()
                     );
 
-            System.out.println(
-                    "[Vanta] Detected Minecraft startup failure."
-            );
-
-            /*
-             * Stop Minecraft so its own Fabric error screen
-             * does not remain visible.
-             */
             process.destroyForcibly();
 
             setState(
                     LaunchState.ERROR
             );
         }
+    }
+
+    private RepairDiagnosis findActionableDiagnosis(
+            List<RepairDiagnosis> diagnoses
+    ) {
+
+        if (diagnoses == null
+                || diagnoses.isEmpty()) {
+
+            return null;
+        }
+
+        /*
+         * Only use categories that represent an actual
+         * failure. Generic LOADER and MINECRAFT_VERSION
+         * matches are intentionally excluded here because
+         * the current diagnostic engine can match normal
+         * startup messages.
+         */
+        for (RepairDiagnosis diagnosis : diagnoses) {
+
+            if (diagnosis == null) {
+                continue;
+            }
+
+            FailureCategory category =
+                    diagnosis.category();
+
+            if (category ==
+                    FailureCategory.MOD_DEPENDENCY
+                    || category ==
+                    FailureCategory.MOD_CONFLICT
+                    || category ==
+                    FailureCategory.DUPLICATE_MOD
+                    || category ==
+                    FailureCategory.MISSING_LIBRARY
+                    || category ==
+                    FailureCategory.CORRUPT_LIBRARY
+                    || category ==
+                    FailureCategory.MISSING_ASSET
+                    || category ==
+                    FailureCategory.JAVA_RUNTIME
+                    || category ==
+                    FailureCategory.JAVA_VERSION
+                    || category ==
+                    FailureCategory.JVM_ARGUMENTS
+                    || category ==
+                    FailureCategory.NATIVE
+                    || category ==
+                    FailureCategory.CLASSPATH
+                    || category ==
+                    FailureCategory.CONFIGURATION
+                    || category ==
+                    FailureCategory.INSTALLATION
+                    || category ==
+                    FailureCategory.DISK_SPACE
+                    || category ==
+                    FailureCategory.PERMISSION) {
+
+                return diagnosis;
+            }
+        }
+
+        return null;
     }
 
     // =============================================================
@@ -387,10 +589,6 @@ public class LaunchService {
                                 return;
                             }
 
-                            /*
-                             * Preserve the instance that failed
-                             * before clearing the running state.
-                             */
                             if (failedInstance == null) {
 
                                 failedInstance =
@@ -404,9 +602,8 @@ public class LaunchService {
                                     null;
 
                             /*
-                             * If the output monitor already detected
-                             * a Fabric/dependency failure, it owns
-                             * the failure state.
+                             * The output monitor already handled
+                             * a known failure.
                              */
                             if (failureHandled) {
 
@@ -420,25 +617,10 @@ public class LaunchService {
                                     String output =
                                             getRecentOutput();
 
-                                    List<RepairView.RepairIssue> issues =
-                                            LaunchFailureParser.parse(
-                                                    output
-                                            );
-
-                                    String title =
-                                            issues.isEmpty()
-                                                    ? "Minecraft stopped unexpectedly"
-                                                    : "Minecraft could not start";
-
-                                    String description =
-                                            issues.isEmpty()
-                                                    ? "Minecraft closed with an error while starting or running."
-                                                    : "Vanta found a problem that may be repairable.";
-
                                     lastFailure =
                                             new LaunchFailure(
-                                                    title,
-                                                    description,
+                                                    "Minecraft stopped unexpectedly",
+                                                    "Minecraft closed with an error that Vanta could not identify.",
                                                     output
                                             );
                                 }
@@ -459,7 +641,6 @@ public class LaunchService {
 
                         Thread.currentThread()
                                 .interrupt();
-
                     }
                 });
 
