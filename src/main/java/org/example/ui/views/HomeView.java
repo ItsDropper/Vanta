@@ -10,6 +10,7 @@ import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -41,10 +42,10 @@ public class HomeView extends StackPane {
     private final Consumer<LaunchFailure> onLaunchFailure;
     private final Consumer<Instance> onLaunchInstance;
 
-    private VBox recentServersList;
+    private FlowPane recentServersList;
     private Label recentServersStatus;
     private final Label accountLabel;
-    private VBox recentList;
+    private FlowPane recentList;
     private Label recentStatus;
     private final java.util.Map<String, Label> playtimeLabels =
             new java.util.HashMap<>();
@@ -140,7 +141,12 @@ public class HomeView extends StackPane {
         );
         recentSubtitle.getStyleClass().add("home-section-subtitle");
 
-        recentList = new VBox(10);
+        recentList = new FlowPane();
+        recentList.setHgap(10);
+        recentList.setVgap(10);
+        recentList.setPrefWrapLength(900);
+        recentList.setMaxWidth(Double.MAX_VALUE);
+        recentList.setMinHeight(0);
         recentList.getStyleClass().add("home-recent-list");
 
         recentStatus = new Label("Loading instances...");
@@ -153,8 +159,6 @@ public class HomeView extends StackPane {
                 recentList,
                 recentStatus
         );
-        recentList.setMinHeight(0);
-        recentList.setMaxHeight(Double.MAX_VALUE);
         section.setFillWidth(true);
         section.getStyleClass().add("home-recent-section");
         return section;
@@ -172,15 +176,16 @@ public class HomeView extends StackPane {
         );
         subtitle.getStyleClass().add("home-section-subtitle");
 
-        recentServersList = new VBox(8);
+        recentServersList = new FlowPane();
+        recentServersList.setHgap(10);
+        recentServersList.setVgap(10);
+        recentServersList.setPrefWrapLength(900);
+        recentServersList.setMaxWidth(Double.MAX_VALUE);
+        recentServersList.setMinHeight(0);
         recentServersList.getStyleClass().add("home-server-list");
 
         recentServersStatus = new Label("No server history yet.");
         recentServersStatus.getStyleClass().add("home-recent-status");
-
-        recentServersList.setMinHeight(Region.USE_PREF_SIZE);
-        recentServersList.setPrefHeight(Region.USE_COMPUTED_SIZE);
-        recentServersList.setMaxHeight(Double.MAX_VALUE);
 
         card.getChildren().addAll(
                 title,
@@ -366,22 +371,10 @@ public class HomeView extends StackPane {
 
             Thread thread = new Thread(() -> {
                 try {
-                    ServerTarget recentServer =
-                            ServerHistoryManager.getRecent().stream()
-                                    .filter(server ->
-                                            instance.getId().equals(
-                                                    server.getInstanceId()
-                                            ))
-                                    .findFirst()
-                                    .map(server ->
-                                            new ServerTarget(
-                                                    server.getHost(),
-                                                    server.getPort()
-                                            )
-                                    )
-                                    .orElse(null);
-
-                    launchService.launch(instance, recentServer);
+                    // Recently played INSTANCE means exactly that: launch
+                    // the instance normally. Server quick-play is handled by
+                    // the separate Recently Played Servers section.
+                    launchService.launch(instance);
                 } catch (Throwable ex) {
                     ex.printStackTrace();
 
@@ -413,7 +406,9 @@ public class HomeView extends StackPane {
         HBox card = new HBox(14, icon, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(14, 16, 14, 16));
-        card.setMaxWidth(Double.MAX_VALUE);
+        card.setMinWidth(320);
+        card.setPrefWidth(430);
+        card.setMaxWidth(600);
         card.setPickOnBounds(true);
         card.setMouseTransparent(false);
         card.getStyleClass().add("home-recent-card");
@@ -549,6 +544,7 @@ public class HomeView extends StackPane {
                         + (rendered == 1 ? "" : "s")
         );
     }
+
     private HBox createRecentServerCard(
             Instance instance,
             ServerHistoryEntry server
@@ -602,6 +598,8 @@ public class HomeView extends StackPane {
 
             Thread thread = new Thread(() -> {
                 try {
+                    // Server cards are intentionally different from instance
+                    // cards: they always launch the selected server target.
                     launchService.launch(
                             instance,
                             new ServerTarget(
@@ -630,7 +628,9 @@ public class HomeView extends StackPane {
         HBox card = new HBox(14, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(12, 14, 12, 14));
-        card.setMaxWidth(Double.MAX_VALUE);
+        card.setMinWidth(320);
+        card.setPrefWidth(430);
+        card.setMaxWidth(600);
         card.getStyleClass().add("home-server-card");
 
         card.setPickOnBounds(true);
