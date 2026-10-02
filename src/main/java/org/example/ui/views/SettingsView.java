@@ -23,7 +23,6 @@ import org.example.launcher.service.AccountService;
 import org.example.ui.DebugAccess;
 import org.example.ui.components.NotificationManager;
 import org.example.ui.LauncherSettings;
-import org.example.ui.OnboardingManager;
 import org.example.ui.ThemeManager;
 
 import java.awt.Desktop;
@@ -642,7 +641,7 @@ public class SettingsView extends BorderPane {
             Button testOnboarding = new Button("TEST ONBOARDING");
             testOnboarding.getStyleClass().add("debug-button");
             testOnboarding.setOnAction(event -> {
-                OnboardingManager.resetOnboarding();
+                LauncherSettings.resetOnboarding();
                 NotificationManager manager = NotificationManager.getGlobal();
                 if (manager != null) {
                     manager.success(
