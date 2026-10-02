@@ -359,7 +359,7 @@ private boolean isGameVersionCompatible(
         return false;
     }
 
-private ModrinthFile findPrimaryFile(
+ModrinthFile findPrimaryFile(
             ModrinthVersion version
     ) {
 
