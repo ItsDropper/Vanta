@@ -2592,4 +2592,236 @@ private boolean isProvidedByFabricApi(
                 .orElseGet(() -> versions.stream().filter(v -> isCompatible(v, minecraftVersion, loader)).findFirst().orElse(null));
     }
 
+
+    /*
+     * Check whether an already-installed mod satisfies a dependency
+     * before downloading another copy.
+     */
+    boolean hasCompatibleInstalledDependency(
+            Instance instance,
+            ModrinthDependency dependency,
+            ModrinthVersion requestingVersion
+    ) throws IOException, InterruptedException {
+
+        if (instance == null
+                || dependency == null) {
+            return false;
+        }
+
+        String dependencyProjectId =
+                dependency.getProjectId();
+
+        if (dependencyProjectId == null
+                || dependencyProjectId.isBlank()) {
+            return false;
+        }
+
+        InstalledMod dependencyMod =
+                findInstalledDependencyMod(
+                        instance,
+                        dependencyProjectId
+                );
+
+        if (dependencyMod == null
+                || dependencyMod.getVersion() == null
+                || dependencyMod.getVersion().isBlank()) {
+            return false;
+        }
+
+        DependencyRequirement requirement =
+                findDependencyRequirement(
+                        requestingVersion,
+                        dependencyMod.getModId()
+                );
+
+        if (requirement == null) {
+            return false;
+        }
+
+        return matchesFabricConstraint(
+                dependencyMod.getVersion(),
+                requirement.getVersionConstraint()
+        );
+    }
+
+    /*
+     * Resolve a Modrinth dependency to a version compatible with the
+     * current instance. An explicitly pinned Modrinth version ID wins.
+     */
+    ModrinthVersion resolveDependencyVersion(
+            Instance instance,
+            ModrinthDependency dependency
+    ) throws IOException, InterruptedException {
+
+        if (instance == null
+                || dependency == null) {
+            return null;
+        }
+
+        String projectId =
+                dependency.getProjectId();
+
+        if (projectId == null
+                || projectId.isBlank()) {
+            return null;
+        }
+
+        List<ModrinthVersion> versions =
+                getVersionsCached(projectId);
+
+        String requiredVersionId =
+                dependency.getVersionId();
+
+        if (requiredVersionId != null
+                && !requiredVersionId.isBlank()) {
+
+            for (ModrinthVersion version : versions) {
+
+                if (version == null
+                        || !requiredVersionId.equals(
+                        version.getId())) {
+                    continue;
+                }
+
+                return isCompatible(
+                        version,
+                        instance.getMinecraftVersion(),
+                        normalizeLoader(
+                                instance.getLoader()
+                        )
+                ) ? version : null;
+            }
+
+            return null;
+        }
+
+        return findCompatibleVersion(
+                versions,
+                instance.getMinecraftVersion(),
+                normalizeLoader(
+                        instance.getLoader()
+                )
+        );
+    }
+
+    private InstalledMod findInstalledDependencyMod(
+            Instance instance,
+            String projectId
+    ) throws IOException, InterruptedException {
+
+        InstalledModRecord record =
+                InstalledModManager.findByProjectId(
+                        instance,
+                        projectId
+                );
+
+        if (record != null
+                && record.getFilename() != null) {
+
+            Path file =
+                    instance.getDirectory()
+                            .resolve("mods")
+                            .resolve(record.getFilename());
+
+            if (Files.isRegularFile(file)) {
+                InstalledMod installed =
+                        installedModScanner.scanFile(file);
+
+                if (installed != null) {
+                    return installed;
+                }
+            }
+        }
+
+        String fabricModId =
+                findFabricModId(
+                        instance,
+                        projectId
+                );
+
+        if (fabricModId == null
+                || fabricModId.isBlank()) {
+            return null;
+        }
+
+        for (InstalledMod installed :
+                installedModScanner.scan(instance)) {
+
+            if (fabricModId.equals(
+                    installed.getModId())) {
+                return installed;
+            }
+        }
+
+        return null;
+    }
+
+    private String findFabricModId(
+            Instance instance,
+            String projectId
+    ) throws IOException, InterruptedException {
+
+        if (instance == null
+                || projectId == null
+                || projectId.isBlank()) {
+            return null;
+        }
+
+        List<ModrinthVersion> versions =
+                getVersionsCached(projectId);
+
+        for (ModrinthVersion version : versions) {
+
+            if (!isCompatible(
+                    version,
+                    instance.getMinecraftVersion(),
+                    normalizeLoader(instance.getLoader()))) {
+                continue;
+            }
+
+            InstalledMod metadata =
+                    readFabricMetadata(version);
+
+            if (metadata != null
+                    && metadata.getModId() != null) {
+                return metadata.getModId();
+            }
+        }
+
+        return null;
+    }
+
+    private DependencyRequirement findDependencyRequirement(
+            ModrinthVersion requestingVersion,
+            String dependencyModId
+    ) throws IOException {
+
+        if (requestingVersion == null
+                || dependencyModId == null
+                || dependencyModId.isBlank()) {
+            return null;
+        }
+
+        InstalledMod requestingMod =
+                readFabricMetadata(requestingVersion);
+
+        if (requestingMod == null
+                || requestingMod.getDependencies() == null) {
+            return null;
+        }
+
+        for (DependencyRequirement requirement :
+                requestingMod.getDependencies()) {
+
+            if (requirement != null
+                    && dependencyModId.equals(
+                    requirement.getModId())) {
+                return requirement;
+            }
+        }
+
+        return null;
+    }
+
+
 }
