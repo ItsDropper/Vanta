@@ -17,6 +17,7 @@ import org.example.launcher.service.*;
 import org.example.launcher.update.*;
 import org.example.ui.components.NotificationManager;
 import org.example.ui.ThemeManager;
+import org.example.ui.LauncherSettings;
 import org.example.ui.components.Sidebar;
 import org.example.ui.views.*;
 
@@ -211,7 +212,9 @@ public class LauncherView {
         );
 
         loadAccount();
-        checkForUpdates();
+        if (LauncherSettings.isUpdateChecksEnabled()) {
+            checkForUpdates();
+        }
 
         if (OnboardingManager.shouldShow()) {
             Platform.runLater(this::showOnboarding);
