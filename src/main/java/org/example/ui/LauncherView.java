@@ -151,10 +151,10 @@ public class LauncherView {
                 } else if (state == LaunchService.LaunchState.ERROR) {
                     LaunchFailure failure = launchService.getLastFailure();
                     manager.error(
-                            failure == null ? "Minecraft launch failed" : failure.getTitle(),
+                            failure == null ? "Minecraft launch failed" : failure.title(),
                             failure == null
                                     ? "Vanta could not start the instance."
-                                    : failure.getDescription()
+                                    : failure.description()
                     );
                 } else if (state == LaunchService.LaunchState.IDLE
                         && previousLaunchState == LaunchService.LaunchState.CLOSING) {
