@@ -3,21 +3,22 @@ package org.example.ui.views;
 import javafx.beans.value.ChangeListener;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import java.util.function.Consumer;
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
+import java.util.function.Consumer;
 
-public class SettingsView extends BorderPane {\n\n    private final Consumer<String> onAccentChanged;
+public class SettingsView extends BorderPane {
 
     private static final String DEFAULT_ACCENT = "#5688ED";
     private static final Path SETTINGS_FILE = Path.of(
@@ -26,13 +27,16 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
             "settings.properties"
     );
 
+    private final Consumer<String> onAccentChanged;
     private final VBox navigation = new VBox(4);
     private final VBox content = new VBox(22);
 
     private ColorPicker accentPicker;
     private String accentColor;
 
-    public SettingsView(Consumer<String> onAccentChanged) {\n        this.onAccentChanged = onAccentChanged;
+    public SettingsView(Consumer<String> onAccentChanged) {
+        this.onAccentChanged = onAccentChanged;
+
         getStyleClass().add("settings-shell");
 
         loadSettings();
@@ -45,9 +49,14 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
 
         setLeft(navigation);
         setCenter(scroll);
-        BorderPane.setMargin(navigation, new Insets(0, 22, 0, 0));
 
-        selectSection("Appearance");\n        applyAccent(accentColor);
+        BorderPane.setMargin(
+                navigation,
+                new Insets(0, 22, 0, 0)
+        );
+
+        selectSection("Appearance");
+        applyAccent(accentColor);
     }
 
     private void loadSettings() {
@@ -63,6 +72,7 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
             properties.load(reader);
 
             String saved = properties.getProperty("accentColor");
+
             if (saved != null && saved.matches("#[0-9a-fA-F]{6}")) {
                 accentColor = saved.toUpperCase();
             }
@@ -103,8 +113,8 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
                 sectionButton("Downloads", false)
         );
 
-        Label supportGroup = group("SYSTEM");
-        navigation.getChildren().add(supportGroup);
+        Label systemGroup = group("SYSTEM");
+        navigation.getChildren().add(systemGroup);
 
         navigation.getChildren().addAll(
                 sectionButton("Repair & Diagnostics", false),
@@ -118,11 +128,9 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
         return label;
     }
 
-    private javafx.scene.control.Button sectionButton(
-            String text,
-            boolean selected
-    ) {
-        var button = new javafx.scene.control.Button(text);
+    private Button sectionButton(String text, boolean selected) {
+        Button button = new Button(text);
+
         button.setMaxWidth(Double.MAX_VALUE);
         button.setAlignment(Pos.CENTER_LEFT);
         button.getStyleClass().add("settings-nav-button");
@@ -132,6 +140,7 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
         }
 
         button.setOnAction(event -> selectSection(text));
+
         return button;
     }
 
@@ -145,8 +154,9 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
         }
 
         for (var node : navigation.getChildren()) {
-            if (node instanceof javafx.scene.control.Button button) {
+            if (node instanceof Button button) {
                 button.getStyleClass().remove("selected");
+
                 if (button.getText().equals(section)) {
                     button.getStyleClass().add("selected");
                 }
@@ -175,7 +185,9 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
         description.getStyleClass().add("settings-card-description");
         description.setWrapText(true);
 
-        accentPicker = new ColorPicker(Color.web(accentColor));
+        accentPicker = new ColorPicker(
+                Color.web(accentColor)
+        );
         accentPicker.getStyleClass().add("accent-picker");
 
         Label value = new Label(accentColor);
@@ -188,13 +200,21 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
 
             accentColor = toHex(newColor);
             value.setText(accentColor);
+
             applyAccent(accentColor);
-            saveSettings();\n            onAccentChanged.accept(accentColor);
+            saveSettings();
+
+            onAccentChanged.accept(accentColor);
         };
 
         accentPicker.valueProperty().addListener(listener);
 
-        HBox row = new HBox(16, accentPicker, value);
+        HBox row = new HBox(
+                16,
+                accentPicker,
+                value
+        );
+
         row.setAlignment(Pos.CENTER_LEFT);
 
         card.getChildren().addAll(
@@ -219,18 +239,18 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
         );
         subtitle.getStyleClass().add("settings-page-subtitle");
 
-        content.getChildren().addAll(title, subtitle);
+        content.getChildren().addAll(
+                title,
+                subtitle
+        );
     }
 
     private void applyAccent(String hex) {
         String rgb = rgb(hex);
 
-        getSceneStylesheets();
-        getStyleClass().removeIf(style -> style.startsWith("accent-"));
-
         setStyle(
                 "-vanta-accent: " + hex + ";" +
-                "-vanta-accent-rgb: " + rgb + ";"
+                        "-vanta-accent-rgb: " + rgb + ";"
         );
     }
 
@@ -244,9 +264,22 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
     }
 
     private static String rgb(String hex) {
-        int r = Integer.parseInt(hex.substring(1, 3), 16);
-        int g = Integer.parseInt(hex.substring(3, 5), 16);
-        int b = Integer.parseInt(hex.substring(5, 7), 16);
+        int r = Integer.parseInt(
+                hex.substring(1, 3),
+                16
+        );
+
+        int g = Integer.parseInt(
+                hex.substring(3, 5),
+                16
+        );
+
+        int b = Integer.parseInt(
+                hex.substring(5, 7),
+                16
+        );
+
         return r + "," + g + "," + b;
     }
 }
+
