@@ -1449,9 +1449,44 @@
 .home-recent-name { -fx-text-fill: #edf2f8; -fx-font-size: 14px; -fx-font-weight: 800; }
 .home-recent-meta { -fx-text-fill: #8491a3; -fx-font-size: 11px; }
 .home-recent-playtime { -fx-text-fill: #697789; -fx-font-size: 10px; }
-.home-recent-play, .home-recent-stop { -fx-min-width: 84px; -fx-pref-width: 84px; -fx-min-height: 32px; -fx-background-radius: 7px; -fx-font-size: 10px; -fx-font-weight: 900; }
-.home-recent-play { -fx-background-color: -vanta-accent; -fx-text-fill: white; }
-.home-recent-stop { -fx-background-color: #303b49; -fx-text-fill: #edf2f8; }
+.home-recent-play, .home-recent-stop {
+    -fx-min-width: 92px;
+    -fx-pref-width: 92px;
+    -fx-min-height: 36px;
+    -fx-pref-height: 36px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 14px;
+    -fx-cursor: hand;
+}
+.home-recent-play {
+    -fx-background-color: -vanta-accent;
+    -fx-border-color: #78a2f0;
+    -fx-text-fill: white;
+}
+.home-recent-play:hover {
+    -fx-background-color: -vanta-accent-hover;
+    -fx-border-color: #9ab9f6;
+}
+.home-recent-play:pressed {
+    -fx-background-color: #3f6fca;
+    -fx-border-color: #a9c2f5;
+}
+.home-recent-stop {
+    -fx-background-color: #303b49;
+    -fx-border-color: #48586c;
+    -fx-text-fill: #edf2f8;
+}
+.home-recent-stop:hover {
+    -fx-background-color: #3a4859;
+    -fx-border-color: #63758d;
+}
+.home-recent-stop:pressed {
+    -fx-background-color: #252e3a;
+}
 .home-recent-status { -fx-text-fill: #697789; -fx-font-size: 11px; }
 .home-account-card, .home-status-card { -fx-min-height: 112px; }
 
