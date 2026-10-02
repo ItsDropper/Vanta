@@ -4,6 +4,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+
+import org.example.ui.components.IconView;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -85,20 +87,11 @@ public class Sidebar extends VBox {
         // NAVIGATION
         // ---------------------------------------------------------
 
-        addButton(
-                "⌂  Home",
-                Page.HOME
-        );
+        addButton("Home", Page.HOME, IconView.Type.HOME);
 
-        addButton(
-                "▦  Instances",
-                Page.INSTANCES
-        );
+        addButton("Instances", Page.INSTANCES, IconView.Type.INSTANCES);
 
-        addButton(
-                "✦  Mods",
-                Page.MODS
-        );
+        addButton("Mods", Page.MODS, IconView.Type.MODS);
 
         Region spacer =
                 new Region();
@@ -112,15 +105,9 @@ public class Sidebar extends VBox {
                 spacer
         );
 
-        addButton(
-                "●  Accounts",
-                Page.ACCOUNTS
-        );
+        addButton("Accounts", Page.ACCOUNTS, IconView.Type.ACCOUNTS);
 
-        addButton(
-                "⚙  Settings",
-                Page.SETTINGS
-        );
+        addButton("Settings", Page.SETTINGS, IconView.Type.SETTINGS);
 
         Label build =
                 new Label(
@@ -177,11 +164,17 @@ public class Sidebar extends VBox {
 
     private void addButton(
             String text,
-            Page page
+            Page page,
+            IconView.Type iconType
     ) {
 
         Button button =
-                new Button(text);
+                new Button(
+                        text,
+                        IconView.create(iconType, 18)
+                );
+
+        button.setGraphicTextGap(10);
 
         button.setMaxWidth(
                 Double.MAX_VALUE
