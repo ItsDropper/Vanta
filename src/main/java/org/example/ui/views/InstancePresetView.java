@@ -4,8 +4,10 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Priority;
 
 import org.example.launcher.instance.InstancePresets;
 import org.example.launcher.model.InstancePreset;
@@ -95,6 +97,28 @@ public class InstancePresetView extends VBox {
             );
         }
 
+        ScrollPane presetScroll =
+                new ScrollPane(
+                        presets
+                );
+
+        presetScroll.setFitToWidth(true);
+        presetScroll.setHbarPolicy(
+                ScrollPane.ScrollBarPolicy.NEVER
+        );
+        presetScroll.setVbarPolicy(
+                ScrollPane.ScrollBarPolicy.AS_NEEDED
+        );
+        presetScroll.setPannable(true);
+        presetScroll.getStyleClass().add(
+                "preset-list-scroll"
+        );
+
+        VBox.setVgrow(
+                presetScroll,
+                Priority.ALWAYS
+        );
+
         // =========================================================
         // BACK
         // =========================================================
@@ -133,7 +157,7 @@ public class InstancePresetView extends VBox {
 
         getChildren().addAll(
                 header,
-                presets,
+                presetScroll,
                 actions
         );
     }
