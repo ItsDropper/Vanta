@@ -104,6 +104,9 @@ public class HomeView extends StackPane {
 
         accountService.addListener(this::onAccountChanged);
         launchService.addStateListener(this::onLaunchStateChanged);
+        ServerHistoryManager.addListener(() ->
+                Platform.runLater(this::refreshRecentServers)
+        );
 
         refreshAccount();
         refreshRecentInstances();
