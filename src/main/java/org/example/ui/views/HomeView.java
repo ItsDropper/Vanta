@@ -268,11 +268,42 @@ public class HomeView extends StackPane {
         play.setMinWidth(84);
 
         play.setOnAction(event -> {
+            event.consume();
+
             if (launchService.isRunning(instance)) {
                 launchService.close(instance);
-            } else {
-                onLaunchInstance.accept(instance);
+                return;
             }
+
+            Thread thread = new Thread(() -> {
+                try {
+                    launchService.launch(instance);
+                } catch (Throwable ex) {
+                    ex.printStackTrace();
+
+                    LaunchFailure failure = launchService.getLastFailure();
+
+                    Platform.runLater(() -> {
+                        if (failure != null) {
+                            onLaunchFailure.accept(failure);
+                        } else {
+                            onLaunchFailure.accept(
+                                    new LaunchFailure(
+                                            "Minecraft failed to launch",
+                                            ex.getMessage() != null
+                                                    ? ex.getMessage()
+                                                    : "Vanta could not start this instance.",
+                                            ""
+                                    )
+                            );
+                        }
+                    });
+                }
+            });
+
+            thread.setDaemon(true);
+            thread.setName("Vanta-Home-Launch");
+            thread.start();
         });
 
         HBox card = new HBox(14, icon, info, play);
