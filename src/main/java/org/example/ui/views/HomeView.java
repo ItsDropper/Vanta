@@ -272,6 +272,37 @@ public class HomeView extends VBox {
     // INSTANCE CARD
     // =============================================================
 
+    private VBox createLauncherStatusCard() {
+        VBox card = new VBox(8);
+        card.getStyleClass().add("home-status-card");
+
+        Label title = new Label("Vanta Launcher");
+        title.getStyleClass().add("home-status-title");
+
+        Label status = new Label("Ready");
+        status.getStyleClass().add("home-status-value");
+
+        Label java = new Label(
+                "Java " + System.getProperty("java.version")
+        );
+        java.getStyleClass().add("home-status-meta");
+
+        Label data = new Label(
+                MinecraftLocator.getVantaDirectory().toString()
+        );
+        data.getStyleClass().add("home-status-meta");
+        data.setWrapText(true);
+
+        card.getChildren().addAll(
+                title,
+                status,
+                java,
+                data
+        );
+
+        return card;
+    }
+
     private VBox createInstanceCard() {
 
         Label title =
