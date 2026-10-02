@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class ServerHistoryManager {
 
@@ -24,7 +25,16 @@ public final class ServerHistoryManager {
 
     private static final int MAX_ENTRIES = 10;
 
+    private static final CopyOnWriteArrayList<Runnable> listeners =
+            new CopyOnWriteArrayList<>();
+
     private ServerHistoryManager() {
+    }
+
+    public static void addListener(Runnable listener) {
+        if (listener != null) {
+            listeners.add(listener);
+        }
     }
 
     public static synchronized void recordConnection(
@@ -60,6 +70,13 @@ public final class ServerHistoryManager {
         }
 
         save(entries);
+
+        for (Runnable listener : listeners) {
+            try {
+                listener.run();
+            } catch (Throwable ignored) {
+            }
+        }
     }
 
     public static synchronized List<ServerHistoryEntry> getRecent() {
