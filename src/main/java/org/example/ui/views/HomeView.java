@@ -501,8 +501,17 @@ public class HomeView extends StackPane {
                         : "home-recent-play"
         );
         play.setMinWidth(84);
+        play.setPickOnBounds(true);
+        play.setMouseTransparent(false);
+        play.setCursor(Cursor.HAND);
 
-        play.setOnAction(event -> {
+        play.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) {
+                return;
+            }
+
+            event.consume();
+
             if (launchService.isRunning(instance)) {
                 launchService.close(instance);
                 return;
@@ -517,7 +526,6 @@ public class HomeView extends StackPane {
                                     server.getPort()
                             )
                     );
-                    Platform.runLater(this::refreshRecentServers);
                 } catch (Exception ex) {
                     LaunchFailure failure = launchService.getLastFailure();
 
@@ -542,8 +550,8 @@ public class HomeView extends StackPane {
         card.setMaxWidth(Double.MAX_VALUE);
         card.getStyleClass().add("home-server-card");
 
-        org.example.ui.AnimationUtils.installInteractiveAnimations(card);
-        org.example.ui.AnimationUtils.slideFadeVertical(card, 8);
+        card.setPickOnBounds(true);
+        card.setMouseTransparent(false);
 
         return card;
     }
