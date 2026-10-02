@@ -99,6 +99,38 @@ public List<Path> installResolvedGraph(
         return installed;
     }
 
+private void removeInstalledMod(
+            Instance instance,
+            String projectId
+    ) throws IOException {
+
+        if (instance == null || projectId == null || projectId.isBlank()) {
+            return;
+        }
+
+        InstalledModRecord existing =
+                InstalledModManager.findByProjectId(
+                        instance,
+                        projectId
+                );
+
+        if (existing != null && existing.getFilename() != null) {
+            Path modsDirectory =
+                    instance.getDirectory()
+                            .resolve("mods");
+
+            Path installedFile =
+                    modsDirectory.resolve(existing.getFilename());
+
+            Files.deleteIfExists(installedFile);
+        }
+
+        InstalledModManager.removeByProjectId(
+                instance,
+                projectId
+        );
+    }
+
 private Path installResolvedVersion(
             Instance instance,
             String projectId,
