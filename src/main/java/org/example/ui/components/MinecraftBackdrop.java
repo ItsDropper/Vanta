@@ -18,6 +18,7 @@ public final class MinecraftBackdrop extends StackPane {
         setMouseTransparent(true);
 
         ImageView background = new ImageView();
+        background.setManaged(false);
         background.setPreserveRatio(false);
         background.setSmooth(true);
         background.setMouseTransparent(true);
@@ -28,17 +29,17 @@ public final class MinecraftBackdrop extends StackPane {
                      )) {
 
             if (stream != null) {
-                Image image = new Image(stream);
-                background.setImage(image);
+                background.setImage(new Image(stream));
             }
         } catch (Exception ignored) {
-            // Keep the backdrop usable if the optional image cannot be loaded.
+            // The backdrop remains empty if the optional image cannot be loaded.
         }
 
         background.fitWidthProperty().bind(widthProperty());
         background.fitHeightProperty().bind(heightProperty());
 
         Rectangle overlay = new Rectangle();
+        overlay.setManaged(false);
         overlay.widthProperty().bind(widthProperty());
         overlay.heightProperty().bind(heightProperty());
         overlay.setFill(Color.rgb(7, 12, 18, 0.42));
