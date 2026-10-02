@@ -5,7 +5,7 @@ import com.jagrosh.discordipc.entities.RichPresence;
 import org.example.launcher.model.Instance;
 import org.example.ui.LauncherSettings;
 
-import java.time.OffsetDateTime;
+
 
 public final class DiscordPresenceService {
 
@@ -52,7 +52,7 @@ public final class DiscordPresenceService {
                     new RichPresence.Builder()
                             .setDetails(details)
                             .setState(state)
-                            .setStartTimestamp(OffsetDateTime.now())
+                            .setStartTimestamp(System.currentTimeMillis())
                             .setLargeImageWithTooltip("vanta", "Vanta Launcher")
                             .setInstance(true)
                             .build();
