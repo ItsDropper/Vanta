@@ -576,6 +576,10 @@ public class HomeView extends StackPane {
 
             event.consume();
 
+            if (instance == null) {
+                return;
+            }
+
             if (launchService.isRunning(instance)) {
                 launchService.close(instance);
                 return;
