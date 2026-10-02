@@ -50,6 +50,7 @@ public class LauncherView {
     private final NotificationManager notifications;
 
     private final TitleBar titleBar;
+    private LaunchService.LaunchState previousLaunchState = LaunchService.LaunchState.IDLE;
 
 
     public LauncherView(Stage stage) {
@@ -131,6 +132,40 @@ public class LauncherView {
             } else if (state == LaunchService.LaunchState.IDLE) {
                 discordPresenceService.clear();
             }
+
+            NotificationManager manager = NotificationManager.getGlobal();
+
+            if (manager != null) {
+                if (state == LaunchService.LaunchState.PREPARING) {
+                    manager.showProgress(
+                            "Starting Minecraft",
+                            "Preparing the selected instance..."
+                    );
+                } else if (state == LaunchService.LaunchState.RUNNING) {
+                    manager.success(
+                            "Minecraft started",
+                            running == null
+                                    ? "The Minecraft process is running."
+                                    : running.getName() + " is now running."
+                    );
+                } else if (state == LaunchService.LaunchState.ERROR) {
+                    LaunchFailure failure = launchService.getLastFailure();
+                    manager.error(
+                            failure == null ? "Minecraft launch failed" : failure.getTitle(),
+                            failure == null
+                                    ? "Vanta could not start the instance."
+                                    : failure.getDescription()
+                    );
+                } else if (state == LaunchService.LaunchState.IDLE
+                        && previousLaunchState == LaunchService.LaunchState.CLOSING) {
+                    manager.success(
+                            "Minecraft closed",
+                            "The Minecraft process has exited."
+                    );
+                }
+            }
+
+            previousLaunchState = state;
         });
 
         titleBar =
@@ -213,18 +248,24 @@ public class LauncherView {
 
         settingsView =
                 new SettingsView(
-                        this::setAccentColor
+                        accountService,
+                        this::setAccentColor,
+                        this::showOnboarding
                 );
 
         sidebar.setOnPageSelected(
                 this::showPage
         );
 
+        AnimationUtils.installInteractiveAnimations(sidebar);
+        AnimationUtils.installInteractiveAnimations(titleBar);
+
         showPage(
                 Sidebar.Page.HOME
         );
 
         loadAccount();
+        settingsView.refreshDebugAccess();
         if (LauncherSettings.isUpdateChecksEnabled()) {
             checkForUpdates();
         }
@@ -246,6 +287,7 @@ public class LauncherView {
 
         StackPane overlay = new StackPane(onboardingView);
         overlay.getStyleClass().add("onboarding-overlay");
+        AnimationUtils.installInteractiveAnimations(onboardingView);
         StackPane.setAlignment(onboardingView, javafx.geometry.Pos.CENTER);
         root.getChildren().add(overlay);
         AnimationUtils.slideFadeIn(overlay, 18);
@@ -271,6 +313,7 @@ public class LauncherView {
 
     private void showAnimatedContent(Parent view) {
         content.getChildren().setAll(view);
+        AnimationUtils.installInteractiveAnimations(view);
         AnimationUtils.slideFadeIn(view, 14);
     }
 
