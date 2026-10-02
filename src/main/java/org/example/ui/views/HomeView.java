@@ -38,7 +38,7 @@ public class HomeView extends StackPane {
     private VBox recentServersList;
     private Label recentServersStatus;
     private final Label accountLabel;
-    private final VBox recentList;
+    private VBox recentList;
     private final Label recentStatus;
 
     public HomeView(
