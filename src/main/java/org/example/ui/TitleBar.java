@@ -2,6 +2,7 @@ package org.example.ui;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.Priority;
@@ -181,6 +182,15 @@ public class TitleBar extends HBox {
         // LAYOUT
         // =========================================================
 
+        Label brand =
+                new Label(
+                        "VANTA"
+                );
+
+        brand.getStyleClass().add(
+                "title-bar-brand"
+        );
+
         Region spacer =
                 new Region();
 
@@ -190,6 +200,7 @@ public class TitleBar extends HBox {
         );
 
         getChildren().addAll(
+                brand,
                 spacer,
                 accountSwitcher,
                 updateButton,

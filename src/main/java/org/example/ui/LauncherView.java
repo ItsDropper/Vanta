@@ -16,6 +16,7 @@ import org.example.launcher.modrinth.ModrinthProject;
 import org.example.launcher.service.*;
 import org.example.launcher.update.*;
 import org.example.ui.components.NotificationManager;
+import org.example.ui.ThemeManager;
 import org.example.ui.components.Sidebar;
 import org.example.ui.views.*;
 
@@ -1075,12 +1076,18 @@ public class LauncherView {
 
     private void setAccentColor(String accent) {
 
-        if (accent == null || !accent.matches("#[0-9A-Fa-f]{6}")) {
+        if (!ThemeManager.isValidAccent(accent)) {
             return;
         }
 
-        window.setStyle(
-                "-vanta-accent: " + accent.toUpperCase() + ";"
+        ThemeManager.apply(
+                root,
+                accent
+        );
+
+        ThemeManager.apply(
+                window,
+                accent
         );
     }
 

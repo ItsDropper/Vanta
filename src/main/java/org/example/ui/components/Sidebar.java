@@ -8,6 +8,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import java.io.InputStream;
+import java.util.Properties;
+
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -118,6 +121,58 @@ public class Sidebar extends VBox {
                 "⚙  Settings",
                 Page.SETTINGS
         );
+
+        Label build =
+                new Label(
+                        "VANTA "
+                                + loadVersion()
+                                + "  •  LOCAL"
+                );
+
+        build.getStyleClass().add(
+                "sidebar-build"
+        );
+
+        build.setWrapText(true);
+
+        getChildren().add(
+                build
+        );
+    }
+
+    private String loadVersion() {
+
+        Properties properties =
+                new Properties();
+
+        try (InputStream stream =
+                     getClass()
+                             .getResourceAsStream(
+                                     "/version.properties"
+                             )) {
+
+            if (stream != null) {
+
+                properties.load(
+                        stream
+                );
+
+                String version =
+                        properties.getProperty(
+                                "version"
+                        );
+
+                if (version != null
+                        && !version.contains("\${")) {
+
+                    return version;
+                }
+            }
+
+        } catch (Exception ignored) {
+        }
+
+        return "1.1.8";
     }
 
     private void addButton(

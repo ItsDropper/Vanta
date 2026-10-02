@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -32,6 +33,11 @@ public class InstancesView extends VBox {
 
     private final Consumer<Instance> onInstanceSelected;
     private final Consumer<Instance> onInstanceSettings;
+
+    private final TextField searchField;
+
+    private List<Instance> loadedInstances =
+            List.of();
 
     private Instance selectedInstance;
 
@@ -120,11 +126,32 @@ public class InstancesView extends VBox {
                         onCreateInstance.run()
         );
 
+        searchField =
+                new TextField();
+
+        searchField.setPromptText(
+                "Search instances..."
+        );
+
+        searchField.getStyleClass().add(
+                "instance-search-field"
+        );
+
+        searchField.setPrefWidth(
+                220
+        );
+
+        searchField.textProperty().addListener(
+                (observable, oldValue, newValue) ->
+                        filterInstances(newValue)
+        );
+
         HBox header =
                 new HBox(
                         18,
                         headerText,
                         countLabel,
+                        searchField,
                         createButton
                 );
 
@@ -259,15 +286,14 @@ public class InstancesView extends VBox {
                                 .getChildren()
                                 .clear();
 
-                        countLabel.setText(
-                                instances.size()
-                                        + " INSTANCE"
-                                        + (instances.size() == 1
-                                        ? ""
-                                        : "S")
+                        loadedInstances =
+                                List.copyOf(instances);
+
+                        updateCount(
+                                loadedInstances.size()
                         );
 
-                        if (instances.isEmpty()) {
+                        if (loadedInstances.isEmpty()) {
 
                             instanceList
                                     .getChildren()
@@ -282,37 +308,9 @@ public class InstancesView extends VBox {
                             return;
                         }
 
-                        for (
-                                Instance instance
-                                : instances
-                        ) {
-
-                            InstanceCard card =
-                                    new InstanceCard(
-                                            instance,
-                                            () -> launch(instance),
-                                            () -> selectInstance(instance),
-                                            () -> onInstanceSettings.accept(instance),
-                                            () -> deleteInstance(instance)
-                                    );
-
-                            card.setSelected(
-                                    selectedInstance != null
-                                            && selectedInstance
-                                            .getId()
-                                            .equals(
-                                                    instance.getId()
-                                            )
-                            );
-
-                            instanceList
-                                    .getChildren()
-                                    .add(
-                                            card
-                                    );
-                        }
-
-                        updateCards();
+                        renderInstances(
+                                loadedInstances
+                        );
 
                         statusLabel.setText(
                                 "Select an instance to use it on the home screen."
@@ -329,6 +327,84 @@ public class InstancesView extends VBox {
         );
 
         thread.start();
+    }
+
+    private void filterInstances(String query) {
+
+        if (loadedInstances.isEmpty()) {
+            return;
+        }
+
+        String normalized =
+                query == null
+                        ? ""
+                        : query.trim().toLowerCase();
+
+        List<Instance> filtered =
+                loadedInstances.stream()
+                        .filter(instance ->
+                                normalized.isBlank()
+                                        || instance.getName()
+                                        .toLowerCase()
+                                        .contains(normalized)
+                                        || instance.getMinecraftVersion()
+                                        .toLowerCase()
+                                        .contains(normalized)
+                                        || instance.getDisplayLoader()
+                                        .toLowerCase()
+                                        .contains(normalized)
+                        )
+                        .toList();
+
+        renderInstances(filtered);
+
+        if (filtered.isEmpty()) {
+            statusLabel.setText(
+                    "No instances match your search."
+            );
+        } else {
+            statusLabel.setText(
+                    filtered.size()
+                            + " matching instance"
+                            + (filtered.size() == 1 ? "" : "s")
+            );
+        }
+    }
+
+    private void updateCount(int count) {
+
+        countLabel.setText(
+                count
+                        + " INSTANCE"
+                        + (count == 1 ? "" : "S")
+        );
+    }
+
+    private void renderInstances(List<Instance> instances) {
+
+        instanceList.getChildren().clear();
+
+        for (Instance instance : instances) {
+
+            InstanceCard card =
+                    new InstanceCard(
+                            instance,
+                            () -> launch(instance),
+                            () -> selectInstance(instance),
+                            () -> onInstanceSettings.accept(instance),
+                            () -> deleteInstance(instance)
+                    );
+
+            card.setSelected(
+                    selectedInstance != null
+                            && selectedInstance.getId()
+                            .equals(instance.getId())
+            );
+
+            instanceList.getChildren().add(card);
+        }
+
+        updateCards();
     }
 
     // =============================================================
