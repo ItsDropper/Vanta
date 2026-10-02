@@ -11,6 +11,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
 
 import org.example.launcher.MinecraftLocator;
 import org.example.launcher.account.Account;
@@ -71,6 +72,12 @@ public class HomeView extends StackPane {
         hero.setPrefHeight(190);
         hero.setMaxHeight(190);
         hero.getStyleClass().add("home-hero");
+        Rectangle heroClip = new Rectangle();
+        heroClip.setArcWidth(32);
+        heroClip.setArcHeight(32);
+        heroClip.widthProperty().bind(hero.widthProperty());
+        heroClip.heightProperty().bind(hero.heightProperty());
+        hero.setClip(heroClip);
         hero.getChildren().addAll(backdrop, header);
         StackPane.setAlignment(header, Pos.TOP_LEFT);
         StackPane.setMargin(header, new Insets(24));
