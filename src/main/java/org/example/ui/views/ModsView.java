@@ -51,6 +51,7 @@ public class ModsView extends VBox {
     private ContentType selectedType;
 
     private enum ContentType {
+        ALL,
         MODS,
         RESOURCE_PACKS,
         SHADERS
@@ -134,6 +135,10 @@ public class ModsView extends VBox {
         // NAVIGATION
         // =========================================================
 
+        Button allButton =
+                new Button("ALL", IconView.create(IconView.Type.PACKAGE, 16));
+        allButton.getStyleClass().add("secondary-button");
+
         Button modsButton =
                 new Button(
                         "MODS",
@@ -194,10 +199,15 @@ public class ModsView extends VBox {
                 "secondary-button"
         );
 
+        allButton.setOnAction(
+                event -> showContent(ContentType.ALL, allButton, modsButton, packsButton, shadersButton)
+        );
+
         modsButton.setOnAction(
                 event ->
                         showContent(
                                 ContentType.MODS,
+                                allButton,
                                 modsButton,
                                 packsButton,
                                 shadersButton
@@ -208,6 +218,7 @@ public class ModsView extends VBox {
                 event ->
                         showContent(
                                 ContentType.RESOURCE_PACKS,
+                                allButton,
                                 modsButton,
                                 packsButton,
                                 shadersButton
@@ -218,6 +229,7 @@ public class ModsView extends VBox {
                 event ->
                         showContent(
                                 ContentType.SHADERS,
+                                allButton,
                                 modsButton,
                                 packsButton,
                                 shadersButton
@@ -355,6 +367,7 @@ public class ModsView extends VBox {
 
     private void showContent(
             ContentType type,
+            Button allButton,
             Button modsButton,
             Button packsButton,
             Button shadersButton
@@ -362,6 +375,11 @@ public class ModsView extends VBox {
 
         selectedType =
                 type;
+
+        setButtonStyle(
+                allButton,
+                type == ContentType.ALL
+        );
 
         setButtonStyle(
                 modsButton,
@@ -418,6 +436,12 @@ public class ModsView extends VBox {
         String statusName;
 
         switch (selectedType) {
+
+            case ALL -> {
+                directory = instance.getDirectory();
+                emptyMessage = "No installed content.";
+                statusName = "item";
+            }
 
             case MODS -> {
 
@@ -591,6 +615,9 @@ public class ModsView extends VBox {
                         .toLowerCase();
 
         return switch (selectedType) {
+
+            case ALL ->
+                    name.endsWith(".jar") || name.endsWith(".jar.disabled") || name.endsWith(".zip");
 
             case MODS ->
                     name.endsWith(".jar")
@@ -1332,6 +1359,7 @@ public class ModsView extends VBox {
 
     private void openContentFolder() {
         Path directory = switch (selectedType) {
+            case ALL -> instance.getDirectory();
             case MODS -> instance.getDirectory().resolve("mods");
             case RESOURCE_PACKS -> instance.getDirectory().resolve("resourcepacks");
             case SHADERS -> instance.getDirectory().resolve("shaderpacks");
