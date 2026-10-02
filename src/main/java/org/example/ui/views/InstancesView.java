@@ -585,43 +585,6 @@ public class InstancesView extends VBox {
         return empty;
     }
 
-    // =============================================================
-    // SELECT
-    // =============================================================
-
-    private void selectInstance(
-            Instance instance
-    ) {
-
-        selectedInstance =
-                instance;
-
-        for (
-                javafx.scene.Node node
-                : instanceList.getChildren()
-        ) {
-
-            if (node instanceof InstanceCard card) {
-
-                card.setSelected(
-                        card.getInstance()
-                                .getId()
-                                .equals(
-                                        instance.getId()
-                                )
-                );
-            }
-        }
-
-        onInstanceSelected.accept(
-                instance
-        );
-
-        statusLabel.setText(
-                "Selected "
-                        + instance.getName()
-        );
-    }
 
     // =============================================================
     // LAUNCH
