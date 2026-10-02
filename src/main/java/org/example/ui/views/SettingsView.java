@@ -138,6 +138,8 @@ public class SettingsView extends BorderPane {
             default -> buildPlaceholderPage(section);
         }
 
+        org.example.ui.AnimationUtils.installInteractiveAnimations(content);
+
         for (var node : navigation.getChildren()) {
             if (node instanceof Button button) {
                 button.getStyleClass().remove("selected");
