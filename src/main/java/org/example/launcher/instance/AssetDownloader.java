@@ -18,10 +18,9 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import org.example.ui.LauncherSettings;
 
 public class AssetDownloader {
-
-    private static final int THREAD_COUNT = 8;
 
     private static final HttpClient HTTP =
             HttpClient.newBuilder()
@@ -116,17 +115,19 @@ public class AssetDownloader {
             return;
         }
 
+        int threadCount = LauncherSettings.getDownloadThreads();
+
         System.out.println(
                 "Downloading "
                         + total
                         + " missing assets using "
-                        + THREAD_COUNT
+                        + threadCount
                         + " workers..."
         );
 
         ExecutorService executor =
                 Executors.newFixedThreadPool(
-                        THREAD_COUNT
+                        threadCount
                 );
 
         try {
