@@ -295,7 +295,7 @@ public class SettingsView extends BorderPane {
 
         VBox connection = card(
                 "Rich Presence",
-                "Vanta connects to the Discord desktop app locally. You provide the Discord application Client ID."
+                "Vanta connects to the Discord desktop app locally using the official Vanta Discord application."
         );
 
         CheckBox enabled = new CheckBox("Enable Discord Rich Presence");
@@ -305,23 +305,8 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setDiscordPresenceEnabled(enabled.isSelected())
         );
 
-        TextField clientId = new TextField(
-                LauncherSettings.getDiscordClientId()
-        );
-        clientId.setPromptText("Discord application Client ID");
-        clientId.getStyleClass().add("create-field");
-        clientId.setMaxWidth(Double.MAX_VALUE);
-
-        Button saveClient = new Button("SAVE CLIENT ID");
-        saveClient.getStyleClass().add("primary-button");
-        saveClient.setOnAction(event ->
-                LauncherSettings.setDiscordClientId(clientId.getText())
-        );
-
-        connection.getChildren().addAll(
-                enabled,
-                createInput("Client ID", clientId),
-                saveClient
+        connection.getChildren().add(
+                enabled
         );
 
         VBox activity = card(
@@ -347,7 +332,7 @@ public class SettingsView extends BorderPane {
 
         VBox note = card(
                 "Setup",
-                "Create a Discord application, copy its Application ID into Client ID, then enable Rich Presence. Vanta does not send your Discord token or account credentials."
+                "Discord Rich Presence uses Vanta's official Discord application automatically. Vanta does not send your Discord token or account credentials."
         );
 
         content.getChildren().addAll(connection, activity, note);
