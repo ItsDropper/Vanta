@@ -2,6 +2,7 @@ package org.example.ui.views;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -274,6 +275,20 @@ public class HomeView extends StackPane {
         }
     }
 
+    private double responsiveCardWidth(FlowPane list) {
+        double width = list.getWidth();
+
+        if (width <= 1) {
+            return 420;
+        }
+
+        if (width < 680) {
+            return Math.max(0, width - 2);
+        }
+
+        return Math.max(0, (width - list.getHgap()) / 2.0);
+    }
+
     private HBox createRecentCard(Instance instance) {
         Label icon = new Label();
         icon.setGraphic(
@@ -406,9 +421,14 @@ public class HomeView extends StackPane {
         HBox card = new HBox(14, icon, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(14, 16, 14, 16));
-        card.setMinWidth(300);
-        card.setPrefWidth(420);
-        card.setMaxWidth(520);
+        card.setMinWidth(0);
+        card.prefWidthProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> responsiveCardWidth(recentList),
+                        recentList.widthProperty()
+                )
+        );
+        card.setMaxWidth(Double.MAX_VALUE);
         card.setPickOnBounds(true);
         card.setMouseTransparent(false);
         card.getStyleClass().add("home-recent-card");
@@ -628,9 +648,14 @@ public class HomeView extends StackPane {
         HBox card = new HBox(14, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(12, 14, 12, 14));
-        card.setMinWidth(300);
-        card.setPrefWidth(420);
-        card.setMaxWidth(520);
+        card.setMinWidth(0);
+        card.prefWidthProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> responsiveCardWidth(recentServersList),
+                        recentServersList.widthProperty()
+                )
+        );
+        card.setMaxWidth(Double.MAX_VALUE);
         card.getStyleClass().add("home-server-card");
 
         card.setPickOnBounds(true);
