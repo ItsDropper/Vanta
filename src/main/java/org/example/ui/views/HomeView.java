@@ -538,7 +538,7 @@ public class HomeView extends StackPane {
             Instance instance,
             ServerHistoryEntry server
     ) {
-        Label name = new Label(server.getAddress());
+        Label name = new Label(server.getDisplayName());
         name.getStyleClass().add("home-server-name");
 
         Label metadata = new Label(
@@ -620,6 +620,44 @@ public class HomeView extends StackPane {
 
         card.setPickOnBounds(true);
         card.setMouseTransparent(false);
+
+        card.setOnMouseClicked(event -> {
+            if (event.getTarget() == play
+                    || instance == null) {
+                return;
+            }
+
+            if (launchService.isRunning(instance)) {
+                launchService.close(instance);
+                return;
+            }
+
+            Thread thread = new Thread(() -> {
+                try {
+                    launchService.launch(
+                            instance,
+                            new ServerTarget(
+                                    server.getHost(),
+                                    server.getPort()
+                            )
+                    );
+                } catch (Exception ex) {
+                    LaunchFailure failure = launchService.getLastFailure();
+
+                    if (failure != null) {
+                        Platform.runLater(() ->
+                                onLaunchFailure.accept(failure)
+                        );
+                    } else {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            thread.setDaemon(true);
+            thread.setName("Vanta-Server-Launch-Card");
+            thread.start();
+        });
 
         return card;
     }
