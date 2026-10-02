@@ -1262,3 +1262,32 @@
 .preset-list-scroll {
     -fx-min-height: 0;
 }
+
+
+.mod-toggle {
+    -fx-min-width: 52px;
+    -fx-pref-width: 52px;
+    -fx-max-width: 52px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 0;
+    -fx-font-size: 18px;
+}
+
+.mod-toggle-enabled {
+    -fx-background-color: #2E8B57;
+    -fx-border-color: #45B875;
+    -fx-alignment: CENTER-RIGHT;
+    -fx-text-fill: white;
+}
+
+.mod-toggle-disabled {
+    -fx-background-color: #A33A3A;
+    -fx-border-color: #D05A5A;
+    -fx-alignment: CENTER-LEFT;
+    -fx-text-fill: white;
+}
