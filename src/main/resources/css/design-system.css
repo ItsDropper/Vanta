@@ -1,0 +1,667 @@
+/* ============================================================
+   VANTA DESIGN SYSTEM
+   Modern dark launcher UI inspired by the information density,
+   spacing and restraint of modern Minecraft launchers.
+   Vanta-specific: blue accent, no gradients, no glassmorphism.
+   ============================================================ */
+
+.root {
+    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+    -fx-font-smoothing-type: lcd;
+}
+
+.launcher {
+    -fx-background-color: #0b0e13;
+    -fx-background-radius: 16px;
+    -fx-border-color: #202733;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+}
+
+.content {
+    -fx-background-color: #0f131a;
+    -fx-background-radius: 0 14px 14px 0;
+}
+
+.page {
+    -fx-background-color: transparent;
+}
+
+/* ---------- typography ---------- */
+
+.page-title,
+.home-title {
+    -fx-text-fill: #f4f7fb;
+    -fx-font-size: 27px;
+    -fx-font-weight: 800;
+}
+
+.page-subtitle,
+.home-account-label {
+    -fx-text-fill: #8b96a8;
+    -fx-font-size: 12px;
+}
+
+.card-title,
+.create-section-title,
+.settings-section-title,
+.instances-count {
+    -fx-text-fill: #7ea7ff;
+}
+
+.footer-label {
+    -fx-text-fill: #687386;
+}
+
+/* ---------- surfaces ---------- */
+
+.info-card,
+.account-card,
+.account-panel,
+.instance-card,
+.instance-empty,
+.create-panel,
+.instance-settings-card,
+.mod-details-card,
+.mod-details-header,
+.create-instance-panel,
+.home-info-card,
+.home-launch-card {
+    -fx-background-color: #151a22;
+    -fx-background-radius: 12px;
+    -fx-border-color: #27303d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.info-card:hover,
+.account-card:hover,
+.instance-card:hover,
+.home-info-card:hover {
+    -fx-background-color: #191f29;
+    -fx-border-color: #364254;
+}
+
+/* ---------- sidebar ---------- */
+
+.sidebar {
+    -fx-background-color: #10151c;
+    -fx-background-radius: 13px;
+    -fx-border-color: #252e3a;
+    -fx-border-width: 1px;
+    -fx-border-radius: 13px;
+    -fx-padding: 18px 12px 14px 12px;
+}
+
+.sidebar-logo {
+    -fx-text-fill: #f4f7fb;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1px;
+}
+
+.sidebar-subtitle {
+    -fx-text-fill: #667286;
+    -fx-font-size: 8px;
+    -fx-font-weight: 800;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #929dad;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 10px 12px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-cursor: hand;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: #181f29;
+    -fx-text-fill: #e8edf5;
+}
+
+.sidebar-button:pressed {
+    -fx-background-color: #1e2632;
+}
+
+.sidebar-button-active,
+.sidebar-button-active:hover {
+    -fx-background-color: #18263d;
+    -fx-text-fill: #eaf1ff;
+    -fx-border-color: transparent transparent transparent #5d91ff;
+    -fx-border-width: 0 0 0 2px;
+}
+
+/* ---------- title bar ---------- */
+
+.title-bar {
+    -fx-background-color: #0b0f15;
+    -fx-background-radius: 14px 14px 0 0;
+    -fx-border-color: transparent transparent #202733 transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.title-bar-button,
+.title-bar-close {
+    -fx-background-radius: 7px;
+}
+
+.title-bar-button:hover {
+    -fx-background-color: #171e28;
+}
+
+.title-bar-button:hover SVGPath {
+    -fx-stroke: #eaf1ff;
+}
+
+.title-bar-close:hover {
+    -fx-background-color: #c33a46;
+}
+
+.account-switcher {
+    -fx-background-color: #131922;
+    -fx-background-radius: 8px;
+    -fx-border-color: #293341;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+.account-switcher:hover {
+    -fx-background-color: #19212c;
+    -fx-border-color: #3a4657;
+}
+
+.account-switcher-name {
+    -fx-text-fill: #e7ecf4;
+}
+
+.title-bar-update {
+    -fx-background-color: #17243a;
+    -fx-text-fill: #9bbcff;
+    -fx-border-color: #2e4770;
+}
+
+.title-bar-update:hover {
+    -fx-background-color: #1d2d48;
+    -fx-text-fill: #c2d7ff;
+    -fx-border-color: #466aa0;
+}
+
+/* ---------- buttons ---------- */
+
+.primary-button,
+.instance-create-button,
+.instance-play-button,
+.home-play-button {
+    -fx-background-color: #4f82f5;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover,
+.instance-create-button:hover,
+.instance-play-button:hover,
+.home-play-button:hover {
+    -fx-background-color: #6594ff;
+}
+
+.primary-button:pressed,
+.instance-create-button:pressed,
+.instance-play-button:pressed,
+.home-play-button:pressed {
+    -fx-background-color: #3f6fd7;
+}
+
+.primary-button:disabled,
+.instance-play-button:disabled,
+.home-play-button:disabled {
+    -fx-opacity: 0.5;
+}
+
+.secondary-button,
+.settings-back-button,
+.instance-settings-button {
+    -fx-background-color: #171d26;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303a49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #c4ccd8;
+}
+
+.secondary-button:hover,
+.settings-back-button:hover,
+.instance-settings-button:hover {
+    -fx-background-color: #1d2530;
+    -fx-border-color: #465467;
+    -fx-text-fill: #f1f5fb;
+}
+
+.danger-button {
+    -fx-background-color: #24181c;
+    -fx-border-color: #523039;
+    -fx-text-fill: #e59aa3;
+}
+
+.danger-button:hover {
+    -fx-background-color: #2e1d23;
+    -fx-border-color: #73404b;
+    -fx-text-fill: #f2b1b8;
+}
+
+/* ---------- home ---------- */
+
+.home-page {
+    -fx-padding: 30px 32px 32px 32px;
+}
+
+.home-header {
+    -fx-spacing: 5px;
+}
+
+.home-launch-card {
+    -fx-background-color: #141b26;
+    -fx-border-color: #2b3a51;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-padding: 28px;
+}
+
+.home-eyebrow,
+.home-selected-label,
+.home-card-eyebrow {
+    -fx-text-fill: #6e7d92;
+}
+
+.home-minecraft-title {
+    -fx-text-fill: #f4f7fb;
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+}
+
+.home-version {
+    -fx-text-fill: #a9b4c4;
+}
+
+.home-loader,
+.instance-loader {
+    -fx-background-color: #1b2a42;
+    -fx-text-fill: #9fc0ff;
+    -fx-background-radius: 6px;
+    -fx-padding: 5px 9px;
+}
+
+.home-launch-status {
+    -fx-text-fill: #788598;
+}
+
+.home-play-button {
+    -fx-min-width: 128px;
+    -fx-pref-width: 128px;
+    -fx-min-height: 44px;
+    -fx-pref-height: 44px;
+    -fx-font-size: 11px;
+}
+
+.home-playing-button,
+.instance-playing-button {
+    -fx-background-color: #241a20;
+    -fx-border-color: #67313c;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #efa8b0;
+}
+
+.home-playing-button:hover,
+.instance-playing-button:hover {
+    -fx-background-color: #302027;
+    -fx-border-color: #884451;
+}
+
+.home-card-title {
+    -fx-text-fill: #edf1f6;
+}
+
+.home-card-description {
+    -fx-text-fill: #7d8898;
+}
+
+.home-card-status,
+.ready-label,
+.account-connected {
+    -fx-text-fill: #76a7ff;
+}
+
+/* ---------- instance library ---------- */
+
+.instances-page {
+    -fx-background-color: transparent;
+}
+
+.instance-card {
+    -fx-background-color: #151a22;
+    -fx-padding: 14px;
+}
+
+.instance-card:hover {
+    -fx-background-color: #1a202a;
+}
+
+.instance-card.selected-instance {
+    -fx-background-color: #172238;
+    -fx-border-color: #3d67a8;
+}
+
+.instance-icon-box {
+    -fx-background-color: #1b2430;
+    -fx-border-color: #313d4c;
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+}
+
+.instance-icon {
+    -fx-text-fill: #8ca0bb;
+}
+
+.instance-name {
+    -fx-text-fill: #f1f4f8;
+    -fx-font-size: 15px;
+}
+
+.instance-version {
+    -fx-text-fill: #8793a4;
+}
+
+.instance-ready {
+    -fx-text-fill: #77a7ff;
+}
+
+.instance-settings-button {
+    -fx-min-width: 82px;
+}
+
+.instance-menu-button {
+    -fx-text-fill: #778396;
+}
+
+.instance-menu-button:hover {
+    -fx-background-color: #1d2530;
+    -fx-border-color: #344052;
+    -fx-text-fill: #dce4ef;
+}
+
+.instances-status {
+    -fx-text-fill: #667386;
+}
+
+.instance-empty {
+    -fx-background-color: #131820;
+}
+
+.instance-empty-icon {
+    -fx-text-fill: #4e5b6e;
+}
+
+.instance-empty-title {
+    -fx-text-fill: #e2e7ef;
+}
+
+.instance-empty-description {
+    -fx-text-fill: #727e90;
+}
+
+/* ---------- forms ---------- */
+
+.create-panel,
+.create-instance-panel {
+    -fx-background-color: #141a22;
+    -fx-padding: 24px;
+}
+
+.create-label {
+    -fx-text-fill: #b9c2cf;
+}
+
+.create-field,
+.create-combo,
+.text-area {
+    -fx-background-color: #0d1219;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #edf2f8;
+    -fx-prompt-text-fill: #667285;
+}
+
+.create-field:hover,
+.text-area:hover,
+.create-combo:hover {
+    -fx-border-color: #435266;
+}
+
+.create-field:focused,
+.text-area:focused,
+.create-combo:focused {
+    -fx-background-color: #101721;
+    -fx-border-color: #5688ed;
+}
+
+.create-combo .list-cell {
+    -fx-background-color: #151b24;
+    -fx-text-fill: #e8edf4;
+}
+
+.create-combo .list-cell:hover,
+.create-combo .list-cell:filled:selected {
+    -fx-background-color: #1d2a40;
+}
+
+.slider .track {
+    -fx-background-color: #303a49;
+}
+
+.slider .thumb {
+    -fx-background-color: #5d91ff;
+}
+
+.slider .thumb:hover {
+    -fx-background-color: #79a6ff;
+}
+
+/* ---------- generic controls ---------- */
+
+.check-box {
+    -fx-text-fill: #c1cad6;
+}
+
+.check-box .box {
+    -fx-background-color: #111720;
+    -fx-border-color: #364253;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.check-box:hover .box {
+    -fx-border-color: #4d607a;
+}
+
+.check-box:selected .box {
+    -fx-background-color: #4f82f5;
+    -fx-border-color: #4f82f5;
+}
+
+.combo-box-base,
+.choice-box {
+    -fx-background-color: #111720;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.combo-box-base:hover,
+.choice-box:hover {
+    -fx-border-color: #46566c;
+}
+
+.combo-box-base:focused,
+.choice-box:focused {
+    -fx-border-color: #5688ed;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 12px;
+}
+
+.tab-pane .tab-label {
+    -fx-text-fill: #7f8b9d;
+    -fx-font-weight: 700;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #dfe8f8;
+}
+
+.separator .line {
+    -fx-border-color: #27303d;
+}
+
+/* ---------- context menus ---------- */
+
+.context-menu {
+    -fx-background-color: #121821;
+    -fx-background-radius: 9px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 9px;
+    -fx-padding: 5px;
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #c9d1dd;
+    -fx-padding: 8px 12px;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+    -fx-background-color: #1d2735;
+    -fx-text-fill: #f1f5fb;
+}
+
+/* ---------- scrollbars ---------- */
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #303b4a;
+    -fx-background-radius: 6px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #46566c;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ---------- dialogs / overlays ---------- */
+
+.dialog-pane {
+    -fx-background-color: #121821;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #151c26;
+}
+
+.dialog-pane .content {
+    -fx-background-color: #121821;
+}
+
+.tooltip {
+    -fx-background-color: #0d131b;
+    -fx-text-fill: #dce5f1;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 7px 9px;
+}
+
+/* ---------- selection / focus ---------- */
+
+.text-field:focused,
+.text-area:focused,
+.button:focused,
+.combo-box-base:focused,
+.choice-box:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* ---------- content browser / project surfaces ---------- */
+
+.mod-details-card,
+.mod-details-header {
+    -fx-background-color: #151a22;
+}
+
+.modrinth-search-field,
+.content-search-field,
+.search-field {
+    -fx-background-color: #111720;
+    -fx-border-color: #303b49;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.modrinth-search-field:focused,
+.content-search-field:focused,
+.search-field:focused {
+    -fx-border-color: #5688ed;
+}
+
+/* ---------- notifications ---------- */
+
+.notification {
+    -fx-background-color: #141b24;
+    -fx-border-color: #303d4e;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0.15, 0, 5);
+}
+
+.notification-progress > .bar {
+    -fx-background-color: #5688ed;
+}
+
+.notification-progress > .track {
+    -fx-background-color: #252e3a;
+}
