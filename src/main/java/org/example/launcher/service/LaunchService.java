@@ -23,7 +23,7 @@ public class LaunchService {
 
     private static final Pattern SERVER_CONNECTION_PATTERN =
             Pattern.compile(
-                    "(?:Connecting to|Connecting)\\s+([^,\\s]+),\\s*(\\d+)"
+                    "(?:Connecting to|Connecting)\\s+(?:/)?([^,\\s:]+|\\[[^\\]]+\\])(?:,\\s*|:)(\\d+)"
             );
 
     public enum LaunchState {
