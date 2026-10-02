@@ -10,6 +10,8 @@ import java.util.TimerTask;
 
 public class NotificationManager {
 
+    private static volatile NotificationManager activeManager;
+
     private final StackPane container;
 
     private NotificationView currentNotification;
@@ -43,6 +45,11 @@ public class NotificationManager {
         );
 
         root.getChildren().add(container);
+        activeManager = this;
+    }
+
+    public static NotificationManager getGlobal() {
+        return activeManager;
     }
 
     public void showProgress(
