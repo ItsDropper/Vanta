@@ -24,6 +24,7 @@ import javafx.stage.Window;
 import org.example.launcher.instance.MrpackExporter;
 import org.example.launcher.model.Instance;
 import org.example.launcher.service.LaunchService;
+import org.example.launcher.service.InstanceUsageManager;
 
 import java.io.File;
 
@@ -32,6 +33,7 @@ public class InstanceCard extends StackPane {
     private final Label nameLabel;
     private final Label versionLabel;
     private final Label loaderLabel;
+    private final Label playtimeLabel;
     private final Label statusLabel;
 
     private final Button playButton;
@@ -130,11 +132,19 @@ public class InstanceCard extends StackPane {
                 "instance-loader"
         );
 
+        playtimeLabel =
+                new Label();
+
+        playtimeLabel.getStyleClass().add(
+                "instance-playtime"
+        );
+
         HBox metadata =
                 new HBox(
                         8,
                         versionLabel,
-                        loaderLabel
+                        loaderLabel,
+                        playtimeLabel
                 );
 
         metadata.setAlignment(
@@ -862,6 +872,13 @@ public class InstanceCard extends StackPane {
 
         loaderLabel.setText(
                 instance.getDisplayLoader()
+        );
+
+        playtimeLabel.setText(
+                InstanceUsageManager.formatPlaytime(
+                        InstanceUsageManager.getPlaytimeSeconds(instance)
+                )
+                        + " played"
         );
     }
 
