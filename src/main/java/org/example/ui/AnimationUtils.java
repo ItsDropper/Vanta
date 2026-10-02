@@ -4,6 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
+import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
