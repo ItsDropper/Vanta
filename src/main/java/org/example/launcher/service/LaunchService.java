@@ -22,7 +22,9 @@ import java.util.function.Consumer;
 public class LaunchService {
 
     private static final Pattern SERVER_CONNECTION_PATTERN =
-            Pattern.compile("Connecting to ([^,\\s]+),\\s*(\\d+)");
+            Pattern.compile(
+                    "(?:Connecting to|Connecting)\\s+([^,\\s]+),\\s*(\\d+)"
+            );
 
     public enum LaunchState {
         IDLE,
@@ -166,6 +168,14 @@ public class LaunchService {
                     "Loader: "
                             + instance.getDisplayLoader()
             );
+
+            if (server != null) {
+                ServerHistoryManager.recordConnection(
+                        instance,
+                        server.getHost(),
+                        server.getPort()
+                );
+            }
 
             LaunchData launchData =
                     LaunchDataBuilder.build(
