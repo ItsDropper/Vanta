@@ -620,10 +620,6 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setConfirmRemovalsEnabled(confirmations.isSelected())
         );
 
-        Button resetIntro = new Button("RESET INTRODUCTION");
-        resetIntro.getStyleClass().add("secondary-button");
-        resetIntro.setOnAction(event -> LauncherSettings.resetOnboarding());
-
         health.getChildren().addAll(
                 confirmations,
                 actionButton(
