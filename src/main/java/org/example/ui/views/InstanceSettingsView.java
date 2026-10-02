@@ -411,32 +411,32 @@ public class InstanceSettingsView extends VBox {
 
         Button saveButton =
                 new Button(
-                        "SAVE CHANGES"
+                        "SAVE"
                 );
 
         saveButton.getStyleClass().add(
-                "primary-button"
+                "secondary-button"
         );
 
         saveButton.setOnAction(
                 event -> saveSettings()
         );
 
-        HBox actions =
-                new HBox(
-                        10,
-                        statusLabel,
-                        cancelButton,
-                        saveButton
+        Button saveAndCloseButton =
+                new Button(
+                        "SAVE & CLOSE"
                 );
 
-        actions.setAlignment(
-                Pos.CENTER_RIGHT
+        saveAndCloseButton.getStyleClass().add(
+                "primary-button"
         );
 
-        HBox.setHgrow(
-                statusLabel,
-                Priority.ALWAYS
+        saveAndCloseButton.setOnAction(
+                event -> {
+                    if (saveSettings()) {
+                        onBack.run();
+                    }
+                }
         );
 
         // ---------------------------------------------------------
@@ -459,9 +459,7 @@ public class InstanceSettingsView extends VBox {
                         gameCard,
 
                         directoryTitle,
-                        directoryCard,
-
-                        actions
+                        directoryCard
                 );
 
         content.setPadding(
@@ -506,8 +504,35 @@ public class InstanceSettingsView extends VBox {
                 Priority.ALWAYS
         );
 
-        getChildren().add(
-                scrollPane
+        HBox footer =
+                new HBox(
+                        10,
+                        statusLabel,
+                        cancelButton,
+                        saveButton,
+                        saveAndCloseButton
+                );
+
+        footer.setAlignment(
+                Pos.CENTER_RIGHT
+        );
+
+        footer.setPadding(
+                new Insets(0, 36, 24, 36)
+        );
+
+        footer.getStyleClass().add(
+                "instance-settings-footer"
+        );
+
+        HBox.setHgrow(
+                statusLabel,
+                Priority.ALWAYS
+        );
+
+        getChildren().addAll(
+                scrollPane,
+                footer
         );
 
         loadSettings();
@@ -587,7 +612,7 @@ public class InstanceSettingsView extends VBox {
     // SAVE
     // =============================================================
 
-    private void saveSettings() {
+    private boolean saveSettings() {
 
         try {
 
@@ -648,11 +673,15 @@ public class InstanceSettingsView extends VBox {
                     "Settings saved."
             );
 
+            return true;
+
         } catch (NumberFormatException e) {
 
             statusLabel.setText(
                     e.getMessage()
             );
+
+            return false;
 
         } catch (Exception e) {
 
@@ -661,6 +690,8 @@ public class InstanceSettingsView extends VBox {
             statusLabel.setText(
                     "Failed to save settings."
             );
+
+            return false;
         }
     }
 
