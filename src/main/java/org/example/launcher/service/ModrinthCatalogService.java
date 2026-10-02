@@ -201,7 +201,7 @@ private List<ModrinthProject> resolveProjects(
         return projects;
     }
 
-private ModrinthVersion findCompatibleVersion(
+ModrinthVersion findCompatibleVersion(
             List<ModrinthVersion> versions,
             String minecraftVersion,
             String loader
@@ -246,7 +246,7 @@ private ModrinthVersion findCompatibleVersion(
                 .orElse(null);
     }
 
-private ModrinthVersion findContentVersion(
+ModrinthVersion findContentVersion(
             List<ModrinthVersion> versions,
             String minecraftVersion
     ) {
@@ -379,7 +379,7 @@ private ModrinthFile findPrimaryFile(
                 );
     }
 
-private String normalizeLoader(
+String normalizeLoader(
             String loader
     ) {
 
@@ -392,7 +392,7 @@ private String normalizeLoader(
                 .toLowerCase();
     }
 
-private String sanitizeFilename(
+String sanitizeFilename(
             String filename
     ) {
 
