@@ -1,5 +1,7 @@
 package org.example.ui.views;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,6 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 import org.example.launcher.account.Account;
 import org.example.launcher.instance.InstanceManager;
@@ -42,6 +45,9 @@ public class HomeView extends StackPane {
     private final Label accountLabel;
     private VBox recentList;
     private Label recentStatus;
+    private final java.util.Map<String, Label> playtimeLabels =
+            new java.util.HashMap<>();
+    private final Timeline playtimeTimer;
 
     public HomeView(
             AccountService accountService,
@@ -107,6 +113,15 @@ public class HomeView extends StackPane {
         ServerHistoryManager.addListener(() ->
                 Platform.runLater(this::refreshRecentServers)
         );
+
+        playtimeTimer = new Timeline(
+                new KeyFrame(
+                        Duration.seconds(1),
+                        event -> updatePlaytimeLabels()
+                )
+        );
+        playtimeTimer.setCycleCount(Timeline.INDEFINITE);
+        playtimeTimer.play();
 
         refreshAccount();
         refreshRecentInstances();
@@ -205,6 +220,7 @@ public class HomeView extends StackPane {
 
     private void renderRecentInstances(List<Instance> instances) {
         recentList.getChildren().clear();
+        playtimeLabels.clear();
 
         List<Instance> recent = instances.stream()
                 .filter(instance ->
@@ -234,6 +250,33 @@ public class HomeView extends StackPane {
         }
     }
 
+    private void updatePlaytimeLabels() {
+        for (java.util.Map.Entry<String, Label> entry
+                : playtimeLabels.entrySet()) {
+
+            Instance instance = InstanceManager.discoverInstances()
+                    .stream()
+                    .filter(candidate ->
+                            candidate.getId().equals(entry.getKey())
+                    )
+                    .findFirst()
+                    .orElse(null);
+
+            if (instance == null) {
+                continue;
+            }
+
+            long seconds =
+                    InstanceUsageManager.getPlaytimeSeconds(instance)
+                            + launchService.getSessionPlaytimeSeconds(instance);
+
+            entry.getValue().setText(
+                    InstanceUsageManager.formatPlaytime(seconds)
+                            + " played"
+            );
+        }
+    }
+
     private HBox createRecentCard(Instance instance) {
         Label icon = new Label();
         icon.setGraphic(
@@ -254,9 +297,11 @@ public class HomeView extends StackPane {
         Label playtime = new Label(
                 InstanceUsageManager.formatPlaytime(
                         InstanceUsageManager.getPlaytimeSeconds(instance)
+                                + launchService.getSessionPlaytimeSeconds(instance)
                 )
                         + " played"
         );
+        playtimeLabels.put(instance.getId(), playtime);
         playtime.getStyleClass().add("home-recent-playtime");
 
         VBox info = new VBox(4, name, metadata, playtime);
