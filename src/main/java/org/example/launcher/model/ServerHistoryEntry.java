@@ -73,12 +73,16 @@ public final class ServerHistoryEntry {
 
             String lower = word.toLowerCase();
 
-            if (lower.equals("pvp")
-                    || lower.equals("pve")
-                    || lower.equals("smp")
-                    || lower.equals("hq")
-                    || lower.equals("mc")) {
-                result.append(lower.toUpperCase());
+            if (lower.equals("pvp")) {
+                result.append("PvP");
+            } else if (lower.equals("pve")) {
+                result.append("PvE");
+            } else if (lower.equals("smp")) {
+                result.append("SMP");
+            } else if (lower.equals("hq")) {
+                result.append("HQ");
+            } else if (lower.equals("mc")) {
+                result.append("MC");
             } else {
                 result.append(
                         Character.toUpperCase(lower.charAt(0))
