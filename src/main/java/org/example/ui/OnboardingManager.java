@@ -1,6 +1,6 @@
 package org.example.ui;
 
-import org.example.launcher.util.MinecraftLocator;
+import org.example.launcher.MinecraftLocator;
 
 import java.io.IOException;
 import java.io.InputStream;
