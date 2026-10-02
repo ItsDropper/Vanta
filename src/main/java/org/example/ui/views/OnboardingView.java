@@ -23,6 +23,7 @@ public class OnboardingView extends BorderPane {
 
     private final AccountService accountService;
     private final Runnable onFinished;
+    private final Runnable onCreateInstance;
 
     private final StackPane pageContainer = new StackPane();
     private final Label stepLabel = new Label();
@@ -35,10 +36,12 @@ public class OnboardingView extends BorderPane {
 
     public OnboardingView(
             AccountService accountService,
-            Runnable onFinished
+            Runnable onFinished,
+            Runnable onCreateInstance
     ) {
         this.accountService = accountService;
         this.onFinished = onFinished;
+        this.onCreateInstance = onCreateInstance;
 
         getStyleClass().add("onboarding-page");
         setMinWidth(700);
@@ -112,7 +115,7 @@ public class OnboardingView extends BorderPane {
                 "A focused Minecraft launcher built around clean instances, reliable downloads, and control without unnecessary clutter.");
 
         Label line = new Label(
-                "Vanta keeps each Minecraft instance separate, so mods, settings, worlds, screenshots, and logs stay organized."
+                "Vanta keeps each Minecraft instance separate, gives you a Modrinth-based content workflow, and keeps launcher configuration local."
         );
         line.getStyleClass().add("onboarding-body");
         line.setWrapText(true);
@@ -123,13 +126,22 @@ public class OnboardingView extends BorderPane {
     }
 
     private Node howItWorksPage() {
-        VBox box = page("The basic workflow", 
-                "Vanta is designed so the common path stays simple.");
+        VBox box = page(
+                "How Vanta is organized",
+                "An instance is a complete Minecraft environment. Keeping environments separate prevents one setup from accidentally changing another."
+        );
 
-        addFeature(box, "1", "Create an instance", "Choose Minecraft and a loader, or start from a preset.");
-        addFeature(box, "2", "Install content", "Browse Modrinth and manage mods, resource packs, and shaders per instance.");
-        addFeature(box, "3", "Play", "Launch the selected instance. Vanta keeps its files and configuration isolated.");
-        addFeature(box, "4", "Repair when needed", "Use Vanta's repair and diagnostics tools when an instance needs attention.");
+        addFeature(box, "1", "Instances", "Each instance has its own mods, resource packs, shaders, worlds, screenshots, logs and settings.");
+        addFeature(box, "2", "Content", "Use Browse Content to install from Modrinth. Installed content can then be enabled, disabled or removed per instance.");
+        addFeature(box, "3", "Launch", "Vanta resolves the selected instance's Minecraft version, loader, libraries and settings before starting it.");
+        addFeature(box, "4", "Repair", "If a dependency is missing or damaged, use the instance repair flow instead of manually deleting random files.");
+
+        Label path = new Label(
+                "Tip: use one instance for each distinct modded setup. For example, keep a Fabric performance setup separate from a large modpack."
+        );
+        path.getStyleClass().add("onboarding-hint");
+        path.setWrapText(true);
+        box.getChildren().add(path);
 
         return box;
     }
@@ -177,21 +189,36 @@ public class OnboardingView extends BorderPane {
     }
 
     private Node readyPage() {
-        VBox box = page("You're ready to use Vanta", 
-                "Start by creating an instance or connecting an account later from the sidebar.");
-
-        Label checklist = new Label(
-                "• Home — launch and monitor your selected instance\n"
-                        + "• Instances — create and manage isolated Minecraft installations\n"
-                        + "• Mods — manage installed content and browse Modrinth\n"
-                        + "• Accounts — manage Microsoft accounts\n"
-                        + "• Settings — customize Vanta and inspect its data"
+        VBox box = page(
+                "You're ready to use Vanta",
+                "The first useful action is to create an instance. You can always change launcher defaults later in Settings."
         );
-        checklist.getStyleClass().add("onboarding-body");
-        checklist.setWrapText(true);
-        checklist.setMaxWidth(680);
 
-        box.getChildren().add(checklist);
+        addFeature(box, "1", "Create your first instance", "Pick a Minecraft version and loader. Vanta creates the isolated folder structure for you.");
+        addFeature(box, "2", "Open Browse Content", "Install compatible mods, resource packs or shaders from Modrinth for that instance.");
+        addFeature(box, "3", "Tune it in Settings", "Set RAM, resolution, fullscreen, Java arguments and Minecraft arguments for an individual instance.");
+
+        HBox actions = new HBox(10);
+        actions.setAlignment(Pos.CENTER_LEFT);
+
+        Button create = new Button("CREATE FIRST INSTANCE");
+        create.getStyleClass().add("primary-button");
+        create.setOnAction(event -> {
+            OnboardingManager.markCompleted();
+            onFinished.run();
+            onCreateInstance.run();
+        });
+
+        Button finish = new Button("EXPLORE VANTA");
+        finish.getStyleClass().add("secondary-button");
+        finish.setOnAction(event -> {
+            OnboardingManager.markCompleted();
+            onFinished.run();
+        });
+
+        actions.getChildren().addAll(create, finish);
+        box.getChildren().add(actions);
+
         return box;
     }
 
