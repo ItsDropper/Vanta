@@ -353,7 +353,8 @@ public class LauncherView {
         CreateInstanceView createInstanceView =
                 new CreateInstanceView(
                         this::showCreateInstanceView,
-                        this::instanceCreated
+                        this::instanceCreated,
+                        this::showModrinthModpackView
                 );
 
         content.getChildren().setAll(
