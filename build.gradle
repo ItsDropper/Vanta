@@ -58,6 +58,9 @@ dependencies {
     // Markdown
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
 
+    // Discord Rich Presence
+    implementation 'io.github.CDAGaming:DiscordIPC:0.11.3'
+
     // SVG support
     implementation 'org.apache.xmlgraphics:batik-transcoder:1.18'
     implementation 'org.apache.xmlgraphics:batik-codec:1.18'
