@@ -495,7 +495,7 @@ public class SettingsView extends BorderPane {
                         properties.getProperty("version");
 
                 if (version != null
-                        && !version.contains("\${")) {
+                        && !version.contains("${")) {
                     return version;
                 }
             }
