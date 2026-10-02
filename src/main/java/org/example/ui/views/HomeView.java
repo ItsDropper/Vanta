@@ -12,6 +12,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
@@ -177,19 +178,14 @@ public class HomeView extends StackPane {
         recentServersStatus = new Label("No server history yet.");
         recentServersStatus.getStyleClass().add("home-recent-status");
 
-        ScrollPane scroll = new ScrollPane(recentServersList);
-        scroll.setFitToWidth(true);
-        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scroll.setPrefViewportHeight(82);
-        scroll.setMinHeight(82);
-        scroll.setMaxHeight(120);
-        scroll.getStyleClass().add("home-recent-scroll");
+        recentServersList.setMinHeight(Region.USE_PREF_SIZE);
+        recentServersList.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        recentServersList.setMaxHeight(Double.MAX_VALUE);
 
         card.getChildren().addAll(
                 title,
                 subtitle,
-                scroll,
+                recentServersList,
                 recentServersStatus
         );
 
