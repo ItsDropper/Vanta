@@ -9,6 +9,8 @@ import org.example.ui.LauncherSettings;
 
 public final class DiscordPresenceService {
 
+    private static final long VANTA_DISCORD_CLIENT_ID = 1555578319720816660L;
+
     private IPCClient client;
     private long connectedClientId;
 
@@ -18,20 +20,12 @@ public final class DiscordPresenceService {
             return;
         }
 
-        String clientIdText = LauncherSettings.getDiscordClientId();
-        if (clientIdText == null || clientIdText.isBlank() || instance == null) {
-            return;
-        }
-
-        long clientId;
-        try {
-            clientId = Long.parseLong(clientIdText.trim());
-        } catch (NumberFormatException ignored) {
+        if (instance == null) {
             return;
         }
 
         try {
-            ensureConnected(clientId);
+            ensureConnected(VANTA_DISCORD_CLIENT_ID);
 
             String details = LauncherSettings.isDiscordShowInstanceEnabled()
                     ? instance.getName()
