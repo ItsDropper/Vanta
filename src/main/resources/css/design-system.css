@@ -1170,3 +1170,12 @@
     -fx-background-color: -vanta-accent-soft;
     -fx-border-color: #3c4c64;
 }
+
+
+.title-bar-brand {
+    -fx-text-fill: #eaf0f8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.4px;
+    -fx-padding: 0 0 0 14px;
+}
