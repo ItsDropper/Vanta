@@ -44,5 +44,9 @@ public class LaunchData {
     public boolean fullscreen;
 
     public String javaPath;
+
+    public String serverHost;
+
+    public int serverPort;
 }
 
