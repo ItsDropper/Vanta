@@ -41,6 +41,12 @@ public class OnboardingView extends BorderPane {
         this.onFinished = onFinished;
 
         getStyleClass().add("onboarding-page");
+        setMinWidth(700);
+        setPrefWidth(820);
+        setMaxWidth(900);
+        setMinHeight(500);
+        setPrefHeight(560);
+        setMaxHeight(620);
         setPadding(new Insets(36));
 
         Label logo = new Label("VANTA");
