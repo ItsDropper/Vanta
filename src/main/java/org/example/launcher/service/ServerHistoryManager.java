@@ -47,10 +47,14 @@ public final class ServerHistoryManager {
         }
 
         List<ServerHistoryEntry> entries = load();
+        String serverIdentity = serverIdentity(host);
+
+        // A server can move a player between lobby endpoints/ports while
+        // remaining the same logical server. Keep one Home entry for that
+        // server+instance instead of creating a new entry for every lobby.
         entries.removeIf(entry ->
-                entry.getHost().equalsIgnoreCase(host)
-                        && entry.getPort() == port
-                        && entry.getInstanceId().equals(instance.getId())
+                entry.getInstanceId().equals(instance.getId())
+                        && serverIdentity(entry.getHost()).equals(serverIdentity)
         );
 
         entries.add(new ServerHistoryEntry(
@@ -153,6 +157,21 @@ public final class ServerHistoryManager {
             );
             return new ArrayList<>();
         }
+    }
+
+    private static String serverIdentity(String host) {
+        if (host == null) {
+            return "";
+        }
+
+        String normalized = host.trim().toLowerCase();
+        while (normalized.endsWith(".")) {
+            normalized = normalized.substring(0, normalized.length() - 1);
+        }
+
+        // Treat different ports/lobby endpoints on the same hostname as one
+        // logical server. This prevents lobby hopping from spamming history.
+        return normalized;
     }
 
     private static String text(JsonNode node, String field) {
