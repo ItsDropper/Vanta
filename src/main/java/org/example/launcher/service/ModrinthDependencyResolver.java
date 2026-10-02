@@ -261,7 +261,9 @@ private boolean resolveRoots(
                     instance,
                     candidate,
                     branch,
-                    resolving
+                    resolving,
+                    requiredProjectId,
+                    requiredVersions
             )) {
                 continue;
             }
@@ -303,7 +305,9 @@ private boolean resolveProject(
             ModrinthDependency requestedBy,
             List<String> requiredVersions,
             Map<String, ModrinthVersion> resolved,
-            Set<String> resolving
+            Set<String> resolving,
+            String requiredProjectId,
+            List<String> repairRequiredVersions
     ) throws IOException, InterruptedException {
 
         if (projectId == null || projectId.isBlank()) {
@@ -347,6 +351,15 @@ private boolean resolveProject(
                     continue;
                 }
 
+                if (requiredProjectId != null
+                        && requiredProjectId.equals(projectId)
+                        && !matchesRequiredVersions(
+                        candidate,
+                        repairRequiredVersions
+                )) {
+                    continue;
+                }
+
                 if (!satisfiesDependency(
                         instance,
                         candidate,
@@ -385,7 +398,9 @@ private boolean resolveProject(
                         instance,
                         candidate,
                         branch,
-                        resolving
+                        resolving,
+                        null,
+                        null
                 )) {
                     continue;
                 }
@@ -414,7 +429,9 @@ private boolean resolveDependencies(
             Instance instance,
             ModrinthVersion version,
             Map<String, ModrinthVersion> resolved,
-            Set<String> resolving
+            Set<String> resolving,
+            String requiredProjectId,
+            List<String> requiredVersions
     ) throws IOException, InterruptedException {
 
         if (version == null) {
@@ -471,6 +488,21 @@ private boolean resolveDependencies(
                 );
 
                 /*
+                 * A repair constraint is global to the entire graph.
+                 * Reject a transitive selection of the wrong version
+                 * immediately so the parent candidate can backtrack.
+                 */
+                if (requiredProjectId != null
+                        && requiredProjectId.equals(dependencyProjectId)
+                        && resolved.containsKey(dependencyProjectId)
+                        && !matchesRequiredVersions(
+                        resolved.get(dependencyProjectId),
+                        requiredVersions
+                )) {
+                    return false;
+                }
+
+                /*
                  * If an existing selected dependency doesn't satisfy
                  * this requirement, this branch is invalid.
                  */
@@ -516,7 +548,9 @@ private boolean resolveDependencies(
                                 dependency,
                                 null,
                                 resolved,
-                                resolving
+                                resolving,
+                                requiredProjectId,
+                                requiredVersions
                         );
 
                 if (!success) {
@@ -1256,7 +1290,9 @@ private boolean resolveFabricDependency(
                         instance,
                         candidate,
                         branch,
-                        resolving
+                        resolving,
+                        null,
+                        null
                 )) {
 
                     continue;
