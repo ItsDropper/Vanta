@@ -288,7 +288,7 @@ ModrinthVersion findContentVersion(
                 .orElse(null);
     }
 
-private boolean isCompatible(
+    boolean isCompatible(
             ModrinthVersion version,
             String minecraftVersion,
             String loader
