@@ -35,4 +35,59 @@ public final class ServerHistoryEntry {
     public String getAddress() {
         return port == 25565 ? host : host + ":" + port;
     }
+
+    public String getDisplayName() {
+        if (host == null || host.isBlank()) {
+            return "Minecraft Server";
+        }
+
+        String normalized = host.trim()
+                .replaceAll("^\.+|\.+$", "");
+
+        String[] parts = normalized.split("\\.");
+        if (parts.length == 0) {
+            return "Minecraft Server";
+        }
+
+        int index = Math.max(0, parts.length - 2);
+        String name = parts[index]
+                .replace('-', ' ')
+                .replace('_', ' ')
+                .trim();
+
+        if (name.isBlank()) {
+            return "Minecraft Server";
+        }
+
+        String[] words = name.split("\\s+");
+        StringBuilder result = new StringBuilder();
+
+        for (String word : words) {
+            if (word.isBlank()) {
+                continue;
+            }
+
+            if (result.length() > 0) {
+                result.append(' ');
+            }
+
+            String lower = word.toLowerCase();
+
+            if (lower.equals("pvp")
+                    || lower.equals("pve")
+                    || lower.equals("smp")
+                    || lower.equals("hq")
+                    || lower.equals("mc")) {
+                result.append(lower.toUpperCase());
+            } else {
+                result.append(
+                        Character.toUpperCase(lower.charAt(0))
+                ).append(lower.substring(1));
+            }
+        }
+
+        return result.length() > 0
+                ? result.toString()
+                : "Minecraft Server";
+    }
 }
