@@ -1250,3 +1250,15 @@
 .button .vanta-icon {
     -fx-opacity: 0.92;
 }
+
+
+.preset-list-scroll,
+.preset-list-scroll > .viewport,
+.preset-config-scroll,
+.preset-config-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.preset-list-scroll {
+    -fx-min-height: 0;
+}
