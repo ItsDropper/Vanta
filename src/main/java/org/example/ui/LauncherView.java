@@ -809,7 +809,7 @@ public class LauncherView {
                 new ScreenshotsView(
                         instance,
                         () ->
-                                showInstanceSettings(
+                                showInstanceMods(
                                         instance
                                 )
                 );
