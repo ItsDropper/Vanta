@@ -51,7 +51,6 @@ public class LauncherView {
 
     private final TitleBar titleBar;
 
-    private Instance selectedInstance;
 
     public LauncherView(Stage stage) {
 
@@ -284,9 +283,6 @@ public class LauncherView {
     private void showInstanceMods(
             Instance instance
     ) {
-
-        selectedInstance =
-                instance;
 
         ModsView view =
                 new ModsView(
@@ -838,9 +834,6 @@ public class LauncherView {
             Instance instance
     ) {
 
-        selectedInstance =
-                instance;
-
         InstanceSettingsView instanceSettingsView =
                 new InstanceSettingsView(
                         instance,
@@ -862,9 +855,6 @@ public class LauncherView {
     private void showScreenshots(
             Instance instance
     ) {
-
-        selectedInstance =
-                instance;
 
         ScreenshotsView screenshotsView =
                 new ScreenshotsView(
@@ -1187,7 +1177,11 @@ public class LauncherView {
         Instance instance = launchService.getFailedInstance();
 
         if (instance == null) {
-            instance = selectedInstance;
+            notifications.error(
+                    "Minecraft failed to launch",
+                    "Vanta could not determine which instance failed."
+            );
+            return;
         }
 
         if (instance == null) {
