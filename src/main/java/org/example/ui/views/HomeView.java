@@ -522,8 +522,8 @@ public class HomeView extends StackPane {
                     launchService.launch(
                             instance,
                             new ServerTarget(
-                                    server.host(),
-                                    server.port()
+                                    server.getHost(),
+                                    server.getPort()
                             )
                     );
                 } catch (Exception ex) {
