@@ -37,8 +37,8 @@ public class HomeView extends StackPane {
     private final Consumer<LaunchFailure> onLaunchFailure;
     private final Consumer<Instance> onLaunchInstance;
 
-    private final VBox recentServersList;
-    private final Label recentServersStatus;
+    private VBox recentServersList;
+    private Label recentServersStatus;
     private final Label accountLabel;
     private final VBox recentList;
     private final Label recentStatus;
