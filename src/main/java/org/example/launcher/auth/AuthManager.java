@@ -103,11 +103,6 @@ public class AuthManager {
                                 deviceCode -> {
 
                                     System.out.println(
-                                            "Microsoft login code: "
-                                                    + deviceCode.getUserCode()
-                                    );
-
-                                    System.out.println(
                                             "Verification URL: "
                                                     + deviceCode.getVerificationUri()
                                     );
