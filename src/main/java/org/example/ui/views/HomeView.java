@@ -257,6 +257,9 @@ public class HomeView extends StackPane {
         card.setMaxWidth(Double.MAX_VALUE);
         card.getStyleClass().add("home-recent-card");
 
+        org.example.ui.AnimationUtils.installInteractiveAnimations(card);
+        org.example.ui.AnimationUtils.slideFadeVertical(card, 10);
+
         return card;
     }
 
