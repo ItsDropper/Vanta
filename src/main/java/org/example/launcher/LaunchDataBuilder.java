@@ -4,6 +4,7 @@ import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
 import org.example.launcher.model.InstanceSettings;
 import org.example.launcher.model.VersionManifest;
+import org.example.launcher.service.ServerTarget;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -12,6 +13,13 @@ public class LaunchDataBuilder {
 
     public static LaunchData build(
             Instance instance
+    ) {
+        return build(instance, null);
+    }
+
+    public static LaunchData build(
+            Instance instance,
+            ServerTarget server
     ) {
 
         if (instance == null) {
@@ -177,6 +185,11 @@ public class LaunchDataBuilder {
 
         data.javaPath =
                 settings.getJavaPath();
+
+        if (server != null) {
+            data.serverHost = server.host();
+            data.serverPort = server.port();
+        }
 
         return data;
     }
