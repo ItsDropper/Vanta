@@ -17,7 +17,11 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import org.example.launcher.MinecraftLocator;
+import org.example.launcher.account.Account;
 import org.example.launcher.instance.InstanceManager;
+import org.example.launcher.service.AccountService;
+import org.example.ui.DebugAccess;
+import org.example.ui.components.NotificationManager;
 import org.example.ui.LauncherSettings;
 import org.example.ui.ThemeManager;
 
@@ -31,7 +35,9 @@ import java.util.function.Consumer;
 
 public class SettingsView extends BorderPane {
 
+    private final AccountService accountService;
     private final Consumer<String> onAccentChanged;
+    private final Runnable onDebugOnboarding;
     private final VBox navigation = new VBox(4);
     private final VBox content = new VBox(22);
 
@@ -40,9 +46,19 @@ public class SettingsView extends BorderPane {
     private Label accentValue;
     private Region accentPreview;
     private String accentColor;
+    private String currentSection = "Appearance";
+    private boolean debugAccess;
 
-    public SettingsView(Consumer<String> onAccentChanged) {
+    public SettingsView(
+            AccountService accountService,
+            Consumer<String> onAccentChanged,
+            Runnable onDebugOnboarding
+    ) {
+        this.accountService = accountService;
         this.onAccentChanged = onAccentChanged;
+        this.onDebugOnboarding = onDebugOnboarding;
+
+        accountService.addListener(account -> refreshDebugAccess());
         this.accentColor = ThemeManager.loadAccent();
 
         getStyleClass().add("settings-shell");
@@ -107,6 +123,7 @@ public class SettingsView extends BorderPane {
     }
 
     private void selectSection(String section) {
+        currentSection = section;
         content.getChildren().clear();
 
         switch (section) {
@@ -284,6 +301,11 @@ public class SettingsView extends BorderPane {
         ThemeManager.saveAccent(accentColor);
         onAccentChanged.accept(accentColor);
 
+        NotificationManager manager = NotificationManager.getGlobal();
+        if (manager != null) {
+            manager.success("Appearance updated", "Accent color changed to " + accentColor + ".");
+        }
+
         updateAccentPreview(null);
     }
 
@@ -301,9 +323,16 @@ public class SettingsView extends BorderPane {
         CheckBox enabled = new CheckBox("Enable Discord Rich Presence");
         enabled.setSelected(LauncherSettings.isDiscordPresenceEnabled());
         enabled.getStyleClass().add("settings-checkbox");
-        enabled.setOnAction(event ->
-                LauncherSettings.setDiscordPresenceEnabled(enabled.isSelected())
-        );
+        enabled.setOnAction(event -> {
+            LauncherSettings.setDiscordPresenceEnabled(enabled.isSelected());
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.success(
+                        "Discord Rich Presence",
+                        enabled.isSelected() ? "Rich Presence enabled." : "Rich Presence disabled."
+                );
+            }
+        });
 
         connection.getChildren().add(
                 enabled
@@ -448,9 +477,25 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setDefaultWidth(w);
                 LauncherSettings.setDefaultHeight(h);
                 LauncherSettings.setDefaultFullscreen(fullscreen.isSelected());
+
+                NotificationManager manager = NotificationManager.getGlobal();
+                if (manager != null) {
+                    manager.success(
+                            "Minecraft defaults saved",
+                            "New instances will use the updated defaults."
+                    );
+                }
             } catch (NumberFormatException ignored) {
                 width.setText(String.valueOf(LauncherSettings.getDefaultWidth()));
                 height.setText(String.valueOf(LauncherSettings.getDefaultHeight()));
+
+                NotificationManager manager = NotificationManager.getGlobal();
+                if (manager != null) {
+                    manager.error(
+                            "Invalid resolution",
+                            "Use a resolution of at least 640×480."
+                    );
+                }
             }
         });
 
@@ -512,9 +557,16 @@ public class SettingsView extends BorderPane {
 
         Button save = new Button("SAVE DOWNLOAD SETTINGS");
         save.getStyleClass().add("primary-button");
-        save.setOnAction(event ->
-                LauncherSettings.setDownloadThreads((int) Math.round(slider.getValue()))
-        );
+        save.setOnAction(event -> {
+            LauncherSettings.setDownloadThreads((int) Math.round(slider.getValue()));
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.success(
+                        "Download settings saved",
+                        "Vanta will use " + (int) Math.round(slider.getValue()) + " download workers."
+                );
+            }
+        });
 
         workers.getChildren().addAll(value, slider, save);
 
@@ -571,7 +623,6 @@ public class SettingsView extends BorderPane {
 
         health.getChildren().addAll(
                 confirmations,
-                resetIntro,
                 actionButton(
                         "OPEN DATA FOLDER",
                         () -> openDirectory(MinecraftLocator.getVantaDirectory())
@@ -583,7 +634,44 @@ public class SettingsView extends BorderPane {
                 "The launcher does not silently rewrite files from this page. Instance dependency repair remains available from the instance repair flow."
         );
 
-        content.getChildren().addAll(health, safety);
+        if (debugAccess) {
+            VBox debug = card(
+                    "Developer Debug",
+                    "Owner-only launcher diagnostics. These controls are hidden from all other Minecraft accounts."
+            );
+
+            Button testOnboarding = new Button("TEST ONBOARDING");
+            testOnboarding.getStyleClass().add("debug-button");
+            testOnboarding.setOnAction(event -> {
+                OnboardingManager.resetOnboarding();
+                NotificationManager manager = NotificationManager.getGlobal();
+                if (manager != null) {
+                    manager.success(
+                            "Onboarding debug",
+                            "Opening the first-run onboarding flow."
+                    );
+                }
+                onDebugOnboarding.run();
+            });
+
+            debug.getChildren().add(testOnboarding);
+            content.getChildren().add(debug);
+        }
+
+        content.getChildren().add(safety);
+    }
+
+    public void refreshDebugAccess() {
+        Account account = accountService.getCurrentAccount();
+        boolean next = DebugAccess.isOwner(account);
+
+        if (next != debugAccess) {
+            debugAccess = next;
+
+            if ("Repair & Diagnostics".equals(currentSection)) {
+                buildDiagnosticsPage();
+            }
+        }
     }
 
     private void buildAboutPage() {
@@ -676,6 +764,10 @@ public class SettingsView extends BorderPane {
                 Desktop.getDesktop().open(directory.toFile());
             }
         } catch (Exception ignored) {
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.error("Could not open folder", directory.toString());
+            }
         }
     }
 
