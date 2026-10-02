@@ -1275,19 +1275,23 @@
     -fx-border-radius: 16px;
     -fx-border-width: 1px;
     -fx-padding: 0;
-    -fx-font-size: 28px;
+    -fx-font-size: 1px;
+}
+
+.mod-toggle-enabled,
+.mod-toggle-disabled {
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-content-display: GRAPHIC_ONLY;
+    -fx-alignment: CENTER;
 }
 
 .mod-toggle-enabled {
     -fx-background-color: #2E8B57;
     -fx-border-color: #45B875;
-    -fx-alignment: CENTER-RIGHT;
-    -fx-text-fill: white;
 }
 
 .mod-toggle-disabled {
     -fx-background-color: #A33A3A;
     -fx-border-color: #D05A5A;
-    -fx-alignment: CENTER-LEFT;
-    -fx-text-fill: white;
 }
