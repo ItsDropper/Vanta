@@ -15,9 +15,14 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.function.Consumer;
 
 public class LaunchService {
+
+    private static final Pattern SERVER_CONNECTION_PATTERN =
+            Pattern.compile("Connecting to ([^,\\s]+),\\s*(\\d+)");
 
     public enum LaunchState {
         IDLE,
@@ -96,6 +101,13 @@ public class LaunchService {
     public synchronized Process launch(
             Instance instance
     ) throws Exception {
+        return launch(instance, null);
+    }
+
+    public synchronized Process launch(
+            Instance instance,
+            ServerTarget server
+    ) throws Exception {
 
         if (isRunning()) {
             return minecraftProcess;
@@ -157,7 +169,8 @@ public class LaunchService {
 
             LaunchData launchData =
                     LaunchDataBuilder.build(
-                            instance
+                            instance,
+                            server
                     );
 
             setState(
@@ -273,6 +286,8 @@ public class LaunchService {
                                             + line
                             );
 
+                            recordServerConnection(line);
+
                             checkForRepairableFailure(
                                     process
                             );
@@ -296,6 +311,26 @@ public class LaunchService {
         );
 
         outputThread.start();
+    }
+
+    private void recordServerConnection(String line) {
+        if (runningInstance == null || line == null) {
+            return;
+        }
+
+        Matcher matcher = SERVER_CONNECTION_PATTERN.matcher(line);
+        if (!matcher.find()) {
+            return;
+        }
+
+        try {
+            ServerHistoryManager.recordConnection(
+                    runningInstance,
+                    matcher.group(1),
+                    Integer.parseInt(matcher.group(2))
+            );
+        } catch (Exception ignored) {
+        }
     }
 
     private void checkForRepairableFailure(
