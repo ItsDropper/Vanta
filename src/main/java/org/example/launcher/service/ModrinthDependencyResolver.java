@@ -139,7 +139,40 @@ private boolean resolveRoots(
         List<ModrinthVersion> selectedCandidates = null;
 
         for (String rootProjectId : roots) {
-            if (resolved.containsKey(rootProjectId)) continue;
+
+            /*
+             * A root may already have been selected while resolving
+             * another root's dependency tree. That does NOT mean the
+             * root's own required constraint can be skipped.
+             *
+             * This matters during repair: for example, Iris 1.10.x
+             * can pull Sodium 0.8.x while the repair request explicitly
+             * requires Sodium 0.9.1 or later. The required Sodium root
+             * must reject that branch and let root backtracking try a
+             * different Iris version.
+             */
+            if (resolved.containsKey(rootProjectId)) {
+
+                if (requiredProjectId != null
+                        && requiredProjectId.equals(rootProjectId)
+                        && !matchesRequiredVersions(
+                        resolved.get(rootProjectId),
+                        requiredVersions
+                )) {
+
+                    System.out.println(
+                            "[Vanta DEBUG] Existing required root "
+                                    + rootProjectId
+                                    + " -> "
+                                    + resolved.get(rootProjectId).getVersionNumber()
+                                    + " does not satisfy the repair constraint."
+                    );
+
+                    return false;
+                }
+
+                continue;
+            }
 
             List<ModrinthVersion> candidates =
                     getCompatibleCandidates(instance, rootProjectId);
