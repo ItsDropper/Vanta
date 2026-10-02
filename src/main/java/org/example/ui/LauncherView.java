@@ -396,7 +396,8 @@ public class LauncherView {
                 new PresetConfigurationView(
                         preset,
                         this::createPresetInstance,
-                        this::showPresetInstanceView
+                        this::showPresetInstanceView,
+                        this::showModrinthModpackView
                 );
 
         content.getChildren().setAll(
