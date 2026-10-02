@@ -807,23 +807,12 @@ public class LauncherView {
     // INSTANCE
     // =============================================================
 
-    private void selectInstance(
-            Instance instance
-    ) {
-
-        selectedInstance =
-                instance;
-
-        homeView.setSelectedInstance(
-                instance
-        );
-
-        showPage(
-                Sidebar.Page.HOME
-        );
-    }
-
     private void instanceCreated() {
+
+        notifications.success(
+                "Instance created",
+                "The new Minecraft instance is ready."
+        );
 
         instancesView.refresh();
         homeView.refreshRecentInstances();
