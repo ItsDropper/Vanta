@@ -1147,3 +1147,26 @@
     -fx-background-color: -vanta-accent-soft;
     -fx-text-fill: #eef4ff;
 }
+
+
+.sidebar-build {
+    -fx-text-fill: #566275;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-padding: 14px 8px 0 8px;
+}
+
+.home-card-path {
+    -fx-text-fill: #69778b;
+    -fx-font-family: "Consolas", "Cascadia Code", monospace;
+    -fx-font-size: 9px;
+}
+
+.home-info-card {
+    -fx-min-width: 0;
+}
+
+.home-info-card:hover {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-border-color: #3c4c64;
+}
