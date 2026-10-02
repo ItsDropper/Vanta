@@ -399,8 +399,8 @@ private boolean resolveProject(
                         candidate,
                         branch,
                         resolving,
-                        null,
-                        null
+                        requiredProjectId,
+                        repairRequiredVersions
                 )) {
                     continue;
                 }
