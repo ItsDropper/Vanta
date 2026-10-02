@@ -31,6 +31,14 @@ public final class LauncherSettings {
         setBoolean("updateChecksEnabled", value);
     }
 
+    public static int getDownloadThreads() {
+        return getInt("downloadThreads", 8, 1, 16);
+    }
+
+    public static void setDownloadThreads(int value) {
+        setInt("downloadThreads", clamp(value, 1, 16));
+    }
+
     public static boolean isConfirmRemovalsEnabled() {
         return getBoolean("confirmRemovalsEnabled", true);
     }
