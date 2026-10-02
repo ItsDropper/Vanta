@@ -17,14 +17,16 @@ import javafx.scene.layout.VBox;
 import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
 import org.example.launcher.service.LaunchService;
+import org.example.launcher.service.MultiLaunchService;
 import org.example.ui.components.InstanceCard;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class InstancesView extends VBox {
 
-    private final LaunchService launchService;
+    private final MultiLaunchService launchService;
 
     private final VBox instanceList;
     private final Label statusLabel;
@@ -39,7 +41,7 @@ public class InstancesView extends VBox {
 
 
     public InstancesView(
-            LaunchService launchService,
+            MultiLaunchService launchService,
             Runnable onCreateInstance,
             Consumer<Instance> onInstanceSettings
     ) {
