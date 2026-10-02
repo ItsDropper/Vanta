@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -117,22 +118,15 @@ public class HomeView extends StackPane {
         recentStatus = new Label("Loading instances...");
         recentStatus.getStyleClass().add("home-recent-status");
 
-        ScrollPane recentScroll = new ScrollPane(recentList);
-        recentScroll.setFitToWidth(true);
-        recentScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        recentScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        recentScroll.setPrefViewportHeight(90);
-        recentScroll.setMinHeight(90);
-        recentScroll.setMaxHeight(150);
-        recentScroll.getStyleClass().add("home-recent-scroll");
-
         VBox section = new VBox(
                 8,
                 recentTitle,
                 recentSubtitle,
-                recentScroll,
+                recentList,
                 recentStatus
         );
+        recentList.setMinHeight(0);
+        recentList.setMaxHeight(Double.MAX_VALUE);
         section.setFillWidth(true);
         section.getStyleClass().add("home-recent-section");
         return section;
@@ -341,8 +335,56 @@ public class HomeView extends StackPane {
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(14, 16, 14, 16));
         card.setMaxWidth(Double.MAX_VALUE);
-        card.setPickOnBounds(false);
+        card.setPickOnBounds(true);
         card.getStyleClass().add("home-recent-card");
+
+        // The whole card is a fallback hit target. The visible PLAY button
+        // remains the primary control, but clicking its area always launches.
+        card.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+            if (event.getTarget() == play || play.isHover()) {
+                return;
+            }
+        });
+
+        card.setOnMouseClicked(event -> {
+            if (event.getTarget() == play) {
+                return;
+            }
+
+            if (launchService.isRunning(instance)) {
+                launchService.close(instance);
+                return;
+            }
+
+            Thread thread = new Thread(() -> {
+                try {
+                    launchService.launch(instance);
+                } catch (Throwable ex) {
+                    ex.printStackTrace();
+                    LaunchFailure failure = launchService.getLastFailure();
+
+                    Platform.runLater(() -> {
+                        if (failure != null) {
+                            onLaunchFailure.accept(failure);
+                        } else {
+                            onLaunchFailure.accept(
+                                    new LaunchFailure(
+                                            "Minecraft failed to launch",
+                                            ex.getMessage() != null
+                                                    ? ex.getMessage()
+                                                    : "Vanta could not start this instance.",
+                                            ""
+                                    )
+                            );
+                        }
+                    });
+                }
+            });
+
+            thread.setDaemon(true);
+            thread.setName("Vanta-Home-Launch-Fallback");
+            thread.start();
+        });
 
         org.example.ui.AnimationUtils.slideFadeVertical(card, 10);
 
