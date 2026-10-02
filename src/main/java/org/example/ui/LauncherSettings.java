@@ -79,6 +79,38 @@ public final class LauncherSettings {
         setBoolean("defaultFullscreen", value);
     }
 
+    public static boolean isDiscordPresenceEnabled() {
+        return getBoolean("discordPresenceEnabled", false);
+    }
+
+    public static void setDiscordPresenceEnabled(boolean value) {
+        setBoolean("discordPresenceEnabled", value);
+    }
+
+    public static String getDiscordClientId() {
+        return getString("discordClientId", "");
+    }
+
+    public static void setDiscordClientId(String value) {
+        setString("discordClientId", value == null ? "" : value.trim());
+    }
+
+    public static boolean isDiscordShowPlaytimeEnabled() {
+        return getBoolean("discordShowPlaytime", true);
+    }
+
+    public static void setDiscordShowPlaytimeEnabled(boolean value) {
+        setBoolean("discordShowPlaytime", value);
+    }
+
+    public static boolean isDiscordShowInstanceEnabled() {
+        return getBoolean("discordShowInstance", true);
+    }
+
+    public static void setDiscordShowInstanceEnabled(boolean value) {
+        setBoolean("discordShowInstance", value);
+    }
+
     public static void resetOnboarding() {
         setBoolean("onboardingCompleted", false);
     }
@@ -106,6 +138,17 @@ public final class LauncherSettings {
     private static void setInt(String key, int value) {
         Properties properties = load();
         properties.setProperty(key, Integer.toString(value));
+        save(properties);
+    }
+
+    private static String getString(String key, String fallback) {
+        Properties properties = load();
+        return properties.getProperty(key, fallback);
+    }
+
+    private static void setString(String key, String value) {
+        Properties properties = load();
+        properties.setProperty(key, value);
         save(properties);
     }
 
