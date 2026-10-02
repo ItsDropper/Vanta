@@ -294,7 +294,13 @@ public class HomeView extends StackPane {
             play.getProperties().put("vanta-home-pressed", false);
         });
 
-        play.setOnAction(event -> {
+        play.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
+            if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) {
+                return;
+            }
+
+            event.consume();
+
             if (launchService.isRunning(instance)) {
                 launchService.close(instance);
                 return;
