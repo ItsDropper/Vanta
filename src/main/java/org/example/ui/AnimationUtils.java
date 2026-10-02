@@ -4,7 +4,6 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
-import javafx.animation.ScaleTransition;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -55,75 +54,6 @@ public final class AnimationUtils {
         }
 
         if (node instanceof Button) {
-            installButtonAnimation(node);
-        } else if (node instanceof javafx.scene.layout.Region) {
-            installSurfaceAnimation(node);
-        }
-
-        if (node instanceof Parent parent) {
-            for (Node child : parent.getChildrenUnmodifiable()) {
-                installInteractiveAnimations(child);
-            }
-        }
-    }
-
-    private static void installButtonAnimation(Node node) {
-        node.setOnMouseEntered(event -> {
-            ScaleTransition transition =
-                    new ScaleTransition(Duration.millis(120), node);
-            transition.setToX(1.025);
-            transition.setToY(1.025);
-            transition.play();
-        });
-
-        node.setOnMouseExited(event -> {
-            ScaleTransition transition =
-                    new ScaleTransition(Duration.millis(140), node);
-            transition.setToX(1);
-            transition.setToY(1);
-            transition.play();
-        });
-
-        node.setOnMousePressed(event -> {
-            ScaleTransition transition =
-                    new ScaleTransition(Duration.millis(70), node);
-            transition.setToX(0.975);
-            transition.setToY(0.975);
-            transition.play();
-        });
-
-        node.setOnMouseReleased(event -> {
-            ScaleTransition transition =
-                    new ScaleTransition(Duration.millis(90), node);
-            transition.setToX(1.025);
-            transition.setToY(1.025);
-            transition.play();
-        });
-    }
-
-    private static void installSurfaceAnimation(Node node) {
-        node.setOnMouseEntered(event -> {
-            node.setTranslateY(-2);
-        });
-
-        node.setOnMouseExited(event -> {
-            node.setTranslateY(0);
-        });
-    }
-
-    public static void installInteractiveAnimations(javafx.scene.Node node) {
-        if (!LauncherSettings.isAnimationsEnabled() || node == null) {
-            return;
-        }
-
-        if (node.getProperties().putIfAbsent(
-                "vanta.interactive-animation",
-                Boolean.TRUE
-        ) != null) {
-            return;
-        }
-
-        if (node instanceof javafx.scene.control.Button) {
             node.setOnMouseEntered(event -> {
                 ScaleTransition transition =
                         new ScaleTransition(Duration.millis(120), node);
@@ -149,8 +79,8 @@ public final class AnimationUtils {
             });
         }
 
-        if (node instanceof javafx.scene.Parent parent) {
-            for (javafx.scene.Node child : parent.getChildrenUnmodifiable()) {
+        if (node instanceof Parent parent) {
+            for (Node child : parent.getChildrenUnmodifiable()) {
                 installInteractiveAnimations(child);
             }
         }
