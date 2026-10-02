@@ -13,16 +13,17 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
-import org.example.launcher.MinecraftLocator;
 import org.example.launcher.account.Account;
 import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
+import org.example.launcher.model.ServerHistoryEntry;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.InstanceUsageManager;
 import org.example.launcher.service.LaunchFailure;
 import org.example.launcher.service.MultiLaunchService;
+import org.example.launcher.service.ServerHistoryManager;
+import org.example.launcher.service.ServerTarget;
 import org.example.launcher.service.LaunchService;
-import org.example.ui.components.AccountCard;
 import org.example.ui.components.IconView;
 import org.example.ui.components.MinecraftBackdrop;
 
@@ -36,7 +37,8 @@ public class HomeView extends StackPane {
     private final Consumer<LaunchFailure> onLaunchFailure;
     private final Consumer<Instance> onLaunchInstance;
 
-    private final AccountCard accountCard;
+    private final VBox recentServersList;
+    private final Label recentServersStatus;
     private final Label accountLabel;
     private final VBox recentList;
     private final Label recentStatus;
@@ -114,19 +116,12 @@ public class HomeView extends StackPane {
         );
         recentSection.getStyleClass().add("home-recent-section");
 
-        accountCard = new AccountCard();
-        accountCard.getStyleClass().add("home-account-card");
-
-        VBox launcherCard = createLauncherStatusCard();
-
-        HBox footerCards = new HBox(14, accountCard, launcherCard);
-        HBox.setHgrow(accountCard, Priority.ALWAYS);
-        HBox.setHgrow(launcherCard, Priority.ALWAYS);
+        VBox serverCard = createRecentServersCard();
 
         contentBox.getChildren().addAll(
                 hero,
                 recentSection,
-                footerCards
+                serverCard
         );
 
         getChildren().add(contentBox);
@@ -136,28 +131,42 @@ public class HomeView extends StackPane {
 
         refreshAccount();
         refreshRecentInstances();
+        refreshRecentServers();
     }
 
-    private VBox createLauncherStatusCard() {
-        VBox card = new VBox(8);
-        card.getStyleClass().add("home-status-card");
+    private VBox createRecentServersCard() {
+        VBox card = new VBox(10);
+        card.getStyleClass().add("home-recent-servers-card");
 
-        Label title = new Label("Vanta Launcher");
-        title.getStyleClass().add("home-status-title");
+        Label title = new Label("RECENTLY PLAYED SERVERS");
+        title.getStyleClass().add("home-section-title");
 
-        Label status = new Label("READY");
-        status.getStyleClass().add("home-status-value");
-
-        Label java = new Label("Java " + System.getProperty("java.version"));
-        java.getStyleClass().add("home-status-meta");
-
-        Label data = new Label(
-                MinecraftLocator.getVantaDirectory().toString()
+        Label subtitle = new Label(
+                "Join a server directly with the instance you last used."
         );
-        data.getStyleClass().add("home-status-meta");
-        data.setWrapText(true);
+        subtitle.getStyleClass().add("home-section-subtitle");
 
-        card.getChildren().addAll(title, status, java, data);
+        recentServersList = new VBox(8);
+        recentServersList.getStyleClass().add("home-server-list");
+
+        recentServersStatus = new Label("No server history yet.");
+        recentServersStatus.getStyleClass().add("home-recent-status");
+
+        ScrollPane scroll = new ScrollPane(recentServersList);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setPrefViewportHeight(150);
+        scroll.setMaxHeight(190);
+        scroll.getStyleClass().add("home-recent-scroll");
+
+        card.getChildren().addAll(
+                title,
+                subtitle,
+                scroll,
+                recentServersStatus
+        );
+
         return card;
     }
 
@@ -270,6 +279,146 @@ public class HomeView extends StackPane {
         return card;
     }
 
+    public void refreshRecentServers() {
+        Thread thread = new Thread(() -> {
+            try {
+                List<Instance> instances =
+                        InstanceManager.discoverInstances();
+
+                List<ServerHistoryEntry> history =
+                        ServerHistoryManager.getRecent();
+
+                Platform.runLater(() ->
+                        renderRecentServers(instances, history)
+                );
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    recentServersList.getChildren().clear();
+                    recentServersStatus.setText(
+                            "Failed to load recent servers."
+                    );
+                });
+            }
+        });
+
+        thread.setDaemon(true);
+        thread.setName("Vanta-Home-Servers");
+        thread.start();
+    }
+
+    private void renderRecentServers(
+            List<Instance> instances,
+            List<ServerHistoryEntry> history
+    ) {
+        recentServersList.getChildren().clear();
+
+        List<ServerHistoryEntry> recent = history.stream()
+                .filter(entry -> instances.stream().anyMatch(
+                        instance -> instance.getId().equals(entry.getInstanceId())
+                ))
+                .limit(5)
+                .toList();
+
+        if (recent.isEmpty()) {
+            recentServersStatus.setText(
+                    "Play on a server from Minecraft and it will appear here."
+            );
+            return;
+        }
+
+        recentServersStatus.setText(
+                recent.size() + " recent server"
+                        + (recent.size() == 1 ? "" : "s")
+        );
+
+        for (ServerHistoryEntry entry : recent) {
+            Instance instance = instances.stream()
+                    .filter(candidate ->
+                            candidate.getId().equals(entry.getInstanceId())
+                    )
+                    .findFirst()
+                    .orElse(null);
+
+            if (instance != null) {
+                recentServersList.getChildren().add(
+                        createRecentServerCard(instance, entry)
+                );
+            }
+        }
+    }
+
+    private HBox createRecentServerCard(
+            Instance instance,
+            ServerHistoryEntry server
+    ) {
+        Label name = new Label(server.getAddress());
+        name.getStyleClass().add("home-server-name");
+
+        Label metadata = new Label(
+                "Using " + instance.getName()
+        );
+        metadata.getStyleClass().add("home-server-meta");
+
+        VBox info = new VBox(3, name, metadata);
+        HBox.setHgrow(info, Priority.ALWAYS);
+
+        Button play = new Button(
+                launchService.isRunning(instance) ? "CLOSE" : "PLAY"
+        );
+        play.getStyleClass().add(
+                launchService.isRunning(instance)
+                        ? "home-recent-stop"
+                        : "home-recent-play"
+        );
+        play.setMinWidth(84);
+
+        play.setOnAction(event -> {
+            if (launchService.isRunning(instance)) {
+                launchService.close(instance);
+                return;
+            }
+
+            Thread thread = new Thread(() -> {
+                try {
+                    launchService.launch(
+                            instance,
+                            new ServerTarget(
+                                    server.getHost(),
+                                    server.getPort()
+                            )
+                    );
+                    Platform.runLater(this::refreshRecentServers);
+                } catch (Exception ex) {
+                    LaunchFailure failure = launchService.getLastFailure();
+
+                    if (failure != null) {
+                        Platform.runLater(() ->
+                                onLaunchFailure.accept(failure)
+                        );
+                    } else {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+
+            thread.setDaemon(true);
+            thread.setName("Vanta-Server-Launch");
+            thread.start();
+        });
+
+        HBox card = new HBox(14, info, play);
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setPadding(new Insets(12, 14, 12, 14));
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.getStyleClass().add("home-server-card");
+
+        org.example.ui.AnimationUtils.installInteractiveAnimations(card);
+        org.example.ui.AnimationUtils.slideFadeVertical(card, 8);
+
+        return card;
+    }
+
     public void refreshAccount() {
         setAccount(accountService.getCurrentAccount());
     }
@@ -277,12 +426,10 @@ public class HomeView extends StackPane {
     public void setAccount(Account account) {
         if (account == null) {
             accountLabel.setText("No Microsoft account connected");
-            accountCard.setDisconnected();
             return;
         }
 
         accountLabel.setText("Signed in as " + account.getUsername());
-        accountCard.setAccount(account);
     }
 
     private void onAccountChanged(Account account) {
@@ -292,6 +439,7 @@ public class HomeView extends StackPane {
     private void onLaunchStateChanged(LaunchService.LaunchState state) {
         Platform.runLater(() -> {
             refreshRecentInstances();
+            refreshRecentServers();
 
             if (state == LaunchService.LaunchState.ERROR) {
                 LaunchFailure failure = launchService.getLastFailure();
