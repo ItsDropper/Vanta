@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
 import org.example.launcher.model.InstanceSettings;
+import org.example.ui.components.IconView;
 
 public class InstanceSettingsView extends VBox {
 
@@ -69,7 +70,7 @@ public class InstanceSettingsView extends VBox {
         // ---------------------------------------------------------
 
         Button backButton =
-                new Button("← BACK");
+                new Button("BACK", IconView.create(IconView.Type.ARROW_LEFT, 16));
 
         backButton.getStyleClass().add(
                 "secondary-button"
@@ -398,7 +399,8 @@ public class InstanceSettingsView extends VBox {
 
         Button cancelButton =
                 new Button(
-                        "CANCEL"
+                        "CLOSE",
+                        IconView.create(IconView.Type.CLOSE, 16)
                 );
 
         cancelButton.getStyleClass().add(
@@ -411,7 +413,8 @@ public class InstanceSettingsView extends VBox {
 
         Button saveButton =
                 new Button(
-                        "SAVE"
+                        "SAVE",
+                        IconView.create(IconView.Type.SAVE, 16)
                 );
 
         saveButton.getStyleClass().add(
@@ -424,7 +427,8 @@ public class InstanceSettingsView extends VBox {
 
         Button saveAndCloseButton =
                 new Button(
-                        "SAVE & CLOSE"
+                        "SAVE & CLOSE",
+                        IconView.create(IconView.Type.SAVE, 16)
                 );
 
         saveAndCloseButton.getStyleClass().add(
