@@ -1346,7 +1346,7 @@ private boolean satisfiesDependency(
         return true;
     }
 
-private InstalledMod readFabricMetadata(
+public InstalledMod readFabricMetadata(
             ModrinthVersion version
     ) throws IOException {
 
