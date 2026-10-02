@@ -54,7 +54,7 @@ public final class DiscordPresenceService {
                             .setDetails(details)
                             .setState(state)
                             .setStartTimestamp(Instant.now().getEpochSecond())
-                            .setLargeImage("vanta", "Vanta Launcher")
+                            .setLargeImageWithTooltip("vanta", "Vanta Launcher")
                             .setInstance(true)
                             .build();
 
