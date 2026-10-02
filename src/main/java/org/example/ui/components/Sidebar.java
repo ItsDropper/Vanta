@@ -163,7 +163,7 @@ public class Sidebar extends VBox {
                         );
 
                 if (version != null
-                        && !version.contains("\${")) {
+                        && !version.contains("${")) {
 
                     return version;
                 }
