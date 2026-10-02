@@ -1,6 +1,8 @@
 package org.example.ui.views;
 
 import javafx.application.Platform;
+import javafx.animation.PauseTransition;
+import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -17,6 +19,7 @@ import javafx.scene.shape.Rectangle;
 
 import org.example.launcher.model.Instance;
 import org.example.ui.components.IconView;
+import org.example.ui.LauncherSettings;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -712,15 +715,39 @@ public class ModsView extends VBox {
                 )
         );
         toggleButton.setOnAction(event -> {
-            toggleMod(mod);
-            toggleButton.setSelected(!toggleButton.isSelected());
-            knob.setTranslateX(toggleButton.isSelected() ? 12 : -12);
+            boolean enabled = !toggleButton.isSelected();
+
+            if (!toggleMod(mod)) {
+                toggleButton.setSelected(!enabled);
+                return;
+            }
+
+            toggleButton.setSelected(enabled);
             updateModToggleStyle(toggleButton);
             toggleButton.setTooltip(new Tooltip(
-                    toggleButton.isSelected()
+                    enabled
                             ? "Disable this mod"
                             : "Enable this mod"
             ));
+
+            TranslateTransition transition =
+                    new TranslateTransition(javafx.util.Duration.millis(180), knob);
+            transition.setFromX(enabled ? -12 : 12);
+            transition.setToX(enabled ? 12 : -12);
+            transition.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+
+            if (LauncherSettings.isAnimationsEnabled()) {
+                transition.play();
+            } else {
+                knob.setTranslateX(enabled ? 12 : -12);
+            }
+
+            PauseTransition refresh =
+                    new PauseTransition(javafx.util.Duration.millis(
+                            LauncherSettings.isAnimationsEnabled() ? 190 : 0
+                    ));
+            refresh.setOnFinished(e -> loadInstalledContent());
+            refresh.play();
         });
 
         Button removeButton =
@@ -730,7 +757,25 @@ public class ModsView extends VBox {
                 );
         removeButton.getStyleClass().add("secondary-button");
         removeButton.setTooltip(new Tooltip("Remove this mod"));
-        removeButton.setOnAction(event -> removeFile(mod));
+        removeButton.setOnAction(event -> {
+            if (!LauncherSettings.isConfirmRemovalsEnabled()) {
+                removeFile(mod);
+                return;
+            }
+
+            javafx.scene.control.Alert alert =
+                    new javafx.scene.control.Alert(
+                            javafx.scene.control.Alert.AlertType.CONFIRMATION
+                    );
+            alert.setTitle("Remove mod");
+            alert.setHeaderText("Remove " + cleanName(filename) + "?");
+            alert.setContentText("The mod will be removed from this instance.");
+            alert.showAndWait().ifPresent(result -> {
+                if (result == javafx.scene.control.ButtonType.OK) {
+                    removeFile(mod);
+                }
+            });
+        });
 
         HBox buttons =
                 new HBox(
@@ -1350,7 +1395,7 @@ public class ModsView extends VBox {
         );
     }
 
-    private void toggleMod(Path file) {
+    private boolean toggleMod(Path file) {
         try {
             String name = file.getFileName().toString();
             Path target;
@@ -1364,11 +1409,12 @@ public class ModsView extends VBox {
             }
 
             Files.move(file, target);
-            loadInstalledContent();
+            return true;
         } catch (IOException e) {
             statusLabel.setText(
                     "Could not change mod state."
             );
+            return false;
         }
     }
 
