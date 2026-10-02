@@ -21,7 +21,6 @@ import org.example.ui.components.InstanceCard;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public class InstancesView extends VBox {
 
@@ -31,7 +30,6 @@ public class InstancesView extends VBox {
     private final Label statusLabel;
     private final Label countLabel;
 
-    private final Consumer<Instance> onInstanceSelected;
     private final Consumer<Instance> onInstanceSettings;
 
     private final TextField searchField;
@@ -39,20 +37,15 @@ public class InstancesView extends VBox {
     private List<Instance> loadedInstances =
             List.of();
 
-    private Instance selectedInstance;
 
     public InstancesView(
             LaunchService launchService,
             Runnable onCreateInstance,
-            Consumer<Instance> onInstanceSelected,
             Consumer<Instance> onInstanceSettings
     ) {
 
         this.launchService =
                 launchService;
-
-        this.onInstanceSelected =
-                onInstanceSelected;
 
         this.onInstanceSettings =
                 onInstanceSettings;
@@ -390,16 +383,9 @@ public class InstancesView extends VBox {
                     new InstanceCard(
                             instance,
                             () -> launch(instance),
-                            () -> selectInstance(instance),
                             () -> onInstanceSettings.accept(instance),
                             () -> deleteInstance(instance)
                     );
-
-            card.setSelected(
-                    selectedInstance != null
-                            && selectedInstance.getId()
-                            .equals(instance.getId())
-            );
 
             instanceList.getChildren().add(card);
         }
@@ -420,36 +406,24 @@ public class InstancesView extends VBox {
         }
 
         LaunchService.LaunchState state =
-                launchService.getState();
+                launchService.getState(instance);
 
         if (state == LaunchService.LaunchState.PREPARING
                 || state == LaunchService.LaunchState.STARTING
                 || state == LaunchService.LaunchState.CLOSING) {
 
             statusLabel.setText(
-                    "Wait until Minecraft has finished starting or closing."
+                    "Wait until this instance has finished starting or closing."
             );
 
             return;
         }
 
-        if (state == LaunchService.LaunchState.RUNNING) {
-
-            Instance running =
-                    launchService.getRunningInstance();
-
-            if (running != null
-                    && running.getId()
-                    .equals(
-                            instance.getId()
-                    )) {
-
-                statusLabel.setText(
-                        "You cannot delete a running instance."
-                );
-
-                return;
-            }
+        if (launchService.isRunning(instance)) {
+            statusLabel.setText(
+                    "You cannot delete a running instance."
+            );
+            return;
         }
 
         statusLabel.setText(
@@ -468,21 +442,6 @@ public class InstancesView extends VBox {
                         );
 
                         Platform.runLater(() -> {
-
-                            if (selectedInstance != null
-                                    && selectedInstance
-                                    .getId()
-                                    .equals(
-                                            instance.getId()
-                                    )) {
-
-                                selectedInstance =
-                                        null;
-
-                                onInstanceSelected.accept(
-                                        null
-                                );
-                            }
 
                             statusLabel.setText(
                                     "Deleted "
