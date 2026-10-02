@@ -36,7 +36,16 @@ public class SettingsView extends BorderPane {\n\n    private final Consumer<Str
 
         loadSettings();
         buildNavigation();
-        buildAppearancePage();
+
+        ScrollPane scroll = new ScrollPane(content);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.getStyleClass().add("settings-scroll");
+
+        setLeft(navigation);
+        setCenter(scroll);
+        BorderPane.setMargin(navigation, new Insets(0, 22, 0, 0));
+
         selectSection("Appearance");\n        applyAccent(accentColor);
     }
 
