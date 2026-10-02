@@ -1080,13 +1080,56 @@ private boolean resolveFabricDependency(
                 }
 
                 /*
-                 * Make absolutely sure the Modrinth project we found
-                 * actually corresponds to the Fabric dependency.
+                 * Fabric API is a provider JAR containing many internal
+                 * Fabric API modules. Those module IDs are NOT the JAR's
+                 * own fabric.mod.json ID, so comparing metadata.getModId()
+                 * directly against fabricDependencyModId incorrectly
+                 * rejects every Fabric API candidate.
+                 *
+                 * For Fabric API, inspect the actual JAR for the requested
+                 * module. For normal standalone mods, the Fabric mod ID must
+                 * match exactly.
                  */
-                if (!fabricModId.equals(
+                boolean fabricApiProvider =
+                        "P7dR8mSH".equals(projectId);
+
+                if (fabricApiProvider) {
+                    ModrinthFile candidateFile =
+                            findPrimaryFile(candidate);
+
+                    if (candidateFile == null
+                            || candidateFile.getUrl() == null
+                            || candidateFile.getUrl().isBlank()) {
+                        continue;
+                    }
+
+                    Path tempFile =
+                            Files.createTempFile(
+                                    "vanta-fabric-provider-",
+                                    ".jar"
+                            );
+
+                    try {
+                        DownloadUtil.downloadFile(
+                                candidateFile.getUrl(),
+                                tempFile
+                        );
+
+                        if (!installedModScanner.containsFabricModId(
+                                tempFile,
+                                fabricModId
+                        )) {
+                            continue;
+                        }
+                    } finally {
+                        try {
+                            Files.deleteIfExists(tempFile);
+                        } catch (IOException ignored) {
+                        }
+                    }
+                } else if (!fabricModId.equals(
                         metadata.getModId()
                 )) {
-
                     continue;
                 }
 
@@ -2517,8 +2560,10 @@ private boolean isProvidedByFabricApi(
         /*
          * Find the Fabric API project in the resolved graph.
          */
+        // The resolver graph is keyed by Modrinth project IDs, not
+        // Fabric mod IDs. Fabric API's Modrinth project ID is P7dR8mSH.
         ModrinthVersion fabricApi =
-                resolved.get("fabric-api");
+                resolved.get("P7dR8mSH");
 
         if (fabricApi == null) {
             return false;
