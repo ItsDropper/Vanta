@@ -46,6 +46,7 @@ public class PresetConfigurationView extends VBox {
         this.preset = preset;
         this.onCreate = onCreate;
         this.onBack = onBack;
+        this.onBrowseModpacks = onBrowseModpacks;
 
         getStyleClass().add("page");
 
