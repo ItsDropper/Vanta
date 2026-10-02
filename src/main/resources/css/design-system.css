@@ -1445,6 +1445,42 @@
 .home-recent-status { -fx-text-fill: #697789; -fx-font-size: 11px; }
 .home-account-card, .home-status-card { -fx-min-height: 112px; }
 
+.home-recent-servers-card {
+    -fx-background-color: #151a22;
+    -fx-background-radius: 12px;
+    -fx-border-color: #27303d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 16px;
+}
+
+.home-server-list {
+    -fx-background-color: transparent;
+}
+
+.home-server-card {
+    -fx-background-color: #171e28;
+    -fx-border-color: #283342;
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+}
+
+.home-server-card:hover {
+    -fx-background-color: #1b2430;
+    -fx-border-color: #3a485a;
+}
+
+.home-server-name {
+    -fx-text-fill: #edf2f8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+.home-server-meta {
+    -fx-text-fill: #8491a3;
+    -fx-font-size: 10px;
+}
+
 .instance-playtime { -fx-text-fill: #697789; -fx-font-size: 10px; -fx-background-color: #111720; -fx-background-radius: 6px; -fx-padding: 4px 7px; }
 
 
