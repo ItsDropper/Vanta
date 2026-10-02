@@ -167,6 +167,19 @@ public final class MultiLaunchService {
         return null;
     }
 
+    public ServerTarget getRunningServerTarget() {
+        for (LaunchService service : services.values()) {
+            if (service.isRunning()) {
+                ServerTarget target = service.getRunningServerTarget();
+                if (target != null) {
+                    return target;
+                }
+            }
+        }
+
+        return null;
+    }
+
     public LaunchFailure getLastFailure() {
         return lastFailure;
     }
