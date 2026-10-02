@@ -69,6 +69,9 @@ public class SettingsView extends BorderPane {
         navigation.getChildren().add(group("PERSONALIZATION"));
         navigation.getChildren().add(sectionButton("Appearance", true));
 
+        navigation.getChildren().add(group("SOCIAL"));
+        navigation.getChildren().add(sectionButton("Discord", false));
+
         navigation.getChildren().add(group("LAUNCHER"));
         navigation.getChildren().addAll(
                 sectionButton("General", false),
@@ -108,6 +111,7 @@ public class SettingsView extends BorderPane {
 
         switch (section) {
             case "Appearance" -> buildAppearancePage();
+            case "Discord" -> buildDiscordPage();
             case "General" -> buildGeneralPage();
             case "Minecraft" -> buildMinecraftPage();
             case "Downloads" -> buildDownloadsPage();
@@ -281,6 +285,72 @@ public class SettingsView extends BorderPane {
         onAccentChanged.accept(accentColor);
 
         updateAccentPreview(null);
+    }
+
+    private void buildDiscordPage() {
+        pageHeader(
+                "Discord",
+                "Show what you are playing in Discord with a configurable Rich Presence."
+        );
+
+        VBox connection = card(
+                "Rich Presence",
+                "Vanta connects to the Discord desktop app locally. You provide the Discord application Client ID."
+        );
+
+        CheckBox enabled = new CheckBox("Enable Discord Rich Presence");
+        enabled.setSelected(LauncherSettings.isDiscordPresenceEnabled());
+        enabled.getStyleClass().add("settings-checkbox");
+        enabled.setOnAction(event ->
+                LauncherSettings.setDiscordPresenceEnabled(enabled.isSelected())
+        );
+
+        TextField clientId = new TextField(
+                LauncherSettings.getDiscordClientId()
+        );
+        clientId.setPromptText("Discord application Client ID");
+        clientId.getStyleClass().add("create-field");
+        clientId.setMaxWidth(Double.MAX_VALUE);
+
+        Button saveClient = new Button("SAVE CLIENT ID");
+        saveClient.getStyleClass().add("primary-button");
+        saveClient.setOnAction(event ->
+                LauncherSettings.setDiscordClientId(clientId.getText())
+        );
+
+        connection.getChildren().addAll(
+                enabled,
+                createInput("Client ID", clientId),
+                saveClient
+        );
+
+        VBox activity = card(
+                "Activity details",
+                "Choose what Vanta puts into the two text lines of the Discord activity."
+        );
+
+        CheckBox showInstance = new CheckBox("Show instance name");
+        showInstance.setSelected(LauncherSettings.isDiscordShowInstanceEnabled());
+        showInstance.getStyleClass().add("settings-checkbox");
+        showInstance.setOnAction(event ->
+                LauncherSettings.setDiscordShowInstanceEnabled(showInstance.isSelected())
+        );
+
+        CheckBox showPlaytime = new CheckBox("Show total instance playtime");
+        showPlaytime.setSelected(LauncherSettings.isDiscordShowPlaytimeEnabled());
+        showPlaytime.getStyleClass().add("settings-checkbox");
+        showPlaytime.setOnAction(event ->
+                LauncherSettings.setDiscordShowPlaytimeEnabled(showPlaytime.isSelected())
+        );
+
+        activity.getChildren().addAll(showInstance, showPlaytime);
+
+        VBox note = card(
+                "Setup",
+                "Create a Discord application, copy its Application ID into Client ID, then enable Rich Presence. Vanta does not send your Discord token or account credentials."
+        );
+
+        content.getChildren().addAll(connection, activity, note);
     }
 
     private void buildGeneralPage() {
