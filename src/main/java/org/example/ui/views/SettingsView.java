@@ -3,17 +3,22 @@ package org.example.ui.views;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Slider;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
 import org.example.launcher.MinecraftLocator;
 import org.example.launcher.instance.InstanceManager;
+import org.example.ui.LauncherSettings;
 import org.example.ui.ThemeManager;
 
 import java.awt.Desktop;
@@ -31,7 +36,9 @@ public class SettingsView extends BorderPane {
     private final VBox content = new VBox(22);
 
     private ColorPicker accentPicker;
+    private TextField accentHexField;
     private Label accentValue;
+    private Region accentPreview;
     private String accentColor;
 
     public SettingsView(Consumer<String> onAccentChanged) {
@@ -53,8 +60,6 @@ public class SettingsView extends BorderPane {
 
         selectSection("Appearance");
         applyAccent(accentColor);
-
-        // Apply the persisted theme immediately on startup.
         onAccentChanged.accept(accentColor);
     }
 
@@ -114,7 +119,6 @@ public class SettingsView extends BorderPane {
         for (var node : navigation.getChildren()) {
             if (node instanceof Button button) {
                 button.getStyleClass().remove("selected");
-
                 if (button.getText().equals(section)) {
                     button.getStyleClass().add("selected");
                 }
@@ -125,16 +129,37 @@ public class SettingsView extends BorderPane {
     private void buildAppearancePage() {
         pageHeader(
                 "Appearance",
-                "Make Vanta yours without changing how the launcher works."
+                "Control Vanta's visual language. Changes apply immediately and persist across launches."
         );
 
         VBox accentCard = card(
                 "Accent color",
-                "The accent is used across navigation, active controls, focus states, selections, progress bars and launcher actions."
+                "Used for active navigation, controls, focus states, selections and progress indicators."
         );
+
+        accentPreview = new Region();
+        accentPreview.getStyleClass().add("accent-preview");
+
+        Label previewText = new Label("LIVE PREVIEW");
+        previewText.getStyleClass().add("accent-preview-label");
+
+        StackPaneLike preview = new StackPaneLike(accentPreview, previewText);
+        preview.setMinHeight(72);
+        preview.setPrefHeight(72);
+        preview.setMaxWidth(Double.MAX_VALUE);
 
         accentPicker = new ColorPicker(Color.web(accentColor));
         accentPicker.getStyleClass().add("accent-picker");
+        accentPicker.setTooltip(new javafx.scene.control.Tooltip("Choose an accent color"));
+
+        accentHexField = new TextField(accentColor);
+        accentHexField.getStyleClass().add("accent-hex-field");
+        accentHexField.setPromptText("#5688ED");
+        accentHexField.setPrefWidth(110);
+
+        Button applyHex = new Button("APPLY");
+        applyHex.getStyleClass().add("primary-button");
+        applyHex.setOnAction(event -> applyHexField());
 
         accentValue = new Label(accentColor);
         accentValue.getStyleClass().add("accent-value");
@@ -147,40 +172,90 @@ public class SettingsView extends BorderPane {
                 }
         );
 
-        HBox pickerRow = new HBox(12, accentPicker, accentValue);
+        HBox pickerRow = new HBox(
+                10,
+                new Label("Picker"),
+                accentPicker,
+                new Label("HEX"),
+                accentHexField,
+                applyHex
+        );
         pickerRow.setAlignment(Pos.CENTER_LEFT);
-        accentCard.getChildren().add(pickerRow);
+
+        Label rgb = new Label();
+        rgb.getStyleClass().add("settings-card-description");
+
+        accentCard.getChildren().addAll(
+                preview,
+                pickerRow,
+                accentValue,
+                rgb
+        );
+
+        updateAccentPreview(rgb);
 
         VBox presetsCard = card(
                 "Presets",
-                "Quickly switch between Vanta's built-in accent palettes."
+                "Use a preset as a starting point, then fine-tune it with the picker or HEX field."
         );
 
         HBox presets = new HBox(8);
-
         addPreset(presets, "Vanta Blue", "#5688ED");
         addPreset(presets, "Cyan", "#42C6E8");
         addPreset(presets, "Emerald", "#4FD18B");
         addPreset(presets, "Violet", "#8B7CFF");
         addPreset(presets, "Amber", "#F0B85B");
         addPreset(presets, "Rose", "#EF7187");
-
         presetsCard.getChildren().add(presets);
 
-        Button reset = new Button("RESET APPEARANCE");
+        Button reset = new Button("RESET TO VANTA BLUE");
         reset.getStyleClass().add("secondary-button");
         reset.setOnAction(event -> setAccent(ThemeManager.DEFAULT_ACCENT));
 
-        content.getChildren().addAll(
-                accentCard,
-                presetsCard,
-                reset
-        );
+        content.getChildren().addAll(accentCard, presetsCard, reset);
+    }
+
+    private void applyHexField() {
+        String value = accentHexField.getText().trim();
+        if (ThemeManager.isValidAccent(value)) {
+            setAccent(value);
+        } else {
+            accentHexField.setText(accentColor);
+            accentHexField.selectAll();
+        }
+    }
+
+    private void updateAccentPreview(Label rgbLabel) {
+        if (accentPreview != null) {
+            accentPreview.setStyle(
+                    "-fx-background-color: " + accentColor + ";"
+                            + "-fx-background-radius: 12px;"
+                            + "-fx-border-color: rgba(255,255,255,0.18);"
+                            + "-fx-border-radius: 12px;"
+            );
+        }
+
+        if (accentHexField != null && !accentHexField.getText().equals(accentColor)) {
+            accentHexField.setText(accentColor);
+        }
+
+        if (rgbLabel != null) {
+            Color color = Color.web(accentColor);
+            rgbLabel.setText(
+                    "RGB "
+                            + Math.round(color.getRed() * 255)
+                            + ", "
+                            + Math.round(color.getGreen() * 255)
+                            + ", "
+                            + Math.round(color.getBlue() * 255)
+            );
+        }
     }
 
     private void addPreset(HBox container, String name, String hex) {
         Button button = new Button(name);
         button.getStyleClass().add("accent-preset");
+        button.setStyle("-vanta-preset-color: " + hex + ";");
         button.setOnAction(event -> setAccent(hex));
         container.getChildren().add(button);
     }
@@ -204,33 +279,55 @@ public class SettingsView extends BorderPane {
         applyAccent(accentColor);
         ThemeManager.saveAccent(accentColor);
         onAccentChanged.accept(accentColor);
+
+        updateAccentPreview(null);
     }
 
     private void buildGeneralPage() {
         pageHeader(
                 "General",
-                "Launcher information and local storage."
+                "Launcher behavior and interaction preferences."
         );
 
-        Path vantaDirectory = MinecraftLocator.getVantaDirectory();
+        VBox behavior = card(
+                "Launcher behavior",
+                "These options affect the launcher itself rather than individual Minecraft instances."
+        );
+
+        CheckBox animations = new CheckBox("Use interface animations");
+        animations.setSelected(LauncherSettings.isAnimationsEnabled());
+        animations.getStyleClass().add("settings-checkbox");
+        animations.setOnAction(event ->
+                LauncherSettings.setAnimationsEnabled(animations.isSelected())
+        );
+
+        CheckBox updates = new CheckBox("Check for launcher updates on startup");
+        updates.setSelected(LauncherSettings.isUpdateChecksEnabled());
+        updates.getStyleClass().add("settings-checkbox");
+        updates.setOnAction(event ->
+                LauncherSettings.setUpdateChecksEnabled(updates.isSelected())
+        );
+
+        CheckBox confirmations = new CheckBox("Confirm destructive content actions");
+        confirmations.setSelected(LauncherSettings.isConfirmRemovalsEnabled());
+        confirmations.getStyleClass().add("settings-checkbox");
+        confirmations.setOnAction(event ->
+                LauncherSettings.setConfirmRemovalsEnabled(confirmations.isSelected())
+        );
+
+        behavior.getChildren().addAll(animations, updates, confirmations);
 
         VBox dataCard = card(
                 "Vanta data",
-                "All launcher-owned data is kept locally in the Vanta directory."
+                "Launcher-owned configuration is kept locally in the Vanta directory."
         );
 
+        Path vantaDirectory = MinecraftLocator.getVantaDirectory();
         addInfoRow(dataCard, "Data directory", vantaDirectory.toString());
-        addInfoRow(
-                dataCard,
-                "Settings",
-                vantaDirectory.resolve("settings.properties").toString()
-        );
+        addInfoRow(dataCard, "Settings", vantaDirectory.resolve("settings.properties").toString());
 
         dataCard.getChildren().add(
-                actionButton(
-                        "OPEN VANTA FOLDER",
-                        () -> openDirectory(vantaDirectory)
-                )
+                actionButton("OPEN VANTA FOLDER", () -> openDirectory(vantaDirectory))
         );
 
         VBox runtimeCard = card(
@@ -238,151 +335,197 @@ public class SettingsView extends BorderPane {
                 "The Java runtime currently executing Vanta."
         );
 
-        addInfoRow(
-                runtimeCard,
-                "Java",
-                System.getProperty("java.version", "Unknown")
-        );
+        addInfoRow(runtimeCard, "Java", System.getProperty("java.version", "Unknown"));
+        addInfoRow(runtimeCard, "Java home", System.getProperty("java.home", "Unknown"));
 
-        addInfoRow(
-                runtimeCard,
-                "Java home",
-                System.getProperty("java.home", "Unknown")
-        );
-
-        content.getChildren().addAll(dataCard, runtimeCard);
+        content.getChildren().addAll(behavior, dataCard, runtimeCard);
     }
 
     private void buildMinecraftPage() {
         pageHeader(
                 "Minecraft",
-                "See where Vanta keeps your Minecraft environments."
+                "Set defaults used when Vanta creates a new instance. Existing instances keep their own settings."
+        );
+
+        VBox defaults = card(
+                "New instance defaults",
+                "These values are copied into settings.json when a new instance is created."
+        );
+
+        Slider ram = new Slider(1024, 16384, LauncherSettings.getDefaultRamMb());
+        ram.setBlockIncrement(512);
+        ram.setMajorTickUnit(4096);
+        ram.setMinorTickCount(7);
+        ram.setSnapToTicks(true);
+        ram.setShowTickMarks(true);
+        ram.setMaxWidth(Double.MAX_VALUE);
+
+        Label ramValue = new Label();
+        ramValue.getStyleClass().add("instance-setting-value");
+        Runnable updateRam = () ->
+                ramValue.setText(((int) Math.round(ram.getValue() / 512.0) * 512) + " MB");
+        ram.valueProperty().addListener((o, oldValue, newValue) -> updateRam.run());
+        updateRam.run();
+
+        TextField width = new TextField(String.valueOf(LauncherSettings.getDefaultWidth()));
+        width.getStyleClass().add("create-field");
+
+        TextField height = new TextField(String.valueOf(LauncherSettings.getDefaultHeight()));
+        height.getStyleClass().add("create-field");
+
+        CheckBox fullscreen = new CheckBox("Start new instances in fullscreen");
+        fullscreen.setSelected(LauncherSettings.isDefaultFullscreen());
+        fullscreen.getStyleClass().add("settings-checkbox");
+
+        Button save = new Button("SAVE MINECRAFT DEFAULTS");
+        save.getStyleClass().add("primary-button");
+        save.setOnAction(event -> {
+            try {
+                int ramMb = (int) Math.round(ram.getValue() / 512.0) * 512;
+                int w = Integer.parseInt(width.getText().trim());
+                int h = Integer.parseInt(height.getText().trim());
+
+                if (w < 640 || h < 480) {
+                    throw new NumberFormatException();
+                }
+
+                LauncherSettings.setDefaultRamMb(ramMb);
+                LauncherSettings.setDefaultWidth(w);
+                LauncherSettings.setDefaultHeight(h);
+                LauncherSettings.setDefaultFullscreen(fullscreen.isSelected());
+            } catch (NumberFormatException ignored) {
+                width.setText(String.valueOf(LauncherSettings.getDefaultWidth()));
+                height.setText(String.valueOf(LauncherSettings.getDefaultHeight()));
+            }
+        });
+
+        defaults.getChildren().addAll(
+                new Label("Memory"),
+                ramValue,
+                ram,
+                createInput("Resolution width", width),
+                createInput("Resolution height", height),
+                fullscreen,
+                save
+        );
+
+        VBox paths = card(
+                "Minecraft storage",
+                "Shared launcher data is separate from each instance."
         );
 
         Path instances = MinecraftLocator.getInstancesDirectory();
         Path libraries = MinecraftLocator.getLibrariesDirectory();
 
-        VBox instanceCard = card(
-                "Instances",
-                "Each Minecraft environment is isolated in its own directory."
+        addInfoRow(paths, "Instances", instances.toString());
+        addInfoRow(paths, "Libraries", libraries.toString());
+
+        paths.getChildren().addAll(
+                actionButton("OPEN INSTANCES", () -> openDirectory(instances)),
+                actionButton("OPEN LIBRARIES", () -> openDirectory(libraries))
         );
 
-        addInfoRow(
-                instanceCard,
-                "Instances directory",
-                instances.toString()
-        );
-
-        instanceCard.getChildren().add(
-                actionButton(
-                        "OPEN INSTANCES",
-                        () -> openDirectory(instances)
-                )
-        );
-
-        VBox libraryCard = card(
-                "Shared libraries",
-                "Launcher-managed libraries are shared between instances."
-        );
-
-        addInfoRow(
-                libraryCard,
-                "Libraries directory",
-                libraries.toString()
-        );
-
-        libraryCard.getChildren().add(
-                actionButton(
-                        "OPEN LIBRARIES",
-                        () -> openDirectory(libraries)
-                )
-        );
-
-        content.getChildren().addAll(instanceCard, libraryCard);
+        content.getChildren().addAll(defaults, paths);
     }
 
     private void buildDownloadsPage() {
         pageHeader(
                 "Downloads",
-                "Vanta keeps shared files separate from individual instances."
+                "Tune how aggressively Vanta downloads Minecraft assets."
         );
+
+        VBox workers = card(
+                "Download workers",
+                "More workers can improve throughput on fast connections; fewer workers reduce concurrent network and disk activity."
+        );
+
+        Slider slider = new Slider(1, 16, LauncherSettings.getDownloadThreads());
+        slider.setMajorTickUnit(1);
+        slider.setMinorTickCount(0);
+        slider.setSnapToTicks(true);
+        slider.setShowTickLabels(true);
+        slider.setShowTickMarks(true);
+        slider.setMaxWidth(Double.MAX_VALUE);
+
+        Label value = new Label();
+        value.getStyleClass().add("instance-setting-value");
+        Runnable update = () -> value.setText(
+                String.valueOf((int) Math.round(slider.getValue())) + " workers"
+        );
+        slider.valueProperty().addListener((o, oldValue, newValue) -> update.run());
+        update.run();
+
+        Button save = new Button("SAVE DOWNLOAD SETTINGS");
+        save.getStyleClass().add("primary-button");
+        save.setOnAction(event ->
+                LauncherSettings.setDownloadThreads((int) Math.round(slider.getValue()))
+        );
+
+        workers.getChildren().addAll(value, slider, save);
 
         VBox layout = card(
-                "Storage layout",
-                "This is the local layout used by the launcher."
+                "Storage",
+                "These locations are managed by Vanta and can be opened directly."
         );
 
-        addInfoRow(
-                layout,
-                "Instances",
-                MinecraftLocator.getInstancesDirectory().toString()
+        addInfoRow(layout, "Instances", MinecraftLocator.getInstancesDirectory().toString());
+        addInfoRow(layout, "Libraries", MinecraftLocator.getLibrariesDirectory().toString());
+        addInfoRow(layout, "Launcher data", MinecraftLocator.getVantaDirectory().toString());
+
+        layout.getChildren().add(
+                new Label(
+                        "Vanta verifies downloaded Minecraft assets with SHA-1 before installing them."
+                )
         );
+        layout.getChildren().get(layout.getChildren().size() - 1)
+                .getStyleClass().add("settings-card-description");
 
-        addInfoRow(
-                layout,
-                "Libraries",
-                MinecraftLocator.getLibrariesDirectory().toString()
-        );
-
-        addInfoRow(
-                layout,
-                "Launcher data",
-                MinecraftLocator.getVantaDirectory().toString()
-        );
-
-        Label note = new Label(
-                "Vanta uses shared libraries so separate instances do not need duplicate copies of the same launcher-managed files."
-        );
-
-        note.getStyleClass().add("settings-card-description");
-        note.setWrapText(true);
-
-        layout.getChildren().add(note);
-        content.getChildren().add(layout);
+        content.getChildren().addAll(workers, layout);
     }
 
     private void buildDiagnosticsPage() {
         pageHeader(
                 "Repair & Diagnostics",
-                "Useful local checks without changing your Minecraft files."
+                "Inspect launcher state and control how destructive actions behave."
         );
 
         VBox health = card(
                 "Environment",
-                "Basic launcher state available without running a repair."
+                "Basic local state available without modifying an instance."
         );
 
         int instanceCount = 0;
-
         try {
             instanceCount = InstanceManager.discoverInstances().size();
         } catch (Throwable ignored) {
         }
 
-        addInfoRow(
-                health,
-                "Discovered instances",
-                String.valueOf(instanceCount)
+        addInfoRow(health, "Discovered instances", String.valueOf(instanceCount));
+        addInfoRow(health, "Vanta directory", MinecraftLocator.getVantaDirectory().toString());
+
+        CheckBox confirmations = new CheckBox("Confirm mod removals");
+        confirmations.setSelected(LauncherSettings.isConfirmRemovalsEnabled());
+        confirmations.getStyleClass().add("settings-checkbox");
+        confirmations.setOnAction(event ->
+                LauncherSettings.setConfirmRemovalsEnabled(confirmations.isSelected())
         );
 
-        addInfoRow(
-                health,
-                "Vanta directory",
-                MinecraftLocator.getVantaDirectory().toString()
-        );
+        Button resetIntro = new Button("RESET INTRODUCTION");
+        resetIntro.getStyleClass().add("secondary-button");
+        resetIntro.setOnAction(event -> LauncherSettings.resetOnboarding());
 
-        health.getChildren().add(
+        health.getChildren().addAll(
+                confirmations,
+                resetIntro,
                 actionButton(
                         "OPEN DATA FOLDER",
-                        () -> openDirectory(
-                                MinecraftLocator.getVantaDirectory()
-                        )
+                        () -> openDirectory(MinecraftLocator.getVantaDirectory())
                 )
         );
 
         VBox safety = card(
-                "Safe diagnostics",
-                "Opening a folder does not modify files. Full dependency repair remains available through the instance repair flow."
+                "What diagnostics change",
+                "The launcher does not silently rewrite files from this page. Instance dependency repair remains available from the instance repair flow."
         );
 
         content.getChildren().addAll(health, safety);
@@ -391,7 +534,7 @@ public class SettingsView extends BorderPane {
     private void buildAboutPage() {
         pageHeader(
                 "About Vanta",
-                "A lightweight Minecraft launcher built around isolated environments."
+                "Launcher information and local configuration status."
         );
 
         VBox about = card(
@@ -402,11 +545,11 @@ public class SettingsView extends BorderPane {
         addInfoRow(about, "Version", loadVersion());
         addInfoRow(about, "UI", "JavaFX");
         addInfoRow(about, "Content", "Modrinth");
+        addInfoRow(about, "Telemetry", "Not required");
 
         Label privacy = new Label(
-                "Vanta does not need telemetry to manage your local instances. Launcher-owned settings are stored locally."
+                "Vanta keeps launcher settings local. Minecraft authentication is handled through the existing Microsoft authentication flow."
         );
-
         privacy.getStyleClass().add("settings-card-description");
         privacy.setWrapText(true);
 
@@ -440,11 +583,7 @@ public class SettingsView extends BorderPane {
         return card;
     }
 
-    private void addInfoRow(
-            VBox parent,
-            String label,
-            String value
-    ) {
+    private void addInfoRow(VBox parent, String label, String value) {
         HBox row = new HBox(14);
         row.setAlignment(Pos.CENTER_LEFT);
 
@@ -455,9 +594,7 @@ public class SettingsView extends BorderPane {
         valueLabel.getStyleClass().add("settings-info-value");
         valueLabel.setWrapText(true);
 
-        javafx.scene.layout.Region spacer =
-                new javafx.scene.layout.Region();
-
+        Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
         row.getChildren().addAll(key, spacer, valueLabel);
@@ -471,10 +608,15 @@ public class SettingsView extends BorderPane {
         return button;
     }
 
+    private VBox createInput(String labelText, javafx.scene.Node input) {
+        Label label = new Label(labelText);
+        label.getStyleClass().add("instance-setting-label");
+        return new VBox(6, label, input);
+    }
+
     private void openDirectory(Path directory) {
         try {
             Files.createDirectories(directory);
-
             if (Desktop.isDesktopSupported()) {
                 Desktop.getDesktop().open(directory.toFile());
             }
@@ -485,17 +627,11 @@ public class SettingsView extends BorderPane {
     private String loadVersion() {
         Properties properties = new Properties();
 
-        try (InputStream stream =
-                     getClass().getResourceAsStream("/version.properties")) {
-
+        try (InputStream stream = getClass().getResourceAsStream("/version.properties")) {
             if (stream != null) {
                 properties.load(stream);
-
-                String version =
-                        properties.getProperty("version");
-
-                if (version != null
-                        && !version.contains("${")) {
+                String version = properties.getProperty("version");
+                if (version != null && !version.contains("${")) {
                     return version;
                 }
             }
@@ -506,10 +642,7 @@ public class SettingsView extends BorderPane {
     }
 
     private void buildPlaceholderPage(String section) {
-        pageHeader(
-                section,
-                "This section is ready for Vanta's next settings modules."
-        );
+        pageHeader(section, "This section is ready for Vanta's next settings modules.");
     }
 
     private void applyAccent(String hex) {
@@ -523,5 +656,11 @@ public class SettingsView extends BorderPane {
                 Math.round(color.getGreen() * 255),
                 Math.round(color.getBlue() * 255)
         );
+    }
+
+    private static final class StackPaneLike extends javafx.scene.layout.StackPane {
+        private StackPaneLike(javafx.scene.Node... nodes) {
+            getChildren().addAll(nodes);
+        }
     }
 }
