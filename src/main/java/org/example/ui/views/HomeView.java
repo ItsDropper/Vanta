@@ -68,9 +68,9 @@ public class HomeView extends StackPane {
 
         MinecraftBackdrop backdrop = new MinecraftBackdrop();
         StackPane hero = new StackPane();
-        hero.setMinHeight(190);
-        hero.setPrefHeight(190);
-        hero.setMaxHeight(190);
+        hero.setMinHeight(240);
+        hero.setPrefHeight(240);
+        hero.setMaxHeight(240);
         hero.getStyleClass().add("home-hero");
         Rectangle heroClip = new Rectangle();
         heroClip.setArcWidth(32);
