@@ -83,17 +83,17 @@ public class Sidebar extends VBox {
         // ---------------------------------------------------------
 
         addButton(
-                "HOME",
+                "⌂  Home",
                 Page.HOME
         );
 
         addButton(
-                "INSTANCES",
+                "▦  Instances",
                 Page.INSTANCES
         );
 
         addButton(
-                "MODS",
+                "✦  Mods",
                 Page.MODS
         );
 
@@ -110,12 +110,12 @@ public class Sidebar extends VBox {
         );
 
         addButton(
-                "ACCOUNTS",
+                "●  Accounts",
                 Page.ACCOUNTS
         );
 
         addButton(
-                "SETTINGS",
+                "⚙  Settings",
                 Page.SETTINGS
         );
     }
