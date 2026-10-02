@@ -1033,6 +1033,15 @@
     -fx-padding: 2px 2px 0 2px;
 }
 
+.home-header {
+    -fx-background-color: #11161e;
+    -fx-background-radius: 10px;
+    -fx-border-color: #242d39;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-padding: 12px 16px;
+}
+
 .home-launch-card {
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 20, 0.12, 0, 8);
 }
@@ -1429,11 +1438,18 @@
 
 /* Home / Modrinth-style recent instances */
 .home-section-title { -fx-text-fill: #edf2f8; -fx-font-size: 18px; -fx-font-weight: 900; }
-.home-section-subtitle { -fx-text-fill: #8491a3; -fx-font-size: 12px; }
-.home-recent-section { -fx-background-color: transparent; -fx-padding: 0; }
+.home-section-subtitle { -fx-text-fill: #7f8b9c; -fx-font-size: 12px; }
+.home-recent-section {
+    -fx-background-color: #11161e;
+    -fx-background-radius: 12px;
+    -fx-border-color: #242d39;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 16px;
+}
 .home-recent-scroll, .home-recent-scroll > .viewport { -fx-background-color: transparent; -fx-border-color: transparent; }
 .home-recent-list { -fx-background-color: transparent; }
-.home-recent-card { -fx-background-color: #141a22; -fx-border-color: #252e3a; -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 14, 0.08, 0, 4); }
+.home-recent-card { -fx-background-color: #0d1219; -fx-border-color: #202a36; -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 14, 0.08, 0, 4); }
 .home-recent-card:hover { -fx-background-color: #1b2430; -fx-border-color: #3a485a; }
 .home-recent-icon { -fx-min-width: 36px; -fx-pref-width: 36px; -fx-min-height: 36px; -fx-pref-height: 36px; -fx-background-color: -vanta-accent-soft; -fx-background-radius: 9px; -fx-alignment: CENTER; }
 .home-recent-name { -fx-text-fill: #edf2f8; -fx-font-size: 14px; -fx-font-weight: 800; }
