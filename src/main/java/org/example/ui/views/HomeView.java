@@ -5,6 +5,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -12,265 +13,108 @@ import javafx.scene.layout.VBox;
 
 import org.example.launcher.MinecraftLocator;
 import org.example.launcher.account.Account;
+import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
 import org.example.launcher.service.AccountService;
+import org.example.launcher.service.InstanceUsageManager;
+import org.example.launcher.service.LaunchFailure;
+import org.example.launcher.service.MultiLaunchService;
 import org.example.launcher.service.LaunchService;
 import org.example.ui.components.AccountCard;
-import org.example.launcher.service.LaunchFailure;
+import org.example.ui.components.IconView;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 public class HomeView extends VBox {
 
     private final AccountService accountService;
-    private final LaunchService launchService;
+    private final MultiLaunchService launchService;
+    private final Consumer<LaunchFailure> onLaunchFailure;
+    private final Consumer<Instance> onLaunchInstance;
 
     private final AccountCard accountCard;
-
     private final Label accountLabel;
-    private final Label statusLabel;
-    private final Button playButton;
-
-    private Instance selectedInstance;
-
-    private final Label minecraftLabel;
-    private final HBox versionInfo;
-
-    private Label instanceNameLabel;
-    private Label instanceDetailsLabel;
-    private Label instanceStatusLabel;
-
-    private final Consumer<LaunchFailure> onLaunchFailure;
+    private final VBox recentList;
+    private final Label recentStatus;
 
     public HomeView(
             AccountService accountService,
-            LaunchService launchService,
-            Consumer<LaunchFailure> onLaunchFailure
+            MultiLaunchService launchService,
+            Consumer<LaunchFailure> onLaunchFailure,
+            Consumer<Instance> onLaunchInstance
     ) {
-
         this.accountService = accountService;
         this.launchService = launchService;
-        this.onLaunchFailure =
-                onLaunchFailure;
+        this.onLaunchFailure = onLaunchFailure;
+        this.onLaunchInstance = onLaunchInstance;
 
-        getStyleClass().add("page");
-        getStyleClass().add("home-page");
-
+        getStyleClass().addAll("page", "home-page");
         setPadding(new Insets(32, 36, 36, 36));
         setSpacing(22);
 
-        // ---------------------------------------------------------
-        // HEADER
-        // ---------------------------------------------------------
-
-        Label title =
-                new Label("Home");
-
+        Label title = new Label("Home");
         title.getStyleClass().add("home-title");
 
-        accountLabel =
-                new Label("Checking account...");
-
+        accountLabel = new Label("Checking account...");
         accountLabel.getStyleClass().add("home-account-label");
 
-        VBox header =
-                new VBox(
-                        4,
-                        title,
-                        accountLabel
-                );
-
+        VBox header = new VBox(4, title, accountLabel);
         header.getStyleClass().add("home-header");
 
-        // ---------------------------------------------------------
-        // MAIN LAUNCH AREA
-        // ---------------------------------------------------------
+        Label recentTitle = new Label("RECENTLY PLAYED");
+        recentTitle.getStyleClass().add("home-section-title");
 
-        Label eyebrow =
-                new Label("PLAY");
-
-        eyebrow.getStyleClass().add("home-eyebrow");
-
-        minecraftLabel =
-                new Label("Minecraft");
-
-        minecraftLabel.getStyleClass().add("home-minecraft-title");
-
-        versionInfo =
-                new HBox(8);
-
-        versionInfo.setAlignment(Pos.CENTER_LEFT);
-
-
-        Label selectedLabel =
-                new Label("SELECTED INSTANCE");
-
-        selectedLabel.getStyleClass().add(
-                "home-selected-label"
+        Label recentSubtitle = new Label(
+                "Jump back into the instances you played most recently."
         );
+        recentSubtitle.getStyleClass().add("home-section-subtitle");
 
-        VBox launchInformation =
-                new VBox(
-                        7,
-                        eyebrow,
-                        minecraftLabel,
-                        versionInfo
-                );
+        recentList = new VBox(10);
+        recentList.getStyleClass().add("home-recent-list");
 
-        launchInformation.getStyleClass().add(
-                "home-launch-information"
+        recentStatus = new Label("Loading instances...");
+        recentStatus.getStyleClass().add("home-recent-status");
+
+        ScrollPane recentScroll = new ScrollPane(recentList);
+        recentScroll.setFitToWidth(true);
+        recentScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        recentScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        recentScroll.setPrefViewportHeight(270);
+        recentScroll.setMaxHeight(330);
+        recentScroll.getStyleClass().add("home-recent-scroll");
+        VBox.setVgrow(recentScroll, Priority.ALWAYS);
+
+        VBox recentSection = new VBox(
+                8,
+                recentTitle,
+                recentSubtitle,
+                recentScroll,
+                recentStatus
         );
+        recentSection.getStyleClass().add("home-recent-section");
 
-        // ---------------------------------------------------------
-        // PLAY CONTROL
-        // ---------------------------------------------------------
+        accountCard = new AccountCard();
+        accountCard.getStyleClass().add("home-account-card");
 
-        playButton =
-                new Button("PLAY");
+        VBox launcherCard = createLauncherStatusCard();
 
-        playButton.getStyleClass().add(
-                "home-play-button"
-        );
-
-        playButton.setPrefWidth(118);
-        playButton.setMinWidth(118);
-        playButton.setPrefHeight(42);
-        playButton.setMinHeight(42);
-
-        playButton.setFocusTraversable(false);
-
-        playButton.setOnAction(
-                event -> handlePlayButton()
-        );
-
-        statusLabel =
-                new Label("Ready to launch");
-
-        statusLabel.getStyleClass().add(
-                "home-launch-status"
-        );
-
-        VBox launchAction =
-                new VBox(
-                        7,
-                        playButton,
-                        statusLabel
-                );
-
-        launchAction.setAlignment(
-                Pos.CENTER_RIGHT
-        );
-
-        Region spacer =
-                new Region();
-
-        HBox.setHgrow(
-                spacer,
-                Priority.ALWAYS
-        );
-
-        HBox launchRow =
-                new HBox(
-                        20,
-                        launchInformation,
-                        spacer,
-                        launchAction
-                );
-
-        launchRow.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        VBox hero =
-                new VBox(
-                        0,
-                        launchRow
-                );
-
-        hero.setPadding(
-                new Insets(26, 28, 26, 28)
-        );
-
-        hero.getStyleClass().add(
-                "home-launch-card"
-        );
-
-        // ---------------------------------------------------------
-        // LOWER INFORMATION
-        // ---------------------------------------------------------
-
-        VBox instanceCard =
-                createInstanceCard();
-
-        accountCard =
-                new AccountCard();
-
-        accountCard.getStyleClass().add(
-                "home-account-card"
-        );
-
-        VBox launcherCard =
-                createLauncherStatusCard();
-
-        HBox cards =
-                new HBox(
-                        14,
-                        instanceCard,
-                        accountCard,
-                        launcherCard
-                );
-
-        cards.setAlignment(
-                Pos.TOP_LEFT
-        );
-
-        HBox.setHgrow(
-                instanceCard,
-                Priority.ALWAYS
-        );
-
-        HBox.setHgrow(
-                accountCard,
-                Priority.ALWAYS
-        );
-
-        HBox.setHgrow(
-                launcherCard,
-                Priority.ALWAYS
-        );
-
-        // ---------------------------------------------------------
-        // LISTENERS
-        // ---------------------------------------------------------
-
-        accountService.addListener(
-                this::onAccountChanged
-        );
-
-        launchService.addStateListener(
-                this::onLaunchStateChanged
-        );
-
-        // ---------------------------------------------------------
-        // BUILD
-        // ---------------------------------------------------------
+        HBox footerCards = new HBox(14, accountCard, launcherCard);
+        HBox.setHgrow(accountCard, Priority.ALWAYS);
+        HBox.setHgrow(launcherCard, Priority.ALWAYS);
 
         getChildren().addAll(
                 header,
-                hero,
-                cards
+                recentSection,
+                footerCards
         );
+
+        accountService.addListener(this::onAccountChanged);
+        launchService.addStateListener(this::onLaunchStateChanged);
 
         refreshAccount();
-
-        updateLaunchState(
-                launchService.getState()
-        );
+        refreshRecentInstances();
     }
-
-    // =============================================================
-    // INSTANCE CARD
-    // =============================================================
 
     private VBox createLauncherStatusCard() {
         VBox card = new VBox(8);
@@ -279,12 +123,10 @@ public class HomeView extends VBox {
         Label title = new Label("Vanta Launcher");
         title.getStyleClass().add("home-status-title");
 
-        Label status = new Label("Ready");
+        Label status = new Label("READY");
         status.getStyleClass().add("home-status-value");
 
-        Label java = new Label(
-                "Java " + System.getProperty("java.version")
-        );
+        Label java = new Label("Java " + System.getProperty("java.version"));
         java.getStyleClass().add("home-status-meta");
 
         Label data = new Label(
@@ -293,455 +135,145 @@ public class HomeView extends VBox {
         data.getStyleClass().add("home-status-meta");
         data.setWrapText(true);
 
-        card.getChildren().addAll(
-                title,
-                status,
-                java,
-                data
-        );
-
+        card.getChildren().addAll(title, status, java, data);
         return card;
     }
 
-    private VBox createInstanceCard() {
+    public void refreshRecentInstances() {
+        Thread thread = new Thread(() -> {
+            try {
+                List<Instance> instances =
+                        InstanceUsageManager.sortByLastPlayed(
+                                InstanceManager.discoverInstances()
+                        );
 
-        Label title =
-                new Label("INSTANCE");
+                Platform.runLater(() -> renderRecentInstances(instances));
 
-        title.getStyleClass().add(
-                "home-card-eyebrow"
-        );
-
-        instanceNameLabel =
-                new Label("No instance selected");
-
-        instanceNameLabel.getStyleClass().add(
-                "home-card-title"
-        );
-
-        instanceDetailsLabel =
-                new Label(
-                        "Select an instance from the Instances page"
-                );
-
-        instanceDetailsLabel.getStyleClass().add(
-                "home-card-description"
-        );
-
-        instanceStatusLabel =
-                new Label("● No instance");
-
-        instanceStatusLabel.getStyleClass().add(
-                "home-card-status"
-        );
-
-        VBox card =
-                new VBox(
-                        8,
-                        title,
-                        instanceNameLabel,
-                        instanceDetailsLabel,
-                        instanceStatusLabel
-                );
-
-        card.setMinHeight(128);
-        card.setPadding(
-                new Insets(18, 20, 18, 20)
-        );
-
-        card.getStyleClass().add(
-                "home-info-card"
-        );
-
-        return card;
-    }
-
-    // =============================================================
-    // ACCOUNT
-    // =============================================================
-
-    public void refreshAccount() {
-
-        Account account =
-                accountService.getCurrentAccount();
-
-        setAccount(account);
-    }
-
-    public void setAccount(
-            Account account
-    ) {
-
-        if (account == null) {
-
-            accountLabel.setText(
-                    "No Microsoft account connected"
-            );
-
-            accountCard.setDisconnected();
-
-            return;
-        }
-
-        String username =
-                account.getUsername();
-
-        accountLabel.setText(
-                "Signed in as " + username
-        );
-
-        accountCard.setAccount(account);
-    }
-
-    private void onAccountChanged(
-            Account account
-    ) {
-
-        Platform.runLater(
-                () -> setAccount(account)
-        );
-    }
-
-    // =============================================================
-    // SELECTED INSTANCE
-    // =============================================================
-
-    public void setSelectedInstance(
-            Instance instance
-    ) {
-
-        this.selectedInstance = instance;
-
-        if (instance == null) {
-
-            minecraftLabel.setText(
-                    "Minecraft"
-            );
-
-            if (instance == null) {
-
-                minecraftLabel.setText("No instance selected");
-
-                versionInfo.getChildren().clear();
-
-                instanceNameLabel.setText(
-                        "No instance selected"
-                );
-
-                instanceDetailsLabel.setText(
-                        "Select an instance from the Instances page"
-                );
-
-                instanceStatusLabel.setText(
-                        "● No instance"
-                );
-
-                return;
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    recentList.getChildren().clear();
+                    recentStatus.setText("Failed to load recent instances.");
+                });
             }
+        });
 
-            instanceNameLabel.setText(
-                    "No instance selected"
+        thread.setDaemon(true);
+        thread.setName("Vanta-Home-Instances");
+        thread.start();
+    }
+
+    private void renderRecentInstances(List<Instance> instances) {
+        recentList.getChildren().clear();
+
+        List<Instance> recent = instances.stream()
+                .filter(instance ->
+                        InstanceUsageManager.getLastPlayed(instance) > 0
+                )
+                .limit(6)
+                .toList();
+
+        if (recent.isEmpty()) {
+            recentStatus.setText(
+                    "No play history yet. Launch an instance and it will appear here."
             );
-
-            instanceDetailsLabel.setText(
-                    "Select an instance from the Instances page"
-            );
-
-            instanceStatusLabel.setText(
-                    "● No instance"
-            );
-
             return;
         }
 
-        minecraftLabel.setText(
-                instance.getName()
+        recentStatus.setText(
+                recent.size() + " recent instance"
+                        + (recent.size() == 1 ? "" : "s")
         );
 
-        setVersionInfo(
-                instance.getMinecraftVersion(),
-                instance.getDisplayLoader()
-        );
+        for (Instance instance : recent) {
+            recentList.getChildren().add(createRecentCard(instance));
+        }
+    }
 
-        instanceNameLabel.setText(
-                instance.getName()
+    private HBox createRecentCard(Instance instance) {
+        Label icon = new Label();
+        icon.setGraphic(
+                IconView.create(IconView.Type.PLAY, 16)
         );
+        icon.getStyleClass().add("home-recent-icon");
 
-        instanceDetailsLabel.setText(
+        Label name = new Label(instance.getName());
+        name.getStyleClass().add("home-recent-name");
+
+        Label metadata = new Label(
                 instance.getMinecraftVersion()
                         + " • "
                         + instance.getDisplayLoader()
         );
+        metadata.getStyleClass().add("home-recent-meta");
 
-        instanceStatusLabel.setText(
-                "● Ready"
+        Label playtime = new Label(
+                InstanceUsageManager.formatPlaytime(
+                        InstanceUsageManager.getPlaytimeSeconds(instance)
+                )
+                        + " played"
         );
+        playtime.getStyleClass().add("home-recent-playtime");
+
+        VBox info = new VBox(4, name, metadata, playtime);
+        HBox.setHgrow(info, Priority.ALWAYS);
+
+        Button play = new Button(
+                launchService.isRunning(instance) ? "CLOSE" : "PLAY"
+        );
+        play.getStyleClass().add(
+                launchService.isRunning(instance)
+                        ? "home-recent-stop"
+                        : "home-recent-play"
+        );
+        play.setMinWidth(84);
+
+        play.setOnAction(event -> {
+            if (launchService.isRunning(instance)) {
+                launchService.close(instance);
+            } else {
+                onLaunchInstance.accept(instance);
+            }
+        });
+
+        HBox card = new HBox(14, icon, info, play);
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setPadding(new Insets(14, 16, 14, 16));
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.getStyleClass().add("home-recent-card");
+
+        return card;
     }
 
-    private void setVersionInfo(
-            String version,
-            String loader
-    ) {
-
-        versionInfo.getChildren().clear();
-
-        Label versionLabel =
-                new Label(version);
-
-        versionLabel.getStyleClass().add(
-                "home-version"
-        );
-
-        Label loaderLabel =
-                new Label(loader);
-
-        loaderLabel.getStyleClass().add(
-                "home-loader"
-        );
-
-        versionInfo.getChildren().addAll(
-                versionLabel,
-                loaderLabel
-        );
+    public void refreshAccount() {
+        setAccount(accountService.getCurrentAccount());
     }
 
-    // =============================================================
-    // PLAY / STOP
-    // =============================================================
-
-    private void handlePlayButton() {
-
-        LaunchService.LaunchState state =
-                launchService.getState();
-
-        if (state ==
-                LaunchService.LaunchState.RUNNING) {
-
-            launchService.close();
-
+    public void setAccount(Account account) {
+        if (account == null) {
+            accountLabel.setText("No Microsoft account connected");
+            accountCard.setDisconnected();
             return;
         }
 
-        if (state ==
-                LaunchService.LaunchState.PREPARING
-                || state ==
-                LaunchService.LaunchState.STARTING
-                || state ==
-                LaunchService.LaunchState.CLOSING) {
-
-            return;
-        }
-
-        if (selectedInstance == null) {
-
-            statusLabel.setText(
-                    "No instance selected."
-            );
-
-            return;
-        }
-
-        Instance instance =
-                selectedInstance;
-
-        Thread thread =
-                new Thread(() -> {
-
-                    try {
-
-                        launchService.launch(
-                                instance
-                        );
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        Platform.runLater(() -> {
-
-                            LaunchFailure failure =
-                                    launchService.getLastFailure();
-
-                            if (failure != null) {
-
-                                onLaunchFailure.accept(
-                                        failure
-                                );
-
-                            } else {
-
-                                statusLabel.setText(
-                                        ex.getMessage() != null
-                                                && !ex.getMessage().isBlank()
-                                                ? ex.getMessage()
-                                                : "Failed to launch Minecraft."
-                                );
-                            }
-                        });
-                    }
-                });
-
-        thread.setDaemon(true);
-
-        thread.setName(
-                "Vanta-Home-Launch"
-        );
-
-        thread.start();
+        accountLabel.setText("Signed in as " + account.getUsername());
+        accountCard.setAccount(account);
     }
 
-    // =============================================================
-    // LAUNCH STATE
-    // =============================================================
-
-    private void onLaunchStateChanged(
-            LaunchService.LaunchState state
-    ) {
-
-        Platform.runLater(
-                () -> updateLaunchState(state)
-        );
+    private void onAccountChanged(Account account) {
+        Platform.runLater(() -> setAccount(account));
     }
 
-    private void updateLaunchState(
-            LaunchService.LaunchState state
-    ) {
+    private void onLaunchStateChanged(LaunchService.LaunchState state) {
+        Platform.runLater(() -> {
+            refreshRecentInstances();
 
-        if (state == null) {
-
-            state =
-                    LaunchService.LaunchState.IDLE;
-        }
-
-        switch (state) {
-
-            case PREPARING -> {
-
-                playButton.setDisable(true);
-
-                playButton.setText("...");
-
-                statusLabel.setText(
-                        "Preparing Minecraft..."
-                );
-
-                setInstanceStatus(
-                        "● Preparing"
-                );
-            }
-
-            case STARTING -> {
-
-                playButton.setDisable(true);
-
-                playButton.setText("...");
-
-                statusLabel.setText(
-                        "Starting Minecraft..."
-                );
-
-                setInstanceStatus(
-                        "● Starting"
-                );
-            }
-
-            case RUNNING -> {
-
-                playButton.setDisable(false);
-
-                playButton.setText("CLOSE");
-
-                if (!playButton.getStyleClass()
-                        .contains("home-playing-button")) {
-
-                    playButton.getStyleClass().add(
-                            "home-playing-button"
-                    );
-                }
-
-                statusLabel.setText(
-                        "Minecraft is running."
-                );
-
-                setInstanceStatus(
-                        "● Running"
-                );
-            }
-
-            case CLOSING -> {
-
-                playButton.setDisable(true);
-
-                playButton.setText("...");
-
-                statusLabel.setText(
-                        "Closing Minecraft..."
-                );
-
-                setInstanceStatus(
-                        "● Closing"
-                );
-            }
-
-            case ERROR -> {
-
-                resetPlayButton();
-
-                statusLabel.setText(
-                        "Minecraft failed to launch."
-                );
-
-                setInstanceStatus(
-                        "● Error"
-                );
-
-                LaunchFailure failure =
-                        launchService.getLastFailure();
-
+            if (state == LaunchService.LaunchState.ERROR) {
+                LaunchFailure failure = launchService.getLastFailure();
                 if (failure != null) {
-
-                    onLaunchFailure.accept(
-                            failure
-                    );
+                    onLaunchFailure.accept(failure);
                 }
             }
-
-            case IDLE -> {
-
-                resetPlayButton();
-
-                statusLabel.setText(
-                        "Ready to launch"
-                );
-
-                setInstanceStatus(
-                        "● Ready"
-                );
-            }
-        }
-    }
-
-    private void resetPlayButton() {
-
-        playButton.setDisable(false);
-
-        playButton.setText("PLAY");
-
-        playButton.getStyleClass().remove(
-                "home-playing-button"
-        );
-    }
-
-    private void setInstanceStatus(
-            String status
-    ) {
-
-        if (selectedInstance != null) {
-
-            instanceStatusLabel.setText(
-                    status
-            );
-        }
+        });
     }
 }
-
