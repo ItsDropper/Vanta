@@ -2113,7 +2113,7 @@ private String findFabricModId(
         return null;
     }
 
-private boolean hasCompatibleInstalledDependency(
+boolean hasCompatibleInstalledDependency(
             Instance instance,
             ModrinthDependency dependency,
             ModrinthVersion requestingVersion
