@@ -10,7 +10,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 
 import org.example.launcher.account.Account;
 import org.example.launcher.instance.InstanceManager;
@@ -70,12 +69,11 @@ public class HomeView extends StackPane {
         // Use the Minecraft screenshot as the full Home background.
         MinecraftBackdrop backdrop = new MinecraftBackdrop();
         backdrop.setMouseTransparent(true);
+        backdrop.setManaged(false);
         backdrop.prefWidthProperty().bind(widthProperty());
         backdrop.prefHeightProperty().bind(heightProperty());
-        backdrop.minWidthProperty().bind(widthProperty());
-        backdrop.minHeightProperty().bind(heightProperty());
-        backdrop.maxWidthProperty().bind(widthProperty());
-        backdrop.maxHeightProperty().bind(heightProperty());
+        backdrop.setMinSize(0, 0);
+        backdrop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         getChildren().add(backdrop);
 
@@ -125,7 +123,7 @@ public class HomeView extends StackPane {
         getChildren().add(contentBox);
         StackPane.setAlignment(contentBox, Pos.TOP_LEFT);
 
-        // Keep the Home title above the background and content.
+        // Keep the Home header above the content and full-page background.
         getChildren().add(header);
         StackPane.setAlignment(header, Pos.TOP_LEFT);
         StackPane.setMargin(header, new Insets(24));
