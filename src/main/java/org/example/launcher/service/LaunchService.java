@@ -172,8 +172,8 @@ public class LaunchService {
             if (server != null) {
                 ServerHistoryManager.recordConnection(
                         instance,
-                        server.getHost(),
-                        server.getPort()
+                        server.host(),
+                        server.port()
                 );
             }
 
