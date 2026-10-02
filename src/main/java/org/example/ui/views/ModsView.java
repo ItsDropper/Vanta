@@ -695,7 +695,9 @@ public class ModsView extends VBox {
                 filename.toLowerCase().endsWith(".jar.disabled");
 
         javafx.scene.control.ToggleButton toggleButton =
-                new javafx.scene.control.ToggleButton("●");
+                new javafx.scene.control.ToggleButton();
+        javafx.scene.shape.Circle knob = new javafx.scene.shape.Circle(12);
+        toggleButton.setGraphic(knob);
         toggleButton.setSelected(!disabled);
         toggleButton.getStyleClass().add("mod-toggle");
         updateModToggleStyle(toggleButton);
