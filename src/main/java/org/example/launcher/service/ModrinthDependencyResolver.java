@@ -1110,10 +1110,18 @@ private boolean resolveFabricDependency(
                             );
 
                     try {
-                        DownloadUtil.downloadFile(
-                                candidateFile.getUrl(),
-                                tempFile
-                        );
+                        try {
+                            DownloadUtil.downloadFile(
+                                    candidateFile.getUrl(),
+                                    tempFile
+                            );
+                        } catch (Exception e) {
+                            throw new IOException(
+                                    "Failed to inspect Fabric API candidate "
+                                            + candidate.getVersionNumber(),
+                                    e
+                            );
+                        }
 
                         if (!installedModScanner.containsFabricModId(
                                 tempFile,
