@@ -46,7 +46,7 @@
 .create-section-title,
 .settings-section-title,
 .instances-count {
-    -fx-text-fill: #7ea7ff;
+    -fx-text-fill: -vanta-accent;
 }
 
 .footer-label {
@@ -129,9 +129,9 @@
 
 .sidebar-button-active,
 .sidebar-button-active:hover {
-    -fx-background-color: #18263d;
+    -fx-background-color: derive(-vanta-accent, 0.7);
     -fx-text-fill: #eaf1ff;
-    -fx-border-color: transparent transparent transparent #5d91ff;
+    -fx-border-color: transparent transparent transparent -vanta-accent;
     -fx-border-width: 0 0 0 2px;
 }
 
@@ -179,8 +179,8 @@
 }
 
 .title-bar-update {
-    -fx-background-color: #17243a;
-    -fx-text-fill: #9bbcff;
+    -fx-background-color: derive(-vanta-accent, 0.72);
+    -fx-text-fill: -vanta-accent;
     -fx-border-color: #2e4770;
 }
 
@@ -196,7 +196,7 @@
 .instance-create-button,
 .instance-play-button,
 .home-play-button {
-    -fx-background-color: #4f82f5;
+    -fx-background-color: -vanta-accent;
     -fx-background-radius: 8px;
     -fx-text-fill: #ffffff;
     -fx-font-size: 11px;
@@ -208,14 +208,14 @@
 .instance-create-button:hover,
 .instance-play-button:hover,
 .home-play-button:hover {
-    -fx-background-color: #6594ff;
+    -fx-background-color: -vanta-accent;
 }
 
 .primary-button:pressed,
 .instance-create-button:pressed,
 .instance-play-button:pressed,
 .home-play-button:pressed {
-    -fx-background-color: #3f6fd7;
+    -fx-background-color: -vanta-accent;
 }
 
 .primary-button:disabled,
@@ -291,7 +291,7 @@
 
 .home-loader,
 .instance-loader {
-    -fx-background-color: #1b2a42;
+    -fx-background-color: derive(-vanta-accent, 0.72);
     -fx-text-fill: #9fc0ff;
     -fx-background-radius: 6px;
     -fx-padding: 5px 9px;
@@ -379,7 +379,7 @@
 }
 
 .instance-ready {
-    -fx-text-fill: #77a7ff;
+    -fx-text-fill: -vanta-accent;
 }
 
 .instance-settings-button {
@@ -450,7 +450,7 @@
 .text-area:focused,
 .create-combo:focused {
     -fx-background-color: #101721;
-    -fx-border-color: #5688ed;
+    -fx-border-color: -vanta-accent;
 }
 
 .create-combo .list-cell {
@@ -468,7 +468,7 @@
 }
 
 .slider .thumb {
-    -fx-background-color: #5d91ff;
+    -fx-background-color: -vanta-accent;
 }
 
 .slider .thumb:hover {
@@ -493,8 +493,8 @@
 }
 
 .check-box:selected .box {
-    -fx-background-color: #4f82f5;
-    -fx-border-color: #4f82f5;
+    -fx-background-color: -vanta-accent;
+    -fx-border-color: -vanta-accent;
 }
 
 .combo-box-base,
@@ -513,7 +513,7 @@
 
 .combo-box-base:focused,
 .choice-box:focused {
-    -fx-border-color: #5688ed;
+    -fx-border-color: -vanta-accent;
 }
 
 .tab-pane .tab-header-area {
@@ -645,7 +645,7 @@
 .modrinth-search-field:focused,
 .content-search-field:focused,
 .search-field:focused {
-    -fx-border-color: #5688ed;
+    -fx-border-color: -vanta-accent;
 }
 
 /* ---------- notifications ---------- */
@@ -659,7 +659,7 @@
 }
 
 .notification-progress > .bar {
-    -fx-background-color: #5688ed;
+    -fx-background-color: -vanta-accent;
 }
 
 .notification-progress > .track {
@@ -685,7 +685,7 @@
 }
 
 .connected-label {
-    -fx-text-fill: #77a7ff;
+    -fx-text-fill: -vanta-accent;
 }
 
 .account-switcher {
@@ -704,7 +704,7 @@
 }
 
 .settings-section-title {
-    -fx-text-fill: #7ea7ff;
+    -fx-text-fill: -vanta-accent;
 }
 
 .instance-setting-label {
@@ -733,8 +733,8 @@
 }
 
 .settings-checkbox:selected .box {
-    -fx-background-color: #4f82f5;
-    -fx-border-color: #4f82f5;
+    -fx-background-color: -vanta-accent;
+    -fx-border-color: -vanta-accent;
 }
 
 /* ---------- login ---------- */
@@ -768,11 +768,11 @@
 }
 
 .verification-code:focused {
-    -fx-border-color: #5688ed;
+    -fx-border-color: -vanta-accent;
 }
 
 .login-status.active {
-    -fx-text-fill: #77a7ff;
+    -fx-text-fill: -vanta-accent;
 }
 
 /* ---------- Modrinth/content browsing ---------- */
@@ -809,9 +809,9 @@
 }
 
 .mod-details-header .instance-play-button {
-    -fx-background-color: #1b2a43;
+    -fx-background-color: derive(-vanta-accent, 0.72);
     -fx-border-color: #36588c;
-    -fx-text-fill: #a9c5ff;
+    -fx-text-fill: -vanta-accent;
 }
 
 .mod-details-header .instance-play-button:hover {
@@ -831,7 +831,7 @@
 }
 
 .progress-bar > .bar {
-    -fx-background-color: #5688ed;
+    -fx-background-color: -vanta-accent;
     -fx-background-radius: 5px;
     -fx-background-insets: 0;
 }
@@ -861,7 +861,7 @@
 .list-cell:selected,
 .table-row-cell:selected,
 .tree-cell:selected {
-    -fx-background-color: #1b2a43;
+    -fx-background-color: derive(-vanta-accent, 0.72);
     -fx-text-fill: #eef4ff;
 }
 
