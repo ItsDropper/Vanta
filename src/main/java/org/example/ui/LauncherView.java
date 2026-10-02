@@ -34,7 +34,8 @@ public class LauncherView {
     private final BorderPane window;
 
     private final AccountService accountService;
-    private final LaunchService launchService;
+    private final MultiLaunchService launchService;
+    private final DiscordPresenceService discordPresenceService;
 
     private final Sidebar sidebar;
     private final StackPane content;
@@ -116,9 +117,24 @@ public class LauncherView {
                 new AccountService();
 
         launchService =
-                new LaunchService(
+                new MultiLaunchService(
                         accountService
                 );
+
+        discordPresenceService =
+                new DiscordPresenceService();
+
+        launchService.addStateListener(state -> {
+            if (state == LaunchService.LaunchState.RUNNING) {
+                Instance running = launchService.getRunningInstance();
+                if (running != null) {
+                    discordPresenceService.update(running);
+                }
+            } else if (state == LaunchService.LaunchState.IDLE
+                    && launchService.getRunningInstance() == null) {
+                discordPresenceService.clear();
+            }
+        });
 
         titleBar =
                 new TitleBar(
@@ -168,7 +184,8 @@ public class LauncherView {
                 new HomeView(
                         accountService,
                         launchService,
-                        this::showRepairView
+                        this::showRepairView,
+                        this::launchFromHome
                 );
 
         accountsView =
@@ -180,7 +197,6 @@ public class LauncherView {
                 new InstancesView(
                         launchService,
                         this::showCreateInstanceView,
-                        this::selectInstance,
                         this::showInstanceMods
                 );
 
