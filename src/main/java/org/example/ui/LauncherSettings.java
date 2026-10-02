@@ -87,14 +87,6 @@ public final class LauncherSettings {
         setBoolean("discordPresenceEnabled", value);
     }
 
-    public static String getDiscordClientId() {
-        return getString("discordClientId", "");
-    }
-
-    public static void setDiscordClientId(String value) {
-        setString("discordClientId", value == null ? "" : value.trim());
-    }
-
     public static boolean isDiscordShowPlaytimeEnabled() {
         return getBoolean("discordShowPlaytime", true);
     }
