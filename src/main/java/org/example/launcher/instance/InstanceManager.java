@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.example.launcher.MinecraftLocator;
 import org.example.launcher.model.Instance;
 import org.example.launcher.model.InstanceSettings;
+import org.example.ui.LauncherSettings;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -206,9 +207,15 @@ public class InstanceManager {
         // DEFAULT SETTINGS
         // ---------------------------------------------------------
 
+        InstanceSettings defaults = new InstanceSettings();
+        defaults.setRamMb(LauncherSettings.getDefaultRamMb());
+        defaults.setWidth(LauncherSettings.getDefaultWidth());
+        defaults.setHeight(LauncherSettings.getDefaultHeight());
+        defaults.setFullscreen(LauncherSettings.isDefaultFullscreen());
+
         saveSettings(
                 instance,
-                new InstanceSettings()
+                defaults
         );
 
         return instance;
