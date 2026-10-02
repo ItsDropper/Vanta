@@ -168,8 +168,8 @@ public class OnboardingView extends BorderPane {
         connectButton.setDisable(false);
         connectButton.setText(
                 account == null
-                        ? "CONNECT MICROSOFT ACCOUNT"
-                        : "CONNECT ANOTHER ACCOUNT"
+                        ? "CONNECT"
+                        : "CONNECT"
         );
         connectButton.setOnAction(event -> connectAccount());
 
