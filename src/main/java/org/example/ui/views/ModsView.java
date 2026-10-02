@@ -270,6 +270,7 @@ public class ModsView extends VBox {
         HBox navigation =
                 new HBox(
                         10,
+                        allButton,
                         modsButton,
                         packsButton,
                         shadersButton
@@ -693,17 +694,11 @@ public class ModsView extends VBox {
         boolean disabled =
                 filename.toLowerCase().endsWith(".jar.disabled");
 
-        Button toggleButton =
-                new Button(
-                        disabled ? "ENABLE" : "DISABLE",
-                        IconView.create(
-                                disabled
-                                        ? IconView.Type.CHECK
-                                        : IconView.Type.PAUSE,
-                                15
-                        )
-                );
-        toggleButton.getStyleClass().add("secondary-button");
+        javafx.scene.control.ToggleButton toggleButton =
+                new javafx.scene.control.ToggleButton("●");
+        toggleButton.setSelected(!disabled);
+        toggleButton.getStyleClass().add("mod-toggle");
+        updateModToggleStyle(toggleButton);
         toggleButton.setTooltip(
                 new Tooltip(
                         disabled
@@ -711,9 +706,16 @@ public class ModsView extends VBox {
                                 : "Disable this mod"
                 )
         );
-        toggleButton.setOnAction(
-                event -> toggleMod(mod)
-        );
+        toggleButton.setOnAction(event -> {
+            toggleMod(mod);
+            toggleButton.setSelected(!toggleButton.isSelected());
+            updateModToggleStyle(toggleButton);
+            toggleButton.setTooltip(new Tooltip(
+                    toggleButton.isSelected()
+                            ? "Disable this mod"
+                            : "Enable this mod"
+            ));
+        });
 
         Button removeButton =
                 new Button(
@@ -1334,6 +1336,13 @@ public class ModsView extends VBox {
     // =============================================================
     // REMOVE
     // =============================================================
+
+    private void updateModToggleStyle(javafx.scene.control.ToggleButton toggleButton) {
+        toggleButton.getStyleClass().removeAll("mod-toggle-enabled", "mod-toggle-disabled");
+        toggleButton.getStyleClass().add(
+                toggleButton.isSelected() ? "mod-toggle-enabled" : "mod-toggle-disabled"
+        );
+    }
 
     private void toggleMod(Path file) {
         try {
