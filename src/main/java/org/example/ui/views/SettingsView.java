@@ -8,7 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.VBox;\nimport java.util.function.Consumer;
 import javafx.scene.paint.Color;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
 
-public class SettingsView extends BorderPane {
+public class SettingsView extends BorderPane {\n\n    private final Consumer<String> onAccentChanged;
 
     private static final String DEFAULT_ACCENT = "#5688ED";
     private static final Path SETTINGS_FILE = Path.of(
@@ -31,13 +31,13 @@ public class SettingsView extends BorderPane {
     private ColorPicker accentPicker;
     private String accentColor;
 
-    public SettingsView() {
+    public SettingsView(Consumer<String> onAccentChanged) {\n        this.onAccentChanged = onAccentChanged;
         getStyleClass().add("settings-shell");
 
         loadSettings();
         buildNavigation();
         buildAppearancePage();
-        selectSection("Appearance");
+        selectSection("Appearance");\n        applyAccent(accentColor);
     }
 
     private void loadSettings() {
@@ -179,7 +179,7 @@ public class SettingsView extends BorderPane {
             accentColor = toHex(newColor);
             value.setText(accentColor);
             applyAccent(accentColor);
-            saveSettings();
+            saveSettings();\n            onAccentChanged.accept(accentColor);
         };
 
         accentPicker.valueProperty().addListener(listener);
