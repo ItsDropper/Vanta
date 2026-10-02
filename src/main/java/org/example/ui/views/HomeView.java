@@ -366,7 +366,22 @@ public class HomeView extends StackPane {
 
             Thread thread = new Thread(() -> {
                 try {
-                    launchService.launch(instance);
+                    ServerTarget recentServer =
+                            ServerHistoryManager.getRecent().stream()
+                                    .filter(server ->
+                                            instance.getId().equals(
+                                                    server.getInstanceId()
+                                            ))
+                                    .findFirst()
+                                    .map(server ->
+                                            new ServerTarget(
+                                                    server.getHost(),
+                                                    server.getPort()
+                                            )
+                                    )
+                                    .orElse(null);
+
+                    launchService.launch(instance, recentServer);
                 } catch (Throwable ex) {
                     ex.printStackTrace();
 
