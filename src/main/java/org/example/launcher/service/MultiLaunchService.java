@@ -73,12 +73,19 @@ public final class MultiLaunchService {
     }
 
     public Process launch(Instance instance) throws Exception {
+        return launch(instance, null);
+    }
+
+    public Process launch(
+            Instance instance,
+            ServerTarget server
+    ) throws Exception {
         if (instance == null) {
             throw new IllegalArgumentException("No Minecraft instance selected.");
         }
 
         latestInstance = instance;
-        return serviceFor(instance).launch(instance);
+        return serviceFor(instance).launch(instance, server);
     }
 
     public void close() {
