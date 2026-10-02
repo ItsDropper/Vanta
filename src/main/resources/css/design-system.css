@@ -1295,3 +1295,100 @@
     -fx-background-color: #A33A3A;
     -fx-border-color: #D05A5A;
 }
+
+
+/* ============================================================
+   FIRST-RUN ONBOARDING
+   ============================================================ */
+
+.onboarding-overlay {
+    -fx-background-color: rgba(7, 10, 15, 0.92);
+}
+
+.onboarding-page {
+    -fx-background-color: #121821;
+    -fx-background-radius: 16px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 34, 0.18, 0, 12);
+}
+
+.onboarding-logo {
+    -fx-text-fill: #f4f7fb;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 2px;
+}
+
+.onboarding-step {
+    -fx-text-fill: -vanta-accent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.onboarding-content {
+    -fx-padding: 30px 36px 10px 36px;
+}
+
+.onboarding-title {
+    -fx-text-fill: #f5f8fc;
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+}
+
+.onboarding-subtitle {
+    -fx-text-fill: #8c98a9;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 3px;
+}
+
+.onboarding-body {
+    -fx-text-fill: #aeb8c7;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 4px;
+}
+
+.onboarding-hint {
+    -fx-text-fill: #687486;
+    -fx-font-size: 11px;
+}
+
+.onboarding-feature {
+    -fx-background-color: #171e27;
+    -fx-background-radius: 10px;
+    -fx-border-color: #283341;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-padding: 12px 14px;
+}
+
+.onboarding-feature-number {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-background-radius: 7px;
+    -fx-text-fill: -vanta-accent;
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-alignment: CENTER;
+    -fx-min-width: 30px;
+    -fx-pref-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+}
+
+.onboarding-feature-title {
+    -fx-text-fill: #edf2f8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+.onboarding-feature-description {
+    -fx-text-fill: #7e8a9c;
+    -fx-font-size: 11px;
+}
+
+.onboarding-account-status {
+    -fx-text-fill: #c4ccd8;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+}
