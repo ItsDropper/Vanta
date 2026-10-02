@@ -2824,4 +2824,32 @@ private boolean isProvidedByFabricApi(
     }
 
 
+
+    private List<ModrinthVersion> getVersionsCached(
+            String projectId
+    ) throws IOException, InterruptedException {
+
+        List<ModrinthVersion> cached =
+                versionCache.get(projectId);
+
+        if (cached != null) {
+            return cached;
+        }
+
+        List<ModrinthVersion> versions =
+                client.getVersions(projectId);
+
+        if (versions == null) {
+            versions = List.of();
+        }
+
+        versionCache.put(
+                projectId,
+                versions
+        );
+
+        return versions;
+    }
+
+
 }
