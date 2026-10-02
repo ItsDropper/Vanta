@@ -1,6 +1,6 @@
 package org.example.launcher.service;
 
-import org.example.launcher.instance.InstalledModScanner;
+import org.example.launcher.modrinth.InstalledModScanner;
 import org.example.launcher.modrinth.*;
 import org.example.launcher.model.Instance;
 import java.io.IOException;

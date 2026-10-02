@@ -2020,7 +2020,7 @@ private String findProjectIdForVersion(
         return version.getProjectId();
     }
 
-public ModrinthVersion resolveDependencyVersion(
+ModrinthVersion resolveDependencyVersion(
             Instance instance,
             ModrinthDependency dependency
     ) throws IOException, InterruptedException {
