@@ -551,11 +551,15 @@ public class HomeView extends StackPane {
         VBox info = new VBox(3, name, metadata);
         HBox.setHgrow(info, Priority.ALWAYS);
 
+        boolean instanceAvailable = instance != null;
+        boolean instanceRunning =
+                instanceAvailable && launchService.isRunning(instance);
+
         Button play = new Button(
-                launchService.isRunning(instance) ? "CLOSE" : "PLAY"
+                instanceRunning ? "CLOSE" : "PLAY"
         );
         play.getStyleClass().add(
-                launchService.isRunning(instance)
+                instanceRunning
                         ? "home-recent-stop"
                         : "home-recent-play"
         );
@@ -563,6 +567,7 @@ public class HomeView extends StackPane {
         play.setPickOnBounds(true);
         play.setMouseTransparent(false);
         play.setCursor(Cursor.HAND);
+        play.setDisable(!instanceAvailable);
 
         play.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) {
