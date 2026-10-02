@@ -630,35 +630,16 @@ public class InstancesView extends VBox {
     ) {
 
         LaunchService.LaunchState state =
-                launchService.getState();
+                launchService.getState(instance);
 
         if (state == LaunchService.LaunchState.RUNNING) {
-
-            Instance running =
-                    launchService.getRunningInstance();
-
-            if (running != null
-                    && running.getId()
-                    .equals(
-                            instance.getId()
-                    )) {
-
-                launchService.close();
-
-            } else {
-
-                statusLabel.setText(
-                        "Minecraft is already running."
-                );
-            }
-
+            launchService.close(instance);
             return;
         }
 
         if (state == LaunchService.LaunchState.PREPARING
                 || state == LaunchService.LaunchState.STARTING
                 || state == LaunchService.LaunchState.CLOSING) {
-
             return;
         }
 
