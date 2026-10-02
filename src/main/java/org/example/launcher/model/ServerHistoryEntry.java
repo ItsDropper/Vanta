@@ -42,7 +42,7 @@ public final class ServerHistoryEntry {
         }
 
         String normalized = host.trim()
-                .replaceAll("^\.+|\.+$", "");
+                .replaceAll("^\\.+|\\.+$", "");
 
         String[] parts = normalized.split("\\.");
         if (parts.length == 0) {
