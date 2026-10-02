@@ -45,6 +45,7 @@ public class CreateInstanceView extends VBox {
 
     private final Runnable onBack;
     private final Runnable onCreated;
+    private final Runnable onBrowseModpacks;
 
     /*
      * Every version change gets a new check ID.
@@ -59,7 +60,8 @@ public class CreateInstanceView extends VBox {
 
     public CreateInstanceView(
             Runnable onBack,
-            Runnable onCreated
+            Runnable onCreated,
+            Runnable onBrowseModpacks
     ) {
 
         this.onBack = onBack;
@@ -309,10 +311,24 @@ public class CreateInstanceView extends VBox {
                         createInstance()
         );
 
+        Button browseModpacksButton =
+                new Button(
+                        "BROWSE MODPACKS"
+                );
+
+        browseModpacksButton.getStyleClass().add(
+                "secondary-button"
+        );
+
+        browseModpacksButton.setOnAction(
+                event -> onBrowseModpacks.run()
+        );
+
         HBox actions =
                 new HBox(
                         12,
                         backButton,
+                        browseModpacksButton,
                         createButton
                 );
 
