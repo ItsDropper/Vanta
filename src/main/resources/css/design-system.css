@@ -1200,3 +1200,36 @@
     -fx-border-color: -vanta-accent;
     -fx-background-color: #141b25;
 }
+
+
+/* Instance content controls */
+.instance-tabs {
+    -fx-padding: 2 0 2 0;
+}
+
+.instance-tabs .button {
+    -fx-content-display: LEFT;
+    -fx-graphic-text-gap: 8;
+}
+
+.instances-search {
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-padding: 0 12px;
+}
+
+.instance-settings-footer {
+    -fx-padding: 12px 0 0 0;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1 0 0 0;
+}
+
+.sidebar-button {
+    -fx-content-display: LEFT;
+    -fx-graphic-text-gap: 10;
+}
+
+.sidebar-button .vanta-icon,
+.button .vanta-icon {
+    -fx-opacity: 0.92;
+}
