@@ -10,6 +10,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
+import org.example.launcher.MinecraftLocator;
 import org.example.launcher.account.Account;
 import org.example.launcher.model.Instance;
 import org.example.launcher.service.AccountService;
@@ -208,11 +209,15 @@ public class HomeView extends VBox {
                 "home-account-card"
         );
 
+        VBox launcherCard =
+                createLauncherStatusCard();
+
         HBox cards =
                 new HBox(
                         14,
                         instanceCard,
-                        accountCard
+                        accountCard,
+                        launcherCard
                 );
 
         cards.setAlignment(
@@ -226,6 +231,11 @@ public class HomeView extends VBox {
 
         HBox.setHgrow(
                 accountCard,
+                Priority.ALWAYS
+        );
+
+        HBox.setHgrow(
+                launcherCard,
                 Priority.ALWAYS
         );
 
