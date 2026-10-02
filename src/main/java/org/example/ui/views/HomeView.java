@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
@@ -265,11 +266,41 @@ public class HomeView extends StackPane {
                         ? "home-recent-stop"
                         : "home-recent-play"
         );
-        play.setMinWidth(84);
+        play.setMinWidth(92);
+        play.setPrefWidth(92);
+        play.setMinHeight(36);
+        play.setPrefHeight(36);
+        play.setMaxHeight(36);
+        play.setCursor(Cursor.HAND);
+        play.setPickOnBounds(true);
+        play.setFocusTraversable(true);
+
+        play.setOnMousePressed(event -> {
+            play.getProperties().put("vanta-home-pressed", true);
+            play.setScaleX(0.96);
+            play.setScaleY(0.96);
+            event.consume();
+        });
+
+        play.setOnMouseReleased(event -> {
+            play.getProperties().put("vanta-home-pressed", false);
+            play.setScaleX(1.0);
+            play.setScaleY(1.0);
+            event.consume();
+        });
+
+        play.setOnMouseEntered(event -> {
+            play.setScaleX(1.025);
+            play.setScaleY(1.025);
+        });
+
+        play.setOnMouseExited(event -> {
+            play.setScaleX(1.0);
+            play.setScaleY(1.0);
+            play.getProperties().put("vanta-home-pressed", false);
+        });
 
         play.setOnAction(event -> {
-            event.consume();
-
             if (launchService.isRunning(instance)) {
                 launchService.close(instance);
                 return;
@@ -310,9 +341,9 @@ public class HomeView extends StackPane {
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(14, 16, 14, 16));
         card.setMaxWidth(Double.MAX_VALUE);
+        card.setPickOnBounds(false);
         card.getStyleClass().add("home-recent-card");
 
-        org.example.ui.AnimationUtils.installInteractiveAnimations(card);
         org.example.ui.AnimationUtils.slideFadeVertical(card, 10);
 
         return card;
