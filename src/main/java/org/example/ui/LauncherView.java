@@ -197,7 +197,9 @@ public class LauncherView {
                 );
 
         settingsView =
-                new SettingsView();
+                new SettingsView(
+                        this::setAccentColor
+                );
 
         sidebar.setOnPageSelected(
                 this::showPage
@@ -1069,6 +1071,17 @@ public class LauncherView {
 
         } catch (Exception ignored) {
         }
+    }
+
+    private void setAccentColor(String accent) {
+
+        if (accent == null || !accent.matches("#[0-9A-Fa-f]{6}")) {
+            return;
+        }
+
+        window.setStyle(
+                "-vanta-accent: " + accent.toUpperCase() + ";"
+        );
     }
 
     // =============================================================
