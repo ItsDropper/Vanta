@@ -84,11 +84,26 @@ public final class ServerHistoryManager {
     }
 
     public static synchronized List<ServerHistoryEntry> getRecent() {
-        return load().stream()
+        List<ServerHistoryEntry> sorted = load().stream()
                 .sorted(Comparator.comparingLong(
                         ServerHistoryEntry::getLastPlayed
                 ).reversed())
                 .toList();
+
+        List<ServerHistoryEntry> recent = new ArrayList<>();
+        java.util.HashSet<String> seen = new java.util.HashSet<>();
+
+        for (ServerHistoryEntry entry : sorted) {
+            String key = entry.getInstanceId()
+                    + "\u0000"
+                    + serverIdentity(entry.getHost());
+
+            if (seen.add(key)) {
+                recent.add(entry);
+            }
+        }
+
+        return recent;
     }
 
     private static List<ServerHistoryEntry> load() {
