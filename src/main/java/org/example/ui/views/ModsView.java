@@ -6,6 +6,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -14,6 +16,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import org.example.launcher.model.Instance;
+import org.example.ui.components.IconView;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -21,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.awt.Desktop;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,6 +45,7 @@ public class ModsView extends VBox {
 
     private final VBox contentList;
     private final Label statusLabel;
+    private final TextField searchField;
 
     private ContentType selectedType;
 
@@ -117,13 +122,21 @@ public class ModsView extends VBox {
                         subtitle
                 );
 
+        searchField = new TextField();
+        searchField.setPromptText("Search installed content...");
+        searchField.getStyleClass().add("instances-search");
+        searchField.textProperty().addListener(
+                (observable, oldValue, newValue) -> loadInstalledContent()
+        );
+
         // =========================================================
         // NAVIGATION
         // =========================================================
 
         Button modsButton =
                 new Button(
-                        "MODS"
+                        "MODS",
+                        IconView.create(IconView.Type.PACKAGE, 16)
                 );
 
         modsButton.getStyleClass().add(
@@ -132,7 +145,8 @@ public class ModsView extends VBox {
 
         Button packsButton =
                 new Button(
-                        "PACKS"
+                        "PACKS",
+                        IconView.create(IconView.Type.PACKAGE, 16)
                 );
 
         packsButton.getStyleClass().add(
@@ -141,7 +155,8 @@ public class ModsView extends VBox {
 
         Button shadersButton =
                 new Button(
-                        "SHADERS"
+                        "SHADERS",
+                        IconView.create(IconView.Type.SHIELD, 16)
                 );
 
         shadersButton.getStyleClass().add(
@@ -150,7 +165,8 @@ public class ModsView extends VBox {
 
         Button browseButton =
                 new Button(
-                        "BROWSE CONTENT"
+                        "BROWSE CONTENT",
+                        IconView.create(IconView.Type.SEARCH, 16)
                 );
 
         browseButton.getStyleClass().add(
@@ -159,7 +175,8 @@ public class ModsView extends VBox {
 
         Button screenshotsButton =
                 new Button(
-                        "SCREENSHOTS"
+                        "SCREENSHOTS",
+                        IconView.create(IconView.Type.PACKAGE, 16)
                 );
 
         screenshotsButton.getStyleClass().add(
@@ -168,7 +185,8 @@ public class ModsView extends VBox {
 
         Button settingsButton =
                 new Button(
-                        "INSTANCE SETTINGS"
+                        "INSTANCE SETTINGS",
+                        IconView.create(IconView.Type.SETTINGS, 16)
                 );
 
         settingsButton.getStyleClass().add(
@@ -220,26 +238,51 @@ public class ModsView extends VBox {
                         onInstanceSettings.run()
         );
 
+        Button refreshButton =
+                new Button(
+                        "REFRESH",
+                        IconView.create(IconView.Type.REFRESH, 16)
+                );
+        refreshButton.getStyleClass().add("secondary-button");
+        refreshButton.setOnAction(event -> loadInstalledContent());
+
+        Button folderButton =
+                new Button(
+                        "OPEN FOLDER",
+                        IconView.create(IconView.Type.FOLDER, 16)
+                );
+        folderButton.getStyleClass().add("secondary-button");
+        folderButton.setOnAction(event -> openContentFolder());
+
         HBox navigation =
                 new HBox(
                         10,
                         modsButton,
                         packsButton,
-                        shadersButton,
+                        shadersButton
+                );
+        navigation.setAlignment(Pos.CENTER_LEFT);
+        navigation.getStyleClass().add("instance-tabs");
+
+        HBox actions =
+                new HBox(
+                        10,
+                        searchField,
                         browseButton,
+                        folderButton,
+                        refreshButton,
                         screenshotsButton,
                         settingsButton
                 );
-
-        navigation.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        actions.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
 
         VBox header =
                 new VBox(
                         14,
                         headerText,
-                        navigation
+                        navigation,
+                        actions
                 );
 
         // =========================================================
@@ -443,6 +486,15 @@ public class ModsView extends VBox {
                                 .filter(
                                         this::isValidContentFile
                                 )
+                                .filter(path -> {
+                                    String query = searchField.getText()
+                                            .trim()
+                                            .toLowerCase();
+                                    return query.isEmpty()
+                                            || path.getFileName().toString()
+                                            .toLowerCase()
+                                            .contains(query);
+                                })
                                 .sorted()
                                 .toList();
             }
@@ -534,7 +586,8 @@ public class ModsView extends VBox {
         return switch (selectedType) {
 
             case MODS ->
-                    name.endsWith(".jar");
+                    name.endsWith(".jar")
+                            || name.endsWith(".jar.disabled");
 
             case RESOURCE_PACKS, SHADERS ->
                     name.endsWith(".zip");
@@ -603,28 +656,53 @@ public class ModsView extends VBox {
                 Priority.ALWAYS
         );
 
+        boolean disabled =
+                filename.toLowerCase().endsWith(".jar.disabled");
+
+        Button toggleButton =
+                new Button(
+                        disabled ? "ENABLE" : "DISABLE",
+                        IconView.create(
+                                disabled
+                                        ? IconView.Type.CHECK
+                                        : IconView.Type.PAUSE,
+                                15
+                        )
+                );
+        toggleButton.getStyleClass().add("secondary-button");
+        toggleButton.setTooltip(
+                new Tooltip(
+                        disabled
+                                ? "Enable this mod"
+                                : "Disable this mod"
+                )
+        );
+        toggleButton.setOnAction(
+                event -> toggleMod(mod)
+        );
+
         Button removeButton =
                 new Button(
-                        "REMOVE"
+                        "REMOVE",
+                        IconView.create(IconView.Type.TRASH, 15)
                 );
+        removeButton.getStyleClass().add("secondary-button");
+        removeButton.setTooltip(new Tooltip("Remove this mod"));
+        removeButton.setOnAction(event -> removeFile(mod));
 
-        removeButton.getStyleClass().add(
-                "secondary-button"
-        );
-
-        removeButton.setOnAction(
-                event ->
-                        removeFile(
-                                mod
-                        )
-        );
+        HBox buttons =
+                new HBox(
+                        8,
+                        toggleButton,
+                        removeButton
+                );
 
         HBox row =
                 new HBox(
                         16,
                         iconBox,
                         information,
-                        removeButton
+                        buttons
                 );
 
         row.setAlignment(
@@ -1223,6 +1301,46 @@ public class ModsView extends VBox {
     // REMOVE
     // =============================================================
 
+    private void toggleMod(Path file) {
+        try {
+            String name = file.getFileName().toString();
+            Path target;
+
+            if (name.toLowerCase().endsWith(".jar.disabled")) {
+                target = file.resolveSibling(
+                        name.substring(0, name.length() - ".disabled".length())
+                );
+            } else {
+                target = file.resolveSibling(name + ".disabled");
+            }
+
+            Files.move(file, target);
+            loadInstalledContent();
+        } catch (IOException e) {
+            statusLabel.setText(
+                    "Could not change mod state."
+            );
+        }
+    }
+
+    private void openContentFolder() {
+        Path directory = switch (selectedType) {
+            case MODS -> instance.getDirectory().resolve("mods");
+            case RESOURCE_PACKS -> instance.getDirectory().resolve("resourcepacks");
+            case SHADERS -> instance.getDirectory().resolve("shaderpacks");
+        };
+
+        try {
+            Files.createDirectories(directory);
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(directory.toFile());
+            }
+        } catch (Exception e) {
+            statusLabel.setText("Could not open content folder.");
+        }
+    }
+
     private void removeFile(
             Path file
     ) {
@@ -1257,6 +1375,13 @@ public class ModsView extends VBox {
 
         String lower =
                 filename.toLowerCase();
+
+        if (lower.endsWith(".jar.disabled")) {
+            return filename.substring(
+                    0,
+                    filename.length() - ".jar.disabled".length()
+            );
+        }
 
         if (lower.endsWith(".jar")
                 || lower.endsWith(".zip")) {
