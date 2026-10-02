@@ -9,7 +9,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
@@ -70,9 +69,9 @@ public class HomeView extends StackPane {
 
         MinecraftBackdrop backdrop = new MinecraftBackdrop();
         StackPane hero = new StackPane();
-        hero.setMinHeight(240);
-        hero.setPrefHeight(240);
-        hero.setMaxHeight(240);
+        hero.setMinHeight(190);
+        hero.setPrefHeight(190);
+        hero.setMaxHeight(190);
         hero.getStyleClass().add("home-hero");
         Rectangle heroClip = new Rectangle();
         heroClip.setArcWidth(32);
@@ -102,8 +101,9 @@ public class HomeView extends StackPane {
         recentScroll.setFitToWidth(true);
         recentScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         recentScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        recentScroll.setPrefViewportHeight(270);
-        recentScroll.setMaxHeight(330);
+        recentScroll.setPrefViewportHeight(92);
+        recentScroll.setMinHeight(92);
+        recentScroll.setMaxHeight(150);
         recentScroll.getStyleClass().add("home-recent-scroll");
         VBox.setVgrow(recentScroll, Priority.ALWAYS);
 
@@ -156,8 +156,9 @@ public class HomeView extends StackPane {
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        scroll.setPrefViewportHeight(150);
-        scroll.setMaxHeight(190);
+        scroll.setPrefViewportHeight(82);
+        scroll.setMinHeight(82);
+        scroll.setMaxHeight(120);
         scroll.getStyleClass().add("home-recent-scroll");
 
         card.getChildren().addAll(
@@ -204,17 +205,21 @@ public class HomeView extends StackPane {
                 .limit(6)
                 .toList();
 
-        if (recent.isEmpty()) {
+        // Keep the Home layout useful even when play history is empty.
+        if (recent.isEmpty() && !instances.isEmpty()) {
+            recent = List.of(instances.get(0));
+            recentStatus.setText("1 instance available");
+        } else if (recent.isEmpty()) {
             recentStatus.setText(
-                    "No play history yet. Launch an instance and it will appear here."
+                    "No instances yet. Create an instance to get started."
             );
             return;
+        } else {
+            recentStatus.setText(
+                    recent.size() + " recent instance"
+                            + (recent.size() == 1 ? "" : "s")
+            );
         }
-
-        recentStatus.setText(
-                recent.size() + " recent instance"
-                        + (recent.size() == 1 ? "" : "s")
-        );
 
         for (Instance instance : recent) {
             recentList.getChildren().add(createRecentCard(instance));
