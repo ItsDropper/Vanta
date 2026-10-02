@@ -1,6 +1,6 @@
 package org.example.launcher.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.example.launcher.MinecraftLocator;
@@ -93,13 +93,73 @@ public final class ServerHistoryManager {
         }
 
         try {
-            return MAPPER.readValue(
-                    FILE.toFile(),
-                    new TypeReference<List<ServerHistoryEntry>>() {}
+            JsonNode root = MAPPER.readTree(FILE.toFile());
+            List<ServerHistoryEntry> entries = new ArrayList<>();
+
+            if (root == null || root.isNull()) {
+                return entries;
+            }
+
+            JsonNode values = root.isArray()
+                    ? root
+                    : root.has("entries") && root.get("entries").isArray()
+                            ? root.get("entries")
+                            : null;
+
+            if (values == null) {
+                return entries;
+            }
+
+            for (JsonNode value : values) {
+                String host = text(value, "host");
+                if (host == null || host.isBlank()) {
+                    host = text(value, "address");
+                }
+
+                if (host == null || host.isBlank()) {
+                    continue;
+                }
+
+                int port = value.has("port") && value.get("port").canConvertToInt()
+                        ? value.get("port").asInt()
+                        : 25565;
+
+                if (port < 1 || port > 65535) {
+                    port = 25565;
+                }
+
+                String instanceId = text(value, "instanceId");
+                String instanceName = text(value, "instanceName");
+
+                long lastPlayed = value.has("lastPlayed")
+                        && value.get("lastPlayed").canConvertToLong()
+                        ? value.get("lastPlayed").asLong()
+                        : 0L;
+
+                entries.add(new ServerHistoryEntry(
+                        host,
+                        port,
+                        instanceId,
+                        instanceName,
+                        lastPlayed
+                ));
+            }
+
+            return entries;
+        } catch (Exception ex) {
+            System.err.println(
+                    "Vanta: failed to read server history from "
+                            + FILE + ": " + ex.getMessage()
             );
-        } catch (Exception ignored) {
             return new ArrayList<>();
         }
+    }
+
+    private static String text(JsonNode node, String field) {
+        JsonNode value = node.get(field);
+        return value != null && !value.isNull()
+                ? value.asText()
+                : null;
     }
 
     private static void save(List<ServerHistoryEntry> entries) {
