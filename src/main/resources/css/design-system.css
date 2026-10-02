@@ -1529,3 +1529,37 @@
 .minecraft-backdrop {
     -fx-background-color: transparent;
 }
+
+
+/* ---------- full-page Home background layout ---------- */
+
+.home-page {
+    -fx-background-color: #0f131a;
+}
+
+.home-content-scroll,
+.home-content-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.home-content-scroll {
+    -fx-padding: 0;
+}
+
+.home-content-scroll > .viewport {
+    -fx-padding: 0;
+}
+
+.home-content-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.home-content-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.home-content-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(120, 135, 155, 0.35);
+    -fx-background-radius: 6px;
+}
