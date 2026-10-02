@@ -282,13 +282,29 @@ public class MinecraftLauncher {
         if (data.serverHost != null
                 && !data.serverHost.isBlank()) {
 
-            command.add("--server");
-            command.add(data.serverHost);
+            int port =
+                    data.serverPort > 0
+                            ? data.serverPort
+                            : 25565;
 
-            command.add("--port");
-            command.add(String.valueOf(
-                    data.serverPort > 0 ? data.serverPort : 25565
-            ));
+            /*
+             * Minecraft 1.20+ uses Quick Play for direct server
+             * launches. The old --server/--port arguments are no
+             * longer supported.
+             *
+             * Quick Play performs the connection after Minecraft
+             * finishes its normal startup/resource loading.
+             */
+            if (supportsQuickPlay(data.version)) {
+                command.add("--quickPlayMultiplayer");
+                command.add(data.serverHost + ":" + port);
+            } else {
+                command.add("--server");
+                command.add(data.serverHost);
+
+                command.add("--port");
+                command.add(String.valueOf(port));
+            }
         }
 
         // =============================================================
@@ -368,6 +384,27 @@ public class MinecraftLauncher {
         );
 
         return process;
+    }
+
+    private static boolean supportsQuickPlay(
+            String version
+    ) {
+        if (version == null || version.isBlank()) {
+            return false;
+        }
+
+        String[] parts = version.split("\\.");
+
+        try {
+            int major = Integer.parseInt(parts[0]);
+            int minor = parts.length > 1
+                    ? Integer.parseInt(parts[1])
+                    : 0;
+
+            return major > 1 || (major == 1 && minor >= 20);
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
     }
 
     // =============================================================
