@@ -276,6 +276,22 @@ public class MinecraftLauncher {
         }
 
         // =============================================================
+        // SERVER
+        // =============================================================
+
+        if (data.serverHost != null
+                && !data.serverHost.isBlank()) {
+
+            command.add("--server");
+            command.add(data.serverHost);
+
+            command.add("--port");
+            command.add(String.valueOf(
+                    data.serverPort > 0 ? data.serverPort : 25565
+            ));
+        }
+
+        // =============================================================
         // GAME ARGUMENTS
         // =============================================================
 
