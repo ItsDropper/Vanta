@@ -1425,3 +1425,22 @@
     -fx-font-size: 15px;
     -fx-font-weight: 700;
 }
+
+
+/* Home / Modrinth-style recent instances */
+.home-section-title { -fx-text-fill: #edf2f8; -fx-font-size: 18px; -fx-font-weight: 900; }
+.home-section-subtitle { -fx-text-fill: #8491a3; -fx-font-size: 12px; }
+.home-recent-section { -fx-background-color: transparent; }
+.home-recent-scroll, .home-recent-scroll > .viewport { -fx-background-color: transparent; -fx-border-color: transparent; }
+.home-recent-list { -fx-background-color: transparent; }
+.home-recent-card { -fx-background-color: #171e28; -fx-border-color: #283342; -fx-border-radius: 10px; -fx-background-radius: 10px; }
+.home-recent-card:hover { -fx-background-color: #1b2430; -fx-border-color: #3a485a; }
+.home-recent-icon { -fx-min-width: 36px; -fx-pref-width: 36px; -fx-min-height: 36px; -fx-pref-height: 36px; -fx-background-color: -vanta-accent-soft; -fx-background-radius: 9px; -fx-alignment: CENTER; }
+.home-recent-name { -fx-text-fill: #edf2f8; -fx-font-size: 14px; -fx-font-weight: 800; }
+.home-recent-meta { -fx-text-fill: #8491a3; -fx-font-size: 11px; }
+.home-recent-playtime { -fx-text-fill: #697789; -fx-font-size: 10px; }
+.home-recent-play, .home-recent-stop { -fx-min-width: 84px; -fx-pref-width: 84px; -fx-min-height: 32px; -fx-background-radius: 7px; -fx-font-size: 10px; -fx-font-weight: 900; }
+.home-recent-play { -fx-background-color: -vanta-accent; -fx-text-fill: white; }
+.home-recent-stop { -fx-background-color: #303b49; -fx-text-fill: #edf2f8; }
+.home-recent-status { -fx-text-fill: #697789; -fx-font-size: 11px; }
+.home-account-card, .home-status-card { -fx-min-height: 112px; }
