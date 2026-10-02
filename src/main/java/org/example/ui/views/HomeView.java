@@ -443,9 +443,6 @@ public class HomeView extends StackPane {
         recentServersList.getChildren().clear();
 
         List<ServerHistoryEntry> recent = history.stream()
-                .filter(entry -> instances.stream().anyMatch(
-                        instance -> instance.getId().equals(entry.getInstanceId())
-                ))
                 .limit(5)
                 .toList();
 
@@ -456,10 +453,7 @@ public class HomeView extends StackPane {
             return;
         }
 
-        recentServersStatus.setText(
-                recent.size() + " recent server"
-                        + (recent.size() == 1 ? "" : "s")
-        );
+        int rendered = 0;
 
         for (ServerHistoryEntry entry : recent) {
             Instance instance = instances.stream()
@@ -467,16 +461,35 @@ public class HomeView extends StackPane {
                             candidate.getId().equals(entry.getInstanceId())
                     )
                     .findFirst()
-                    .orElse(null);
+                    .orElseGet(() -> instances.stream()
+                            .filter(candidate ->
+                                    candidate.getName().equalsIgnoreCase(
+                                            entry.getInstanceName()
+                                    )
+                            )
+                            .findFirst()
+                            .orElse(null));
 
             if (instance != null) {
                 recentServersList.getChildren().add(
                         createRecentServerCard(instance, entry)
                 );
+                rendered++;
             }
         }
-    }
 
+        if (rendered == 0) {
+            recentServersStatus.setText(
+                    "Recent server history is unavailable for the installed instances."
+            );
+            return;
+        }
+
+        recentServersStatus.setText(
+                rendered + " recent server"
+                        + (rendered == 1 ? "" : "s")
+        );
+    }
     private HBox createRecentServerCard(
             Instance instance,
             ServerHistoryEntry server
