@@ -789,10 +789,38 @@ public class LauncherView {
     private void instanceCreated() {
 
         instancesView.refresh();
+        homeView.refreshRecentInstances();
 
         content.getChildren().setAll(
                 instancesView
         );
+    }
+
+    private void launchFromHome(Instance instance) {
+        if (instance == null) {
+            return;
+        }
+
+        Thread thread = new Thread(() -> {
+            try {
+                launchService.launch(instance);
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+
+                Platform.runLater(() ->
+                        notifications.error(
+                                "Minecraft failed to launch",
+                                ex.getMessage() != null
+                                        ? ex.getMessage()
+                                        : "Vanta could not start this instance."
+                        )
+                );
+            }
+        });
+
+        thread.setDaemon(true);
+        thread.setName("Vanta-Home-Launch");
+        thread.start();
     }
 
     private void showInstances() {
