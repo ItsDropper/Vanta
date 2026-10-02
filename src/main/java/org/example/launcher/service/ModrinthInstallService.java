@@ -269,13 +269,13 @@ private Path installModVersion(
 
         try {
 
-            List<ModrinthDependency> dependencies =
+            List<ModrinthDependency> modDependencies =
                     version.getDependencies();
 
-            if (dependencies != null) {
+            if (modDependencies != null) {
 
                 for (ModrinthDependency dependency :
-                        dependencies) {
+                        modDependencies) {
 
                     if (dependency == null
                             || dependency.isOptional()
@@ -389,13 +389,13 @@ private Path installModProject(
                 );
             }
 
-            List<ModrinthDependency> dependencies =
+            List<ModrinthDependency> modDependencies =
                     compatibleVersion.getDependencies();
 
-            if (dependencies != null) {
+            if (modDependencies != null) {
 
                 for (ModrinthDependency dependency :
-                        dependencies) {
+                        modDependencies) {
 
                     if (dependency == null
                             || dependency.isOptional()
