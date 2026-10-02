@@ -583,14 +583,19 @@ public class HomeView extends StackPane {
         HBox.setHgrow(info, Priority.ALWAYS);
 
         boolean instanceAvailable = instance != null;
-        boolean instanceRunning =
-                instanceAvailable && launchService.isRunning(instance);
+        ServerTarget runningTarget = launchService.getRunningServerTarget();
+        boolean serverRunning =
+                instanceAvailable
+                        && launchService.isRunning(instance)
+                        && runningTarget != null
+                        && runningTarget.host().equalsIgnoreCase(server.getHost())
+                        && runningTarget.port() == server.getPort();
 
         Button play = new Button(
-                instanceRunning ? "CLOSE" : "PLAY"
+                serverRunning ? "CLOSE" : "PLAY"
         );
         play.getStyleClass().add(
-                instanceRunning
+                serverRunning
                         ? "home-recent-stop"
                         : "home-recent-play"
         );
