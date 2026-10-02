@@ -699,6 +699,9 @@ public class ModsView extends VBox {
         javafx.scene.shape.Circle knob = new javafx.scene.shape.Circle(12);
         toggleButton.setGraphic(knob);
         toggleButton.setSelected(!disabled);
+        knob.setFill(javafx.scene.paint.Color.WHITE);
+        knob.setMouseTransparent(true);
+        knob.setTranslateX(toggleButton.isSelected() ? 12 : -12);
         toggleButton.getStyleClass().add("mod-toggle");
         updateModToggleStyle(toggleButton);
         toggleButton.setTooltip(
@@ -711,6 +714,7 @@ public class ModsView extends VBox {
         toggleButton.setOnAction(event -> {
             toggleMod(mod);
             toggleButton.setSelected(!toggleButton.isSelected());
+            knob.setTranslateX(toggleButton.isSelected() ? 12 : -12);
             updateModToggleStyle(toggleButton);
             toggleButton.setTooltip(new Tooltip(
                     toggleButton.isSelected()
