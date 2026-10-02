@@ -665,3 +665,213 @@
 .notification-progress > .track {
     -fx-background-color: #252e3a;
 }
+
+
+/* ---------- accounts ---------- */
+
+.account-panel {
+    -fx-background-color: #151a22;
+    -fx-border-color: #27303d;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+}
+
+.account-name {
+    -fx-text-fill: #f1f5fa;
+}
+
+.account-detail {
+    -fx-text-fill: #8793a4;
+}
+
+.connected-label {
+    -fx-text-fill: #77a7ff;
+}
+
+.account-switcher {
+    -fx-background-color: #131922;
+}
+
+.account-sign-out-button {
+    -fx-background-color: #24181c;
+    -fx-border-color: #523039;
+}
+
+/* ---------- instance settings ---------- */
+
+.settings-page {
+    -fx-background-color: transparent;
+}
+
+.settings-section-title {
+    -fx-text-fill: #7ea7ff;
+}
+
+.instance-setting-label {
+    -fx-text-fill: #7d899a;
+}
+
+.instance-setting-value {
+    -fx-text-fill: #eef2f7;
+}
+
+.instance-directory {
+    -fx-text-fill: #7b8798;
+}
+
+.instance-settings-divider {
+    -fx-background-color: #27303d;
+}
+
+.settings-checkbox {
+    -fx-text-fill: #dce3ec;
+}
+
+.settings-checkbox .box {
+    -fx-background-color: #111720;
+    -fx-border-color: #364253;
+}
+
+.settings-checkbox:selected .box {
+    -fx-background-color: #4f82f5;
+    -fx-border-color: #4f82f5;
+}
+
+/* ---------- login ---------- */
+
+.login-window {
+    -fx-background-color: #0d1219;
+    -fx-border-color: #27303d;
+}
+
+.login-logo {
+    -fx-text-fill: #eef3fa;
+}
+
+.login-title {
+    -fx-text-fill: #f5f8fc;
+}
+
+.login-subtitle,
+.login-instruction {
+    -fx-text-fill: #7e899a;
+}
+
+.verification-code {
+    -fx-background-color: #111720;
+    -fx-border-color: #303b49;
+}
+
+.verification-code:hover {
+    -fx-background-color: #151c26;
+    -fx-border-color: #435266;
+}
+
+.verification-code:focused {
+    -fx-border-color: #5688ed;
+}
+
+.login-status.active {
+    -fx-text-fill: #77a7ff;
+}
+
+/* ---------- Modrinth/content browsing ---------- */
+
+.mod-icon-box {
+    -fx-background-color: #1a2230;
+    -fx-border-color: #303d50;
+}
+
+.mod-details-header,
+.mod-details-card,
+.mod-details-header-container {
+    -fx-background-color: #151a22;
+    -fx-border-color: #27303d;
+}
+
+.mod-details-title {
+    -fx-text-fill: #f2f6fb;
+}
+
+.mod-details-author,
+.mod-details-description {
+    -fx-text-fill: #8d98a9;
+}
+
+.mod-details-stat-value,
+.mod-details-info-value {
+    -fx-text-fill: #edf2f8;
+}
+
+.mod-details-stat-label,
+.mod-details-card .instance-setting-label {
+    -fx-text-fill: #7c889a;
+}
+
+.mod-details-header .instance-play-button {
+    -fx-background-color: #1b2a43;
+    -fx-border-color: #36588c;
+    -fx-text-fill: #a9c5ff;
+}
+
+.mod-details-header .instance-play-button:hover {
+    -fx-background-color: #223553;
+    -fx-border-color: #4a73b4;
+}
+
+/* ---------- progress ---------- */
+
+.progress-bar {
+    -fx-background-color: transparent;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #252e3a;
+    -fx-background-radius: 5px;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: #5688ed;
+    -fx-background-radius: 5px;
+    -fx-background-insets: 0;
+}
+
+/* ---------- tables / lists ---------- */
+
+.list-view,
+.table-view,
+.tree-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.list-cell,
+.table-row-cell,
+.tree-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c5ceda;
+}
+
+.list-cell:hover,
+.table-row-cell:hover,
+.tree-cell:hover {
+    -fx-background-color: #171e28;
+}
+
+.list-cell:selected,
+.table-row-cell:selected,
+.tree-cell:selected {
+    -fx-background-color: #1b2a43;
+    -fx-text-fill: #eef4ff;
+}
+
+/* ---------- disabled controls ---------- */
+
+.button:disabled,
+.text-field:disabled,
+.combo-box-base:disabled,
+.check-box:disabled {
+    -fx-opacity: 0.48;
+}
+
+/* Keep the interface flat and intentional: no gradients anywhere. */
