@@ -144,7 +144,7 @@ public class HomeView extends StackPane {
         recentList = new FlowPane();
         recentList.setHgap(10);
         recentList.setVgap(10);
-        recentList.setPrefWrapLength(900);
+        recentList.prefWrapLengthProperty().bind(recentList.widthProperty());
         recentList.setMaxWidth(Double.MAX_VALUE);
         recentList.setMinHeight(0);
         recentList.getStyleClass().add("home-recent-list");
@@ -179,7 +179,7 @@ public class HomeView extends StackPane {
         recentServersList = new FlowPane();
         recentServersList.setHgap(10);
         recentServersList.setVgap(10);
-        recentServersList.setPrefWrapLength(900);
+        recentServersList.prefWrapLengthProperty().bind(recentServersList.widthProperty());
         recentServersList.setMaxWidth(Double.MAX_VALUE);
         recentServersList.setMinHeight(0);
         recentServersList.getStyleClass().add("home-server-list");
@@ -406,9 +406,9 @@ public class HomeView extends StackPane {
         HBox card = new HBox(14, icon, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(14, 16, 14, 16));
-        card.setMinWidth(320);
-        card.setPrefWidth(430);
-        card.setMaxWidth(600);
+        card.setMinWidth(300);
+        card.setPrefWidth(420);
+        card.setMaxWidth(520);
         card.setPickOnBounds(true);
         card.setMouseTransparent(false);
         card.getStyleClass().add("home-recent-card");
@@ -628,9 +628,9 @@ public class HomeView extends StackPane {
         HBox card = new HBox(14, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(12, 14, 12, 14));
-        card.setMinWidth(320);
-        card.setPrefWidth(430);
-        card.setMaxWidth(600);
+        card.setMinWidth(300);
+        card.setPrefWidth(420);
+        card.setMaxWidth(520);
         card.getStyleClass().add("home-server-card");
 
         card.setPickOnBounds(true);
