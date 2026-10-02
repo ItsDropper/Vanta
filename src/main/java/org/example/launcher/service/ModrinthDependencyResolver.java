@@ -2551,4 +2551,28 @@ private boolean isProvidedByFabricApi(
          */
         return true;
     }
+    private boolean isCompatible(ModrinthVersion version, String minecraftVersion, String loader) {
+        if (!isGameVersionCompatible(version, minecraftVersion)) return false;
+        if (version == null || version.getLoaders() == null || loader == null) return false;
+        return version.getLoaders().stream().map(this::normalizeLoader).anyMatch(loader::equals);
+    }
+
+    private boolean isGameVersionCompatible(ModrinthVersion version, String minecraftVersion) {
+        if (version == null || version.getGameVersions() == null || minecraftVersion == null || minecraftVersion.isBlank()) return false;
+        if (version.getGameVersions().contains(minecraftVersion)) return true;
+        String prefix = minecraftVersion + ".";
+        return version.getGameVersions().stream().anyMatch(v -> v != null && v.startsWith(prefix));
+    }
+
+    private ModrinthFile findPrimaryFile(ModrinthVersion version) {
+        if (version == null || version.getFiles() == null || version.getFiles().isEmpty()) return null;
+        return version.getFiles().stream().filter(ModrinthFile::isPrimary).findFirst().orElse(version.getFiles().get(0));
+    }
+
+    private ModrinthVersion findCompatibleVersion(List<ModrinthVersion> versions, String minecraftVersion, String loader) {
+        if (versions == null || versions.isEmpty()) return null;
+        return versions.stream().filter(v -> isCompatible(v, minecraftVersion, loader)).filter(v -> "release".equalsIgnoreCase(v.getVersionType())).findFirst()
+                .orElseGet(() -> versions.stream().filter(v -> isCompatible(v, minecraftVersion, loader)).findFirst().orElse(null));
+    }
+
 }
