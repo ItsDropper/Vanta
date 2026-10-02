@@ -75,9 +75,14 @@ public class HomeView extends StackPane {
         VBox recentSection = createRecentInstancesSection();
         VBox serverCard = createRecentServersCard();
 
-        VBox contentBox = new VBox(18, recentSection, serverCard);
+        VBox contentBox = new VBox(
+                18,
+                header,
+                recentSection,
+                serverCard
+        );
         contentBox.setFillWidth(true);
-        contentBox.setPadding(new Insets(88, 36, 28, 36));
+        contentBox.setPadding(new Insets(24, 36, 28, 36));
         contentBox.setMaxWidth(Double.MAX_VALUE);
         contentBox.setMaxHeight(Double.MAX_VALUE);
 
@@ -90,10 +95,12 @@ public class HomeView extends StackPane {
         homeScroll.getStyleClass().add("home-content-scroll");
         homeScroll.setManaged(true);
 
-        getChildren().addAll(backdrop, homeScroll, header);
+        getChildren().addAll(backdrop, homeScroll);
         StackPane.setAlignment(homeScroll, Pos.TOP_LEFT);
-        StackPane.setAlignment(header, Pos.TOP_LEFT);
-        StackPane.setMargin(header, new Insets(24, 36, 0, 36));
+
+        // Home content is a single interactive hierarchy.
+        // Keeping the header inside the ScrollPane prevents an overlay node
+        // from ever sitting above the recent-instance controls.
 
         accountService.addListener(this::onAccountChanged);
         launchService.addStateListener(this::onLaunchStateChanged);
@@ -268,6 +275,8 @@ public class HomeView extends StackPane {
         play.setCursor(Cursor.HAND);
         play.setPickOnBounds(true);
         play.setFocusTraversable(true);
+        play.setDisable(false);
+        play.setMouseTransparent(false);
 
         play.setOnMousePressed(event -> {
             play.getProperties().put("vanta-home-pressed", true);
@@ -342,6 +351,7 @@ public class HomeView extends StackPane {
         card.setPadding(new Insets(14, 16, 14, 16));
         card.setMaxWidth(Double.MAX_VALUE);
         card.setPickOnBounds(true);
+        card.setMouseTransparent(false);
         card.getStyleClass().add("home-recent-card");
 
         // The whole card is a fallback hit target. The visible PLAY button
@@ -391,8 +401,6 @@ public class HomeView extends StackPane {
             thread.setName("Vanta-Home-Launch-Fallback");
             thread.start();
         });
-
-        org.example.ui.AnimationUtils.slideFadeVertical(card, 10);
 
         return card;
     }
