@@ -124,13 +124,11 @@ public class LauncherView {
                 new DiscordPresenceService();
 
         launchService.addStateListener(state -> {
-            if (state == LaunchService.LaunchState.RUNNING) {
-                Instance running = launchService.getRunningInstance();
-                if (running != null) {
-                    discordPresenceService.update(running);
-                }
-            } else if (state == LaunchService.LaunchState.IDLE
-                    && launchService.getRunningInstance() == null) {
+            Instance running = launchService.getRunningInstance();
+
+            if (running != null) {
+                discordPresenceService.update(running);
+            } else if (state == LaunchService.LaunchState.IDLE) {
                 discordPresenceService.clear();
             }
         });
