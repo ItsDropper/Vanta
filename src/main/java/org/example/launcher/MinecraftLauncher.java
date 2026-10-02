@@ -15,7 +15,9 @@ public class MinecraftLauncher {
     ) throws Exception {
 
         Path minecraft =
-                data.minecraftDirectory;
+                data.minecraftDirectory
+                        .toAbsolutePath()
+                        .normalize();
 
         // =============================================================
         // CLASSPATH
@@ -357,6 +359,11 @@ public class MinecraftLauncher {
                         + data.fullscreen
         );
 
+        System.out.println(
+                "Minecraft game directory: "
+                        + minecraft
+        );
+
         // =============================================================
         // PROCESS
         // =============================================================
@@ -365,6 +372,16 @@ public class MinecraftLauncher {
                 new ProcessBuilder(
                         command
                 );
+
+        /*
+         * Make the Minecraft instance directory the process working
+         * directory as well as the explicit --gameDir. This prevents
+         * relative paths such as "config" from resolving beside
+         * Vanta.exe or another launcher working directory.
+         */
+        processBuilder.directory(
+                minecraft.toFile()
+        );
 
         /*
          * Do NOT use inheritIO() here.
