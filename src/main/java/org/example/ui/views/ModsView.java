@@ -29,6 +29,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.jar.JarFile;
@@ -468,36 +469,42 @@ public class ModsView extends VBox {
                     directory
             );
 
-            List<Path> files;
+            List<Path> files = new ArrayList<>();
 
-            try (var stream =
-                         Files.list(
-                                 directory
-                         )) {
+            List<Path> directories =
+                    selectedType == ContentType.ALL
+                            ? List.of(
+                                    instance.getDirectory().resolve("mods"),
+                                    instance.getDirectory().resolve("resourcepacks"),
+                                    instance.getDirectory().resolve("shaderpacks")
+                            )
+                            : List.of(directory);
 
-                files =
-                        stream
-                                .filter(
-                                        path ->
-                                                !Files.isDirectory(
-                                                        path
-                                                )
-                                )
-                                .filter(
-                                        this::isValidContentFile
-                                )
-                                .filter(path -> {
-                                    String query = searchField.getText()
-                                            .trim()
-                                            .toLowerCase();
-                                    return query.isEmpty()
+            String query =
+                    searchField.getText()
+                            .trim()
+                            .toLowerCase();
+
+            for (Path contentDirectory : directories) {
+                Files.createDirectories(contentDirectory);
+
+                try (var stream = Files.list(contentDirectory)) {
+                    stream
+                            .filter(path -> !Files.isDirectory(path))
+                            .filter(this::isValidContentFile)
+                            .filter(path ->
+                                    query.isEmpty()
                                             || path.getFileName().toString()
                                             .toLowerCase()
-                                            .contains(query);
-                                })
-                                .sorted()
-                                .toList();
+                                            .contains(query)
+                            )
+                            .forEach(files::add);
+                }
             }
+
+            files.sort(java.util.Comparator.comparing(
+                    path -> path.getFileName().toString().toLowerCase()
+            ));
 
             if (files.isEmpty()) {
 
