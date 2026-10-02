@@ -104,6 +104,18 @@ public final class MultiLaunchService {
         }
     }
 
+    public long getSessionPlaytimeSeconds(Instance instance) {
+        if (instance == null) return 0;
+
+        Long started = sessionStarts.get(instance.getId());
+        if (started == null) return 0;
+
+        return Math.max(
+                0,
+                (System.currentTimeMillis() - started) / 1000
+        );
+    }
+
     public boolean isRunning(Instance instance) {
         LaunchService service = instance == null
                 ? null
