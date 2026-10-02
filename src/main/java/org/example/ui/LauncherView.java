@@ -227,7 +227,8 @@ public class LauncherView {
                         accountService,
                         () -> root.getChildren().removeIf(
                                 node -> node.getStyleClass().contains("onboarding-overlay")
-                        )
+                        ),
+                        this::showCreateInstanceView
                 );
 
         StackPane overlay = new StackPane(onboardingView);
