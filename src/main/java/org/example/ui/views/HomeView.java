@@ -305,7 +305,9 @@ public class HomeView extends StackPane {
         HBox.setHgrow(info, Priority.ALWAYS);
 
         Button play = new Button(
-                launchService.isRunning(instance) ? "CLOSE" : "PLAY"
+                instance != null && launchService.isRunning(instance)
+                        ? "CLOSE"
+                        : "PLAY"
         );
         play.getStyleClass().add(
                 launchService.isRunning(instance)
@@ -348,12 +350,18 @@ public class HomeView extends StackPane {
             play.getProperties().put("vanta-home-pressed", false);
         });
 
+        play.setDisable(instance == null);
+
         play.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) {
                 return;
             }
 
             event.consume();
+
+            if (instance == null) {
+                return;
+            }
 
             if (launchService.isRunning(instance)) {
                 launchService.close(instance);
@@ -512,12 +520,10 @@ public class HomeView extends StackPane {
                             .findFirst()
                             .orElse(null));
 
-            if (instance != null) {
-                recentServersList.getChildren().add(
-                        createRecentServerCard(instance, entry)
-                );
-                rendered++;
-            }
+            recentServersList.getChildren().add(
+                    createRecentServerCard(instance, entry)
+            );
+            rendered++;
         }
 
         if (rendered == 0) {
@@ -540,7 +546,9 @@ public class HomeView extends StackPane {
         name.getStyleClass().add("home-server-name");
 
         Label metadata = new Label(
-                "Using " + instance.getName()
+                instance != null
+                        ? "Using " + instance.getName()
+                        : "Instance no longer installed"
         );
         metadata.getStyleClass().add("home-server-meta");
 
