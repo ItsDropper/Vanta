@@ -12,6 +12,13 @@ public final class AnimationUtils {
     }
 
     public static void slideFadeIn(Node node, double distance) {
+        if (!LauncherSettings.isAnimationsEnabled()) {
+            node.setOpacity(1);
+            node.setTranslateX(0);
+            node.setTranslateY(0);
+            return;
+        }
+
         node.setOpacity(0);
         node.setTranslateX(distance);
 
@@ -32,6 +39,13 @@ public final class AnimationUtils {
     }
 
     public static void slideFadeVertical(Node node, double distance) {
+        if (!LauncherSettings.isAnimationsEnabled()) {
+            node.setOpacity(1);
+            node.setTranslateX(0);
+            node.setTranslateY(0);
+            return;
+        }
+
         node.setOpacity(0);
         node.setTranslateY(distance);
 
