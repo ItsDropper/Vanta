@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
@@ -22,11 +23,12 @@ import org.example.launcher.service.MultiLaunchService;
 import org.example.launcher.service.LaunchService;
 import org.example.ui.components.AccountCard;
 import org.example.ui.components.IconView;
+import org.example.ui.components.MinecraftBackdrop;
 
 import java.util.List;
 import java.util.function.Consumer;
 
-public class HomeView extends VBox {
+public class HomeView extends StackPane {
 
     private final AccountService accountService;
     private final MultiLaunchService launchService;
@@ -50,8 +52,9 @@ public class HomeView extends VBox {
         this.onLaunchInstance = onLaunchInstance;
 
         getStyleClass().addAll("page", "home-page");
-        setPadding(new Insets(32, 36, 36, 36));
-        setSpacing(22);
+
+        VBox contentBox = new VBox(22);
+        contentBox.setPadding(new Insets(32, 36, 36, 36));
 
         Label title = new Label("Home");
         title.getStyleClass().add("home-title");
@@ -61,6 +64,16 @@ public class HomeView extends VBox {
 
         VBox header = new VBox(4, title, accountLabel);
         header.getStyleClass().add("home-header");
+
+        MinecraftBackdrop backdrop = new MinecraftBackdrop();
+        StackPane hero = new StackPane();
+        hero.setMinHeight(190);
+        hero.setPrefHeight(190);
+        hero.setMaxHeight(190);
+        hero.getStyleClass().add("home-hero");
+        hero.getChildren().addAll(backdrop, header);
+        StackPane.setAlignment(header, Pos.TOP_LEFT);
+        StackPane.setMargin(header, new Insets(24));
 
         Label recentTitle = new Label("RECENTLY PLAYED");
         recentTitle.getStyleClass().add("home-section-title");
@@ -103,11 +116,13 @@ public class HomeView extends VBox {
         HBox.setHgrow(accountCard, Priority.ALWAYS);
         HBox.setHgrow(launcherCard, Priority.ALWAYS);
 
-        getChildren().addAll(
-                header,
+        contentBox.getChildren().addAll(
+                hero,
                 recentSection,
                 footerCards
         );
+
+        getChildren().add(contentBox);
 
         accountService.addListener(this::onAccountChanged);
         launchService.addStateListener(this::onLaunchStateChanged);
