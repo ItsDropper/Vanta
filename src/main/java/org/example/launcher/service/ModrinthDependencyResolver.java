@@ -1279,13 +1279,30 @@ private List<ModrinthVersion> getCompatibleCandidates(
                     );
 
             if (aRelease != bRelease) {
-                return Boolean.compare(
-                        bRelease,
-                        aRelease
-                );
+                return Boolean.compare(bRelease, aRelease);
             }
 
-            return 0;
+            boolean aFeatured = a.isFeatured();
+            boolean bFeatured = b.isFeatured();
+
+            if (aFeatured != bFeatured) {
+                return Boolean.compare(bFeatured, aFeatured);
+            }
+
+            int downloadComparison =
+                    Integer.compare(
+                            b.getDownloads(),
+                            a.getDownloads()
+                    );
+
+            if (downloadComparison != 0) {
+                return downloadComparison;
+            }
+
+            String aNumber = a.getVersionNumber() == null ? "" : a.getVersionNumber();
+            String bNumber = b.getVersionNumber() == null ? "" : b.getVersionNumber();
+
+            return bNumber.compareToIgnoreCase(aNumber);
         });
 
         return candidates;
