@@ -43,7 +43,6 @@ public class InstanceCard extends StackPane {
     public InstanceCard(
             Instance instance,
             Runnable onPlay,
-            Runnable onSelect,
             Runnable onSettings,
             Runnable onDelete
     ) {
@@ -381,20 +380,6 @@ public class InstanceCard extends StackPane {
         getChildren().addAll(
                 content,
                 menuButton
-        );
-
-        /*
-         * Clicking anywhere on the card selects it.
-         *
-         * PLAY, OPTIONS and the menu button consume their
-         * own events, so clicking those controls does not
-         * select the card accidentally.
-         */
-        setOnMouseClicked(
-                event -> {
-
-                    onSelect.run();
-                }
         );
 
         update();
@@ -1087,23 +1072,4 @@ public class InstanceCard extends StackPane {
         update();
     }
 
-    // =============================================================
-    // SELECTED STATE
-    // =============================================================
-
-    public void setSelected(
-            boolean selected
-    ) {
-
-        getStyleClass().remove(
-                "selected-instance"
-        );
-
-        if (selected) {
-
-            getStyleClass().add(
-                    "selected-instance"
-            );
-        }
-    }
 }
