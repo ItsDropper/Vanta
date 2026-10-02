@@ -47,6 +47,8 @@ public class HomeView extends StackPane {
     private Label recentStatus;
     private final java.util.Map<String, Label> playtimeLabels =
             new java.util.HashMap<>();
+    private final java.util.Map<String, Instance> displayedInstances =
+            new java.util.HashMap<>();
     private final Timeline playtimeTimer;
 
     public HomeView(
@@ -221,6 +223,7 @@ public class HomeView extends StackPane {
     private void renderRecentInstances(List<Instance> instances) {
         recentList.getChildren().clear();
         playtimeLabels.clear();
+        displayedInstances.clear();
 
         List<Instance> recent = instances.stream()
                 .filter(instance ->
@@ -254,14 +257,7 @@ public class HomeView extends StackPane {
         for (java.util.Map.Entry<String, Label> entry
                 : playtimeLabels.entrySet()) {
 
-            Instance instance = InstanceManager.discoverInstances()
-                    .stream()
-                    .filter(candidate ->
-                            candidate.getId().equals(entry.getKey())
-                    )
-                    .findFirst()
-                    .orElse(null);
-
+            Instance instance = displayedInstances.get(entry.getKey());
             if (instance == null) {
                 continue;
             }
@@ -302,6 +298,7 @@ public class HomeView extends StackPane {
                         + " played"
         );
         playtimeLabels.put(instance.getId(), playtime);
+        displayedInstances.put(instance.getId(), instance);
         playtime.getStyleClass().add("home-recent-playtime");
 
         VBox info = new VBox(4, name, metadata, playtime);
