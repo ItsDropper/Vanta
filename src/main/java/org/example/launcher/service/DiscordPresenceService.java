@@ -1,6 +1,5 @@
 package org.example.launcher.service;
 
-import com.jagrosh.discordipc.DiscordBuild;
 import com.jagrosh.discordipc.IPCClient;
 import com.jagrosh.discordipc.entities.RichPresence;
 import org.example.launcher.model.Instance;
@@ -87,7 +86,7 @@ public final class DiscordPresenceService {
 
         client = new IPCClient(clientId);
         connectedClientId = clientId;
-        client.connect(DiscordBuild.ANY);
+        client.connect();
     }
 
     private void disconnectQuietly() {
