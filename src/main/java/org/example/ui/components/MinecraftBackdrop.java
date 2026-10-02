@@ -2,11 +2,19 @@ package org.example.ui.components;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
 public final class MinecraftBackdrop extends StackPane {
+
+    private static final String BACKGROUND_RESOURCE =
+            "/images/home-background.png";
+
+    private final ImageView background = new ImageView();
+
 
     private final Canvas canvas = new Canvas();
     private final AnimationTimer animator;
@@ -18,6 +26,18 @@ public final class MinecraftBackdrop extends StackPane {
 
         canvas.widthProperty().bind(widthProperty());
         canvas.heightProperty().bind(heightProperty());
+
+        var stream = MinecraftBackdrop.class.getResourceAsStream(BACKGROUND_RESOURCE);
+        if (stream != null) {
+            Image image = new Image(stream);
+            background.setImage(image);
+            background.setPreserveRatio(false);
+            background.fitWidthProperty().bind(widthProperty());
+            background.fitHeightProperty().bind(heightProperty());
+            background.setOpacity(0.78);
+            getChildren().add(background);
+        }
+
         getChildren().add(canvas);
 
         animator = new AnimationTimer() {
@@ -43,7 +63,7 @@ public final class MinecraftBackdrop extends StackPane {
 
         GraphicsContext g = canvas.getGraphicsContext2D();
 
-        g.setFill(Color.web("#0b121b"));
+        g.setFill(Color.rgb(7, 12, 18, 0.30));
         g.fillRect(0, 0, width, height);
 
         double horizon = height * 0.57;
