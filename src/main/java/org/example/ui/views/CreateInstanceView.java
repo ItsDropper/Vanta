@@ -66,6 +66,7 @@ public class CreateInstanceView extends VBox {
 
         this.onBack = onBack;
         this.onCreated = onCreated;
+        this.onBrowseModpacks = onBrowseModpacks;
 
         // =========================================================
         // PAGE
