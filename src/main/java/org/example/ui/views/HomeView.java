@@ -67,19 +67,18 @@ public class HomeView extends StackPane {
         VBox header = new VBox(4, title, accountLabel);
         header.getStyleClass().add("home-header");
 
+        // Use the Minecraft screenshot as the full Home background.
         MinecraftBackdrop backdrop = new MinecraftBackdrop();
-        StackPane hero = new StackPane();
-        hero.setMinHeight(190);
-        hero.setPrefHeight(190);
-        hero.setMaxHeight(190);
-        hero.getStyleClass().add("home-hero");
-        Rectangle heroClip = new Rectangle();
-        heroClip.setArcWidth(32);
-        heroClip.setArcHeight(32);
-        heroClip.widthProperty().bind(hero.widthProperty());
-        heroClip.heightProperty().bind(hero.heightProperty());
-        hero.setClip(heroClip);
-        hero.getChildren().addAll(backdrop, header);
+        backdrop.setMouseTransparent(true);
+        backdrop.prefWidthProperty().bind(widthProperty());
+        backdrop.prefHeightProperty().bind(heightProperty());
+        backdrop.minWidthProperty().bind(widthProperty());
+        backdrop.minHeightProperty().bind(heightProperty());
+        backdrop.maxWidthProperty().bind(widthProperty());
+        backdrop.maxHeightProperty().bind(heightProperty());
+
+        getChildren().add(backdrop);
+
         StackPane.setAlignment(header, Pos.TOP_LEFT);
         StackPane.setMargin(header, new Insets(24));
 
@@ -119,12 +118,17 @@ public class HomeView extends StackPane {
         VBox serverCard = createRecentServersCard();
 
         contentBox.getChildren().addAll(
-                hero,
                 recentSection,
                 serverCard
         );
 
         getChildren().add(contentBox);
+        StackPane.setAlignment(contentBox, Pos.TOP_LEFT);
+
+        // Keep the Home title above the background and content.
+        getChildren().add(header);
+        StackPane.setAlignment(header, Pos.TOP_LEFT);
+        StackPane.setMargin(header, new Insets(24));
 
         accountService.addListener(this::onAccountChanged);
         launchService.addStateListener(this::onLaunchStateChanged);
