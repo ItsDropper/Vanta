@@ -54,8 +54,12 @@ public class HomeView extends StackPane {
 
         getStyleClass().addAll("page", "home-page");
 
-        VBox contentBox = new VBox(22);
-        contentBox.setPadding(new Insets(32, 36, 36, 36));
+        MinecraftBackdrop backdrop = new MinecraftBackdrop();
+        backdrop.setManaged(false);
+        backdrop.prefWidthProperty().bind(widthProperty());
+        backdrop.prefHeightProperty().bind(heightProperty());
+        backdrop.setMinSize(0, 0);
+        backdrop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         Label title = new Label("Home");
         title.getStyleClass().add("home-title");
@@ -66,20 +70,38 @@ public class HomeView extends StackPane {
         VBox header = new VBox(4, title, accountLabel);
         header.getStyleClass().add("home-header");
 
-        // Use the Minecraft screenshot as the full Home background.
-        MinecraftBackdrop backdrop = new MinecraftBackdrop();
-        backdrop.setMouseTransparent(true);
-        backdrop.setManaged(false);
-        backdrop.prefWidthProperty().bind(widthProperty());
-        backdrop.prefHeightProperty().bind(heightProperty());
-        backdrop.setMinSize(0, 0);
-        backdrop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        VBox recentSection = createRecentInstancesSection();
+        VBox serverCard = createRecentServersCard();
 
-        getChildren().add(backdrop);
+        VBox contentBox = new VBox(18, recentSection, serverCard);
+        contentBox.setFillWidth(true);
+        contentBox.setPadding(new Insets(88, 36, 28, 36));
+        contentBox.setMaxWidth(Double.MAX_VALUE);
+        contentBox.setMaxHeight(Double.MAX_VALUE);
 
+        ScrollPane homeScroll = new ScrollPane(contentBox);
+        homeScroll.setFitToWidth(true);
+        homeScroll.setFitToHeight(false);
+        homeScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        homeScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        homeScroll.setPannable(false);
+        homeScroll.getStyleClass().add("home-content-scroll");
+        homeScroll.setManaged(true);
+
+        getChildren().addAll(backdrop, homeScroll, header);
+        StackPane.setAlignment(homeScroll, Pos.TOP_LEFT);
         StackPane.setAlignment(header, Pos.TOP_LEFT);
-        StackPane.setMargin(header, new Insets(24));
+        StackPane.setMargin(header, new Insets(24, 36, 0, 36));
 
+        accountService.addListener(this::onAccountChanged);
+        launchService.addStateListener(this::onLaunchStateChanged);
+
+        refreshAccount();
+        refreshRecentInstances();
+        refreshRecentServers();
+    }
+
+    private VBox createRecentInstancesSection() {
         Label recentTitle = new Label("RECENTLY PLAYED");
         recentTitle.getStyleClass().add("home-section-title");
 
@@ -98,42 +120,21 @@ public class HomeView extends StackPane {
         recentScroll.setFitToWidth(true);
         recentScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         recentScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-        recentScroll.setPrefViewportHeight(92);
-        recentScroll.setMinHeight(92);
+        recentScroll.setPrefViewportHeight(90);
+        recentScroll.setMinHeight(90);
         recentScroll.setMaxHeight(150);
         recentScroll.getStyleClass().add("home-recent-scroll");
-        VBox.setVgrow(recentScroll, Priority.ALWAYS);
 
-        VBox recentSection = new VBox(
+        VBox section = new VBox(
                 8,
                 recentTitle,
                 recentSubtitle,
                 recentScroll,
                 recentStatus
         );
-        recentSection.getStyleClass().add("home-recent-section");
-
-        VBox serverCard = createRecentServersCard();
-
-        contentBox.getChildren().addAll(
-                recentSection,
-                serverCard
-        );
-
-        getChildren().add(contentBox);
-        StackPane.setAlignment(contentBox, Pos.TOP_LEFT);
-
-        // Keep the Home header above the content and full-page background.
-        getChildren().add(header);
-        StackPane.setAlignment(header, Pos.TOP_LEFT);
-        StackPane.setMargin(header, new Insets(24));
-
-        accountService.addListener(this::onAccountChanged);
-        launchService.addStateListener(this::onLaunchStateChanged);
-
-        refreshAccount();
-        refreshRecentInstances();
-        refreshRecentServers();
+        section.setFillWidth(true);
+        section.getStyleClass().add("home-recent-section");
+        return section;
     }
 
     private VBox createRecentServersCard() {
