@@ -1446,3 +1446,50 @@
 .home-account-card, .home-status-card { -fx-min-height: 112px; }
 
 .instance-playtime { -fx-text-fill: #697789; -fx-font-size: 10px; -fx-background-color: #111720; -fx-background-radius: 6px; -fx-padding: 4px 7px; }
+
+
+/* ---------- animated Minecraft-inspired home hero ---------- */
+
+.home-hero {
+    -fx-background-color: #0d1721;
+    -fx-background-radius: 16px;
+    -fx-border-color: #2a3a4c;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 24, 0.12, 0, 8);
+    -fx-overflow: hidden;
+}
+
+.home-hero .home-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #f4f7fb;
+}
+
+.home-hero .home-account-label {
+    -fx-text-fill: #c1ccd9;
+    -fx-font-size: 13px;
+}
+
+.debug-button {
+    -fx-background-color: rgba(90, 55, 120, 0.28);
+    -fx-border-color: #8059a8;
+    -fx-border-width: 1px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #d9c7ed;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 9px 13px;
+    -fx-cursor: hand;
+}
+
+.debug-button:hover {
+    -fx-background-color: rgba(112, 72, 148, 0.42);
+    -fx-border-color: #a47dcc;
+    -fx-text-fill: #f1e8fa;
+}
+
+.minecraft-backdrop {
+    -fx-background-color: transparent;
+}
