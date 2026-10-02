@@ -841,8 +841,25 @@ private boolean isEnvironmentDependencySatisfied(
                 dependencyModId
         )) {
 
-            int javaMajorVersion =
+            int launcherJavaMajorVersion =
                     Runtime.version().feature();
+
+            /*
+             * Vanta may run on a different JVM than the Minecraft
+             * process. Use the Minecraft version's required Java level
+             * as the resolver floor instead of assuming Vanta's JVM is
+             * the game's JVM.
+             */
+            int minecraftRequiredJava =
+                    minimumJavaMajorForMinecraft(
+                            instance.getMinecraftVersion()
+                    );
+
+            int javaMajorVersion =
+                    Math.max(
+                            launcherJavaMajorVersion,
+                            minecraftRequiredJava
+                    );
 
             String javaVersion =
                     Integer.toString(
@@ -2690,6 +2707,27 @@ private boolean isProvidedByFabricApi(
          */
         return true;
     }
+    private int minimumJavaMajorForMinecraft(
+            String minecraftVersion
+    ) {
+        if (minecraftVersion == null
+                || minecraftVersion.isBlank()) {
+            return 0;
+        }
+
+        if (minecraftVersion.startsWith("26.")) {
+            return 25;
+        }
+
+        if (minecraftVersion.startsWith("1.20.5")
+                || minecraftVersion.startsWith("1.20.6")
+                || minecraftVersion.startsWith("1.21")) {
+            return 21;
+        }
+
+        return 17;
+    }
+
     private boolean isCompatible(ModrinthVersion version, String minecraftVersion, String loader) {
         if (!isGameVersionCompatible(version, minecraftVersion)) return false;
         if (version == null || version.getLoaders() == null || loader == null) return false;
