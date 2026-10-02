@@ -34,11 +34,13 @@ public class PresetConfigurationView extends VBox {
 
     private final CreateHandler onCreate;
     private final Runnable onBack;
+    private final Runnable onBrowseModpacks;
 
     public PresetConfigurationView(
             InstancePreset preset,
             CreateHandler onCreate,
-            Runnable onBack
+            Runnable onBack,
+            Runnable onBrowseModpacks
     ) {
 
         this.preset = preset;
@@ -457,6 +459,11 @@ public class PresetConfigurationView extends VBox {
                 true
         );
 
+        contentScroll.setMinHeight(0);
+        contentScroll.setMaxHeight(Double.MAX_VALUE);
+
+        panel.setMinHeight(0);
+
         VBox.setVgrow(
                 contentScroll,
                 Priority.ALWAYS
@@ -539,10 +546,24 @@ public class PresetConfigurationView extends VBox {
                     );
                 });
 
+        Button browseModpacksButton =
+                new Button(
+                        "BROWSE MODPACKS"
+                );
+
+        browseModpacksButton.getStyleClass().add(
+                "secondary-button"
+        );
+
+        browseModpacksButton.setOnAction(
+                event -> onBrowseModpacks.run()
+        );
+
         HBox actions =
                 new HBox(
                         12,
                         backButton,
+                        browseModpacksButton,
                         createButton
                 );
 
