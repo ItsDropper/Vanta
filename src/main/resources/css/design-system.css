@@ -1179,3 +1179,24 @@
     -fx-letter-spacing: 1.4px;
     -fx-padding: 0 0 0 14px;
 }
+
+
+.instance-search-field {
+    -fx-background-color: #111720;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #edf2f8;
+    -fx-prompt-text-fill: #667285;
+    -fx-padding: 8px 11px;
+}
+
+.instance-search-field:hover {
+    -fx-border-color: #435266;
+}
+
+.instance-search-field:focused {
+    -fx-border-color: -vanta-accent;
+    -fx-background-color: #141b25;
+}
