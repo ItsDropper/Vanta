@@ -212,6 +212,26 @@ public class LauncherView {
 
         loadAccount();
         checkForUpdates();
+
+        if (OnboardingManager.shouldShow()) {
+            Platform.runLater(this::showOnboarding);
+        }
+    }
+
+    private void showOnboarding() {
+        OnboardingView onboardingView =
+                new OnboardingView(
+                        accountService,
+                        () -> root.getChildren().removeIf(
+                                node -> node.getStyleClass().contains("onboarding-overlay")
+                        )
+                );
+
+        StackPane overlay = new StackPane(onboardingView);
+        overlay.getStyleClass().add("onboarding-overlay");
+        StackPane.setAlignment(onboardingView, javafx.geometry.Pos.CENTER);
+        root.getChildren().add(overlay);
+        AnimationUtils.slideFadeIn(overlay, 18);
     }
 
     private void showPage(
@@ -224,26 +244,17 @@ public class LauncherView {
 
         switch (page) {
 
-            case HOME -> content.getChildren().setAll(
-                    homeView
-            );
-
-            case ACCOUNTS -> content.getChildren().setAll(
-                    accountsView
-            );
-
-            case INSTANCES -> content.getChildren().setAll(
-                    instancesView
-            );
-
-            case MODS -> content.getChildren().setAll(
-                    globalModsView
-            );
-
-            case SETTINGS -> content.getChildren().setAll(
-                    settingsView
-            );
+            case HOME -> showAnimatedContent(homeView);
+            case ACCOUNTS -> showAnimatedContent(accountsView);
+            case INSTANCES -> showAnimatedContent(instancesView);
+            case MODS -> showAnimatedContent(globalModsView);
+            case SETTINGS -> showAnimatedContent(settingsView);
         }
+    }
+
+    private void showAnimatedContent(Parent view) {
+        content.getChildren().setAll(view);
+        AnimationUtils.slideFadeIn(view, 14);
     }
 
     // =============================================================
