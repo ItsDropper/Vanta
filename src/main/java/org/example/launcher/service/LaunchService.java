@@ -44,6 +44,8 @@ public class LaunchService {
 
     private Instance runningInstance;
 
+    private ServerTarget runningServerTarget;
+
     private Instance failedInstance;
 
     private LaunchState state =
@@ -206,6 +208,9 @@ public class LaunchService {
             runningInstance =
                     instance;
 
+            runningServerTarget =
+                    server;
+
             monitorOutput(
                     process
             );
@@ -225,6 +230,8 @@ public class LaunchService {
             minecraftProcess = null;
 
             runningInstance = null;
+
+            runningServerTarget = null;
 
             failedInstance = instance;
 
@@ -646,6 +653,8 @@ public class LaunchService {
                             runningInstance =
                                     null;
 
+                            runningServerTarget = null;
+
                             /*
                              * The output monitor already handled
                              * a known failure.
@@ -751,6 +760,8 @@ public class LaunchService {
 
             runningInstance = null;
 
+            runningServerTarget = null;
+
             setState(
                     LaunchState.IDLE
             );
@@ -798,6 +809,8 @@ public class LaunchService {
 
                                 runningInstance = null;
 
+                                runningServerTarget = null;
+
                                 setState(
                                         LaunchState.IDLE
                                 );
@@ -835,6 +848,10 @@ public class LaunchService {
     public synchronized Instance getRunningInstance() {
 
         return runningInstance;
+    }
+
+    public synchronized ServerTarget getRunningServerTarget() {
+        return runningServerTarget;
     }
 
     public synchronized LaunchState getState() {
