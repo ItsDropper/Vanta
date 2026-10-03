@@ -26,6 +26,8 @@ public class AccountSwitcher extends HBox {
     private final Popup popup;
     private final VBox accountList;
 
+    private boolean loginInProgress;
+
     public AccountSwitcher(
             AccountService accountService
     ) {
@@ -132,6 +134,10 @@ public class AccountSwitcher extends HBox {
         // -----------------------------------------------------
 
         setOnMouseClicked(event -> {
+
+            if (loginInProgress) {
+                return;
+            }
 
             if (popup.isShowing()) {
                 popup.hide();
@@ -452,9 +458,10 @@ public class AccountSwitcher extends HBox {
 
                     } finally {
 
-                        Platform.runLater(
-                                () -> setDisable(false)
-                        );
+                        Platform.runLater(() -> {
+                            loginInProgress = false;
+                            getStyleClass().remove("account-switcher-busy");
+                        });
                     }
                 });
 
@@ -464,7 +471,12 @@ public class AccountSwitcher extends HBox {
 
     private void loginNewAccount() {
 
-        setDisable(true);
+        if (loginInProgress) {
+            return;
+        }
+
+        loginInProgress = true;
+        getStyleClass().add("account-switcher-busy");
 
         Thread thread =
                 new Thread(() -> {
