@@ -7,6 +7,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.Popup;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -386,13 +387,108 @@ public class InstancesView extends VBox {
                             instance,
                             () -> launch(instance),
                             () -> onInstanceSettings.accept(instance),
-                            () -> deleteInstance(instance)
+                            () -> deleteInstance(instance),
+                            () -> showRenamePopup(instance),
+                            () -> showDuplicatePopup(instance),
+                            () -> showIconPopup(instance)
                     );
 
             instanceList.getChildren().add(card);
         }
 
         updateCards();
+    }
+
+
+    private void showRenamePopup(Instance instance) {
+        showNamePopup(instance, false);
+    }
+
+    private void showDuplicatePopup(Instance instance) {
+        showNamePopup(instance, true);
+    }
+
+    private void showNamePopup(Instance instance, boolean duplicate) {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        VBox root = new VBox(12);
+        root.getStyleClass().add("instance-action-popup");
+        Label title = new Label(duplicate ? "DUPLICATE INSTANCE" : "RENAME INSTANCE");
+        title.getStyleClass().add("instance-action-title");
+        Label subtitle = new Label(duplicate ? "Create a complete copy with its own instance ID." : "Change the display name without moving the instance.");
+        subtitle.getStyleClass().add("instance-action-subtitle");
+        subtitle.setWrapText(true);
+        TextField field = new TextField(duplicate ? "Copy of " + instance.getName() : instance.getName());
+        field.getStyleClass().add("instance-action-field");
+        HBox actions = new HBox(8);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        Button cancel = new Button("CANCEL");
+        cancel.getStyleClass().add("secondary-button");
+        Button apply = new Button(duplicate ? "DUPLICATE" : "SAVE");
+        apply.getStyleClass().add("primary-button");
+        cancel.setOnAction(e -> popup.hide());
+        apply.setOnAction(e -> {
+            String name = field.getText() == null ? "" : field.getText().trim();
+            if (name.isBlank()) return;
+            popup.hide();
+            statusLabel.setText((duplicate ? "Duplicating " : "Renaming ") + instance.getName() + "...");
+            Thread thread = new Thread(() -> {
+                try {
+                    if (duplicate) InstanceManager.duplicateInstance(instance, name);
+                    else InstanceManager.renameInstance(instance, name);
+                    Platform.runLater(this::refresh);
+                } catch (Throwable ex) {
+                    Platform.runLater(() -> statusLabel.setText(ex.getMessage() == null ? "Operation failed." : ex.getMessage()));
+                }
+            }, duplicate ? "Vanta-Instance-Duplicate" : "Vanta-Instance-Rename");
+            thread.setDaemon(true);
+            thread.start();
+        });
+        actions.getChildren().addAll(cancel, apply);
+        root.getChildren().addAll(title, subtitle, field, actions);
+        popup.getContent().add(root);
+        showPopupCentered(popup, 430, duplicate ? 190 : 175);
+        Platform.runLater(() -> { field.requestFocus(); field.selectAll(); });
+    }
+
+    private void showIconPopup(Instance instance) {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        VBox root = new VBox(12);
+        root.getStyleClass().add("instance-action-popup");
+        Label title = new Label("INSTANCE ICON");
+        title.getStyleClass().add("instance-action-title");
+        Label subtitle = new Label("Choose the identity shown on the Instances page.");
+        subtitle.getStyleClass().add("instance-action-subtitle");
+        subtitle.setWrapText(true);
+        HBox choices = new HBox(8);
+        choices.setAlignment(Pos.CENTER_LEFT);
+        String[][] icons = {{"SHIELD","⬢"},{"PACKAGE","◆"},{"SWORD","⚔"},{"PICKAXE","⛏"},{"STAR","★"},{"FIRE","✦"},{"WORLD","◎"},{"CROWN","♛"},{"DIAMOND","◇"}};
+        for (String[] icon : icons) {
+            Button button = new Button(icon[1]);
+            button.getStyleClass().add("instance-icon-choice");
+            button.setTooltip(new javafx.scene.control.Tooltip(icon[0]));
+            button.setOnAction(e -> {
+                popup.hide();
+                Thread thread = new Thread(() -> {
+                    try { InstanceManager.setInstanceIcon(instance, icon[0]); Platform.runLater(this::refresh); }
+                    catch (Throwable ex) { Platform.runLater(() -> statusLabel.setText(ex.getMessage() == null ? "Could not change icon." : ex.getMessage())); }
+                }, "Vanta-Instance-Icon");
+                thread.setDaemon(true);
+                thread.start();
+            });
+            choices.getChildren().add(button);
+        }
+        root.getChildren().addAll(title, subtitle, choices);
+        popup.getContent().add(root);
+        showPopupCentered(popup, 430, 150);
+    }
+
+    private void showPopupCentered(Popup popup, double width, double height) {
+        javafx.stage.Window window = getScene() == null ? null : getScene().getWindow();
+        if (window == null) return;
+        popup.show(window, window.getX() + Math.max(0, (window.getWidth() - width) / 2),
+                window.getY() + Math.max(0, (window.getHeight() - height) / 2));
     }
 
     // =============================================================
