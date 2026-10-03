@@ -2,12 +2,9 @@ package org.example.ui;
 
 import javafx.animation.*;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.Line;
 import javafx.util.Duration;
 
 public final class LoadingScreen {
@@ -19,30 +16,20 @@ public final class LoadingScreen {
     public LoadingScreen() {
         root.getStyleClass().add("vanta-loading");
 
-        StackPane atmosphere = new StackPane();
-        atmosphere.getStyleClass().add("loading-atmosphere");
+        VBox content = new VBox(10);
+        content.setAlignment(Pos.CENTER);
+        content.getStyleClass().add("loading-content");
 
-        Circle glow = new Circle(170);
-        glow.getStyleClass().add("loading-glow");
+        HBox brand = new HBox(9);
+        brand.setAlignment(Pos.CENTER);
 
-        Circle ringOuter = new Circle(70);
-        ringOuter.getStyleClass().add("loading-ring-outer");
-
-        Circle ringInner = new Circle(48);
-        ringInner.getStyleClass().add("loading-ring-inner");
-
-        StackPane mark = new StackPane();
+        Circle mark = new Circle(5);
         mark.getStyleClass().add("loading-mark");
-        mark.getChildren().addAll(ringOuter, ringInner);
-
-        Line slash = new Line(-22, 22, 22, -22);
-        slash.getStyleClass().add("loading-slash");
-        mark.getChildren().add(slash);
-
-        atmosphere.getChildren().add(glow);
 
         Label logo = new Label("VANTA");
         logo.getStyleClass().add("loading-logo");
+
+        brand.getChildren().addAll(mark, logo);
 
         Label subtitle = new Label("ENVIRONMENT MANAGER");
         subtitle.getStyleClass().add("loading-subtitle");
@@ -53,23 +40,16 @@ public final class LoadingScreen {
         progressTrack.getStyleClass().add("loading-progress-track");
 
         progressFill.getStyleClass().add("loading-progress-fill");
-        progressFill.setPrefWidth(320);
-        progressFill.setMaxWidth(320);
+        progressFill.setPrefWidth(280);
+        progressFill.setMaxWidth(280);
         progressFill.setScaleX(0.01);
-        progressFill.setTranslateX(-158.4);
-        progressFill.scaleXProperty().addListener((obs, oldValue, newValue) ->
-                progressFill.setTranslateX(-160 + (160 * newValue.doubleValue()))
-        );
 
         progressTrack.getChildren().add(progressFill);
 
-        VBox content = new VBox(8, mark, logo, subtitle, status, progressTrack);
-        content.setAlignment(Pos.CENTER);
-        content.getStyleClass().add("loading-content");
+        content.getChildren().addAll(brand, subtitle, status, progressTrack);
+        root.getChildren().add(content);
 
-        root.getChildren().addAll(atmosphere, content);
-
-        animate(glow, mark, progressFill);
+        animate(progressFill);
     }
 
     public StackPane getRoot() {
@@ -84,7 +64,7 @@ public final class LoadingScreen {
         progressFill.getProperties().put("finished", Boolean.TRUE);
 
         ScaleTransition progress = new ScaleTransition(
-                Duration.millis(140),
+                Duration.millis(120),
                 progressFill
         );
         progress.setFromX(progressFill.getScaleX());
@@ -92,7 +72,7 @@ public final class LoadingScreen {
         progress.setInterpolator(Interpolator.EASE_OUT);
         progress.setOnFinished(event -> {
             FadeTransition fade = new FadeTransition(
-                    Duration.millis(220),
+                    Duration.millis(150),
                     root
             );
             fade.setFromValue(1);
@@ -104,29 +84,7 @@ public final class LoadingScreen {
         progress.play();
     }
 
-    private void animate(Node glow, Node mark, Node progress) {
-        ScaleTransition pulse = new ScaleTransition(
-                Duration.millis(1200),
-                glow
-        );
-        pulse.setFromX(0.88);
-        pulse.setFromY(0.88);
-        pulse.setToX(1.06);
-        pulse.setToY(1.06);
-        pulse.setAutoReverse(true);
-        pulse.setCycleCount(Animation.INDEFINITE);
-        pulse.setInterpolator(Interpolator.EASE_BOTH);
-        pulse.play();
-
-        RotateTransition rotate = new RotateTransition(
-                Duration.seconds(7),
-                mark
-        );
-        rotate.setByAngle(360);
-        rotate.setCycleCount(Animation.INDEFINITE);
-        rotate.setInterpolator(Interpolator.LINEAR);
-        rotate.play();
-
+    private void animate(Region progress) {
         Timeline loading = new Timeline(
                 new KeyFrame(
                         Duration.ZERO,
@@ -140,16 +98,18 @@ public final class LoadingScreen {
                         Duration.millis(460),
                         new KeyValue(
                                 progress.scaleXProperty(),
-                                0.82,
+                                0.86,
                                 Interpolator.EASE_OUT
                         )
                 )
         );
+
         loading.setOnFinished(event -> {
             if (!Boolean.TRUE.equals(progress.getProperties().get("finished"))) {
                 loading.playFromStart();
             }
         });
+
         loading.play();
     }
 }
