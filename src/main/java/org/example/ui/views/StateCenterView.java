@@ -243,7 +243,7 @@ public final class StateCenterView extends VBox {
 
                         InstanceRepairService.repair(instance);
 
-                        state = InstanceStateEngine.inspect(instance);
+                        state = InstanceStateEngine.inspect(instance, workers);
 
                         final InstanceState repairedState = state;
                         Platform.runLater(() -> {
@@ -284,21 +284,40 @@ public final class StateCenterView extends VBox {
                     true,
                     workers
             );
-            int done = completed.incrementAndGet();
+            if (state.getLevel() == SharedState.Level.BROKEN
+                    && LauncherSettings.isStateAutoRepairEnabled()) {
+                try {
+                    SharedResourceRepairService.repair(instances, true, false);
+                    state = InstanceStateEngine.inspectShared(
+                            "Libraries",
+                            org.example.launcher.MinecraftLocator.getLibrariesDirectory(),
+                            true,
+                            workers
+                    );
+                } catch (Throwable repairFailure) {
+                    repairFailure.printStackTrace();
+                }
+            }
 
-            Platform.runLater(() -> {
-                if (generation != scanGeneration) return;
-                replaceSharedRow(state);
-            });
-
-            updateScanProgress(generation, done, totalTasks, workers,
-                    healthy.get(), attention.get(), broken.get(), "Libraries", brokenThings);
             if (state.getLevel() == SharedState.Level.BROKEN) {
                 broken.incrementAndGet();
                 brokenThings.add("Libraries");
             } else if (state.getLevel() == SharedState.Level.ATTENTION) {
                 attention.incrementAndGet();
+            } else {
+                healthy.incrementAndGet();
             }
+
+            int done = completed.incrementAndGet();
+
+            final SharedState finalState = state;
+            Platform.runLater(() -> {
+                if (generation != scanGeneration) return;
+                replaceSharedRow(finalState);
+            });
+
+            updateScanProgress(generation, done, totalTasks, workers,
+                    healthy.get(), attention.get(), broken.get(), "Libraries", brokenThings);
             maybeFinishParallelScan(
                         executor, generation, done, totalTasks, instances,
                         healthy, attention, broken, brokenThings
@@ -312,21 +331,40 @@ public final class StateCenterView extends VBox {
                     false,
                     workers
             );
-            int done = completed.incrementAndGet();
+            if (state.getLevel() == SharedState.Level.BROKEN
+                    && LauncherSettings.isStateAutoRepairEnabled()) {
+                try {
+                    SharedResourceRepairService.repair(instances, false, true);
+                    state = InstanceStateEngine.inspectShared(
+                            "Assets",
+                            org.example.launcher.MinecraftLocator.getVantaDirectory().resolve("assets"),
+                            false,
+                            workers
+                    );
+                } catch (Throwable repairFailure) {
+                    repairFailure.printStackTrace();
+                }
+            }
 
-            Platform.runLater(() -> {
-                if (generation != scanGeneration) return;
-                replaceSharedRow(state);
-            });
-
-            updateScanProgress(generation, done, totalTasks, workers,
-                    healthy.get(), attention.get(), broken.get(), "Assets", brokenThings);
             if (state.getLevel() == SharedState.Level.BROKEN) {
                 broken.incrementAndGet();
                 brokenThings.add("Assets");
             } else if (state.getLevel() == SharedState.Level.ATTENTION) {
                 attention.incrementAndGet();
+            } else {
+                healthy.incrementAndGet();
             }
+
+            int done = completed.incrementAndGet();
+
+            final SharedState finalState = state;
+            Platform.runLater(() -> {
+                if (generation != scanGeneration) return;
+                replaceSharedRow(finalState);
+            });
+
+            updateScanProgress(generation, done, totalTasks, workers,
+                    healthy.get(), attention.get(), broken.get(), "Assets", brokenThings);
             maybeFinishParallelScan(
                         executor, generation, done, totalTasks, instances,
                         healthy, attention, broken, brokenThings
