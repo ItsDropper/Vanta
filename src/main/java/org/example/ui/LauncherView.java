@@ -335,8 +335,17 @@ public class LauncherView {
 
     private void showAnimatedContent(Parent view) {
         content.getChildren().setAll(view);
+        view.setVisible(true);
+        view.setManaged(true);
+        view.setOpacity(1);
+        view.setTranslateX(0);
+        view.setTranslateY(0);
+
         AnimationUtils.installInteractiveAnimations(view);
-        AnimationUtils.slideFadeIn(view, 14);
+
+        if (LauncherSettings.isAnimationsEnabled()) {
+            AnimationUtils.slideFadeIn(view, 14);
+        }
     }
 
     // =============================================================
