@@ -7,6 +7,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -16,6 +18,7 @@ import org.example.launcher.model.Instance;
 import org.example.launcher.state.InstanceState;
 import org.example.launcher.state.InstanceStateEngine;
 import org.example.ui.components.IconView;
+import org.example.ui.components.InstanceCard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -226,8 +229,19 @@ public final class StateCenterView extends VBox {
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(16));
 
-        StackPane icon = new StackPane(IconView.create(
-                state.isHealthy() ? IconView.Type.SHIELD : IconView.Type.PACKAGE, 21));
+        StackPane icon = new StackPane();
+        icon.getStyleClass().add("state-instance-icon");
+        if ("CUSTOM".equalsIgnoreCase(instance.getIcon())
+                && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
+            ImageView customIcon = new ImageView(new Image(
+                    instance.getDirectory().resolve("icon.png").toUri().toString(), 28, 28, true, true));
+            customIcon.setFitWidth(28);
+            customIcon.setFitHeight(28);
+            customIcon.setPreserveRatio(true);
+            icon.getChildren().add(customIcon);
+        } else {
+            icon.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 28));
+        }
         icon.getStyleClass().add("state-icon-" + state.getLevel().name().toLowerCase());
 
         VBox text = new VBox(5);
