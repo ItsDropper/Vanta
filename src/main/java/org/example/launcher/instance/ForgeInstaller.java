@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import org.example.launcher.model.Instance;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -112,7 +113,7 @@ public final class ForgeInstaller {
             String output =
                     new String(
                             process.getInputStream().readAllBytes(),
-                            java.nio.charset.StandardCharsets.UTF_8
+                            StandardCharsets.UTF_8
                     );
 
             int exitCode =
