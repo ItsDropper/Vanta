@@ -327,6 +327,11 @@ public class LoginPopup {
                     "login-window"
             );
 
+            ThemeManager.apply(
+                    root,
+                    ThemeManager.loadAccent()
+            );
+
             // -----------------------------------------------------
             // SCENE
             // -----------------------------------------------------
