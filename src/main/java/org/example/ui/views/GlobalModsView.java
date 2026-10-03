@@ -719,7 +719,7 @@ public class GlobalModsView extends VBox {
         );
 
         description.getStyleClass().add(
-                "instance-version"
+                "global-mod-description"
         );
 
         Label downloads =
