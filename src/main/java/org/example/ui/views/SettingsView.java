@@ -290,7 +290,7 @@ public class SettingsView extends BorderPane {
         reset.getStyleClass().add("secondary-button");
         reset.setOnAction(event -> setAccent(ThemeManager.DEFAULT_ACCENT));
 
-        content.getChildren().addAll(accentCard, presetsCard, reset);
+        content.getChildren().addAll(themeCard, accentCard, presetsCard, reset);
     }
 
     private void applyHexField() {
