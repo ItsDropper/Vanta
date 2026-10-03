@@ -438,6 +438,7 @@ public class MarkdownRenderer {
                     new javafx.scene.text.Text(
                             text.getChars().toString()
                     );
+            rendered.setStyle("-fx-fill: #ffffff;");
 
             rendered.getStyleClass().add(
                     "mod-description-text"
