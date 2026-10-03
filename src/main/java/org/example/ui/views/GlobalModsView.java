@@ -1,5 +1,6 @@
 package org.example.ui.views;
 
+import org.example.ui.ThemeManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -557,6 +558,8 @@ public class GlobalModsView extends VBox {
             installToInstances(project, selected, sourceButton);
         });
 
+        ThemeManager.apply(root, ThemeManager.loadAccent());
+
         popup.getContent().add(root);
         popup.show(sourceButton,
                 sourceButton.localToScreen(sourceButton.getBoundsInLocal()).getMinX() - 560 + sourceButton.getWidth(),
@@ -1078,6 +1081,8 @@ public class GlobalModsView extends VBox {
         scroll.getStyleClass().add("modrinth-popup-scroll");
 
         root.getChildren().addAll(title, subtitle, new Separator(), scroll);
+        ThemeManager.apply(root, ThemeManager.loadAccent());
+
         popup.getContent().add(root);
 
         Thread thread = new Thread(() -> {
@@ -1218,6 +1223,8 @@ public class GlobalModsView extends VBox {
         HBox actions = new HBox(8, cancel, install);
         actions.setAlignment(Pos.CENTER_RIGHT);
         root.getChildren().addAll(title, subtitle, scroll, actions);
+        ThemeManager.apply(root, ThemeManager.loadAccent());
+
         popup.getContent().add(root);
 
         cancel.setOnAction(event -> popup.hide());
