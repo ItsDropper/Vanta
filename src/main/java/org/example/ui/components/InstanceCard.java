@@ -46,7 +46,10 @@ public class InstanceCard extends StackPane {
             Instance instance,
             Runnable onPlay,
             Runnable onSettings,
-            Runnable onDelete
+            Runnable onDelete,
+            Runnable onRename,
+            Runnable onDuplicate,
+            Runnable onIcon
     ) {
 
         this.instance = instance;
@@ -363,7 +366,10 @@ public class InstanceCard extends StackPane {
 
                     showMenu(
                             menuButton,
-                            onDelete
+                            onDelete,
+                            onRename,
+                            onDuplicate,
+                            onIcon
                     );
                 }
         );
@@ -401,8 +407,15 @@ public class InstanceCard extends StackPane {
 
     private void showMenu(
             Button source,
-            Runnable onDelete
+            Runnable onDelete,
+            Runnable onRename,
+            Runnable onDuplicate,
+            Runnable onIcon
     ) {
+
+        MenuItem renameItem = new MenuItem("Rename instance");
+        MenuItem duplicateItem = new MenuItem("Duplicate instance");
+        MenuItem iconItem = new MenuItem("Change icon");
 
         MenuItem exportItem =
                 new MenuItem(
@@ -418,6 +431,10 @@ public class InstanceCard extends StackPane {
                 "instance-delete-menu-item"
         );
 
+        renameItem.setOnAction(event -> onRename.run());
+        duplicateItem.setOnAction(event -> onDuplicate.run());
+        iconItem.setOnAction(event -> onIcon.run());
+
         exportItem.setOnAction(
                 event ->
                         exportInstance()
@@ -432,6 +449,9 @@ public class InstanceCard extends StackPane {
 
         ContextMenu menu =
                 new ContextMenu(
+                        renameItem,
+                        duplicateItem,
+                        iconItem,
                         exportItem,
                         deleteItem
                 );
