@@ -459,8 +459,7 @@ public class AccountSwitcher extends HBox {
                     } finally {
 
                         Platform.runLater(() -> {
-                            loginInProgress = false;
-                            getStyleClass().remove("account-switcher-busy");
+                            setDisable(false);
                         });
                     }
                 });
@@ -491,9 +490,11 @@ public class AccountSwitcher extends HBox {
 
                     } finally {
 
-                        Platform.runLater(
-                                () -> setDisable(false)
-                        );
+                        Platform.runLater(() -> {
+                            loginInProgress = false;
+                            getStyleClass().remove("account-switcher-busy");
+                            setDisable(false);
+                        });
                     }
                 });
 
