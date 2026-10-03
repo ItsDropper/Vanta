@@ -19,6 +19,10 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+        // Keep the JavaFX application alive when the launcher window is
+        // hidden while Minecraft is running.
+        javafx.application.Platform.setImplicitExit(false);
+
         stage.initStyle(StageStyle.TRANSPARENT);
 
         LoadingScreen loadingScreen = new LoadingScreen();
