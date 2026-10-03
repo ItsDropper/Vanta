@@ -28,7 +28,7 @@ import org.example.ui.LauncherSettings;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicBoolean;\nimport java.util.IdentityHashMap;\nimport java.util.Map;
 
 public final class StateCenterView extends VBox {
     private final VBox instanceList = new VBox(10);
@@ -36,11 +36,11 @@ public final class StateCenterView extends VBox {
     private final ScrollPane instanceScroll = new ScrollPane(instanceList);
     private final Label overallTitle = new Label("READY");
     private final Label overallSubtitle = new Label("Vanta will inspect your environments when you open this page.");
-    private final ProgressBar progress = new ProgressBar(0);
+    private final ProgressBar progress = new ProgressBar(0);\n    private final Label progressLabel = new Label("HEALTH");
     private final Button refreshButton = new Button("SCAN NOW", IconView.create(IconView.Type.REFRESH, 15));
     private final AtomicBoolean scanning = new AtomicBoolean(false);
     private volatile long scanGeneration;
-    private volatile List<SharedState> sharedStates = List.of();
+    private volatile List<SharedState> sharedStates = List.of();\n    private final Map<Instance, HBox> liveInstanceCards = new IdentityHashMap<>();\n    private final Map<String, HBox> liveSharedRows = new java.util.HashMap<>();
 
     public StateCenterView() {
         getStyleClass().add("state-center");
@@ -129,165 +129,429 @@ public final class StateCenterView extends VBox {
         refreshButton.setText("SCANNING...");
         animateRefreshButton(true);
         overallTitle.setText("SCANNING...");
-        overallSubtitle.setText("Checking instance structure and installed content.");
-        progress.setProgress(-1);
+        overallSubtitle.setText("Parallel scan starting...");
+        progressLabel.setText("SCAN PROGRESS");
+        progress.setProgress(0);
         instanceList.getChildren().clear();
+        sharedList.getChildren().clear();
+        liveInstanceCards.clear();
+        liveSharedRows.clear();
 
-
-        Thread thread = new Thread(() -> {
-            List<Instance> instances;
-            List<InstanceState> states = new ArrayList<>();
-
-            try {
-                instances = InstanceManager.discoverInstances();
-                sharedStates = InstanceStateEngine.inspectSharedResources();
-                for (Instance instance : instances) {
-                    try {
-                        states.add(InstanceStateEngine.inspect(instance));
-                    } catch (Throwable ex) {
-                        ex.printStackTrace();
-                        states.add(new InstanceState(InstanceState.Level.BROKEN, "SCAN FAILED",
-                                "Vanta could not inspect this environment.", 0, 1, 0, 0, ""));
-                    }
-                }
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-                List<Instance> failedInstances = List.of();
-                Platform.runLater(() -> {
-                    finishScan(generation, false, failedInstances, states);
-                });
-                return;
-            }
-
-            List<Instance> finalInstances = instances;
-            Platform.runLater(() -> {
-                finishScan(generation, true, finalInstances, states);
-            });
-        }, "Vanta-State-Engine");
-
-        thread.setDaemon(true);
-        thread.setUncaughtExceptionHandler((t, ex) -> {
+        Thread coordinator = new Thread(() -> startParallelScan(generation), "Vanta-State-Coordinator");
+        coordinator.setDaemon(true);
+        coordinator.setUncaughtExceptionHandler((t, ex) -> {
             ex.printStackTrace();
+            Platform.runLater(() -> failScan(generation, "The State scanner stopped unexpectedly."));
         });
-        thread.start();
+        coordinator.start();
     }
 
-    private void finishScan(long generation, boolean success, List<Instance> instances, List<InstanceState> states) {
-        if (generation != scanGeneration) {
+    private void startParallelScan(long generation) {
+        final List<Instance> instances;
+
+        try {
+            instances = InstanceManager.discoverInstances();
+        } catch (Throwable ex) {
+            ex.printStackTrace();
+            Platform.runLater(() -> failScan(generation, "Vanta could not discover the installed environments."));
             return;
         }
 
-        try {
-            if (!success) {
-                overallTitle.setText("SCAN FAILED");
-                overallSubtitle.setText("Vanta could not discover the installed environments.");
-                progress.setProgress(0);
-                instanceList.getChildren().clear();
-                return;
+        final int totalTasks = instances.size() + 2;
+        final int workers = Math.max(1, Math.min(LauncherSettings.getStateScanWorkers(), Math.max(1, totalTasks)));
+        final java.util.concurrent.atomic.AtomicInteger completed = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger healthy = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger attention = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.concurrent.atomic.AtomicInteger broken = new java.util.concurrent.atomic.AtomicInteger();
+
+        Platform.runLater(() -> {
+            if (generation != scanGeneration) return;
+
+            for (Instance instance : instances) {
+                HBox card = createScanningCard(instance);
+                liveInstanceCards.put(instance, card);
+                instanceList.getChildren().add(card);
             }
-            render(instances, states);
-        } catch (Throwable ex) {
-            ex.printStackTrace();
-            overallTitle.setText("SCAN FAILED");
-            overallSubtitle.setText("The State view could not render the scan results.");
-            progress.setProgress(0);
-            instanceList.getChildren().clear();
-        } finally {
+
+            addSharedPlaceholder("Libraries");
+            addSharedPlaceholder("Assets");
+
+            overallSubtitle.setText(
+                    totalTasks + " scan tasks queued • " + workers + " workers active"
+            );
+
+            org.example.ui.components.NotificationManager manager =
+                    org.example.ui.components.NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.showProgress(
+                        "State scan",
+                        "0/" + totalTasks + " complete • " + workers + " workers active"
+                );
+                manager.setProgress(0);
+            }
+        });
+
+        java.util.concurrent.ExecutorService executor =
+                java.util.concurrent.Executors.newFixedThreadPool(
+                        workers,
+                        runnable -> {
+                            Thread thread = new Thread(runnable);
+                            thread.setName("Vanta-State-Worker");
+                            thread.setDaemon(true);
+                            return thread;
+                        }
+                );
+
+        java.util.function.BiConsumer<String, Object> complete = (kind, result) -> {
+            int done = completed.incrementAndGet();
+
+            if (result instanceof InstanceState state) {
+                if (state.isHealthy()) healthy.incrementAndGet();
+                else if (state.getLevel() == InstanceState.Level.ATTENTION) attention.incrementAndGet();
+                else broken.incrementAndGet();
+            }
+
+            Platform.runLater(() -> {
+                if (generation != scanGeneration) return;
+
+                if (result instanceof InstanceState state) {
+                    Instance instance = (Instance) ((Object[]) new Object[]{kind, result})[0];
+                }
+            });
+
+            // The UI update is submitted separately below so the task can carry
+            // its actual instance/resource identity without shared mutable state.
+            updateScanProgress(generation, done, totalTasks, workers, healthy.get(), attention.get(), broken.get(), kind);
+        };
+
+        for (Instance instance : instances) {
+            executor.submit(() -> {
+                InstanceState state;
+                try {
+                    state = InstanceStateEngine.inspect(instance);
+                } catch (Throwable ex) {
+                    ex.printStackTrace();
+                    state = new InstanceState(
+                            InstanceState.Level.BROKEN,
+                            "SCAN FAILED",
+                            "Vanta could not inspect this environment.",
+                            0, 1, 0, 0, ""
+                    );
+                }
+
+                final InstanceState finalState = state;
+                Platform.runLater(() -> {
+                    if (generation != scanGeneration) return;
+                    replaceInstanceCard(instance, finalState);
+                    updateLiveSummary(instances.size(), healthy.get(), attention.get(), broken.get(), completed.get(), totalTasks);
+                });
+
+                int done = completed.incrementAndGet();
+                if (state.isHealthy()) healthy.incrementAndGet();
+                else if (state.getLevel() == InstanceState.Level.ATTENTION) attention.incrementAndGet();
+                else broken.incrementAndGet();
+
+                updateScanProgress(generation, done, totalTasks, workers,
+                        healthy.get(), attention.get(), broken.get(), instance.getName());
+                maybeFinishParallelScan(
+                        executor, generation, done, totalTasks, instances,
+                        healthy, attention, broken
+                );
+            });
+        }
+
+        executor.submit(() -> {
+            SharedState state = InstanceStateEngine.inspectShared(
+                    "Libraries",
+                    org.example.launcher.MinecraftLocator.getLibrariesDirectory(),
+                    true
+            );
+            int done = completed.incrementAndGet();
+
+            Platform.runLater(() -> {
+                if (generation != scanGeneration) return;
+                replaceSharedRow(state);
+            });
+
+            updateScanProgress(generation, done, totalTasks, workers,
+                    healthy.get(), attention.get(), broken.get(), "Libraries");
+            maybeFinishParallelScan(
+                    executor, generation, done, totalTasks, instances,
+                    healthy, attention, broken
+            );
+        });
+
+        executor.submit(() -> {
+            SharedState state = InstanceStateEngine.inspectShared(
+                    "Assets",
+                    org.example.launcher.MinecraftLocator.getVantaDirectory().resolve("assets"),
+                    false
+            );
+            int done = completed.incrementAndGet();
+
+            Platform.runLater(() -> {
+                if (generation != scanGeneration) return;
+                replaceSharedRow(state);
+            });
+
+            updateScanProgress(generation, done, totalTasks, workers,
+                    healthy.get(), attention.get(), broken.get(), "Assets");
+            maybeFinishParallelScan(
+                    executor, generation, done, totalTasks, instances,
+                    healthy, attention, broken
+            );
+        });
+    }
+
+    private void maybeFinishParallelScan(
+            java.util.concurrent.ExecutorService executor,
+            long generation,
+            int done,
+            int total,
+            List<Instance> instances,
+            java.util.concurrent.atomic.AtomicInteger healthy,
+            java.util.concurrent.atomic.AtomicInteger attention,
+            java.util.concurrent.atomic.AtomicInteger broken
+    ) {
+        if (done != total) {
+            return;
+        }
+
+        executor.shutdown();
+
+        Platform.runLater(() -> {
+            if (generation != scanGeneration) return;
+
+            progressLabel.setText("HEALTH");
+            progress.setProgress(instances.isEmpty()
+                    ? 1.0
+                    : (double) healthy.get() / instances.size());
+
+            if (instances.isEmpty()) {
+                overallTitle.setText("NO ENVIRONMENTS");
+                overallSubtitle.setText(
+                        "Shared resources were scanned successfully."
+                );
+            } else {
+                int affected = attention.get() + broken.get();
+                overallTitle.setText(
+                        affected == 0
+                                ? "ALL SYSTEMS HEALTHY"
+                                : affected + " ENVIRONMENT" + (affected == 1 ? "" : "S") + " NEED ATTENTION"
+                );
+                overallSubtitle.setText(
+                        healthy.get() + " healthy  •  "
+                                + attention.get() + " attention  •  "
+                                + broken.get() + " broken"
+                );
+            }
+
+            org.example.ui.components.NotificationManager manager =
+                    org.example.ui.components.NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.setProgress(1.0);
+                manager.success(
+                        "State scan complete",
+                        total + "/" + total + " checks complete • "
+                                + healthy.get() + " healthy • "
+                                + attention.get() + " attention • "
+                                + broken.get() + " broken"
+                );
+            }
+
             scanning.set(false);
             refreshButton.setDisable(false);
             refreshButton.setText("SCAN AGAIN");
             animateRefreshButton(false);
+        });
+    }
+
+    private void updateScanProgress(
+            long generation,
+            int done,
+            int total,
+            int workers,
+            int healthy,
+            int attention,
+            int broken,
+            String completedName
+    ) {
+        double fraction = total == 0 ? 1.0 : (double) done / total;
+
+        Platform.runLater(() -> {
+            if (generation != scanGeneration) return;
+
+            progress.setProgress(fraction);
+            overallSubtitle.setText(
+                    done + "/" + total + " complete • "
+                            + healthy + " healthy • "
+                            + attention + " attention • "
+                            + broken + " broken"
+            );
+
+            org.example.ui.components.NotificationManager manager =
+                    org.example.ui.components.NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.updateProgress(
+                        done + "/" + total + " complete • finished " + safe(completedName, "task")
+                                + " • " + workers + " workers"
+                );
+                manager.setProgress(fraction);
+            }
+        });
+    }
+
+    private void updateLiveSummary(
+            int instanceCount,
+            int healthy,
+            int attention,
+            int broken,
+            int done,
+            int total
+    ) {
+        if (done < total) {
+            overallSubtitle.setText(
+                    done + "/" + total + " complete • "
+                            + healthy + " healthy • "
+                            + attention + " attention • "
+                            + broken + " broken"
+            );
         }
     }
 
-    private void render(List<Instance> instances, List<InstanceState> states) {
-        instanceList.getChildren().clear();
-
-
-        if (states.isEmpty()) {
-            overallTitle.setText("NO ENVIRONMENTS");
-            overallSubtitle.setText("Create an instance and Vanta will start tracking its state.");
-            progress.setProgress(0);
-            addEmptyState();
+    private void failScan(long generation, String message) {
+        if (generation != scanGeneration) {
             return;
         }
 
-        int healthy = 0, attention = 0, broken = 0;
-        for (InstanceState state : states) {
-            if (state.isHealthy()) healthy++;
-            else if (state.getLevel() == InstanceState.Level.ATTENTION) attention++;
-            else broken++;
+        overallTitle.setText("SCAN FAILED");
+        overallSubtitle.setText(message);
+        progressLabel.setText("SCAN PROGRESS");
+        progress.setProgress(0);
+        scanning.set(false);
+        refreshButton.setDisable(false);
+        refreshButton.setText("SCAN AGAIN");
+        animateRefreshButton(false);
+
+        org.example.ui.components.NotificationManager manager =
+                org.example.ui.components.NotificationManager.getGlobal();
+        if (manager != null) {
+            manager.error("State scan failed", message);
+        }
+    }
+
+    private HBox createScanningCard(Instance instance) {
+        HBox card = new HBox(16);
+        card.getStyleClass().add("state-card");
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setPadding(new Insets(16));
+
+        StackPane icon = new StackPane(IconView.create(IconView.Type.REFRESH, 22));
+        icon.getStyleClass().add("state-instance-icon");
+        icon.getStyleClass().add("state-icon-attention");
+
+        VBox text = new VBox(5);
+        Label name = new Label(safe(instance.getName(), "Unnamed instance"));
+        name.getStyleClass().add("state-instance-name");
+        Label detail = new Label(
+                safe(instance.getMinecraftVersion(), "Unknown version")
+                        + "  •  " + safe(instance.getDisplayLoader(), "Unknown loader")
+        );
+        detail.getStyleClass().add("state-instance-detail");
+        Label summary = new Label("Scanning...");
+        summary.getStyleClass().add("state-instance-summary");
+        text.getChildren().addAll(name, detail, summary);
+        HBox.setHgrow(text, Priority.ALWAYS);
+
+        Label status = new Label("SCANNING");
+        status.getStyleClass().add("state-status-attention");
+        Label stats = new Label("Waiting for a State worker");
+        stats.getStyleClass().add("state-stats");
+
+        VBox right = new VBox(5, status, stats);
+        right.setAlignment(Pos.CENTER_RIGHT);
+        card.getChildren().addAll(icon, text, right);
+        return card;
+    }
+
+    private void replaceInstanceCard(Instance instance, InstanceState state) {
+        HBox replacement = createStateCard(instance, state);
+        HBox old = liveInstanceCards.get(instance);
+        if (old == null) {
+            instanceList.getChildren().add(replacement);
+            liveInstanceCards.put(instance, replacement);
+            return;
         }
 
-        int affected = attention + broken;
-        overallTitle.setText(affected == 0 ? "ALL SYSTEMS HEALTHY"
-                : affected + " ENVIRONMENT" + (affected == 1 ? "" : "S") + " NEED ATTENTION");
-        overallSubtitle.setText(healthy + " healthy  •  " + attention + " attention  •  " + broken + " broken");
-        progress.setProgress((double) healthy / states.size());
-
-        renderSharedStates();
-
-        for (int i = 0; i < instances.size() && i < states.size(); i++) {
-            addStateCard(instances.get(i), states.get(i));
+        int index = instanceList.getChildren().indexOf(old);
+        if (index >= 0) {
+            instanceList.getChildren().set(index, replacement);
         }
+        liveInstanceCards.put(instance, replacement);
 
         if (LauncherSettings.isAnimationsEnabled()) {
-            for (int i = 0; i < instanceList.getChildren().size(); i++) {
-                javafx.scene.Node card = instanceList.getChildren().get(i);
-                PauseTransition delay = new PauseTransition(Duration.millis(35L * Math.min(i, 10)));
-                delay.setOnFinished(e -> AnimationUtils.slideFadeVertical(card, 12));
-                delay.play();
+            AnimationUtils.slideFadeVertical(replacement, 8);
+        }
+    }
+
+    private void addSharedPlaceholder(String name) {
+        HBox row = createSharedRow(name, null);
+        liveSharedRows.put(name, row);
+        sharedList.getChildren().add(row);
+    }
+
+    private void replaceSharedRow(SharedState state) {
+        HBox replacement = createSharedRow(state.getName(), state);
+        HBox old = liveSharedRows.get(state.getName());
+        if (old == null) {
+            sharedList.getChildren().add(replacement);
+        } else {
+            int index = sharedList.getChildren().indexOf(old);
+            if (index >= 0) {
+                sharedList.getChildren().set(index, replacement);
             }
         }
+        liveSharedRows.put(state.getName(), replacement);
     }
 
-    private void renderSharedStates() {
-        sharedList.getChildren().clear();
-        for (SharedState state : sharedStates) {
-            HBox row = new HBox(14);
-            row.setAlignment(Pos.CENTER_LEFT);
-            row.getStyleClass().add("state-shared-row");
+    private HBox createSharedRow(String name, SharedState state) {
+        HBox row = new HBox(14);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("state-shared-row");
 
-            StackPane icon = new StackPane(IconView.create(
-                    "Libraries".equals(state.getName()) ? IconView.Type.PACKAGE : IconView.Type.FOLDER, 20));
-            icon.getStyleClass().add("state-shared-icon");
+        StackPane icon = new StackPane(IconView.create(
+                "Libraries".equals(name) ? IconView.Type.PACKAGE : IconView.Type.FOLDER, 20));
+        icon.getStyleClass().add("state-shared-icon");
 
-            VBox text = new VBox(3);
-            Label name = new Label(state.getName());
-            name.getStyleClass().add("state-shared-name");
-            Label summary = new Label(state.getSummary());
-            summary.getStyleClass().add("state-shared-summary");
-            text.getChildren().addAll(name, summary);
-            HBox.setHgrow(text, Priority.ALWAYS);
+        VBox text = new VBox(3);
+        Label nameLabel = new Label(name);
+        nameLabel.getStyleClass().add("state-shared-name");
+        Label summary = new Label(
+                state == null ? "Waiting for a State worker..." : state.getSummary()
+        );
+        summary.getStyleClass().add("state-shared-summary");
+        text.getChildren().addAll(nameLabel, summary);
+        HBox.setHgrow(text, Priority.ALWAYS);
 
-            Label count = new Label(state.getFiles() + " files");
-            count.getStyleClass().add("state-shared-count");
-            Label status = new Label(state.getLevel().name());
-            status.getStyleClass().add("state-shared-" + state.getLevel().name().toLowerCase());
+        Label count = new Label(
+                state == null ? "WAITING" : state.getFiles() + " files"
+        );
+        count.getStyleClass().add("state-shared-count");
 
-            row.getChildren().addAll(icon, text, count, status);
-            sharedList.getChildren().add(row);
-        }
+        Label status = new Label(
+                state == null ? "SCANNING" : state.getLevel().name()
+        );
+        status.getStyleClass().add(
+                state == null
+                        ? "state-shared-attention"
+                        : "state-shared-" + state.getLevel().name().toLowerCase()
+        );
+
+        row.getChildren().addAll(icon, text, count, status);
+        return row;
     }
 
-    private void addEmptyState() {
-        VBox empty = new VBox(8);
-        empty.setAlignment(Pos.CENTER);
-        empty.setPadding(new Insets(42));
-
-        StackPane icon = new StackPane(IconView.create(IconView.Type.SHIELD, 30));
-        icon.getStyleClass().add("state-empty-icon");
-
-        Label title = new Label("Nothing to inspect yet");
-        title.getStyleClass().add("state-empty-title");
-        Label text = new Label("Your installed Vanta instances will appear here.");
-        text.getStyleClass().add("state-empty-text");
-
-        empty.getChildren().addAll(icon, title, text);
-        instanceList.getChildren().add(empty);
-    }
-
-    private void addStateCard(Instance instance, InstanceState state) {
+    private HBox createStateCard(Instance instance, InstanceState state) {
         HBox card = new HBox(16);
         card.getStyleClass().add("state-card");
         card.setAlignment(Pos.CENTER_LEFT);
@@ -331,7 +595,7 @@ public final class StateCenterView extends VBox {
         VBox right = new VBox(5, status, stats);
         right.setAlignment(Pos.CENTER_RIGHT);
         card.getChildren().addAll(icon, text, right);
-        instanceList.getChildren().add(card);
+        return card;
     }
 
     private void animateRefreshButton(boolean scanning) {
