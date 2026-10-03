@@ -179,11 +179,45 @@ public class LaunchService {
                 );
             }
 
-            LaunchData launchData =
-                    LaunchDataBuilder.build(
-                            instance,
-                            server
-                    );
+            LaunchData launchData;
+
+            try {
+                launchData =
+                        LaunchDataBuilder.build(
+                                instance,
+                                server
+                        );
+            } catch (Exception buildFailure) {
+                /*
+                 * A launch can fail before Minecraft even starts when
+                 * an instance has a missing/corrupt core file. Repair
+                 * only deterministic installation failures, then retry
+                 * exactly once. User content such as mods, configs and
+                 * saves is never touched by this repair path.
+                 */
+                if (!org.example.launcher.instance.InstanceRepairService
+                        .isRepairableInstallationFailure(buildFailure)) {
+                    throw buildFailure;
+                }
+
+                System.out.println(
+                        "[Vanta Repair] Core installation failure detected. "
+                                + "Attempting automatic instance repair."
+                );
+
+                org.example.launcher.instance.InstanceRepairService
+                        .repair(instance);
+
+                launchData =
+                        LaunchDataBuilder.build(
+                                instance,
+                                server
+                        );
+
+                System.out.println(
+                        "[Vanta Repair] Instance repair completed successfully."
+                );
+            }
 
             setState(
                     LaunchState.STARTING
