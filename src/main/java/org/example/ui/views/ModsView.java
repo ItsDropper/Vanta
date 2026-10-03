@@ -715,14 +715,15 @@ public class ModsView extends VBox {
                 )
         );
         toggleButton.setOnAction(event -> {
-            boolean enabled = !toggleButton.isSelected();
+            boolean enabled = toggleButton.isSelected();
+            boolean animationsEnabled = LauncherSettings.isAnimationsEnabled();
 
             if (!toggleMod(mod)) {
                 toggleButton.setSelected(!enabled);
+                updateModToggleStyle(toggleButton);
                 return;
             }
 
-            toggleButton.setSelected(enabled);
             updateModToggleStyle(toggleButton);
             toggleButton.setTooltip(new Tooltip(
                     enabled
@@ -730,24 +731,32 @@ public class ModsView extends VBox {
                             : "Enable this mod"
             ));
 
-            TranslateTransition transition =
-                    new TranslateTransition(javafx.util.Duration.millis(180), knob);
-            transition.setFromX(enabled ? -12 : 12);
-            transition.setToX(enabled ? 12 : -12);
-            transition.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+            int targetX = enabled ? 12 : -12;
 
-            if (LauncherSettings.isAnimationsEnabled()) {
-                transition.play();
-            } else {
-                knob.setTranslateX(enabled ? 12 : -12);
+            if (!animationsEnabled) {
+                knob.setTranslateX(targetX);
+                loadInstalledContent();
+                return;
             }
 
-            PauseTransition refresh =
-                    new PauseTransition(javafx.util.Duration.millis(
-                            LauncherSettings.isAnimationsEnabled() ? 190 : 0
-                    ));
-            refresh.setOnFinished(e -> loadInstalledContent());
-            refresh.play();
+            toggleButton.setDisable(true);
+
+            TranslateTransition transition =
+                    new TranslateTransition(
+                            javafx.util.Duration.millis(220),
+                            knob
+                    );
+            transition.setFromX(-targetX);
+            transition.setToX(targetX);
+            transition.setInterpolator(
+                    javafx.animation.Interpolator.EASE_BOTH
+            );
+            transition.setOnFinished(e -> {
+                knob.setTranslateX(targetX);
+                toggleButton.setDisable(false);
+                loadInstalledContent();
+            });
+            transition.play();
         });
 
         Button removeButton =
