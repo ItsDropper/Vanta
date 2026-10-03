@@ -12,7 +12,8 @@ public final class ModrinthDependencyResolver {
     private final InstalledModScanner installedModScanner;
     private final Map<String, InstalledMod> fabricMetadataCache = new HashMap<>();
     private final Map<String, String> fabricModIdProjectCache = new HashMap<>();
-    private final Map<String, List<ModrinthVersion>> versionCache = new HashMap<>();
+    private final Map<String, List<ModrinthVersion>> versionCache =
+            new java.util.concurrent.ConcurrentHashMap<>();
     private boolean fastResolution = true;
     private static final int FAST_CANDIDATE_LIMIT = 6;
 
@@ -69,6 +70,12 @@ public List<ModrinthService.ResolvedMod> resolveModGraph(
         if (roots.isEmpty()) {
             return List.of();
         }
+
+        /*
+         * Fetch all root version lists concurrently. This removes the
+         * sequential Modrinth network wait from FPS instance creation.
+         */
+        prefetchCandidates(instance, roots);
 
         if (requiredProjectId != null
                 && !requiredProjectId.isBlank()
@@ -140,6 +147,63 @@ public List<ModrinthService.ResolvedMod> resolveModGraph(
         }
 
         return result;
+    }
+
+private void prefetchCandidates(
+            Instance instance,
+            Collection<String> projectIds
+    ) throws IOException, InterruptedException {
+
+        int projectCount = projectIds == null ? 0 : projectIds.size();
+        if (projectCount == 0) {
+            return;
+        }
+
+        int workers = Math.min(8, Math.max(1, projectCount));
+        java.util.concurrent.ExecutorService executor =
+                java.util.concurrent.Executors.newFixedThreadPool(workers);
+
+        try {
+            List<java.util.concurrent.Future<?>> futures = new ArrayList<>();
+
+            for (String projectId : projectIds) {
+                if (projectId == null || projectId.isBlank()) {
+                    continue;
+                }
+
+                futures.add(executor.submit(() -> {
+                    try {
+                        getCompatibleCandidates(instance, projectId);
+                    } catch (IOException | InterruptedException e) {
+                        throw new java.util.concurrent.CompletionException(e);
+                    }
+                }));
+            }
+
+            for (java.util.concurrent.Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (java.util.concurrent.ExecutionException e) {
+                    Throwable cause = e.getCause();
+                    if (cause instanceof java.util.concurrent.CompletionException
+                            && cause.getCause() != null) {
+                        cause = cause.getCause();
+                    }
+                    if (cause instanceof InterruptedException interrupted) {
+                        throw interrupted;
+                    }
+                    if (cause instanceof IOException io) {
+                        throw io;
+                    }
+                    throw new IOException(
+                            "Failed to prefetch Modrinth candidates.",
+                            cause
+                    );
+                }
+            }
+        } finally {
+            executor.shutdownNow();
+        }
     }
 
 private boolean resolveRoots(
@@ -980,6 +1044,83 @@ private String findModrinthProjectForFabricModId(
         }
 
         /*
+         * Search Modrinth first for a standalone project. This is much
+         * cheaper than downloading multiple Fabric API JARs. The Fabric
+         * API scan below is only the fallback for API modules.
+         */
+        List<ModrinthSearchHit> hits =
+                client.search(
+                        fabricModId,
+                        ModrinthContentType.MOD,
+                        normalizeLoader(
+                                instance.getLoader()
+                        ),
+                        instance.getMinecraftVersion()
+                ).getHits();
+
+        if (hits == null
+                || hits.isEmpty()) {
+
+            return null;
+        }
+
+        for (ModrinthSearchHit hit :
+                hits) {
+
+            if (hit == null
+                    || hit.getProjectId() == null
+                    || hit.getProjectId().isBlank()) {
+
+                continue;
+            }
+
+            String projectId =
+                    hit.getProjectId();
+
+            List<ModrinthVersion> versions =
+                    getCompatibleCandidates(
+                            instance,
+                            projectId
+                    );
+
+            for (ModrinthVersion version :
+                    versions) {
+
+                InstalledMod metadata =
+                        readFabricMetadata(
+                                version
+                        );
+
+                if (metadata == null
+                        || metadata.getModId() == null) {
+
+                    continue;
+                }
+
+                if (!fabricModId.equals(
+                        metadata.getModId()
+                )) {
+
+                    continue;
+                }
+
+                fabricModIdProjectCache.put(
+                        fabricModId,
+                        projectId
+                );
+
+                System.out.println(
+                        "[Vanta DEBUG] Mapped Fabric mod "
+                                + fabricModId
+                                + " -> Modrinth project "
+                                + projectId
+                );
+
+                return projectId;
+            }
+        }
+
+        /*
          * Fabric API contains a number of modules inside its JAR.
          * Check Fabric API directly before searching Modrinth.
          */
@@ -1054,82 +1195,6 @@ private String findModrinthProjectForFabricModId(
                     );
                 } catch (IOException ignored) {
                 }
-            }
-        }
-
-        /*
-         * If Fabric API does not provide it, search Modrinth
-         * for a standalone project.
-         */
-        List<ModrinthSearchHit> hits =
-                client.search(
-                        fabricModId,
-                        ModrinthContentType.MOD,
-                        normalizeLoader(
-                                instance.getLoader()
-                        ),
-                        instance.getMinecraftVersion()
-                ).getHits();
-
-        if (hits == null
-                || hits.isEmpty()) {
-
-            return null;
-        }
-
-        for (ModrinthSearchHit hit :
-                hits) {
-
-            if (hit == null
-                    || hit.getProjectId() == null
-                    || hit.getProjectId().isBlank()) {
-
-                continue;
-            }
-
-            String projectId =
-                    hit.getProjectId();
-
-            List<ModrinthVersion> versions =
-                    getCompatibleCandidates(
-                            instance,
-                            projectId
-                    );
-
-            for (ModrinthVersion version :
-                    versions) {
-
-                InstalledMod metadata =
-                        readFabricMetadata(
-                                version
-                        );
-
-                if (metadata == null
-                        || metadata.getModId() == null) {
-
-                    continue;
-                }
-
-                if (!fabricModId.equals(
-                        metadata.getModId()
-                )) {
-
-                    continue;
-                }
-
-                fabricModIdProjectCache.put(
-                        fabricModId,
-                        projectId
-                );
-
-                System.out.println(
-                        "[Vanta DEBUG] Mapped Fabric mod "
-                                + fabricModId
-                                + " -> Modrinth project "
-                                + projectId
-                );
-
-                return projectId;
             }
         }
 
