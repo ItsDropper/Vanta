@@ -78,38 +78,110 @@ public final class FpsInstanceGenerator {
             ModrinthService modrinth =
                     new ModrinthService();
 
-            List<ModrinthProject> roots =
-                    new ArrayList<>();
+            List<String> projectSlugs =
+                    new ArrayList<>(BASE_MODS);
 
-            for (String slug : BASE_MODS) {
-                try {
-                    ModrinthProject project =
-                            modrinth.getProjectBySlug(slug);
+            boolean nvidiumRequested =
+                    hardware.supportsNvidium();
 
-                    if (project != null) {
-                        roots.add(project);
-                    }
-                } catch (IOException e) {
-                    throw new IOException(
-                            "Failed to resolve FPS mod '" + slug + "' from Modrinth: "
-                                    + e.getMessage(),
-                            e
-                    );
-                }
+            if (nvidiumRequested) {
+                projectSlugs.add("nvidium");
             }
 
-            boolean nvidiumInstalled = false;
+            /*
+             * Modrinth project lookups are independent network requests.
+             * Fetch them concurrently instead of waiting for every request
+             * serially. The list order is preserved for deterministic output.
+             */
+            int workers = Math.min(8, Math.max(1, projectSlugs.size()));
+            java.util.concurrent.ExecutorService executor =
+                    java.util.concurrent.Executors.newFixedThreadPool(workers);
 
-            if (hardware.supportsNvidium()) {
-                ModrinthProject nvidium =
-                        modrinth.getProjectBySlug(
-                                "nvidium"
+            List<java.util.concurrent.Future<ModrinthProject>> futures =
+                    new ArrayList<>(projectSlugs.size());
+
+            try {
+                for (String slug : projectSlugs) {
+                    futures.add(executor.submit(() -> {
+                        try {
+                            return modrinth.getProjectBySlug(slug);
+                        } catch (IOException | InterruptedException e) {
+                            throw new java.util.concurrent.CompletionException(e);
+                        }
+                    }));
+                }
+
+                List<ModrinthProject> roots =
+                        new ArrayList<>(projectSlugs.size());
+
+                boolean nvidiumInstalled = false;
+
+                for (int i = 0; i < futures.size(); i++) {
+                    try {
+                        ModrinthProject project = futures.get(i).get();
+                        if (project != null) {
+                            roots.add(project);
+                            if (nvidiumRequested && "nvidium".equals(projectSlugs.get(i))) {
+                                nvidiumInstalled = true;
+                            }
+                        }
+                    } catch (java.util.concurrent.ExecutionException e) {
+                        Throwable cause = e.getCause();
+                        if (cause instanceof java.util.concurrent.CompletionException
+                                && cause.getCause() != null) {
+                            cause = cause.getCause();
+                        }
+                        if (cause instanceof InterruptedException interrupted) {
+                            throw interrupted;
+                        }
+                        if (cause instanceof IOException io) {
+                            throw new IOException(
+                                    "Failed to resolve FPS mod '"
+                                            + projectSlugs.get(i)
+                                            + "' from Modrinth: "
+                                            + io.getMessage(),
+                                    io
+                            );
+                        }
+                        throw new IOException(
+                                "Failed to resolve FPS mod '"
+                                        + projectSlugs.get(i)
+                                        + "' from Modrinth.",
+                                cause
+                        );
+                    }
+                }
+
+                List<ModrinthService.ResolvedMod> resolved =
+                        modrinth.resolveModGraph(
+                                instance,
+                                roots,
+                                null,
+                                List.of()
                         );
 
-                if (nvidium != null) {
-                    roots.add(nvidium);
-                    nvidiumInstalled = true;
-                }
+                modrinth.installResolvedGraph(
+                        instance,
+                        resolved
+                );
+
+                FpsOptionsOptimizer.optimize(
+                        instance,
+                        hardware,
+                        learning.profile()
+                );
+
+                return new Result(
+                        instance,
+                        hardware,
+                        nvidiumInstalled,
+                        resolved.size(),
+                        learning.profile(),
+                        learning.trainingSamples(),
+                        learning.learned()
+                );
+            } finally {
+                executor.shutdownNow();
             }
 
             List<ModrinthService.ResolvedMod> resolved =
