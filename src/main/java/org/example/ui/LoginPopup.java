@@ -382,14 +382,17 @@ public class LoginPopup {
                     scene
             );
 
-            stage.setOnHidden(event -> {
-                stage = null;
+            Stage popupStage = stage;
+            popupStage.setOnHidden(event -> {
+                if (stage == popupStage) {
+                    stage = null;
+                }
                 if (onClosed != null) {
                     onClosed.run();
                 }
             });
 
-            stage.show();
+            popupStage.show();
 
             if (LauncherSettings.isAutoOpenBrowserEnabled()) {
                 PauseTransition browserDelay = new PauseTransition(Duration.millis(250));
