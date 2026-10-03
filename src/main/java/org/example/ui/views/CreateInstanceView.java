@@ -75,11 +75,11 @@ public class CreateInstanceView extends VBox {
         getStyleClass().add("page");
 
         setPadding(
-                new Insets(36)
+                new Insets(32, 36, 36, 36)
         );
 
         setSpacing(
-                24
+                20
         );
 
         // =========================================================
@@ -133,11 +133,16 @@ public class CreateInstanceView extends VBox {
         // =========================================================
 
         Label panelTitle =
-                new Label("CREATE INSTANCE");
+                new Label("Instance details");
 
         panelTitle.getStyleClass().add(
-                "card-title"
+                "create-panel-title"
         );
+
+        Label panelSubtitle = new Label(
+                "Choose a name, Minecraft version, and loader. You can change instance settings later."
+        );
+        panelSubtitle.getStyleClass().add("create-panel-subtitle");
 
         // =========================================================
         // NAME
@@ -270,7 +275,7 @@ public class CreateInstanceView extends VBox {
 
         backButton =
                 new Button(
-                        "CANCEL"
+                        "Back"
                 );
 
         backButton.getStyleClass().add(
@@ -282,7 +287,7 @@ public class CreateInstanceView extends VBox {
         );
 
         backButton.setPrefWidth(
-                110
+                92
         );
 
         backButton.setOnAction(
@@ -292,7 +297,7 @@ public class CreateInstanceView extends VBox {
 
         createButton =
                 new Button(
-                        "CREATE INSTANCE"
+                        "Create instance"
                 );
 
         createButton.getStyleClass().add(
@@ -304,7 +309,7 @@ public class CreateInstanceView extends VBox {
         );
 
         createButton.setPrefWidth(
-                170
+                150
         );
 
         createButton.setOnAction(
@@ -314,7 +319,7 @@ public class CreateInstanceView extends VBox {
 
         Button browseModpacksButton =
                 new Button(
-                        "BROWSE MODPACKS"
+                        "Browse modpacks"
                 );
 
         browseModpacksButton.getStyleClass().add(
@@ -343,6 +348,7 @@ public class CreateInstanceView extends VBox {
 
         panel.getChildren().addAll(
                 panelTitle,
+                panelSubtitle,
                 form,
                 statusLabel,
                 actions
