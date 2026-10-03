@@ -87,6 +87,34 @@ public final class LauncherSettings {
         setBoolean("defaultFullscreen", value);
     }
 
+    public static String getDefaultMinecraftVersion() {
+        return getString("defaultMinecraftVersion", "");
+    }
+
+    public static void setDefaultMinecraftVersion(String value) {
+        setString("defaultMinecraftVersion", value == null ? "" : value.trim());
+    }
+
+    public static String getDefaultLoader() {
+        return getString("defaultLoader", "Fabric");
+    }
+
+    public static void setDefaultLoader(String value) {
+        String loader = value == null ? "Fabric" : value.trim();
+        if (!"Vanilla".equals(loader) && !"Fabric".equals(loader)) {
+            loader = "Fabric";
+        }
+        setString("defaultLoader", loader);
+    }
+
+    public static boolean isHideLauncherOnLaunchEnabled() {
+        return getBoolean("hideLauncherOnLaunch", false);
+    }
+
+    public static void setHideLauncherOnLaunchEnabled(boolean value) {
+        setBoolean("hideLauncherOnLaunch", value);
+    }
+
     public static String getDefaultJavaPath() {
         return getString("defaultJavaPath", "");
     }
