@@ -160,6 +160,8 @@ public final class ForgeInstaller {
                         "-installer.jar"
                 );
 
+        boolean createdProfile = false;
+
         try {
             DownloadUtil.downloadFile(url, installer);
 
@@ -175,9 +177,6 @@ public final class ForgeInstaller {
              */
             Path launcherProfile =
                     target.resolve("launcher_profiles.json");
-
-            boolean createdProfile =
-                    false;
 
             if (!Files.exists(launcherProfile)) {
                 Files.writeString(
