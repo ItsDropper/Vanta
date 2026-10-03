@@ -23,6 +23,8 @@ import javafx.util.Duration;
 
 import java.net.URL;
 
+import org.example.ui.LauncherSettings;
+
 public class LoginPopup {
 
     private static Stage stage;
@@ -171,9 +173,12 @@ public class LoginPopup {
             // CODE
             // -----------------------------------------------------
 
+            Label step = new Label("STEP 1 OF 2  •  MICROSOFT");
+            step.getStyleClass().add("login-step");
+
             Label instruction =
                     new Label(
-                            "Enter this code on the Microsoft verification page."
+                            "Enter the code below on the Microsoft verification page."
                     );
 
             instruction.getStyleClass().add(
@@ -257,21 +262,7 @@ public class LoginPopup {
                     Double.MAX_VALUE
             );
 
-            openButton.setOnAction(event -> {
-
-                try {
-
-                    java.awt.Desktop
-                            .getDesktop()
-                            .browse(
-                                    java.net.URI.create(url)
-                            );
-
-                } catch (Exception ex) {
-
-                    ex.printStackTrace();
-                }
-            });
+            openButton.setOnAction(event -> openInBrowser(url));
 
             // -----------------------------------------------------
             // STATUS
@@ -294,6 +285,7 @@ public class LoginPopup {
                     new VBox(
                             14,
                             logo,
+                            step,
                             title,
                             subtitle,
                             instruction,
@@ -386,7 +378,24 @@ public class LoginPopup {
             );
 
             stage.show();
+
+            if (LauncherSettings.isAutoOpenBrowserEnabled()) {
+                PauseTransition browserDelay = new PauseTransition(Duration.millis(250));
+                browserDelay.setOnFinished(event -> openInBrowser(url));
+                browserDelay.play();
+            }
         });
+    }
+
+    private static void openInBrowser(String url) {
+        try {
+            if (!java.awt.Desktop.isDesktopSupported()) {
+                return;
+            }
+            java.awt.Desktop.getDesktop().browse(java.net.URI.create(url));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     public static void close() {
