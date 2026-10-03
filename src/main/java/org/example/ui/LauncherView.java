@@ -271,7 +271,8 @@ public class LauncherView {
                 new SettingsView(
                         accountService,
                         this::setAccentColor,
-                        this::showOnboarding
+                        this::showOnboarding,
+                        this::performUpdate
                 );
 
         sidebar.setOnPageSelected(
@@ -287,7 +288,8 @@ public class LauncherView {
 
         loadAccount();
         settingsView.refreshDebugAccess();
-        if (LauncherSettings.isUpdateChecksEnabled()) {
+        if (LauncherSettings.isUpdateChecksEnabled()
+                || LauncherSettings.isAutoUpdateOnLaunchEnabled()) {
             checkForUpdates();
         }
 
@@ -993,6 +995,13 @@ public class LauncherView {
                 .thenAccept(updateInfo -> {
 
                     if (!updateInfo.isUpdateAvailable()) {
+                        return;
+                    }
+
+                    if (LauncherSettings.isAutoUpdateOnLaunchEnabled()) {
+                        Platform.runLater(() ->
+                                performUpdate(updateInfo)
+                        );
                         return;
                     }
 
