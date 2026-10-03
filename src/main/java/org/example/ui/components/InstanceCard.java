@@ -9,6 +9,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -36,6 +38,8 @@ public class InstanceCard extends StackPane {
     private final Label loaderLabel;
     private final Label playtimeLabel;
     private final Label statusLabel;
+    private final Label iconLabel;
+    private final ImageView customIconView;
 
     private final Button playButton;
     private final Button settingsButton;
@@ -91,17 +95,17 @@ public class InstanceCard extends StackPane {
         // ICON
         // ---------------------------------------------------------
 
-        Label icon =
-                new Label("◇");
+        iconLabel = new Label();
+        iconLabel.getStyleClass().add("instance-icon");
+        customIconView = new ImageView();
+        customIconView.setFitWidth(28);
+        customIconView.setFitHeight(28);
+        customIconView.setPreserveRatio(true);
 
-        icon.getStyleClass().add(
-                "instance-icon"
-        );
+        StackPane icon = new StackPane(iconLabel, customIconView);
+        icon.setAlignment(Pos.CENTER);
 
-        VBox iconBox =
-                new VBox(
-                        icon
-                );
+        VBox iconBox = new VBox(icon);
 
         iconBox.setAlignment(
                 Pos.CENTER
@@ -400,6 +404,7 @@ public class InstanceCard extends StackPane {
         );
 
         update();
+        updateIcon();
     }
 
     // =============================================================
@@ -877,6 +882,33 @@ public class InstanceCard extends StackPane {
     // =============================================================
     // UPDATE
     // =============================================================
+
+    private void updateIcon() {
+        String icon = instance.getIcon();
+        boolean custom = "CUSTOM".equalsIgnoreCase(icon);
+        customIconView.setVisible(custom);
+        customIconView.setManaged(custom);
+        iconLabel.setVisible(!custom);
+        iconLabel.setManaged(!custom);
+        if (custom) {
+            File file = instance.getDirectory().resolve("icon.png").toFile();
+            if (file.isFile()) {
+                customIconView.setImage(new Image(file.toURI().toString(), 28, 28, true, true));
+            } else {
+                customIconView.setImage(null);
+                customIconView.setVisible(false);
+                iconLabel.setVisible(true);
+                iconLabel.setManaged(true);
+                iconLabel.setText("⬢");
+            }
+        } else {
+            iconLabel.setText(iconGlyph(icon));
+        }
+    }
+
+    private void updateIconFromDisk() {
+        updateIcon();
+    }
 
     private void update() {
 
