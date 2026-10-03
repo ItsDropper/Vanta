@@ -216,7 +216,8 @@ public class ModrinthClient {
 
         if (loader != null
                 && !loader.isBlank()
-                && contentType == ModrinthContentType.MOD) {
+                && contentType == ModrinthContentType.MOD
+                && !loader.equalsIgnoreCase("vanilla")) {
 
             facets.append(
                     ",[\"categories:"
