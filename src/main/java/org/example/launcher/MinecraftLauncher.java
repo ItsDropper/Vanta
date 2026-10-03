@@ -181,6 +181,36 @@ public class MinecraftLauncher {
         );
 
         // =============================================================
+        // LOADER-SPECIFIC ARGUMENTS
+        // =============================================================
+
+        /*
+         * Forge uses ModLauncher and requires its launch target plus
+         * Forge identity arguments. Vanta keeps instances isolated,
+         * so add the equivalent arguments directly to the command.
+         */
+        if ("Forge".equalsIgnoreCase(data.loader)) {
+            if (data.loaderVersion == null
+                    || data.loaderVersion.isBlank()) {
+                throw new IllegalStateException(
+                        "Forge instance has no Forge version."
+                );
+            }
+
+            command.add("--launchTarget");
+            command.add("forgeclient");
+
+            command.add("--fml.forgeVersion");
+            command.add(data.loaderVersion);
+
+            command.add("--fml.mcVersion");
+            command.add(data.version);
+
+            command.add("--fml.forgeGroup");
+            command.add("net.minecraftforge");
+        }
+
+        // =============================================================
         // ASSET INDEX
         // =============================================================
 
