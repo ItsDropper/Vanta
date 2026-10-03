@@ -1,323 +1,543 @@
 # Vanta
 
-**A lightweight, modern Minecraft launcher built from the ground up with JavaFX.**
+**A modern, modular Minecraft launcher built for reliable instance management.**
 
-Vanta is a custom Minecraft launcher focused on reliable game management, isolated instances, modern account handling, and a clean desktop experience.
+Vanta is a Windows-focused Minecraft launcher built from the ground up with JavaFX. It provides isolated Minecraft instances, Microsoft account management, Fabric and Forge support, Modrinth integration, automatic repair, installation health monitoring, and a self-updating launcher architecture.
 
-It is designed to give players control over their Minecraft installations without turning the launcher into an overloaded collection of unrelated features.
+The project is designed around a simple principle:
 
-> **Status:** Active development
+> **Keep Minecraft management powerful without making the launcher unnecessarily complicated.**
+
+**Status:** Active development
 
 ---
 
 ## Features
 
-### 🎮 Minecraft Instances
+### Minecraft Instances
 
-Vanta keeps Minecraft installations separated into independent instances.
+Vanta treats each Minecraft installation as an independent instance.
 
-Each instance can have its own:
+Instances maintain their own:
 
 * Minecraft version
+* Mod loader and loader version
 * Mods
-* Resource packs
-* Shaders
-* Worlds
 * Configuration
-* Screenshots
+* Resource packs
+* Shader packs
+* Worlds
 * Logs
-* `options.txt`
-* JVM settings
+* Screenshots
+* Native files
+* Installation metadata
 
-Shared Minecraft libraries and assets can be reused where appropriate instead of duplicating everything for every instance.
+This prevents separate Minecraft environments from interfering with one another.
+
+Vanta also maintains shared Minecraft resources such as libraries and assets separately from individual instances where appropriate.
 
 ---
 
-### 🔐 Microsoft Account Authentication
+## Microsoft Account Support
 
 Vanta supports Microsoft authentication for Minecraft Java Edition.
 
-Accounts are stored locally and sessions are protected using Windows credential storage.
+The account system supports:
 
-Vanta supports:
-
-* Persistent login
-* Automatic session refresh
-* Multiple Minecraft accounts
+* Multiple accounts
+* Persistent sessions
 * Account switching
 * Manual logout
-* Secure local account storage
+* Session refresh
+* Local account storage
+* Account migration
 
-Vanta does not require users to enter or store their Microsoft password inside the launcher.
+Authentication is handled through the launcher rather than requiring users to provide their Microsoft password directly to Vanta.
 
----
-
-### ☕ Java Management
-
-Vanta can locate and manage the Java installations required by Minecraft.
-
-The launcher verifies the **actual Java runtime version** instead of relying only on directory names.
-
-This allows different Minecraft versions to use appropriate Java runtimes.
+Windows-specific credential functionality is supported through JNA.
 
 ---
 
-### 🧩 Fabric
+## Minecraft Version Management
 
-Vanta supports Fabric installation and Fabric-based instances.
+Vanta retrieves official Minecraft version metadata and uses it to construct installations.
 
-Fabric loader versions are resolved through Fabric's metadata rather than allowing arbitrary Minecraft/loader combinations.
+The launcher handles:
+
+* Version metadata
+* Client JARs
+* Libraries
+* Assets
+* Native libraries
+* Launch arguments
+* JVM arguments
+* Game arguments
+* Authentication
+* Per-instance game directories
+
+Minecraft installations are created from version metadata rather than relying on a pre-existing `.minecraft` installation.
 
 ---
 
-### 📦 Modrinth
+## Fabric Support
 
-Vanta integrates with Modrinth for discovering and installing Minecraft content.
+Vanta has dedicated Fabric installation and metadata handling.
+
+Fabric loader versions are resolved through Fabric's metadata services, and Fabric profiles are merged into the corresponding Minecraft installation metadata.
+
+Fabric instances can also be repaired automatically when their loader or installation data becomes inconsistent.
+
+---
+
+## Forge Support
+
+Forge is supported alongside Fabric.
+
+Vanta can:
+
+* Resolve Forge loader versions
+* Install Forge
+* Maintain Forge instance metadata
+* Repair Forge installations
+* Integrate Forge installations into the normal instance lifecycle
+
+Forge version resolution uses Forge's promotion metadata rather than arbitrary version selection.
+
+---
+
+## Modrinth Integration
+
+Vanta integrates directly with Modrinth for Minecraft content management.
 
 Supported functionality includes:
 
 * Mod search
+* Version-aware searches
+* Loader-aware searches
+* Minecraft-version filtering
 * Mod installation
+* Resource-pack installation
+* Shader installation
+* Modpack discovery
 * Dependency resolution
-* Version-aware installation
-* Instance-specific mod management
+* Dependency graph installation
+* Dependency repair
+* Installed-mod scanning
 
-Local `.jar` files can also be added directly to an instance's Mods interface.
+Vanta's Modrinth system is separated into dedicated catalog, dependency, installation, and repair services rather than placing the entire system into one class.
 
 ---
 
-### 🛠️ Minecraft Launching
+## Dependency Resolution
 
-Vanta builds Minecraft launch configurations dynamically from the selected instance.
+Vanta includes a dedicated Modrinth dependency resolver.
 
-The launcher handles:
+When a mod requires another project, Vanta can resolve the dependency graph against:
 
-* Minecraft libraries
-* Assets
-* Client JARs
+* Minecraft version
+* Mod loader
+* Required project
+* Required compatible versions
+* Already installed mods
+
+Resolved dependencies can then be installed as a complete graph.
+
+This architecture also allows the launcher to repair a specific broken dependency without unnecessarily rebuilding the entire instance.
+
+---
+
+## Automatic Installation Repair
+
+Vanta includes an instance repair system designed to recover incomplete or damaged Minecraft installations.
+
+The repair process can restore:
+
+* Minecraft client files
+* Libraries
 * Native libraries
-* Authentication
-* JVM arguments
-* Game arguments
+* Assets
 * Instance directories
-* Fabric launch configurations
+* Fabric installations
+* Forge installations
+* Instance metadata
 
-The goal is to support Minecraft versions across a broad range of releases rather than relying on a single modern version.
-
----
-
-### ⚙️ Launcher & Instance Settings
-
-Vanta provides configurable settings for things such as:
-
-* Allocated RAM
-* Java runtime
-* JVM arguments
-* Instance configuration
-* Launcher behavior
-
-Settings are designed to remain specific to the appropriate scope instead of creating unnecessary global configuration.
+Existing healthy files are retained where possible, while missing or invalid installation files are restored.
 
 ---
 
-## Instance Architecture
+## State Center
 
-Vanta does not treat the user's normal `.minecraft` directory as the primary source of truth for every instance.
+Vanta includes a dedicated **State Center** for inspecting launcher and Minecraft installation health.
 
-Conceptually, instances look like:
+The State Center checks individual instances as well as shared resources.
+
+### Instance checks
+
+Vanta can verify:
+
+* Instance directory
+* Instance metadata
+* Minecraft version
+* Loader configuration
+* Installation completion state
+* Required directories
+* Empty mod files
+* Instance fingerprint information
+
+Instances are classified as:
 
 ```text
-Vanta/
-├── accounts/
-├── instances/
-│   ├── survival/
-│   │   ├── mods/
-│   │   ├── resourcepacks/
-│   │   ├── shaderpacks/
-│   │   ├── saves/
-│   │   ├── screenshots/
-│   │   ├── logs/
-│   │   └── ...
-│   │
-│   └── pvp/
-│       ├── mods/
-│       ├── resourcepacks/
-│       └── ...
-│
-└── libraries/
+HEALTHY
+ATTENTION
+BROKEN
 ```
 
-This separation makes instances easier to manage, back up, move, and configure independently.
+### Shared-resource checks
+
+Shared libraries and assets can also be inspected.
+
+Library archives can be validated as JAR/ZIP files, while empty or invalid files are detected during scanning.
 
 ---
 
-## Account Storage
+## Automatic Repair
 
-Vanta stores account data separately from Minecraft instances.
+The State Center can integrate with Vanta's repair services to rebuild unhealthy installations.
 
-On Windows, application data is stored under:
+Shared resources can also be repaired when necessary.
+
+For example, a damaged or zero-byte shared library can be detected and removed before the corresponding Minecraft metadata is used to restore the required resource.
+
+The goal is to make installation recovery a normal launcher operation rather than requiring manual deletion of Minecraft files.
+
+---
+
+## Parallel State Scanning
+
+State inspection is designed to remain responsive as the number of instances and files increases.
+
+Vanta uses bounded worker pools to parallelize filesystem inspection, including:
+
+* Instance file counting
+* Configuration counting
+* Empty-file detection
+* Shared-resource validation
+
+Shared resource scans can also validate multiple files concurrently.
+
+The implementation uses bounded concurrency rather than creating an unrestricted thread for every file.
+
+---
+
+## Launcher Updates
+
+Vanta includes its own launcher update system.
+
+Updates are retrieved from the Vanta GitHub Releases repository and support:
+
+* Release discovery
+* Version comparison
+* Application ZIP downloads
+* SHA-256 checksum downloads
+* Checksum verification
+* External updater execution
+* Installation replacement
+* Automatic restart
+
+The updater runs outside the main Vanta process so that the launcher can safely replace its own installation.
+
+### Update architecture
+
+```text
+Vanta
+  │
+  ├── Check GitHub Releases
+  │
+  ├── Download Vanta package
+  │
+  ├── Download SHA-256 checksum
+  │
+  ├── Verify package
+  │
+  └── Start external updater
+          │
+          ├── Wait for Vanta to exit
+          ├── Stage new installation
+          ├── Back up existing installation
+          ├── Replace installation
+          ├── Verify replacement
+          ├── Roll back if replacement fails
+          └── Start Vanta again
+```
+
+This keeps the update mechanism independent from the running launcher executable.
+
+---
+
+## Version Rollback
+
+Vanta supports **launcher rollback**, not just normal updates.
+
+The Settings interface can retrieve published Vanta releases and display older compatible releases.
+
+A selected release can then be downloaded and installed using the same verified external updater architecture.
+
+This allows the launcher itself to be downgraded when a newer version needs to be replaced.
+
+Rollback releases are filtered to published releases with the required Vanta application package and SHA-256 checksum.
+
+---
+
+## Automatic Updates
+
+Vanta can optionally check for launcher updates automatically.
+
+The setting is configurable from the launcher settings.
+
+When enabled, Vanta can perform its normal update workflow on launch rather than requiring the user to manually select the update action.
+
+---
+
+## Isolated Data
+
+Vanta separates application files from Minecraft instance data.
+
+The launcher installation contains the application itself, while user data is maintained separately.
+
+Conceptually:
 
 ```text
 %APPDATA%\Vanta\
+├── accounts\
+├── instances\
+│   ├── <instance>\
+│   │   ├── mods\
+│   │   ├── config\
+│   │   ├── resourcepacks\
+│   │   ├── shaderpacks\
+│   │   ├── saves\
+│   │   ├── logs\
+│   │   ├── screenshots\
+│   │   ├── natives\
+│   │   └── instance.json
+│   │
+│   └── ...
+│
+├── libraries\
+├── assets\
+└── ...
 ```
 
-Account files are stored separately and protected using Windows credential functionality.
+The exact storage structure can evolve as the launcher develops, but application installation files and user Minecraft data are intentionally treated as separate concerns.
 
-Vanta's account system is designed around:
-
-* Local storage
-* Persistent sessions
-* Encrypted session data
-* Multiple accounts
-* Atomic account-file updates
-* Account migration from previous Vanta installations
+When Minecraft is launched, Vanta explicitly sets the Minecraft instance directory as the process working directory as well as the Minecraft game directory. This prevents relative paths such as `config` from accidentally resolving beside the launcher executable.
 
 ---
 
-## Privacy
+## Launcher Settings
 
-Vanta is designed with a **local-first approach**.
+Vanta provides a dedicated settings system covering launcher-wide behavior.
 
-The launcher does not require a Vanta account or centralized Vanta database to function.
+Current settings areas include:
 
-Vanta communicates with external services when required for functionality, such as:
+* Appearance
+* Discord
+* General
+* Minecraft
+* Downloads
+* State
+* Repair & Diagnostics
+* About Vanta
 
-* Microsoft authentication
-* Minecraft services
-* Mojang metadata
-* Fabric metadata
-* Modrinth
+General launcher options include controls for:
 
-Vanta does not intentionally collect unnecessary user data.
+* Animations
+* Update checks
+* Automatic updates
+* Launch confirmations
+* Hiding the launcher when Minecraft starts
+* Automatic browser opening
+* Launcher version rollback
+* Data-directory information
+* Runtime information
+* Workspace configuration
 
-External services have their own privacy policies and terms, which remain separate from Vanta.
+State-related settings include configurable state-scan workers and automatic state repair.
+
+---
+
+## Discord Rich Presence
+
+Vanta includes Discord Rich Presence integration.
+
+Discord presence can be controlled from the launcher settings.
+
+The integration is implemented as an optional launcher service rather than being part of the core Minecraft installation system.
 
 ---
 
 ## Technology
 
-Vanta is built using:
+Vanta is currently built with:
 
 * **Java 21**
-* **JavaFX**
+* **JavaFX 21**
 * **Gradle**
+* **Shadow**
 * **jlink**
 * **jpackage**
 * **NSIS**
-* **MinecraftAuth**
 * **Jackson**
+* **MinecraftAuth**
+* **JNA**
+* **TwelveMonkeys ImageIO**
+* **Flexmark**
+* **DiscordIPC**
 
-The project currently focuses on **Windows** while keeping the architecture suitable for future platform support.
+The launcher currently targets Windows while keeping the codebase modular enough for future platform support.
 
 ---
 
 ## Architecture
 
-Vanta is structured around separate systems rather than placing launcher functionality into one large class.
+Vanta is deliberately split into separate systems.
 
-Major components include:
+A simplified representation is:
 
 ```text
-Account
- ├── Authentication
- ├── Persistent storage
- └── Account switching
-
-Instance
- ├── Instance management
- ├── Minecraft installation
- ├── Mods
- ├── Resource packs
- └── Configuration
-
-Minecraft
- ├── Version metadata
- ├── Libraries
- ├── Assets
- ├── Natives
- └── Launch configuration
-
-Loader
- └── Fabric
-
-Services
- ├── Authentication
- ├── Launching
- ├── Downloads
- ├── Modrinth
- └── Java management
+Vanta
+│
+├── UI
+│   ├── Home
+│   ├── Instances
+│   ├── Accounts
+│   ├── Global Mods
+│   ├── State Center
+│   └── Settings
+│
+├── Accounts
+│   ├── Authentication
+│   ├── Account storage
+│   └── Session management
+│
+├── Instances
+│   ├── Creation
+│   ├── Installation
+│   ├── Repair
+│   ├── Metadata
+│   └── Usage tracking
+│
+├── Minecraft
+│   ├── Version metadata
+│   ├── Client installation
+│   ├── Libraries
+│   ├── Assets
+│   ├── Natives
+│   └── Launch configuration
+│
+├── Loaders
+│   ├── Fabric
+│   └── Forge
+│
+├── Modrinth
+│   ├── Catalog
+│   ├── Dependency resolver
+│   ├── Installer
+│   ├── Scanner
+│   └── Repair
+│
+├── State
+│   ├── Instance state
+│   ├── Shared resource state
+│   ├── Parallel scanning
+│   └── Repair integration
+│
+└── Updates
+    ├── Release service
+    ├── Checksum verification
+    ├── External updater
+    ├── Installation replacement
+    └── Rollback
 ```
 
-The architecture is intentionally designed so that new functionality can be added without turning the launcher into a monolithic system.
-
----
-
-## Installation
-
-Download the latest Vanta release from the **Releases** section of this repository.
-
-The Windows installer installs Vanta and creates the required application files.
-
-Your Minecraft accounts and Vanta instances are stored separately from the application installation, allowing the launcher itself to be updated without unnecessarily replacing user data.
-
----
-
-## First Launch
-
-On the first launch:
-
-1. Sign in with your Microsoft account.
-2. Vanta stores the authenticated session securely.
-3. Create or select an instance.
-4. Select the desired Minecraft version.
-5. Configure the instance if needed.
-6. Launch Minecraft.
-
-After authentication has been established, Vanta can refresh the saved session automatically when possible.
-
----
-
-## Development
-
-### Requirements
-
-* Windows 10/11
-* Java 21 JDK
-* IntelliJ IDEA
-* Gradle
-
-Clone the repository and open the project in IntelliJ IDEA.
-
-Run the launcher using the IntelliJ run configuration.
+The architecture favors dedicated services over monolithic launcher classes so that individual systems can evolve independently.
 
 ---
 
 ## Project Structure
 
-The project separates launcher responsibilities into dedicated packages.
-
-Examples include:
+The main source tree is organized approximately as follows:
 
 ```text
 src/
 └── main/
     ├── java/
-    │   └── org/example/launcher/
-    │       ├── account/
-    │       ├── instance/
-    │       ├── java/
-    │       ├── model/
+    │   ├── org/example/Main.java
+    │   │
+    │   ├── org/example/launcher/
+    │   │   ├── account/
+    │   │   ├── auth/
+    │   │   ├── instance/
+    │   │   ├── java/
+    │   │   ├── modrinth/
+    │   │   ├── service/
+    │   │   ├── state/
+    │   │   ├── update/
+    │   │   └── ...
+    │   │
+    │   └── org/example/ui/
+    │       ├── components/
+    │       ├── views/
     │       └── ...
     │
     └── resources/
+        ├── launcher.css
         └── ...
 ```
 
-The exact structure may change as Vanta develops.
+The codebase is actively evolving, so the exact package structure may change.
 
 ---
 
-## Project Philosophy
+## Build & Development
+
+### Requirements
+
+* Windows 10/11
+* JDK 21
+* IntelliJ IDEA
+* Gradle
+
+The project uses a Java 21 Gradle toolchain.
+
+Open the repository in IntelliJ IDEA and use the project's configured run/build tasks.
+
+For packaged distributions, Vanta uses the Java runtime packaging ecosystem provided by `jlink` and `jpackage`, with NSIS used as part of the Windows distribution pipeline.
+
+---
+
+## Privacy
+
+Vanta follows a local-first design.
+
+The launcher does not require a Vanta account or centralized Vanta service for normal operation.
+
+External network communication is used where required by launcher functionality, including services such as:
+
+* Microsoft authentication
+* Mojang/Minecraft metadata
+* Fabric metadata
+* Forge metadata
+* Modrinth
+* GitHub Releases for launcher updates
+
+Vanta does not intentionally collect unnecessary telemetry.
+
+Third-party services remain subject to their own privacy policies and terms.
+
+---
+
+## Reliability Philosophy
 
 Vanta prioritizes:
 
@@ -325,107 +545,109 @@ Vanta prioritizes:
 
 **Maintainability over unnecessary abstraction.**
 
-**A polished user experience over visual complexity.**
+**Recovery over manual troubleshooting.**
 
-**Local control over unnecessary data collection.**
+**Isolated data over shared mutable state.**
 
-New functionality should solve a real launcher problem rather than exist simply to increase the feature list.
+**A clean interface over unnecessary complexity.**
+
+The launcher should not merely install Minecraft once. It should be able to understand the state of an installation, detect problems, and recover from them.
 
 ---
 
 ## Roadmap
 
-Planned development includes:
+Vanta is actively developed. Areas of ongoing development include:
 
-* [ ] Further launcher reliability and error handling
-* [ ] More robust download and file verification
-* [ ] Improved Minecraft compatibility
-* [ ] More complete loader support
-* [ ] Instance import/export
-* [ ] `.mrpack` importing
-* [ ] `.vantapack` exporting
-* [ ] Launcher updates
-* [ ] Improved launcher settings
-* [ ] Linux support
-* [ ] macOS support
-* [ ] Additional social functionality
+* More robust dependency resolution
+* Additional Minecraft compatibility
+* Improved repair coverage
+* More complete loader support
+* Better diagnostics
+* Instance import/export
+* `.mrpack` support
+* `.vantapack` support
+* Further launcher update improvements
+* Linux support
+* macOS support
+* Additional launcher integrations
 
-The roadmap is subject to change.
+The roadmap is subject to change as the architecture develops.
 
 ---
 
 ## Contributing
 
-Contributions are welcome when they improve Vanta without compromising its architecture, security, reliability, or user experience.
+Contributions are welcome when they improve Vanta without compromising its architecture, reliability, security, or user experience.
 
-Before submitting a pull request, contributors should clearly explain:
+Before submitting a pull request, explain:
 
 * What the change does
-* Why the change is necessary
-* How the implementation works
+* Why it is needed
+* How it works
 * Which files were changed
-* How the change was tested
+* How it was tested
 * Any known limitations or edge cases
 
-Pull requests are reviewed carefully before being merged.
-
-A pull request being submitted does not mean it will automatically be accepted.
+Large architectural changes should be discussed before implementation.
 
 ---
 
 ## Security
 
-Security issues should **not** be publicly disclosed through ordinary GitHub issues when they could expose sensitive information or create an exploitable vulnerability.
+Do not publicly disclose sensitive security information through ordinary issues.
 
-Avoid publishing:
+Never publish:
 
 * Authentication tokens
 * Account credentials
 * Private keys
-* Personal data
+* Sensitive personal information
 * Exploit details that could put users at risk
+
+Security-related issues should be reported responsibly.
 
 ---
 
 ## Disclaimer
 
-Vanta is provided **"as is"**, without warranties of any kind, express or implied.
-
-Vanta is an independent project and is not affiliated with, endorsed by, or sponsored by Mojang Studios, Microsoft, Fabric, or Modrinth.
+Vanta is an independent project and is not affiliated with, endorsed by, or sponsored by Mojang Studios, Microsoft, Fabric, Forge, or Modrinth.
 
 Minecraft is a trademark of Microsoft Corporation and/or its affiliates.
+
+Vanta is provided without guarantees of availability or compatibility.
 
 ---
 
 ## License
 
-Vanta is distributed under the license included in this repository.
-
-See [`LICENSE`](LICENSE) for the complete terms.
+See [`LICENSE`](LICENSE) for the complete license terms.
 
 ---
 
 ## Acknowledgements
 
-Vanta relies on several open-source projects and external services.
+Vanta builds upon a number of open-source projects and external services, including:
 
-Notable dependencies and services include:
-
-* MinecraftAuth
-* Fabric
-* Modrinth
 * JavaFX
-* Jackson
 * Gradle
+* MinecraftAuth
+* JNA
+* Jackson
+* Fabric
+* Forge
+* Modrinth
+* TwelveMonkeys
+* Flexmark
+* DiscordIPC
 * NSIS
 
 Their respective licenses and terms apply independently.
 
 ---
 
-## Repository
+## Vanta
 
-**Vanta**
-Custom Minecraft launcher by **ItsDropper**.
+**Vanta — a modern Minecraft launcher focused on control, isolation, and recovery.**
 
-The project is actively developed with a focus on turning Vanta into a reliable, maintainable launcher rather than simply maximizing its feature count.
+Built by **ItsDropper**.
