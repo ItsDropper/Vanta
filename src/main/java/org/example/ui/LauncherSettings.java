@@ -171,6 +171,27 @@ public final class LauncherSettings {
         setBoolean("discordShowLoader", value);
     }
 
+    public static boolean isShowPlaytimeEnabled() { return getBoolean("showPlaytime", true); }
+    public static void setShowPlaytimeEnabled(boolean value) { setBoolean("showPlaytime", value); }
+    public static boolean isCompactInstancesEnabled() { return getBoolean("compactInstances", false); }
+    public static void setCompactInstancesEnabled(boolean value) { setBoolean("compactInstances", value); }
+    public static boolean isStateScanOnOpenEnabled() { return getBoolean("stateScanOnOpen", true); }
+    public static void setStateScanOnOpenEnabled(boolean value) { setBoolean("stateScanOnOpen", value); }
+    public static boolean isNotificationsEnabled() { return getBoolean("notificationsEnabled", true); }
+    public static void setNotificationsEnabled(boolean value) { setBoolean("notificationsEnabled", value); }
+    public static boolean isRememberLastSettingsPageEnabled() { return getBoolean("rememberLastSettingsPage", true); }
+    public static void setRememberLastSettingsPageEnabled(boolean value) { setBoolean("rememberLastSettingsPage", value); }
+    public static int getDownloadRetries() { return getInt("downloadRetries", 3, 1, 8); }
+    public static void setDownloadRetries(int value) { setInt("downloadRetries", clamp(value, 1, 8)); }
+    public static boolean isVerifyDownloadsEnabled() { return getBoolean("verifyDownloads", true); }
+    public static void setVerifyDownloadsEnabled(boolean value) { setBoolean("verifyDownloads", value); }
+    public static boolean isAutoRepairOnLaunchEnabled() { return getBoolean("autoRepairOnLaunch", true); }
+    public static void setAutoRepairOnLaunchEnabled(boolean value) { setBoolean("autoRepairOnLaunch", value); }
+    public static boolean isShowModrinthDownloadsEnabled() { return getBoolean("showModrinthDownloads", true); }
+    public static void setShowModrinthDownloadsEnabled(boolean value) { setBoolean("showModrinthDownloads", value); }
+    public static boolean isConfirmInstanceDeletionEnabled() { return getBoolean("confirmInstanceDeletion", true); }
+    public static void setConfirmInstanceDeletionEnabled(boolean value) { setBoolean("confirmInstanceDeletion", value); }
+
     public static void resetOnboarding() {
         setBoolean("onboardingCompleted", false);
     }
