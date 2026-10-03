@@ -155,21 +155,18 @@ public class GlobalModsView extends VBox {
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
-            results.getChildren().clear();
             showPopularSection();
             loadMostDownloadedMods();
         });
 
         loaderBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
-                    results.getChildren().clear();
-                showPopularSection();
+                        showPopularSection();
                 loadMostDownloadedMods();
             }
         });
 
         versionBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-            results.getChildren().clear();
             showPopularSection();
             loadMostDownloadedMods();
         });
