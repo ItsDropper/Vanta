@@ -124,6 +124,12 @@ public class LaunchDataBuilder {
         data.version =
                 instance.getMinecraftVersion();
 
+        data.loader =
+                instance.getLoader();
+
+        data.loaderVersion =
+                instance.getLoaderVersion();
+
         // ---------------------------------------------------------
         // ASSETS
         // ---------------------------------------------------------
