@@ -22,6 +22,7 @@ import org.example.launcher.state.InstanceState;
 import org.example.launcher.state.SharedState;
 import org.example.launcher.state.InstanceStateEngine;
 import org.example.launcher.instance.InstanceRepairService;
+import org.example.launcher.instance.SharedResourceRepairService;
 import org.example.ui.components.IconView;
 import org.example.ui.components.InstanceCard;
 import org.example.ui.components.NotificationManager;
@@ -212,7 +213,7 @@ public final class StateCenterView extends VBox {
             executor.submit(() -> {
                 InstanceState state;
                 try {
-                    state = InstanceStateEngine.inspect(instance);
+                    state = InstanceStateEngine.inspect(instance, workers);
                 } catch (Throwable ex) {
                     ex.printStackTrace();
                     state = new InstanceState(
@@ -280,7 +281,8 @@ public final class StateCenterView extends VBox {
             SharedState state = InstanceStateEngine.inspectShared(
                     "Libraries",
                     org.example.launcher.MinecraftLocator.getLibrariesDirectory(),
-                    true
+                    true,
+                    workers
             );
             int done = completed.incrementAndGet();
 
@@ -307,7 +309,8 @@ public final class StateCenterView extends VBox {
             SharedState state = InstanceStateEngine.inspectShared(
                     "Assets",
                     org.example.launcher.MinecraftLocator.getVantaDirectory().resolve("assets"),
-                    false
+                    false,
+                    workers
             );
             int done = completed.incrementAndGet();
 
@@ -584,8 +587,73 @@ public final class StateCenterView extends VBox {
                         : "state-shared-" + state.getLevel().name().toLowerCase()
         );
 
-        row.getChildren().addAll(icon, text, count, status);
+        VBox right = new VBox(6);
+        right.setAlignment(Pos.CENTER_RIGHT);
+
+        if (state != null
+                && state.getLevel() == SharedState.Level.BROKEN
+                && !LauncherSettings.isStateAutoRepairEnabled()) {
+            Button repair = new Button("REPAIR");
+            repair.getStyleClass().add("state-repair-button");
+            repair.setFocusTraversable(false);
+            repair.setOnAction(event -> repairSharedResource(name, repair));
+            right.getChildren().add(repair);
+        }
+
+        right.getChildren().addAll(count, status);
+        row.getChildren().addAll(icon, text, right);
         return row;
+    }
+
+    private void repairSharedResource(String name, Button button) {
+        button.setDisable(true);
+        button.setText("REPAIRING...");
+
+        Thread repairThread = new Thread(() -> {
+            try {
+                List<Instance> instances = InstanceManager.discoverInstances();
+                boolean libraries = "Libraries".equals(name);
+                boolean assets = "Assets".equals(name);
+
+                SharedResourceRepairService.repair(instances, libraries, assets);
+
+                SharedState repaired = libraries
+                        ? InstanceStateEngine.inspectShared(
+                                "Libraries",
+                                org.example.launcher.MinecraftLocator.getLibrariesDirectory(),
+                                true,
+                                LauncherSettings.getStateScanWorkers())
+                        : InstanceStateEngine.inspectShared(
+                                "Assets",
+                                org.example.launcher.MinecraftLocator.getVantaDirectory().resolve("assets"),
+                                false,
+                                LauncherSettings.getStateScanWorkers());
+
+                Platform.runLater(() -> {
+                    replaceSharedRow(repaired);
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.success("Shared resource repair complete",
+                                name + " was repaired and rescanned.");
+                    }
+                });
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error("Shared resource repair failed",
+                                name + ": " + (ex.getMessage() == null
+                                        ? ex.getClass().getSimpleName()
+                                        : ex.getMessage()));
+                    }
+                    button.setDisable(false);
+                    button.setText("REPAIR");
+                });
+            }
+        }, "Vanta-State-Shared-Repair");
+        repairThread.setDaemon(true);
+        repairThread.start();
     }
 
     private void repairInstanceManually(Instance instance, Button button) {
