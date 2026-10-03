@@ -27,6 +27,7 @@ import org.example.ui.ThemeManager;
 
 import java.awt.Desktop;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -359,7 +360,26 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setDiscordShowPlaytimeEnabled(showPlaytime.isSelected())
         );
 
-        activity.getChildren().addAll(showInstance, showPlaytime);
+        CheckBox showVersion = new CheckBox("Show Minecraft version");
+        showVersion.setSelected(LauncherSettings.isDiscordShowVersionEnabled());
+        showVersion.getStyleClass().add("settings-checkbox");
+        showVersion.setOnAction(event ->
+                LauncherSettings.setDiscordShowVersionEnabled(showVersion.isSelected())
+        );
+
+        CheckBox showLoader = new CheckBox("Show mod loader");
+        showLoader.setSelected(LauncherSettings.isDiscordShowLoaderEnabled());
+        showLoader.getStyleClass().add("settings-checkbox");
+        showLoader.setOnAction(event ->
+                LauncherSettings.setDiscordShowLoaderEnabled(showLoader.isSelected())
+        );
+
+        activity.getChildren().addAll(
+                showInstance,
+                showPlaytime,
+                showVersion,
+                showLoader
+        );
 
         VBox note = card(
                 "Setup",
@@ -638,6 +658,24 @@ public class SettingsView extends BorderPane {
                     "Owner-only launcher diagnostics. These controls are hidden from all other Minecraft accounts."
             );
 
+            addInfoRow(debug, "Launcher PID", String.valueOf(ProcessHandle.current().pid()));
+            addInfoRow(debug, "Java", System.getProperty("java.version", "Unknown"));
+            addInfoRow(debug, "Java VM", System.getProperty("java.vm.name", "Unknown"));
+            addInfoRow(debug, "OS", System.getProperty("os.name", "Unknown") + " " + System.getProperty("os.version", ""));
+            addInfoRow(debug, "Architecture", System.getProperty("os.arch", "Unknown"));
+            addInfoRow(debug, "JVM memory", formatBytes(Runtime.getRuntime().maxMemory()));
+            Account debugAccount = accountService.getCurrentAccount();
+            addInfoRow(debug, "Account UUID", debugAccount == null ? "Not signed in" : debugAccount.getUuid());
+            addInfoRow(debug, "Vanta data", MinecraftLocator.getVantaDirectory().toString());
+            addInfoRow(debug, "Settings file", MinecraftLocator.getVantaDirectory().resolve("settings.properties").toString());
+
+            HBox debugActions = new HBox(8);
+            debugActions.getChildren().addAll(
+                    actionButton("OPEN DATA", () -> openDirectory(MinecraftLocator.getVantaDirectory())),
+                    actionButton("OPEN SETTINGS", () -> openFile(MinecraftLocator.getVantaDirectory().resolve("settings.properties"))),
+                    actionButton("REFRESH", () -> selectSection("Repair & Diagnostics"))
+            );
+
             Button testOnboarding = new Button("TEST ONBOARDING");
             testOnboarding.getStyleClass().add("debug-button");
             testOnboarding.setOnAction(event -> {
@@ -652,7 +690,7 @@ public class SettingsView extends BorderPane {
                 onDebugOnboarding.run();
             });
 
-            debug.getChildren().add(testOnboarding);
+            debug.getChildren().addAll(debugActions, testOnboarding);
             content.getChildren().add(debug);
         }
 
@@ -767,6 +805,34 @@ public class SettingsView extends BorderPane {
                 manager.error("Could not open folder", directory.toString());
             }
         }
+    }
+
+    private void openFile(Path file) {
+        try {
+            if (!Files.exists(file)) {
+                Files.createDirectories(file.getParent());
+                Files.createFile(file);
+            }
+
+            if (Desktop.isDesktopSupported()) {
+                Desktop.getDesktop().open(file.toFile());
+            }
+        } catch (Exception ignored) {
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.error("Could not open file", file.toString());
+            }
+        }
+    }
+
+    private static String formatBytes(long bytes) {
+        if (bytes < 1024L * 1024L) {
+            return bytes + " B";
+        }
+        if (bytes < 1024L * 1024L * 1024L) {
+            return String.format("%.0f MB", bytes / 1024.0 / 1024.0);
+        }
+        return String.format("%.1f GB", bytes / 1024.0 / 1024.0 / 1024.0);
     }
 
     private String loadVersion() {
