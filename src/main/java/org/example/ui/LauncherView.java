@@ -28,6 +28,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.function.Consumer;
+
 public class LauncherView {
 
     private final StackPane root;
@@ -51,9 +53,15 @@ public class LauncherView {
 
     private final TitleBar titleBar;
     private LaunchService.LaunchState previousLaunchState = LaunchService.LaunchState.IDLE;
+    private final Runnable onReady;
 
 
     public LauncherView(Stage stage) {
+        this(stage, () -> {});
+    }
+
+    public LauncherView(Stage stage, Runnable onReady) {
+        this.onReady = onReady;
 
         root =
                 new StackPane();
@@ -913,15 +921,6 @@ public class LauncherView {
 
                         accountService.loadAccount();
 
-                        // Keep the startup/loading state visible for a moment after
-                        // authentication finishes so the title bar never briefly
-                        // renders the signed-out state before the account is shown.
-                        try {
-                            Thread.sleep(350);
-                        } catch (InterruptedException ex) {
-                            Thread.currentThread().interrupt();
-                        }
-
                         Platform.runLater(() -> {
 
                             homeView.setAccount(
@@ -929,6 +928,8 @@ public class LauncherView {
                             );
 
                             accountsView.updateAccountDisplay();
+
+                            onReady.run();
                         });
 
                     } catch (Throwable ex) {
