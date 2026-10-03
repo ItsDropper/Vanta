@@ -2,7 +2,9 @@ package org.example.ui.views;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.control.ComboBox;
@@ -17,11 +19,14 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.application.Platform;
+import javafx.util.StringConverter;
 
 import org.example.launcher.MinecraftLocator;
 import org.example.launcher.account.Account;
 import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.service.AccountService;
+import org.example.launcher.update.UpdateInfo;
+import org.example.launcher.update.UpdateService;
 import org.example.ui.DebugAccess;
 import org.example.ui.components.NotificationManager;
 import org.example.ui.LauncherSettings;
@@ -45,6 +50,7 @@ public class SettingsView extends BorderPane {
     private final AccountService accountService;
     private final Consumer<String> onAccentChanged;
     private final Runnable onDebugOnboarding;
+    private final Consumer<UpdateInfo> onVantaUpdate;
     private final VBox navigation = new VBox(4);
     private final VBox content = new VBox(22);
 
@@ -59,11 +65,13 @@ public class SettingsView extends BorderPane {
     public SettingsView(
             AccountService accountService,
             Consumer<String> onAccentChanged,
-            Runnable onDebugOnboarding
+            Runnable onDebugOnboarding,
+            Consumer<UpdateInfo> onVantaUpdate
     ) {
         this.accountService = accountService;
         this.onAccentChanged = onAccentChanged;
         this.onDebugOnboarding = onDebugOnboarding;
+        this.onVantaUpdate = onVantaUpdate;
 
         accountService.addListener(account -> refreshDebugAccess());
         this.accentColor = ThemeManager.loadAccent();
@@ -163,6 +171,103 @@ public class SettingsView extends BorderPane {
                 }
             }
         }
+    }
+
+        VBox rollback = card(
+                "Vanta version rollback",
+                "Install an older published Vanta release. This rolls back the launcher itself, not Minecraft instances."
+        );
+
+        ComboBox<UpdateInfo> versions = new ComboBox<>();
+        versions.setPromptText("Select a Vanta version");
+        versions.setMaxWidth(Double.MAX_VALUE);
+        versions.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(UpdateInfo info) {
+                return info == null ? "" : info.getLatestVersion().replaceFirst("^[vV]", "");
+            }
+
+            @Override
+            public UpdateInfo fromString(String string) {
+                return null;
+            }
+        });
+
+        Button rollbackButton = new Button("ROLL BACK VANTA");
+        rollbackButton.getStyleClass().add("secondary-button");
+        rollbackButton.setDisable(true);
+        versions.valueProperty().addListener((obs, oldValue, newValue) ->
+                rollbackButton.setDisable(newValue == null)
+        );
+
+        rollbackButton.setOnAction(event -> {
+            UpdateInfo selected = versions.getValue();
+            if (selected == null) {
+                return;
+            }
+
+            Alert confirm = new Alert(
+                    Alert.AlertType.CONFIRMATION,
+                    "Vanta will be replaced with version "
+                            + selected.getLatestVersion().replaceFirst("^[vV]", "")
+                            + " and restarted. Continue?",
+                    ButtonType.CANCEL,
+                    ButtonType.OK
+            );
+            confirm.setTitle("Roll Back Vanta");
+            confirm.setHeaderText("Roll back launcher version");
+
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                onVantaUpdate.accept(selected);
+            }
+        });
+
+        rollback.getChildren().addAll(
+                versions,
+                rollbackButton
+        );
+
+        content.getChildren().add(rollback);
+        loadRollbackVersions(versions, rollbackButton);
+    }
+
+    private void loadRollbackVersions(
+            ComboBox<UpdateInfo> versions,
+            Button rollbackButton
+    ) {
+        versions.setPromptText("Loading available versions...");
+
+        Thread thread = new Thread(() -> {
+            try {
+                UpdateService service = new UpdateService();
+                var available = service.getAvailableVersions(loadVersion());
+
+                Platform.runLater(() -> {
+                    versions.getItems().setAll(available);
+                    versions.setPromptText(
+                            available.isEmpty()
+                                    ? "No rollback versions available"
+                                    : "Select a Vanta version"
+                    );
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    versions.setPromptText("Could not load Vanta versions");
+                    rollbackButton.setDisable(true);
+
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error(
+                                "Rollback versions unavailable",
+                                "Vanta could not load published launcher releases."
+                        );
+                    }
+                });
+            }
+        }, "Vanta-Rollback-Versions");
+
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void buildAppearancePage() {
@@ -477,6 +582,16 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setUpdateChecksEnabled(updates.isSelected())
         );
 
+        CheckBox autoUpdate = new CheckBox("Automatically install launcher updates on every launch");
+        autoUpdate.setSelected(LauncherSettings.isAutoUpdateOnLaunchEnabled());
+        autoUpdate.getStyleClass().add("settings-checkbox");
+        autoUpdate.setTooltip(new javafx.scene.control.Tooltip(
+                "When an update is available, Vanta downloads, verifies and installs it automatically, then restarts."
+        ));
+        autoUpdate.setOnAction(event ->
+                LauncherSettings.setAutoUpdateOnLaunchEnabled(autoUpdate.isSelected())
+        );
+
         CheckBox confirmations = new CheckBox("Confirm destructive content actions");
         confirmations.setSelected(LauncherSettings.isConfirmRemovalsEnabled());
         confirmations.getStyleClass().add("settings-checkbox");
@@ -507,6 +622,7 @@ public class SettingsView extends BorderPane {
         behavior.getChildren().addAll(
                 animations,
                 updates,
+                autoUpdate,
                 confirmations,
                 hideLauncher,
                 autoOpenBrowser
