@@ -1037,3 +1037,15 @@
     -fx-background-color: #141714;
 }
 
+
+
+/* Instance management popups */
+.instance-action-popup{-fx-background-color:#121821;-fx-background-radius:14px;-fx-border-color:#303b49;-fx-border-width:1px;-fx-border-radius:14px;-fx-padding:20px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.38),24,.15,0,8)}
+.instance-action-title{-fx-text-fill:#f1f5fa;-fx-font-size:14px;-fx-font-weight:900}
+.instance-action-subtitle{-fx-text-fill:#7f8b9c;-fx-font-size:10px}
+.instance-action-field{-fx-background-color:#0f151d;-fx-background-radius:8px;-fx-border-color:#303b49;-fx-border-radius:8px;-fx-text-fill:#edf2f8;-fx-prompt-text-fill:#667487;-fx-padding:10px 12px;-fx-min-height:40px}
+.instance-action-field:focused{-fx-border-color:-vanta-accent}
+.instance-icon-choice{-fx-background-color:#171f29;-fx-background-radius:10px;-fx-border-color:#2e3b4c;-fx-border-radius:10px;-fx-text-fill:#edf2f8;-fx-font-size:20px;-fx-font-weight:800;-fx-min-width:38px;-fx-pref-width:38px;-fx-min-height:38px;-fx-pref-height:38px;-fx-cursor:hand}
+.instance-icon-choice:hover{-fx-background-color:#202b38;-fx-border-color:-vanta-accent}
+.instance-card-compact{-fx-min-height:62px}
+.instance-card-compact .instance-playtime{-fx-font-size:9px}
