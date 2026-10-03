@@ -33,6 +33,7 @@ import java.util.function.Consumer;
 public class LauncherView {
 
     private final StackPane root;
+    private final Stage stage;
     private final BorderPane window;
 
     private final AccountService accountService;
@@ -61,6 +62,7 @@ public class LauncherView {
     }
 
     public LauncherView(Stage stage, Runnable onReady) {
+        this.stage = stage;
         this.onReady = onReady;
 
         root =
@@ -150,6 +152,9 @@ public class LauncherView {
                             "Preparing the selected instance..."
                     );
                 } else if (state == LaunchService.LaunchState.RUNNING) {
+                    if (LauncherSettings.isHideLauncherOnLaunchEnabled()) {
+                        Platform.runLater(stage::hide);
+                    }
                     manager.success(
                             "Minecraft started",
                             running == null
@@ -166,6 +171,9 @@ public class LauncherView {
                     );
                 } else if (state == LaunchService.LaunchState.IDLE
                         && previousLaunchState == LaunchService.LaunchState.CLOSING) {
+                    if (LauncherSettings.isHideLauncherOnLaunchEnabled()) {
+                        Platform.runLater(stage::show);
+                    }
                     manager.success(
                             "Minecraft closed",
                             "The Minecraft process has exited."
