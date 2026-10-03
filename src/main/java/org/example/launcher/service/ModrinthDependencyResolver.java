@@ -13,6 +13,8 @@ public final class ModrinthDependencyResolver {
     private final Map<String, InstalledMod> fabricMetadataCache = new HashMap<>();
     private final Map<String, String> fabricModIdProjectCache = new HashMap<>();
     private final Map<String, List<ModrinthVersion>> versionCache = new HashMap<>();
+    private boolean fastResolution = true;
+    private static final int FAST_CANDIDATE_LIMIT = 6;
 
     public ModrinthDependencyResolver(ModrinthClient client, InstalledModScanner installedModScanner) {
         this.client = client;
@@ -96,6 +98,24 @@ public List<ModrinthService.ResolvedMod> resolveModGraph(
                         resolved,
                         new HashSet<>()
                 );
+
+        if (!success && fastResolution) {
+            System.out.println(
+                    "[Vanta DEBUG] Fast dependency resolution failed; "
+                            + "retrying with the full candidate set."
+            );
+            fastResolution = false;
+            resolved.clear();
+            success =
+                    resolveRoots(
+                            instance,
+                            rootList,
+                            requiredProjectId,
+                            requiredVersions,
+                            resolved,
+                            new HashSet<>()
+                    );
+        }
 
         if (!success) {
             throw new IOException(
@@ -1442,6 +1462,12 @@ private List<ModrinthVersion> getCompatibleCandidates(
             return bNumber.compareToIgnoreCase(aNumber);
         });
 
+        if (fastResolution && candidates.size() > FAST_CANDIDATE_LIMIT) {
+            return new ArrayList<>(
+                    candidates.subList(0, FAST_CANDIDATE_LIMIT)
+            );
+        }
+
         return candidates;
     }
 
@@ -1944,52 +1970,64 @@ private boolean fabricDependencyAcceptsVersion(
             ModrinthVersion dependencyVersion
     ) throws IOException {
 
-        InstalledMod requesting =
-                readFabricMetadata(
-                        requestingVersion
-                );
-
-        InstalledMod dependency =
-                readFabricMetadata(
-                        dependencyVersion
-                );
-
-        if (requesting == null
-                || dependency == null) {
-
+        if (requestingVersion == null || dependencyVersion == null) {
             return true;
         }
 
-        String dependencyModId =
-                dependency.getModId();
-
-        String dependencyVersionNumber =
-                dependency.getVersion();
-
-        if (dependencyModId == null
-                || dependencyVersionNumber == null) {
-
+        String dependencyProjectId = dependencyVersion.getProjectId();
+        if (dependencyProjectId == null || dependencyProjectId.isBlank()) {
             return true;
         }
 
-        for (DependencyRequirement requirement :
-                requesting.getDependencies()) {
+        List<ModrinthDependency> modrinthDependencies =
+                requestingVersion.getDependencies();
 
-            if (requirement == null) {
+        if (modrinthDependencies != null) {
+            for (ModrinthDependency requirement : modrinthDependencies) {
+                if (requirement == null
+                        || !dependencyProjectId.equals(requirement.getProjectId())) {
+                    continue;
+                }
+
+                if (requirement.isIncompatible()) {
+                    return false;
+                }
+
+                if (requirement.isOptional()) {
+                    return true;
+                }
+
+                String requiredVersionId = requirement.getVersionId();
+                return requiredVersionId == null
+                        || requiredVersionId.isBlank()
+                        || requiredVersionId.equals(dependencyVersion.getId());
+            }
+        }
+
+        InstalledMod requesting = readFabricMetadata(requestingVersion);
+        InstalledMod dependency = readFabricMetadata(dependencyVersion);
+
+        if (requesting == null || dependency == null) {
+            return true;
+        }
+
+        String dependencyModId = dependency.getModId();
+        String dependencyVersionNumber = dependency.getVersion();
+
+        if (dependencyModId == null || dependencyVersionNumber == null) {
+            return true;
+        }
+
+        for (DependencyRequirement requirement : requesting.getDependencies()) {
+            if (requirement == null
+                    || !dependencyModId.equals(requirement.getModId())) {
                 continue;
             }
 
-            if (!dependencyModId.equals(
-                    requirement.getModId()
-            )) {
-                continue;
-            }
-
-            boolean matches =
-                    matchesFabricConstraint(
-                            dependencyVersionNumber,
-                            requirement.getVersionConstraint()
-                    );
+            boolean matches = matchesFabricConstraint(
+                    dependencyVersionNumber,
+                    requirement.getVersionConstraint()
+            );
 
             System.out.println(
                     "[Vanta] Fabric dependency check: "
@@ -2011,6 +2049,7 @@ private boolean fabricDependencyAcceptsVersion(
 
         return true;
     }
+
 
 private boolean hasFabricBreakConflict(
             ModrinthVersion breakingVersion,
