@@ -1288,30 +1288,57 @@ private boolean resolveFabricDependency(
                     continue;
                 }
 
-                if (resolved.containsKey(
-                        projectId
-                )) {
+                if (resolved.containsKey(projectId)) {
 
-                    ModrinthVersion existing =
-                            resolved.get(
-                                    projectId
-                            );
+                    /*
+                     * Fabric API is a provider JAR: its own Fabric mod ID is
+                     * "fabric", while the dependency may target one of its
+                     * nested module IDs. Once Fabric API is already resolved,
+                     * validate the requested module against THAT exact JAR.
+                     * Do not compare the nested module ID to fabric.mod.json's
+                     * top-level "fabric" ID.
+                     */
+                    if (fabricApiProvider) {
+                        ModrinthVersion existing =
+                                resolved.get(projectId);
+
+                        Map<String, String> existingModules =
+                                fabricApiModuleCache.get(existing.getId());
+
+                        if (existingModules != null) {
+                            String existingModuleVersion =
+                                    existingModules.get(fabricModId);
+
+                            if (existingModuleVersion != null
+                                    && matchesFabricModuleConstraint(
+                                    existingModuleVersion,
+                                    constraint
+                            )) {
+                                System.out.println(
+                                        "[Vanta DEBUG] Existing Fabric API "
+                                                + "provides "
+                                                + fabricModId + " "
+                                                + existingModuleVersion
+                                                + " via "
+                                                + existing.getVersionNumber()
+                                );
+                                return true;
+                            }
+                        }
+
+                        continue;
+                    }
 
                     InstalledMod existingMetadata =
-                            readFabricMetadata(
-                                    existing
-                            );
+                            readFabricMetadata(existing);
 
                     if (existingMetadata != null
-                            && fabricModId.equals(
-                            existingMetadata.getModId()
-                    )
+                            && fabricModId.equals(existingMetadata.getModId())
                             && existingMetadata.getVersion() != null
                             && matchesFabricConstraint(
                             existingMetadata.getVersion(),
                             constraint
                     )) {
-
                         return true;
                     }
 
