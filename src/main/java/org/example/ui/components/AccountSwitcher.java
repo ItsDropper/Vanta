@@ -14,6 +14,7 @@ import javafx.stage.Popup;
 import org.example.launcher.account.Account;
 import org.example.launcher.service.AccountService;
 import org.example.launcher.service.AccountSkinService;
+import org.example.ui.LoginPopup;
 
 public class AccountSwitcher extends HBox {
 
@@ -150,6 +151,12 @@ public class AccountSwitcher extends HBox {
         // -----------------------------------------------------
         // ACCOUNT LISTENER
         // -----------------------------------------------------
+
+        LoginPopup.setOnClosed(() -> Platform.runLater(() -> {
+            loginInProgress = false;
+            getStyleClass().remove("account-switcher-busy");
+            setDisable(false);
+        }));
 
         accountService.addListener(
                 account ->
