@@ -9,6 +9,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
@@ -31,6 +33,7 @@ import org.example.launcher.service.ServerHistoryManager;
 import org.example.launcher.service.ServerTarget;
 import org.example.launcher.service.LaunchService;
 import org.example.ui.components.IconView;
+import org.example.ui.components.InstanceCard;
 import org.example.ui.components.MinecraftBackdrop;
 
 import java.util.List;
@@ -290,11 +293,19 @@ public class HomeView extends StackPane {
     }
 
     private HBox createRecentCard(Instance instance) {
-        Label icon = new Label();
-        icon.setGraphic(
-                IconView.create(IconView.Type.PLAY, 16)
-        );
+        StackPane icon = new StackPane();
         icon.getStyleClass().add("home-recent-icon");
+        ImageView customIcon = new ImageView();
+        customIcon.setFitWidth(30);
+        customIcon.setFitHeight(30);
+        customIcon.setPreserveRatio(true);
+        if ("CUSTOM".equalsIgnoreCase(instance.getIcon())
+                && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
+            customIcon.setImage(new Image(instance.getDirectory().resolve("icon.png").toUri().toString(), 30, 30, true, true));
+            icon.getChildren().add(customIcon);
+        } else {
+            icon.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 30));
+        }
 
         Label name = new Label(instance.getName());
         name.getStyleClass().add("home-recent-name");
