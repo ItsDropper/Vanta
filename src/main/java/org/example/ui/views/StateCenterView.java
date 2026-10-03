@@ -284,7 +284,7 @@ public final class StateCenterView extends VBox {
                     true,
                     workers
             );
-            if (state.getLevel() == SharedState.Level.BROKEN
+            if (state.getLevel() != SharedState.Level.HEALTHY
                     && LauncherSettings.isStateAutoRepairEnabled()) {
                 try {
                     SharedResourceRepairService.repair(instances, true, false);
@@ -629,7 +629,7 @@ public final class StateCenterView extends VBox {
         right.setAlignment(Pos.CENTER_RIGHT);
 
         if (state != null
-                && state.getLevel() == SharedState.Level.BROKEN
+                && state.getLevel() != SharedState.Level.HEALTHY
                 && !LauncherSettings.isStateAutoRepairEnabled()) {
             Button repair = new Button("REPAIR");
             repair.getStyleClass().add("state-repair-button");
