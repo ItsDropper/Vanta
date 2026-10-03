@@ -863,6 +863,13 @@ public class SettingsView extends BorderPane {
                 scanPresets,
                 saveScanWorkers
         );
+        CheckBox autoRepair = new CheckBox("Automatically repair broken State results");
+        autoRepair.setSelected(LauncherSettings.isStateAutoRepairEnabled());
+        autoRepair.getStyleClass().add("settings-checkbox");
+        autoRepair.setOnAction(event -> LauncherSettings.setStateAutoRepairEnabled(autoRepair.isSelected()));
+
+        scanPerformance.getChildren().add(autoRepair);
+
         VBox safety = card(
                 "What diagnostics change",
                 "The launcher does not silently rewrite files from this page. Instance dependency repair remains available from the instance repair flow."
