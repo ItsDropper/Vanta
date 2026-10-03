@@ -200,6 +200,14 @@ public final class LauncherSettings {
         setInt("stateScanWorkers", clamp(value, 1, 32));
     }
 
+    public static boolean isStateAutoRepairEnabled() {
+        return getBoolean("stateAutoRepair", false);
+    }
+
+    public static void setStateAutoRepairEnabled(boolean value) {
+        setBoolean("stateAutoRepair", value);
+    }
+
     public static void resetOnboarding() {
         setBoolean("onboardingCompleted", false);
     }
