@@ -60,9 +60,6 @@ public class UpdateInfo {
             String first,
             String second
     ) {
-            String first,
-            String second
-    ) {
         int[] firstParts =
                 parseVersion(first);
 
