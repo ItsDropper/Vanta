@@ -16,6 +16,7 @@ import javafx.scene.layout.VBox;
 
 import org.example.launcher.instance.FabricInstaller;
 import org.example.launcher.instance.InstanceInstaller;
+import org.example.ui.LauncherSettings;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -482,9 +483,15 @@ public class CreateInstanceView extends VBox {
                                 return;
                             }
 
-                            versionBox
-                                    .getSelectionModel()
-                                    .selectFirst();
+                            String preferredVersion =
+                                    LauncherSettings.getDefaultMinecraftVersion();
+
+                            if (!preferredVersion.isBlank()
+                                    && versionBox.getItems().contains(preferredVersion)) {
+                                versionBox.getSelectionModel().select(preferredVersion);
+                            } else {
+                                versionBox.getSelectionModel().selectFirst();
+                            }
 
                             statusLabel.setText(
                                     "Checking Fabric support..."
@@ -636,12 +643,14 @@ public class CreateInstanceView extends VBox {
                                     "Fabric"
                             );
 
-                            /*
-                             * Fabric is the preferred loader
-                             * when it is actually supported.
-                             */
-                            loaderBox.getSelectionModel()
-                                    .select("Fabric");
+                            String preferredLoader =
+                                    LauncherSettings.getDefaultLoader();
+
+                            if ("Fabric".equals(preferredLoader)) {
+                                loaderBox.getSelectionModel().select("Fabric");
+                            } else {
+                                loaderBox.getSelectionModel().select("Vanilla");
+                            }
 
                             statusLabel.setText(
                                     "Fabric is available for Minecraft "
