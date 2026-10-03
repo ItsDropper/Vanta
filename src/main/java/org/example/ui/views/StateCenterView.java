@@ -167,6 +167,8 @@ public final class StateCenterView extends VBox {
         final java.util.concurrent.atomic.AtomicInteger healthy = new java.util.concurrent.atomic.AtomicInteger();
         final java.util.concurrent.atomic.AtomicInteger attention = new java.util.concurrent.atomic.AtomicInteger();
         final java.util.concurrent.atomic.AtomicInteger broken = new java.util.concurrent.atomic.AtomicInteger();
+        final java.util.Set<String> brokenThings =
+                java.util.Collections.synchronizedSet(new java.util.LinkedHashSet<>());
 
         Platform.runLater(() -> {
             if (generation != scanGeneration) return;
@@ -225,7 +227,8 @@ public final class StateCenterView extends VBox {
                 Platform.runLater(() -> {
                     if (generation != scanGeneration) return;
                     replaceInstanceCard(instance, finalState);
-                    updateLiveSummary(instances.size(), healthy.get(), attention.get(), broken.get(), completed.get(), totalTasks);
+                    updateLiveSummary(instances.size(), healthy.get(), attention.get(), broken.get(),
+                            completed.get(), totalTasks, brokenThings);
                 });
 
                 if (state.getLevel() == InstanceState.Level.BROKEN
@@ -259,13 +262,16 @@ public final class StateCenterView extends VBox {
                 int done = completed.incrementAndGet();
                 if (state.isHealthy()) healthy.incrementAndGet();
                 else if (state.getLevel() == InstanceState.Level.ATTENTION) attention.incrementAndGet();
-                else broken.incrementAndGet();
+                else {
+                    broken.incrementAndGet();
+                    brokenThings.add(instance.getName());
+                }
 
                 updateScanProgress(generation, done, totalTasks, workers,
                         healthy.get(), attention.get(), broken.get(), instance.getName());
                 maybeFinishParallelScan(
                         executor, generation, done, totalTasks, instances,
-                        healthy, attention, broken
+                        healthy, attention, broken, brokenThings
                 );
             });
         }
@@ -285,6 +291,12 @@ public final class StateCenterView extends VBox {
 
             updateScanProgress(generation, done, totalTasks, workers,
                     healthy.get(), attention.get(), broken.get(), "Libraries");
+            if (state.getLevel() == SharedState.Level.BROKEN) {
+                broken.incrementAndGet();
+                brokenThings.add("Libraries");
+            } else if (state.getLevel() == SharedState.Level.ATTENTION) {
+                attention.incrementAndGet();
+            }
             maybeFinishParallelScan(
                     executor, generation, done, totalTasks, instances,
                     healthy, attention, broken
@@ -306,6 +318,12 @@ public final class StateCenterView extends VBox {
 
             updateScanProgress(generation, done, totalTasks, workers,
                     healthy.get(), attention.get(), broken.get(), "Assets");
+            if (state.getLevel() == SharedState.Level.BROKEN) {
+                broken.incrementAndGet();
+                brokenThings.add("Assets");
+            } else if (state.getLevel() == SharedState.Level.ATTENTION) {
+                attention.incrementAndGet();
+            }
             maybeFinishParallelScan(
                     executor, generation, done, totalTasks, instances,
                     healthy, attention, broken
@@ -321,7 +339,8 @@ public final class StateCenterView extends VBox {
             List<Instance> instances,
             java.util.concurrent.atomic.AtomicInteger healthy,
             java.util.concurrent.atomic.AtomicInteger attention,
-            java.util.concurrent.atomic.AtomicInteger broken
+            java.util.concurrent.atomic.AtomicInteger broken,
+            java.util.Set<String> brokenThings
     ) {
         if (done != total) {
             return;
@@ -350,9 +369,9 @@ public final class StateCenterView extends VBox {
                                 : affected + " ENVIRONMENT" + (affected == 1 ? "" : "S") + " NEED ATTENTION"
                 );
                 overallSubtitle.setText(
-                        healthy.get() + " healthy  •  "
-                                + attention.get() + " attention  •  "
-                                + broken.get() + " broken"
+                        broken.get() == 0
+                                ? healthy.get() + " healthy  •  " + attention.get() + " attention"
+                                : broken.get() + " broken: " + String.join(", ", brokenThings)
                 );
             }
 
@@ -398,6 +417,11 @@ public final class StateCenterView extends VBox {
                             + attention + " attention • "
                             + broken + " broken"
             );
+            if (broken > 0) {
+                overallSubtitle.setText(
+                        broken + " broken: " + String.join(", ", brokenThings)
+                );
+            }
 
             org.example.ui.components.NotificationManager manager =
                     org.example.ui.components.NotificationManager.getGlobal();
@@ -417,7 +441,8 @@ public final class StateCenterView extends VBox {
             int attention,
             int broken,
             int done,
-            int total
+            int total,
+            java.util.Set<String> brokenThings
     ) {
         if (done < total) {
             overallSubtitle.setText(
@@ -692,7 +717,7 @@ public final class StateCenterView extends VBox {
                 + " checks  •  " + state.getMods() + " mods  •  " + state.getConfigs() + " configs");
         stats.getStyleClass().add("state-stats");
 
-        VBox right = new VBox(5, status, stats);
+        VBox right = new VBox(6);
         right.setAlignment(Pos.CENTER_RIGHT);
 
         if (state.getLevel() == InstanceState.Level.BROKEN
@@ -704,6 +729,7 @@ public final class StateCenterView extends VBox {
             right.getChildren().add(repair);
         }
 
+        right.getChildren().addAll(status, stats);
         card.getChildren().addAll(icon, text, right);
         return card;
     }
