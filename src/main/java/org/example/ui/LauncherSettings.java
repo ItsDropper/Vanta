@@ -101,7 +101,7 @@ public final class LauncherSettings {
 
     public static void setDefaultLoader(String value) {
         String loader = value == null ? "Fabric" : value.trim();
-        if (!"Vanilla".equals(loader) && !"Fabric".equals(loader)) {
+        if (!"Vanilla".equals(loader) && !"Fabric".equals(loader) && !"Forge".equals(loader)) {
             loader = "Fabric";
         }
         setString("defaultLoader", loader);
