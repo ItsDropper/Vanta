@@ -117,6 +117,11 @@ public class InstanceInstaller {
                         + minecraftVersion
         );
 
+        JsonNode vanillaMetadata =
+                MinecraftVersionResolver.downloadMetadata(
+                        minecraftVersion
+                );
+
         Instance instance =
                 InstanceManager.createInstance(
                         name,
@@ -126,6 +131,28 @@ public class InstanceInstaller {
                 );
 
         try {
+            // Forge is layered on top of a complete vanilla installation.
+            // This also ensures the shared client, libraries, natives and
+            // assets required by the Forge version are already present.
+            MinecraftFileInstaller.installClient(
+                    instance,
+                    vanillaMetadata
+            );
+
+            MinecraftFileInstaller.installLibraries(
+                    vanillaMetadata
+            );
+
+            NativeInstaller.extract(
+                    instance,
+                    vanillaMetadata
+            );
+
+            AssetInstaller.install(
+                    instance,
+                    vanillaMetadata
+            );
+
             ForgeInstaller.installForge(instance, loaderVersion);
             InstanceManager.markInstallationComplete(instance);
             System.out.println("Forge installation complete.");
