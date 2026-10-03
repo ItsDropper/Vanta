@@ -864,11 +864,30 @@ public class ModsView extends VBox {
                 "instance-name"
         );
 
-        String typeName =
-                selectedType ==
-                        ContentType.RESOURCE_PACKS
-                        ? "RESOURCE PACK"
-                        : "SHADER";
+        String parentName =
+                file.getParent() == null
+                        ? ""
+                        : file.getParent()
+                                .getFileName()
+                                .toString()
+                                .toLowerCase();
+
+        String typeName;
+
+        if (parentName.equals("mods")) {
+            typeName = "JAR";
+        } else if (parentName.equals("resourcepacks")) {
+            typeName = "RESOURCE PACK";
+        } else if (parentName.equals("shaderpacks")) {
+            typeName = "SHADER";
+        } else {
+            typeName = switch (selectedType) {
+                case MODS -> "JAR";
+                case RESOURCE_PACKS -> "RESOURCE PACK";
+                case SHADERS -> "SHADER";
+                case ALL -> "CONTENT";
+            };
+        }
 
         Label metadata =
                 new Label(
