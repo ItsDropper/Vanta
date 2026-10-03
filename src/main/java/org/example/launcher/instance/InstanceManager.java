@@ -317,7 +317,8 @@ public class InstanceManager {
                         minecraftVersion,
                         instance.getLoader(),
                         instance.getLoaderVersion(),
-                        instance.getDirectory()
+                        instance.getDirectory(),
+                        instance.getIcon()
                 );
 
         saveInstance(
