@@ -79,6 +79,22 @@ public final class LauncherSettings {
         setBoolean("defaultFullscreen", value);
     }
 
+    public static String getDefaultJavaPath() {
+        return getString("defaultJavaPath", "");
+    }
+
+    public static void setDefaultJavaPath(String value) {
+        setString("defaultJavaPath", value == null ? "" : value.trim());
+    }
+
+    public static String getDefaultJavaArguments() {
+        return getString("defaultJavaArguments", "");
+    }
+
+    public static void setDefaultJavaArguments(String value) {
+        setString("defaultJavaArguments", value == null ? "" : value.trim());
+    }
+
     public static boolean isDiscordPresenceEnabled() {
         return getBoolean("discordPresenceEnabled", false);
     }
