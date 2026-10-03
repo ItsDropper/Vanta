@@ -919,6 +919,55 @@ private boolean isEnvironmentDependencySatisfied(
         }
 
         /*
+         * Fabric Loader 0.15.0+ bundles MixinExtras. Fabric mods declare
+         * this as the Fabric module ID "mixinextras", but it is not a
+         * standalone Modrinth dependency that Vanta needs to download.
+         *
+         * MixinExtras 0.3.2+ is available through the supported Fabric
+         * Loader baseline used by this resolver.
+         */
+        if ("mixinextras".equalsIgnoreCase(
+                dependencyModId
+        )) {
+
+            if (!"fabric".equalsIgnoreCase(
+                    instance.getLoader()
+            )) {
+                return false;
+            }
+
+            String loaderVersion =
+                    instance.getLoaderVersion();
+
+            if (loaderVersion == null
+                    || loaderVersion.isBlank()
+                    || !matchesFabricConstraint(
+                    loaderVersion,
+                    ">=0.15.0"
+            )) {
+                return false;
+            }
+
+            boolean satisfies =
+                    matchesFabricConstraint(
+                            "0.3.2",
+                            constraint
+                    );
+
+            System.out.println(
+                    "[Vanta DEBUG]   Environment dependency: "
+                            + "mixinextras bundled by Fabric Loader "
+                            + loaderVersion
+                            + " ["
+                            + constraint
+                            + "] = "
+                            + satisfies
+            );
+
+            return satisfies;
+        }
+
+        /*
          * Java is provided by the Java runtime used to launch
          * the Minecraft instance. It is not a Modrinth mod.
          *
