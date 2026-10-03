@@ -11,6 +11,7 @@ import org.example.ui.LauncherSettings;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -432,6 +433,64 @@ public class InstanceManager {
                 settingsFile.toFile(),
                 settings
         );
+    }
+
+    // =============================================================
+    // INSTANCE MANAGEMENT
+    // =============================================================
+
+    public static Instance renameInstance(Instance instance, String newName) throws IOException {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        if (newName == null || newName.isBlank()) throw new IllegalArgumentException("Instance name cannot be empty.");
+        Instance renamed = new Instance(instance.getId(), newName.trim(), instance.getMinecraftVersion(),
+                instance.getLoader(), instance.getLoaderVersion(), instance.getDirectory(), instance.getIcon());
+        saveInstance(renamed);
+        return renamed;
+    }
+
+    public static Instance setInstanceIcon(Instance instance, String icon) throws IOException {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        String safeIcon = icon == null || icon.isBlank() ? "SHIELD" : icon.trim().toUpperCase();
+        Instance updated = new Instance(instance.getId(), instance.getName(), instance.getMinecraftVersion(),
+                instance.getLoader(), instance.getLoaderVersion(), instance.getDirectory(), safeIcon);
+        saveInstance(updated);
+        return updated;
+    }
+
+    public static Instance duplicateInstance(Instance source, String requestedName) throws IOException {
+        if (source == null) throw new IllegalArgumentException("Source instance cannot be null.");
+        if (requestedName == null || requestedName.isBlank()) throw new IllegalArgumentException("Instance name cannot be empty.");
+        String id = createId(requestedName);
+        Path target = MinecraftLocator.getInstancesDirectory().resolve(id);
+        Files.createDirectories(target);
+        try (var stream = Files.walk(source.getDirectory())) {
+            stream.forEach(path -> {
+                try {
+                    Path relative = source.getDirectory().relativize(path);
+                    if (relative.toString().equals(INSTALLING_MARKER)) return;
+                    Path destination = target.resolve(relative);
+                    if (Files.isDirectory(path)) Files.createDirectories(destination);
+                    else Files.copy(path, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                } catch (IOException e) { throw new RuntimeException(e); }
+            });
+        } catch (RuntimeException e) {
+            deleteInstanceQuietly(target);
+            if (e.getCause() instanceof IOException io) throw io;
+            throw e;
+        }
+        Instance duplicate = new Instance(id, requestedName.trim(), source.getMinecraftVersion(), source.getLoader(),
+                source.getLoaderVersion(), target, source.getIcon());
+        saveInstance(duplicate);
+        return duplicate;
+    }
+
+    private static void deleteInstanceQuietly(Path directory) {
+        if (!Files.exists(directory)) return;
+        try (var stream = Files.walk(directory)) {
+            stream.sorted(Comparator.reverseOrder()).forEach(path -> {
+                try { Files.deleteIfExists(path); } catch (IOException ignored) { }
+            });
+        } catch (IOException ignored) { }
     }
 
     // =============================================================
