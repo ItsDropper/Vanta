@@ -629,9 +629,15 @@ public class SettingsView extends BorderPane {
                 rollbackButton
         );
 
-    }
+        content.getChildren().addAll(
+                behavior,
+                workspace,
+                dataCard,
+                runtimeCard,
+                rollback
+        );
 
-        content.getChildren().addAll(behavior, workspace, dataCard, runtimeCard, rollback);
+        loadRollbackVersions(versions, rollbackButton);
     }
 
 
