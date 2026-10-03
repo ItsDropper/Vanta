@@ -170,7 +170,9 @@ public class LauncherView {
                                     : failure.description()
                     );
                 } else if (state == LaunchService.LaunchState.IDLE
-                        && previousLaunchState == LaunchService.LaunchState.CLOSING) {
+                        && (previousLaunchState == LaunchService.LaunchState.CLOSING
+                        || previousLaunchState == LaunchService.LaunchState.RUNNING
+                        || previousLaunchState == LaunchService.LaunchState.STARTING)) {
                     if (LauncherSettings.isHideLauncherOnLaunchEnabled()) {
                         Platform.runLater(stage::show);
                     }
