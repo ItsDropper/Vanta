@@ -57,6 +57,24 @@ public Path installMod(
         );
     }
 
+public Path installModVersion(
+            Instance instance,
+            String projectId,
+            ModrinthVersion version
+    ) throws IOException, InterruptedException {
+
+        if (instance == null || projectId == null || projectId.isBlank() || version == null) {
+            throw new IllegalArgumentException("Invalid mod version installation request.");
+        }
+
+        return installModVersion(
+                instance,
+                projectId,
+                version,
+                new HashSet<>()
+        );
+    }
+
 public List<Path> installResolvedGraph(
             Instance instance,
             List<ModrinthService.ResolvedMod> resolvedMods
