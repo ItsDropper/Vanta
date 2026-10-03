@@ -528,7 +528,7 @@ public class SettingsView extends BorderPane {
         defaultVersion.setPromptText("Leave blank to use the newest release");
 
         ComboBox<String> defaultLoader = new ComboBox<>();
-        defaultLoader.getItems().addAll("Fabric", "Vanilla");
+        defaultLoader.getItems().addAll("Fabric", "Forge", "Vanilla");
         defaultLoader.getSelectionModel().select(LauncherSettings.getDefaultLoader());
         defaultLoader.setMaxWidth(Double.MAX_VALUE);
         defaultLoader.getStyleClass().add("create-combo");
