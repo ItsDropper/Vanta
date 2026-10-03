@@ -4,10 +4,10 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Separator;
+import javafx.stage.Popup;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -490,25 +490,22 @@ public class GlobalModsView extends VBox {
             return;
         }
 
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Install " + project.getTitle());
-        dialog.setHeaderText("Choose where to install this.");
-        dialog.getDialogPane().getStyleClass().add("vanta-dialog");
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.setAutoFix(true);
+        popup.setHideOnEscape(true);
 
-        VBox content = new VBox(14);
-        content.setPadding(new Insets(6, 4, 4, 4));
+        VBox root = new VBox(14);
+        root.getStyleClass().add("modrinth-popup");
+        root.setPrefWidth(560);
 
-        Label subtitle = new Label(
-                "Only instances compatible with this " +
-                        (contentTypeBox.getValue() == ModrinthContentType.MOD ? "mod" : "project") +
-                        " are shown."
-        );
-        subtitle.getStyleClass().add("dialog-subtitle");
+        Label title = new Label("INSTALL " + project.getTitle());
+        title.getStyleClass().add("modrinth-popup-title");
+        Label subtitle = new Label("Choose compatible instances.");
+        subtitle.getStyleClass().add("modrinth-popup-subtitle");
 
         VBox choices = new VBox(8);
-        choices.getStyleClass().add("dialog-choice-list");
         List<CheckBox> boxes = new ArrayList<>();
-
         for (Instance instance : compatible) {
             CheckBox box = new CheckBox(
                     instance.getName() + "   •   Minecraft " + instance.getMinecraftVersion()
@@ -521,33 +518,40 @@ public class GlobalModsView extends VBox {
 
         ScrollPane scroll = new ScrollPane(choices);
         scroll.setFitToWidth(true);
-        scroll.setPrefViewportHeight(Math.min(420, 90 + compatible.size() * 48.0));
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
-        scroll.getStyleClass().add("dialog-scroll");
+        scroll.setPrefViewportHeight(Math.min(420, 90 + compatible.size() * 48.0));
+        scroll.getStyleClass().add("modrinth-popup-scroll");
 
-        content.getChildren().addAll(subtitle, scroll);
-        dialog.getDialogPane().setContent(content);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
-
-        Button ok = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
-        ok.getStyleClass().add("primary-button");
-        Button cancel = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        Button cancel = new Button("CANCEL");
         cancel.getStyleClass().add("secondary-button");
-        ok.setDisable(true);
+        Button install = new Button("INSTALL");
+        install.getStyleClass().add("primary-button");
+        install.setDisable(true);
+
         for (CheckBox box : boxes) {
             box.selectedProperty().addListener((obs, oldValue, selected) ->
-                    ok.setDisable(boxes.stream().noneMatch(CheckBox::isSelected))
+                    install.setDisable(boxes.stream().noneMatch(CheckBox::isSelected))
             );
         }
 
-        dialog.showAndWait().ifPresent(result -> {
-            if (result != ButtonType.OK) return;
+        HBox actions = new HBox(8, cancel, install);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        root.getChildren().addAll(title, subtitle, scroll, actions);
+
+        cancel.setOnAction(event -> popup.hide());
+        install.setOnAction(event -> {
             List<Instance> selected = new ArrayList<>();
             for (int i = 0; i < boxes.size(); i++) {
                 if (boxes.get(i).isSelected()) selected.add(compatible.get(i));
             }
+            popup.hide();
             installToInstances(project, selected, sourceButton);
         });
+
+        popup.getContent().add(root);
+        popup.show(sourceButton,
+                sourceButton.localToScreen(sourceButton.getBoundsInLocal()).getMinX() - 560 + sourceButton.getWidth(),
+                sourceButton.localToScreen(sourceButton.getBoundsInLocal()).getMaxY() + 8);
     }
 
     private void installToInstances(ModrinthProject project, List<Instance> instances, Button sourceButton) {
@@ -743,12 +747,21 @@ public class GlobalModsView extends VBox {
                 Priority.ALWAYS
         );
 
+        Button versionsButton = createVersionsButton(project.getProjectId());
+
         Button installButton =
                 new Button("INSTALL");
         installButton.getStyleClass().add("primary-button");
         installButton.setOnAction(event ->
                 loadProjectForInstall(project.getProjectId(), installButton)
         );
+
+        HBox actions = new HBox(
+                8,
+                versionsButton,
+                installButton
+        );
+        actions.setAlignment(Pos.CENTER_RIGHT);
 
         HBox row =
                 new HBox(
@@ -758,7 +771,7 @@ public class GlobalModsView extends VBox {
                                 52
                         ),
                         information,
-                        installButton
+                        actions
                 );
 
         row.setAlignment(
@@ -1025,6 +1038,86 @@ public class GlobalModsView extends VBox {
     // PROJECT CARD
     // =============================================================
 
+    private Button createVersionsButton(String projectId) {
+        Button button = new Button("⋮");
+        button.getStyleClass().add("modrinth-versions-button");
+        button.setAccessibleText("Versions");
+        button.setOnAction(event -> showVersionsPopup(projectId, button));
+        return button;
+    }
+
+    private void showVersionsPopup(String projectId, Button anchor) {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.setAutoFix(true);
+        popup.setHideOnEscape(true);
+
+        VBox root = new VBox(10);
+        root.getStyleClass().add("modrinth-popup");
+        root.setPrefWidth(520);
+
+        Label title = new Label("VERSIONS");
+        title.getStyleClass().add("modrinth-popup-title");
+        Label subtitle = new Label("Loading project versions...");
+        subtitle.getStyleClass().add("modrinth-popup-subtitle");
+
+        VBox list = new VBox(7);
+        ScrollPane scroll = new ScrollPane(list);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setPrefViewportHeight(420);
+        scroll.getStyleClass().add("modrinth-popup-scroll");
+
+        root.getChildren().addAll(title, subtitle, new Separator(), scroll);
+        popup.getContent().add(root);
+
+        Thread thread = new Thread(() -> {
+            try {
+                List<org.example.launcher.modrinth.ModrinthVersion> versions =
+                        modrinthClient.getVersions(projectId);
+                Platform.runLater(() -> {
+                    list.getChildren().clear();
+                    subtitle.setText((versions == null ? 0 : versions.size()) + " versions");
+                    if (versions == null || versions.isEmpty()) {
+                        list.getChildren().add(new Label("No versions found."));
+                        return;
+                    }
+                    for (org.example.launcher.modrinth.ModrinthVersion version : versions) {
+                        list.getChildren().add(createVersionRow(version));
+                    }
+                });
+            } catch (Throwable ex) {
+                Platform.runLater(() -> {
+                    list.getChildren().clear();
+                    subtitle.setText("Could not load versions");
+                });
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+
+        popup.show(anchor, anchor.localToScreen(anchor.getBoundsInLocal()).getMaxX() - 520,
+                anchor.localToScreen(anchor.getBoundsInLocal()).getMaxY() + 6);
+    }
+
+    private HBox createVersionRow(org.example.launcher.modrinth.ModrinthVersion version) {
+        Label name = new Label(safe(version.getVersionNumber(), safe(version.getName(), "Unknown")));
+        name.getStyleClass().add("modrinth-version-name");
+        Label type = new Label(safe(version.getVersionType(), "release").toUpperCase());
+        type.getStyleClass().add("modrinth-version-type");
+        String games = version.getGameVersions() == null ? "" : String.join(", ", version.getGameVersions());
+        Label meta = new Label(games + (version.getLoaders() == null ? "" : "  •  " + String.join(", ", version.getLoaders())));
+        meta.getStyleClass().add("modrinth-version-meta");
+        VBox info = new VBox(4, name, meta);
+        HBox.setHgrow(info, Priority.ALWAYS);
+        Label downloads = new Label(formatNumber(version.getDownloads()));
+        downloads.getStyleClass().add("modrinth-version-downloads");
+        HBox row = new HBox(10, info, type, downloads);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("modrinth-version-row");
+        return row;
+    }
+
     private VBox createProjectCard(
             ModrinthSearchHit project
     ) {
@@ -1092,12 +1185,21 @@ public class GlobalModsView extends VBox {
                 Priority.ALWAYS
         );
 
+        Button versionsButton = createVersionsButton(project.getProjectId());
+
         Button installButton =
                 new Button("INSTALL");
         installButton.getStyleClass().add("primary-button");
         installButton.setOnAction(event ->
                 loadProjectForInstall(project.getProjectId(), installButton)
         );
+
+        HBox actions = new HBox(
+                8,
+                versionsButton,
+                installButton
+        );
+        actions.setAlignment(Pos.CENTER_RIGHT);
 
         HBox row =
                 new HBox(
