@@ -14,6 +14,18 @@ public class Instance {
     private final String loader;
     private final String loaderVersion;
     private final Path directory;
+    private final String icon;
+
+    public Instance(
+            String id,
+            String name,
+            String minecraftVersion,
+            String loader,
+            String loaderVersion,
+            Path directory
+    ) {
+        this(id, name, minecraftVersion, loader, loaderVersion, directory, "SHIELD");
+    }
 
     @JsonCreator
     public Instance(
@@ -33,7 +45,10 @@ public class Instance {
             String loaderVersion,
 
             @JsonProperty("directory")
-            Path directory
+            Path directory,
+
+            @JsonProperty("icon")
+            String icon
     ) {
 
         this.id = id;
@@ -42,6 +57,7 @@ public class Instance {
         this.loader = loader;
         this.loaderVersion = loaderVersion;
         this.directory = directory;
+        this.icon = icon == null || icon.isBlank() ? "SHIELD" : icon;
     }
 
     public String getId() {
@@ -66,6 +82,14 @@ public class Instance {
 
     public Path getDirectory() {
         return directory;
+    }
+
+    public String getIcon() {
+        return icon;
+    }
+
+    public Instance withIcon(String newIcon) {
+        return new Instance(id, name, minecraftVersion, loader, loaderVersion, directory, newIcon);
     }
 
     @JsonIgnore
