@@ -347,7 +347,8 @@ public final class ForgeInstaller {
             this.cause = cause;
         }
 
-        private IOException getCause() {
+        @Override
+        public synchronized IOException getCause() {
             return cause;
         }
     }
