@@ -20,7 +20,8 @@ import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
 import org.example.launcher.state.InstanceState;
 import org.example.launcher.state.SharedState;
-import org.example.launcher.state.InstanceStateEngine;\nimport org.example.launcher.instance.InstanceRepairService;
+import org.example.launcher.state.InstanceStateEngine;
+import org.example.launcher.instance.InstanceRepairService;
 import org.example.ui.components.IconView;
 import org.example.ui.components.InstanceCard;
 import org.example.ui.AnimationUtils;
@@ -478,6 +479,16 @@ public final class StateCenterView extends VBox {
 
         VBox right = new VBox(5, status, stats);
         right.setAlignment(Pos.CENTER_RIGHT);
+
+        if (state.getLevel() == InstanceState.Level.BROKEN
+                && !LauncherSettings.isStateAutoRepairEnabled()) {
+            Button repair = new Button("REPAIR");
+            repair.getStyleClass().add("state-repair-button");
+            repair.setFocusTraversable(false);
+            repair.setOnAction(event -> repairInstanceManually(instance, repair));
+            right.getChildren().add(repair);
+        }
+
         card.getChildren().addAll(icon, text, right);
         return card;
     }
@@ -557,6 +568,53 @@ public final class StateCenterView extends VBox {
 
         row.getChildren().addAll(icon, text, count, status);
         return row;
+    }
+
+    private void repairInstanceManually(Instance instance, Button button) {
+        button.setDisable(true);
+        button.setText("REPAIRING...");
+
+        markInstanceRepairing(instance);
+
+        Thread repairThread = new Thread(() -> {
+            try {
+                InstanceRepairService.repair(instance);
+                InstanceState repaired = InstanceStateEngine.inspect(instance);
+
+                Platform.runLater(() -> {
+                    replaceInstanceCard(instance, repaired);
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.success(
+                                "State repair complete",
+                                safe(instance.getName(), "Instance") + " was repaired and rescanned."
+                        );
+                    }
+                });
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    InstanceState failedState = new InstanceState(
+                            InstanceState.Level.BROKEN,
+                            "REPAIR FAILED",
+                            ex.getMessage() == null ? "Vanta could not repair this installation." : ex.getMessage(),
+                            0, 1, 0, 0, ""
+                    );
+                    replaceInstanceCard(instance, failedState);
+
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error(
+                                "State repair failed",
+                                safe(instance.getName(), "Instance") + ": "
+                                        + (ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage())
+                        );
+                    }
+                });
+            }
+        }, "Vanta-State-Repair");
+        repairThread.setDaemon(true);
+        repairThread.start();
     }
 
     private void markInstanceRepairing(Instance instance) {
