@@ -538,7 +538,7 @@ public class ContentBrowserView extends VBox {
                         List<ModrinthProject> projects =
                                 contentService.getMostDownloaded(
                                         contentType,
-                                        null,
+                                        instance.getLoader(),
                                         instance.getMinecraftVersion()
                                 );
 
@@ -671,7 +671,7 @@ public class ContentBrowserView extends VBox {
                                 contentService.search(
                                         query,
                                         contentType,
-                                        null,
+                                        instance.getLoader(),
                                         instance.getMinecraftVersion()
                                 );
 
