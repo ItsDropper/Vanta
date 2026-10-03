@@ -85,7 +85,7 @@ public final class FpsHardwareDetector {
 
             List<String> adapters = new ArrayList<>();
 
-            for (String line : output.split("\R")) {
+            for (String line : output.split("\\R")) {
                 String value = line.trim();
                 if (!value.isBlank()) {
                     adapters.add(value);
