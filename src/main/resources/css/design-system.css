@@ -2190,3 +2190,12 @@
     -fx-font-size: 10px;
     -fx-font-weight: 900;
 }
+
+.state-shared-row { -fx-background-color: -vanta-surface-raised; -fx-background-radius: 10px; -fx-border-color: -vanta-border; -fx-border-radius: 10px; -fx-padding: 12px; }
+.state-shared-row:hover { -fx-background-color: -vanta-surface-hover; }
+.state-shared-icon { -fx-background-color: -vanta-accent-soft; -fx-background-radius: 9px; -fx-padding: 8px; }
+.state-shared-name { -fx-text-fill: -vanta-text; -fx-font-size: 12px; -fx-font-weight: 800; }
+.state-shared-summary, .state-shared-count { -fx-text-fill: -vanta-muted; -fx-font-size: 10px; }
+.state-shared-healthy { -fx-text-fill: -vanta-success; -fx-font-size: 10px; -fx-font-weight: 900; }
+.state-shared-attention { -fx-text-fill: #e7bd68; -fx-font-size: 10px; -fx-font-weight: 900; }
+.state-shared-broken { -fx-text-fill: -vanta-danger; -fx-font-size: 10px; -fx-font-weight: 900; }
