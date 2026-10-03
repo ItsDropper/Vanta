@@ -261,7 +261,7 @@ public class LauncherView {
 
         globalModsView =
                 new GlobalModsView(
-                        this::showGlobalModDetails
+                        this::showGlobalContentDetails
                 );
 
         settingsView =
@@ -1205,13 +1205,16 @@ public class LauncherView {
     // GLOBAL MOD DETAILS
     // =============================================================
 
-    private void showGlobalModDetails(
-            String projectId
+    private void showGlobalContentDetails(
+            String projectId,
+            ModrinthContentType contentType
     ) {
 
         content.getChildren().setAll(
                 new ModDetailsView(
+                        null,
                         projectId,
+                        contentType,
                         () ->
                                 content.getChildren().setAll(
                                         globalModsView
