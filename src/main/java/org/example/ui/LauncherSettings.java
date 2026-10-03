@@ -191,6 +191,14 @@ public final class LauncherSettings {
     public static void setShowModrinthDownloadsEnabled(boolean value) { setBoolean("showModrinthDownloads", value); }
     public static boolean isConfirmInstanceDeletionEnabled() { return getBoolean("confirmInstanceDeletion", true); }
     public static void setConfirmInstanceDeletionEnabled(boolean value) { setBoolean("confirmInstanceDeletion", value); }
+    public static int getStateScanWorkers() {
+        int fallback = Math.max(2, Math.min(Runtime.getRuntime().availableProcessors(), 8));
+        return getInt("stateScanWorkers", fallback, 1, 32);
+    }
+
+    public static void setStateScanWorkers(int value) {
+        setInt("stateScanWorkers", clamp(value, 1, 32));
+    }
 
     public static void resetOnboarding() {
         setBoolean("onboardingCompleted", false);
