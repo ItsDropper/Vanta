@@ -549,7 +549,11 @@ public class CreateInstanceView extends VBox {
         forgeCheckRunning = true;
 
         Platform.runLater(() -> {
-            loaderBox.getItems().setAll("Vanilla");
+            loaderBox.getItems().setAll(
+                    "Vanilla",
+                    "Fabric",
+                    "Forge"
+            );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
             createButton.setDisable(true);
@@ -582,10 +586,14 @@ public class CreateInstanceView extends VBox {
 
                 fabricCheckRunning = false;
                 forgeCheckRunning = false;
-                loaderBox.getItems().setAll("Vanilla");
+                loaderBox.getItems().setAll(
+                        "Vanilla",
+                        "Fabric",
+                        "Forge"
+                );
 
-                if (fabric) loaderBox.getItems().add("Fabric");
-                if (forge) loaderBox.getItems().add("Forge");
+                // Keep unsupported loaders visible but prevent selecting them.
+                loaderBox.getSelectionModel().select("Vanilla");
 
                 String preferredLoader = LauncherSettings.getDefaultLoader();
                 if (loaderBox.getItems().contains(preferredLoader)) {
@@ -601,6 +609,15 @@ public class CreateInstanceView extends VBox {
                 }
 
                 loaderBox.setDisable(false);
+
+                if (!fabric) {
+                    loaderBox.getItems().remove("Fabric");
+                }
+
+                if (!forge) {
+                    loaderBox.getItems().remove("Forge");
+                }
+
                 createButton.setDisable(false);
             });
         });
