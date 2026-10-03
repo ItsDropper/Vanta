@@ -1,6 +1,7 @@
 package org.example.launcher.instance;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.example.launcher.model.Instance;
 
 import java.io.IOException;
 import java.nio.file.Files;
