@@ -420,7 +420,22 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setConfirmRemovalsEnabled(confirmations.isSelected())
         );
 
-        behavior.getChildren().addAll(animations, updates, confirmations);
+        CheckBox autoOpenBrowser = new CheckBox("Automatically open web links in your browser");
+        autoOpenBrowser.setSelected(LauncherSettings.isAutoOpenBrowserEnabled());
+        autoOpenBrowser.getStyleClass().add("settings-checkbox");
+        autoOpenBrowser.setTooltip(new javafx.scene.control.Tooltip(
+                "Automatically open supported authentication links in your default browser."
+        ));
+        autoOpenBrowser.setOnAction(event ->
+                LauncherSettings.setAutoOpenBrowserEnabled(autoOpenBrowser.isSelected())
+        );
+
+        behavior.getChildren().addAll(
+                animations,
+                updates,
+                confirmations,
+                autoOpenBrowser
+        );
 
         VBox dataCard = card(
                 "Vanta data",
