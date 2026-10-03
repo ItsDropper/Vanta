@@ -51,6 +51,47 @@ public class MinecraftVersionResolver {
         );
     }
 
+
+    // =============================================================
+    // RELEASE VERSIONS
+    // =============================================================
+
+    public static java.util.List<String> getReleaseVersions()
+            throws Exception {
+
+        JsonNode manifest =
+                DownloadUtil.downloadJson(
+                        VERSION_MANIFEST_URL
+                );
+
+        JsonNode versions =
+                manifest.get("versions");
+
+        if (versions == null || !versions.isArray()) {
+            throw new IllegalStateException(
+                    "Invalid Minecraft version manifest."
+            );
+        }
+
+        java.util.List<String> result =
+                new java.util.ArrayList<>();
+
+        for (JsonNode version : versions) {
+
+            JsonNode id = version.get("id");
+            JsonNode type = version.get("type");
+
+            if (id != null
+                    && type != null
+                    && "release".equalsIgnoreCase(type.asText())) {
+
+                result.add(id.asText());
+            }
+        }
+
+        return result;
+    }
+
     // =============================================================
     // VERSION
     // =============================================================
