@@ -4,6 +4,10 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -16,6 +20,12 @@ import javafx.scene.shape.Rectangle;
 
 import org.example.launcher.modrinth.ModrinthClient;
 import org.example.launcher.modrinth.ModrinthSearchHit;
+import org.example.launcher.instance.InstanceManager;
+import org.example.launcher.instance.MinecraftVersionResolver;
+import org.example.launcher.model.Instance;
+import org.example.launcher.modrinth.ModrinthContentType;
+import org.example.launcher.modrinth.ModrinthProject;
+import org.example.launcher.service.ModrinthContentService;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -25,7 +35,9 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.imageio.ImageIO;
 
@@ -35,6 +47,9 @@ public class GlobalModsView extends VBox {
     private final HttpClient httpClient;
 
     private final TextField searchField;
+    private final ComboBox<String> loaderBox;
+    private final ComboBox<String> versionBox;
+    private final ComboBox<ModrinthContentType> contentTypeBox;
 
     private final VBox popularResults;
     private final Label popularStatusLabel;
@@ -45,10 +60,10 @@ public class GlobalModsView extends VBox {
     private final Label statusLabel;
     private final ScrollPane resultsScrollPane;
 
-    private final java.util.function.Consumer<String> onModSelected;
+    private final BiConsumer<String, ModrinthContentType> onModSelected;
 
     public GlobalModsView(
-            java.util.function.Consumer<String> onModSelected
+            BiConsumer<String, ModrinthContentType> onModSelected
     ) {
 
         this.onModSelected =
@@ -100,6 +115,82 @@ public class GlobalModsView extends VBox {
                         title,
                         subtitle
                 );
+
+        // =========================================================
+        // GLOBAL CONTENT FILTERS
+        // =========================================================
+
+        contentTypeBox = new ComboBox<>();
+        contentTypeBox.getItems().addAll(
+                ModrinthContentType.MOD,
+                ModrinthContentType.RESOURCE_PACK,
+                ModrinthContentType.SHADER
+        );
+        contentTypeBox.setValue(ModrinthContentType.MOD);
+        contentTypeBox.setPrefWidth(170);
+        contentTypeBox.setPrefHeight(42);
+        contentTypeBox.getStyleClass().add("create-combo");
+
+        loaderBox = new ComboBox<>();
+        loaderBox.getItems().addAll("Fabric", "Forge");
+        loaderBox.setValue("Fabric");
+        loaderBox.setPrefWidth(140);
+        loaderBox.setPrefHeight(42);
+        loaderBox.getStyleClass().add("create-combo");
+
+        versionBox = new ComboBox<>();
+        versionBox.getItems().add("All versions");
+        versionBox.setValue("All versions");
+        versionBox.setPrefWidth(170);
+        versionBox.setPrefHeight(42);
+        versionBox.getStyleClass().add("create-combo");
+
+        HBox filters = new HBox(
+                10,
+                contentTypeBox,
+                loaderBox,
+                versionBox
+        );
+        filters.setAlignment(Pos.CENTER_LEFT);
+
+        contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            loaderBox.setDisable(newValue != ModrinthContentType.MOD);
+            searchField.clear();
+            results.getChildren().clear();
+            showPopularSection();
+            loadMostDownloadedMods();
+        });
+
+        loaderBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
+                searchField.clear();
+                results.getChildren().clear();
+                showPopularSection();
+                loadMostDownloadedMods();
+            }
+        });
+
+        versionBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            searchField.clear();
+            results.getChildren().clear();
+            showPopularSection();
+            loadMostDownloadedMods();
+        });
+
+        Thread versionThread = new Thread(() -> {
+            try {
+                List<String> versions =
+                        MinecraftVersionResolver.getReleaseVersions();
+
+                Platform.runLater(() -> {
+                    versionBox.getItems().setAll("All versions");
+                    versionBox.getItems().addAll(versions);
+                });
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+            }
+        });
+        versionThread.setDaemon(true);
 
         // =========================================================
         // SEARCH
@@ -273,6 +364,7 @@ public class GlobalModsView extends VBox {
 
         getChildren().addAll(
                 header,
+                filters,
                 searchBar,
                 popularTitle,
                 popularScrollPane,
@@ -297,7 +389,135 @@ public class GlobalModsView extends VBox {
         // LOAD POPULAR MODS
         // =========================================================
 
+        versionThread.start();
         loadMostDownloadedMods();
+    }
+
+    private String selectedVersion() {
+        String value = versionBox.getValue();
+        return value == null || "All versions".equals(value) ? null : value;
+    }
+
+    private String selectedLoader() {
+        return contentTypeBox.getValue() == ModrinthContentType.MOD
+                ? loaderBox.getValue()
+                : null;
+    }
+
+    private List<Instance> compatibleInstances(ModrinthProject project) {
+        List<Instance> compatible = new ArrayList<>();
+        for (Instance instance : InstanceManager.discoverInstances()) {
+            if (instance == null || instance.getMinecraftVersion() == null) continue;
+            if (project.getVersions() != null && !project.getVersions().isEmpty()
+                    && !project.getVersions().contains(instance.getMinecraftVersion())) continue;
+
+            if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
+                String loader = instance.getLoader() == null ? "" : instance.getLoader().toLowerCase();
+                if (!loader.equals("fabric") && !loader.equals("forge")) continue;
+                if (project.getLoaders() != null && !project.getLoaders().isEmpty()
+                        && project.getLoaders().stream().noneMatch(value -> loader.equalsIgnoreCase(value))) continue;
+            }
+            compatible.add(instance);
+        }
+        return compatible;
+    }
+
+    private void loadProjectForInstall(String projectId, Button sourceButton) {
+        Thread thread = new Thread(() -> {
+            try {
+                ModrinthProject project = modrinthClient.getProject(projectId);
+                Platform.runLater(() -> chooseInstances(project, sourceButton));
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> statusLabel.setText("Could not load project compatibility information."));
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void chooseInstances(ModrinthProject project, Button sourceButton) {
+        List<Instance> compatible = compatibleInstances(project);
+        if (compatible.isEmpty()) {
+            statusLabel.setText("No compatible instances found for " + project.getTitle() + ".");
+            return;
+        }
+
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Install " + project.getTitle());
+        dialog.setHeaderText("Choose the compatible instances to install this into.");
+
+        VBox choices = new VBox(10);
+        choices.setPadding(new Insets(8));
+        List<CheckBox> boxes = new ArrayList<>();
+
+        for (Instance instance : compatible) {
+            CheckBox box = new CheckBox(
+                    instance.getName() + " • Minecraft " + instance.getMinecraftVersion()
+                            + " • " + instance.getDisplayLoader()
+            );
+            boxes.add(box);
+            choices.getChildren().add(box);
+        }
+
+        ScrollPane scroll = new ScrollPane(choices);
+        scroll.setFitToWidth(true);
+        scroll.setPrefViewportHeight(Math.min(420, 80 + compatible.size() * 44.0));
+        dialog.getDialogPane().setContent(scroll);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
+
+        Button ok = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        ok.setDisable(true);
+        for (CheckBox box : boxes) {
+            box.selectedProperty().addListener((obs, oldValue, selected) ->
+                    ok.setDisable(boxes.stream().noneMatch(CheckBox::isSelected))
+            );
+        }
+
+        dialog.showAndWait().ifPresent(result -> {
+            if (result != ButtonType.OK) return;
+            List<Instance> selected = new ArrayList<>();
+            for (int i = 0; i < boxes.size(); i++) {
+                if (boxes.get(i).isSelected()) selected.add(compatible.get(i));
+            }
+            installToInstances(project, selected, sourceButton);
+        });
+    }
+
+    private void installToInstances(ModrinthProject project, List<Instance> instances, Button sourceButton) {
+        sourceButton.setDisable(true);
+        sourceButton.setText("INSTALLING...");
+        Thread thread = new Thread(() -> {
+            int success = 0;
+            int failed = 0;
+            for (Instance instance : instances) {
+                try {
+                    ModrinthContentType type = contentTypeBox.getValue();
+                    if (type == ModrinthContentType.MOD) {
+                        new org.example.launcher.service.ModrinthService().installMod(instance, project);
+                    } else if (type == ModrinthContentType.RESOURCE_PACK) {
+                        new ModrinthContentService().installResourcePack(instance, project);
+                    } else if (type == ModrinthContentType.SHADER) {
+                        new ModrinthContentService().installShader(instance, project);
+                    }
+                    success++;
+                } catch (Throwable ex) {
+                    failed++;
+                    ex.printStackTrace();
+                }
+            }
+            int installed = success;
+            int failures = failed;
+            Platform.runLater(() -> {
+                sourceButton.setDisable(false);
+                sourceButton.setText("INSTALL");
+                statusLabel.setText(project.getTitle() + " installed into " + installed
+                        + " instance" + (installed == 1 ? "" : "s")
+                        + (failures == 0 ? "." : "; " + failures + " failed."));
+            });
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     // =============================================================
@@ -314,8 +534,9 @@ public class GlobalModsView extends VBox {
                         List<ModrinthSearchHit> projects =
                                 modrinthClient
                                         .getMostDownloadedMods(
-                                                null,
-                                                null
+                                                contentTypeBox.getValue(),
+                                                selectedLoader(),
+                                                selectedVersion()
                                         )
                                         .getHits();
 
@@ -456,6 +677,13 @@ public class GlobalModsView extends VBox {
                 Priority.ALWAYS
         );
 
+        Button installButton =
+                new Button("INSTALL");
+        installButton.getStyleClass().add("primary-button");
+        installButton.setOnAction(event ->
+                loadProjectForInstall(project.getProjectId(), installButton)
+        );
+
         HBox row =
                 new HBox(
                         16,
@@ -463,7 +691,8 @@ public class GlobalModsView extends VBox {
                                 icon,
                                 52
                         ),
-                        information
+                        information,
+                        installButton
                 );
 
         row.setAlignment(
@@ -509,7 +738,8 @@ public class GlobalModsView extends VBox {
                                 && !projectId.isBlank()) {
 
                             onModSelected.accept(
-                                    projectId
+                                    projectId,
+                                    contentTypeBox.getValue()
                             );
                         }
                     }
@@ -572,8 +802,8 @@ public class GlobalModsView extends VBox {
                                 modrinthClient
                                         .search(
                                                 query,
-                                                null,
-                                                null
+                                                selectedLoader(),
+                                                selectedVersion()
                                         )
                                         .getHits();
 
