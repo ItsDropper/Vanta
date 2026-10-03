@@ -162,6 +162,54 @@ public class SettingsView extends BorderPane {
                 "Control Vanta's visual language. Changes apply immediately and persist across launches."
         );
 
+        VBox themeCard = card(
+                "Complete theme",
+                "Themes control the launcher-wide palette: shell, sidebar, cards, controls, text, borders, status colors and overlays."
+        );
+
+        ComboBox<String> themeBox = new ComboBox<>();
+        themeBox.getItems().addAll(ThemeManager.getThemes().keySet());
+        themeBox.setValue(ThemeManager.loadThemeName());
+        themeBox.setMaxWidth(Double.MAX_VALUE);
+        themeBox.setPromptText("Choose a theme");
+
+        Label themePreview = new Label();
+        themePreview.getStyleClass().add("theme-preview-label");
+
+        themeBox.setOnAction(event -> {
+            String selected = themeBox.getValue();
+            if (selected == null) return;
+
+            ThemeManager.saveThemeName(selected);
+            accentColor = ThemeManager.getTheme(selected).accent();
+            ThemeManager.saveAccent(accentColor);
+            applyAccent(accentColor);
+            onAccentChanged.accept(accentColor);
+
+            if (accentPicker != null) {
+                accentPicker.setValue(Color.web(accentColor));
+            }
+            if (accentValue != null) {
+                accentValue.setText(accentColor);
+            }
+            updateAccentPreview(null);
+
+            themePreview.setText(
+                    selected + "  •  " + ThemeManager.getTheme(selected).accent()
+            );
+        });
+
+        themePreview.setText(
+                ThemeManager.loadThemeName() + "  •  " +
+                        ThemeManager.getTheme(ThemeManager.loadThemeName()).accent()
+        );
+
+        HBox themeRow = new HBox(12, themeBox, themePreview);
+        themeRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(themeBox, Priority.ALWAYS);
+
+        themeCard.getChildren().add(themeRow);
+
         VBox accentCard = card(
                 "Accent color",
                 "Used for active navigation, controls, focus states, selections and progress indicators."
