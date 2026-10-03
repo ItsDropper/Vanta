@@ -147,8 +147,12 @@ th {
 /* Mod description */
 
 .mod-description-text,
-.mod-description-paragraph {
-    -fx-fill: #c4c8d7;
+.mod-description-paragraph,
+.mod-description-bold,
+.mod-description-italic,
+.mod-description-code {
+    -fx-fill: #ffffff;
+    -fx-text-fill: #ffffff;
     -fx-font-size: 14px;
 }
 
