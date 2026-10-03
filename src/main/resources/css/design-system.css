@@ -1844,3 +1844,319 @@
 .state-empty-icon{-fx-min-width:58px;-fx-pref-width:58px;-fx-min-height:58px;-fx-pref-height:58px;-fx-background-color:rgba(86,136,237,.10);-fx-background-radius:16px}
 .state-empty-title{-fx-text-fill:#edf2f8;-fx-font-size:15px;-fx-font-weight:800}
 .state-empty-text{-fx-text-fill:#738095;-fx-font-size:11px}
+
+
+/* ============================================================
+   VANTA UNIVERSAL THEME LAYER
+   Loaded last so theme presets reach every launcher surface,
+   including older UI classes that still have legacy colors.
+   ============================================================ */
+
+.launcher,
+.content,
+.page,
+.settings-shell,
+.home-page,
+.instances-page,
+.accounts-page,
+.state-center,
+.modrinth-view,
+.create-instance-panel,
+.login-window {
+    -fx-background-color: -vanta-bg;
+}
+
+.launcher {
+    -fx-border-color: -vanta-border;
+}
+
+.launcher .label,
+.launcher .text,
+.launcher .list-cell,
+.launcher .table-row-cell,
+.launcher .tree-cell {
+    -fx-text-fill: -vanta-text;
+}
+
+.sidebar,
+.settings-navigation,
+.settings-card,
+.info-card,
+.account-card,
+.account-panel,
+.instance-card,
+.instance-empty,
+.create-panel,
+.instance-settings-card,
+.mod-details-card,
+.mod-details-header,
+.home-info-card,
+.home-launch-card,
+.home-recent-servers-card,
+.state-list-card,
+.state-card,
+.accounts-hero,
+.accounts-section,
+.accounts-card,
+.accounts-empty {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+}
+
+.sidebar-button:hover,
+.settings-nav-button:hover,
+.instance-card:hover,
+.info-card:hover,
+.account-card:hover,
+.home-info-card:hover,
+.accounts-card:hover,
+.state-card:hover,
+.home-server-card:hover {
+    -fx-background-color: -vanta-surface-hover;
+}
+
+.sidebar-button-active,
+.sidebar-button-active:hover,
+.settings-nav-button.selected,
+.settings-nav-button:selected,
+.instance-card.selected-instance,
+.list-cell:selected,
+.table-row-cell:selected,
+.tree-cell:selected {
+    -fx-background-color: -vanta-accent-soft;
+}
+
+.sidebar-button-active,
+.sidebar-button-active:hover {
+    -fx-border-color: transparent transparent transparent -vanta-accent;
+}
+
+.title-bar {
+    -fx-background-color: -vanta-bg;
+    -fx-border-color: transparent transparent -vanta-border transparent;
+}
+
+.title-bar-button:hover,
+.account-switcher:hover {
+    -fx-background-color: -vanta-surface-hover;
+}
+
+.account-switcher,
+.account-panel,
+.accent-picker,
+.accent-hex-field,
+.create-field,
+.create-combo,
+.text-area,
+.combo-box-base,
+.choice-box,
+.search-field,
+.modrinth-search-field,
+.content-search-field,
+.verification-code {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+    -fx-text-fill: -vanta-text;
+}
+
+.secondary-button,
+.settings-back-button,
+.instance-settings-button {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+    -fx-text-fill: -vanta-text;
+}
+
+.secondary-button:hover,
+.settings-back-button:hover,
+.instance-settings-button:hover {
+    -fx-background-color: -vanta-surface-hover;
+}
+
+.primary-button,
+.instance-create-button,
+.instance-play-button,
+.home-play-button {
+    -fx-background-color: -vanta-accent;
+}
+
+.primary-button:hover,
+.instance-create-button:hover,
+.instance-play-button:hover,
+.home-play-button:hover {
+    -fx-background-color: -vanta-accent-hover;
+}
+
+.card-title,
+.create-section-title,
+.settings-section-title,
+.instances-count,
+.home-card-status,
+.ready-label,
+.account-connected,
+.instance-ready,
+.connected-label,
+.login-status.active {
+    -fx-text-fill: -vanta-accent;
+}
+
+.page-subtitle,
+.home-account-label,
+.home-card-description,
+.settings-page-subtitle,
+.settings-card-description,
+.instance-version,
+.account-detail,
+.instance-directory,
+.footer-label,
+.state-instance-detail,
+.home-recent-meta,
+.accounts-subtitle {
+    -fx-text-fill: -vanta-muted;
+}
+
+.sidebar-logo,
+.page-title,
+.home-title,
+.home-minecraft-title,
+.settings-page-title,
+.accounts-title,
+.accounts-hero-name,
+.accounts-card-name,
+.settings-card-title,
+.instance-name,
+.home-card-title,
+.mod-details-title,
+.state-instance-name,
+.state-hero-title {
+    -fx-text-fill: -vanta-text;
+}
+
+.instance-icon-box,
+.accounts-hero-head-frame,
+.accounts-card-head-frame,
+.home-recent-icon {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+}
+
+.instance-loader,
+.home-loader,
+.modrinth-version-type,
+.title-bar-update {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-text-fill: -vanta-accent;
+}
+
+.slider .track,
+.progress-bar > .track,
+.notification-progress > .track {
+    -fx-background-color: -vanta-border;
+}
+
+.slider .thumb,
+.progress-bar > .bar,
+.notification-progress > .bar {
+    -fx-background-color: -vanta-accent;
+}
+
+.check-box {
+    -fx-text-fill: -vanta-text;
+}
+
+.check-box .box {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+}
+
+.check-box:selected .box,
+.settings-checkbox:selected .box {
+    -fx-background-color: -vanta-accent;
+    -fx-border-color: -vanta-accent;
+}
+
+.tab-pane .tab-label {
+    -fx-text-fill: -vanta-muted;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: -vanta-text;
+}
+
+.separator .line,
+.instance-settings-divider {
+    -fx-border-color: -vanta-border;
+}
+
+.context-menu,
+.tooltip,
+.dialog-pane,
+.dialog-pane.vanta-dialog {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+}
+
+.context-menu .menu-item {
+    -fx-text-fill: -vanta-text;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+    -fx-background-color: -vanta-surface-hover;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -vanta-border;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -vanta-accent-soft;
+}
+
+.notification {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+}
+
+.mod-details-header,
+.mod-details-card,
+.mod-details-header-container,
+.modrinth-version-row {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+}
+
+.modrinth-version-row:hover {
+    -fx-background-color: -vanta-surface-hover;
+}
+
+.state-refresh-button,
+.modrinth-versions-button {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+}
+
+.state-refresh-button:hover,
+.modrinth-versions-button:hover {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-border-color: -vanta-accent;
+}
+
+.state-status-healthy,
+.accounts-status-connected,
+.accounts-card-active-label {
+    -fx-text-fill: -vanta-success;
+}
+
+.debug-button {
+    -fx-accent: -vanta-accent;
+}
+
+.theme-preview-label {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-text-fill: -vanta-accent;
+    -fx-background-radius: 8px;
+    -fx-padding: 9px 12px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+}
