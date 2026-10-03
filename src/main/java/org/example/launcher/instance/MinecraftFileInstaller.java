@@ -7,6 +7,12 @@ import org.example.launcher.model.Instance;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import org.example.ui.LauncherSettings;
 
 public class MinecraftFileInstaller {
 
@@ -74,154 +80,116 @@ public class MinecraftFileInstaller {
             JsonNode metadata
     ) throws Exception {
 
-        JsonNode libraries =
-                metadata.get("libraries");
-
-        if (libraries == null
-                || !libraries.isArray()) {
-
+        JsonNode libraries = metadata.get("libraries");
+        if (libraries == null || !libraries.isArray()) {
             return;
         }
 
-        Path librariesDirectory =
-                MinecraftLocator
-                        .getLibrariesDirectory();
+        List<LibraryDownload> downloads = new ArrayList<>();
 
         for (JsonNode library : libraries) {
-
-            // -----------------------------------------------------
-            // PLATFORM RULES
-            // -----------------------------------------------------
-
             if (!isAllowedOnCurrentPlatform(library)) {
                 continue;
             }
 
-            JsonNode downloads =
-                    library.get("downloads");
-
-            if (downloads == null) {
+            JsonNode libraryDownloads = library.get("downloads");
+            if (libraryDownloads == null) {
                 continue;
             }
 
-            // -----------------------------------------------------
-            // NORMAL JAR
-            // -----------------------------------------------------
-
-            JsonNode artifact =
-                    downloads.get("artifact");
-
+            JsonNode artifact = libraryDownloads.get("artifact");
             if (artifact != null) {
-
-                String url =
-                        artifact
-                                .get("url")
-                                .asText();
-
-                String path =
-                        artifact
-                                .get("path")
-                                .asText();
-
-                String sha1 =
-                        getSha1(artifact);
-
-                Path target =
-                        librariesDirectory.resolve(
-                                path
-                        );
-
-                downloadIfNeeded(
-                        url,
-                        target,
-                        sha1
-                );
+                downloads.add(new LibraryDownload(
+                        artifact.path("url").asText(),
+                        MinecraftLocator.getLibrariesDirectory().resolve(
+                                artifact.path("path").asText()
+                        ),
+                        getSha1(artifact)
+                ));
             }
 
-            // -----------------------------------------------------
-            // NATIVES
-            // -----------------------------------------------------
-
-            JsonNode classifiers =
-                    downloads.get("classifiers");
-
-            JsonNode natives =
-                    library.get("natives");
-
-            if (classifiers == null
-                    || natives == null
-                    || !natives.isObject()) {
-
+            JsonNode classifiers = libraryDownloads.get("classifiers");
+            JsonNode natives = library.get("natives");
+            if (classifiers == null || natives == null || !natives.isObject()) {
                 continue;
             }
 
-            JsonNode windowsClassifier =
-                    natives.get("windows");
-
-            if (windowsClassifier == null
-                    || windowsClassifier.isNull()) {
-
+            JsonNode windowsClassifier = natives.get("windows");
+            if (windowsClassifier == null || windowsClassifier.isNull()) {
                 continue;
             }
 
-            String classifier =
-                    windowsClassifier.asText();
-
-            if (classifier == null
-                    || classifier.isBlank()) {
-
+            String classifier = windowsClassifier.asText();
+            if (classifier == null || classifier.isBlank()) {
                 continue;
             }
 
-            classifier =
-                    classifier.replace(
-                            "${arch}",
-                            getArchitecture()
-                    );
-
-            JsonNode nativeArtifact =
-                    classifiers.get(
-                            classifier
-                    );
-
+            classifier = classifier.replace("${arch}", getArchitecture());
+            JsonNode nativeArtifact = classifiers.get(classifier);
             if (nativeArtifact == null) {
-
                 throw new IllegalStateException(
                         "Native classifier not found: "
                                 + classifier
                                 + " for "
-                                + library
-                                .path("name")
-                                .asText()
+                                + library.path("name").asText()
                 );
             }
 
-            String url =
-                    nativeArtifact
-                            .get("url")
-                            .asText();
+            downloads.add(new LibraryDownload(
+                    nativeArtifact.path("url").asText(),
+                    MinecraftLocator.getLibrariesDirectory().resolve(
+                            nativeArtifact.path("path").asText()
+                    ),
+                    getSha1(nativeArtifact)
+            ));
+        }
 
-            String path =
-                    nativeArtifact
-                            .get("path")
-                            .asText();
+        if (downloads.isEmpty()) {
+            return;
+        }
 
-            String sha1 =
-                    getSha1(nativeArtifact);
+        int workers = Math.min(
+                LauncherSettings.getDownloadThreads(),
+                downloads.size()
+        );
 
-            Path target =
-                    librariesDirectory.resolve(
-                            path
+        System.out.println(
+                "Installing " + downloads.size()
+                        + " Minecraft libraries using "
+                        + workers + " workers..."
+        );
+
+        ExecutorService executor =
+                Executors.newFixedThreadPool(Math.max(1, workers));
+
+        try {
+            List<Future<?>> futures = new ArrayList<>(downloads.size());
+
+            for (LibraryDownload download : downloads) {
+                futures.add(executor.submit(() -> {
+                    downloadIfNeeded(
+                            download.url(),
+                            download.target(),
+                            download.sha1()
                     );
+                    return null;
+                }));
+            }
 
-            downloadIfNeeded(
-                    url,
-                    target,
-                    sha1
-            );
+            for (Future<?> future : futures) {
+                future.get();
+            }
+        } finally {
+            executor.shutdownNow();
         }
     }
 
+    private record LibraryDownload(
+            String url,
+            Path target,
+            String sha1
+    ) {
+    }
     // =============================================================
     // PLATFORM RULES
     // =============================================================
