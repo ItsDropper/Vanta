@@ -25,6 +25,7 @@ import org.example.launcher.instance.MrpackExporter;
 import org.example.launcher.model.Instance;
 import org.example.launcher.service.LaunchService;
 import org.example.launcher.service.InstanceUsageManager;
+import org.example.ui.LauncherSettings;
 
 import java.io.File;
 
