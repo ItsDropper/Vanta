@@ -1,6 +1,8 @@
 package org.example.launcher.instance;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.example.launcher.model.Instance;
 
 import java.io.IOException;
@@ -247,9 +249,45 @@ public final class ForgeInstaller {
                     target
             );
 
+            /*
+             * Forge's generated version JSON is an overlay: it can
+             * inherit the vanilla version and therefore omit fields
+             * such as assetIndex. Vanta stores one self-contained
+             * version.json, so merge Forge's fields onto the vanilla
+             * metadata instead of replacing the vanilla metadata.
+             */
+            JsonNode vanillaMetadata =
+                    MinecraftVersionResolver.downloadMetadata(
+                            instance.getMinecraftVersion()
+                    );
+
+            ObjectNode mergedMetadata =
+                    vanillaMetadata.deepCopy();
+
+            forgeMetadata.fields().forEachRemaining(entry -> {
+                if (!"inherits".equals(entry.getKey())
+                        && !"libraries".equals(entry.getKey())) {
+                    mergedMetadata.set(
+                            entry.getKey(),
+                            entry.getValue().deepCopy()
+                    );
+                }
+            });
+
+            JsonNode forgeLibraries =
+                    forgeMetadata.get("libraries");
+
+            if (forgeLibraries != null && forgeLibraries.isArray()) {
+                ArrayNode libraries =
+                        mergedMetadata.withArray("libraries");
+                forgeLibraries.forEach(library ->
+                        libraries.add(library.deepCopy())
+                );
+            }
+
             MinecraftVersionResolver.saveMetadata(
                     instance,
-                    forgeMetadata
+                    mergedMetadata
             );
         } finally {
             Files.deleteIfExists(installer);
