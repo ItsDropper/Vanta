@@ -782,7 +782,7 @@ public class ModsView extends VBox {
             root.getStyleClass().add("modrinth-popup");
             root.setPrefWidth(430);
 
-            Label title = new Label("REMOVE MOD");
+            Label removeTitle = new Label("REMOVE MOD");
             title.getStyleClass().add("modrinth-popup-title");
 
             Label message = new Label(
@@ -800,7 +800,7 @@ public class ModsView extends VBox {
             HBox actions = new HBox(8, cancel, remove);
             actions.setAlignment(Pos.CENTER_RIGHT);
 
-            root.getChildren().addAll(title, message, actions);
+            root.getChildren().addAll(removeTitle, message, actions);
             popup.getContent().add(root);
 
             cancel.setOnAction(e -> popup.hide());
