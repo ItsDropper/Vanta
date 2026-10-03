@@ -26,6 +26,7 @@ public class AccountsView extends VBox {
     private final AccountService accountService;
 
     private final ImageView heroHead = new ImageView();
+    private final Label heroFallback = new Label("?");
     private final Label heroUsername = new Label();
     private final Label heroStatus = new Label();
     private final Label heroUuid = new Label();
@@ -105,12 +106,11 @@ public class AccountsView extends VBox {
         heroHead.setSmooth(false);
         heroHead.getStyleClass().add("accounts-hero-head");
 
-        Label fallback = new Label("?");
-        fallback.getStyleClass().add("accounts-head-fallback");
-        fallback.setVisible(false);
-        fallback.setManaged(false);
+        heroFallback.getStyleClass().add("accounts-head-fallback");
+        heroFallback.setVisible(false);
+        heroFallback.setManaged(false);
 
-        headFrame.getChildren().addAll(heroHead, fallback);
+        headFrame.getChildren().addAll(heroHead, heroFallback);
 
         VBox identity = new VBox(7);
 
@@ -239,8 +239,9 @@ public class AccountsView extends VBox {
 
             heroHead.setImage(null);
             heroHead.setVisible(false);
-
-            addFallbackHead();
+            heroHead.setManaged(false);
+            heroFallback.setVisible(true);
+            heroFallback.setManaged(true);
 
             signOutButton.setDisable(true);
             refreshButton.setDisable(true);
@@ -261,16 +262,18 @@ public class AccountsView extends VBox {
         signOutButton.setDisable(false);
         refreshButton.setDisable(false);
 
+        heroFallback.setVisible(false);
+        heroFallback.setManaged(false);
+        heroHead.setManaged(true);
+
         AccountSkinService.loadHead(account, image -> {
             heroHead.setImage(image);
             heroHead.setVisible(image != null);
-            heroHead.setManaged(image != null);
+            heroFallback.setVisible(image == null);
+            heroFallback.setManaged(image == null);
         });
     }
 
-    private void addFallbackHead() {
-        heroHead.setManaged(false);
-    }
 
     private VBox createAccountCard(Account account, boolean active) {
 
