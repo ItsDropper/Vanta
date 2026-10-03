@@ -430,6 +430,15 @@ public class GlobalModsView extends VBox {
                 continue;
             }
 
+            if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
+                String selected = selectedLoader();
+                if (!selected.isBlank()
+                        && !selected.equalsIgnoreCase("all")
+                        && !loader.equalsIgnoreCase(selected)) {
+                    continue;
+                }
+            }
+
             boolean compatibleVersion = false;
 
             if (versions != null) {
