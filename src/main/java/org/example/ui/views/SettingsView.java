@@ -28,6 +28,11 @@ import org.example.ui.ThemeManager;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Properties;
@@ -420,6 +425,16 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setConfirmRemovalsEnabled(confirmations.isSelected())
         );
 
+        CheckBox hideLauncher = new CheckBox("Hide Vanta when Minecraft starts");
+        hideLauncher.setSelected(LauncherSettings.isHideLauncherOnLaunchEnabled());
+        hideLauncher.getStyleClass().add("settings-checkbox");
+        hideLauncher.setTooltip(new javafx.scene.control.Tooltip(
+                "Hide the launcher window after Minecraft successfully starts. Vanta can be shown again from the taskbar."
+        ));
+        hideLauncher.setOnAction(event ->
+                LauncherSettings.setHideLauncherOnLaunchEnabled(hideLauncher.isSelected())
+        );
+
         CheckBox autoOpenBrowser = new CheckBox("Automatically open web links in your browser");
         autoOpenBrowser.setSelected(LauncherSettings.isAutoOpenBrowserEnabled());
         autoOpenBrowser.getStyleClass().add("settings-checkbox");
@@ -434,6 +449,7 @@ public class SettingsView extends BorderPane {
                 animations,
                 updates,
                 confirmations,
+                hideLauncher,
                 autoOpenBrowser
         );
 
@@ -505,6 +521,17 @@ public class SettingsView extends BorderPane {
         fullscreen.setSelected(LauncherSettings.isDefaultFullscreen());
         fullscreen.getStyleClass().add("settings-checkbox");
 
+        TextField defaultVersion = new TextField(LauncherSettings.getDefaultMinecraftVersion());
+        defaultVersion.getStyleClass().add("create-field");
+        defaultVersion.setPromptText("Leave blank to use the newest release");
+
+        ComboBox<String> defaultLoader = new ComboBox<>();
+        defaultLoader.getItems().addAll("Fabric", "Vanilla");
+        defaultLoader.getSelectionModel().select(LauncherSettings.getDefaultLoader());
+        defaultLoader.setMaxWidth(Double.MAX_VALUE);
+        defaultLoader.getStyleClass().add("create-combo");
+
+
         Button save = new Button("SAVE MINECRAFT DEFAULTS");
         save.getStyleClass().add("primary-button");
         save.setOnAction(event -> {
@@ -521,6 +548,8 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setDefaultWidth(w);
                 LauncherSettings.setDefaultHeight(h);
                 LauncherSettings.setDefaultFullscreen(fullscreen.isSelected());
+                LauncherSettings.setDefaultMinecraftVersion(defaultVersion.getText());
+                LauncherSettings.setDefaultLoader(defaultLoader.getValue());
                 LauncherSettings.setDefaultJavaPath(javaPath.getText());
                 LauncherSettings.setDefaultJavaArguments(javaArguments.getText());
 
@@ -553,6 +582,8 @@ public class SettingsView extends BorderPane {
                 createInput("Resolution height", height),
                 createInput("Java executable", javaPath),
                 createInput("JVM arguments", javaArguments),
+                createInput("Default Minecraft version", defaultVersion),
+                createInput("Default mod loader", defaultLoader),
                 fullscreen,
                 save
         );
@@ -732,11 +763,174 @@ public class SettingsView extends BorderPane {
                 onDebugOnboarding.run();
             });
 
-            debug.getChildren().addAll(debugActions, testOnboarding);
+            VBox tests = card(
+                    "Live launcher tests",
+                    "These tests exercise real Vanta dependencies and local paths. They do not modify Minecraft instances."
+            );
+
+            Button testModrinth = new Button("TEST MODRINTH API");
+            testModrinth.getStyleClass().add("debug-button");
+            testModrinth.setOnAction(event -> runDebugTest(
+                    "Modrinth API",
+                    "https://api.modrinth.com/v2/project/fabric-api"
+            ));
+
+            Button testMinecraft = new Button("TEST MINECRAFT API");
+            testMinecraft.getStyleClass().add("debug-button");
+            testMinecraft.setOnAction(event -> runDebugTest(
+                    "Minecraft version API",
+                    "https://piston-meta.mojang.com/mc/game/version_manifest_v2.json"
+            ));
+
+            Button testStorage = new Button("TEST STORAGE");
+            testStorage.getStyleClass().add("debug-button");
+            testStorage.setOnAction(event -> runStorageTest());
+
+            Button testJava = new Button("TEST JAVA RUNTIME");
+            testJava.getStyleClass().add("debug-button");
+            testJava.setOnAction(event -> runJavaRuntimeTest());
+
+            HBox testButtons = new HBox(8, testModrinth, testMinecraft, testStorage, testJava);
+            tests.getChildren().add(testButtons);
+
+            debug.getChildren().addAll(debugActions, testOnboarding, tests);
             content.getChildren().add(debug);
         }
 
         content.getChildren().add(safety);
+    }
+
+    private void runDebugTest(String name, String url) {
+        Thread thread = new Thread(() -> {
+            try {
+                HttpClient client = HttpClient.newBuilder()
+                        .connectTimeout(java.time.Duration.ofSeconds(8))
+                        .build();
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(url))
+                        .timeout(java.time.Duration.ofSeconds(12))
+                        .GET()
+                        .build();
+
+                HttpResponse<Void> response =
+                        client.send(request, HttpResponse.BodyHandlers.discarding());
+
+                Platform.runLater(() -> {
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                            manager.success(name + " test passed", "HTTP " + response.statusCode());
+                        } else {
+                            manager.error(name + " test failed", "HTTP " + response.statusCode());
+                        }
+                    }
+                });
+            } catch (Throwable ex) {
+                Platform.runLater(() -> {
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error(name + " test failed",
+                                ex.getClass().getSimpleName() + ": " +
+                                        (ex.getMessage() == null ? "No details." : ex.getMessage()));
+                    }
+                });
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void runStorageTest() {
+        Thread thread = new Thread(() -> {
+            Path testFile = MinecraftLocator.getVantaDirectory().resolve(".vanta-debug-test");
+            try {
+                Files.createDirectories(testFile.getParent());
+                byte[] payload = "VANTA_DEBUG_TEST".getBytes(StandardCharsets.UTF_8);
+                Files.write(testFile, payload);
+                byte[] read = Files.readAllBytes(testFile);
+                Files.deleteIfExists(testFile);
+
+                if (!java.util.Arrays.equals(payload, read)) {
+                    throw new IOException("Read-back data did not match.");
+                }
+
+                Platform.runLater(() -> {
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.success("Storage test passed", "Write, read and delete completed successfully.");
+                    }
+                });
+            } catch (Throwable ex) {
+                try {
+                    Files.deleteIfExists(testFile);
+                } catch (IOException ignored) {
+                }
+
+                Platform.runLater(() -> {
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error("Storage test failed",
+                                ex.getClass().getSimpleName() + ": " +
+                                        (ex.getMessage() == null ? "No details." : ex.getMessage()));
+                    }
+                });
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void runJavaRuntimeTest() {
+        Thread thread = new Thread(() -> {
+            try {
+                Path javaBinary = Path.of(
+                        System.getProperty("java.home"),
+                        "bin",
+                        System.getProperty("os.name", "").toLowerCase().contains("win")
+                                ? "java.exe"
+                                : "java"
+                );
+
+                if (!Files.isRegularFile(javaBinary)) {
+                    throw new IOException("Java executable was not found at " + javaBinary);
+                }
+
+                Process process = new ProcessBuilder(
+                        javaBinary.toString(),
+                        "-version"
+                ).redirectErrorStream(true).start();
+
+                boolean finished = process.waitFor(8, java.util.concurrent.TimeUnit.SECONDS);
+                if (!finished) {
+                    process.destroyForcibly();
+                    throw new IOException("java -version timed out.");
+                }
+
+                if (process.exitValue() != 0) {
+                    throw new IOException("java -version exited with code " + process.exitValue());
+                }
+
+                Platform.runLater(() -> {
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.success("Java runtime test passed",
+                                javaBinary + " executed successfully.");
+                    }
+                });
+            } catch (Throwable ex) {
+                Platform.runLater(() -> {
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error("Java runtime test failed",
+                                ex.getClass().getSimpleName() + ": " +
+                                        (ex.getMessage() == null ? "No details." : ex.getMessage()));
+                    }
+                });
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public void refreshDebugAccess() {
