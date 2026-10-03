@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
+import javafx.stage.Popup;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -772,35 +773,49 @@ public class ModsView extends VBox {
                 return;
             }
 
-            javafx.scene.control.Alert alert =
-                    new javafx.scene.control.Alert(
-                            javafx.scene.control.Alert.AlertType.CONFIRMATION
-                    );
-            alert.setTitle("Remove mod");
-            alert.setHeaderText("Remove " + cleanName(filename) + "?");
-            alert.setContentText("This will permanently remove the mod from this instance.");
-            alert.getDialogPane().getStyleClass().add("delete-dialog");
-            javafx.scene.Node header = alert.getDialogPane().lookup(".header-panel");
-            if (header != null) {
-                header.getStyleClass().add("delete-dialog-header");
-            }
-            javafx.scene.Node content = alert.getDialogPane().lookup(".content");
-            if (content != null) {
-                content.getStyleClass().add("delete-dialog-content");
-            }
-            javafx.scene.Node okButton = alert.getDialogPane().lookupButton(
-                    javafx.scene.control.ButtonType.OK
+            Popup popup = new Popup();
+            popup.setAutoHide(true);
+            popup.setAutoFix(true);
+            popup.setHideOnEscape(true);
+
+            VBox root = new VBox(12);
+            root.getStyleClass().add("modrinth-popup");
+            root.setPrefWidth(430);
+
+            Label title = new Label("REMOVE MOD");
+            title.getStyleClass().add("modrinth-popup-title");
+
+            Label message = new Label(
+                    "Remove " + cleanName(filename) + "?\\nThis will permanently remove the mod from this instance."
             );
-            javafx.scene.Node cancelButton = alert.getDialogPane().lookupButton(
-                    javafx.scene.control.ButtonType.CANCEL
-            );
-            okButton.getStyleClass().add("delete-dialog-delete");
-            cancelButton.getStyleClass().add("delete-dialog-cancel");
-            alert.showAndWait().ifPresent(result -> {
-                if (result == javafx.scene.control.ButtonType.OK) {
-                    removeFile(mod);
-                }
+            message.setWrapText(true);
+            message.getStyleClass().add("modrinth-popup-subtitle");
+
+            Button cancel = new Button("CANCEL");
+            cancel.getStyleClass().add("modrinth-popup-secondary");
+
+            Button remove = new Button("REMOVE");
+            remove.getStyleClass().add("modrinth-popup-danger");
+
+            HBox actions = new HBox(8, cancel, remove);
+            actions.setAlignment(Pos.CENTER_RIGHT);
+
+            root.getChildren().addAll(title, message, actions);
+            popup.getContent().add(root);
+
+            cancel.setOnAction(e -> popup.hide());
+            remove.setOnAction(e -> {
+                popup.hide();
+                removeFile(mod);
             });
+
+            javafx.geometry.Bounds bounds =
+                    removeButton.localToScreen(removeButton.getBoundsInLocal());
+            if (bounds != null) {
+                popup.show(removeButton,
+                        Math.max(20, bounds.getMaxX() - 430),
+                        bounds.getMinY() - 110);
+            }
         });
 
         HBox buttons =
