@@ -60,9 +60,8 @@ public final class StateCenterView extends VBox {
         progress.setPrefHeight(6);
         progress.getStyleClass().add("state-progress");
 
-        Label healthLabel = new Label("HEALTH");
-        healthLabel.getStyleClass().add("state-progress-label");
-        VBox progressBox = new VBox(6, healthLabel, progress);
+        progressLabel.getStyleClass().add("state-progress-label");
+        VBox progressBox = new VBox(6, progressLabel, progress);
 
         HBox heroRow = new HBox(20, heroText, progressBox);
         heroRow.setAlignment(Pos.CENTER_LEFT);
