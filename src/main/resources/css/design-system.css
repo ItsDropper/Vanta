@@ -1812,12 +1812,35 @@
 
 
 /* State Center polished UI */
-.state-progress-label{-fx-text-fill:#657286;-fx-font-size:9px;-fx-font-weight:900;-fx-letter-spacing:1px}
-.state-hero{-fx-min-height:112px}
-.state-list-card{-fx-background-color:#10161e;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.20),18,.08,0,5)}
-.state-card{-fx-min-height:72px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.12),10,.05,0,3)}
-.state-card:hover{-fx-background-color:#1a222d;-fx-border-color:#4a5c73;-fx-translate-y:-1px}
-.state-instance-summary{-fx-text-fill:#b4bfce;-fx-font-size:10px}
+.state-center{-fx-spacing:18px}
+.state-hero{-fx-min-height:118px;-fx-padding:24px}
+.state-hero-title{-fx-font-size:20px}
+.state-hero-subtitle{-fx-font-size:11px}
+.state-progress-label{-fx-text-fill:#667487;-fx-font-size:9px;-fx-font-weight:900;-fx-letter-spacing:1.2px}
+.state-progress{-fx-accent:-vanta-accent;-fx-pref-height:7px;-fx-min-height:7px;-fx-max-height:7px}
+.state-progress > .track{-fx-background-color:#202a36;-fx-background-radius:5px}
+.state-progress > .bar{-fx-background-color:-vanta-accent;-fx-background-radius:5px}
+.state-refresh-button{-fx-min-height:36px;-fx-pref-height:36px;-fx-padding:0 13px;-fx-cursor:hand}
+.state-list-card{-fx-background-color:#10161e;-fx-background-radius:14px;-fx-border-color:#27303d;-fx-border-width:1px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.20),18,.08,0,5)}
+.state-instance-scroll,.state-instance-scroll>.viewport{-fx-background-color:transparent;-fx-border-color:transparent}
+.state-instance-scroll{-fx-padding:0}
+.state-instance-scroll .scroll-bar:vertical{-fx-background-color:transparent;-fx-padding:2px}
+.state-instance-scroll .scroll-bar:vertical .track{-fx-background-color:transparent}
+.state-instance-scroll .scroll-bar:vertical .thumb{-fx-background-color:rgba(120,135,155,.32);-fx-background-radius:6px}
+.state-card{-fx-background-color:#151b24;-fx-background-radius:11px;-fx-border-color:#293545;-fx-border-width:1px;-fx-border-radius:11px;-fx-min-height:72px;-fx-cursor:hand}
+.state-card:hover{-fx-background-color:#1a222d;-fx-border-color:#4a5c73}
+.state-instance-name{-fx-text-fill:#edf2f8;-fx-font-size:13px;-fx-font-weight:800}
+.state-instance-detail{-fx-text-fill:#8996a8;-fx-font-size:10px}
+.state-instance-summary{-fx-text-fill:#b7c1ce;-fx-font-size:10px}
+.state-fingerprint{-fx-text-fill:#5e6b7d;-fx-font-family:"Consolas";-fx-font-size:8px;-fx-font-weight:700}
+.state-stats{-fx-text-fill:#667487;-fx-font-size:9px}
+.state-status-healthy{-fx-text-fill:#65d69a;-fx-font-size:10px;-fx-font-weight:900}
+.state-status-attention{-fx-text-fill:#e7bd68;-fx-font-size:10px;-fx-font-weight:900}
+.state-status-broken{-fx-text-fill:#ed7777;-fx-font-size:10px;-fx-font-weight:900}
+.state-icon-healthy,.state-icon-attention,.state-icon-broken{-fx-background-radius:10px;-fx-padding:9px}
+.state-icon-healthy{-fx-background-color:rgba(76,204,137,.12)}
+.state-icon-attention{-fx-background-color:rgba(231,189,104,.12)}
+.state-icon-broken{-fx-background-color:rgba(237,119,119,.12)}
 .state-empty-icon{-fx-min-width:58px;-fx-pref-width:58px;-fx-min-height:58px;-fx-pref-height:58px;-fx-background-color:rgba(86,136,237,.10);-fx-background-radius:16px}
 .state-empty-title{-fx-text-fill:#edf2f8;-fx-font-size:15px;-fx-font-weight:800}
 .state-empty-text{-fx-text-fill:#738095;-fx-font-size:11px}
