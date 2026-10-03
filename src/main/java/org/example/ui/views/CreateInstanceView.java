@@ -497,7 +497,7 @@ public class CreateInstanceView extends VBox {
                             }
 
                             statusLabel.setText(
-                                    "Checking Fabric support..."
+                                    "Checking mod loader support..."
                             );
                         });
 
