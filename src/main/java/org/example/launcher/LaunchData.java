@@ -19,6 +19,10 @@ public class LaunchData {
 
     public String version;
 
+    public String loader;
+
+    public String loaderVersion;
+
     public String assetIndex;
 
     public List<Path> classpath;
