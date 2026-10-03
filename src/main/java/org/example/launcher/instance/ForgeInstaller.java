@@ -233,6 +233,20 @@ public final class ForgeInstaller {
                     new com.fasterxml.jackson.databind.ObjectMapper()
                             .readTree(metadata.toFile());
 
+            /*
+             * Forge's installer uses the target directory as a
+             * temporary Minecraft launcher root. Vanta, however,
+             * keeps shared libraries in %APPDATA%/Vanta/libraries.
+             *
+             * Copy every library produced by Forge into Vanta's
+             * shared library store while preserving its Maven path.
+             * This is critical for Forge's universal JAR and its
+             * transitive dependencies.
+             */
+            syncForgeLibraries(
+                    target
+            );
+
             MinecraftVersionResolver.saveMetadata(
                     instance,
                     forgeMetadata
@@ -246,6 +260,95 @@ public final class ForgeInstaller {
                                 .resolve("launcher_profiles.json")
                 );
             }
+        }
+    }
+
+    private static void syncForgeLibraries(
+            Path instanceDirectory
+    ) throws IOException {
+
+        Path sourceLibraries =
+                instanceDirectory.resolve("libraries");
+
+        if (!Files.isDirectory(sourceLibraries)) {
+            throw new IOException(
+                    "Forge installer completed without creating a libraries directory."
+            );
+        }
+
+        Path sharedLibraries =
+                org.example.launcher.MinecraftLocator
+                        .getLibrariesDirectory();
+
+        try (var stream = Files.walk(sourceLibraries)) {
+
+            stream
+                    .filter(Files::isRegularFile)
+                    .forEach(source -> {
+
+                        try {
+                            Path relative =
+                                    sourceLibraries.relativize(source);
+
+                            Path target =
+                                    sharedLibraries
+                                            .resolve(relative)
+                                            .normalize();
+
+                            if (!target.startsWith(
+                                    sharedLibraries.normalize()
+                            )) {
+                                throw new IOException(
+                                        "Unsafe Forge library path: "
+                                                + relative
+                                );
+                            }
+
+                            Files.createDirectories(
+                                    target.getParent()
+                            );
+
+                            /*
+                             * Forge generated libraries are authoritative
+                             * for this installation. Replace stale files,
+                             * but never leave a zero-byte library behind.
+                             */
+                            Files.copy(
+                                    source,
+                                    target,
+                                    java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                            );
+
+                            if (!Files.isRegularFile(target)
+                                    || Files.size(target) == 0) {
+                                throw new IOException(
+                                        "Forge library copy produced an invalid file: "
+                                                + target
+                                );
+                            }
+
+                        } catch (IOException e) {
+                            throw new ForgeLibrarySyncException(e);
+                        }
+                    });
+        } catch (ForgeLibrarySyncException e) {
+            throw e.getCause();
+        }
+    }
+
+    private static final class ForgeLibrarySyncException
+            extends RuntimeException {
+
+        private final IOException cause;
+
+        private ForgeLibrarySyncException(
+                IOException cause
+        ) {
+            this.cause = cause;
+        }
+
+        private IOException getCause() {
+            return cause;
         }
     }
 
