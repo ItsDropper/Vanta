@@ -1,5 +1,6 @@
 package org.example.ui.views;
 
+import org.example.ui.ThemeManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -449,6 +450,8 @@ public class InstancesView extends VBox {
         });
         actions.getChildren().addAll(cancel, apply);
         root.getChildren().addAll(title, subtitle, field, actions);
+        ThemeManager.apply(root, ThemeManager.loadAccent());
+
         popup.getContent().add(root);
         showPopupCentered(popup, 430, duplicate ? 190 : 175);
         Platform.runLater(() -> { field.requestFocus(); field.selectAll(); });
@@ -504,6 +507,8 @@ public class InstancesView extends VBox {
             thread.start();
         });
         root.getChildren().addAll(title, subtitle, choices, upload);
+        ThemeManager.apply(root, ThemeManager.loadAccent());
+
         popup.getContent().add(root);
         showPopupCentered(popup, 430, 150);
     }
