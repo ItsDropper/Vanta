@@ -94,6 +94,49 @@ public class InstanceInstaller {
     }
 
     // =============================================================
+    // FORGE
+    // =============================================================
+
+    public static Instance installForge(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+
+        String loaderVersion =
+                ForgeInstaller.findLatestLoaderVersion(
+                        minecraftVersion
+                );
+
+        System.out.println(
+                "Installing Forge "
+                        + loaderVersion
+                        + " for Minecraft "
+                        + minecraftVersion
+        );
+
+        Instance instance =
+                InstanceManager.createInstance(
+                        name,
+                        minecraftVersion,
+                        "Forge",
+                        loaderVersion
+                );
+
+        try {
+            ForgeInstaller.installForge(instance, loaderVersion);
+            InstanceManager.markInstallationComplete(instance);
+            System.out.println("Forge installation complete.");
+            return instance;
+        } catch (Exception e) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw e;
+        }
+    }
+
+    // =============================================================
     // FABRIC
     // =============================================================
 
@@ -327,6 +370,29 @@ public class InstanceInstaller {
                     );
         }
 
+        if ("Forge".equalsIgnoreCase(loader)) {
+
+            if (loaderVersion == null || loaderVersion.isBlank()) {
+                throw new IllegalStateException("Forge Loader version is missing.");
+            }
+
+            ForgeInstaller.installForge(instance, loaderVersion);
+
+            Path forgeMetadata =
+                    instance.getDirectory()
+                            .resolve("minecraft")
+                            .resolve("version.json");
+
+            if (!Files.exists(forgeMetadata)) {
+                throw new IllegalStateException(
+                        "Forge installation did not produce version metadata."
+                );
+            }
+
+            finalMetadata =
+                    new com.fasterxml.jackson.databind.ObjectMapper()
+                            .readTree(forgeMetadata.toFile());
+        }
         /*
          * ---------------------------------------------------------
          * 4. SAVE FINAL VERSION METADATA
