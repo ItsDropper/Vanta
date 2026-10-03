@@ -8,16 +8,14 @@ import org.example.launcher.service.ModrinthService;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 public final class FpsInstanceGenerator {
 
-    /*
-     * This is intentionally a compatibility-first performance stack.
-     * Modrinth resolves exact versions for the selected Minecraft version.
-     *
-     * Nvidium is added only after Vanta positively identifies a compatible
-     * NVIDIA GPU. It is not installed speculatively.
-     */
     private static final List<String> BASE_MODS = List.of(
             "fabric-api",
             "sodium",
@@ -50,8 +48,7 @@ public final class FpsInstanceGenerator {
             );
         }
 
-        if (minecraftVersion == null
-                || minecraftVersion.isBlank()) {
+        if (minecraftVersion == null || minecraftVersion.isBlank()) {
             throw new IllegalArgumentException(
                     "Minecraft version cannot be blank."
             );
@@ -69,14 +66,12 @@ public final class FpsInstanceGenerator {
         Instance instance = null;
 
         try {
-            instance =
-                    InstanceInstaller.installFabric(
-                            name.trim(),
-                            minecraftVersion.trim()
-                    );
+            instance = InstanceInstaller.installFabric(
+                    name.trim(),
+                    minecraftVersion.trim()
+            );
 
-            ModrinthService modrinth =
-                    new ModrinthService();
+            ModrinthService modrinth = new ModrinthService();
 
             List<String> projectSlugs =
                     new ArrayList<>(BASE_MODS);
@@ -88,16 +83,11 @@ public final class FpsInstanceGenerator {
                 projectSlugs.add("nvidium");
             }
 
-            /*
-             * Modrinth project lookups are independent network requests.
-             * Fetch them concurrently instead of waiting for every request
-             * serially. The list order is preserved for deterministic output.
-             */
             int workers = Math.min(8, Math.max(1, projectSlugs.size()));
-            java.util.concurrent.ExecutorService executor =
-                    java.util.concurrent.Executors.newFixedThreadPool(workers);
+            ExecutorService executor =
+                    Executors.newFixedThreadPool(workers);
 
-            List<java.util.concurrent.Future<ModrinthProject>> futures =
+            List<Future<ModrinthProject>> futures =
                     new ArrayList<>(projectSlugs.size());
 
             try {
@@ -106,7 +96,7 @@ public final class FpsInstanceGenerator {
                         try {
                             return modrinth.getProjectBySlug(slug);
                         } catch (IOException | InterruptedException e) {
-                            throw new java.util.concurrent.CompletionException(e);
+                            throw new CompletionException(e);
                         }
                     }));
                 }
@@ -119,21 +109,27 @@ public final class FpsInstanceGenerator {
                 for (int i = 0; i < futures.size(); i++) {
                     try {
                         ModrinthProject project = futures.get(i).get();
+
                         if (project != null) {
                             roots.add(project);
-                            if (nvidiumRequested && "nvidium".equals(projectSlugs.get(i))) {
+
+                            if (nvidiumRequested
+                                    && "nvidium".equals(projectSlugs.get(i))) {
                                 nvidiumInstalled = true;
                             }
                         }
-                    } catch (java.util.concurrent.ExecutionException e) {
+                    } catch (ExecutionException e) {
                         Throwable cause = e.getCause();
-                        if (cause instanceof java.util.concurrent.CompletionException
+
+                        if (cause instanceof CompletionException
                                 && cause.getCause() != null) {
                             cause = cause.getCause();
                         }
+
                         if (cause instanceof InterruptedException interrupted) {
                             throw interrupted;
                         }
+
                         if (cause instanceof IOException io) {
                             throw new IOException(
                                     "Failed to resolve FPS mod '"
@@ -143,6 +139,7 @@ public final class FpsInstanceGenerator {
                                     io
                             );
                         }
+
                         throw new IOException(
                                 "Failed to resolve FPS mod '"
                                         + projectSlugs.get(i)
@@ -183,35 +180,6 @@ public final class FpsInstanceGenerator {
             } finally {
                 executor.shutdownNow();
             }
-
-            List<ModrinthService.ResolvedMod> resolved =
-                    modrinth.resolveModGraph(
-                            instance,
-                            roots,
-                            null,
-                            List.of()
-                    );
-
-            modrinth.installResolvedGraph(
-                    instance,
-                    resolved
-            );
-
-            FpsOptionsOptimizer.optimize(
-                    instance,
-                    hardware,
-                    learning.profile()
-            );
-
-            return new Result(
-                    instance,
-                    hardware,
-                    nvidiumInstalled,
-                    resolved.size(),
-                    learning.profile(),
-                    learning.trainingSamples(),
-                    learning.learned()
-            );
 
         } catch (Exception e) {
             if (instance != null) {
