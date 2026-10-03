@@ -427,7 +427,23 @@ public final class RepairDiagnosticEngine {
          * =========================================================
          */
 
-        if (CONFIGURATION.matcher(text).find()) {
+        /*
+         * Some mods intentionally fall back to default configuration when
+         * their config is missing. This is not a launch failure.
+         *
+         * Example:
+         *   Dynamic FPS config missing or corrupted! Using defaults.
+         *
+         * Do not let that warning trigger the repair engine and terminate
+         * an otherwise healthy Minecraft startup.
+         */
+        String configurationDiagnosticText =
+                text.replaceAll(
+                        "(?m)^.*config missing or corrupted! using defaults.*$",
+                        ""
+                );
+
+        if (CONFIGURATION.matcher(configurationDiagnosticText).find()) {
 
             diagnoses.add(
                     new RepairDiagnosis(
