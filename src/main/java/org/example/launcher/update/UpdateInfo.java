@@ -49,7 +49,17 @@ public class UpdateInfo {
         ) > 0;
     }
 
-    private int compareVersions(
+    public boolean isDowngrade() {
+        return compareVersions(
+                latestVersion,
+                currentVersion
+        ) < 0;
+    }
+
+    public static int compareVersions(
+            String first,
+            String second
+    ) {
             String first,
             String second
     ) {
@@ -73,7 +83,7 @@ public class UpdateInfo {
         return 0;
     }
 
-    private int[] parseVersion(
+    private static int[] parseVersion(
             String version
     ) {
         String cleaned =
