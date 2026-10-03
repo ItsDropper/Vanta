@@ -10,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.stage.Popup;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -481,7 +482,28 @@ public class InstancesView extends VBox {
             });
             choices.getChildren().add(button);
         }
-        root.getChildren().addAll(title, subtitle, choices);
+        Button upload = new Button("UPLOAD PNG");
+        upload.getStyleClass().add("secondary-button");
+        upload.setOnAction(e -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Choose instance icon");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG images", "*.png"));
+            java.io.File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
+            if (selected == null) return;
+            popup.hide();
+            Thread thread = new Thread(() -> {
+                try {
+                    java.nio.file.Files.copy(selected.toPath(), instance.getDirectory().resolve("icon.png"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    InstanceManager.setInstanceIcon(instance, "CUSTOM");
+                    Platform.runLater(this::refresh);
+                } catch (Throwable ex) {
+                    Platform.runLater(() -> statusLabel.setText(ex.getMessage() == null ? "Could not upload icon." : ex.getMessage()));
+                }
+            }, "Vanta-Instance-Icon-Upload");
+            thread.setDaemon(true);
+            thread.start();
+        });
+        root.getChildren().addAll(title, subtitle, choices, upload);
         popup.getContent().add(root);
         showPopupCentered(popup, 430, 150);
     }
