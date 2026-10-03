@@ -198,7 +198,7 @@ public class MinecraftLauncher {
             }
 
             command.add("--launchTarget");
-            command.add("forgeclient");
+            command.add("forge_client");
 
             command.add("--fml.forgeVersion");
             command.add(data.loaderVersion);
