@@ -298,9 +298,9 @@ public final class StateCenterView extends VBox {
                 attention.incrementAndGet();
             }
             maybeFinishParallelScan(
-                    executor, generation, done, totalTasks, instances,
-                    healthy, attention, broken
-            );
+                        executor, generation, done, totalTasks, instances,
+                        healthy, attention, broken, brokenThings
+                );
         });
 
         executor.submit(() -> {
@@ -325,9 +325,9 @@ public final class StateCenterView extends VBox {
                 attention.incrementAndGet();
             }
             maybeFinishParallelScan(
-                    executor, generation, done, totalTasks, instances,
-                    healthy, attention, broken
-            );
+                        executor, generation, done, totalTasks, instances,
+                        healthy, attention, broken, brokenThings
+                );
         });
     }
 
