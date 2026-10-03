@@ -20,6 +20,7 @@ import org.example.launcher.model.Instance;
 import org.example.launcher.service.LaunchService;
 import org.example.launcher.service.MultiLaunchService;
 import org.example.ui.components.InstanceCard;
+import org.example.ui.LauncherSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -393,6 +394,7 @@ public class InstancesView extends VBox {
                             () -> showIconPopup(instance)
                     );
 
+            if (LauncherSettings.isCompactInstancesEnabled()) card.getStyleClass().add("instance-card-compact");
             instanceList.getChildren().add(card);
         }
 
