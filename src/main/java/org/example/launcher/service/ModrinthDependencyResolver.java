@@ -52,6 +52,7 @@ public List<ModrinthService.ResolvedMod> resolveModGraph(
 
         fabricMetadataCache.clear();
         versionCache.clear();
+        fastResolution = true;
         fabricModIdProjectCache.clear();
 
         LinkedHashSet<String> roots =
@@ -1058,13 +1059,8 @@ private String findModrinthProjectForFabricModId(
                         instance.getMinecraftVersion()
                 ).getHits();
 
-        if (hits == null
-                || hits.isEmpty()) {
-
-            return null;
-        }
-
-        for (ModrinthSearchHit hit :
+        if (hits != null && !hits.isEmpty()) {
+            for (ModrinthSearchHit hit :
                 hits) {
 
             if (hit == null
@@ -1118,6 +1114,15 @@ private String findModrinthProjectForFabricModId(
 
                 return projectId;
             }
+        }
+
+        /*
+         * Only IDs in Fabric's own module namespace can be provided by
+         * Fabric API. Standalone IDs such as mixinextras must never
+         * trigger expensive Fabric API JAR downloads.
+         */
+        if (!fabricModId.startsWith("fabric-")) {
+            return null;
         }
 
         /*
