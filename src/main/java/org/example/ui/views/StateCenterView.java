@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public final class StateCenterView extends VBox {
     private static void debug(String message) { System.out.println("[Vanta State DEBUG] " + message); }
     private final VBox instanceList = new VBox(10);
+    private final ScrollPane instanceScroll = new ScrollPane(instanceList);
     private final Label overallTitle = new Label("READY");
     private final Label overallSubtitle = new Label("Vanta will inspect your environments when you open this page.");
     private final ProgressBar progress = new ProgressBar(0);
@@ -71,7 +73,19 @@ public final class StateCenterView extends VBox {
         HBox section = new HBox(10, sectionTitle, refreshButton);
         section.setAlignment(Pos.CENTER_LEFT);
 
-        VBox listCard = new VBox(instanceList);
+        instanceList.setFillWidth(true);
+        instanceList.setPadding(new Insets(2));
+
+        instanceScroll.getStyleClass().add("state-instance-scroll");
+        instanceScroll.setFitToWidth(true);
+        instanceScroll.setFitToHeight(false);
+        instanceScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        instanceScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        instanceScroll.setPannable(true);
+        instanceScroll.setFocusTraversable(false);
+        VBox.setVgrow(instanceScroll, Priority.ALWAYS);
+
+        VBox listCard = new VBox(instanceScroll);
         listCard.getStyleClass().add("state-list-card");
         listCard.setPadding(new Insets(12));
         VBox.setVgrow(listCard, Priority.ALWAYS);
