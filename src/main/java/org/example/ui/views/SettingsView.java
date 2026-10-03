@@ -808,6 +808,61 @@ public class SettingsView extends BorderPane {
                 )
         );
 
+        VBox scanPerformance = card(
+                "State scanner performance",
+                "Control how many background workers Vanta can use while scanning instances, libraries and assets. Higher values can finish I/O-heavy scans faster, but use more system resources."
+        );
+
+        Slider scanWorkers = new Slider(1, 32, LauncherSettings.getStateScanWorkers());
+        scanWorkers.setMajorTickUnit(4);
+        scanWorkers.setMinorTickCount(3);
+        scanWorkers.setSnapToTicks(true);
+        scanWorkers.setShowTickLabels(true);
+        scanWorkers.setShowTickMarks(true);
+        scanWorkers.setMaxWidth(Double.MAX_VALUE);
+
+        Label scanWorkerValue = new Label();
+        scanWorkerValue.getStyleClass().add("instance-setting-value");
+
+        Runnable updateScanWorkerValue = () ->
+                scanWorkerValue.setText((int) Math.round(scanWorkers.getValue()) + " scan workers");
+
+        scanWorkers.valueProperty().addListener((o, oldValue, newValue) -> updateScanWorkerValue.run());
+        updateScanWorkerValue.run();
+
+        HBox scanPresets = new HBox(8);
+        for (int workerCount : new int[]{2, 4, 8, 12, 16, 24}) {
+            Button preset = new Button(workerCount + "×");
+            preset.getStyleClass().add("accent-preset");
+            preset.setOnAction(event -> scanWorkers.setValue(workerCount));
+            scanPresets.getChildren().add(preset);
+        }
+
+        Button saveScanWorkers = new Button("SAVE SCAN WORKERS");
+        saveScanWorkers.getStyleClass().add("primary-button");
+        saveScanWorkers.setOnAction(event -> {
+            int workers = (int) Math.round(scanWorkers.getValue());
+            LauncherSettings.setStateScanWorkers(workers);
+
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.success(
+                        "State scanner settings saved",
+                        "Vanta will use " + workers + " workers on the next State scan."
+                );
+            }
+        });
+
+        scanPerformance.getChildren().addAll(
+                scanWorkerValue,
+                scanWorkers,
+                new Label("Quick presets"),
+                scanPresets,
+                saveScanWorkers
+        );
+        scanPerformance.getChildren().get(scanPerformance.getChildren().size() - 2)
+                .getStyleClass().add("settings-card-description");
+
         VBox safety = card(
                 "What diagnostics change",
                 "The launcher does not silently rewrite files from this page. Instance dependency repair remains available from the instance repair flow."
