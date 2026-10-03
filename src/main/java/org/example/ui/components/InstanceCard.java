@@ -924,7 +924,6 @@ public class InstanceCard extends StackPane {
     private static String iconGlyph(String icon) {
         return switch (icon == null ? "SHIELD" : icon.toUpperCase()) {
             case "PACKAGE" -> "◆";
-            case "SWORD" -> "⚔";
             case "PICKAXE" -> "⛏";
             case "STAR" -> "★";
             case "FIRE" -> "✦";
