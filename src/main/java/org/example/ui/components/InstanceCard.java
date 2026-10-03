@@ -440,12 +440,10 @@ public class InstanceCard extends StackPane {
                         exportInstance()
         );
 
-        deleteItem.setOnAction(
-                event ->
-                        confirmDelete(
-                                onDelete
-                        )
-        );
+        deleteItem.setOnAction(event -> {
+            if (LauncherSettings.isConfirmInstanceDeletionEnabled()) confirmDelete(onDelete);
+            else onDelete.run();
+        });
 
         ContextMenu menu =
                 new ContextMenu(
@@ -900,9 +898,11 @@ public class InstanceCard extends StackPane {
         playtimeLabel.setText(
                 InstanceUsageManager.formatPlaytime(
                         InstanceUsageManager.getPlaytimeSeconds(instance)
-                )
-                        + " played"
+                ) + " played"
         );
+        boolean showPlaytime = LauncherSettings.isShowPlaytimeEnabled();
+        playtimeLabel.setVisible(showPlaytime);
+        playtimeLabel.setManaged(showPlaytime);
     }
 
     private Label findIconLabel() {
