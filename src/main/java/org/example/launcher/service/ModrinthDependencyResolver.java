@@ -1290,6 +1290,9 @@ private boolean resolveFabricDependency(
 
                 if (resolved.containsKey(projectId)) {
 
+                    ModrinthVersion existing =
+                            resolved.get(projectId);
+
                     /*
                      * Fabric API is a provider JAR: its own Fabric mod ID is
                      * "fabric", while the dependency may target one of its
@@ -1299,8 +1302,6 @@ private boolean resolveFabricDependency(
                      * top-level "fabric" ID.
                      */
                     if (fabricApiProvider) {
-                        ModrinthVersion existing =
-                                resolved.get(projectId);
 
                         Map<String, String> existingModules =
                                 fabricApiModuleCache.get(existing.getId());
