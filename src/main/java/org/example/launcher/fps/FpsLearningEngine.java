@@ -1,6 +1,5 @@
 package org.example.launcher.fps;
 
-import org.example.launcher.MinecraftLocator;
 import org.example.launcher.model.Instance;
 import org.example.launcher.instance.InstanceManager;
 
@@ -325,7 +324,7 @@ public final class FpsLearningEngine {
                 String normalized =
                         columns[i]
                                 .trim()
-                                .replace(""", "")
+                                .replace("\"", "")
                                 .toLowerCase(Locale.ROOT);
 
                 if (normalized.equals("fps")
