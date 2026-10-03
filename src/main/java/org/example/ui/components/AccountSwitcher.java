@@ -1,5 +1,6 @@
 package org.example.ui.components;
 
+import org.example.ui.ThemeManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -125,6 +126,8 @@ public class AccountSwitcher extends HBox {
         accountList.setPadding(
                 new Insets(10)
         );
+
+        ThemeManager.apply(accountList, ThemeManager.loadAccent());
 
         popup.getContent().add(
                 accountList
