@@ -17,12 +17,12 @@ public class AssetInstaller {
             Instance instance,
             JsonNode metadata
     ) throws Exception {
+        install(metadata);
+    }
 
-        if (instance == null) {
-            throw new IllegalArgumentException(
-                    "Instance cannot be null."
-            );
-        }
+    public static void install(
+            JsonNode metadata
+    ) throws Exception {
 
         if (metadata == null) {
             throw new IllegalArgumentException(
