@@ -23,6 +23,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CreateInstanceView extends VBox {
@@ -34,7 +35,9 @@ public class CreateInstanceView extends VBox {
             new ObjectMapper();
 
     private static final HttpClient HTTP =
-            HttpClient.newHttpClient();
+            HttpClient.newBuilder()
+                    .connectTimeout(Duration.ofSeconds(10))
+                    .build();
 
     private final TextField nameField;
     private final ComboBox<String> versionBox;
@@ -407,6 +410,7 @@ public class CreateInstanceView extends VBox {
                                                         VERSION_MANIFEST_URL
                                                 )
                                         )
+                                        .timeout(Duration.ofSeconds(15))
                                         .GET()
                                         .build();
 
