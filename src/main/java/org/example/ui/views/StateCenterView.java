@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class StateCenterView extends VBox {
+    private static void debug(String message) { System.out.println("[Vanta State DEBUG] " + message); }
     private final VBox instanceList = new VBox(10);
     private final Label overallTitle = new Label("READY");
     private final Label overallSubtitle = new Label("Vanta will inspect your environments when you open this page.");
@@ -30,6 +31,7 @@ public final class StateCenterView extends VBox {
     private volatile long scanGeneration;
 
     public StateCenterView() {
+        debug("CONSTRUCTOR START");
         getStyleClass().add("state-center");
         setPadding(new Insets(32));
         setSpacing(20);
@@ -75,14 +77,20 @@ public final class StateCenterView extends VBox {
         VBox.setVgrow(listCard, Priority.ALWAYS);
 
         getChildren().addAll(heading, hero, section, listCard);
+        debug("CONSTRUCTOR COMPLETE");
     }
 
     public void onShown() {
+        debug("ON_SHOWN");
         refresh();
     }
 
     public void refresh() {
-        if (!scanning.compareAndSet(false, true)) return;
+        debug("REFRESH ENTER");
+        if (!scanning.compareAndSet(false, true)) {
+            debug("REFRESH SKIPPED: already scanning");
+            return;
+        }
 
         long generation = ++scanGeneration;
         refreshButton.setDisable(true);
@@ -92,36 +100,62 @@ public final class StateCenterView extends VBox {
         progress.setProgress(-1);
         instanceList.getChildren().clear();
 
+        debug("SCAN THREAD STARTING generation=" + generation);
+
         Thread thread = new Thread(() -> {
             List<Instance> instances;
             List<InstanceState> states = new ArrayList<>();
 
             try {
+                debug("DISCOVERY START");
                 instances = InstanceManager.discoverInstances();
+                debug("DISCOVERY COMPLETE instances=" + instances.size());
                 for (Instance instance : instances) {
+                    debug("INSPECT START name=" + safe(instance.getName(), "<null>") + " id=" + safe(instance.getId(), "<null>"));
                     try {
                         states.add(InstanceStateEngine.inspect(instance));
-                    } catch (Throwable ignored) {
+                        debug("INSPECT COMPLETE name=" + safe(instance.getName(), "<null>") + " state=" + states.get(states.size()-1).getLevel());
+                    } catch (Throwable ex) {
+                        debug("INSPECT FAILED: " + ex);
+                        ex.printStackTrace();
                         states.add(new InstanceState(InstanceState.Level.BROKEN, "SCAN FAILED",
                                 "Vanta could not inspect this environment.", 0, 1, 0, 0, ""));
                     }
                 }
-            } catch (Throwable ignored) {
+            } catch (Throwable ex) {
+                debug("SCAN THREAD FAILED: " + ex);
+                ex.printStackTrace();
                 List<Instance> failedInstances = List.of();
-                Platform.runLater(() -> finishScan(generation, false, failedInstances, states));
+                Platform.runLater(() -> {
+                    debug("FX CALLBACK: FAILED SCAN");
+                    finishScan(generation, false, failedInstances, states);
+                });
                 return;
             }
 
             List<Instance> finalInstances = instances;
-            Platform.runLater(() -> finishScan(generation, true, finalInstances, states));
+            debug("SCAN COMPLETE instances=" + finalInstances.size() + " states=" + states.size());
+            Platform.runLater(() -> {
+                debug("FX CALLBACK: SUCCESS SCAN");
+                finishScan(generation, true, finalInstances, states);
+            });
         }, "Vanta-State-Engine");
 
         thread.setDaemon(true);
+        thread.setUncaughtExceptionHandler((t, ex) -> {
+            debug("UNCAUGHT THREAD EXCEPTION: " + ex);
+            ex.printStackTrace();
+        });
         thread.start();
+        debug("SCAN THREAD STARTED");
     }
 
     private void finishScan(long generation, boolean success, List<Instance> instances, List<InstanceState> states) {
-        if (generation != scanGeneration) return;
+        debug("FINISH_SCAN ENTER success=" + success + " generation=" + generation + " current=" + scanGeneration + " instances=" + instances.size() + " states=" + states.size());
+        if (generation != scanGeneration) {
+            debug("FINISH_SCAN SKIPPED: stale generation");
+            return;
+        }
 
         try {
             if (!success) {
@@ -131,14 +165,18 @@ public final class StateCenterView extends VBox {
                 instanceList.getChildren().clear();
                 return;
             }
+            debug("RENDER START");
             render(instances, states);
+            debug("RENDER COMPLETE");
         } catch (Throwable ex) {
+            debug("FINISH_SCAN/RENDER FAILED: " + ex);
             ex.printStackTrace();
             overallTitle.setText("SCAN FAILED");
             overallSubtitle.setText("The State view could not render the scan results.");
             progress.setProgress(0);
             instanceList.getChildren().clear();
         } finally {
+            debug("FINISH_SCAN FINALLY");
             scanning.set(false);
             refreshButton.setDisable(false);
             refreshButton.setText("SCAN AGAIN");
@@ -146,7 +184,10 @@ public final class StateCenterView extends VBox {
     }
 
     private void render(List<Instance> instances, List<InstanceState> states) {
+        debug("RENDER: clearing list");
         instanceList.getChildren().clear();
+
+        debug("RENDER: states empty=" + states.isEmpty());
 
         if (states.isEmpty()) {
             overallTitle.setText("NO ENVIRONMENTS");
@@ -167,10 +208,13 @@ public final class StateCenterView extends VBox {
         overallTitle.setText(affected == 0 ? "ALL SYSTEMS HEALTHY"
                 : affected + " ENVIRONMENT" + (affected == 1 ? "" : "S") + " NEED ATTENTION");
         overallSubtitle.setText(healthy + " healthy  •  " + attention + " attention  •  " + broken + " broken");
+        debug("RENDER: healthy=" + healthy + " attention=" + attention + " broken=" + broken);
         progress.setProgress((double) healthy / states.size());
 
         for (int i = 0; i < instances.size() && i < states.size(); i++) {
+            debug("CARD START index=" + i + " name=" + safe(instances.get(i).getName(), "<null>"));
             addStateCard(instances.get(i), states.get(i));
+            debug("CARD COMPLETE index=" + i);
         }
     }
 
@@ -179,6 +223,7 @@ public final class StateCenterView extends VBox {
         empty.setAlignment(Pos.CENTER);
         empty.setPadding(new Insets(42));
 
+        debug("CARD: icon START type=" + (state.isHealthy() ? "SHIELD" : "PACKAGE"));
         StackPane icon = new StackPane(IconView.create(IconView.Type.SHIELD, 30));
         icon.getStyleClass().add("state-empty-icon");
 
@@ -192,6 +237,7 @@ public final class StateCenterView extends VBox {
     }
 
     private void addStateCard(Instance instance, InstanceState state) {
+        debug("CARD: HBox");
         HBox card = new HBox(16);
         card.getStyleClass().add("state-card");
         card.setAlignment(Pos.CENTER_LEFT);
@@ -199,8 +245,10 @@ public final class StateCenterView extends VBox {
 
         StackPane icon = new StackPane(IconView.create(
                 state.isHealthy() ? IconView.Type.SHIELD : IconView.Type.PACKAGE, 21));
+        debug("CARD: icon COMPLETE");
         icon.getStyleClass().add("state-icon-" + state.getLevel().name().toLowerCase());
 
+        debug("CARD: text VBox");
         VBox text = new VBox(5);
         Label name = new Label(safe(instance.getName(), "Unnamed instance"));
         name.getStyleClass().add("state-instance-name");
@@ -221,10 +269,13 @@ public final class StateCenterView extends VBox {
                 + " checks  •  " + state.getMods() + " mods  •  " + state.getConfigs() + " configs");
         stats.getStyleClass().add("state-stats");
 
+        debug("CARD: right VBox");
         VBox right = new VBox(5, status, stats);
         right.setAlignment(Pos.CENTER_RIGHT);
         card.getChildren().addAll(icon, text, right);
+        debug("CARD: adding to instanceList");
         instanceList.getChildren().add(card);
+        debug("CARD: added to instanceList");
     }
 
     private static String safe(String value, String fallback) {
