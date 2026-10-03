@@ -93,7 +93,7 @@ public class GlobalModsView extends VBox {
 
         Label title =
                 new Label(
-                        "Mods"
+                        "Modrinth"
                 );
 
         title.getStyleClass().add(
@@ -102,7 +102,7 @@ public class GlobalModsView extends VBox {
 
         Label subtitle =
                 new Label(
-                        "Browse mods on Modrinth."
+                        "Browse mods, resource packs, and shaders on Modrinth."
                 );
 
         subtitle.getStyleClass().add(
