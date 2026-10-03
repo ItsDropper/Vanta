@@ -479,6 +479,36 @@
     -fx-background-color: -vanta-accent-hover;
 }
 
+/* ---------- theme selector popup ---------- */
+
+.theme-selector-popup,
+.combo-box-popup .list-view {
+    -fx-background-color: #121821;
+    -fx-control-inner-background: #121821;
+    -fx-border-color: #303B49;
+    -fx-border-width: 1px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 5px;
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E8EDF4;
+    -fx-padding: 9px 12px;
+    -fx-background-radius: 7px;
+}
+
+.combo-box-popup .list-cell:hover,
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #202936;
+    -fx-text-fill: #FFFFFF;
+}
+
+.theme-selector .list-cell {
+    -fx-text-fill: #E8EDF4;
+}
+
 /* ---------- generic controls ---------- */
 
 .check-box {
