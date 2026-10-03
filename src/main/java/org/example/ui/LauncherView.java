@@ -540,6 +540,40 @@ public class LauncherView {
                                         + "..."
                         );
 
+                        if ("fps-optimized".equalsIgnoreCase(
+                                preset.getId()
+                        )) {
+                            org.example.launcher.fps.FpsInstanceGenerator.Result result =
+                                    org.example.launcher.fps.FpsInstanceGenerator.generate(
+                                            name,
+                                            minecraftVersion
+                                    );
+
+                            String gpu =
+                                    result.hardware().gpuName();
+
+                            String nvidium =
+                                    result.nvidiumInstalled()
+                                            ? " NVIDIA optimization enabled."
+                                            : "";
+
+                            notifications.success(
+                                    "FPS instance ready",
+                                    preset.getName()
+                                            + " ("
+                                            + minecraftVersion
+                                            + ") generated for "
+                                            + gpu
+                                            + "."
+                                            + nvidium
+                            );
+
+                            Platform.runLater(
+                                    this::instanceCreated
+                            );
+                            return;
+                        }
+
                         Instance instance;
 
                         if ("Fabric".equalsIgnoreCase(
