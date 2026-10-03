@@ -398,21 +398,55 @@ public class GlobalModsView extends VBox {
                 : null;
     }
 
-    private List<Instance> compatibleInstances(ModrinthProject project) {
+    private List<Instance> compatibleInstances(
+            ModrinthProject project,
+            List<org.example.launcher.modrinth.ModrinthVersion> versions
+    ) {
         List<Instance> compatible = new ArrayList<>();
-        for (Instance instance : InstanceManager.discoverInstances()) {
-            if (instance == null || instance.getMinecraftVersion() == null) continue;
-            if (project.getVersions() != null && !project.getVersions().isEmpty()
-                    && !project.getVersions().contains(instance.getMinecraftVersion())) continue;
 
-            if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
-                String loader = instance.getLoader() == null ? "" : instance.getLoader().toLowerCase();
-                if (!loader.equals("fabric") && !loader.equals("forge")) continue;
-                if (project.getLoaders() != null && !project.getLoaders().isEmpty()
-                        && project.getLoaders().stream().noneMatch(value -> loader.equalsIgnoreCase(value))) continue;
+        for (Instance instance : InstanceManager.discoverInstances()) {
+            if (instance == null
+                    || instance.getMinecraftVersion() == null
+                    || instance.getLoader() == null) {
+                continue;
             }
-            compatible.add(instance);
+
+            String minecraftVersion = instance.getMinecraftVersion();
+            String loader = instance.getLoader().trim().toLowerCase(java.util.Locale.ROOT);
+
+            if (contentTypeBox.getValue() == ModrinthContentType.MOD
+                    && !loader.equals("fabric")
+                    && !loader.equals("forge")) {
+                continue;
+            }
+
+            boolean compatibleVersion = false;
+
+            if (versions != null) {
+                for (org.example.launcher.modrinth.ModrinthVersion version : versions) {
+                    if (version.getGameVersions() == null
+                            || !version.getGameVersions().contains(minecraftVersion)) {
+                        continue;
+                    }
+
+                    if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
+                        if (version.getLoaders() == null
+                                || version.getLoaders().stream()
+                                .noneMatch(value -> loader.equalsIgnoreCase(value))) {
+                            continue;
+                        }
+                    }
+
+                    compatibleVersion = true;
+                    break;
+                }
+            }
+
+            if (compatibleVersion) {
+                compatible.add(instance);
+            }
         }
+
         return compatible;
     }
 
@@ -420,7 +454,9 @@ public class GlobalModsView extends VBox {
         Thread thread = new Thread(() -> {
             try {
                 ModrinthProject project = modrinthClient.getProject(projectId);
-                Platform.runLater(() -> chooseInstances(project, sourceButton));
+                List<org.example.launcher.modrinth.ModrinthVersion> versions =
+                        modrinthClient.getVersions(projectId);
+                Platform.runLater(() -> chooseInstances(project, versions, sourceButton));
             } catch (Throwable ex) {
                 ex.printStackTrace();
                 Platform.runLater(() -> statusLabel.setText("Could not load project compatibility information."));
@@ -430,10 +466,17 @@ public class GlobalModsView extends VBox {
         thread.start();
     }
 
-    private void chooseInstances(ModrinthProject project, Button sourceButton) {
-        List<Instance> compatible = compatibleInstances(project);
+    private void chooseInstances(
+            ModrinthProject project,
+            List<org.example.launcher.modrinth.ModrinthVersion> versions,
+            Button sourceButton
+    ) {
+        List<Instance> compatible = compatibleInstances(project, versions);
         if (compatible.isEmpty()) {
-            statusLabel.setText("No compatible instances found for " + project.getTitle() + ".");
+            statusLabel.setText(
+                    "No compatible instances found for " + project.getTitle()
+                            + ". Check that you have a matching Minecraft version and loader."
+            );
             return;
         }
 
