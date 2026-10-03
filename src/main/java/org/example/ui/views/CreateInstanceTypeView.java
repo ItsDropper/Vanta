@@ -36,19 +36,23 @@ public class CreateInstanceTypeView extends VBox {
         getStyleClass().add("page");
 
         setPadding(
-                new Insets(36)
+                new Insets(28, 32, 32, 32)
         );
 
         setSpacing(
-                24
+                18
         );
 
         // =========================================================
         // HEADER
         // =========================================================
 
+        Label eyebrow =
+                new Label("NEW INSTANCE");
+        eyebrow.getStyleClass().add("settings-nav-group");
+
         Label title =
-                new Label("Create instance");
+                new Label("Create an instance");
 
         title.getStyleClass().add(
                 "page-title"
@@ -65,7 +69,8 @@ public class CreateInstanceTypeView extends VBox {
 
         VBox header =
                 new VBox(
-                        6,
+                        5,
+                        eyebrow,
                         title,
                         subtitle
                 );
@@ -89,8 +94,8 @@ public class CreateInstanceTypeView extends VBox {
 
         Button customButton =
                 createOption(
-                        "CUSTOM",
-                        "Create a new instance manually.",
+                        "Custom instance",
+                        "Choose the Minecraft version, loader and installation settings yourself.",
                         false
                 );
 
@@ -104,8 +109,8 @@ public class CreateInstanceTypeView extends VBox {
 
         Button importButton =
                 createOption(
-                        "IMPORT AN INSTANCE",
-                        "Import an existing Vanta instance or .mrpack.",
+                        "Import an instance",
+                        "Bring an existing Vanta instance or supported .mrpack into Vanta.",
                         false
                 );
 
@@ -119,8 +124,8 @@ public class CreateInstanceTypeView extends VBox {
 
         Button presetButton =
                 createOption(
-                        "CHOOSE A PRESET",
-                        "Start with a predefined Vanta instance configuration.",
+                        "Use a preset",
+                        "Start from a predefined Vanta configuration.",
                         false
                 );
 
@@ -134,8 +139,8 @@ public class CreateInstanceTypeView extends VBox {
 
         Button modrinthButton =
                 createOption(
-                        "BROWSE MODRINTH",
-                        "Browse and install modpacks from Modrinth.",
+                        "Browse Modrinth",
+                        "Find and install a modpack directly from Modrinth.",
                         false
                 );
 
@@ -156,7 +161,7 @@ public class CreateInstanceTypeView extends VBox {
 
         Button backButton =
                 new Button(
-                        "CANCEL"
+                        "Back"
                 );
 
         backButton.getStyleClass().add(
@@ -164,7 +169,7 @@ public class CreateInstanceTypeView extends VBox {
         );
 
         backButton.setPrefWidth(
-                110
+                92
         );
 
         backButton.setPrefHeight(
