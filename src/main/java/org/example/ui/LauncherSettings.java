@@ -47,6 +47,14 @@ public final class LauncherSettings {
         setBoolean("confirmRemovalsEnabled", value);
     }
 
+    public static boolean isAutoOpenBrowserEnabled() {
+        return getBoolean("autoOpenBrowserEnabled", false);
+    }
+
+    public static void setAutoOpenBrowserEnabled(boolean value) {
+        setBoolean("autoOpenBrowserEnabled", value);
+    }
+
     public static int getDefaultRamMb() {
         return getInt("defaultRamMb", 4096, 1024, 16384);
     }
