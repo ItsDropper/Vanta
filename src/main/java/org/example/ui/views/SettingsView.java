@@ -589,11 +589,11 @@ public class SettingsView extends BorderPane {
         update.run();
 
         HBox presets = new HBox(8);
-        for (int workers : new int[]{2, 4, 8, 12, 16}) {
-            Button preset = new Button(workers + "×");
+        for (int workerCount : new int[]{2, 4, 8, 12, 16}) {
+            Button preset = new Button(workerCount + "×");
             preset.getStyleClass().add("accent-preset");
             preset.setOnAction(event -> {
-                slider.setValue(workers);
+                slider.setValue(workerCount);
                 update.run();
             });
             presets.getChildren().add(preset);
