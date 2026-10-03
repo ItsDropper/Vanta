@@ -1,100 +1,60 @@
 .vanta-loading {
     -fx-background-color:
-        radial-gradient(center 50% 42%, radius 78%,
-            #10252c 0%,
-            #0b171b 42%,
-            #080e11 74%,
-            #06090b 100%);
-    -fx-background-radius: 16px;
-}
-
-.loading-atmosphere {
-    -fx-max-width: 520px;
-    -fx-max-height: 520px;
-}
-
-.loading-glow {
-    -fx-fill: radial-gradient(center 50% 50%, radius 50%,
-        rgba(53, 211, 255, 0.18) 0%,
-        rgba(34, 170, 215, 0.07) 42%,
-        rgba(0, 0, 0, 0) 73%);
-}
-
-.loading-mark {
-    -fx-effect: dropshadow(gaussian, rgba(52, 215, 255, 0.22), 28, 0.18, 0, 0);
-}
-
-.loading-ring-outer {
-    -fx-fill: transparent;
-    -fx-stroke: rgba(91, 220, 255, 0.38);
-    -fx-stroke-width: 1px;
-    -fx-stroke-dash-array: 2 9 18 7;
-}
-
-.loading-ring-inner {
-    -fx-fill: rgba(8, 21, 26, 0.82);
-    -fx-stroke: rgba(135, 235, 255, 0.9);
-    -fx-stroke-width: 1.5px;
-    -fx-stroke-dash-array: 24 8;
-}
-
-.loading-slash {
-    -fx-stroke: #8beaff;
-    -fx-stroke-width: 4px;
-    -fx-stroke-line-cap: round;
-    -fx-effect: dropshadow(gaussian, rgba(66, 220, 255, 0.75), 14, 0.28, 0, 0);
+        linear-gradient(to bottom,
+            #10161b 0%,
+            #0c1115 100%);
+    -fx-background-radius: 14px;
 }
 
 .loading-content {
-    -fx-translate-y: 6px;
+    -fx-translate-y: 2px;
+}
+
+.loading-mark {
+    -fx-fill: #35c7f5;
+    -fx-effect: dropshadow(gaussian, rgba(53, 199, 245, 0.35), 10, 0.18, 0, 0);
 }
 
 .loading-logo {
-    -fx-text-fill: #f1fbff;
+    -fx-text-fill: #f3f7f9;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
-    -fx-font-size: 36px;
+    -fx-font-size: 28px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(72, 218, 255, 0.3), 18, 0.18, 0, 0);
+    -fx-letter-spacing: 5px;
 }
 
 .loading-subtitle {
-    -fx-text-fill: rgba(178, 218, 228, 0.62);
+    -fx-text-fill: rgba(184, 197, 204, 0.58);
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 9px;
     -fx-font-weight: 700;
-    -fx-letter-spacing: 2.8px;
+    -fx-letter-spacing: 2px;
 }
 
 .loading-status {
-    -fx-padding: 20px 0 5px 0;
-    -fx-text-fill: rgba(209, 239, 246, 0.68);
+    -fx-padding: 14px 0 2px 0;
+    -fx-text-fill: rgba(220, 229, 233, 0.58);
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 9px;
     -fx-font-weight: 600;
-    -fx-letter-spacing: 1.8px;
+    -fx-letter-spacing: 1.4px;
 }
 
 .loading-progress-track {
-    -fx-pref-width: 320px;
-    -fx-max-width: 320px;
-    -fx-pref-height: 3px;
-    -fx-max-height: 3px;
-    -fx-background-color: rgba(125, 211, 232, 0.12);
-    -fx-background-radius: 3px;
-    -fx-border-radius: 3px;
-    -fx-overflow: hidden;
+    -fx-pref-width: 280px;
+    -fx-max-width: 280px;
+    -fx-pref-height: 4px;
+    -fx-max-height: 4px;
+    -fx-background-color: rgba(255, 255, 255, 0.09);
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
 }
 
 .loading-progress-fill {
-    -fx-pref-height: 3px;
-    -fx-max-height: 3px;
-    -fx-background-color:
-        linear-gradient(to right,
-            #3bd7ff 0%,
-            #8beaff 72%,
-            #d4f8ff 100%);
-    -fx-background-radius: 3px;
-    -fx-border-radius: 3px;
-    -fx-effect: dropshadow(gaussian, rgba(65, 218, 255, 0.65), 9, 0.24, 0, 0);
+    -fx-pref-height: 4px;
+    -fx-max-height: 4px;
+    -fx-background-color: #35c7f5;
+    -fx-background-radius: 4px;
+    -fx-border-radius: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(53, 199, 245, 0.35), 7, 0.18, 0, 0);
 }
