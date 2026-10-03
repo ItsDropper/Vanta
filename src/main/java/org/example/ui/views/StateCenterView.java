@@ -20,7 +20,7 @@ import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
 import org.example.launcher.state.InstanceState;
 import org.example.launcher.state.SharedState;
-import org.example.launcher.state.InstanceStateEngine;
+import org.example.launcher.state.InstanceStateEngine;\nimport org.example.launcher.instance.InstanceRepairService;
 import org.example.ui.components.IconView;
 import org.example.ui.components.InstanceCard;
 import org.example.ui.AnimationUtils;
@@ -225,6 +225,34 @@ public final class StateCenterView extends VBox {
                     replaceInstanceCard(instance, finalState);
                     updateLiveSummary(instances.size(), healthy.get(), attention.get(), broken.get(), completed.get(), totalTasks);
                 });
+
+                if (state.getLevel() == InstanceState.Level.BROKEN
+                        && LauncherSettings.isStateAutoRepairEnabled()) {
+                    try {
+                        Platform.runLater(() -> {
+                            if (generation == scanGeneration) {
+                                markInstanceRepairing(instance);
+                            }
+                        });
+
+                        InstanceRepairService.repair(instance);
+
+                        state = InstanceStateEngine.inspect(instance);
+
+                        final InstanceState repairedState = state;
+                        Platform.runLater(() -> {
+                            if (generation != scanGeneration) return;
+                            replaceInstanceCard(instance, repairedState);
+                        });
+                    } catch (Throwable repairFailure) {
+                        repairFailure.printStackTrace();
+                        Platform.runLater(() -> {
+                            if (generation == scanGeneration) {
+                                showRepairFailure(instance, repairFailure);
+                            }
+                        });
+                    }
+                }
 
                 int done = completed.incrementAndGet();
                 if (state.isHealthy()) healthy.incrementAndGet();
@@ -529,6 +557,48 @@ public final class StateCenterView extends VBox {
 
         row.getChildren().addAll(icon, text, count, status);
         return row;
+    }
+
+    private void markInstanceRepairing(Instance instance) {
+        HBox old = liveInstanceCards.get(instance);
+        if (old == null) return;
+
+        int index = instanceList.getChildren().indexOf(old);
+        if (index < 0) return;
+
+        HBox card = new HBox(16);
+        card.getStyleClass().add("state-card");
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setPadding(new Insets(16));
+
+        StackPane icon = new StackPane(IconView.create(IconView.Type.REFRESH, 22));
+        icon.getStyleClass().addAll("state-instance-icon", "state-icon-attention");
+
+        VBox text = new VBox(5);
+        Label name = new Label(safe(instance.getName(), "Unnamed instance"));
+        name.getStyleClass().add("state-instance-name");
+        Label detail = new Label("Repairing broken installation...");
+        detail.getStyleClass().add("state-instance-summary");
+        text.getChildren().addAll(name, detail);
+        HBox.setHgrow(text, Priority.ALWAYS);
+
+        Label status = new Label("REPAIRING");
+        status.getStyleClass().add("state-status-attention");
+        card.getChildren().addAll(icon, text, status);
+
+        instanceList.getChildren().set(index, card);
+        liveInstanceCards.put(instance, card);
+    }
+
+    private void showRepairFailure(Instance instance, Throwable failure) {
+        NotificationManager manager = NotificationManager.getGlobal();
+        if (manager != null) {
+            manager.error(
+                    "State repair failed",
+                    safe(instance.getName(), "Instance") + ": "
+                            + (failure.getMessage() == null ? failure.getClass().getSimpleName() : failure.getMessage())
+            );
+        }
     }
 
     private HBox createStateCard(Instance instance, InstanceState state) {
