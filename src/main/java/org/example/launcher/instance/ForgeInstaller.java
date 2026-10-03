@@ -166,6 +166,28 @@ public final class ForgeInstaller {
             Path target =
                     instance.getDirectory();
 
+            /*
+             * Forge's official client installer expects a Minecraft
+             * launcher profile in the target directory. Vanta uses
+             * isolated instance directories instead of the vanilla
+             * launcher's profile system, so provide a minimal temporary
+             * profile for the installer and remove it afterwards.
+             */
+            Path launcherProfile =
+                    target.resolve("launcher_profiles.json");
+
+            boolean createdProfile =
+                    false;
+
+            if (!Files.exists(launcherProfile)) {
+                Files.writeString(
+                        launcherProfile,
+                        "{}",
+                        StandardCharsets.UTF_8
+                );
+                createdProfile = true;
+            }
+
             Path java =
                     resolveJava();
 
@@ -218,6 +240,13 @@ public final class ForgeInstaller {
             );
         } finally {
             Files.deleteIfExists(installer);
+
+            if (createdProfile) {
+                Files.deleteIfExists(
+                        instance.getDirectory()
+                                .resolve("launcher_profiles.json")
+                );
+            }
         }
     }
 
