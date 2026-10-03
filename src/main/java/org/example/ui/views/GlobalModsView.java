@@ -155,20 +155,17 @@ public class GlobalModsView extends VBox {
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
-            showPopularSection();
-            loadMostDownloadedMods();
+            refreshForCurrentFilters();
         });
 
         loaderBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
-                        showPopularSection();
-                loadMostDownloadedMods();
+                refreshForCurrentFilters();
             }
         });
 
         versionBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-            showPopularSection();
-            loadMostDownloadedMods();
+            refreshForCurrentFilters();
         });
 
         Thread versionThread = new Thread(() -> {
@@ -386,6 +383,17 @@ public class GlobalModsView extends VBox {
 
         versionThread.start();
         loadMostDownloadedMods();
+    }
+
+    private void refreshForCurrentFilters() {
+        String query = searchField.getText();
+
+        if (query != null && !query.trim().isBlank()) {
+            search();
+        } else {
+            showPopularSection();
+            loadMostDownloadedMods();
+        }
     }
 
     private String selectedVersion() {
@@ -1084,6 +1092,13 @@ public class GlobalModsView extends VBox {
                 Priority.ALWAYS
         );
 
+        Button installButton =
+                new Button("INSTALL");
+        installButton.getStyleClass().add("primary-button");
+        installButton.setOnAction(event ->
+                loadProjectForInstall(project.getProjectId(), installButton)
+        );
+
         HBox row =
                 new HBox(
                         16,
@@ -1091,7 +1106,8 @@ public class GlobalModsView extends VBox {
                                 icon,
                                 52
                         ),
-                        information
+                        information,
+                        installButton
                 );
 
         row.setAlignment(
