@@ -1117,14 +1117,17 @@ public class GlobalModsView extends VBox {
         Label downloads = new Label(formatNumber(version.getDownloads()));
         downloads.getStyleClass().add("modrinth-version-downloads");
 
-        Button installButton = new Button("INSTALL");
-        installButton.getStyleClass().add("modrinth-version-install");
-        installButton.setOnAction(event -> {
-            versionsPopup.hide();
-            chooseInstancesForVersion(projectId, version);
-        });
+        HBox row = new HBox(10, info, type, downloads);
 
-        HBox row = new HBox(10, info, type, downloads, installButton);
+        if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
+            Button installButton = new Button("INSTALL");
+            installButton.getStyleClass().add("modrinth-version-install");
+            installButton.setOnAction(event -> {
+                versionsPopup.hide();
+                chooseInstancesForVersion(projectId, version);
+            });
+            row.getChildren().add(installButton);
+        }
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("modrinth-version-row");
         return row;
@@ -1136,7 +1139,6 @@ public class GlobalModsView extends VBox {
     ) {
         List<Instance> compatible = new ArrayList<>();
 
-        String loader = selectedLoader();
         for (Instance instance : InstanceManager.discoverInstances()) {
             if (instance == null || instance.getMinecraftVersion() == null
                     || instance.getMinecraftVersion().isBlank()) continue;
@@ -1219,15 +1221,11 @@ public class GlobalModsView extends VBox {
             installExactVersion(projectId, version, selected);
         });
 
-        root.applyCss();
-        popup.show(getScene().getWindow(), 0, 0);
-        popup.hide();
-        Button anchor = null;
-        // Re-anchor to the global page center; the version selector has already closed.
         if (getScene() != null) {
             javafx.geometry.Bounds bounds = localToScreen(getBoundsInLocal());
             if (bounds != null) {
-                popup.show(this, Math.max(bounds.getMinX() + 80, bounds.getCenterX() - 280),
+                popup.show(this,
+                        Math.max(bounds.getMinX() + 80, bounds.getCenterX() - 280),
                         Math.max(bounds.getMinY() + 80, bounds.getCenterY() - 220));
             }
         }
