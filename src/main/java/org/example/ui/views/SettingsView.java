@@ -674,7 +674,10 @@ public class SettingsView extends BorderPane {
             addInfoRow(debug, "Java VM", System.getProperty("java.vm.name", "Unknown"));
             addInfoRow(debug, "OS", System.getProperty("os.name", "Unknown") + " " + System.getProperty("os.version", ""));
             addInfoRow(debug, "Architecture", System.getProperty("os.arch", "Unknown"));
-            addInfoRow(debug, "JVM memory", formatBytes(Runtime.getRuntime().maxMemory()));
+            addInfoRow(debug, "Processors", String.valueOf(Runtime.getRuntime().availableProcessors()));
+            addInfoRow(debug, "JVM max memory", formatBytes(Runtime.getRuntime().maxMemory()));
+            addInfoRow(debug, "JVM allocated", formatBytes(Runtime.getRuntime().totalMemory()));
+            addInfoRow(debug, "Working directory", System.getProperty("user.dir", "Unknown"));
             Account debugAccount = accountService.getCurrentAccount();
             addInfoRow(debug, "Account UUID", debugAccount == null ? "Not signed in" : debugAccount.getUuid());
             addInfoRow(debug, "Vanta data", MinecraftLocator.getVantaDirectory().toString());
