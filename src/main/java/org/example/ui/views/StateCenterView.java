@@ -223,7 +223,6 @@ public final class StateCenterView extends VBox {
         empty.setAlignment(Pos.CENTER);
         empty.setPadding(new Insets(42));
 
-        debug("CARD: icon START type=" + (state.isHealthy() ? "SHIELD" : "PACKAGE"));
         StackPane icon = new StackPane(IconView.create(IconView.Type.SHIELD, 30));
         icon.getStyleClass().add("state-empty-icon");
 
