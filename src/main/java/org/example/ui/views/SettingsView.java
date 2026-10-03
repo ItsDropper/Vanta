@@ -531,6 +531,50 @@ public class SettingsView extends BorderPane {
                 autoOpenBrowser
         );
 
+        VBox dataCard = card(
+                "Vanta data",
+                "Launcher-owned configuration is kept locally in the Vanta directory."
+        );
+
+        Path vantaDirectory = MinecraftLocator.getVantaDirectory();
+        addInfoRow(dataCard, "Data directory", vantaDirectory.toString());
+        addInfoRow(dataCard, "Settings", vantaDirectory.resolve("settings.properties").toString());
+
+        dataCard.getChildren().add(
+                actionButton("OPEN VANTA FOLDER", () -> openDirectory(vantaDirectory))
+        );
+
+        VBox runtimeCard = card(
+                "Runtime",
+                "The Java runtime currently executing Vanta."
+        );
+
+        addInfoRow(runtimeCard, "Java", System.getProperty("java.version", "Unknown"));
+        addInfoRow(runtimeCard, "Java home", System.getProperty("java.home", "Unknown"));
+
+        VBox workspace = card("Workspace", "Control how the main Vanta pages behave and how much information they show.");
+        CheckBox playtime = new CheckBox("Show playtime on instance cards");
+        playtime.setSelected(LauncherSettings.isShowPlaytimeEnabled());
+        playtime.getStyleClass().add("settings-checkbox");
+        playtime.setOnAction(e -> LauncherSettings.setShowPlaytimeEnabled(playtime.isSelected()));
+        CheckBox compact = new CheckBox("Use compact instance cards");
+        compact.setSelected(LauncherSettings.isCompactInstancesEnabled());
+        compact.getStyleClass().add("settings-checkbox");
+        compact.setOnAction(e -> LauncherSettings.setCompactInstancesEnabled(compact.isSelected()));
+        CheckBox notifications = new CheckBox("Show launcher notifications");
+        notifications.setSelected(LauncherSettings.isNotificationsEnabled());
+        notifications.getStyleClass().add("settings-checkbox");
+        notifications.setOnAction(e -> LauncherSettings.setNotificationsEnabled(notifications.isSelected()));
+        CheckBox remember = new CheckBox("Remember the last Settings section");
+        remember.setSelected(LauncherSettings.isRememberLastSettingsPageEnabled());
+        remember.getStyleClass().add("settings-checkbox");
+        remember.setOnAction(e -> LauncherSettings.setRememberLastSettingsPageEnabled(remember.isSelected()));
+        CheckBox stateScan = new CheckBox("Scan State automatically when opened");
+        stateScan.setSelected(LauncherSettings.isStateScanOnOpenEnabled());
+        stateScan.getStyleClass().add("settings-checkbox");
+        stateScan.setOnAction(e -> LauncherSettings.setStateScanOnOpenEnabled(stateScan.isSelected()));
+        workspace.getChildren().addAll(playtime, compact, notifications, remember, stateScan);
+
         VBox rollback = card(
                 "Vanta version rollback",
                 "Install an older published Vanta release. This rolls back the launcher itself, not Minecraft instances."
@@ -585,55 +629,9 @@ public class SettingsView extends BorderPane {
                 rollbackButton
         );
 
-        content.getChildren().add(rollback);
-        loadRollbackVersions(versions, rollbackButton);
     }
 
-        VBox dataCard = card(
-                "Vanta data",
-                "Launcher-owned configuration is kept locally in the Vanta directory."
-        );
-
-        Path vantaDirectory = MinecraftLocator.getVantaDirectory();
-        addInfoRow(dataCard, "Data directory", vantaDirectory.toString());
-        addInfoRow(dataCard, "Settings", vantaDirectory.resolve("settings.properties").toString());
-
-        dataCard.getChildren().add(
-                actionButton("OPEN VANTA FOLDER", () -> openDirectory(vantaDirectory))
-        );
-
-        VBox runtimeCard = card(
-                "Runtime",
-                "The Java runtime currently executing Vanta."
-        );
-
-        addInfoRow(runtimeCard, "Java", System.getProperty("java.version", "Unknown"));
-        addInfoRow(runtimeCard, "Java home", System.getProperty("java.home", "Unknown"));
-
-        VBox workspace = card("Workspace", "Control how the main Vanta pages behave and how much information they show.");
-        CheckBox playtime = new CheckBox("Show playtime on instance cards");
-        playtime.setSelected(LauncherSettings.isShowPlaytimeEnabled());
-        playtime.getStyleClass().add("settings-checkbox");
-        playtime.setOnAction(e -> LauncherSettings.setShowPlaytimeEnabled(playtime.isSelected()));
-        CheckBox compact = new CheckBox("Use compact instance cards");
-        compact.setSelected(LauncherSettings.isCompactInstancesEnabled());
-        compact.getStyleClass().add("settings-checkbox");
-        compact.setOnAction(e -> LauncherSettings.setCompactInstancesEnabled(compact.isSelected()));
-        CheckBox notifications = new CheckBox("Show launcher notifications");
-        notifications.setSelected(LauncherSettings.isNotificationsEnabled());
-        notifications.getStyleClass().add("settings-checkbox");
-        notifications.setOnAction(e -> LauncherSettings.setNotificationsEnabled(notifications.isSelected()));
-        CheckBox remember = new CheckBox("Remember the last Settings section");
-        remember.setSelected(LauncherSettings.isRememberLastSettingsPageEnabled());
-        remember.getStyleClass().add("settings-checkbox");
-        remember.setOnAction(e -> LauncherSettings.setRememberLastSettingsPageEnabled(remember.isSelected()));
-        CheckBox stateScan = new CheckBox("Scan State automatically when opened");
-        stateScan.setSelected(LauncherSettings.isStateScanOnOpenEnabled());
-        stateScan.getStyleClass().add("settings-checkbox");
-        stateScan.setOnAction(e -> LauncherSettings.setStateScanOnOpenEnabled(stateScan.isSelected()));
-        workspace.getChildren().addAll(playtime, compact, notifications, remember, stateScan);
-
-        content.getChildren().addAll(behavior, workspace, dataCard, runtimeCard);
+        content.getChildren().addAll(behavior, workspace, dataCard, runtimeCard, rollback);
     }
 
 
