@@ -12,7 +12,7 @@ public final class ModrinthDependencyResolver {
     private final InstalledModScanner installedModScanner;
     private final Map<String, InstalledMod> fabricMetadataCache = new HashMap<>();
     private final Map<String, String> fabricModIdProjectCache = new HashMap<>();
-    private final Map<String, Set<String>> fabricApiModuleCache = new HashMap<>();
+    private final Map<String, Map<String, String>> fabricApiModuleCache = new HashMap<>();
     private final Map<String, List<ModrinthVersion>> versionCache =
             new java.util.concurrent.ConcurrentHashMap<>();
     private boolean fastResolution = true;
@@ -56,6 +56,7 @@ public List<ModrinthService.ResolvedMod> resolveModGraph(
         versionCache.clear();
         fastResolution = true;
         fabricModIdProjectCache.clear();
+        fabricApiModuleCache.clear();
 
         LinkedHashSet<String> roots =
                 new LinkedHashSet<>();
@@ -1212,16 +1213,12 @@ private boolean resolveFabricDependency(
 
                 if (fabricApiProvider) {
                     String cacheKey = candidate.getId();
-                    Set<String> cachedModules =
+                    Map<String, String> modules =
                             fabricApiModuleCache.get(cacheKey);
 
-                    boolean providesModule;
-                    if (cachedModules != null) {
-                        providesModule = cachedModules.contains(fabricModId);
-                    } else {
+                    if (modules == null) {
                         ModrinthFile candidateFile =
                                 findPrimaryFile(candidate);
-
                         if (candidateFile == null
                                 || candidateFile.getUrl() == null
                                 || candidateFile.getUrl().isBlank()) {
@@ -1244,29 +1241,35 @@ private boolean resolveFabricDependency(
                                         "Failed to download Fabric API candidate: "
                                                 + e.getMessage(), e);
                             }
-
-                            providesModule = installedModScanner.containsFabricModId(
-                                    tempFile, fabricModId);
-                            fabricApiModuleCache
-                                    .computeIfAbsent(cacheKey, ignored -> new HashSet<>())
-                                    .add(providesModule ? fabricModId : "__missing__:" + fabricModId);
+                            modules = installedModScanner.scanFabricModuleVersions(tempFile);
+                            fabricApiModuleCache.put(cacheKey, modules);
                         } finally {
                             Files.deleteIfExists(tempFile);
                         }
                     }
 
-                    if (!providesModule) {
+                    String moduleVersion = modules.get(fabricModId);
+                    if (moduleVersion == null) {
                         continue;
                     }
 
-                    /*
-                     * Fabric API's top-level version is NOT the version of
-                     * its nested modules. A module such as
-                     * fabric-rendering-fluids-v1 can require >=2.0.0 while
-                     * the provider JAR itself is version 0.141.x. Once the
-                     * module is present in the API JAR, do not compare the
-                     * API's top-level version against the module constraint.
-                     */
+                    System.out.println(
+                            "[Vanta DEBUG] Fabric API provides "
+                                    + fabricModId + " " + moduleVersion
+                                    + " via " + candidate.getVersionNumber()
+                    );
+
+                    /* Fabric API module constraints use the module's own
+                     * version, not Fabric API's top-level 0.141.x version. */
+                    if (!matchesFabricConstraint(moduleVersion, constraint)) {
+                        System.out.println(
+                                "[Vanta DEBUG] Rejected Fabric API module "
+                                        + fabricModId + " " + moduleVersion
+                                        + " [" + constraint + "]"
+                        );
+                        continue;
+                    }
+
                 } else if (!fabricModId.equals(metadata.getModId())) {
                     continue;
                 } else if (!matchesFabricConstraint(
