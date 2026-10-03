@@ -139,6 +139,9 @@
    ============================================================= */
 
 .modrinth-popup {
+    -vanta-accent: #5688ED;
+    -vanta-accent-soft: #1E2D49;
+    -vanta-accent-hover: #6E9BF2;
     -fx-background-color: #121821;
     -fx-background-radius: 12px;
     -fx-border-color: #303b49;
@@ -218,4 +221,84 @@
     -fx-text-fill: #ffffff;
     -fx-fill: #ffffff;
     -fx-font-size: 11px;
+}
+
+.modrinth-popup-primary {
+    -fx-background-color: #5688ED;
+    -fx-background-radius: 8px;
+    -fx-border-color: #78A2F0;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-padding: 9px 14px;
+    -fx-cursor: hand;
+}
+
+.modrinth-popup-primary:hover {
+    -fx-background-color: #6E9BF2;
+}
+
+.modrinth-popup-secondary {
+    -fx-background-color: #1b2430;
+    -fx-background-radius: 8px;
+    -fx-border-color: #3a485a;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #d8e0eb;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-padding: 9px 14px;
+    -fx-cursor: hand;
+}
+
+.modrinth-popup-secondary:hover {
+    -fx-background-color: #252f3c;
+    -fx-border-color: #53657c;
+}
+
+.modrinth-version-install {
+    -fx-background-color: #1E2D49;
+    -fx-background-radius: 7px;
+    -fx-border-color: #38527D;
+    -fx-border-radius: 7px;
+    -fx-text-fill: #9FC0FF;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-padding: 6px 9px;
+    -fx-cursor: hand;
+}
+
+.modrinth-version-install:hover {
+    -fx-background-color: #5688ED;
+    -fx-border-color: #78A2F0;
+    -fx-text-fill: #ffffff;
+}
+
+.mod-details-description-card {
+    -fx-background-color: #141a22;
+    -fx-background-radius: 14px;
+    -fx-border-color: #2a3442;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 18, 0.08, 0, 5);
+}
+
+.mod-details-description-card .settings-section-title {
+    -fx-text-fill: #f2f5f9;
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1px;
+}
+
+.mod-details-markdown,
+.mod-details-markdown .label,
+.mod-details-markdown .text {
+    -fx-text-fill: #ffffff;
+    -fx-fill: #ffffff;
+}
+
+.mod-details-markdown .mod-description-link,
+.mod-details-markdown .mod-description-bullet {
+    -fx-text-fill: #8ab4ff;
+    -fx-fill: #8ab4ff;
 }
