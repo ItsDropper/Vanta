@@ -461,28 +461,89 @@ public class InstanceManager {
     public static Instance duplicateInstance(Instance source, String requestedName) throws IOException {
         if (source == null) throw new IllegalArgumentException("Source instance cannot be null.");
         if (requestedName == null || requestedName.isBlank()) throw new IllegalArgumentException("Instance name cannot be empty.");
+
         String id = createId(requestedName);
         Path target = MinecraftLocator.getInstancesDirectory().resolve(id);
         Files.createDirectories(target);
-        try (var stream = Files.walk(source.getDirectory())) {
-            stream.forEach(path -> {
-                try {
+
+        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(
+                Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()))
+        );
+
+        try {
+            List<Path> files = new ArrayList<>();
+            try (var stream = Files.walk(source.getDirectory())) {
+                stream.forEach(path -> {
                     Path relative = source.getDirectory().relativize(path);
-                    if (relative.toString().equals(INSTALLING_MARKER)) return;
+                    String first = relative.getNameCount() == 0 ? "" : relative.getName(0).toString();
+                    if (relative.toString().equals(INSTALLING_MARKER)
+                            || first.equals("logs")
+                            || first.equals("screenshots")) {
+                        return;
+                    }
+
                     Path destination = target.resolve(relative);
-                    if (Files.isDirectory(path)) Files.createDirectories(destination);
-                    else Files.copy(path, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-                } catch (IOException e) { throw new RuntimeException(e); }
-            });
+                    try {
+                        if (Files.isDirectory(path)) {
+                            Files.createDirectories(destination);
+                        } else {
+                            files.add(path);
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            }
+
+            List<java.util.concurrent.Future<?>> tasks = new ArrayList<>(files.size());
+            for (Path path : files) {
+                tasks.add(executor.submit(() -> {
+                    try {
+                        Path relative = source.getDirectory().relativize(path);
+                        Path destination = target.resolve(relative);
+                        Files.copy(path, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }));
+            }
+
+            for (var task : tasks) {
+                try {
+                    task.get();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Instance duplication was interrupted.", e);
+                } catch (java.util.concurrent.ExecutionException e) {
+                    Throwable cause = e.getCause();
+                    if (cause instanceof RuntimeException runtime && runtime.getCause() instanceof IOException io) {
+                        throw io;
+                    }
+                    throw new IOException("Failed to copy instance files.", cause);
+                }
+            }
+
+            Instance duplicate = new Instance(
+                    id,
+                    requestedName.trim(),
+                    source.getMinecraftVersion(),
+                    source.getLoader(),
+                    source.getLoaderVersion(),
+                    target,
+                    source.getIcon()
+            );
+            saveInstance(duplicate);
+            return duplicate;
         } catch (RuntimeException e) {
             deleteInstanceQuietly(target);
             if (e.getCause() instanceof IOException io) throw io;
             throw e;
+        } catch (IOException e) {
+            deleteInstanceQuietly(target);
+            throw e;
+        } finally {
+            executor.shutdownNow();
         }
-        Instance duplicate = new Instance(id, requestedName.trim(), source.getMinecraftVersion(), source.getLoader(),
-                source.getLoaderVersion(), target, source.getIcon());
-        saveInstance(duplicate);
-        return duplicate;
     }
 
     private static void deleteInstanceQuietly(Path directory) {
