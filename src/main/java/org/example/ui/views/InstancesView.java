@@ -468,7 +468,7 @@ public class InstancesView extends VBox {
         choices.setAlignment(Pos.CENTER_LEFT);
         String[][] icons = {{"SHIELD","⬢"},{"PACKAGE","◆"},{"PICKAXE","⛏"},{"STAR","★"},{"FIRE","✦"},{"WORLD","◎"},{"CROWN","♛"},{"DIAMOND","◇"}};
         for (String[] icon : icons) {
-            Button button = new Button(icon[1]);
+            Button button = new Button("", InstanceCard.createIconGraphic(icon[0], 24));
             button.getStyleClass().add("instance-icon-choice");
             button.setTooltip(new javafx.scene.control.Tooltip(icon[0]));
             button.setOnAction(e -> {
