@@ -27,7 +27,6 @@ import org.example.ui.ThemeManager;
 
 import java.awt.Desktop;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -479,6 +478,14 @@ public class SettingsView extends BorderPane {
         TextField height = new TextField(String.valueOf(LauncherSettings.getDefaultHeight()));
         height.getStyleClass().add("create-field");
 
+        TextField javaPath = new TextField(LauncherSettings.getDefaultJavaPath());
+        javaPath.getStyleClass().add("create-field");
+        javaPath.setPromptText("Auto-detect compatible Java");
+
+        TextField javaArguments = new TextField(LauncherSettings.getDefaultJavaArguments());
+        javaArguments.getStyleClass().add("create-field");
+        javaArguments.setPromptText("Optional JVM arguments");
+
         CheckBox fullscreen = new CheckBox("Start new instances in fullscreen");
         fullscreen.setSelected(LauncherSettings.isDefaultFullscreen());
         fullscreen.getStyleClass().add("settings-checkbox");
@@ -499,6 +506,8 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setDefaultWidth(w);
                 LauncherSettings.setDefaultHeight(h);
                 LauncherSettings.setDefaultFullscreen(fullscreen.isSelected());
+                LauncherSettings.setDefaultJavaPath(javaPath.getText());
+                LauncherSettings.setDefaultJavaArguments(javaArguments.getText());
 
                 NotificationManager manager = NotificationManager.getGlobal();
                 if (manager != null) {
@@ -527,6 +536,8 @@ public class SettingsView extends BorderPane {
                 ram,
                 createInput("Resolution width", width),
                 createInput("Resolution height", height),
+                createInput("Java executable", javaPath),
+                createInput("JVM arguments", javaArguments),
                 fullscreen,
                 save
         );
