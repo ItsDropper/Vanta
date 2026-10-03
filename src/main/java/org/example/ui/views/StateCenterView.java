@@ -132,7 +132,8 @@ public final class StateCenterView extends VBox {
                 return;
             }
             render(instances, states);
-        } catch (Throwable ignored) {
+        } catch (Throwable ex) {
+            ex.printStackTrace();
             overallTitle.setText("SCAN FAILED");
             overallSubtitle.setText("The State view could not render the scan results.");
             progress.setProgress(0);
