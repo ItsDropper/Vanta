@@ -1075,7 +1075,8 @@ public class GlobalModsView extends VBox {
                                 && !projectId.isBlank()) {
 
                             onModSelected.accept(
-                                    projectId
+                                    projectId,
+                                    contentTypeBox.getValue()
                             );
                         }
                     }
