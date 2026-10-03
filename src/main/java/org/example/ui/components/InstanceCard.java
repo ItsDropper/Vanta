@@ -885,6 +885,9 @@ public class InstanceCard extends StackPane {
                 instance.getName()
         );
 
+        Label icon = findIconLabel();
+        if (icon != null) icon.setText(iconGlyph(instance.getIcon()));
+
         versionLabel.setText(
                 "Minecraft "
                         + instance.getMinecraftVersion()
@@ -900,6 +903,35 @@ public class InstanceCard extends StackPane {
                 )
                         + " played"
         );
+    }
+
+    private Label findIconLabel() {
+        for (javafx.scene.Node node : getChildren()) {
+            if (node instanceof HBox content) {
+                for (javafx.scene.Node child : content.getChildren()) {
+                    if (child instanceof VBox box) {
+                        for (javafx.scene.Node nested : box.getChildren()) {
+                            if (nested instanceof Label label && label.getStyleClass().contains("instance-icon")) return label;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    private static String iconGlyph(String icon) {
+        return switch (icon == null ? "SHIELD" : icon.toUpperCase()) {
+            case "PACKAGE" -> "◆";
+            case "SWORD" -> "⚔";
+            case "PICKAXE" -> "⛏";
+            case "STAR" -> "★";
+            case "FIRE" -> "✦";
+            case "WORLD" -> "◎";
+            case "CROWN" -> "♛";
+            case "DIAMOND" -> "◇";
+            default -> "⬢";
+        };
     }
 
     // =============================================================
