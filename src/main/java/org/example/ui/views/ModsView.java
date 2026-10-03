@@ -1,5 +1,6 @@
 package org.example.ui.views;
 
+import org.example.ui.ThemeManager;
 import javafx.application.Platform;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
@@ -801,6 +802,8 @@ public class ModsView extends VBox {
             actions.setAlignment(Pos.CENTER_RIGHT);
 
             root.getChildren().addAll(removeTitle, message, actions);
+        ThemeManager.apply(root, ThemeManager.loadAccent());
+
             popup.getContent().add(root);
 
             cancel.setOnAction(e -> popup.hide());
