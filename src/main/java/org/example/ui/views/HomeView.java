@@ -231,7 +231,7 @@ public class HomeView extends StackPane {
                 .filter(instance ->
                         InstanceUsageManager.getLastPlayed(instance) > 0
                 )
-                .limit(6)
+                .limit(2)
                 .toList();
 
         // Keep the Home layout useful even when play history is empty.
