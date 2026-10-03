@@ -8,6 +8,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.parsers.DocumentBuilderFactory;
 
 public final class ForgeInstaller {
 
@@ -28,30 +31,98 @@ public final class ForgeInstaller {
             throw new IllegalArgumentException("Minecraft version cannot be empty.");
         }
 
-        JsonNode promotions =
-                DownloadUtil.downloadJson(PROMOTIONS_URL);
+        String metadataUrl =
+                MAVEN_BASE
+                        + "maven-metadata.xml";
 
-        String latest =
-                textValue(
-                        promotions,
-                        minecraftVersion + "-latest"
+        Path metadataFile =
+                Files.createTempFile(
+                        "vanta-forge-metadata-",
+                        ".xml"
                 );
 
-        if (latest == null || latest.isBlank()) {
-            latest =
-                    textValue(
-                            promotions,
-                            minecraftVersion + "-recommended"
+        try {
+            DownloadUtil.downloadFile(metadataUrl, metadataFile);
+
+            var document =
+                    DocumentBuilderFactory
+                            .newInstance()
+                            .newDocumentBuilder()
+                            .parse(metadataFile.toFile());
+
+            var versionNodes =
+                    document.getElementsByTagName("version");
+
+            List<String> candidates =
+                    new ArrayList<>();
+
+            String prefix =
+                    minecraftVersion + "-";
+
+            for (int i = 0; i < versionNodes.getLength(); i++) {
+                String version =
+                        versionNodes.item(i)
+                                .getTextContent()
+                                .trim();
+
+                if (version.startsWith(prefix)
+                        && version.length() > prefix.length()) {
+                    candidates.add(
+                            version.substring(prefix.length())
                     );
-        }
+                }
+            }
 
-        if (latest == null || latest.isBlank()) {
-            throw new IllegalArgumentException(
-                    "Forge is not available for Minecraft " + minecraftVersion + "."
+            if (candidates.isEmpty()) {
+                throw new IllegalArgumentException(
+                        "Forge is not available for Minecraft "
+                                + minecraftVersion
+                                + "."
+                );
+            }
+
+            candidates.sort(
+                    ForgeInstaller::compareVersions
             );
+
+            return candidates.get(candidates.size() - 1);
+
+        } finally {
+            Files.deleteIfExists(metadataFile);
+        }
+    }
+
+    private static int compareVersions(
+            String left,
+            String right
+    ) {
+        String[] a = left.split("[.-]");
+        String[] b = right.split("[.-]");
+
+        int length = Math.max(a.length, b.length);
+
+        for (int i = 0; i < length; i++) {
+            String av = i < a.length ? a[i] : "0";
+            String bv = i < b.length ? b[i] : "0";
+
+            try {
+                int ai = Integer.parseInt(av);
+                int bi = Integer.parseInt(bv);
+
+                if (ai != bi) {
+                    return Integer.compare(ai, bi);
+                }
+            } catch (NumberFormatException e) {
+                int comparison =
+                        av.compareToIgnoreCase(bv);
+
+                if (comparison != 0) {
+                    return comparison;
+                }
+            }
         }
 
-        return latest;
+        return 0;
     }
 
     public static void installForge(
