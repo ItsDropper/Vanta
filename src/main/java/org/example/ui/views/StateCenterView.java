@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
 import org.example.launcher.state.InstanceState;
+import org.example.launcher.state.SharedState;
 import org.example.launcher.state.InstanceStateEngine;
 import org.example.ui.components.IconView;
 import org.example.ui.components.InstanceCard;
@@ -31,6 +32,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class StateCenterView extends VBox {
     private final VBox instanceList = new VBox(10);
+    private final VBox sharedList = new VBox(10);
     private final ScrollPane instanceScroll = new ScrollPane(instanceList);
     private final Label overallTitle = new Label("READY");
     private final Label overallSubtitle = new Label("Vanta will inspect your environments when you open this page.");
@@ -38,6 +40,7 @@ public final class StateCenterView extends VBox {
     private final Button refreshButton = new Button("SCAN NOW", IconView.create(IconView.Type.REFRESH, 15));
     private final AtomicBoolean scanning = new AtomicBoolean(false);
     private volatile long scanGeneration;
+    private volatile List<SharedState> sharedStates = List.of();
 
     public StateCenterView() {
         getStyleClass().add("state-center");
@@ -96,7 +99,13 @@ public final class StateCenterView extends VBox {
         listCard.setPadding(new Insets(12));
         VBox.setVgrow(listCard, Priority.ALWAYS);
 
-        getChildren().addAll(heading, hero, section, listCard);
+        Label sharedTitle = new Label("SHARED RESOURCES");
+        sharedTitle.getStyleClass().add("state-section-title");
+        VBox sharedCard = new VBox(12, sharedTitle, sharedList);
+        sharedCard.getStyleClass().add("state-list-card");
+        sharedCard.setPadding(new Insets(16));
+
+        getChildren().addAll(heading, hero, section, listCard, sharedCard);
 
         if (LauncherSettings.isAnimationsEnabled()) {
             AnimationUtils.slideFadeVertical(heading, 12);
@@ -131,6 +140,7 @@ public final class StateCenterView extends VBox {
 
             try {
                 instances = InstanceManager.discoverInstances();
+                sharedStates = InstanceStateEngine.inspectSharedResources();
                 for (Instance instance : instances) {
                     try {
                         states.add(InstanceStateEngine.inspect(instance));
@@ -215,6 +225,8 @@ public final class StateCenterView extends VBox {
         overallSubtitle.setText(healthy + " healthy  •  " + attention + " attention  •  " + broken + " broken");
         progress.setProgress((double) healthy / states.size());
 
+        renderSharedStates();
+
         for (int i = 0; i < instances.size() && i < states.size(); i++) {
             addStateCard(instances.get(i), states.get(i));
         }
@@ -226,6 +238,35 @@ public final class StateCenterView extends VBox {
                 delay.setOnFinished(e -> AnimationUtils.slideFadeVertical(card, 12));
                 delay.play();
             }
+        }
+    }
+
+    private void renderSharedStates() {
+        sharedList.getChildren().clear();
+        for (SharedState state : sharedStates) {
+            HBox row = new HBox(14);
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.getStyleClass().add("state-shared-row");
+
+            StackPane icon = new StackPane(IconView.create(
+                    "Libraries".equals(state.getName()) ? IconView.Type.PACKAGE : IconView.Type.FOLDER, 20));
+            icon.getStyleClass().add("state-shared-icon");
+
+            VBox text = new VBox(3);
+            Label name = new Label(state.getName());
+            name.getStyleClass().add("state-shared-name");
+            Label summary = new Label(state.getSummary());
+            summary.getStyleClass().add("state-shared-summary");
+            text.getChildren().addAll(name, summary);
+            HBox.setHgrow(text, Priority.ALWAYS);
+
+            Label count = new Label(state.getFiles() + " files");
+            count.getStyleClass().add("state-shared-count");
+            Label status = new Label(state.getLevel().name());
+            status.getStyleClass().add("state-shared-" + state.getLevel().name().toLowerCase());
+
+            row.getChildren().addAll(icon, text, count, status);
+            sharedList.getChildren().add(row);
         }
     }
 
