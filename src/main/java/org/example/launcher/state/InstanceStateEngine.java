@@ -8,9 +8,48 @@ import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.zip.ZipFile;
+import org.example.launcher.MinecraftLocator;
 
 public final class InstanceStateEngine {
     private InstanceStateEngine(){}
+
+    public static List<SharedState> inspectSharedResources() {
+        return List.of(
+                inspectShared("Libraries", MinecraftLocator.getLibrariesDirectory(), true),
+                inspectShared("Assets", MinecraftLocator.getVantaDirectory().resolve("assets"), false)
+        );
+    }
+
+    public static SharedState inspectShared(String name, Path root, boolean validateArchives) {
+        if (root == null || !Files.isDirectory(root)) {
+            return new SharedState(name, SharedState.Level.ATTENTION, 0, 1, "Directory is missing and may need to be rebuilt.");
+        }
+
+        int files = 0;
+        int broken = 0;
+        try (var stream = Files.walk(root)) {
+            var paths = stream.filter(Files::isRegularFile).toList();
+            files = paths.size();
+            for (Path path : paths) {
+                try {
+                    if (Files.size(path) == 0) {
+                        broken++;
+                    } else if (validateArchives && path.getFileName().toString().toLowerCase().endsWith(".jar")) {
+                        try (ZipFile ignored = new ZipFile(path.toFile())) {}
+                    }
+                } catch (Exception ignored) {
+                    broken++;
+                }
+            }
+        } catch (IOException ignored) {
+            return new SharedState(name, SharedState.Level.BROKEN, files, broken + 1, "Vanta could not completely scan this directory.");
+        }
+
+        SharedState.Level level = broken == 0 ? SharedState.Level.HEALTHY : SharedState.Level.BROKEN;
+        String summary = broken == 0 ? files + " files verified." : broken + " broken or empty file" + (broken == 1 ? "" : "s") + " detected.";
+        return new SharedState(name, level, files, broken, summary);
+    }
 
     public static InstanceState inspect(Instance instance) {
         if(instance==null || instance.getDirectory()==null)
