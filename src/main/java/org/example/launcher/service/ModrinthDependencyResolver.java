@@ -960,6 +960,16 @@ private String findModrinthProjectForFabricModId(
             return null;
         }
 
+        /*
+         * The special Fabric "fabric" dependency is provided by the
+         * Fabric API project itself. Do not search Modrinth or download
+         * Fabric API JARs just to rediscover this mapping.
+         */
+        if ("fabric".equalsIgnoreCase(fabricModId)) {
+            fabricModIdProjectCache.put(fabricModId, "P7dR8mSH");
+            return "P7dR8mSH";
+        }
+
         String cached =
                 fabricModIdProjectCache.get(
                         fabricModId
