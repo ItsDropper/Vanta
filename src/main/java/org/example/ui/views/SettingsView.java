@@ -111,6 +111,7 @@ public class SettingsView extends BorderPane {
 
         navigation.getChildren().add(group("SYSTEM"));
         navigation.getChildren().addAll(
+                sectionButton("State", false),
                 sectionButton("Repair & Diagnostics", false),
                 sectionButton("About Vanta", false)
         );
@@ -146,6 +147,7 @@ public class SettingsView extends BorderPane {
             case "General" -> buildGeneralPage();
             case "Minecraft" -> buildMinecraftPage();
             case "Downloads" -> buildDownloadsPage();
+            case "State" -> buildStatePage();
             case "Repair & Diagnostics" -> buildDiagnosticsPage();
             case "About Vanta" -> buildAboutPage();
             default -> buildPlaceholderPage(section);
@@ -774,6 +776,84 @@ public class SettingsView extends BorderPane {
         content.getChildren().addAll(workers, reliability, layout);
     }
 
+    private void buildStatePage() {
+        pageHeader(
+                "State",
+                "Configure how Vanta scans, reports and repairs installed environments."
+        );
+
+        VBox scanner = card(
+                "Scanner performance",
+                "Choose how many background workers Vanta can use during State scans. More workers can improve I/O-heavy scans."
+        );
+
+        Slider scanWorkers = new Slider(1, 32, LauncherSettings.getStateScanWorkers());
+        scanWorkers.setMajorTickUnit(4);
+        scanWorkers.setMinorTickCount(3);
+        scanWorkers.setSnapToTicks(true);
+        scanWorkers.setShowTickLabels(true);
+        scanWorkers.setShowTickMarks(true);
+        scanWorkers.setMaxWidth(Double.MAX_VALUE);
+
+        Label scanWorkerValue = new Label();
+        scanWorkerValue.getStyleClass().add("instance-setting-value");
+
+        Runnable updateValue = () ->
+                scanWorkerValue.setText((int) Math.round(scanWorkers.getValue()) + " scan workers");
+        scanWorkers.valueProperty().addListener((o, oldValue, newValue) -> updateValue.run());
+        updateValue.run();
+
+        HBox presets = new HBox(8);
+        for (int workerCount : new int[]{2, 4, 8, 12, 16, 24}) {
+            Button preset = new Button(workerCount + "×");
+            preset.getStyleClass().add("accent-preset");
+            preset.setOnAction(event -> scanWorkers.setValue(workerCount));
+            presets.getChildren().add(preset);
+        }
+
+        Button save = new Button("SAVE SCAN WORKERS");
+        save.getStyleClass().add("primary-button");
+        save.setOnAction(event -> {
+            int workers = (int) Math.round(scanWorkers.getValue());
+            LauncherSettings.setStateScanWorkers(workers);
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.success("State scanner settings saved",
+                        "Vanta will use " + workers + " workers on the next State scan.");
+            }
+        });
+
+        scanner.getChildren().addAll(
+                scanWorkerValue,
+                scanWorkers,
+                new Label("Quick presets"),
+                presets,
+                save
+        );
+
+        VBox repair = card(
+                "Automatic repair",
+                "When enabled, Vanta automatically attempts to repair broken instance State results after they are detected."
+        );
+
+        CheckBox autoRepair = new CheckBox("Automatically repair broken instances");
+        autoRepair.setSelected(LauncherSettings.isStateAutoRepairEnabled());
+        autoRepair.getStyleClass().add("settings-checkbox");
+        autoRepair.setOnAction(event ->
+                LauncherSettings.setStateAutoRepairEnabled(autoRepair.isSelected())
+        );
+
+        Label manual = new Label(
+                "When disabled, broken instances show a REPAIR button directly in State."
+        );
+        manual.getStyleClass().add("settings-card-description");
+        manual.setWrapText(true);
+
+        repair.getChildren().addAll(autoRepair, manual);
+
+        content.getChildren().addAll(scanner, repair);
+    }
+
     private void buildDiagnosticsPage() {
         pageHeader(
                 "Repair & Diagnostics",
@@ -814,68 +894,6 @@ public class SettingsView extends BorderPane {
                         () -> openDirectory(MinecraftLocator.getVantaDirectory())
                 )
         );
-
-        VBox scanPerformance = card(
-                "State scanner performance",
-                "Control how many background workers Vanta can use while scanning instances, libraries and assets. Higher values can finish I/O-heavy scans faster, but use more system resources."
-        );
-
-        Slider scanWorkers = new Slider(1, 32, LauncherSettings.getStateScanWorkers());
-        scanWorkers.setMajorTickUnit(4);
-        scanWorkers.setMinorTickCount(3);
-        scanWorkers.setSnapToTicks(true);
-        scanWorkers.setShowTickLabels(true);
-        scanWorkers.setShowTickMarks(true);
-        scanWorkers.setMaxWidth(Double.MAX_VALUE);
-
-        Label scanWorkerValue = new Label();
-        scanWorkerValue.getStyleClass().add("instance-setting-value");
-
-        Label presetLabel = new Label("Quick presets");
-        presetLabel.getStyleClass().add("settings-card-description");
-
-        Runnable updateScanWorkerValue = () ->
-                scanWorkerValue.setText((int) Math.round(scanWorkers.getValue()) + " scan workers");
-
-        scanWorkers.valueProperty().addListener((o, oldValue, newValue) -> updateScanWorkerValue.run());
-        updateScanWorkerValue.run();
-
-        HBox scanPresets = new HBox(8);
-        for (int workerCount : new int[]{2, 4, 8, 12, 16, 24}) {
-            Button preset = new Button(workerCount + "×");
-            preset.getStyleClass().add("accent-preset");
-            preset.setOnAction(event -> scanWorkers.setValue(workerCount));
-            scanPresets.getChildren().add(preset);
-        }
-
-        Button saveScanWorkers = new Button("SAVE SCAN WORKERS");
-        saveScanWorkers.getStyleClass().add("primary-button");
-        saveScanWorkers.setOnAction(event -> {
-            int workers = (int) Math.round(scanWorkers.getValue());
-            LauncherSettings.setStateScanWorkers(workers);
-
-            NotificationManager manager = NotificationManager.getGlobal();
-            if (manager != null) {
-                manager.success(
-                        "State scanner settings saved",
-                        "Vanta will use " + workers + " workers on the next State scan."
-                );
-            }
-        });
-
-        scanPerformance.getChildren().addAll(
-                scanWorkerValue,
-                scanWorkers,
-                presetLabel,
-                scanPresets,
-                saveScanWorkers
-        );
-        CheckBox autoRepair = new CheckBox("Automatically repair broken State results");
-        autoRepair.setSelected(LauncherSettings.isStateAutoRepairEnabled());
-        autoRepair.getStyleClass().add("settings-checkbox");
-        autoRepair.setOnAction(event -> LauncherSettings.setStateAutoRepairEnabled(autoRepair.isSelected()));
-
-        scanPerformance.getChildren().add(autoRepair);
 
         VBox safety = card(
                 "What diagnostics change",
