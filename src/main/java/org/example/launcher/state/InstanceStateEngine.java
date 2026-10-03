@@ -34,7 +34,7 @@ public final class InstanceStateEngine {
         int mods=countFiles(root.resolve("mods"));
         int configs=countFiles(root.resolve("config"));
         total++;
-        if(findZeroByteFiles(root.resolve("mods")).isEmpty()) passed++;
+        if(!findZeroByteFiles(root.resolve("mods"))) passed++;
         else problems.add("Empty mod file detected");
 
         InstanceState.Level level=problems.isEmpty()?InstanceState.Level.HEALTHY:(problems.size()==1?InstanceState.Level.ATTENTION:InstanceState.Level.BROKEN);
