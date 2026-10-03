@@ -209,22 +209,65 @@ public class InstanceInstaller {
             // -----------------------------------------------------
             // VANILLA FILES
             // -----------------------------------------------------
+            // These downloads are independent. Start them together so
+            // a fresh instance is not forced through three network stages.
+            java.util.concurrent.ExecutorService executor =
+                    java.util.concurrent.Executors.newFixedThreadPool(3);
 
-            MinecraftFileInstaller.installClient(
-                    instance,
-                    vanillaMetadata
-            );
+            try {
+                java.util.concurrent.Future<?> clientTask =
+                        executor.submit(() -> {
+                            try {
+                                MinecraftFileInstaller.installClient(
+                                        instance,
+                                        vanillaMetadata
+                                );
+                            } catch (Exception e) {
+                                throw new java.util.concurrent.CompletionException(e);
+                            }
+                        });
 
-            MinecraftFileInstaller.installLibraries(
-                    vanillaMetadata
-            );
+                java.util.concurrent.Future<?> librariesTask =
+                        executor.submit(() -> {
+                            try {
+                                MinecraftFileInstaller.installLibraries(
+                                        vanillaMetadata
+                                );
+                            } catch (Exception e) {
+                                throw new java.util.concurrent.CompletionException(e);
+                            }
+                        });
+
+                java.util.concurrent.Future<?> assetsTask =
+                        executor.submit(() -> {
+                            try {
+                                AssetInstaller.install(
+                                        instance,
+                                        vanillaMetadata
+                                );
+                            } catch (Exception e) {
+                                throw new java.util.concurrent.CompletionException(e);
+                            }
+                        });
+
+                clientTask.get();
+                librariesTask.get();
+                assetsTask.get();
+            } catch (java.util.concurrent.ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof java.util.concurrent.CompletionException
+                        && cause.getCause() != null) {
+                    cause = cause.getCause();
+                }
+                if (cause instanceof Exception exception) {
+                    throw exception;
+                }
+                throw new RuntimeException(cause);
+            } finally {
+                executor.shutdownNow();
+            }
 
             NativeInstaller.extract(
-                    instance,
-                    vanillaMetadata
-            );
-
-            AssetInstaller.install(
                     instance,
                     vanillaMetadata
             );
