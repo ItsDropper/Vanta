@@ -31,6 +31,14 @@ public final class LauncherSettings {
         setBoolean("updateChecksEnabled", value);
     }
 
+    public static boolean isAutoUpdateOnLaunchEnabled() {
+        return getBoolean("autoUpdateOnLaunch", false);
+    }
+
+    public static void setAutoUpdateOnLaunchEnabled(boolean value) {
+        setBoolean("autoUpdateOnLaunch", value);
+    }
+
     public static int getDownloadThreads() {
         return getInt("downloadThreads", 8, 1, 16);
     }
