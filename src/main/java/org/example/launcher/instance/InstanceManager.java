@@ -212,6 +212,8 @@ public class InstanceManager {
         defaults.setWidth(LauncherSettings.getDefaultWidth());
         defaults.setHeight(LauncherSettings.getDefaultHeight());
         defaults.setFullscreen(LauncherSettings.isDefaultFullscreen());
+        defaults.setJavaPath(LauncherSettings.getDefaultJavaPath());
+        defaults.setJavaArguments(LauncherSettings.getDefaultJavaArguments());
 
         saveSettings(
                 instance,
