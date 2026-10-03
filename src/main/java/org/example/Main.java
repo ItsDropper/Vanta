@@ -70,6 +70,7 @@ public class Main extends Application {
         final boolean[] launcherReady = {false};
         final boolean[] minimumTimeElapsed = {false};
         final boolean[] finished = {false};
+        final LauncherView[] launcherHolder = new LauncherView[1];
 
         Runnable tryFinish = () -> {
             if (finished[0] || !launcherReady[0] || !minimumTimeElapsed[0]) {
@@ -78,13 +79,15 @@ public class Main extends Application {
 
             finished[0] = true;
             loadingScreen.setStatus("READY");
+
+            LauncherView readyLauncher = launcherHolder[0];
             loadingScreen.finish(() -> {
-                scene.setRoot(launcherView.getRoot());
+                scene.setRoot(readyLauncher.getRoot());
                 stage.setScene(scene);
             });
         };
 
-        LauncherView launcherView = new LauncherView(stage, () -> {
+        launcherHolder[0] = new LauncherView(stage, () -> {
             launcherReady[0] = true;
             tryFinish.run();
         });
