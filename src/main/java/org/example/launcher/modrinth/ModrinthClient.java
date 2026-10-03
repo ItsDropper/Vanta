@@ -224,7 +224,7 @@ public class ModrinthClient {
             );
 
             facets.append(
-                    escapeFacetValue(loader)
+                    escapeFacetValue(loader.trim().toLowerCase(java.util.Locale.ROOT))
             );
 
             facets.append(
