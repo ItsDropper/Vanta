@@ -1,6 +1,9 @@
 package org.example.ui.views;
 
 import javafx.application.Platform;
+import javafx.animation.RotateTransition;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -19,6 +22,8 @@ import org.example.launcher.state.InstanceState;
 import org.example.launcher.state.InstanceStateEngine;
 import org.example.ui.components.IconView;
 import org.example.ui.components.InstanceCard;
+import org.example.ui.AnimationUtils;
+import org.example.ui.LauncherSettings;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +97,13 @@ public final class StateCenterView extends VBox {
         VBox.setVgrow(listCard, Priority.ALWAYS);
 
         getChildren().addAll(heading, hero, section, listCard);
+
+        if (LauncherSettings.isAnimationsEnabled()) {
+            AnimationUtils.slideFadeVertical(heading, 12);
+            AnimationUtils.slideFadeVertical(hero, 16);
+            AnimationUtils.slideFadeVertical(section, 12);
+            AnimationUtils.slideFadeVertical(listCard, 18);
+        }
     }
 
     public void onShown() {
@@ -106,6 +118,7 @@ public final class StateCenterView extends VBox {
         long generation = ++scanGeneration;
         refreshButton.setDisable(true);
         refreshButton.setText("SCANNING...");
+        animateRefreshButton(true);
         overallTitle.setText("SCANNING...");
         overallSubtitle.setText("Checking instance structure and installed content.");
         progress.setProgress(-1);
@@ -173,6 +186,7 @@ public final class StateCenterView extends VBox {
             scanning.set(false);
             refreshButton.setDisable(false);
             refreshButton.setText("SCAN AGAIN");
+            animateRefreshButton(false);
         }
     }
 
@@ -203,6 +217,15 @@ public final class StateCenterView extends VBox {
 
         for (int i = 0; i < instances.size() && i < states.size(); i++) {
             addStateCard(instances.get(i), states.get(i));
+        }
+
+        if (LauncherSettings.isAnimationsEnabled()) {
+            for (int i = 0; i < instanceList.getChildren().size(); i++) {
+                javafx.scene.Node card = instanceList.getChildren().get(i);
+                PauseTransition delay = new PauseTransition(Duration.millis(35L * Math.min(i, 10)));
+                delay.setOnFinished(e -> AnimationUtils.slideFadeVertical(card, 12));
+                delay.play();
+            }
         }
     }
 
@@ -270,6 +293,26 @@ public final class StateCenterView extends VBox {
         instanceList.getChildren().add(card);
     }
 
+    private void animateRefreshButton(boolean scanning) {
+        if (!LauncherSettings.isAnimationsEnabled()) {
+            refreshButton.setRotate(0);
+            return;
+        }
+
+        if (scanning) {
+            RotateTransition rotate = new RotateTransition(Duration.millis(850), refreshButton);
+            rotate.setByAngle(360);
+            rotate.setCycleCount(RotateTransition.INDEFINITE);
+            rotate.play();
+            refreshButton.getProperties().put("vanta.state.scan-rotation", rotate);
+        } else {
+            Object existing = refreshButton.getProperties().remove("vanta.state.scan-rotation");
+            if (existing instanceof RotateTransition rotate) {
+                rotate.stop();
+            }
+            refreshButton.setRotate(0);
+        }
+    }
     private static String safe(String value, String fallback) {
         return value == null || value.isBlank() ? fallback : value;
     }
