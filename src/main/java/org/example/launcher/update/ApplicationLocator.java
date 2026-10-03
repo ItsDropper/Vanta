@@ -17,18 +17,17 @@ public final class ApplicationLocator {
     /**
      * Locates the root directory of the packaged Vanta installation.
      *
-     * <p>The locator deliberately does not trust the Java classpath alone.
-     * In a jpackage installation the application classes live below the
-     * {@code app} directory while Vanta.exe and the bundled runtime live
-     * at the installation root. When Vanta is started normally, the actual
-     * process command is the strongest signal and is checked first.</p>
-     *
-     * <p>Development launches (for example IntelliJ/Gradle) normally do not
-     * have a packaged Vanta.exe/runtime pair, so they are rejected instead
-     * of accidentally treating a source/build directory as the installed
-     * launcher.</p>
+     * <p>jpackage runs Vanta from a private runtime located at
+     * {@code <installation>/runtime}. That makes {@code java.home} a much
+     * more reliable installation anchor than the process command, because
+     * the process command may be java.exe/javaw.exe rather than Vanta.exe.</p>
      */
     public static Path getApplicationDirectory() {
+        Path fromRuntime = findFromJavaHome();
+        if (fromRuntime != null) {
+            return fromRuntime;
+        }
+
         Path fromProcess = findFromProcessCommand();
         if (fromProcess != null) {
             return fromProcess;
@@ -39,10 +38,60 @@ public final class ApplicationLocator {
             return fromCodeSource;
         }
 
+        Path fromWorkingDirectory = findFromWorkingDirectory();
+        if (fromWorkingDirectory != null) {
+            return fromWorkingDirectory;
+        }
+
         throw new IllegalStateException(
                 "Could not locate Vanta installation. "
-                        + "Rollback and launcher self-update require a packaged Vanta installation."
+                        + "Rollback and launcher self update require a packaged Vanta installation."
         );
+    }
+
+    private static Path findFromJavaHome() {
+        try {
+            String javaHomeProperty =
+                    System.getProperty("java.home");
+
+            if (javaHomeProperty == null
+                    || javaHomeProperty.isBlank()) {
+                return null;
+            }
+
+            Path javaHome =
+                    Path.of(javaHomeProperty)
+                            .toAbsolutePath()
+                            .normalize();
+
+            /*
+             * Packaged jpackage layout:
+             *
+             * Vanta/
+             *   Vanta.exe
+             *   runtime/
+             *     bin/java.exe
+             *
+             * java.home therefore points directly at <Vanta>/runtime.
+             */
+            Path runtimeDirectory =
+                    javaHome.getFileName() != null
+                            && RUNTIME_DIRECTORY.equalsIgnoreCase(
+                            javaHome.getFileName().toString()
+                    )
+                            ? javaHome
+                            : null;
+
+            if (runtimeDirectory == null) {
+                return null;
+            }
+
+            return findInstallationRoot(
+                    runtimeDirectory.getParent()
+            );
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     private static Path findFromProcessCommand() {
@@ -61,13 +110,15 @@ public final class ApplicationLocator {
                             .toAbsolutePath()
                             .normalize();
 
-            if (!EXECUTABLE_NAME.equalsIgnoreCase(
-                    executable.getFileName().toString()
-            )) {
-                return null;
-            }
+            Path start = executable.getParent();
 
-            return findInstallationRoot(executable.getParent());
+            /*
+             * The jpackage launcher can appear as Vanta.exe, java.exe,
+             * or javaw.exe depending on how the application was started.
+             * We therefore search from its directory rather than requiring
+             * the process itself to be named Vanta.exe.
+             */
+            return findInstallationRoot(start);
         } catch (RuntimeException ignored) {
             return null;
         }
@@ -97,6 +148,23 @@ public final class ApplicationLocator {
         }
     }
 
+    private static Path findFromWorkingDirectory() {
+        try {
+            Path workingDirectory =
+                    Path.of(
+                            System.getProperty("user.dir", ".")
+                    )
+                    .toAbsolutePath()
+                    .normalize();
+
+            return findInstallationRoot(
+                    workingDirectory
+            );
+        } catch (RuntimeException ignored) {
+            return null;
+        }
+    }
+
     private static Path findInstallationRoot(Path start) {
         Path current = start;
 
@@ -108,11 +176,14 @@ public final class ApplicationLocator {
          *   runtime/
          *   app/
          *
-         * The code source therefore starts below the root. Walking upward
-         * is intentional, but every candidate must satisfy the complete
-         * installation signature before it is accepted.
+         * The starting point may be runtime/bin, app, updater, or another
+         * nested directory, so walk upward until the complete installation
+         * signature is found.
          */
-        for (int depth = 0; current != null && depth < 12; depth++) {
+        for (int depth = 0;
+             current != null && depth < 16;
+             depth++) {
+
             if (isInstallationRoot(current)) {
                 return current;
             }
@@ -124,12 +195,20 @@ public final class ApplicationLocator {
     }
 
     private static boolean isInstallationRoot(Path directory) {
-        if (directory == null || !Files.isDirectory(directory)) {
+        if (directory == null
+                || !Files.isDirectory(directory)) {
             return false;
         }
 
-        Path executable = directory.resolve(EXECUTABLE_NAME);
-        Path runtime = directory.resolve(RUNTIME_DIRECTORY);
+        Path executable =
+                directory.resolve(
+                        EXECUTABLE_NAME
+                );
+
+        Path runtime =
+                directory.resolve(
+                        RUNTIME_DIRECTORY
+                );
 
         if (!Files.isRegularFile(executable)
                 || !Files.isDirectory(runtime)) {
@@ -138,22 +217,16 @@ public final class ApplicationLocator {
 
         /*
          * The bundled runtime is part of the install signature. Checking
-         * java.exe prevents an unrelated folder containing a file named
-         * Vanta.exe from being mistaken for the launcher installation.
+         * both Java launchers makes this work with normal Windows jpackage
+         * runtimes as well as layouts where only javaw.exe is present.
          */
         Path javaExecutable =
-                runtime.resolve("bin").resolve(
-                        isWindows()
-                                ? "java.exe"
-                                : "java"
-                );
+                runtime.resolve("bin").resolve("java.exe");
 
-        return Files.isRegularFile(javaExecutable);
-    }
+        Path javawExecutable =
+                runtime.resolve("bin").resolve("javaw.exe");
 
-    private static boolean isWindows() {
-        return System.getProperty("os.name", "")
-                .toLowerCase(Locale.ROOT)
-                .contains("win");
+        return Files.isRegularFile(javaExecutable)
+                || Files.isRegularFile(javawExecutable);
     }
 }
