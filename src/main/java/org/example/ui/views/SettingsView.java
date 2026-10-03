@@ -588,6 +588,17 @@ public class SettingsView extends BorderPane {
         slider.valueProperty().addListener((o, oldValue, newValue) -> update.run());
         update.run();
 
+        HBox presets = new HBox(8);
+        for (int workers : new int[]{2, 4, 8, 12, 16}) {
+            Button preset = new Button(workers + "×");
+            preset.getStyleClass().add("accent-preset");
+            preset.setOnAction(event -> {
+                slider.setValue(workers);
+                update.run();
+            });
+            presets.getChildren().add(preset);
+        }
+
         Button save = new Button("SAVE DOWNLOAD SETTINGS");
         save.getStyleClass().add("primary-button");
         save.setOnAction(event -> {
@@ -601,7 +612,9 @@ public class SettingsView extends BorderPane {
             }
         });
 
-        workers.getChildren().addAll(value, slider, save);
+        Label presetLabel = new Label("Quick presets");
+        presetLabel.getStyleClass().add("settings-card-description");
+        workers.getChildren().addAll(value, slider, presetLabel, presets, save);
 
         VBox layout = card(
                 "Storage",
