@@ -163,7 +163,8 @@ th {
 }
 
 .mod-description-italic {
-    -fx-fill: #c4c8d7;
+    -fx-fill: #ffffff;
+    -fx-text-fill: #ffffff;
     -fx-font-size: 14px;
     -fx-font-style: italic;
 }
@@ -204,7 +205,8 @@ th {
 }
 
 .mod-description-code {
-    -fx-fill: #c4c8d7;
+    -fx-fill: #ffffff;
+    -fx-text-fill: #ffffff;
     -fx-font-family: "Consolas";
     -fx-font-size: 13px;
 }
