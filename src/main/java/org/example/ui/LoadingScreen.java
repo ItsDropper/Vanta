@@ -39,7 +39,7 @@ public final class LoadingScreen {
         slash.getStyleClass().add("loading-slash");
         mark.getChildren().add(slash);
 
-        atmosphere.getChildren().addAll(glow, mark);
+        atmosphere.getChildren().add(glow);
 
         Label logo = new Label("VANTA");
         logo.getStyleClass().add("loading-logo");
