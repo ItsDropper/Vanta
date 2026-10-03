@@ -48,6 +48,14 @@ public final class SharedResourceRepairService {
             );
         }
 
+        if (repairLibraries) {
+            deleteZeroByteFiles(org.example.launcher.MinecraftLocator.getLibrariesDirectory());
+        }
+
+        if (repairAssets) {
+            deleteZeroByteFiles(org.example.launcher.MinecraftLocator.getVantaDirectory().resolve("assets"));
+        }
+
         for (String version : versions) {
             JsonNode metadata =
                     MinecraftVersionResolver.downloadMetadata(version);
@@ -59,6 +67,30 @@ public final class SharedResourceRepairService {
             if (repairAssets) {
                 AssetInstaller.install(metadata);
             }
+        }
+    }
+
+    private static void deleteZeroByteFiles(java.nio.file.Path root) throws java.io.IOException {
+        if (root == null || !java.nio.file.Files.isDirectory(root)) {
+            return;
+        }
+
+        try (java.util.stream.Stream<java.nio.file.Path> paths = java.nio.file.Files.walk(root)) {
+            paths.filter(java.nio.file.Files::isRegularFile)
+                    .filter(path -> {
+                        try {
+                            return java.nio.file.Files.size(path) == 0;
+                        } catch (java.io.IOException ignored) {
+                            return false;
+                        }
+                    })
+                    .forEach(path -> {
+                        try {
+                            java.nio.file.Files.deleteIfExists(path);
+                        } catch (java.io.IOException ignored) {
+                            // A locked file will be reported by the State scan after repair.
+                        }
+                    });
         }
     }
 }
