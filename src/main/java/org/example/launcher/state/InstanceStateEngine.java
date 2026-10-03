@@ -9,19 +9,28 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.zip.ZipFile;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.example.launcher.MinecraftLocator;
 
 public final class InstanceStateEngine {
     private InstanceStateEngine(){}
 
     public static List<SharedState> inspectSharedResources() {
+        int workers = Math.max(1, Math.min(Runtime.getRuntime().availableProcessors(), 32));
         return List.of(
-                inspectShared("Libraries", MinecraftLocator.getLibrariesDirectory(), true),
-                inspectShared("Assets", MinecraftLocator.getVantaDirectory().resolve("assets"), false)
+                inspectShared("Libraries", MinecraftLocator.getLibrariesDirectory(), true, workers),
+                inspectShared("Assets", MinecraftLocator.getVantaDirectory().resolve("assets"), false, workers)
         );
     }
 
     public static SharedState inspectShared(String name, Path root, boolean validateArchives) {
+        int workers = Math.max(1, Math.min(Runtime.getRuntime().availableProcessors(), 32));
+        return inspectShared(name, root, validateArchives, workers);
+    }
+
+    public static SharedState inspectShared(String name, Path root, boolean validateArchives, int workers) {
         if (root == null || !Files.isDirectory(root)) {
             return new SharedState(name, SharedState.Level.ATTENTION, 0, 1, "Directory is missing and may need to be rebuilt.");
         }
@@ -31,18 +40,27 @@ public final class InstanceStateEngine {
         try (var stream = Files.walk(root)) {
             var paths = stream.filter(Files::isRegularFile).toList();
             files = paths.size();
-            for (Path path : paths) {
-                try {
-                    if (Files.size(path) == 0) {
-                        broken++;
-                    } else if (validateArchives && path.getFileName().toString().toLowerCase().endsWith(".jar")) {
-                        try (ZipFile ignored = new ZipFile(path.toFile())) {}
+
+            AtomicInteger brokenFiles = new AtomicInteger();
+            ForkJoinPool pool = new ForkJoinPool(Math.max(1, workers));
+            try {
+                pool.submit(() -> paths.parallelStream().forEach(path -> {
+                    try {
+                        if (Files.size(path) == 0) {
+                            brokenFiles.incrementAndGet();
+                        } else if (validateArchives
+                                && path.getFileName().toString().toLowerCase().endsWith(".jar")) {
+                            try (ZipFile ignored = new ZipFile(path.toFile())) {}
+                        }
+                    } catch (Exception ignored) {
+                        brokenFiles.incrementAndGet();
                     }
-                } catch (Exception ignored) {
-                    broken++;
-                }
+                })).get();
+            } finally {
+                pool.shutdown();
             }
-        } catch (IOException ignored) {
+            broken = brokenFiles.get();
+        } catch (Exception ignored) {
             return new SharedState(name, SharedState.Level.BROKEN, files, broken + 1, "Vanta could not completely scan this directory.");
         }
 
@@ -52,6 +70,11 @@ public final class InstanceStateEngine {
     }
 
     public static InstanceState inspect(Instance instance) {
+        int workers = Math.max(1, Math.min(Runtime.getRuntime().availableProcessors(), 32));
+        return inspect(instance, workers);
+    }
+
+    public static InstanceState inspect(Instance instance, int workers) {
         if(instance==null || instance.getDirectory()==null)
             return new InstanceState(InstanceState.Level.BROKEN,"INSTANCE UNAVAILABLE","Vanta could not inspect this instance.",0,1,0,0,"");
 
@@ -70,10 +93,28 @@ public final class InstanceStateEngine {
             if(Files.isDirectory(root.resolve(name))) passed++; else problems.add("Missing "+name+" directory");
         }
 
-        int mods=countFiles(root.resolve("mods"));
-        int configs=countFiles(root.resolve("config"));
+        int mods;
+        int configs;
+        boolean emptyMod;
+
+        ForkJoinPool pool = new ForkJoinPool(Math.max(1, Math.min(workers, 3)));
+        try {
+            Future<Integer> modsFuture = pool.submit(() -> countFiles(root.resolve("mods")));
+            Future<Integer> configsFuture = pool.submit(() -> countFiles(root.resolve("config")));
+            Future<Boolean> emptyModFuture = pool.submit(() -> findZeroByteFiles(root.resolve("mods")));
+            mods = modsFuture.get();
+            configs = configsFuture.get();
+            emptyMod = emptyModFuture.get();
+        } catch (Exception ignored) {
+            mods = countFiles(root.resolve("mods"));
+            configs = countFiles(root.resolve("config"));
+            emptyMod = findZeroByteFiles(root.resolve("mods"));
+        } finally {
+            pool.shutdown();
+        }
+
         total++;
-        if(!findZeroByteFiles(root.resolve("mods"))) passed++;
+        if(!emptyMod) passed++;
         else problems.add("Empty mod file detected");
 
         InstanceState.Level level=problems.isEmpty()?InstanceState.Level.HEALTHY:(problems.size()==1?InstanceState.Level.ATTENTION:InstanceState.Level.BROKEN);
