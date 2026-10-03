@@ -778,7 +778,24 @@ public class ModsView extends VBox {
                     );
             alert.setTitle("Remove mod");
             alert.setHeaderText("Remove " + cleanName(filename) + "?");
-            alert.setContentText("The mod will be removed from this instance.");
+            alert.setContentText("This will permanently remove the mod from this instance.");
+            alert.getDialogPane().getStyleClass().add("delete-dialog");
+            javafx.scene.Node header = alert.getDialogPane().lookup(".header-panel");
+            if (header != null) {
+                header.getStyleClass().add("delete-dialog-header");
+            }
+            javafx.scene.Node content = alert.getDialogPane().lookup(".content");
+            if (content != null) {
+                content.getStyleClass().add("delete-dialog-content");
+            }
+            javafx.scene.Node okButton = alert.getDialogPane().lookupButton(
+                    javafx.scene.control.ButtonType.OK
+            );
+            javafx.scene.Node cancelButton = alert.getDialogPane().lookupButton(
+                    javafx.scene.control.ButtonType.CANCEL
+            );
+            okButton.getStyleClass().add("delete-dialog-delete");
+            cancelButton.getStyleClass().add("delete-dialog-cancel");
             alert.showAndWait().ifPresent(result -> {
                 if (result == javafx.scene.control.ButtonType.OK) {
                     removeFile(mod);
