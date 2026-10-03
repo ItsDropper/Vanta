@@ -15,6 +15,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import org.example.launcher.instance.FabricInstaller;
+import org.example.launcher.instance.ForgeInstaller;
 import org.example.launcher.instance.InstanceInstaller;
 import org.example.ui.LauncherSettings;
 
@@ -58,6 +59,8 @@ public class CreateInstanceView extends VBox {
             new AtomicInteger();
 
     private volatile boolean fabricCheckRunning;
+    private final AtomicInteger forgeCheckId = new AtomicInteger();
+    private volatile boolean forgeCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -529,162 +532,78 @@ public class CreateInstanceView extends VBox {
     }
 
     // =============================================================
-    // FABRIC AVAILABILITY
+    // LOADER AVAILABILITY
     // =============================================================
 
-    private void checkFabricAvailability(
-            String minecraftVersion
-    ) {
+    private void checkLoaderAvailability(String minecraftVersion) {
 
-        if (minecraftVersion == null
-                || minecraftVersion.isBlank()) {
-
+        if (minecraftVersion == null || minecraftVersion.isBlank()) {
             return;
         }
 
-        int checkId =
-                fabricCheckId.incrementAndGet();
-
-        fabricCheckRunning =
-                true;
+        int fabricId = fabricCheckId.incrementAndGet();
+        int forgeId = forgeCheckId.incrementAndGet();
+        fabricCheckRunning = true;
+        forgeCheckRunning = true;
 
         Platform.runLater(() -> {
-
-            /*
-             * Vanilla stays available while Fabric is being
-             * checked.
-             */
-            loaderBox.getItems().setAll(
-                    "Vanilla"
-            );
-
-            loaderBox.getSelectionModel()
-                    .select("Vanilla");
-
-            loaderBox.setDisable(
-                    true
-            );
-
-            createButton.setDisable(
-                    true
-            );
-
-            statusLabel.setText(
-                    "Checking Fabric support for Minecraft "
-                            + minecraftVersion
-                            + "..."
-            );
+            loaderBox.getItems().setAll("Vanilla");
+            loaderBox.getSelectionModel().select("Vanilla");
+            loaderBox.setDisable(true);
+            createButton.setDisable(true);
+            statusLabel.setText("Checking available mod loaders for Minecraft " + minecraftVersion + "...");
         });
 
-        Thread thread =
-                new Thread(() -> {
+        Thread thread = new Thread(() -> {
+            boolean fabricAvailable = false;
+            boolean forgeAvailable = false;
 
-                    boolean fabricAvailable =
-                            false;
+            try {
+                FabricInstaller.findLatestLoaderVersion(minecraftVersion);
+                fabricAvailable = true;
+            } catch (Throwable ignored) {
+            }
 
-                    try {
+            try {
+                ForgeInstaller.findLatestLoaderVersion(minecraftVersion);
+                forgeAvailable = true;
+            } catch (Throwable ignored) {
+            }
 
-                        /*
-                         * This uses the existing Fabric API
-                         * integration already present in Vanta.
-                         *
-                         * If no loader exists for this Minecraft
-                         * version, FabricInstaller throws.
-                         */
-                        FabricInstaller.findLatestLoaderVersion(
-                                minecraftVersion
-                        );
+            final boolean fabric = fabricAvailable;
+            final boolean forge = forgeAvailable;
 
-                        fabricAvailable =
-                                true;
+            Platform.runLater(() -> {
+                if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()) {
+                    return;
+                }
 
-                    } catch (Throwable ex) {
+                fabricCheckRunning = false;
+                forgeCheckRunning = false;
+                loaderBox.getItems().setAll("Vanilla");
 
-                        /*
-                         * No Fabric version for this Minecraft
-                         * version is a normal result.
-                         *
-                         * Do not treat it as a launcher error.
-                         */
-                        fabricAvailable =
-                                false;
-                    }
+                if (fabric) loaderBox.getItems().add("Fabric");
+                if (forge) loaderBox.getItems().add("Forge");
 
-                    final boolean available =
-                            fabricAvailable;
+                String preferredLoader = LauncherSettings.getDefaultLoader();
+                if (loaderBox.getItems().contains(preferredLoader)) {
+                    loaderBox.getSelectionModel().select(preferredLoader);
+                } else {
+                    loaderBox.getSelectionModel().select("Vanilla");
+                }
 
-                    Platform.runLater(() -> {
+                if (fabric || forge) {
+                    statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
+                } else {
+                    statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
+                }
 
-                        /*
-                         * Ignore this result if the user already
-                         * selected another Minecraft version.
-                         */
-                        if (checkId
-                                != fabricCheckId.get()) {
+                loaderBox.setDisable(false);
+                createButton.setDisable(false);
+            });
+        });
 
-                            return;
-                        }
-
-                        fabricCheckRunning =
-                                false;
-
-                        loaderBox.getItems().clear();
-
-                        /*
-                         * Vanilla is ALWAYS available.
-                         */
-                        loaderBox.getItems().add(
-                                "Vanilla"
-                        );
-
-                        if (available) {
-
-                            loaderBox.getItems().add(
-                                    "Fabric"
-                            );
-
-                            String preferredLoader =
-                                    LauncherSettings.getDefaultLoader();
-
-                            if ("Fabric".equals(preferredLoader)) {
-                                loaderBox.getSelectionModel().select("Fabric");
-                            } else {
-                                loaderBox.getSelectionModel().select("Vanilla");
-                            }
-
-                            statusLabel.setText(
-                                    "Fabric is available for Minecraft "
-                                            + minecraftVersion
-                                            + "."
-                            );
-
-                        } else {
-
-                            loaderBox.getSelectionModel()
-                                    .select("Vanilla");
-
-                            statusLabel.setText(
-                                    "Fabric is not available for Minecraft "
-                                            + minecraftVersion
-                                            + ". Vanilla only."
-                            );
-                        }
-
-                        loaderBox.setDisable(
-                                false
-                        );
-
-                        createButton.setDisable(
-                                false
-                        );
-                    });
-
-                });
-
-        thread.setDaemon(
-                true
-        );
-
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -694,7 +613,7 @@ public class CreateInstanceView extends VBox {
 
     private void createInstance() {
 
-        if (fabricCheckRunning) {
+        if (fabricCheckRunning || forgeCheckRunning) {
 
             statusLabel.setText(
                     "Still checking Fabric support..."
@@ -809,6 +728,13 @@ public class CreateInstanceView extends VBox {
                         if ("Fabric".equals(loader)) {
 
                             InstanceInstaller.installFabric(
+                                    name,
+                                    version
+                            );
+
+                        } else if ("Forge".equals(loader)) {
+
+                            InstanceInstaller.installForge(
                                     name,
                                     version
                             );
