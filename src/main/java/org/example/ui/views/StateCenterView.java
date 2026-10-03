@@ -1,7 +1,5 @@
 package org.example.ui.views;
 
-import javafx.animation.FadeTransition;
-import javafx.animation.ScaleTransition;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -12,77 +10,223 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.util.Duration;
 import org.example.launcher.instance.InstanceManager;
 import org.example.launcher.model.Instance;
 import org.example.launcher.state.InstanceState;
 import org.example.launcher.state.InstanceStateEngine;
 import org.example.ui.components.IconView;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class StateCenterView extends VBox {
-    private final VBox instanceList=new VBox(10);
-    private final Label overallTitle=new Label("SCANNING...");
-    private final Label overallSubtitle=new Label("Vanta is checking your installed instances.");
-    private final ProgressBar progress=new ProgressBar();
-    private final Button refreshButton=new Button("REFRESH",IconView.create(IconView.Type.REFRESH,15));
+public final class StateCenterView extends VBox {
+    private final VBox instanceList = new VBox(10);
+    private final Label overallTitle = new Label("READY");
+    private final Label overallSubtitle = new Label("Vanta will inspect your environments when you open this page.");
+    private final ProgressBar progress = new ProgressBar(0);
+    private final Button refreshButton = new Button("SCAN NOW", IconView.create(IconView.Type.REFRESH, 15));
+    private final AtomicBoolean scanning = new AtomicBoolean(false);
+    private volatile long scanGeneration;
 
-    public StateCenterView(){
-        getStyleClass().add("state-center"); setPadding(new Insets(36)); setSpacing(22);
-        Label title=new Label("State"); title.getStyleClass().add("page-title");
-        Label subtitle=new Label("A live view of the health of your Vanta environments."); subtitle.getStyleClass().add("page-subtitle");
-        VBox heading=new VBox(5,title,subtitle);
+    public StateCenterView() {
+        getStyleClass().add("state-center");
+        setPadding(new Insets(32));
+        setSpacing(20);
 
-        StackPane hero=new StackPane(); hero.getStyleClass().add("state-hero"); hero.setPadding(new Insets(22));
-        VBox heroText=new VBox(5,overallTitle,overallSubtitle);
-        overallTitle.getStyleClass().add("state-hero-title"); overallSubtitle.getStyleClass().add("state-hero-subtitle");
-        progress.setPrefWidth(260); progress.setProgress(-1); progress.getStyleClass().add("state-progress");
-        HBox heroRow=new HBox(18,heroText,new VBox(8,progress)); heroRow.setAlignment(Pos.CENTER_LEFT); HBox.setHgrow(heroText,Priority.ALWAYS);
-        refreshButton.getStyleClass().add("state-refresh-button"); refreshButton.setFocusTraversable(false); refreshButton.setOnAction(e->refresh());
-        hero.getChildren().add(heroRow);
+        Label title = new Label("State");
+        title.getStyleClass().add("page-title");
+        Label subtitle = new Label("Understand what Vanta knows about every installed environment.");
+        subtitle.getStyleClass().add("page-subtitle");
+        VBox heading = new VBox(5, title, subtitle);
 
-        HBox section=new HBox(10,new Label("ENVIRONMENTS"),refreshButton); section.getChildren().get(0).getStyleClass().add("state-section-title");
-        VBox listCard=new VBox(instanceList); listCard.getStyleClass().add("state-list-card"); listCard.setPadding(new Insets(12)); VBox.setVgrow(listCard,Priority.ALWAYS);
-        getChildren().addAll(heading,hero,section,listCard); refresh();
+        VBox heroText = new VBox(5, overallTitle, overallSubtitle);
+        overallTitle.getStyleClass().add("state-hero-title");
+        overallSubtitle.getStyleClass().add("state-hero-subtitle");
+
+        progress.setPrefWidth(220);
+        progress.setPrefHeight(6);
+        progress.getStyleClass().add("state-progress");
+
+        Label healthLabel = new Label("HEALTH");
+        healthLabel.getStyleClass().add("state-progress-label");
+        VBox progressBox = new VBox(6, healthLabel, progress);
+
+        HBox heroRow = new HBox(20, heroText, progressBox);
+        heroRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(heroText, Priority.ALWAYS);
+
+        StackPane hero = new StackPane(heroRow);
+        hero.getStyleClass().add("state-hero");
+        hero.setPadding(new Insets(22));
+
+        refreshButton.getStyleClass().add("state-refresh-button");
+        refreshButton.setFocusTraversable(false);
+        refreshButton.setOnAction(e -> refresh());
+
+        Label sectionTitle = new Label("ENVIRONMENTS");
+        sectionTitle.getStyleClass().add("state-section-title");
+        HBox section = new HBox(10, sectionTitle, refreshButton);
+        section.setAlignment(Pos.CENTER_LEFT);
+
+        VBox listCard = new VBox(instanceList);
+        listCard.getStyleClass().add("state-list-card");
+        listCard.setPadding(new Insets(12));
+        VBox.setVgrow(listCard, Priority.ALWAYS);
+
+        getChildren().addAll(heading, hero, section, listCard);
     }
 
-    public void refresh(){
-        overallTitle.setText("SCANNING..."); overallSubtitle.setText("Checking files, metadata and instance structure."); progress.setProgress(-1); instanceList.getChildren().clear();
-        Thread thread=new Thread(()->{
-            List<Instance> instances;
-            try{instances=InstanceManager.discoverInstances();}catch(Throwable ex){Platform.runLater(()->{overallTitle.setText("SCAN FAILED");overallSubtitle.setText("Vanta could not inspect the installed instances.");});return;}
-            List<InstanceState> states=new ArrayList<>();
-            for(Instance instance:instances) states.add(InstanceStateEngine.inspect(instance));
-            Platform.runLater(()->render(instances,states));
-        });
-        thread.setDaemon(true); thread.setName("Vanta-State-Engine"); thread.start();
+    public void onShown() {
+        refresh();
     }
 
-    private void render(List<Instance> instances,List<InstanceState> states){
+    public void refresh() {
+        if (!scanning.compareAndSet(false, true)) return;
+
+        long generation = ++scanGeneration;
+        refreshButton.setDisable(true);
+        refreshButton.setText("SCANNING...");
+        overallTitle.setText("SCANNING...");
+        overallSubtitle.setText("Checking instance structure and installed content.");
+        progress.setProgress(-1);
         instanceList.getChildren().clear();
-        int healthy=(int)states.stream().filter(InstanceState::isHealthy).count();
-        int attention=(int)states.stream().filter(s->s.getLevel()==InstanceState.Level.ATTENTION).count();
-        int broken=states.size()-healthy-attention;
-        int affected=attention+broken;
-        overallTitle.setText(states.isEmpty()?"NO ENVIRONMENTS":affected==0?"ALL SYSTEMS HEALTHY":affected+" ENVIRONMENT"+(affected==1?"":"S")+" NEED ATTENTION");
-        overallSubtitle.setText(states.isEmpty()?"Create an instance and Vanta will start tracking it here.":healthy+" healthy  •  "+attention+" attention  •  "+broken+" broken");
-        progress.setProgress(states.isEmpty()?0:(double)healthy/states.size());
-        for(int i=0;i<instances.size();i++) addStateCard(instances.get(i),states.get(i),i);
+
+        Thread thread = new Thread(() -> {
+            List<Instance> instances;
+            List<InstanceState> states = new ArrayList<>();
+
+            try {
+                instances = InstanceManager.discoverInstances();
+                for (Instance instance : instances) {
+                    try {
+                        states.add(InstanceStateEngine.inspect(instance));
+                    } catch (Throwable ignored) {
+                        states.add(new InstanceState(InstanceState.Level.BROKEN, "SCAN FAILED",
+                                "Vanta could not inspect this environment.", 0, 1, 0, 0, ""));
+                    }
+                }
+            } catch (Throwable ignored) {
+                instances = List.of();
+                Platform.runLater(() -> finishScan(generation, false, instances, states));
+                return;
+            }
+
+            List<Instance> finalInstances = instances;
+            Platform.runLater(() -> finishScan(generation, true, finalInstances, states));
+        }, "Vanta-State-Engine");
+
+        thread.setDaemon(true);
+        thread.start();
     }
 
-    private void addStateCard(Instance instance,InstanceState state,int index){
-        HBox card=new HBox(16); card.getStyleClass().add("state-card"); card.setAlignment(Pos.CENTER_LEFT); card.setPadding(new Insets(15));
-        StackPane icon=new StackPane(IconView.create(state.isHealthy()?IconView.Type.SHIELD:IconView.Type.PACKAGE,22)); icon.getStyleClass().add("state-icon-"+state.getLevel().name().toLowerCase());
-        VBox text=new VBox(4); Label name=new Label(instance.getName()); name.getStyleClass().add("state-instance-name");
-        Label detail=new Label(instance.getMinecraftVersion()+"  •  "+instance.getDisplayLoader()+"  •  "+state.getSummary()); detail.getStyleClass().add("state-instance-detail");
-        Label fingerprint=new Label("STATE "+state.getFingerprint()); fingerprint.getStyleClass().add("state-fingerprint");
-        text.getChildren().addAll(name,detail,fingerprint); HBox.setHgrow(text,Priority.ALWAYS);
-        Label status=new Label(state.getTitle()); status.getStyleClass().add("state-status-"+state.getLevel().name().toLowerCase());
-        Label stats=new Label(state.getChecksPassed()+"/"+state.getChecksTotal()+" checks  •  "+state.getMods()+" mods  •  "+state.getConfigs()+" configs"); stats.getStyleClass().add("state-stats");
-        VBox right=new VBox(4,status,stats); right.setAlignment(Pos.CENTER_RIGHT); card.getChildren().addAll(icon,text,right); instanceList.getChildren().add(card);
-        card.setOpacity(0); card.setScaleX(.985); card.setScaleY(.985);
-        FadeTransition fade=new FadeTransition(Duration.millis(240+index*25),card); fade.setFromValue(0); fade.setToValue(1); fade.play();
-        ScaleTransition scale=new ScaleTransition(Duration.millis(280+index*25),card); scale.setFromX(.985); scale.setFromY(.985); scale.setToX(1); scale.setToY(1); scale.play();
+    private void finishScan(long generation, boolean success, List<Instance> instances, List<InstanceState> states) {
+        if (generation != scanGeneration) return;
+
+        try {
+            if (!success) {
+                overallTitle.setText("SCAN FAILED");
+                overallSubtitle.setText("Vanta could not discover the installed environments.");
+                progress.setProgress(0);
+                instanceList.getChildren().clear();
+                return;
+            }
+            render(instances, states);
+        } catch (Throwable ignored) {
+            overallTitle.setText("SCAN FAILED");
+            overallSubtitle.setText("The State view could not render the scan results.");
+            progress.setProgress(0);
+            instanceList.getChildren().clear();
+        } finally {
+            scanning.set(false);
+            refreshButton.setDisable(false);
+            refreshButton.setText("SCAN AGAIN");
+        }
+    }
+
+    private void render(List<Instance> instances, List<InstanceState> states) {
+        instanceList.getChildren().clear();
+
+        if (states.isEmpty()) {
+            overallTitle.setText("NO ENVIRONMENTS");
+            overallSubtitle.setText("Create an instance and Vanta will start tracking its state.");
+            progress.setProgress(0);
+            addEmptyState();
+            return;
+        }
+
+        int healthy = 0, attention = 0, broken = 0;
+        for (InstanceState state : states) {
+            if (state.isHealthy()) healthy++;
+            else if (state.getLevel() == InstanceState.Level.ATTENTION) attention++;
+            else broken++;
+        }
+
+        int affected = attention + broken;
+        overallTitle.setText(affected == 0 ? "ALL SYSTEMS HEALTHY"
+                : affected + " ENVIRONMENT" + (affected == 1 ? "" : "S") + " NEED ATTENTION");
+        overallSubtitle.setText(healthy + " healthy  •  " + attention + " attention  •  " + broken + " broken");
+        progress.setProgress((double) healthy / states.size());
+
+        for (int i = 0; i < instances.size() && i < states.size(); i++) {
+            addStateCard(instances.get(i), states.get(i));
+        }
+    }
+
+    private void addEmptyState() {
+        VBox empty = new VBox(8);
+        empty.setAlignment(Pos.CENTER);
+        empty.setPadding(new Insets(42));
+
+        StackPane icon = new StackPane(IconView.create(IconView.Type.SHIELD, 30));
+        icon.getStyleClass().add("state-empty-icon");
+
+        Label title = new Label("Nothing to inspect yet");
+        title.getStyleClass().add("state-empty-title");
+        Label text = new Label("Your installed Vanta instances will appear here.");
+        text.getStyleClass().add("state-empty-text");
+
+        empty.getChildren().addAll(icon, title, text);
+        instanceList.getChildren().add(empty);
+    }
+
+    private void addStateCard(Instance instance, InstanceState state) {
+        HBox card = new HBox(16);
+        card.getStyleClass().add("state-card");
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setPadding(new Insets(16));
+
+        StackPane icon = new StackPane(IconView.create(
+                state.isHealthy() ? IconView.Type.SHIELD : IconView.Type.PACKAGE, 21));
+        icon.getStyleClass().add("state-icon-" + state.getLevel().name().toLowerCase());
+
+        VBox text = new VBox(5);
+        Label name = new Label(safe(instance.getName(), "Unnamed instance"));
+        name.getStyleClass().add("state-instance-name");
+        Label detail = new Label(safe(instance.getMinecraftVersion(), "Unknown version")
+                + "  •  " + safe(instance.getDisplayLoader(), "Unknown loader"));
+        detail.getStyleClass().add("state-instance-detail");
+        Label summary = new Label(safe(state.getSummary(), "No diagnostic summary."));
+        summary.getStyleClass().add("state-instance-summary");
+        Label fingerprint = new Label("STATE " + safe(state.getFingerprint(), ""));
+        fingerprint.getStyleClass().add("state-fingerprint");
+
+        text.getChildren().addAll(name, detail, summary, fingerprint);
+        HBox.setHgrow(text, Priority.ALWAYS);
+
+        Label status = new Label(state.getTitle());
+        status.getStyleClass().add("state-status-" + state.getLevel().name().toLowerCase());
+        Label stats = new Label(state.getChecksPassed() + "/" + state.getChecksTotal()
+                + " checks  •  " + state.getMods() + " mods  •  " + state.getConfigs() + " configs");
+        stats.getStyleClass().add("state-stats");
+
+        VBox right = new VBox(5, status, stats);
+        right.setAlignment(Pos.CENTER_RIGHT);
+        card.getChildren().addAll(icon, text, right);
+        instanceList.getChildren().add(card);
+    }
+
+    private static String safe(String value, String fallback) {
+        return value == null || value.isBlank() ? fallback : value;
     }
 }
