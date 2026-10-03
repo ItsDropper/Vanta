@@ -61,20 +61,42 @@ public final class InstanceStateEngine {
         try{
             MessageDigest digest=MessageDigest.getInstance("SHA-256");
             if(!Files.exists(root)) return "";
-            try(var stream=Files.walk(root)){
-                stream.filter(Files::isRegularFile).sorted(Comparator.comparing(Path::toString)).forEach(path->{
-                    try{
-                        digest.update(root.relativize(path).toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
-                        digest.update(longBytes(Files.size(path)));
-                        digest.update(longBytes(Files.getLastModifiedTime(path).toMillis()));
-                    }catch(IOException ignored){}
-                });
+
+            // State identity must stay fast. Do not walk saves, logs, screenshots,
+            // or other potentially huge instance data just to display a fingerprint.
+            List<Path> roots=new ArrayList<>();
+            roots.add(root.resolve("instance.json"));
+            for(String name:new String[]{"mods","config","resourcepacks","shaderpacks"}){
+                roots.add(root.resolve(name));
             }
+
+            for(Path target:roots){
+                if(Files.isRegularFile(target)){
+                    updateFingerprint(digest,root,target);
+                    continue;
+                }
+                if(!Files.isDirectory(target)) continue;
+
+                try(var stream=Files.walk(target,2)){
+                    stream.filter(Files::isRegularFile)
+                            .sorted(Comparator.comparing(Path::toString))
+                            .forEach(path->updateFingerprint(digest,root,path));
+                }
+            }
+
             byte[] bytes=digest.digest();
             StringBuilder out=new StringBuilder(16);
             for(int i=0;i<8;i++) out.append(String.format("%02x",bytes[i]));
             return out.toString().toUpperCase();
         }catch(Exception ignored){return "";}
+    }
+
+    private static void updateFingerprint(MessageDigest digest,Path root,Path path){
+        try{
+            digest.update(root.relativize(path).toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            digest.update(longBytes(Files.size(path)));
+            digest.update(longBytes(Files.getLastModifiedTime(path).toMillis()));
+        }catch(IOException ignored){}
     }
 
     private static byte[] longBytes(long value){
