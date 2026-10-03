@@ -31,6 +31,7 @@ public final class FpsInstanceGenerator {
             "better-block-entities",
             "modernfix-mvus",
             "sodium-extra",
+            "particle-core",
             "reeses-sodium-options",
             "modmenu"
     );
