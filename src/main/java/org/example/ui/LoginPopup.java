@@ -28,6 +28,11 @@ import org.example.ui.LauncherSettings;
 public class LoginPopup {
 
     private static Stage stage;
+    private static Runnable onClosed;
+
+    public static void setOnClosed(Runnable callback) {
+        onClosed = callback;
+    }
 
     public static void show(
             String url,
@@ -377,6 +382,13 @@ public class LoginPopup {
                     scene
             );
 
+            stage.setOnHidden(event -> {
+                stage = null;
+                if (onClosed != null) {
+                    onClosed.run();
+                }
+            });
+
             stage.show();
 
             if (LauncherSettings.isAutoOpenBrowserEnabled()) {
@@ -405,8 +417,6 @@ public class LoginPopup {
             if (stage != null) {
 
                 stage.close();
-
-                stage = null;
             }
         });
     }
