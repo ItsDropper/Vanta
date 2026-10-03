@@ -1809,3 +1809,15 @@
 }
 
 .state-center{-fx-background-color:transparent}.state-hero{-fx-background-color:#151c26;-fx-background-radius:16px;-fx-border-color:#2b3747;-fx-border-radius:16px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.28),24,.12,0,8)}.state-hero-title{-fx-text-fill:#f2f6fb;-fx-font-size:19px;-fx-font-weight:900}.state-hero-subtitle{-fx-text-fill:#7f8b9d;-fx-font-size:12px}.state-progress{-fx-pref-height:6px;-fx-min-height:6px;-fx-max-height:6px}.state-section-title{-fx-text-fill:#687588;-fx-font-size:10px;-fx-font-weight:900;-fx-letter-spacing:1.3px}.state-refresh-button{-fx-background-color:#151c26;-fx-border-color:#303c4d;-fx-border-radius:8px;-fx-background-radius:8px;-fx-text-fill:#cbd4e0;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 11px}.state-refresh-button:hover{-fx-border-color:#5688ED;-fx-background-color:#1E2D49;-fx-text-fill:#f4f7fc}.state-list-card{-fx-background-color:#121821;-fx-background-radius:14px;-fx-border-color:#27303d;-fx-border-radius:14px}.state-card{-fx-background-color:#151b24;-fx-background-radius:11px;-fx-border-color:#293545;-fx-border-radius:11px}.state-card:hover{-fx-background-color:#19212c;-fx-border-color:#3b4c63}.state-instance-name{-fx-text-fill:#edf2f8;-fx-font-size:13px;-fx-font-weight:800}.state-instance-detail{-fx-text-fill:#8a96a8;-fx-font-size:11px}.state-fingerprint{-fx-text-fill:#59677a;-fx-font-family:"Consolas";-fx-font-size:9px;-fx-font-weight:700}.state-stats{-fx-text-fill:#657286;-fx-font-size:9px}.state-status-healthy{-fx-text-fill:#65d69a;-fx-font-size:10px;-fx-font-weight:900}.state-status-attention{-fx-text-fill:#e7bd68;-fx-font-size:10px;-fx-font-weight:900}.state-status-broken{-fx-text-fill:#ed7777;-fx-font-size:10px;-fx-font-weight:900}.state-icon-healthy,.state-icon-attention,.state-icon-broken{-fx-background-radius:10px;-fx-padding:9px}.state-icon-healthy{-fx-background-color:rgba(76,204,137,.12)}.state-icon-attention{-fx-background-color:rgba(231,189,104,.12)}.state-icon-broken{-fx-background-color:rgba(237,119,119,.12)}
+
+
+/* State Center polished UI */
+.state-progress-label{-fx-text-fill:#657286;-fx-font-size:9px;-fx-font-weight:900;-fx-letter-spacing:1px}
+.state-hero{-fx-min-height:112px}
+.state-list-card{-fx-background-color:#10161e;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.20),18,.08,0,5)}
+.state-card{-fx-min-height:72px;-fx-cursor:hand;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.12),10,.05,0,3)}
+.state-card:hover{-fx-background-color:#1a222d;-fx-border-color:#4a5c73;-fx-translate-y:-1px}
+.state-instance-summary{-fx-text-fill:#b4bfce;-fx-font-size:10px}
+.state-empty-icon{-fx-min-width:58px;-fx-pref-width:58px;-fx-min-height:58px;-fx-pref-height:58px;-fx-background-color:rgba(86,136,237,.10);-fx-background-radius:16px}
+.state-empty-title{-fx-text-fill:#edf2f8;-fx-font-size:15px;-fx-font-weight:800}
+.state-empty-text{-fx-text-fill:#738095;-fx-font-size:11px}
