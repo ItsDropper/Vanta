@@ -179,6 +179,7 @@ public class GlobalModsView extends VBox {
                 Platform.runLater(() -> {
                     versionBox.getItems().setAll("All versions");
                     versionBox.getItems().addAll(versions);
+                    versionBox.getSelectionModel().select("All versions");
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -407,6 +408,7 @@ public class GlobalModsView extends VBox {
         for (Instance instance : InstanceManager.discoverInstances()) {
             if (instance == null
                     || instance.getMinecraftVersion() == null
+                    || instance.getMinecraftVersion().isBlank()
                     || instance.getLoader() == null) {
                 continue;
             }
@@ -482,28 +484,47 @@ public class GlobalModsView extends VBox {
 
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.setTitle("Install " + project.getTitle());
-        dialog.setHeaderText("Choose the compatible instances to install this into.");
+        dialog.setHeaderText("Choose where to install this.");
+        dialog.getDialogPane().getStyleClass().add("vanta-dialog");
 
-        VBox choices = new VBox(10);
-        choices.setPadding(new Insets(8));
+        VBox content = new VBox(14);
+        content.setPadding(new Insets(6, 4, 4, 4));
+
+        Label subtitle = new Label(
+                "Only instances compatible with this " +
+                        (contentTypeBox.getValue() == ModrinthContentType.MOD ? "mod" : "project") +
+                        " are shown."
+        );
+        subtitle.getStyleClass().add("dialog-subtitle");
+
+        VBox choices = new VBox(8);
+        choices.getStyleClass().add("dialog-choice-list");
         List<CheckBox> boxes = new ArrayList<>();
 
         for (Instance instance : compatible) {
             CheckBox box = new CheckBox(
-                    instance.getName() + " • Minecraft " + instance.getMinecraftVersion()
-                            + " • " + instance.getDisplayLoader()
+                    instance.getName() + "   •   Minecraft " + instance.getMinecraftVersion()
+                            + "   •   " + instance.getDisplayLoader()
             );
+            box.getStyleClass().add("dialog-instance-checkbox");
             boxes.add(box);
             choices.getChildren().add(box);
         }
 
         ScrollPane scroll = new ScrollPane(choices);
         scroll.setFitToWidth(true);
-        scroll.setPrefViewportHeight(Math.min(420, 80 + compatible.size() * 44.0));
-        dialog.getDialogPane().setContent(scroll);
+        scroll.setPrefViewportHeight(Math.min(420, 90 + compatible.size() * 48.0));
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.getStyleClass().add("dialog-scroll");
+
+        content.getChildren().addAll(subtitle, scroll);
+        dialog.getDialogPane().setContent(content);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, ButtonType.OK);
 
         Button ok = (Button) dialog.getDialogPane().lookupButton(ButtonType.OK);
+        ok.getStyleClass().add("primary-button");
+        Button cancel = (Button) dialog.getDialogPane().lookupButton(ButtonType.CANCEL);
+        cancel.getStyleClass().add("secondary-button");
         ok.setDisable(true);
         for (CheckBox box : boxes) {
             box.selectedProperty().addListener((obs, oldValue, selected) ->
