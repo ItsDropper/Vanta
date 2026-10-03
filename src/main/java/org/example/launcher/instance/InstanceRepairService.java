@@ -38,6 +38,7 @@ public final class InstanceRepairService {
                         || text.contains("minecraft client jar not found")
                         || text.contains("native library not found")
                         || text.contains("native classifier not found")
+                        || text.contains("asset index missing")
                         || text.contains("forge installed, but no forge version metadata")
                         || text.contains("missing forge")
                         || text.contains("forge")
