@@ -533,7 +533,7 @@ public class GlobalModsView extends VBox {
 
                         List<ModrinthSearchHit> projects =
                                 modrinthClient
-                                        .getMostDownloadedMods(
+                                        .getMostDownloaded(
                                                 contentTypeBox.getValue(),
                                                 selectedLoader(),
                                                 selectedVersion()
@@ -802,6 +802,7 @@ public class GlobalModsView extends VBox {
                                 modrinthClient
                                         .search(
                                                 query,
+                                                contentTypeBox.getValue(),
                                                 selectedLoader(),
                                                 selectedVersion()
                                         )
