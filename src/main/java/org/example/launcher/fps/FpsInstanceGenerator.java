@@ -27,7 +27,7 @@ public final class FpsInstanceGenerator {
             "entityculling",
             "moreculling",
             "dynamic-fps",
-            "bad-optimizations",
+            "badoptimizations",
             "better-block-entities",
             "modernfix-mvus",
             "sodium-extra",
