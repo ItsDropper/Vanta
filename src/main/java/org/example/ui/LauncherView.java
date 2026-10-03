@@ -47,6 +47,7 @@ public class LauncherView {
     private final AccountsView accountsView;
     private final InstancesView instancesView;
     private final GlobalModsView globalModsView;
+    private final StateCenterView stateCenterView;
     private final SettingsView settingsView;
     private final CreateInstanceTypeView createInstanceTypeView;
 
@@ -264,6 +265,8 @@ public class LauncherView {
                         this::showGlobalContentDetails
                 );
 
+        stateCenterView = new StateCenterView();
+
         settingsView =
                 new SettingsView(
                         accountService,
@@ -325,6 +328,7 @@ public class LauncherView {
             case ACCOUNTS -> showAnimatedContent(accountsView);
             case INSTANCES -> showAnimatedContent(instancesView);
             case MODS -> showAnimatedContent(globalModsView);
+            case STATE -> showAnimatedContent(stateCenterView);
             case SETTINGS -> showAnimatedContent(settingsView);
         }
     }
