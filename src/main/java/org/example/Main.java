@@ -110,7 +110,6 @@ public class Main extends Application {
                 "/css/login.css",
                 "/css/scrollbars.css",
                 "/css/modrinth.css",
-                "/css/markdown.css",
                 "/css/title-bar.css",
                 "/css/design-system.css"
         };
