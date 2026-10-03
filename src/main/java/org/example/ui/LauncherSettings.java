@@ -103,6 +103,22 @@ public final class LauncherSettings {
         setBoolean("discordShowInstance", value);
     }
 
+    public static boolean isDiscordShowVersionEnabled() {
+        return getBoolean("discordShowVersion", true);
+    }
+
+    public static void setDiscordShowVersionEnabled(boolean value) {
+        setBoolean("discordShowVersion", value);
+    }
+
+    public static boolean isDiscordShowLoaderEnabled() {
+        return getBoolean("discordShowLoader", true);
+    }
+
+    public static void setDiscordShowLoaderEnabled(boolean value) {
+        setBoolean("discordShowLoader", value);
+    }
+
     public static void resetOnboarding() {
         setBoolean("onboardingCompleted", false);
     }
