@@ -67,7 +67,27 @@ public class Main extends Application {
     ) {
         loadingScreen.setStatus("BUILDING YOUR WORKSPACE");
 
-        LauncherView launcherView = new LauncherView(stage);
+        final boolean[] launcherReady = {false};
+        final boolean[] minimumTimeElapsed = {false};
+        final boolean[] finished = {false};
+
+        Runnable tryFinish = () -> {
+            if (finished[0] || !launcherReady[0] || !minimumTimeElapsed[0]) {
+                return;
+            }
+
+            finished[0] = true;
+            loadingScreen.setStatus("READY");
+            loadingScreen.finish(() -> {
+                scene.setRoot(launcherView.getRoot());
+                stage.setScene(scene);
+            });
+        };
+
+        LauncherView launcherView = new LauncherView(stage, () -> {
+            launcherReady[0] = true;
+            tryFinish.run();
+        });
 
         String[] stylesheets = {
                 "/css/global.css",
@@ -110,11 +130,8 @@ public class Main extends Application {
                 new PauseTransition(Duration.millis(remainingMs));
 
         minimumDisplay.setOnFinished(event -> {
-            loadingScreen.setStatus("READY");
-            loadingScreen.finish(() -> {
-                scene.setRoot(launcherView.getRoot());
-                stage.setScene(scene);
-            });
+            minimumTimeElapsed[0] = true;
+            tryFinish.run();
         });
 
         minimumDisplay.play();
