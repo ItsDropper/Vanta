@@ -221,8 +221,10 @@ public class CreateInstanceView extends VBox {
          * Fabric and Forge are added only after we verify that the
          * selected Minecraft version supports them.
          */
-        loaderBox.getItems().add(
-                "Vanilla"
+        loaderBox.getItems().addAll(
+                "Vanilla",
+                "Fabric",
+                "Forge"
         );
 
         loaderBox.getSelectionModel()
