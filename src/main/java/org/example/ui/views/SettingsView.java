@@ -476,7 +476,30 @@ public class SettingsView extends BorderPane {
         addInfoRow(runtimeCard, "Java", System.getProperty("java.version", "Unknown"));
         addInfoRow(runtimeCard, "Java home", System.getProperty("java.home", "Unknown"));
 
-        content.getChildren().addAll(behavior, dataCard, runtimeCard);
+        VBox workspace = card("Workspace", "Control how the main Vanta pages behave and how much information they show.");
+        CheckBox playtime = new CheckBox("Show playtime on instance cards");
+        playtime.setSelected(LauncherSettings.isShowPlaytimeEnabled());
+        playtime.getStyleClass().add("settings-checkbox");
+        playtime.setOnAction(e -> LauncherSettings.setShowPlaytimeEnabled(playtime.isSelected()));
+        CheckBox compact = new CheckBox("Use compact instance cards");
+        compact.setSelected(LauncherSettings.isCompactInstancesEnabled());
+        compact.getStyleClass().add("settings-checkbox");
+        compact.setOnAction(e -> LauncherSettings.setCompactInstancesEnabled(compact.isSelected()));
+        CheckBox notifications = new CheckBox("Show launcher notifications");
+        notifications.setSelected(LauncherSettings.isNotificationsEnabled());
+        notifications.getStyleClass().add("settings-checkbox");
+        notifications.setOnAction(e -> LauncherSettings.setNotificationsEnabled(notifications.isSelected()));
+        CheckBox remember = new CheckBox("Remember the last Settings section");
+        remember.setSelected(LauncherSettings.isRememberLastSettingsPageEnabled());
+        remember.getStyleClass().add("settings-checkbox");
+        remember.setOnAction(e -> LauncherSettings.setRememberLastSettingsPageEnabled(remember.isSelected()));
+        CheckBox stateScan = new CheckBox("Scan State automatically when opened");
+        stateScan.setSelected(LauncherSettings.isStateScanOnOpenEnabled());
+        stateScan.getStyleClass().add("settings-checkbox");
+        stateScan.setOnAction(e -> LauncherSettings.setStateScanOnOpenEnabled(stateScan.isSelected()));
+        workspace.getChildren().addAll(playtime, compact, notifications, remember, stateScan);
+
+        content.getChildren().addAll(behavior, workspace, dataCard, runtimeCard);
     }
 
     private void buildMinecraftPage() {
@@ -681,7 +704,19 @@ public class SettingsView extends BorderPane {
         layout.getChildren().get(layout.getChildren().size() - 1)
                 .getStyleClass().add("settings-card-description");
 
-        content.getChildren().addAll(workers, layout);
+        VBox reliability = card("Download reliability", "Control verification and retry behavior for network downloads.");
+        CheckBox verify = new CheckBox("Verify downloaded files before installation");
+        verify.setSelected(LauncherSettings.isVerifyDownloadsEnabled());
+        verify.getStyleClass().add("settings-checkbox");
+        verify.setOnAction(e -> LauncherSettings.setVerifyDownloadsEnabled(verify.isSelected()));
+        Slider retries = new Slider(1, 8, LauncherSettings.getDownloadRetries());
+        retries.setMajorTickUnit(1); retries.setMinorTickCount(0); retries.setSnapToTicks(true); retries.setShowTickLabels(true); retries.setShowTickMarks(true); retries.setMaxWidth(Double.MAX_VALUE);
+        Label retryValue = new Label(LauncherSettings.getDownloadRetries() + " retries"); retryValue.getStyleClass().add("instance-setting-value");
+        retries.valueProperty().addListener((o,a,b) -> retryValue.setText((int)Math.round(b.doubleValue()) + " retries"));
+        Button saveReliability = new Button("SAVE DOWNLOAD RELIABILITY"); saveReliability.getStyleClass().add("primary-button");
+        saveReliability.setOnAction(e -> LauncherSettings.setDownloadRetries((int)Math.round(retries.getValue())));
+        reliability.getChildren().addAll(verify, retryValue, retries, saveReliability);
+        content.getChildren().addAll(workers, reliability, layout);
     }
 
     private void buildDiagnosticsPage() {
@@ -711,8 +746,14 @@ public class SettingsView extends BorderPane {
                 LauncherSettings.setConfirmRemovalsEnabled(confirmations.isSelected())
         );
 
+        CheckBox instanceDeletion = new CheckBox("Confirm instance deletion");
+        instanceDeletion.setSelected(LauncherSettings.isConfirmInstanceDeletionEnabled());
+        instanceDeletion.getStyleClass().add("settings-checkbox");
+        instanceDeletion.setOnAction(e -> LauncherSettings.setConfirmInstanceDeletionEnabled(instanceDeletion.isSelected()));
+
         health.getChildren().addAll(
                 confirmations,
+                instanceDeletion,
                 actionButton(
                         "OPEN DATA FOLDER",
                         () -> openDirectory(MinecraftLocator.getVantaDirectory())
