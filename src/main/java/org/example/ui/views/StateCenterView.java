@@ -481,15 +481,6 @@ public final class StateCenterView extends VBox {
         VBox right = new VBox(5, status, stats);
         right.setAlignment(Pos.CENTER_RIGHT);
 
-        if (state.getLevel() == InstanceState.Level.BROKEN
-                && !LauncherSettings.isStateAutoRepairEnabled()) {
-            Button repair = new Button("REPAIR");
-            repair.getStyleClass().add("state-repair-button");
-            repair.setFocusTraversable(false);
-            repair.setOnAction(event -> repairInstanceManually(instance, repair));
-            right.getChildren().add(repair);
-        }
-
         card.getChildren().addAll(icon, text, right);
         return card;
     }
@@ -703,6 +694,16 @@ public final class StateCenterView extends VBox {
 
         VBox right = new VBox(5, status, stats);
         right.setAlignment(Pos.CENTER_RIGHT);
+
+        if (state.getLevel() == InstanceState.Level.BROKEN
+                && !LauncherSettings.isStateAutoRepairEnabled()) {
+            Button repair = new Button("REPAIR");
+            repair.getStyleClass().add("state-repair-button");
+            repair.setFocusTraversable(false);
+            repair.setOnAction(event -> repairInstanceManually(instance, repair));
+            right.getChildren().add(repair);
+        }
+
         card.getChildren().addAll(icon, text, right);
         return card;
     }
