@@ -24,6 +24,7 @@ import org.example.launcher.state.InstanceStateEngine;
 import org.example.launcher.instance.InstanceRepairService;
 import org.example.ui.components.IconView;
 import org.example.ui.components.InstanceCard;
+import org.example.ui.components.NotificationManager;
 import org.example.ui.AnimationUtils;
 import org.example.ui.LauncherSettings;
 
