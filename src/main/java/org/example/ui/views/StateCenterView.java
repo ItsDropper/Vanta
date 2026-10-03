@@ -26,7 +26,6 @@ import org.example.ui.components.InstanceCard;
 import org.example.ui.AnimationUtils;
 import org.example.ui.LauncherSettings;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;\nimport java.util.IdentityHashMap;\nimport java.util.Map;
 
@@ -201,28 +200,6 @@ public final class StateCenterView extends VBox {
                             return thread;
                         }
                 );
-
-        java.util.function.BiConsumer<String, Object> complete = (kind, result) -> {
-            int done = completed.incrementAndGet();
-
-            if (result instanceof InstanceState state) {
-                if (state.isHealthy()) healthy.incrementAndGet();
-                else if (state.getLevel() == InstanceState.Level.ATTENTION) attention.incrementAndGet();
-                else broken.incrementAndGet();
-            }
-
-            Platform.runLater(() -> {
-                if (generation != scanGeneration) return;
-
-                if (result instanceof InstanceState state) {
-                    Instance instance = (Instance) ((Object[]) new Object[]{kind, result})[0];
-                }
-            });
-
-            // The UI update is submitted separately below so the task can carry
-            // its actual instance/resource identity without shared mutable state.
-            updateScanProgress(generation, done, totalTasks, workers, healthy.get(), attention.get(), broken.get(), kind);
-        };
 
         for (Instance instance : instances) {
             executor.submit(() -> {
