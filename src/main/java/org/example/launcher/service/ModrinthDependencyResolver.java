@@ -1019,132 +1019,78 @@ private String findModrinthProjectForFabricModId(
             String fabricModId
     ) throws IOException, InterruptedException {
 
-        if (fabricModId == null
-                || fabricModId.isBlank()) {
-
+        if (fabricModId == null || fabricModId.isBlank()) {
             return null;
         }
 
-        /*
-         * The special Fabric "fabric" dependency is provided by the
-         * Fabric API project itself. Do not search Modrinth or download
-         * Fabric API JARs just to rediscover this mapping.
-         */
         if ("fabric".equalsIgnoreCase(fabricModId)) {
             fabricModIdProjectCache.put(fabricModId, "P7dR8mSH");
             return "P7dR8mSH";
         }
 
-        String cached =
-                fabricModIdProjectCache.get(
-                        fabricModId
-                );
-
+        String cached = fabricModIdProjectCache.get(fabricModId);
         if (cached != null) {
             return cached;
         }
 
         /*
-         * Search Modrinth first for a standalone project. This is much
-         * cheaper than downloading multiple Fabric API JARs. The Fabric
-         * API scan below is only the fallback for API modules.
+         * Standalone Fabric IDs should be resolved directly through
+         * Modrinth. Fabric API inspection is only relevant to IDs that
+         * are actually in Fabric API's namespace.
          */
         List<ModrinthSearchHit> hits =
                 client.search(
                         fabricModId,
                         ModrinthContentType.MOD,
-                        normalizeLoader(
-                                instance.getLoader()
-                        ),
+                        normalizeLoader(instance.getLoader()),
                         instance.getMinecraftVersion()
                 ).getHits();
 
-        if (hits != null && !hits.isEmpty()) {
-            for (ModrinthSearchHit hit :
-                hits) {
+        if (hits != null) {
+            for (ModrinthSearchHit hit : hits) {
+                if (hit == null
+                        || hit.getProjectId() == null
+                        || hit.getProjectId().isBlank()) {
+                    continue;
+                }
 
-            if (hit == null
-                    || hit.getProjectId() == null
-                    || hit.getProjectId().isBlank()) {
+                String projectId = hit.getProjectId();
 
-                continue;
-            }
+                for (ModrinthVersion version :
+                        getCompatibleCandidates(instance, projectId)) {
 
-            String projectId =
-                    hit.getProjectId();
+                    InstalledMod metadata = readFabricMetadata(version);
 
-            List<ModrinthVersion> versions =
-                    getCompatibleCandidates(
-                            instance,
-                            projectId
-                    );
+                    if (metadata != null
+                            && fabricModId.equals(metadata.getModId())) {
 
-            for (ModrinthVersion version :
-                    versions) {
-
-                InstalledMod metadata =
-                        readFabricMetadata(
-                                version
+                        fabricModIdProjectCache.put(
+                                fabricModId,
+                                projectId
                         );
 
-                if (metadata == null
-                        || metadata.getModId() == null) {
-
-                    continue;
+                        return projectId;
+                    }
                 }
-
-                if (!fabricModId.equals(
-                        metadata.getModId()
-                )) {
-
-                    continue;
-                }
-
-                fabricModIdProjectCache.put(
-                        fabricModId,
-                        projectId
-                );
-
-                System.out.println(
-                        "[Vanta DEBUG] Mapped Fabric mod "
-                                + fabricModId
-                                + " -> Modrinth project "
-                                + projectId
-                );
-
-                return projectId;
             }
         }
 
-        /*
-         * Only IDs in Fabric's own module namespace can be provided by
-         * Fabric API. Standalone IDs such as mixinextras must never
-         * trigger expensive Fabric API JAR downloads.
-         */
         if (!fabricModId.startsWith("fabric-")) {
             return null;
         }
 
         /*
-         * Fabric API contains a number of modules inside its JAR.
-         * Check Fabric API directly before searching Modrinth.
+         * Fabric API contains internal modules. This is deliberately a
+         * fallback because downloading API JARs is expensive.
          */
-        List<ModrinthVersion> fabricApiVersions =
-                getCompatibleCandidates(
-                        instance,
-                        "P7dR8mSH"
-                );
-
         for (ModrinthVersion version :
-                fabricApiVersions) {
+                getCompatibleCandidates(instance, "P7dR8mSH")) {
 
-            ModrinthFile file =
-                    findPrimaryFile(version);
+            ModrinthFile file = findPrimaryFile(version);
 
             if (file == null
                     || file.getUrl() == null
                     || file.getUrl().isBlank()) {
-
                 continue;
             }
 
@@ -1155,51 +1101,23 @@ private String findModrinthProjectForFabricModId(
                     );
 
             try {
-
-                try {
-
-                    DownloadUtil.downloadFile(
-                            file.getUrl(),
-                            tempFile
-                    );
-
-                } catch (Exception e) {
-
-                    throw new IOException(
-                            "Failed to download Fabric API "
-                                    + version.getVersionNumber()
-                                    + " for dependency inspection.",
-                            e
-                    );
-                }
+                DownloadUtil.downloadFile(
+                        file.getUrl(),
+                        tempFile
+                );
 
                 if (installedModScanner.containsFabricModId(
                         tempFile,
                         fabricModId
                 )) {
-
                     fabricModIdProjectCache.put(
                             fabricModId,
                             "P7dR8mSH"
                     );
-
-                    System.out.println(
-                            "[Vanta DEBUG] Fabric API provides "
-                                    + fabricModId
-                                    + " -> fabric-api"
-                    );
-
                     return "P7dR8mSH";
                 }
-
             } finally {
-
-                try {
-                    Files.deleteIfExists(
-                            tempFile
-                    );
-                } catch (IOException ignored) {
-                }
+                Files.deleteIfExists(tempFile);
             }
         }
 
@@ -2758,80 +2676,20 @@ private boolean isProvidedByFabricApi(
         if (resolved == null
                 || fabricDependencyModId == null
                 || fabricDependencyModId.isBlank()) {
-
             return false;
         }
 
         /*
-         * The special Fabric "fabric" dependency is provided by the
-         * Fabric API project. Treat it exactly like the internal
-         * fabric-* modules so we never search Modrinth or download
-         * multiple Fabric API candidates just to rediscover this.
+         * "fabric" is Fabric's special dependency and is provided by
+         * Fabric API. Other IDs must not be assumed to be API modules.
          */
-        boolean fabricApiDependency =
-                "fabric".equalsIgnoreCase(fabricDependencyModId)
-                        || fabricDependencyModId.startsWith("fabric-");
-
-        if (!fabricApiDependency) {
+        if (!"fabric".equalsIgnoreCase(fabricDependencyModId)) {
             return false;
         }
 
-        /*
-         * Find the Fabric API project in the resolved graph.
-         */
-        // The resolver graph is keyed by Modrinth project IDs, not
-        // Fabric mod IDs. Fabric API's Modrinth project ID is P7dR8mSH.
-        ModrinthVersion fabricApi =
-                resolved.get("P7dR8mSH");
-
-        if (fabricApi == null) {
-            return false;
-        }
-
-        /*
-         * Verify that the selected Fabric API version itself is
-         * compatible with the requested Fabric API module version.
-         *
-         * Fabric API modules use "*" in most cases, meaning any
-         * compatible Fabric API version is acceptable.
-         */
-        if (constraint == null
-                || constraint.isBlank()
-                || "*".equals(constraint)) {
-
-            System.out.println(
-                    "[Vanta DEBUG]   Fabric API provides module "
-                            + fabricDependencyModId
-            );
-
-            return true;
-        }
-
-        /*
-         * For a versioned module dependency, do not blindly assume
-         * that any Fabric API version satisfies it.
-         */
-        InstalledMod fabricApiMetadata =
-                readFabricMetadata(fabricApi);
-
-        if (fabricApiMetadata == null) {
-            return false;
-        }
-
-        System.out.println(
-                "[Vanta DEBUG]   Fabric API selected for module "
-                        + fabricDependencyModId
-                        + " ["
-                        + constraint
-                        + "]"
-        );
-
-        /*
-         * Fabric API is the provider. The module itself does not have
-         * to exist as a separate Modrinth project.
-         */
-        return true;
+        return resolved.containsKey("P7dR8mSH");
     }
+
     private int minimumJavaMajorForMinecraft(
             String minecraftVersion
     ) {
