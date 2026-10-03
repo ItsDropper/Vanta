@@ -1261,7 +1261,7 @@ private boolean resolveFabricDependency(
 
                     /* Fabric API module constraints use the module's own
                      * version, not Fabric API's top-level 0.141.x version. */
-                    if (!matchesFabricConstraint(moduleVersion, constraint)) {
+                    if (!matchesFabricModuleConstraint(moduleVersion, constraint)) {
                         System.out.println(
                                 "[Vanta DEBUG] Rejected Fabric API module "
                                         + fabricModId + " " + moduleVersion
@@ -1615,6 +1615,34 @@ public InstalledMod readFabricMetadata(
                 }
             }
         }
+    }
+
+private boolean matchesFabricModuleConstraint(
+            String version,
+            String constraint
+    ) {
+        if (version == null || constraint == null) return false;
+        String actual = normalizeVersionForComparison(version);
+        String required = constraint.trim();
+        if (required.isEmpty() || "*".equals(required)) return true;
+
+        if (required.startsWith(">=")) {
+            return compareSimpleVersions(actual,
+                    normalizeVersionForComparison(required.substring(2).trim())) >= 0;
+        }
+        if (required.startsWith(">")) {
+            return compareSimpleVersions(actual,
+                    normalizeVersionForComparison(required.substring(1).trim())) > 0;
+        }
+        if (required.startsWith("<=")) {
+            return compareSimpleVersions(actual,
+                    normalizeVersionForComparison(required.substring(2).trim())) <= 0;
+        }
+        if (required.startsWith("<")) {
+            return compareSimpleVersions(actual,
+                    normalizeVersionForComparison(required.substring(1).trim())) < 0;
+        }
+        return matchesFabricConstraint(actual, required);
     }
 
 private boolean matchesFabricConstraint(
