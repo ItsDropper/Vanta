@@ -173,103 +173,6 @@ public class SettingsView extends BorderPane {
         }
     }
 
-        VBox rollback = card(
-                "Vanta version rollback",
-                "Install an older published Vanta release. This rolls back the launcher itself, not Minecraft instances."
-        );
-
-        ComboBox<UpdateInfo> versions = new ComboBox<>();
-        versions.setPromptText("Select a Vanta version");
-        versions.setMaxWidth(Double.MAX_VALUE);
-        versions.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(UpdateInfo info) {
-                return info == null ? "" : info.getLatestVersion().replaceFirst("^[vV]", "");
-            }
-
-            @Override
-            public UpdateInfo fromString(String string) {
-                return null;
-            }
-        });
-
-        Button rollbackButton = new Button("ROLL BACK VANTA");
-        rollbackButton.getStyleClass().add("secondary-button");
-        rollbackButton.setDisable(true);
-        versions.valueProperty().addListener((obs, oldValue, newValue) ->
-                rollbackButton.setDisable(newValue == null)
-        );
-
-        rollbackButton.setOnAction(event -> {
-            UpdateInfo selected = versions.getValue();
-            if (selected == null) {
-                return;
-            }
-
-            Alert confirm = new Alert(
-                    Alert.AlertType.CONFIRMATION,
-                    "Vanta will be replaced with version "
-                            + selected.getLatestVersion().replaceFirst("^[vV]", "")
-                            + " and restarted. Continue?",
-                    ButtonType.CANCEL,
-                    ButtonType.OK
-            );
-            confirm.setTitle("Roll Back Vanta");
-            confirm.setHeaderText("Roll back launcher version");
-
-            if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
-                onVantaUpdate.accept(selected);
-            }
-        });
-
-        rollback.getChildren().addAll(
-                versions,
-                rollbackButton
-        );
-
-        content.getChildren().add(rollback);
-        loadRollbackVersions(versions, rollbackButton);
-    }
-
-    private void loadRollbackVersions(
-            ComboBox<UpdateInfo> versions,
-            Button rollbackButton
-    ) {
-        versions.setPromptText("Loading available versions...");
-
-        Thread thread = new Thread(() -> {
-            try {
-                UpdateService service = new UpdateService();
-                var available = service.getAvailableVersions(loadVersion());
-
-                Platform.runLater(() -> {
-                    versions.getItems().setAll(available);
-                    versions.setPromptText(
-                            available.isEmpty()
-                                    ? "No rollback versions available"
-                                    : "Select a Vanta version"
-                    );
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    versions.setPromptText("Could not load Vanta versions");
-                    rollbackButton.setDisable(true);
-
-                    NotificationManager manager = NotificationManager.getGlobal();
-                    if (manager != null) {
-                        manager.error(
-                                "Rollback versions unavailable",
-                                "Vanta could not load published launcher releases."
-                        );
-                    }
-                });
-            }
-        }, "Vanta-Rollback-Versions");
-
-        thread.setDaemon(true);
-        thread.start();
-    }
-
     private void buildAppearancePage() {
         pageHeader(
                 "Appearance",
@@ -627,6 +530,103 @@ public class SettingsView extends BorderPane {
                 hideLauncher,
                 autoOpenBrowser
         );
+
+        VBox rollback = card(
+                "Vanta version rollback",
+                "Install an older published Vanta release. This rolls back the launcher itself, not Minecraft instances."
+        );
+
+        ComboBox<UpdateInfo> versions = new ComboBox<>();
+        versions.setPromptText("Select a Vanta version");
+        versions.setMaxWidth(Double.MAX_VALUE);
+        versions.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(UpdateInfo info) {
+                return info == null ? "" : info.getLatestVersion().replaceFirst("^[vV]", "");
+            }
+
+            @Override
+            public UpdateInfo fromString(String string) {
+                return null;
+            }
+        });
+
+        Button rollbackButton = new Button("ROLL BACK VANTA");
+        rollbackButton.getStyleClass().add("secondary-button");
+        rollbackButton.setDisable(true);
+        versions.valueProperty().addListener((obs, oldValue, newValue) ->
+                rollbackButton.setDisable(newValue == null)
+        );
+
+        rollbackButton.setOnAction(event -> {
+            UpdateInfo selected = versions.getValue();
+            if (selected == null) {
+                return;
+            }
+
+            Alert confirm = new Alert(
+                    Alert.AlertType.CONFIRMATION,
+                    "Vanta will be replaced with version "
+                            + selected.getLatestVersion().replaceFirst("^[vV]", "")
+                            + " and restarted. Continue?",
+                    ButtonType.CANCEL,
+                    ButtonType.OK
+            );
+            confirm.setTitle("Roll Back Vanta");
+            confirm.setHeaderText("Roll back launcher version");
+
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+                onVantaUpdate.accept(selected);
+            }
+        });
+
+        rollback.getChildren().addAll(
+                versions,
+                rollbackButton
+        );
+
+        content.getChildren().add(rollback);
+        loadRollbackVersions(versions, rollbackButton);
+    }
+
+    private void loadRollbackVersions(
+            ComboBox<UpdateInfo> versions,
+            Button rollbackButton
+    ) {
+        versions.setPromptText("Loading available versions...");
+
+        Thread thread = new Thread(() -> {
+            try {
+                UpdateService service = new UpdateService();
+                var available = service.getAvailableVersions(loadVersion());
+
+                Platform.runLater(() -> {
+                    versions.getItems().setAll(available);
+                    versions.setPromptText(
+                            available.isEmpty()
+                                    ? "No rollback versions available"
+                                    : "Select a Vanta version"
+                    );
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    versions.setPromptText("Could not load Vanta versions");
+                    rollbackButton.setDisable(true);
+
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error(
+                                "Rollback versions unavailable",
+                                "Vanta could not load published launcher releases."
+                        );
+                    }
+                });
+            }
+        }, "Vanta-Rollback-Versions");
+
+        thread.setDaemon(true);
+        thread.start();
+    }
 
         VBox dataCard = card(
                 "Vanta data",
