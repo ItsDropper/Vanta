@@ -12,6 +12,7 @@ public final class ModrinthDependencyResolver {
     private final InstalledModScanner installedModScanner;
     private final Map<String, InstalledMod> fabricMetadataCache = new HashMap<>();
     private final Map<String, String> fabricModIdProjectCache = new HashMap<>();
+    private final Map<String, Set<String>> fabricApiModuleCache = new HashMap<>();
     private final Map<String, List<ModrinthVersion>> versionCache =
             new java.util.concurrent.ConcurrentHashMap<>();
     private boolean fastResolution = true;
@@ -25,6 +26,7 @@ public final class ModrinthDependencyResolver {
     public void clearCaches() {
         fabricMetadataCache.clear();
         fabricModIdProjectCache.clear();
+        fabricApiModuleCache.clear();
         versionCache.clear();
     }
 
@@ -1209,28 +1211,29 @@ private boolean resolveFabricDependency(
                         "P7dR8mSH".equals(projectId);
 
                 if (fabricApiProvider) {
-                    ModrinthFile candidateFile =
-                            findPrimaryFile(candidate);
+                    String cacheKey = candidate.getId();
+                    Set<String> cachedModules =
+                            fabricApiModuleCache.get(cacheKey);
 
-                    if (candidateFile == null
-                            || candidateFile.getUrl() == null
-                            || candidateFile.getUrl().isBlank()) {
-                        continue;
-                    }
+                    boolean providesModule;
+                    if (cachedModules != null) {
+                        providesModule = cachedModules.contains(fabricModId);
+                    } else {
+                        ModrinthFile candidateFile =
+                                findPrimaryFile(candidate);
 
-                    Path tempFile =
-                            Files.createTempFile(
-                                    "vanta-fabric-provider-",
-                                    ".jar"
-                            );
+                        if (candidateFile == null
+                                || candidateFile.getUrl() == null
+                                || candidateFile.getUrl().isBlank()) {
+                            continue;
+                        }
 
-                    try {
+                        Path tempFile = Files.createTempFile(
+                                "vanta-fabric-provider-", ".jar");
                         try {
                             try {
                                 DownloadUtil.downloadFile(
-                                        candidateFile.getUrl(),
-                                        tempFile
-                                );
+                                        candidateFile.getUrl(), tempFile);
                             } catch (InterruptedException e) {
                                 Thread.currentThread().interrupt();
                                 throw e;
@@ -1239,40 +1242,35 @@ private boolean resolveFabricDependency(
                             } catch (Exception e) {
                                 throw new IOException(
                                         "Failed to download Fabric API candidate: "
-                                                + e.getMessage(),
-                                        e
-                                );
+                                                + e.getMessage(), e);
                             }
-                        } catch (Exception e) {
-                            throw new IOException(
-                                    "Failed to inspect Fabric API candidate "
-                                            + candidate.getVersionNumber(),
-                                    e
-                            );
-                        }
 
-                        if (!installedModScanner.containsFabricModId(
-                                tempFile,
-                                fabricModId
-                        )) {
-                            continue;
-                        }
-                    } finally {
-                        try {
+                            providesModule = installedModScanner.containsFabricModId(
+                                    tempFile, fabricModId);
+                            fabricApiModuleCache
+                                    .computeIfAbsent(cacheKey, ignored -> new HashSet<>())
+                                    .add(providesModule ? fabricModId : "__missing__:" + fabricModId);
+                        } finally {
                             Files.deleteIfExists(tempFile);
-                        } catch (IOException ignored) {
                         }
                     }
-                } else if (!fabricModId.equals(
-                        metadata.getModId()
-                )) {
-                    continue;
-                }
 
-                if (!matchesFabricConstraint(
-                        metadata.getVersion(),
-                        constraint
-                )) {
+                    if (!providesModule) {
+                        continue;
+                    }
+
+                    /*
+                     * Fabric API's top-level version is NOT the version of
+                     * its nested modules. A module such as
+                     * fabric-rendering-fluids-v1 can require >=2.0.0 while
+                     * the provider JAR itself is version 0.141.x. Once the
+                     * module is present in the API JAR, do not compare the
+                     * API's top-level version against the module constraint.
+                     */
+                } else if (!fabricModId.equals(metadata.getModId())) {
+                    continue;
+                } else if (!matchesFabricConstraint(
+                        metadata.getVersion(), constraint)) {
 
                     System.out.println(
                             "[Vanta DEBUG] Rejected Fabric dependency candidate "
