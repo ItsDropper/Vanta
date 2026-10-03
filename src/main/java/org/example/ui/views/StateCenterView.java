@@ -107,8 +107,8 @@ public final class StateCenterView extends VBox {
                     }
                 }
             } catch (Throwable ignored) {
-                instances = List.of();
-                Platform.runLater(() -> finishScan(generation, false, instances, states));
+                List<Instance> failedInstances = List.of();
+                Platform.runLater(() -> finishScan(generation, false, failedInstances, states));
                 return;
             }
 
