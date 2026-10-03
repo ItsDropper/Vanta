@@ -22,6 +22,7 @@ public final class InstancePresets {
     );
 
     private static final List<InstancePreset> BUILT_IN_PRESETS = List.of(
+            createFpsPreset(),
             createPvpPreset(),
             createPerformancePreset(),
             createVanillaPlusPreset(),
@@ -54,6 +55,19 @@ public final class InstancePresets {
                                 )
                 )
                 .findFirst();
+    }
+
+    private static InstancePreset createFpsPreset() {
+
+        return new InstancePreset(
+                "fps-optimized",
+                "FPS Optimized",
+                "Hardware-aware Fabric instance generated for high FPS, low frame time, and automatic NVIDIA optimization.",
+                DEFAULT_VERSIONS,
+                "Fabric",
+                List.of(),
+                List.of()
+        );
     }
 
     private static InstancePreset createPvpPreset() {
