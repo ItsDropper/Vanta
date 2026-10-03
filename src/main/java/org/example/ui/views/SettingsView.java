@@ -824,6 +824,9 @@ public class SettingsView extends BorderPane {
         Label scanWorkerValue = new Label();
         scanWorkerValue.getStyleClass().add("instance-setting-value");
 
+        Label presetLabel = new Label("Quick presets");
+        presetLabel.getStyleClass().add("settings-card-description");
+
         Runnable updateScanWorkerValue = () ->
                 scanWorkerValue.setText((int) Math.round(scanWorkers.getValue()) + " scan workers");
 
@@ -856,13 +859,10 @@ public class SettingsView extends BorderPane {
         scanPerformance.getChildren().addAll(
                 scanWorkerValue,
                 scanWorkers,
-                new Label("Quick presets"),
+                presetLabel,
                 scanPresets,
                 saveScanWorkers
         );
-        scanPerformance.getChildren().get(scanPerformance.getChildren().size() - 2)
-                .getStyleClass().add("settings-card-description");
-
         VBox safety = card(
                 "What diagnostics change",
                 "The launcher does not silently rewrite files from this page. Instance dependency repair remains available from the instance repair flow."
