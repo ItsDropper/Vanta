@@ -328,9 +328,18 @@ public class LauncherView {
             case ACCOUNTS -> showAnimatedContent(accountsView);
             case INSTANCES -> showAnimatedContent(instancesView);
             case MODS -> showAnimatedContent(globalModsView);
-            case STATE -> showAnimatedContent(stateCenterView);
+            case STATE -> showStatePage();
             case SETTINGS -> showAnimatedContent(settingsView);
         }
+    }
+
+    private void showStatePage() {
+        content.getChildren().setAll(stateCenterView);
+        stateCenterView.setVisible(true);
+        stateCenterView.setManaged(true);
+        stateCenterView.setOpacity(1);
+        stateCenterView.setTranslateX(0);
+        stateCenterView.setTranslateY(0);
     }
 
     private void showAnimatedContent(Parent view) {
