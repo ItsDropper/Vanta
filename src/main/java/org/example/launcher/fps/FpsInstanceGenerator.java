@@ -82,17 +82,20 @@ public final class FpsInstanceGenerator {
                     new ArrayList<>();
 
             for (String slug : BASE_MODS) {
-                ModrinthProject project =
-                        modrinth.getProjectBySlug(slug);
+                try {
+                    ModrinthProject project =
+                            modrinth.getProjectBySlug(slug);
 
-                if (project == null) {
+                    if (project != null) {
+                        roots.add(project);
+                    }
+                } catch (IOException e) {
                     throw new IOException(
-                            "Required FPS mod was not found on Modrinth: "
-                                    + slug
+                            "Failed to resolve FPS mod '" + slug + "' from Modrinth: "
+                                    + e.getMessage(),
+                            e
                     );
                 }
-
-                roots.add(project);
             }
 
             boolean nvidiumInstalled = false;
