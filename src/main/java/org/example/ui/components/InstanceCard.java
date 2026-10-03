@@ -4,6 +4,8 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -38,7 +40,7 @@ public class InstanceCard extends StackPane {
     private final Label loaderLabel;
     private final Label playtimeLabel;
     private final Label statusLabel;
-    private final Label iconLabel;
+    private final Canvas presetIconCanvas;
     private final ImageView customIconView;
 
     private final Button playButton;
@@ -95,14 +97,13 @@ public class InstanceCard extends StackPane {
         // ICON
         // ---------------------------------------------------------
 
-        iconLabel = new Label();
-        iconLabel.getStyleClass().add("instance-icon");
+        presetIconCanvas = createIconGraphic(instance.getIcon(), 30);
         customIconView = new ImageView();
         customIconView.setFitWidth(28);
         customIconView.setFitHeight(28);
         customIconView.setPreserveRatio(true);
 
-        StackPane icon = new StackPane(iconLabel, customIconView);
+        StackPane icon = new StackPane(presetIconCanvas, customIconView);
         icon.setAlignment(Pos.CENTER);
 
         VBox iconBox = new VBox(icon);
@@ -886,10 +887,10 @@ public class InstanceCard extends StackPane {
     private void updateIcon() {
         String icon = instance.getIcon();
         boolean custom = "CUSTOM".equalsIgnoreCase(icon);
+        presetIconCanvas.setVisible(!custom);
+        presetIconCanvas.setManaged(!custom);
         customIconView.setVisible(custom);
         customIconView.setManaged(custom);
-        iconLabel.setVisible(!custom);
-        iconLabel.setManaged(!custom);
         if (custom) {
             File file = instance.getDirectory().resolve("icon.png").toFile();
             if (file.isFile()) {
@@ -897,12 +898,11 @@ public class InstanceCard extends StackPane {
             } else {
                 customIconView.setImage(null);
                 customIconView.setVisible(false);
-                iconLabel.setVisible(true);
-                iconLabel.setManaged(true);
-                iconLabel.setText("⬢");
+                presetIconCanvas.setVisible(true);
+                presetIconCanvas.setManaged(true);
             }
         } else {
-            iconLabel.setText(iconGlyph(icon));
+            drawIconGraphic(presetIconCanvas, icon);
         }
     }
 
@@ -915,9 +915,6 @@ public class InstanceCard extends StackPane {
         nameLabel.setText(
                 instance.getName()
         );
-
-        Label icon = findIconLabel();
-        if (icon != null) icon.setText(iconGlyph(instance.getIcon()));
 
         versionLabel.setText(
                 "Minecraft "
@@ -938,32 +935,72 @@ public class InstanceCard extends StackPane {
         playtimeLabel.setManaged(showPlaytime);
     }
 
-    private Label findIconLabel() {
-        for (javafx.scene.Node node : getChildren()) {
-            if (node instanceof HBox content) {
-                for (javafx.scene.Node child : content.getChildren()) {
-                    if (child instanceof VBox box) {
-                        for (javafx.scene.Node nested : box.getChildren()) {
-                            if (nested instanceof Label label && label.getStyleClass().contains("instance-icon")) return label;
-                        }
-                    }
-                }
-            }
-        }
-        return null;
+    public static Canvas createIconGraphic(String icon, double size) {
+        Canvas canvas = new Canvas(size, size);
+        drawIconGraphic(canvas, icon);
+        return canvas;
     }
 
-    private static String iconGlyph(String icon) {
-        return switch (icon == null ? "SHIELD" : icon.toUpperCase()) {
-            case "PACKAGE" -> "◆";
-            case "PICKAXE" -> "⛏";
-            case "STAR" -> "★";
-            case "FIRE" -> "✦";
-            case "WORLD" -> "◎";
-            case "CROWN" -> "♛";
-            case "DIAMOND" -> "◇";
-            default -> "⬢";
-        };
+    private static void drawIconGraphic(Canvas canvas, String value) {
+        double s = canvas.getWidth() / 30.0;
+        GraphicsContext g = canvas.getGraphicsContext2D();
+        g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        g.setStroke(javafx.scene.paint.Color.web("#dbe7ff"));
+        g.setFill(javafx.scene.paint.Color.web("#dbe7ff"));
+        g.setLineWidth(2.2 * s);
+        String icon = value == null ? "SHIELD" : value.toUpperCase();
+
+        switch (icon) {
+            case "PACKAGE" -> {
+                g.strokeRect(6*s,8*s,18*s,15*s);
+                g.strokeLine(6*s,8*s,15*s,4*s);
+                g.strokeLine(15*s,4*s,24*s,8*s);
+                g.strokeLine(15*s,4*s,15*s,16*s);
+                g.strokeLine(6*s,8*s,15*s,16*s);
+                g.strokeLine(24*s,8*s,15*s,16*s);
+            }
+            case "PICKAXE" -> {
+                g.strokeLine(7*s,22*s,22*s,7*s);
+                g.strokeLine(7*s,8*s,22*s,8*s);
+                g.strokeLine(7*s,8*s,7*s,13*s);
+                g.strokeLine(22*s,7*s,25*s,10*s);
+            }
+            case "STAR" -> {
+                double[] x={15,18,24,19,21,15,9,11,6,12};
+                double[] y={4,11,11,15,23,19,23,15,11,11};
+                for(int i=0;i<x.length;i++){x[i]*=s;y[i]*=s;}
+                g.fillPolygon(x,y,x.length);
+            }
+            case "FIRE" -> {
+                g.beginPath(); g.moveTo(15*s,4*s); g.lineTo(21*s,13*s); g.lineTo(20*s,9*s);
+                g.lineTo(25*s,17*s); g.quadraticCurveTo(25*s,25*s,15*s,26*s);
+                g.quadraticCurveTo(5*s,25*s,7*s,16*s); g.quadraticCurveTo(8*s,11*s,12*s,8*s);
+                g.lineTo(12*s,16*s); g.closePath(); g.fill();
+            }
+            case "WORLD" -> {
+                g.strokeOval(5*s,5*s,20*s,20*s);
+                g.strokeOval(11*s,5*s,8*s,20*s);
+                g.strokeLine(5*s,15*s,25*s,15*s);
+            }
+            case "CROWN" -> {
+                double[] x={5,7,11,15,19,23,25,23,7};
+                double[] y={8,21,18,21,18,8,21,24,24};
+                for(int i=0;i<x.length;i++){x[i]*=s;y[i]*=s;}
+                g.fillPolygon(x,y,x.length);
+            }
+            case "DIAMOND" -> {
+                double[] x={15,5,15,25};
+                double[] y={5,15,25,15};
+                for(int i=0;i<x.length;i++){x[i]*=s;y[i]*=s;}
+                g.strokePolygon(x,y,x.length);
+                g.strokeLine(5*s,15*s,25*s,15*s);
+                g.strokeLine(15*s,5*s,15*s,25*s);
+            }
+            default -> {
+                g.beginPath(); g.moveTo(15*s,4*s); g.lineTo(24*s,8*s); g.lineTo(22*s,20*s);
+                g.lineTo(15*s,26*s); g.lineTo(8*s,20*s); g.lineTo(6*s,8*s); g.closePath(); g.stroke();
+            }
+        }
     }
 
     // =============================================================
