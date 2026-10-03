@@ -268,7 +268,7 @@ public final class StateCenterView extends VBox {
                 }
 
                 updateScanProgress(generation, done, totalTasks, workers,
-                        healthy.get(), attention.get(), broken.get(), instance.getName());
+                        healthy.get(), attention.get(), broken.get(), instance.getName(), brokenThings);
                 maybeFinishParallelScan(
                         executor, generation, done, totalTasks, instances,
                         healthy, attention, broken, brokenThings
@@ -290,7 +290,7 @@ public final class StateCenterView extends VBox {
             });
 
             updateScanProgress(generation, done, totalTasks, workers,
-                    healthy.get(), attention.get(), broken.get(), "Libraries");
+                    healthy.get(), attention.get(), broken.get(), "Libraries", brokenThings);
             if (state.getLevel() == SharedState.Level.BROKEN) {
                 broken.incrementAndGet();
                 brokenThings.add("Libraries");
@@ -317,7 +317,7 @@ public final class StateCenterView extends VBox {
             });
 
             updateScanProgress(generation, done, totalTasks, workers,
-                    healthy.get(), attention.get(), broken.get(), "Assets");
+                    healthy.get(), attention.get(), broken.get(), "Assets", brokenThings);
             if (state.getLevel() == SharedState.Level.BROKEN) {
                 broken.incrementAndGet();
                 brokenThings.add("Assets");
@@ -403,7 +403,8 @@ public final class StateCenterView extends VBox {
             int healthy,
             int attention,
             int broken,
-            String completedName
+            String completedName,
+            java.util.Set<String> brokenThings
     ) {
         double fraction = total == 0 ? 1.0 : (double) done / total;
 
