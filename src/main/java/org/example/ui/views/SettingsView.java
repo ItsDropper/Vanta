@@ -589,45 +589,6 @@ public class SettingsView extends BorderPane {
         loadRollbackVersions(versions, rollbackButton);
     }
 
-    private void loadRollbackVersions(
-            ComboBox<UpdateInfo> versions,
-            Button rollbackButton
-    ) {
-        versions.setPromptText("Loading available versions...");
-
-        Thread thread = new Thread(() -> {
-            try {
-                UpdateService service = new UpdateService();
-                var available = service.getAvailableVersions(loadVersion());
-
-                Platform.runLater(() -> {
-                    versions.getItems().setAll(available);
-                    versions.setPromptText(
-                            available.isEmpty()
-                                    ? "No rollback versions available"
-                                    : "Select a Vanta version"
-                    );
-                });
-            } catch (Exception e) {
-                Platform.runLater(() -> {
-                    versions.setPromptText("Could not load Vanta versions");
-                    rollbackButton.setDisable(true);
-
-                    NotificationManager manager = NotificationManager.getGlobal();
-                    if (manager != null) {
-                        manager.error(
-                                "Rollback versions unavailable",
-                                "Vanta could not load published launcher releases."
-                        );
-                    }
-                });
-            }
-        }, "Vanta-Rollback-Versions");
-
-        thread.setDaemon(true);
-        thread.start();
-    }
-
         VBox dataCard = card(
                 "Vanta data",
                 "Launcher-owned configuration is kept locally in the Vanta directory."
@@ -673,6 +634,46 @@ public class SettingsView extends BorderPane {
         workspace.getChildren().addAll(playtime, compact, notifications, remember, stateScan);
 
         content.getChildren().addAll(behavior, workspace, dataCard, runtimeCard);
+    }
+
+
+    private void loadRollbackVersions(
+            ComboBox<UpdateInfo> versions,
+            Button rollbackButton
+    ) {
+        versions.setPromptText("Loading available versions...");
+
+        Thread thread = new Thread(() -> {
+            try {
+                UpdateService service = new UpdateService();
+                var available = service.getAvailableVersions(loadVersion());
+
+                Platform.runLater(() -> {
+                    versions.getItems().setAll(available);
+                    versions.setPromptText(
+                            available.isEmpty()
+                                    ? "No rollback versions available"
+                                    : "Select a Vanta version"
+                    );
+                });
+            } catch (Exception e) {
+                Platform.runLater(() -> {
+                    versions.setPromptText("Could not load Vanta versions");
+                    rollbackButton.setDisable(true);
+
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error(
+                                "Rollback versions unavailable",
+                                "Vanta could not load published launcher releases."
+                        );
+                    }
+                });
+            }
+        }, "Vanta-Rollback-Versions");
+
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private void buildMinecraftPage() {
