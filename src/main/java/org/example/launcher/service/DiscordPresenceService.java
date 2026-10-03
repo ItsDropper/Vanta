@@ -31,9 +31,22 @@ public final class DiscordPresenceService {
                     ? instance.getName()
                     : "Minecraft";
 
-            String state = instance.getMinecraftVersion()
-                    + " • "
-                    + instance.getDisplayLoader();
+            StringBuilder stateBuilder = new StringBuilder();
+
+            if (LauncherSettings.isDiscordShowVersionEnabled()) {
+                stateBuilder.append(instance.getMinecraftVersion());
+            }
+
+            if (LauncherSettings.isDiscordShowLoaderEnabled()) {
+                if (stateBuilder.length() > 0) {
+                    stateBuilder.append(" • ");
+                }
+                stateBuilder.append(instance.getDisplayLoader());
+            }
+
+            String state = stateBuilder.length() > 0
+                    ? stateBuilder.toString()
+                    : "Minecraft";
 
             if (LauncherSettings.isDiscordShowPlaytimeEnabled()) {
                 state += " • "
