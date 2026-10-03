@@ -328,7 +328,7 @@ public class LauncherView {
             case ACCOUNTS -> showAnimatedContent(accountsView);
             case INSTANCES -> showAnimatedContent(instancesView);
             case MODS -> showAnimatedContent(globalModsView);
-            case STATE -> showStatePage();
+            case STATE -> { showStatePage(); stateCenterView.onShown(); }
             case SETTINGS -> showAnimatedContent(settingsView);
         }
     }
