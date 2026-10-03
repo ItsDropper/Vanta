@@ -302,3 +302,20 @@
     -fx-text-fill: #8ab4ff;
     -fx-fill: #8ab4ff;
 }
+
+.modrinth-popup-danger {
+    -fx-background-color: #6b3036;
+    -fx-background-radius: 8px;
+    -fx-border-color: #9b4a52;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-padding: 9px 14px;
+    -fx-cursor: hand;
+}
+
+.modrinth-popup-danger:hover {
+    -fx-background-color: #854049;
+    -fx-border-color: #b85b64;
+}
