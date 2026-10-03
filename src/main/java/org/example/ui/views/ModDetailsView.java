@@ -707,12 +707,15 @@ public class ModDetailsView extends VBox {
                 );
 
         card.setPadding(
-                new Insets(
-                        22,
-                        0,
-                        22,
-                        0
-                )
+                new Insets(22)
+        );
+
+        card.getStyleClass().add(
+                "mod-details-description-card"
+        );
+
+        description.getStyleClass().add(
+                "mod-details-markdown"
         );
 
         return card;
