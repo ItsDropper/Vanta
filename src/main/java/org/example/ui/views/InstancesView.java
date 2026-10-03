@@ -465,7 +465,7 @@ public class InstancesView extends VBox {
         subtitle.setWrapText(true);
         HBox choices = new HBox(8);
         choices.setAlignment(Pos.CENTER_LEFT);
-        String[][] icons = {{"SHIELD","⬢"},{"PACKAGE","◆"},{"SWORD","⚔"},{"PICKAXE","⛏"},{"STAR","★"},{"FIRE","✦"},{"WORLD","◎"},{"CROWN","♛"},{"DIAMOND","◇"}};
+        String[][] icons = {{"SHIELD","⬢"},{"PACKAGE","◆"},{"PICKAXE","⛏"},{"STAR","★"},{"FIRE","✦"},{"WORLD","◎"},{"CROWN","♛"},{"DIAMOND","◇"}};
         for (String[] icon : icons) {
             Button button = new Button(icon[1]);
             button.getStyleClass().add("instance-icon-choice");
