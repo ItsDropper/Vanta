@@ -123,3 +123,93 @@
     -fx-text-fill: #d66d75;
 }
 
+
+/* =========================================================
+   MODERN LOGIN SURFACE
+   ========================================================= */
+
+.login-window {
+    -fx-background-color: #10151d;
+    -fx-background-radius: 14px;
+    -fx-border-color: #283241;
+    -fx-border-radius: 14px;
+}
+
+.login-title-bar {
+    -fx-background-color: #151b24;
+    -fx-border-color: transparent transparent #252e3a transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 10px 12px 10px 16px;
+}
+
+.login-title-bar-text {
+    -fx-text-fill: #9aa7b8;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.2px;
+}
+
+.login-title-bar-close {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #7c8898;
+    -fx-padding: 5px 8px;
+}
+
+.login-title-bar-close:hover {
+    -fx-background-color: #222a35;
+    -fx-text-fill: #edf2f8;
+}
+
+.login-logo {
+    -fx-text-fill: -vanta-accent;
+    -fx-font-size: 13px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 3px;
+}
+
+.login-step {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-background-radius: 6px;
+    -fx-text-fill: -vanta-accent;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-padding: 5px 8px;
+}
+
+.login-title {
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+
+.login-subtitle {
+    -fx-text-fill: #8a96a7;
+    -fx-font-size: 12px;
+}
+
+.login-instruction {
+    -fx-text-fill: #b2bdcb;
+    -fx-font-size: 11px;
+}
+
+.verification-code {
+    -fx-background-color: #151c26;
+    -fx-border-color: #344154;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-font-size: 25px;
+    -fx-padding: 12px 18px;
+}
+
+.secondary-button {
+    -fx-min-height: 40px;
+}
+
+.primary-button {
+    -fx-min-height: 40px;
+}
+
+.login-status {
+    -fx-text-fill: #697789;
+    -fx-padding: 3px 0 0 0;
+}
