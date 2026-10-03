@@ -523,9 +523,9 @@ public class GlobalModsView extends VBox {
         scroll.getStyleClass().add("modrinth-popup-scroll");
 
         Button cancel = new Button("CANCEL");
-        cancel.getStyleClass().add("secondary-button");
+        cancel.getStyleClass().add("modrinth-popup-secondary");
         Button install = new Button("INSTALL");
-        install.getStyleClass().add("primary-button");
+        install.getStyleClass().add("modrinth-popup-primary");
         install.setDisable(true);
 
         for (CheckBox box : boxes) {
@@ -1083,7 +1083,7 @@ public class GlobalModsView extends VBox {
                         return;
                     }
                     for (org.example.launcher.modrinth.ModrinthVersion version : versions) {
-                        list.getChildren().add(createVersionRow(version));
+                        list.getChildren().add(createVersionRow(projectId, version, popup));
                     }
                 });
             } catch (Throwable ex) {
@@ -1100,7 +1100,11 @@ public class GlobalModsView extends VBox {
                 anchor.localToScreen(anchor.getBoundsInLocal()).getMaxY() + 6);
     }
 
-    private HBox createVersionRow(org.example.launcher.modrinth.ModrinthVersion version) {
+    private HBox createVersionRow(
+            String projectId,
+            org.example.launcher.modrinth.ModrinthVersion version,
+            Popup versionsPopup
+    ) {
         Label name = new Label(safe(version.getVersionNumber(), safe(version.getName(), "Unknown")));
         name.getStyleClass().add("modrinth-version-name");
         Label type = new Label(safe(version.getVersionType(), "release").toUpperCase());
@@ -1112,10 +1116,151 @@ public class GlobalModsView extends VBox {
         HBox.setHgrow(info, Priority.ALWAYS);
         Label downloads = new Label(formatNumber(version.getDownloads()));
         downloads.getStyleClass().add("modrinth-version-downloads");
-        HBox row = new HBox(10, info, type, downloads);
+
+        Button installButton = new Button("INSTALL");
+        installButton.getStyleClass().add("modrinth-version-install");
+        installButton.setOnAction(event -> {
+            versionsPopup.hide();
+            chooseInstancesForVersion(projectId, version);
+        });
+
+        HBox row = new HBox(10, info, type, downloads, installButton);
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("modrinth-version-row");
         return row;
+    }
+
+    private void chooseInstancesForVersion(
+            String projectId,
+            org.example.launcher.modrinth.ModrinthVersion version
+    ) {
+        List<Instance> compatible = new ArrayList<>();
+
+        String loader = selectedLoader();
+        for (Instance instance : InstanceManager.discoverInstances()) {
+            if (instance == null || instance.getMinecraftVersion() == null
+                    || instance.getMinecraftVersion().isBlank()) continue;
+
+            if (contentTypeBox.getValue() != ModrinthContentType.MOD) continue;
+
+            String instanceLoader = instance.getLoader() == null
+                    ? ""
+                    : instance.getLoader().trim();
+
+            if (!"fabric".equalsIgnoreCase(instanceLoader)
+                    && !"forge".equalsIgnoreCase(instanceLoader)) continue;
+
+            boolean gameMatch = version.getGameVersions() != null
+                    && version.getGameVersions().contains(instance.getMinecraftVersion());
+            boolean loaderMatch = version.getLoaders() != null
+                    && version.getLoaders().stream().anyMatch(v -> instanceLoader.equalsIgnoreCase(v));
+
+            if (gameMatch && loaderMatch) compatible.add(instance);
+        }
+
+        if (compatible.isEmpty()) {
+            statusLabel.setText("No compatible instances found for this mod version.");
+            return;
+        }
+
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.setAutoFix(true);
+        popup.setHideOnEscape(true);
+
+        VBox root = new VBox(14);
+        root.getStyleClass().add("modrinth-popup");
+        root.setPrefWidth(560);
+
+        Label title = new Label("INSTALL " + safe(version.getVersionNumber(), "VERSION"));
+        title.getStyleClass().add("modrinth-popup-title");
+        Label subtitle = new Label("Choose compatible instances for this exact version.");
+        subtitle.getStyleClass().add("modrinth-popup-subtitle");
+
+        VBox choices = new VBox(8);
+        List<CheckBox> boxes = new ArrayList<>();
+        for (Instance instance : compatible) {
+            CheckBox box = new CheckBox(instance.getName() + "   •   Minecraft "
+                    + instance.getMinecraftVersion() + "   •   " + instance.getDisplayLoader());
+            box.getStyleClass().add("dialog-instance-checkbox");
+            boxes.add(box);
+            choices.getChildren().add(box);
+        }
+
+        ScrollPane scroll = new ScrollPane(choices);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setPrefViewportHeight(Math.min(420, 90 + compatible.size() * 48.0));
+        scroll.getStyleClass().add("modrinth-popup-scroll");
+
+        Button cancel = new Button("CANCEL");
+        cancel.getStyleClass().add("modrinth-popup-secondary");
+        Button install = new Button("INSTALL");
+        install.getStyleClass().add("modrinth-popup-primary");
+        install.setDisable(true);
+
+        for (CheckBox box : boxes) {
+            box.selectedProperty().addListener((obs, oldValue, selected) ->
+                    install.setDisable(boxes.stream().noneMatch(CheckBox::isSelected)));
+        }
+
+        HBox actions = new HBox(8, cancel, install);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        root.getChildren().addAll(title, subtitle, scroll, actions);
+        popup.getContent().add(root);
+
+        cancel.setOnAction(event -> popup.hide());
+        install.setOnAction(event -> {
+            List<Instance> selected = new ArrayList<>();
+            for (int i = 0; i < boxes.size(); i++) {
+                if (boxes.get(i).isSelected()) selected.add(compatible.get(i));
+            }
+            popup.hide();
+            installExactVersion(projectId, version, selected);
+        });
+
+        root.applyCss();
+        popup.show(getScene().getWindow(), 0, 0);
+        popup.hide();
+        Button anchor = null;
+        // Re-anchor to the global page center; the version selector has already closed.
+        if (getScene() != null) {
+            javafx.geometry.Bounds bounds = localToScreen(getBoundsInLocal());
+            if (bounds != null) {
+                popup.show(this, Math.max(bounds.getMinX() + 80, bounds.getCenterX() - 280),
+                        Math.max(bounds.getMinY() + 80, bounds.getCenterY() - 220));
+            }
+        }
+    }
+
+    private void installExactVersion(
+            String projectId,
+            org.example.launcher.modrinth.ModrinthVersion version,
+            List<Instance> instances
+    ) {
+        Thread thread = new Thread(() -> {
+            int success = 0;
+            int failed = 0;
+            for (Instance instance : instances) {
+                try {
+                    new org.example.launcher.service.ModrinthService()
+                            .installModVersion(instance, projectId, version);
+                    success++;
+                } catch (Throwable ex) {
+                    failed++;
+                    ex.printStackTrace();
+                }
+            }
+            int installed = success;
+            int failures = failed;
+            Platform.runLater(() -> statusLabel.setText(
+                    safe(version.getVersionNumber(), "Version") + " installed into " + installed
+                            + " instance" + (installed == 1 ? "" : "s")
+                            + (failures == 0 ? "." : "; " + failures + " failed.")
+            ));
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     private VBox createProjectCard(
@@ -1156,7 +1301,7 @@ public class GlobalModsView extends VBox {
         );
 
         description.getStyleClass().add(
-                "instance-version"
+                "global-mod-description"
         );
 
         Label metadata =
@@ -1209,7 +1354,7 @@ public class GlobalModsView extends VBox {
                                 52
                         ),
                         information,
-                        installButton
+                        actions
                 );
 
         row.setAlignment(
