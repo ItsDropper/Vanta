@@ -27,7 +27,9 @@ import org.example.ui.AnimationUtils;
 import org.example.ui.LauncherSettings;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;\nimport java.util.IdentityHashMap;\nimport java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 public final class StateCenterView extends VBox {
     private final VBox instanceList = new VBox(10);
@@ -35,11 +37,13 @@ public final class StateCenterView extends VBox {
     private final ScrollPane instanceScroll = new ScrollPane(instanceList);
     private final Label overallTitle = new Label("READY");
     private final Label overallSubtitle = new Label("Vanta will inspect your environments when you open this page.");
-    private final ProgressBar progress = new ProgressBar(0);\n    private final Label progressLabel = new Label("HEALTH");
+    private final ProgressBar progress = new ProgressBar(0);
+    private final Label progressLabel = new Label("HEALTH");
     private final Button refreshButton = new Button("SCAN NOW", IconView.create(IconView.Type.REFRESH, 15));
     private final AtomicBoolean scanning = new AtomicBoolean(false);
     private volatile long scanGeneration;
-    private volatile List<SharedState> sharedStates = List.of();\n    private final Map<Instance, HBox> liveInstanceCards = new IdentityHashMap<>();\n    private final Map<String, HBox> liveSharedRows = new java.util.HashMap<>();
+    private final Map<Instance, HBox> liveInstanceCards = new IdentityHashMap<>();
+    private final Map<String, HBox> liveSharedRows = new java.util.HashMap<>();
 
     public StateCenterView() {
         getStyleClass().add("state-center");
