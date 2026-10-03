@@ -913,6 +913,15 @@ public class LauncherView {
 
                         accountService.loadAccount();
 
+                        // Keep the startup/loading state visible for a moment after
+                        // authentication finishes so the title bar never briefly
+                        // renders the signed-out state before the account is shown.
+                        try {
+                            Thread.sleep(350);
+                        } catch (InterruptedException ex) {
+                            Thread.currentThread().interrupt();
+                        }
+
                         Platform.runLater(() -> {
 
                             homeView.setAccount(
