@@ -4,6 +4,10 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Separator;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -32,6 +36,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ModDetailsView extends VBox {
@@ -537,6 +542,28 @@ public class ModDetailsView extends VBox {
         // INSTALL
         // =========================================================
 
+        Button versionsButton =
+                new Button(
+                        "⋮"
+                );
+
+        versionsButton.getStyleClass().add(
+                "modrinth-versions-button"
+        );
+
+        versionsButton.setTooltip(
+                new Tooltip("Versions")
+        );
+
+        versionsButton.setAccessibleText(
+                "Versions"
+        );
+
+        versionsButton.setOnAction(
+                event ->
+                        showVersionsDialog()
+        );
+
         Button installButton =
                 new Button(
                         "INSTALL"
@@ -601,11 +628,22 @@ public class ModDetailsView extends VBox {
         // HEADER CONTAINER
         // =========================================================
 
+        HBox headerActions =
+                new HBox(
+                        8,
+                        versionsButton,
+                        installButton
+                );
+
+        headerActions.setAlignment(
+                Pos.CENTER_LEFT
+        );
+
         VBox headerContainer =
                 new VBox(
                         16,
                         projectHeader,
-                        installButton
+                        headerActions
                 );
 
         headerContainer.setFillWidth(
@@ -654,6 +692,139 @@ public class ModDetailsView extends VBox {
         statusLabel.setText(
                 ""
         );
+    }
+
+    // =============================================================
+    // VERSIONS
+    // =============================================================
+
+    private void showVersionsDialog() {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Versions");
+        dialog.setHeaderText("Available versions");
+        dialog.getDialogPane().getStyleClass().add("vanta-dialog");
+
+        VBox root = new VBox(10);
+        root.getStyleClass().add("modrinth-version-dialog");
+
+        Label subtitle = new Label(
+                "Versions published for " + safe(projectId, "this project")
+        );
+        subtitle.getStyleClass().add("dialog-subtitle");
+
+        VBox versionList = new VBox(8);
+        versionList.getStyleClass().add("modrinth-version-list");
+
+        Label loading = new Label("Loading versions...");
+        loading.getStyleClass().add("instances-status");
+        versionList.getChildren().add(loading);
+
+        ScrollPane scroll = new ScrollPane(versionList);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setPrefViewportHeight(460);
+        scroll.getStyleClass().add("dialog-scroll");
+
+        root.getChildren().addAll(subtitle, scroll);
+        dialog.getDialogPane().setContent(root);
+        dialog.getDialogPane().getButtonTypes().add(ButtonType.CLOSE);
+        ((Button) dialog.getDialogPane().lookupButton(ButtonType.CLOSE))
+                .getStyleClass().add("secondary-button");
+
+        Thread thread = new Thread(() -> {
+            try {
+                List<org.example.launcher.modrinth.ModrinthVersion> versions =
+                        modrinthClient.getVersions(projectId);
+
+                Platform.runLater(() -> {
+                    versionList.getChildren().clear();
+
+                    if (versions == null || versions.isEmpty()) {
+                        Label empty = new Label("No versions found.");
+                        empty.getStyleClass().add("instances-status");
+                        versionList.getChildren().add(empty);
+                        return;
+                    }
+
+                    for (org.example.launcher.modrinth.ModrinthVersion version : versions) {
+                        versionList.getChildren().add(createVersionRow(version));
+                    }
+                });
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    versionList.getChildren().clear();
+                    Label error = new Label(
+                            ex.getMessage() != null
+                                    ? ex.getMessage()
+                                    : "Failed to load versions."
+                    );
+                    error.getStyleClass().add("instances-status");
+                    versionList.getChildren().add(error);
+                });
+            }
+        });
+
+        thread.setDaemon(true);
+        thread.start();
+        dialog.showAndWait();
+    }
+
+    private HBox createVersionRow(
+            org.example.launcher.modrinth.ModrinthVersion version
+    ) {
+        String versionNumber = safe(
+                version.getVersionNumber(),
+                safe(version.getName(), "Unknown version")
+        );
+
+        Label name = new Label(versionNumber);
+        name.getStyleClass().add("modrinth-version-name");
+
+        Label type = new Label(
+                safe(version.getVersionType(), "release").toUpperCase()
+        );
+        type.getStyleClass().add("modrinth-version-type");
+
+        String gameVersions = version.getGameVersions() == null
+                ? "Any Minecraft version"
+                : String.join(", ", version.getGameVersions());
+
+        Label gameLabel = new Label(gameVersions);
+        gameLabel.getStyleClass().add("modrinth-version-meta");
+
+        String loaders = version.getLoaders() == null
+                ? ""
+                : String.join(" • ", version.getLoaders());
+
+        Label loaderLabel = new Label(loaders);
+        loaderLabel.getStyleClass().add("modrinth-version-meta");
+
+        VBox information = new VBox(
+                5,
+                name,
+                gameLabel,
+                loaderLabel
+        );
+        HBox.setHgrow(information, Priority.ALWAYS);
+
+        Label downloads = new Label(
+                formatNumber(version.getDownloads()) + " downloads"
+        );
+        downloads.getStyleClass().add("modrinth-version-downloads");
+
+        HBox row = new HBox(
+                10,
+                information,
+                type,
+                downloads
+        );
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("modrinth-version-row");
+        row.setPadding(new Insets(12, 14, 12, 14));
+
+        return row;
     }
 
     // =============================================================
