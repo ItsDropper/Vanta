@@ -202,7 +202,7 @@ public class CreateInstanceView extends VBox {
          */
         versionBox.valueProperty().addListener(
                 (observable, oldValue, newValue) ->
-                        checkFabricAvailability(newValue)
+                        checkLoaderAvailability(newValue)
         );
 
         // =========================================================
@@ -218,8 +218,8 @@ public class CreateInstanceView extends VBox {
         /*
          * Vanilla is always valid.
          *
-         * Fabric is added only after we verify that Fabric
-         * supports the selected Minecraft version.
+         * Fabric and Forge are added only after we verify that the
+         * selected Minecraft version supports them.
          */
         loaderBox.getItems().add(
                 "Vanilla"
@@ -616,7 +616,7 @@ public class CreateInstanceView extends VBox {
         if (fabricCheckRunning || forgeCheckRunning) {
 
             statusLabel.setText(
-                    "Still checking Fabric support..."
+                    "Still checking mod loader support..."
             );
 
             return;
@@ -669,18 +669,12 @@ public class CreateInstanceView extends VBox {
         }
 
         /*
-         * Extra safety check:
-         *
-         * Even if the UI somehow contains Fabric, do not allow
-         * installation unless the current Fabric check succeeded.
+         * Extra safety check: only install a loader that the
+         * current version check actually exposed in the UI.
          */
         if ("Fabric".equals(loader)) {
 
-            /*
-             * The only way Fabric gets into loaderBox is through
-             * checkFabricAvailability(), so reaching this point
-             * means the current version was verified.
-             */
+            /* The loader was exposed only after the version check. */
             if (!loaderBox.getItems().contains("Fabric")) {
 
                 loaderBox.getSelectionModel()
