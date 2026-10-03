@@ -1213,10 +1213,23 @@ private boolean resolveFabricDependency(
 
                     try {
                         try {
-                            DownloadUtil.downloadFile(
-                                    candidateFile.getUrl(),
-                                    tempFile
-                            );
+                            try {
+                                DownloadUtil.downloadFile(
+                                        candidateFile.getUrl(),
+                                        tempFile
+                                );
+                            } catch (InterruptedException e) {
+                                Thread.currentThread().interrupt();
+                                throw e;
+                            } catch (IOException e) {
+                                throw e;
+                            } catch (Exception e) {
+                                throw new IOException(
+                                        "Failed to download Fabric API candidate: "
+                                                + e.getMessage(),
+                                        e
+                                );
+                            }
                         } catch (Exception e) {
                             throw new IOException(
                                     "Failed to inspect Fabric API candidate "
