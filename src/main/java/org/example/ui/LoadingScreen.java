@@ -57,6 +57,9 @@ public final class LoadingScreen {
         progressFill.setMaxWidth(320);
         progressFill.setScaleX(0.01);
         progressFill.setTranslateX(-158.4);
+        progressFill.scaleXProperty().addListener((obs, oldValue, newValue) ->
+                progressFill.setTranslateX(-160 + (160 * newValue.doubleValue()))
+        );
 
         progressTrack.getChildren().add(progressFill);
 
