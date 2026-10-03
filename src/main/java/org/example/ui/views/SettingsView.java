@@ -72,9 +72,16 @@ public class SettingsView extends BorderPane {
 
         buildNavigation();
 
+        content.setFillWidth(true);
+        content.setPadding(new Insets(0, 4, 24, 4));
+
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
+        scroll.setFitToHeight(false);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setPannable(true);
+        scroll.setFocusTraversable(false);
         scroll.getStyleClass().add("settings-scroll");
 
         setLeft(navigation);
