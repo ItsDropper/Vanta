@@ -2693,10 +2693,16 @@ private boolean isProvidedByFabricApi(
         }
 
         /*
-         * Fabric API modules use the "fabric-" namespace.
-         * Do not assume every fabric-* ID is provided by Fabric API.
+         * The special Fabric "fabric" dependency is provided by the
+         * Fabric API project. Treat it exactly like the internal
+         * fabric-* modules so we never search Modrinth or download
+         * multiple Fabric API candidates just to rediscover this.
          */
-        if (!fabricDependencyModId.startsWith("fabric-")) {
+        boolean fabricApiDependency =
+                "fabric".equalsIgnoreCase(fabricDependencyModId)
+                        || fabricDependencyModId.startsWith("fabric-");
+
+        if (!fabricApiDependency) {
             return false;
         }
 
