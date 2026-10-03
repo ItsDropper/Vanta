@@ -1101,10 +1101,23 @@ private String findModrinthProjectForFabricModId(
                     );
 
             try {
-                DownloadUtil.downloadFile(
-                        file.getUrl(),
-                        tempFile
-                );
+                try {
+                    DownloadUtil.downloadFile(
+                            file.getUrl(),
+                            tempFile
+                    );
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw e;
+                } catch (IOException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new IOException(
+                            "Failed to download Fabric API candidate: "
+                                    + e.getMessage(),
+                            e
+                    );
+                }
 
                 if (installedModScanner.containsFabricModId(
                         tempFile,
