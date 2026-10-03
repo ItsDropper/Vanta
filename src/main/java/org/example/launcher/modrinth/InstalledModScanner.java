@@ -186,6 +186,89 @@ public class InstalledModScanner {
         }
     }
 
+    /**
+     * Reads every Fabric module ID/version exposed by a Fabric JAR,
+     * including Fabric API's nested JARs. This lets the dependency
+     * resolver inspect one API JAR once and reuse the complete result.
+     */
+    public java.util.Map<String, String> scanFabricModuleVersions(
+            Path file
+    ) {
+        java.util.Map<String, String> modules =
+                new java.util.HashMap<>();
+
+        if (file == null) {
+            return modules;
+        }
+
+        try (JarFile jar = new JarFile(file.toFile())) {
+            scanFabricModuleVersions(jar, modules);
+        } catch (Exception ignored) {
+        }
+
+        return modules;
+    }
+
+    private void scanFabricModuleVersions(
+            JarFile jar,
+            java.util.Map<String, String> modules
+    ) {
+        try {
+            JarEntry metadataEntry = jar.getJarEntry("fabric.mod.json");
+            if (metadataEntry == null) {
+                return;
+            }
+
+            JsonNode root;
+            try (InputStream input = jar.getInputStream(metadataEntry)) {
+                root = objectMapper.readTree(input);
+            }
+
+            JsonNode idNode = root.get("id");
+            JsonNode versionNode = root.get("version");
+            if (idNode != null && versionNode != null) {
+                String id = idNode.asText();
+                String version = versionNode.asText();
+                if (id != null && !id.isBlank()
+                        && version != null && !version.isBlank()) {
+                    modules.put(id, version);
+                }
+            }
+
+            JsonNode jarsNode = root.get("jars");
+            if (jarsNode == null || !jarsNode.isArray()) {
+                return;
+            }
+
+            for (JsonNode jarNode : jarsNode) {
+                JsonNode fileNode = jarNode.get("file");
+                if (fileNode == null || fileNode.asText().isBlank()) {
+                    continue;
+                }
+
+                JarEntry nestedEntry = jar.getJarEntry(fileNode.asText());
+                if (nestedEntry == null) {
+                    continue;
+                }
+
+                Path tempNestedJar = Files.createTempFile(
+                        "vanta-fabric-api-module-", ".jar");
+                try {
+                    try (InputStream nestedInput = jar.getInputStream(nestedEntry)) {
+                        Files.copy(nestedInput, tempNestedJar,
+                                java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    try (JarFile nestedJar = new JarFile(tempNestedJar.toFile())) {
+                        scanFabricModuleVersions(nestedJar, modules);
+                    }
+                } finally {
+                    Files.deleteIfExists(tempNestedJar);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
     public boolean containsFabricModId(
             Path file,
             String targetModId
