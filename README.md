@@ -10,6 +10,8 @@ The project is designed around a simple principle:
 
 **Status:** Active development
 
+**Privacy:** [Privacy Policy](PRIVACY.md) · **Security:** [Security Policy](SECURITY.md)
+
 ---
 
 ## Features
