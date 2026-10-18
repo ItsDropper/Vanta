@@ -1,0 +1,498 @@
+package dev.itsdropper.vanta.launcher.instance;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import dev.itsdropper.vanta.launcher.model.Instance;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+public class InstanceInstaller {
+
+    // =============================================================
+    // VANILLA
+    // =============================================================
+
+    public static Instance installVanilla(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+
+        System.out.println(
+                "Installing Minecraft "
+                        + minecraftVersion
+        );
+
+        JsonNode metadata =
+                MinecraftVersionResolver.downloadMetadata(
+                        minecraftVersion
+                );
+
+        Instance instance =
+                InstanceManager.createInstance(
+                        name,
+                        minecraftVersion,
+                        "Vanilla",
+                        null
+                );
+
+        try {
+
+            // -----------------------------------------------------
+            // VANILLA FILES
+            // -----------------------------------------------------
+
+            MinecraftFileInstaller.installClient(
+                    instance,
+                    metadata
+            );
+
+            MinecraftFileInstaller.installLibraries(
+                    metadata
+            );
+
+            NativeInstaller.extract(
+                    instance,
+                    metadata
+            );
+
+            AssetInstaller.install(
+                    instance,
+                    metadata
+            );
+
+            // -----------------------------------------------------
+            // METADATA
+            // -----------------------------------------------------
+
+            MinecraftVersionResolver.saveMetadata(
+                    instance,
+                    metadata
+            );
+
+            // -----------------------------------------------------
+            // COMPLETE
+            // -----------------------------------------------------
+
+            InstanceManager.markInstallationComplete(
+                    instance
+            );
+
+            System.out.println(
+                    "Minecraft installation complete."
+            );
+
+            return instance;
+
+        } catch (Exception e) {
+
+            try {
+                InstanceManager.deleteInstance(
+                        instance
+                );
+            } catch (Exception ignored) {
+            }
+
+            throw e;
+        }
+    }
+
+    // =============================================================
+    // FORGE
+    // =============================================================
+
+    public static Instance installForge(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+
+        String loaderVersion =
+                ForgeInstaller.findLatestLoaderVersion(
+                        minecraftVersion
+                );
+
+        System.out.println(
+                "Installing Forge "
+                        + loaderVersion
+                        + " for Minecraft "
+                        + minecraftVersion
+        );
+
+        JsonNode vanillaMetadata =
+                MinecraftVersionResolver.downloadMetadata(
+                        minecraftVersion
+                );
+
+        Instance instance =
+                InstanceManager.createInstance(
+                        name,
+                        minecraftVersion,
+                        "Forge",
+                        loaderVersion
+                );
+
+        try {
+            // Forge is layered on top of a complete vanilla installation.
+            // This also ensures the shared client, libraries, natives and
+            // assets required by the Forge version are already present.
+            MinecraftFileInstaller.installClient(
+                    instance,
+                    vanillaMetadata
+            );
+
+            MinecraftFileInstaller.installLibraries(
+                    vanillaMetadata
+            );
+
+            NativeInstaller.extract(
+                    instance,
+                    vanillaMetadata
+            );
+
+            AssetInstaller.install(
+                    instance,
+                    vanillaMetadata
+            );
+
+            ForgeInstaller.installForge(instance, loaderVersion);
+            InstanceManager.markInstallationComplete(instance);
+            System.out.println("Forge installation complete.");
+            return instance;
+        } catch (Exception e) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw e;
+        }
+    }
+
+    // =============================================================
+    // FABRIC
+    // =============================================================
+
+    public static Instance installFabric(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+
+        /*
+         * Find the latest Fabric Loader compatible
+         * with this Minecraft version.
+         */
+        String loaderVersion =
+                FabricInstaller.findLatestLoaderVersion(
+                        minecraftVersion
+                );
+
+        System.out.println(
+                "Installing Fabric "
+                        + loaderVersion
+                        + " for Minecraft "
+                        + minecraftVersion
+        );
+
+        JsonNode vanillaMetadata =
+                MinecraftVersionResolver.downloadMetadata(
+                        minecraftVersion
+                );
+
+        Instance instance =
+                InstanceManager.createInstance(
+                        name,
+                        minecraftVersion,
+                        "Fabric",
+                        loaderVersion
+                );
+
+        try {
+
+            // -----------------------------------------------------
+            // VANILLA FILES
+            // -----------------------------------------------------
+            // These downloads are independent. Start them together so
+            // a fresh instance is not forced through three network stages.
+            java.util.concurrent.ExecutorService executor =
+                    java.util.concurrent.Executors.newFixedThreadPool(3);
+
+            try {
+                java.util.concurrent.Future<?> clientTask =
+                        executor.submit(() -> {
+                            try {
+                                MinecraftFileInstaller.installClient(
+                                        instance,
+                                        vanillaMetadata
+                                );
+                            } catch (Exception e) {
+                                throw new java.util.concurrent.CompletionException(e);
+                            }
+                        });
+
+                java.util.concurrent.Future<?> librariesTask =
+                        executor.submit(() -> {
+                            try {
+                                MinecraftFileInstaller.installLibraries(
+                                        vanillaMetadata
+                                );
+                            } catch (Exception e) {
+                                throw new java.util.concurrent.CompletionException(e);
+                            }
+                        });
+
+                java.util.concurrent.Future<?> assetsTask =
+                        executor.submit(() -> {
+                            try {
+                                AssetInstaller.install(
+                                        instance,
+                                        vanillaMetadata
+                                );
+                            } catch (Exception e) {
+                                throw new java.util.concurrent.CompletionException(e);
+                            }
+                        });
+
+                clientTask.get();
+                librariesTask.get();
+                assetsTask.get();
+            } catch (java.util.concurrent.ExecutionException e) {
+                Throwable cause = e.getCause();
+                if (cause instanceof java.util.concurrent.CompletionException
+                        && cause.getCause() != null) {
+                    cause = cause.getCause();
+                }
+                if (cause instanceof Exception exception) {
+                    throw exception;
+                }
+                throw new RuntimeException(cause);
+            } finally {
+                executor.shutdownNow();
+            }
+
+            NativeInstaller.extract(
+                    instance,
+                    vanillaMetadata
+            );
+
+            // -----------------------------------------------------
+            // FABRIC
+            // -----------------------------------------------------
+
+            JsonNode fabricProfile =
+                    FabricInstaller.downloadProfile(
+                            minecraftVersion,
+                            loaderVersion
+                    );
+
+            FabricInstaller.installLibraries(
+                    fabricProfile
+            );
+
+            JsonNode merged =
+                    FabricInstaller.mergeProfile(
+                            vanillaMetadata,
+                            fabricProfile
+                    );
+
+            // -----------------------------------------------------
+            // SAVE
+            // -----------------------------------------------------
+
+            MinecraftVersionResolver.saveMetadata(
+                    instance,
+                    merged
+            );
+
+            // -----------------------------------------------------
+            // COMPLETE
+            // -----------------------------------------------------
+
+            InstanceManager.markInstallationComplete(
+                    instance
+            );
+
+            System.out.println(
+                    "Fabric installation complete."
+            );
+
+            return instance;
+
+        } catch (Exception e) {
+
+            try {
+                InstanceManager.deleteInstance(
+                        instance
+                );
+            } catch (Exception ignored) {
+            }
+
+            throw e;
+        }
+    }
+
+    public static Instance updateMinecraftVersion(
+            Instance instance,
+            String minecraftVersion
+    ) throws Exception {
+
+        if (instance == null) {
+            throw new IllegalArgumentException(
+                    "Instance cannot be null."
+            );
+        }
+
+        if (minecraftVersion == null
+                || minecraftVersion.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Minecraft version cannot be empty."
+            );
+        }
+
+        minecraftVersion =
+                minecraftVersion.trim();
+
+        System.out.println(
+                "[Vanta Repair] Updating Minecraft version: "
+                        + instance.getMinecraftVersion()
+                        + " -> "
+                        + minecraftVersion
+        );
+
+        /*
+         * ---------------------------------------------------------
+         * 1. DOWNLOAD TARGET MINECRAFT METADATA
+         * ---------------------------------------------------------
+         */
+
+        JsonNode vanillaMetadata =
+                MinecraftVersionResolver.downloadMetadata(
+                        minecraftVersion
+                );
+
+        /*
+         * ---------------------------------------------------------
+         * 2. INSTALL TARGET MINECRAFT RUNTIME
+         * ---------------------------------------------------------
+         *
+         * These methods are SHA-1 verified and only replace files
+         * when the existing file does not match the target metadata.
+         */
+
+        MinecraftFileInstaller.installClient(
+                instance,
+                vanillaMetadata
+        );
+
+        MinecraftFileInstaller.installLibraries(
+                vanillaMetadata
+        );
+
+        NativeInstaller.extract(
+                instance,
+                vanillaMetadata
+        );
+
+        AssetInstaller.install(
+                instance,
+                vanillaMetadata
+        );
+
+        /*
+         * ---------------------------------------------------------
+         * 3. REBUILD LOADER PROFILE
+         * ---------------------------------------------------------
+         */
+
+        JsonNode finalMetadata =
+                vanillaMetadata;
+
+        String loader =
+                instance.getLoader();
+
+        String loaderVersion =
+                instance.getLoaderVersion();
+
+        if ("Fabric".equalsIgnoreCase(loader)) {
+
+            if (loaderVersion == null
+                    || loaderVersion.isBlank()) {
+
+                throw new IllegalStateException(
+                        "Fabric Loader version is missing."
+                );
+            }
+
+            System.out.println(
+                    "[Vanta Repair] Using Fabric Loader "
+                            + loaderVersion
+            );
+
+            JsonNode fabricProfile =
+                    FabricInstaller.downloadProfile(
+                            minecraftVersion,
+                            loaderVersion
+                    );
+
+            FabricInstaller.installLibraries(
+                    fabricProfile
+            );
+
+            finalMetadata =
+                    FabricInstaller.mergeProfile(
+                            vanillaMetadata,
+                            fabricProfile
+                    );
+        }
+
+        if ("Forge".equalsIgnoreCase(loader)) {
+
+            if (loaderVersion == null || loaderVersion.isBlank()) {
+                throw new IllegalStateException("Forge Loader version is missing.");
+            }
+
+            ForgeInstaller.installForge(instance, loaderVersion);
+
+            Path forgeMetadata =
+                    instance.getDirectory()
+                            .resolve("minecraft")
+                            .resolve("version.json");
+
+            if (!Files.exists(forgeMetadata)) {
+                throw new IllegalStateException(
+                        "Forge installation did not produce version metadata."
+                );
+            }
+
+            finalMetadata =
+                    new com.fasterxml.jackson.databind.ObjectMapper()
+                            .readTree(forgeMetadata.toFile());
+        }
+        /*
+         * ---------------------------------------------------------
+         * 4. SAVE FINAL VERSION METADATA
+         * ---------------------------------------------------------
+         */
+
+        MinecraftVersionResolver.saveMetadata(
+                instance,
+                finalMetadata
+        );
+
+        /*
+         * ---------------------------------------------------------
+         * 5. UPDATE INSTANCE METADATA
+         * ---------------------------------------------------------
+         */
+
+        Instance updatedInstance =
+                InstanceManager.updateMinecraftVersion(
+                        instance,
+                        minecraftVersion
+                );
+
+        System.out.println(
+                "[Vanta Repair] Minecraft version updated successfully."
+        );
+
+        return updatedInstance;
+    }
+}

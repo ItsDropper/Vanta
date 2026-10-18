@@ -1,4 +1,4 @@
-import org.example.launcher.NativeExtractor;
+import dev.itsdropper.vanta.launcher.NativeExtractor;
 
 import java.nio.file.Path;
 

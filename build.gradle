@@ -5,7 +5,7 @@ plugins {
     id 'com.gradleup.shadow' version '8.3.5'
 }
 
-group = 'org.example'
+group = 'dev.itsdropper.vanta'
 version = '1.2.2'
 
 repositories {
@@ -19,7 +19,7 @@ java {
 }
 
 application {
-    mainClass = 'org.example.Main'
+    mainClass = 'dev.itsdropper.vanta.Main'
 }
 
 processResources {
@@ -86,7 +86,7 @@ tasks.register('updaterJar', Jar) {
 
     manifest {
         attributes(
-                'Main-Class': 'org.example.launcher.update.UpdaterMain'
+                'Main-Class': 'dev.itsdropper.vanta.launcher.update.UpdaterMain'
         )
     }
 }

@@ -1,4 +1,4 @@
-import org.example.launcher.java.JavaVerifier;
+import dev.itsdropper.vanta.launcher.java.JavaVerifier;
 
 public class JavaLocatorTest {
 
