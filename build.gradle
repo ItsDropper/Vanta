@@ -81,8 +81,8 @@ tasks.register('updaterJar', Jar) {
 
     from sourceSets.main.output
 
-    include 'org/example/launcher/update/UpdaterMain.class'
-    include 'org/example/launcher/update/UpdaterMain$*.class'
+    include 'dev/itsdropper/vanta/launcher/update/UpdaterMain.class'
+    include 'dev/itsdropper/vanta/launcher/update/UpdaterMain$*.class'
 
     manifest {
         attributes(
