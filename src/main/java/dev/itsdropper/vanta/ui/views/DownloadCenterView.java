@@ -156,7 +156,7 @@ public final class DownloadCenterView extends VBox {
                 : task.status() == Status.COMPLETED
                     ? "Finished · " + formatBytes(task.receivedBytes())
                     : task.status() == Status.VERIFYING
-                        ? "Checking file integrity…"
+                        ? "Finalizing download…"
                         : formatBytes(task.receivedBytes()) + (task.totalBytes() > 0
                             ? " of " + formatBytes(task.totalBytes()) + " · " + Math.round(task.progress() * 100) + "%"
                             : " received"));
