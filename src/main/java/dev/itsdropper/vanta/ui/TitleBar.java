@@ -21,6 +21,7 @@ public class TitleBar extends HBox {
 
     private double dragX;
     private double dragY;
+    private boolean draggingWindow;
 
     private final Button updateButton;
 
@@ -223,7 +224,8 @@ public class TitleBar extends HBox {
         // =========================================================
 
         setOnMousePressed(event -> {
-            if (isInteractiveTarget(event.getTarget())) return;
+            draggingWindow = !isInteractiveTarget(event.getTarget());
+            if (!draggingWindow) return;
 
             dragX = event.getScreenX() - stage.getX();
             dragY = event.getScreenY() - stage.getY();
@@ -231,15 +233,18 @@ public class TitleBar extends HBox {
             if (event.getClickCount() == 2) {
                 stage.setMaximized(!stage.isMaximized());
                 maximize.setGraphic(stage.isMaximized() ? restoreIcon : maximizeIcon);
+                draggingWindow = false;
                 event.consume();
             }
         });
 
         setOnMouseDragged(event -> {
-            if (isInteractiveTarget(event.getTarget()) || stage.isMaximized()) return;
+            if (!draggingWindow || stage.isMaximized()) return;
             stage.setX(event.getScreenX() - dragX);
             stage.setY(event.getScreenY() - dragY);
         });
+
+        setOnMouseReleased(event -> draggingWindow = false);
     }
 
     private boolean isInteractiveTarget(Object target) {
