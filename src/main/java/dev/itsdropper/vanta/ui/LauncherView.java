@@ -1708,7 +1708,6 @@ public class LauncherView {
 
                         if (!repaired) {
                             notifications.updateProgress(
-                                    "Repairing managed files",
                                     "Verifying Minecraft metadata, libraries, natives and assets..."
                             );
 
