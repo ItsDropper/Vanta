@@ -35,6 +35,13 @@ public class DownloadUtil {
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .build();
 
+    private static final HttpClient HTTP_NO_REUSE =
+            HttpClient.newBuilder()
+                    .version(HttpClient.Version.HTTP_1_1)
+                    .connectTimeout(Duration.ofSeconds(15))
+                    .followRedirects(HttpClient.Redirect.NORMAL)
+                    .build();
+
     private static final Duration REQUEST_TIMEOUT =
             Duration.ofMinutes(5);
 
@@ -43,13 +50,12 @@ public class DownloadUtil {
     private static <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> handler)
             throws IOException, InterruptedException {
         if (LauncherSettings.isConnectionReuseEnabled()) return HTTP.send(request, handler);
-        HttpClient oneShot = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15))
-                .followRedirects(HttpClient.Redirect.NORMAL).build();
-        try {
-            return oneShot.send(request, handler);
-        } finally {
-            oneShot.close();
-        }
+        // Connection: close is valid for HTTP/1.1 and avoids creating an unbounded
+        // number of short-lived HttpClient executors for streamed file responses.
+        HttpRequest noReuse = HttpRequest.newBuilder(request, (name, value) -> true)
+                .header("Connection", "close")
+                .build();
+        return HTTP_NO_REUSE.send(noReuse, handler);
     }
 
     // =============================================================
