@@ -434,7 +434,7 @@ public class SettingsView extends BorderPane {
         }
     }
 
-    private void addPreset(HBox container, String name, String hex) {
+    private void addPreset(FlowPane container, String name, String hex) {
         Button button = new Button(name);
         button.getStyleClass().add("accent-preset");
         button.setStyle("-vanta-preset-color: " + hex + ";");
