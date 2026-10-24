@@ -271,7 +271,7 @@ public class InstanceSettingsView extends VBox {
                 "Choose JVM preset…",
                 "Default (no extra arguments)",
                 "G1GC balanced",
-                "Low-memory / garbage collection",
+                "Low-pause G1GC",
                 "Diagnostics (GC logging)"
         );
         jvmPreset.getSelectionModel().selectFirst();
