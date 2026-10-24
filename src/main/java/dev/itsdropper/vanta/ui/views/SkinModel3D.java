@@ -102,7 +102,7 @@ public final class SkinModel3D extends StackPane {
     private void rebuild() {
         player.getChildren().clear();
         if (skin == null || skin.isError() || skin.getPixelReader() == null
-                || skin.getWidth() < 64 || skin.getHeight() < 64) {
+                || skin.getWidth() < 64 || skin.getHeight() < 32) {
             return;
         }
 
