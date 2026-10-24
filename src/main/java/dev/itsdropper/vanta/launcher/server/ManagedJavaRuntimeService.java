@@ -119,7 +119,7 @@ final class ManagedJavaRuntimeService {
             }
             JsonNode assets = JSON.readTree(metadata.body());
             JsonNode packageInfo = assets.isArray() && !assets.isEmpty()
-                    ? assets.get(0).path("binary").path("package") : JSON.nullNode();
+                    ? assets.get(0).path("binary").path("package") : JSON.getNodeFactory().nullNode();
             String downloadUrl = packageInfo.path("link").asText("");
             String expectedSha256 = packageInfo.path("checksum").asText("").toLowerCase(Locale.ROOT);
             if (!downloadUrl.startsWith("https://github.com/adoptium/")
