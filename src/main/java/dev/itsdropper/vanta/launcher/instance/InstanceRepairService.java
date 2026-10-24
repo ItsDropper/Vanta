@@ -88,6 +88,11 @@ public final class InstanceRepairService {
                         + instance.getName()
         );
 
+        // Save a rollback snapshot before touching instance metadata.
+        Path backup = dev.itsdropper.vanta.launcher.repair.RepairBackupService
+                .createSnapshot(instance.getDirectory());
+        System.out.println("[Vanta Repair] Metadata rollback snapshot: " + backup);
+
         JsonNode vanillaMetadata =
                 MinecraftVersionResolver.downloadMetadata(
                         minecraftVersion
