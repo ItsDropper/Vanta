@@ -24,6 +24,7 @@ public class Sidebar extends VBox {
         INSTANCES,
         MODS,
         STATE,
+        SKIN,
         ACCOUNTS,
         SETTINGS
     }
@@ -94,6 +95,7 @@ public class Sidebar extends VBox {
 
         addButton("Mods", Page.MODS, IconView.Type.MODS);
         addButton("State", Page.STATE, IconView.Type.SHIELD);
+        addButton("Skin changer", Page.SKIN, IconView.Type.SKIN);
 
         Region spacer =
                 new Region();
