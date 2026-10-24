@@ -1140,7 +1140,7 @@ public class SettingsView extends BorderPane {
         layout.getChildren().get(layout.getChildren().size() - 1)
                 .getStyleClass().add("settings-card-description");
 
-        VBox reliability = card("Download reliability", "Control verification and retry behavior for network downloads.");
+        VBox reliability = card("Download reliability", "Control verification, retries and recovery for network downloads.");
         CheckBox verify = new CheckBox("Verify downloaded files before installation");
         verify.setSelected(LauncherSettings.isVerifyDownloadsEnabled());
         verify.getStyleClass().add("settings-checkbox");
@@ -1150,9 +1150,42 @@ public class SettingsView extends BorderPane {
         Label retryValue = new Label(LauncherSettings.getDownloadRetries() + " retries"); retryValue.getStyleClass().add("instance-setting-value");
         retries.valueProperty().addListener((o,a,b) -> retryValue.setText((int)Math.round(b.doubleValue()) + " retries"));
         Button saveReliability = new Button("SAVE DOWNLOAD RELIABILITY"); saveReliability.getStyleClass().add("primary-button");
-        saveReliability.setOnAction(e -> LauncherSettings.setDownloadRetries((int)Math.round(retries.getValue())));
-        reliability.getChildren().addAll(verify, retryValue, retries, saveReliability);
-        content.getChildren().addAll(workers, reliability, layout);
+        saveReliability.setOnAction(e -> {
+            LauncherSettings.setDownloadRetries((int)Math.round(retries.getValue()));
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.success("Download settings saved", "Retry policy updated.");
+        });
+
+        VBox acceleration = card("Download acceleration", "These options affect future downloads. They never bypass checksum verification when a checksum is available.");
+        CheckBox parallel = new CheckBox("Download independent files concurrently");
+        parallel.setSelected(LauncherSettings.isParallelDownloadsEnabled());
+        parallel.getStyleClass().add("settings-checkbox");
+        parallel.setOnAction(e -> LauncherSettings.setParallelDownloadsEnabled(parallel.isSelected()));
+        CheckBox reuse = new CheckBox("Reuse HTTP connections");
+        reuse.setSelected(LauncherSettings.isConnectionReuseEnabled());
+        reuse.getStyleClass().add("settings-checkbox");
+        reuse.setTooltip(new javafx.scene.control.Tooltip("Keep a shared HTTP client for connection pooling and TLS reuse. Disabling this creates short-lived clients and is usually slower."));
+        reuse.setOnAction(e -> LauncherSettings.setConnectionReuseEnabled(reuse.isSelected()));
+        CheckBox cache = new CheckBox("Cache verified files for reuse across instances");
+        cache.setSelected(LauncherSettings.isDownloadCacheEnabled());
+        cache.getStyleClass().add("settings-checkbox");
+        cache.setOnAction(e -> LauncherSettings.setDownloadCacheEnabled(cache.isSelected()));
+        CheckBox adaptive = new CheckBox("Adapt download concurrency to available CPU capacity");
+        adaptive.setSelected(LauncherSettings.isAdaptiveDownloadsEnabled());
+        adaptive.getStyleClass().add("settings-checkbox");
+        adaptive.setOnAction(e -> LauncherSettings.setAdaptiveDownloadsEnabled(adaptive.isSelected()));
+        CheckBox resume = new CheckBox("Resume interrupted downloads when supported");
+        resume.setSelected(LauncherSettings.isResumableDownloadsEnabled());
+        resume.getStyleClass().add("settings-checkbox");
+        resume.setOnAction(e -> LauncherSettings.setResumableDownloadsEnabled(resume.isSelected()));
+        CheckBox segmented = new CheckBox("Use parallel segments for large files (experimental)");
+        segmented.setSelected(LauncherSettings.isSegmentedDownloadsEnabled());
+        segmented.getStyleClass().add("settings-checkbox");
+        segmented.setTooltip(new javafx.scene.control.Tooltip("Only works when a server supports byte-range requests. Some hosts throttle parallel ranges, so leave this off if downloads become less reliable."));
+        segmented.setOnAction(e -> LauncherSettings.setSegmentedDownloadsEnabled(segmented.isSelected()));
+        acceleration.getChildren().addAll(parallel, reuse, cache, adaptive, resume, segmented);
+
+        content.getChildren().addAll(workers, reliability, acceleration, layout);
     }
 
     private void buildStatePage() {
