@@ -184,6 +184,8 @@ public final class ServerManagerService implements AutoCloseable {
             if (!Files.exists(eula) || !Files.readString(eula).matches("(?s).*?eula\\s*=\\s*true.*")) {
                 throw new IllegalStateException("The server's eula.txt does not contain eula=true. Review and accept the EULA first.");
             }
+            rt.process = null;
+            rt.stdin = null;
             rt.state = State.STARTING;
             rt.exitCode = Integer.MIN_VALUE;
             rt.lastExitReason = "";
