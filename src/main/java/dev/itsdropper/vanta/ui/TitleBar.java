@@ -228,9 +228,9 @@ public class TitleBar extends HBox {
             dragX = event.getScreenX() - stage.getX();
             dragY = event.getScreenY() - stage.getY();
 
-            if (event.getClickCount() == 2 && !stage.isMaximized()) {
-                stage.setMaximized(true);
-                maximize.setGraphic(restoreIcon);
+            if (event.getClickCount() == 2) {
+                stage.setMaximized(!stage.isMaximized());
+                maximize.setGraphic(stage.isMaximized() ? restoreIcon : maximizeIcon);
                 event.consume();
             }
         });
