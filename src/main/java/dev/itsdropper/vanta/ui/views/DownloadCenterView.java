@@ -69,7 +69,8 @@ public final class DownloadCenterView extends VBox {
         scroll.getStyleClass().add("download-scroll");
         VBox.setVgrow(scroll, Priority.ALWAYS);
 
-        getChildren().addAll(heading, stats, listHeading, scroll);
+        summary.getStyleClass().add("download-summary");
+        getChildren().addAll(heading, stats, summary, listHeading, scroll);
         service.addListener(listener);
     }
 
@@ -120,7 +121,7 @@ public final class DownloadCenterView extends VBox {
         file.getStyleClass().add("download-task-name");
         file.setMaxWidth(Double.MAX_VALUE);
         file.setWrapText(true);
-        Label source = new Label(task.source() + (task.target() == null ? "" : "  ·  " + task.target().getFileName()));
+        Label source = new Label(displaySource(task.source()) + (task.target() == null ? "" : "  ·  " + task.target().getFileName()));
         source.getStyleClass().add("download-task-source");
         source.setWrapText(true);
 
@@ -174,6 +175,15 @@ public final class DownloadCenterView extends VBox {
             card.getChildren().add(actions);
         }
         return card;
+    }
+
+    private static String displaySource(String raw) {
+        try {
+            String host = java.net.URI.create(raw).getHost();
+            return host == null ? "Remote source" : host;
+        } catch (RuntimeException ignored) {
+            return "Remote source";
+        }
     }
 
     private static String formatBytes(long bytes) {
