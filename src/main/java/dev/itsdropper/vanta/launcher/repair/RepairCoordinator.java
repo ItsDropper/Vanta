@@ -34,7 +34,10 @@ public final class RepairCoordinator {
                     || signature.contains("mixin") || signature.contains("duplicate mod")
                     || signature.contains("mod crash") || signature.contains("mod initialization")
                     || signature.contains("jvm argument") || signature.contains("unsupported java")
-                    || signature.contains("java version") || signature.contains("configuration")) {
+                    || signature.contains("java version") || signature.contains("java runtime")
+                    || signature.contains("mod dependency") || signature.contains("mod conflict")
+                    || signature.contains("mod incompatibility") || signature.contains("incompatible mod")
+                    || signature.contains("minecraft version") || signature.contains("configuration")) {
                 sawSpecificIssue = true;
                 continue;
             }
