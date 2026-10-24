@@ -8,7 +8,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
-import javafx.util.StringConverter;
 import javafx.scene.control.Label;
 import javafx.stage.Popup;
 import javafx.scene.control.ScrollPane;
@@ -321,18 +320,17 @@ public class InstancesView extends VBox {
             return;
         }
 
-        ChoiceDialog<Instance> chooser = new ChoiceDialog<>(loadedInstances.get(0), loadedInstances);
+        List<String> instanceLabels = loadedInstances.stream()
+                .map(instance -> instance.getName() + " · Minecraft " + instance.getMinecraftVersion()
+                        + " · " + instance.getDisplayLoader() + " [" + instance.getId() + "]")
+                .toList();
+        ChoiceDialog<String> chooser = new ChoiceDialog<>(instanceLabels.get(0), instanceLabels);
         chooser.setTitle("Back Up Instance");
         chooser.setHeaderText("Choose an instance to back up");
         chooser.setContentText("Instance:");
-        chooser.setConverter(new StringConverter<>() {
-            @Override public String toString(Instance instance) {
-                return instance == null ? "" : instance.getName() + " · Minecraft "
-                        + instance.getMinecraftVersion() + " · " + instance.getDisplayLoader();
-            }
-            @Override public Instance fromString(String value) { return null; }
-        });
-        Instance selected = chooser.showAndWait().orElse(null);
+        String selectedLabel = chooser.showAndWait().orElse(null);
+        if (selectedLabel == null) return;
+        Instance selected = loadedInstances.get(instanceLabels.indexOf(selectedLabel));
         if (selected == null) return;
 
         if (launchService.isRunning(selected)) {
@@ -388,24 +386,17 @@ public class InstancesView extends VBox {
             return;
         }
 
-        ChoiceDialog<Instance> chooser = new ChoiceDialog<>(loadedInstances.get(0), loadedInstances);
+        List<String> instanceLabels = loadedInstances.stream()
+                .map(instance -> instance.getName() + " · Minecraft " + instance.getMinecraftVersion()
+                        + " · " + instance.getDisplayLoader() + " [" + instance.getId() + "]")
+                .toList();
+        ChoiceDialog<String> chooser = new ChoiceDialog<>(instanceLabels.get(0), instanceLabels);
         chooser.setTitle("Export Modrinth Modpack");
         chooser.setHeaderText("Choose an instance to export");
         chooser.setContentText("Instance:");
-        chooser.setConverter(new StringConverter<>() {
-            @Override
-            public String toString(Instance instance) {
-                return instance == null ? "" : instance.getName()
-                        + "  ·  Minecraft " + instance.getMinecraftVersion()
-                        + "  ·  " + instance.getDisplayLoader();
-            }
-
-            @Override
-            public Instance fromString(String value) {
-                return null;
-            }
-        });
-        Instance selected = chooser.showAndWait().orElse(null);
+        String selectedLabel = chooser.showAndWait().orElse(null);
+        if (selectedLabel == null) return;
+        Instance selected = loadedInstances.get(instanceLabels.indexOf(selectedLabel));
         if (selected == null) return;
 
         FileChooser saveChooser = new FileChooser();
