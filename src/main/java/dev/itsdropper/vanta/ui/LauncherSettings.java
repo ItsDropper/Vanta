@@ -39,6 +39,14 @@ public final class LauncherSettings {
         setBoolean("autoUpdateOnLaunch", value);
     }
 
+    public static int getNotificationDurationSeconds() {
+        return getInt("notificationDurationSeconds", 3, 1, 10);
+    }
+
+    public static void setNotificationDurationSeconds(int value) {
+        setInt("notificationDurationSeconds", clamp(value, 1, 10));
+    }
+
     public static int getDownloadThreads() {
         return getInt("downloadThreads", 8, 1, 16);
     }
