@@ -153,9 +153,6 @@ public class HomeView extends StackPane {
         playtimeTimer.setCycleCount(Timeline.INDEFINITE);
         playtimeTimer.play();
 
-        refreshAccount();
-        refreshRecentInstances();
-        refreshRecentServers();
     }
 
     private VBox createRecentInstancesSection() {
