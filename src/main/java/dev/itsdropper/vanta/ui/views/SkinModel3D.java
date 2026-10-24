@@ -173,6 +173,43 @@ public final class SkinModel3D extends StackPane {
                     face(4, 16, 4, 4), face(8, 16, 4, 4));
         }
 
+        // Transparent second-layer jacket, sleeves, and trousers.
+        if (atlasHeight >= 64) {
+            addBox(material, 8.35, 12.35, 4.35, 0, 0, 0,
+                    face(20, 36, 8, 12), face(32, 36, 8, 12),
+                    face(16, 36, 4, 12), face(28, 36, 4, 12),
+                    face(20, 32, 8, 4), face(28, 32, 8, 4));
+
+            if (slimArms) {
+                addBox(material, 3.35, 12.35, 4.35, -5.5, 0, 0,
+                        face(36, 52, 3, 12), face(44, 52, 3, 12),
+                        face(32, 52, 4, 12), face(40, 52, 4, 12),
+                        face(36, 48, 3, 4), face(39, 48, 3, 4));
+                addBox(material, 3.35, 12.35, 4.35, 5.5, 0, 0,
+                        face(44, 36, 3, 12), face(52, 36, 3, 12),
+                        face(40, 36, 4, 12), face(48, 36, 4, 12),
+                        face(44, 32, 3, 4), face(47, 32, 3, 4));
+            } else {
+                addBox(material, 4.35, 12.35, 4.35, -6, 0, 0,
+                        face(36, 52, 4, 12), face(44, 52, 4, 12),
+                        face(32, 52, 4, 12), face(40, 52, 4, 12),
+                        face(36, 48, 4, 4), face(40, 48, 4, 4));
+                addBox(material, 4.35, 12.35, 4.35, 6, 0, 0,
+                        face(44, 36, 4, 12), face(52, 36, 4, 12),
+                        face(40, 36, 4, 12), face(48, 36, 4, 12),
+                        face(44, 32, 4, 4), face(48, 32, 4, 4));
+            }
+
+            addBox(material, 4.35, 12.35, 4.35, -2, 12, 0,
+                    face(4, 36, 4, 12), face(12, 36, 4, 12),
+                    face(0, 36, 4, 12), face(8, 36, 4, 12),
+                    face(4, 32, 4, 4), face(8, 32, 4, 4));
+            addBox(material, 4.35, 12.35, 4.35, 2, 12, 0,
+                    face(20, 52, 4, 12), face(28, 52, 4, 12),
+                    face(16, 52, 4, 12), face(24, 52, 4, 12),
+                    face(20, 48, 4, 4), face(24, 48, 4, 4));
+        }
+
         // Scale pixel-sized geometry to make the player comfortably visible.
         player.setScaleX(3.4);
         player.setScaleY(3.4);
