@@ -92,7 +92,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         maxRam.getStyleClass().add("server-spinner");
         eula.getStyleClass().add("server-eula");
         Button saveSettings = actionButton("Save runtime settings", IconView.Type.SAVE, "server-secondary");
-        saveSettings.setOnAction(event -> saveRuntimeSettings());
+        saveSettings.setOnAction(event -> saveRuntimeSettings(true));
 
         GridPane runtimeGrid = new GridPane();
         runtimeGrid.setHgap(12);
@@ -165,6 +165,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         eula.setOnAction(event -> acceptEulaChanged());
         commandInput.setDisable(true);
         setActionsEnabled(false);
+        detail.setDisable(true);
 
         service.setConsoleListener((id, line) -> Platform.runLater(() -> {
             if (!id.equals(selectedId)) return;
@@ -239,6 +240,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
     private void selectProfile(String id) {
         selectedId = id;
+        detail.setDisable(false);
         console.clear();
         Profile profile = service.profile(id).orElse(null);
         if (profile == null) {
@@ -285,14 +287,14 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         }
     }
 
-    private void saveRuntimeSettings() {
+    private void saveRuntimeSettings(boolean notify) {
         try {
             Profile p = service.profile(requireSelectedId()).orElseThrow();
             p.javaExecutable = javaInput.getText().isBlank() ? "java" : javaInput.getText().trim();
             p.minRamMb = minRam.getValue();
             p.maxRamMb = maxRam.getValue();
             service.updateProfile(p);
-            info("Settings saved", "Java and memory settings saved for " + p.name + ".");
+            if (notify) info("Settings saved", "Java and memory settings saved for " + p.name + ".");
         } catch (Exception e) {
             error("Could not save settings", e.getMessage());
         }
@@ -301,7 +303,14 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
     private void acceptEulaChanged() {
         if (suppressEulaChange || selectedId == null) return;
         if (!eula.isSelected()) {
-            info("EULA acceptance", "The server will not start until you accept the Minecraft EULA. Vanta does not change eula.txt to false when you uncheck this box.");
+            try {
+                Profile p = service.profile(selectedId).orElseThrow();
+                p.eulaAccepted = false;
+                service.updateProfile(p);
+                console.appendText("Vanta: EULA acceptance disabled for this profile. The server cannot start until you accept it again.\\n");
+            } catch (Exception e) {
+                error("Could not update EULA setting", e.getMessage());
+            }
             return;
         }
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -325,7 +334,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
     private void startServer() {
         try {
-            saveRuntimeSettings();
+            saveRuntimeSettings(false);
             service.start(requireSelectedId());
         } catch (Exception e) { error("Could not start server", e.getMessage()); }
     }
