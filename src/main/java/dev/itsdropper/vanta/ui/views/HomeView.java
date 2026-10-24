@@ -223,6 +223,17 @@ public class HomeView extends StackPane {
         return card;
     }
 
+    /**
+     * Refresh dashboard data whenever the user returns to Home. Instance
+     * creation, imports and repairs can change the library without a launch
+     * state transition, so relying only on launch listeners leaves stale UI.
+     */
+    public void onShown() {
+        refreshAccount();
+        refreshRecentInstances();
+        refreshRecentServers();
+    }
+
     public void refreshRecentInstances() {
         Thread thread = new Thread(() -> {
             try {
