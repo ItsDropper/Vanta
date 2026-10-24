@@ -258,12 +258,10 @@ public class DownloadUtil {
                     );
                 }
 
-                return;
-
                 if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
                     Path cached = cachePath(expectedSha1);
                     Files.createDirectories(cached.getParent());
-                    Files.copy(temporary, cached, StandardCopyOption.REPLACE_EXISTING);
+                    Files.copy(target, cached, StandardCopyOption.REPLACE_EXISTING);
                 }
                 return;
             } catch (Exception e) {
