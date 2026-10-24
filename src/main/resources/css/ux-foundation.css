@@ -1,0 +1,350 @@
+/*
+ * Vanta UX foundation — final cascade layer.
+ * One token-driven surface system, predictable controls, accessible focus,
+ * calmer typography and consistent interaction states across every view.
+ */
+
+.root {
+    -fx-font-family: "Segoe UI Variable", "Segoe UI", "Inter", sans-serif;
+    -fx-font-smoothing-type: lcd;
+    -fx-focus-color: -vanta-accent;
+    -fx-faint-focus-color: derive(-vanta-accent, 78%);
+}
+
+.launcher {
+    -fx-background-color: -vanta-bg;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-background-radius: 15px;
+    -fx-border-radius: 15px;
+}
+
+.content {
+    -fx-background-color: -vanta-bg;
+    -fx-background-radius: 0 14px 14px 0;
+}
+
+.page {
+    -fx-background-color: transparent;
+}
+
+/* Typography: fewer competing sizes, stronger hierarchy, readable secondary text. */
+.page-title, .home-title, .accounts-title, .settings-page-title {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 26px;
+    -fx-font-weight: 800;
+}
+
+.page-subtitle, .settings-page-subtitle, .accounts-subtitle,
+.home-account-label, .home-section-subtitle {
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 12px;
+}
+
+.settings-section-title, .home-section-title, .create-section-title {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.footer-label, .sidebar-build, .home-recent-status {
+    -fx-text-fill: -vanta-subtle;
+}
+
+/* Shell and navigation. */
+.sidebar {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 20px 12px 14px 12px;
+}
+
+.sidebar-logo {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 22px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.3px;
+}
+
+.sidebar-subtitle {
+    -fx-text-fill: -vanta-subtle;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.7px;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 11px 12px;
+    -fx-cursor: hand;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-text-fill: -vanta-text;
+}
+
+.sidebar-button:pressed {
+    -fx-background-color: -vanta-surface-hover;
+}
+
+.sidebar-button-active, .sidebar-button-active:hover {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-border-color: -vanta-accent;
+    -fx-border-width: 0 0 0 3px;
+    -fx-text-fill: -vanta-text;
+    -fx-font-weight: 700;
+}
+
+.title-bar {
+    -fx-background-color: -vanta-bg;
+    -fx-border-color: transparent transparent -vanta-border transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-background-radius: 14px 14px 0 0;
+    -fx-padding: 0 8px 0 16px;
+}
+
+.title-bar-brand {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.2px;
+}
+
+.title-bar-button, .title-bar-close {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7px;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.title-bar-button:hover { -fx-background-color: -vanta-surface-raised; }
+.title-bar-close:hover { -fx-background-color: #B93848; }
+.title-bar-button SVGPath, .title-bar-close SVGPath {
+    -fx-stroke: -vanta-muted;
+    -fx-stroke-width: 1.4px;
+}
+.title-bar-button:hover SVGPath, .title-bar-close:hover SVGPath { -fx-stroke: -vanta-text; }
+
+/* Buttons: clear primary action, quiet secondary actions, explicit destructive states. */
+.button {
+    -fx-font-family: "Segoe UI Variable", "Segoe UI", "Inter", sans-serif;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-background-insets: 0;
+    -fx-cursor: hand;
+}
+
+.primary-button, .instance-create-button, .instance-play-button, .home-play-button {
+    -fx-background-color: -vanta-accent;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+    -fx-padding: 10px 16px;
+}
+
+.primary-button:hover, .instance-create-button:hover,
+.instance-play-button:hover, .home-play-button:hover {
+    -fx-background-color: -vanta-accent-hover;
+}
+
+.primary-button:pressed, .instance-create-button:pressed,
+.instance-play-button:pressed, .home-play-button:pressed {
+    -fx-background-color: derive(-vanta-accent, -12%);
+}
+
+.primary-button:disabled, .instance-play-button:disabled, .home-play-button:disabled {
+    -fx-opacity: 0.48;
+    -fx-cursor: default;
+}
+
+.secondary-button, .settings-back-button, .instance-settings-button {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: -vanta-text;
+    -fx-padding: 9px 14px;
+}
+
+.secondary-button:hover, .settings-back-button:hover, .instance-settings-button:hover {
+    -fx-background-color: -vanta-surface-hover;
+    -fx-border-color: derive(-vanta-border, 20%);
+}
+
+.danger-button {
+    -fx-background-color: derive(-vanta-danger, -78%);
+    -fx-background-radius: 8px;
+    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-border-radius: 8px;
+    -fx-text-fill: -vanta-danger;
+}
+.danger-button:hover { -fx-background-color: derive(-vanta-danger, -70%); }
+
+/* Keyboard users get an obvious focus state; pointer hover stays restrained. */
+.button:focused, .text-field:focused, .text-area:focused,
+.combo-box-base:focused, .choice-box:focused, .list-view:focused,
+.table-view:focused, .check-box:focused, .radio-button:focused,
+.sidebar-button:focused {
+    -fx-border-color: -vanta-accent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+    -fx-faint-focus-color: transparent;
+}
+
+/* Consistent card language across Home, Instances, Accounts, Mods and Settings. */
+.info-card, .account-card, .account-panel, .instance-card, .instance-empty,
+.create-panel, .instance-settings-card, .mod-details-card, .mod-details-header,
+.create-instance-panel, .home-info-card, .home-launch-card, .home-recent-servers-card,
+.state-card, .accounts-card, .settings-card, .home-recent-card {
+    -fx-background-color: -vanta-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.info-card:hover, .account-card:hover, .instance-card:hover,
+.home-info-card:hover, .home-recent-card:hover {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: derive(-vanta-border, 18%);
+}
+
+.card-title, .create-section-title, .instances-count { -fx-text-fill: -vanta-accent; }
+.card-main { -fx-text-fill: -vanta-text; }
+.card-secondary { -fx-text-fill: -vanta-muted; }
+
+/* Home dashboard: neutral surfaces, restrained accent, clear clickable cards. */
+.home-page { -fx-background-color: transparent; }
+.home-content-scroll, .home-content-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+.home-header { -fx-spacing: 5px; }
+.home-title { -fx-font-size: 28px; }
+.home-account-label { -fx-font-size: 12px; }
+.home-section-title {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+.home-section-subtitle { -fx-font-size: 12px; }
+.home-recent-section { -fx-spacing: 10px; }
+.home-recent-card {
+    -fx-padding: 14px 16px;
+    -fx-spacing: 14px;
+    -fx-cursor: hand;
+}
+.home-recent-icon {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-background-radius: 10px;
+    -fx-border-color: derive(-vanta-accent, -48%);
+    -fx-border-radius: 10px;
+    -fx-min-width: 48px;
+    -fx-min-height: 48px;
+    -fx-pref-width: 48px;
+    -fx-pref-height: 48px;
+}
+.home-recent-name {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+.home-recent-meta { -fx-text-fill: -vanta-muted; -fx-font-size: 11px; }
+.home-recent-playtime { -fx-text-fill: -vanta-subtle; -fx-font-size: 10px; }
+.home-recent-play {
+    -fx-background-color: -vanta-accent;
+    -fx-background-radius: 7px;
+    -fx-text-fill: white;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 8px 12px;
+}
+.home-recent-play:hover { -fx-background-color: -vanta-accent-hover; }
+.home-recent-stop {
+    -fx-background-color: derive(-vanta-danger, -78%);
+    -fx-background-radius: 7px;
+    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-border-radius: 7px;
+    -fx-text-fill: -vanta-danger;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+.home-recent-servers-card { -fx-padding: 18px; }
+.home-recent-servers-card:hover { -fx-border-color: derive(-vanta-border, 12%); }
+.home-recent-status { -fx-font-size: 11px; }
+
+/* Inputs should look and behave as a family, not a collection of unrelated widgets. */
+.text-field, .text-area, .create-field, .search-field, .modrinth-search-field,
+.content-search-field, .instance-search-field, .accent-hex-field {
+    -fx-background-color: -vanta-surface;
+    -fx-text-fill: -vanta-text;
+    -fx-prompt-text-fill: -vanta-subtle;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 9px 11px;
+    -fx-highlight-fill: -vanta-accent-soft;
+    -fx-highlight-text-fill: -vanta-text;
+}
+.text-area .content { -fx-background-color: -vanta-surface; }
+.combo-box-base, .choice-box {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.combo-box-base .list-cell, .choice-box .label { -fx-text-fill: -vanta-text; }
+.combo-box-popup .list-view, .context-menu, .menu-item {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-text-fill: -vanta-text;
+}
+.combo-box-popup .list-cell:hover, .menu-item:focused {
+    -fx-background-color: -vanta-accent-soft;
+}
+
+/* Scrollbars, separators, and status indicators are present but never dominant. */
+.scroll-pane, .scroll-pane > .viewport { -fx-background-color: transparent; }
+.scroll-bar:vertical, .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+.scroll-bar .track { -fx-background-color: transparent; }
+.scroll-bar .thumb {
+    -fx-background-color: derive(-vanta-border, 20%);
+    -fx-background-radius: 999px;
+}
+.scroll-bar .thumb:hover { -fx-background-color: -vanta-muted; }
+.scroll-bar .increment-button, .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+.separator .line { -fx-border-color: -vanta-border; }
+.progress-bar > .track { -fx-background-color: -vanta-surface-raised; }
+.progress-bar > .bar { -fx-background-color: -vanta-accent; }
+.progress-indicator { -fx-progress-color: -vanta-accent; }
+
+/* Notifications and tooltips use the same material, radius and border language. */
+.notification, .tooltip {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-text-fill: -vanta-text;
+}
+.tooltip { -fx-padding: 7px 10px; }
+
+/* Reduce motion is handled in Java; this layer does not add CSS animation. */
