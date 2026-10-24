@@ -135,16 +135,8 @@ public final class RemoteServerConnectionDialog {
         stage.setScene(new Scene(root, 720, 460));
         stage.setMinWidth(520);
         stage.setMinHeight(340);
-        stage.setOnCloseRequest(event -> client.close());
+        stage.setOnHidden(event -> client.close());
         stage.show();
-        Thread keepalive = new Thread(() -> {
-            try {
-                while (stage.isShowing() && !Thread.currentThread().isInterrupted()) Thread.sleep(1000);
-            } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-            client.close();
-        }, "vanta-remote-rcon-lifecycle");
-        keepalive.setDaemon(true);
-        keepalive.start();
     }
 
     private static ColumnConstraints growColumn() {
