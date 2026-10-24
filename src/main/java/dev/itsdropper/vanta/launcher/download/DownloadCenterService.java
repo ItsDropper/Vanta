@@ -3,7 +3,6 @@ package dev.itsdropper.vanta.launcher.download;
 import javafx.application.Platform;
 import dev.itsdropper.vanta.launcher.instance.DownloadUtil;
 
-import java.net.URI;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -131,22 +130,21 @@ public final class DownloadCenterService {
     private void publish() {
         List<Task> copy = snapshot();
         for (Consumer<List<Task>> listener : listeners) {
-            Platform.runLater(() -> listener.accept(copy));
+            dispatch(() -> listener.accept(copy));
         }
     }
 
     private void notifyListener(Consumer<List<Task>> listener) {
         List<Task> copy = snapshot();
-        Platform.runLater(() -> listener.accept(copy));
+        dispatch(() -> listener.accept(copy));
     }
 
-    private static String safeSource(String raw) {
+    private static void dispatch(Runnable action) {
         try {
-            URI uri = URI.create(raw);
-            String host = uri.getHost();
-            return host == null ? "Remote source" : host;
-        } catch (RuntimeException ignored) {
-            return "Remote source";
+            Platform.runLater(action);
+        } catch (IllegalStateException toolkitUnavailable) {
+            // A closing JavaFX toolkit must not turn a successful transfer into a failure.
         }
     }
+
 }
