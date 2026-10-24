@@ -682,6 +682,13 @@ public class HomeView extends StackPane {
         play.setMouseTransparent(false);
         play.setCursor(Cursor.HAND);
         play.setDisable(!instanceAvailable);
+        String serverActionDescription = !instanceAvailable
+                ? "Unavailable: the instance for " + server.getDisplayName() + " is not installed"
+                : (serverRunning ? "Close Minecraft on " : "Join ")
+                        + server.getDisplayName()
+                        + (serverRunning ? "" : " using " + instance.getName());
+        play.setAccessibleText(serverActionDescription);
+        play.setTooltip(new Tooltip(serverActionDescription));
 
         play.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) {
