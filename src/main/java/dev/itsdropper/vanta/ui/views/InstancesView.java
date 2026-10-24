@@ -38,6 +38,7 @@ public class InstancesView extends VBox {
     private final Label countLabel;
 
     private final Consumer<Instance> onInstanceSettings;
+    private final Runnable onCreateInstance;
 
     private final TextField searchField;
 
@@ -59,6 +60,7 @@ public class InstancesView extends VBox {
 
         this.onInstanceSettings =
                 onInstanceSettings;
+        this.onCreateInstance = onCreateInstance;
 
         getStyleClass().add(
                 "instances-page"
