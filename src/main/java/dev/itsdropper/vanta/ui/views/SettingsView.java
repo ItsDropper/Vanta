@@ -301,13 +301,83 @@ public class SettingsView extends BorderPane {
         addPreset(presets, "Violet", "#8B7CFF");
         addPreset(presets, "Amber", "#F0B85B");
         addPreset(presets, "Rose", "#EF7187");
+        addPreset(presets, "Arctic", "#7DD3FC");
+        addPreset(presets, "Lime", "#A3E635");
+        addPreset(presets, "Coral", "#FB7185");
+        addPreset(presets, "Lavender", "#C4A7FF");
+        addPreset(presets, "Ice", "#A5F3FC");
+        addPreset(presets, "Crimson", "#FF647C");
+        addPreset(presets, "Silver", "#E5E7EB");
         presetsCard.getChildren().add(presets);
 
         Button reset = new Button("RESET TO VANTA BLUE");
         reset.getStyleClass().add("secondary-button");
         reset.setOnAction(event -> setAccent(ThemeManager.DEFAULT_ACCENT));
 
-        content.getChildren().addAll(themeCard, accentCard, presetsCard, reset);
+        VBox customColors = card(
+                "Custom interface palette",
+                "Override the theme's core colors independently. These overrides are saved locally and apply across the launcher."
+        );
+
+        ColorPicker backgroundColor = customColorPicker("customBackground", ThemeManager.loadTheme().background());
+        ColorPicker surfaceColor = customColorPicker("customSurface", ThemeManager.loadTheme().surface());
+        ColorPicker borderColor = customColorPicker("customBorder", ThemeManager.loadTheme().border());
+        ColorPicker textColor = customColorPicker("customText", ThemeManager.loadTheme().text());
+        ColorPicker mutedColor = customColorPicker("customMuted", ThemeManager.loadTheme().muted());
+
+        customColors.getChildren().addAll(
+                colorSettingRow("Window background", "Main application shell and page canvas", backgroundColor),
+                colorSettingRow("Card surfaces", "Panels, cards and raised content surfaces", surfaceColor),
+                colorSettingRow("Borders", "Separators and control outlines", borderColor),
+                colorSettingRow("Primary text", "Headings and high-priority text", textColor),
+                colorSettingRow("Muted text", "Descriptions and secondary labels", mutedColor)
+        );
+
+        Button resetPalette = new Button("RESET CUSTOM PALETTE");
+        resetPalette.getStyleClass().add("secondary-button");
+        resetPalette.setOnAction(event -> {
+            ThemeManager.clearCustomColors();
+            ThemeManager.apply(this, accentColor);
+            onAccentChanged.accept(accentColor);
+            backgroundColor.setValue(Color.web(ThemeManager.loadTheme().background()));
+            surfaceColor.setValue(Color.web(ThemeManager.loadTheme().surface()));
+            borderColor.setValue(Color.web(ThemeManager.loadTheme().border()));
+            textColor.setValue(Color.web(ThemeManager.loadTheme().text()));
+            mutedColor.setValue(Color.web(ThemeManager.loadTheme().muted()));
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.success("Palette reset", "Theme colors restored to their defaults.");
+        });
+        customColors.getChildren().add(resetPalette);
+
+        content.getChildren().addAll(themeCard, accentCard, presetsCard, customColors, reset);
+    }
+
+    private ColorPicker customColorPicker(String key, String fallback) {
+        ColorPicker picker = new ColorPicker(Color.web(ThemeManager.loadCustomColor(key, fallback)));
+        picker.getStyleClass().add("accent-picker");
+        picker.setOnAction(event -> {
+            Color selected = picker.getValue();
+            if (selected == null) return;
+            String hex = toHex(selected);
+            ThemeManager.saveCustomColor(key, hex);
+            ThemeManager.apply(this, accentColor);
+            onAccentChanged.accept(accentColor);
+        });
+        return picker;
+    }
+
+    private HBox colorSettingRow(String title, String description, ColorPicker picker) {
+        VBox labels = new VBox(3);
+        Label name = new Label(title);
+        name.getStyleClass().add("settings-info-label");
+        Label detail = new Label(description);
+        detail.getStyleClass().add("settings-card-description");
+        detail.setWrapText(true);
+        labels.getChildren().addAll(name, detail);
+        HBox row = new HBox(12, labels, picker);
+        row.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(labels, Priority.ALWAYS);
+        return row;
     }
 
     private void applyHexField() {
