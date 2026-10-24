@@ -1725,6 +1725,16 @@ public class LauncherView {
                         }
 
                         if (!repaired) {
+                            if (!dev.itsdropper.vanta.launcher.repair.RepairCoordinator
+                                    .shouldRepairManagedInstallation(issues)) {
+                                notifications.error(
+                                        "Manual steps recommended",
+                                        dev.itsdropper.vanta.launcher.repair.RepairCoordinator
+                                                .explainNoAutomaticRepair(issues)
+                                );
+                                return;
+                            }
+
                             notifications.updateProgress(
                                     "Verifying Minecraft metadata, libraries, natives and assets..."
                             );
