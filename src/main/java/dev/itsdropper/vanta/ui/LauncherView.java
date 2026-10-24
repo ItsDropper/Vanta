@@ -70,6 +70,21 @@ public class LauncherView {
         root =
                 new StackPane();
 
+        root.sceneProperty().addListener((observable, previousScene, nextScene) -> {
+            if (previousScene != null) {
+                previousScene.removeEventFilter(
+                        javafx.scene.input.KeyEvent.KEY_PRESSED,
+                        this::handleKeyboardShortcut
+                );
+            }
+            if (nextScene != null) {
+                nextScene.addEventFilter(
+                        javafx.scene.input.KeyEvent.KEY_PRESSED,
+                        this::handleKeyboardShortcut
+                );
+            }
+        });
+
         window =
                 new BorderPane();
 
@@ -321,6 +336,32 @@ public class LauncherView {
         StackPane.setAlignment(onboardingView, javafx.geometry.Pos.CENTER);
         root.getChildren().add(overlay);
         AnimationUtils.slideFadeIn(overlay, 18);
+    }
+
+    /**
+     * Global navigation shortcuts are limited to Ctrl+number so ordinary
+     * text-editing shortcuts remain untouched.
+     */
+    private void handleKeyboardShortcut(javafx.scene.input.KeyEvent event) {
+        if (!event.isControlDown() || event.isAltDown() || event.isMetaDown()) {
+            return;
+        }
+
+        Sidebar.Page page = switch (event.getCode()) {
+            case DIGIT1, NUMPAD1 -> Sidebar.Page.HOME;
+            case DIGIT2, NUMPAD2 -> Sidebar.Page.INSTANCES;
+            case DIGIT3, NUMPAD3 -> Sidebar.Page.MODS;
+            case DIGIT4, NUMPAD4 -> Sidebar.Page.STATE;
+            case DIGIT5, NUMPAD5 -> Sidebar.Page.SKIN;
+            case DIGIT6, NUMPAD6 -> Sidebar.Page.ACCOUNTS;
+            case DIGIT7, NUMPAD7 -> Sidebar.Page.SETTINGS;
+            default -> null;
+        };
+
+        if (page != null) {
+            showPage(page);
+            event.consume();
+        }
     }
 
     private void showPage(
