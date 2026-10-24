@@ -27,7 +27,8 @@ public class Sidebar extends VBox {
         STATE,
         SKIN,
         ACCOUNTS,
-        SETTINGS
+        SETTINGS,
+        DOWNLOADS
     }
 
     private Consumer<Page> pageListener;
@@ -97,6 +98,7 @@ public class Sidebar extends VBox {
         addButton("Mods", Page.MODS, IconView.Type.MODS);
         addButton("State", Page.STATE, IconView.Type.SHIELD);
         addButton("Skin changer", Page.SKIN, IconView.Type.SKIN);
+        addButton("Downloads", Page.DOWNLOADS, IconView.Type.DOWNLOAD);
 
         Region spacer =
                 new Region();
@@ -127,9 +129,9 @@ public class Sidebar extends VBox {
 
         build.setWrapText(true);
         build.setAccessibleText("Vanta version " + loadVersion()
-                + ". Navigate with Control plus numbers one through seven.");
+                + ". Navigate with Control plus numbers one through eight.");
         build.setTooltip(new Tooltip("Ctrl+N New instance · Ctrl+1 Home · Ctrl+2 Instances · "
-                + "Ctrl+3 Mods · Ctrl+4 State · Ctrl+5 Skin · Ctrl+6 Accounts · Ctrl+7 Settings"));
+                + "Ctrl+3 Mods · Ctrl+4 State · Ctrl+5 Skin · Ctrl+6 Accounts · Ctrl+7 Settings · Ctrl+8 Downloads"));
 
         getChildren().add(
                 build
