@@ -386,7 +386,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         }
     }
 
-    private void saveRuntimeSettings(boolean notify) {
+    private boolean saveRuntimeSettings(boolean notify) {
         try {
             Profile p = service.profile(requireSelectedId()).orElseThrow();
             p.javaExecutable = javaInput.getText().isBlank() ? "java" : javaInput.getText().trim();
@@ -394,8 +394,10 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             p.maxRamMb = maxRam.getValue();
             service.updateProfile(p);
             if (notify) info("Settings saved", "Java and memory settings saved for " + p.name + ".");
+            return true;
         } catch (Exception e) {
             error("Could not save settings", e.getMessage());
+            return false;
         }
     }
 
@@ -433,7 +435,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
     private void startServer() {
         try {
-            saveRuntimeSettings(false);
+            if (!saveRuntimeSettings(false)) return;
             service.start(requireSelectedId());
         } catch (Exception e) { error("Could not start server", e.getMessage()); }
     }
