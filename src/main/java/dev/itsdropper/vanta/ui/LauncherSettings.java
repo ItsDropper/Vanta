@@ -57,8 +57,8 @@ public final class LauncherSettings {
 
     public static boolean isParallelDownloadsEnabled() { return getBoolean("parallelDownloads", true); }
     public static void setParallelDownloadsEnabled(boolean value) { setBoolean("parallelDownloads", value); }
-    public static boolean isConnectionReuseEnabled() { return getBoolean("connectionReuse", true); }
-    public static void setConnectionReuseEnabled(boolean value) { setBoolean("connectionReuse", value); }
+    public static boolean isHttp2Enabled() { return getBoolean("http2Enabled", true); }
+    public static void setHttp2Enabled(boolean value) { setBoolean("http2Enabled", value); }
     public static boolean isDownloadCacheEnabled() { return getBoolean("downloadCache", true); }
     public static void setDownloadCacheEnabled(boolean value) { setBoolean("downloadCache", value); }
     public static boolean isAdaptiveDownloadsEnabled() { return getBoolean("adaptiveDownloads", true); }
