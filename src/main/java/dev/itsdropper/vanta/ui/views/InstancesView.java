@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.stage.Popup;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -166,7 +167,15 @@ public class InstancesView extends VBox {
         ));
         backupButton.setOnAction(event -> backUpInstance());
 
-        HBox headerTop = new HBox(10, headerText, countLabel, backupButton, createButton);
+        Button restoreButton = new Button("RESTORE");
+        restoreButton.getStyleClass().add("secondary-button");
+        restoreButton.setAccessibleText("Restore a Vanta instance from a ZIP backup");
+        restoreButton.setTooltip(new javafx.scene.control.Tooltip(
+                "Restore a ZIP backup as a separate instance without overwriting existing instances."
+        ));
+        restoreButton.setOnAction(event -> restoreInstanceBackup());
+
+        HBox headerTop = new HBox(10, headerText, countLabel, backupButton, restoreButton, createButton);
         headerTop.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(headerText, Priority.ALWAYS);
 
@@ -304,6 +313,54 @@ public class InstancesView extends VBox {
 
         thread.setDaemon(true);
         thread.start();
+    }
+
+
+    private void restoreInstanceBackup() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Select Vanta Instance Backup");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP backups (*.zip)", "*.zip"));
+        java.io.File archive = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
+        if (archive == null) return;
+
+        String filename = archive.getName();
+        String suggestedName = filename.replaceFirst("(?i)-backup\\.zip$", "")
+                .replaceFirst("(?i)\\.zip$", "") + " (Restored)";
+        TextInputDialog nameDialog = new TextInputDialog(suggestedName);
+        nameDialog.setTitle("Restore Instance Backup");
+        nameDialog.setHeaderText("Restore as a new instance");
+        nameDialog.setContentText("Instance name:");
+        String name = nameDialog.showAndWait().orElse(null);
+        if (name == null) return;
+        if (name.isBlank()) {
+            new Alert(Alert.AlertType.WARNING, "Enter a name for the restored instance.").showAndWait();
+            return;
+        }
+
+        backupButton.setDisable(true);
+        statusLabel.setText("Restoring backup… Existing instances will not be overwritten.");
+        Thread worker = new Thread(() -> {
+            try {
+                InstanceBackupService.restoreBackup(archive.toPath(), name);
+                Platform.runLater(() -> {
+                    backupButton.setDisable(false);
+                    statusLabel.setText("Backup restored as " + name.trim() + ".");
+                    refresh();
+                    new Alert(Alert.AlertType.INFORMATION,
+                            "The backup was restored as a separate instance. The original instance and backup file were not changed.")
+                            .show();
+                });
+            } catch (Throwable ex) {
+                Platform.runLater(() -> {
+                    backupButton.setDisable(false);
+                    String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
+                    statusLabel.setText("Restore failed: " + message);
+                    new Alert(Alert.AlertType.ERROR, "Vanta could not restore this backup.\\n\\n" + message).show();
+                });
+            }
+        }, "Vanta-Instance-Restore");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     private void backUpInstance() {
