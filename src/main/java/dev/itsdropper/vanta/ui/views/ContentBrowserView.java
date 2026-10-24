@@ -1134,6 +1134,7 @@ public class ContentBrowserView extends VBox {
                 "INSTALLING..."
         );
 
+        ModrinthContentType installType = contentType;
         statusLabel.setText(
                 "Installing "
                         + project.getTitle()
@@ -1145,7 +1146,7 @@ public class ContentBrowserView extends VBox {
 
                     try {
 
-                        if (contentType ==
+                        if (installType ==
                                 ModrinthContentType.MOD) {
 
                             modrinthService.installMod(
@@ -1153,7 +1154,7 @@ public class ContentBrowserView extends VBox {
                                     project
                             );
 
-                        } else if (contentType ==
+                        } else if (installType ==
                                 ModrinthContentType.RESOURCE_PACK) {
 
                             contentService.installResourcePack(
@@ -1161,7 +1162,7 @@ public class ContentBrowserView extends VBox {
                                     project
                             );
 
-                        } else if (contentType ==
+                        } else if (installType ==
                                 ModrinthContentType.SHADER) {
 
                             contentService.installShader(
@@ -1173,7 +1174,7 @@ public class ContentBrowserView extends VBox {
 
                             throw new IllegalStateException(
                                     "Unsupported content type: "
-                                            + contentType
+                                            + installType
                             );
                         }
 
