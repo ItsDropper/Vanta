@@ -141,6 +141,12 @@ public final class ServerManagerService implements AutoCloseable {
                 || !edited.jarPath().startsWith(edited.directoryPath())) {
             throw new IllegalArgumentException("Server directory or JAR path is invalid.");
         }
+        if (edited.eulaAccepted && !current.eulaAccepted) {
+            Path eula = edited.directoryPath().resolve("eula.txt");
+            Files.writeString(eula,
+                    "# By changing the setting below to TRUE you indicate your agreement to the Minecraft EULA (https://aka.ms/MinecraftEULA).\neula=true\n",
+                    StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+        }
         profiles.put(edited.id, copy(edited));
         save();
         publish(edited.id);
