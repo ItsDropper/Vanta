@@ -14,6 +14,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -294,7 +295,8 @@ public class SettingsView extends BorderPane {
                 "Use a preset as a starting point, then fine-tune it with the picker or HEX field."
         );
 
-        HBox presets = new HBox(8);
+        FlowPane presets = new FlowPane(8, 8);
+        presets.setPrefWrapLength(560);
         addPreset(presets, "Vanta Blue", "#5688ED");
         addPreset(presets, "Cyan", "#42C6E8");
         addPreset(presets, "Emerald", "#4FD18B");
