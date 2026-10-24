@@ -388,23 +388,6 @@ public final class UpdaterLauncher {
 
         } catch (Exception e) {
 
-                            log(
-                                    "Failed to capture updater output: "
-                                            + e
-                            );
-                        }
-
-                    }, "Vanta-Updater-Output");
-
-            outputThread.setDaemon(true);
-            outputThread.start();
-
-            log(
-                    "Updater output capture thread started."
-            );
-
-        } catch (Exception e) {
-
             log(
                     "========================================"
             );
