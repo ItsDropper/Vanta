@@ -47,14 +47,12 @@ public final class AnimationUtils {
             return;
         }
 
-        if (node.getProperties().putIfAbsent(
+        boolean installHandlers = node.getProperties().putIfAbsent(
                 "vanta.interactive-animation",
                 Boolean.TRUE
-        ) != null) {
-            return;
-        }
+        ) == null;
 
-        if (node instanceof Button) {
+        if (installHandlers && node instanceof Button) {
             // Add handlers instead of replacing a control's existing
             // mouse handlers. Views own behavior; this utility owns polish.
             node.addEventHandler(MouseEvent.MOUSE_ENTERED,
