@@ -74,6 +74,30 @@ public class ModrinthProject {
     public ModrinthProject() {
     }
 
+    /**
+     * Builds the list-card representation directly from the search response.
+     * Modrinth search already contains all fields needed to render a result;
+     * fetching each project individually adds one serial HTTP request per card.
+     */
+    public static ModrinthProject fromSearchHit(ModrinthSearchHit hit) {
+        if (hit == null) {
+            return null;
+        }
+
+        ModrinthProject project = new ModrinthProject();
+        project.id = hit.getProjectId();
+        project.projectId = hit.getProjectId();
+        project.slug = hit.getSlug();
+        project.projectType = hit.getProjectType();
+        project.title = hit.getTitle();
+        project.description = hit.getDescription();
+        project.team = hit.getAuthor();
+        project.iconUrl = hit.getIconUrl();
+        project.downloads = hit.getDownloads();
+        project.followers = hit.getFollows();
+        return project;
+    }
+
     public String getId() {
         return id;
     }
