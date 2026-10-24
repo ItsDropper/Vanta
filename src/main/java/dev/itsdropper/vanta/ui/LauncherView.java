@@ -349,6 +349,12 @@ public class LauncherView {
             return;
         }
 
+        if (event.getCode() == javafx.scene.input.KeyCode.N) {
+            showCreateInstanceView();
+            event.consume();
+            return;
+        }
+
         Sidebar.Page page = switch (event.getCode()) {
             case DIGIT1, NUMPAD1 -> Sidebar.Page.HOME;
             case DIGIT2, NUMPAD2 -> Sidebar.Page.INSTANCES;
