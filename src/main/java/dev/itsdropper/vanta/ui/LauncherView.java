@@ -1139,7 +1139,12 @@ public class LauncherView {
                                 applicationDirectory
                         );
 
-                        Platform.exit();
+                        // The external updater waits for this JVM's PID to exit.
+                        // Platform.exit() only shuts down JavaFX; non-daemon service
+                        // threads can keep the JVM alive and leave the updater waiting
+                        // until its timeout. Exit the original process after the updater
+                        // has successfully started so the application files are released.
+                        System.exit(0);
 
                     } catch (InterruptedException e) {
 
