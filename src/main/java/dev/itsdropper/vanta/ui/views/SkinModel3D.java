@@ -54,7 +54,7 @@ public final class SkinModel3D extends StackPane {
         PerspectiveCamera camera = new PerspectiveCamera(true);
         camera.setNearClip(0.1);
         camera.setFarClip(1000);
-        camera.setTranslateZ(-112);
+        camera.setTranslateZ(-190);
         scene.setCamera(camera);
 
         scene.setOnMousePressed(event -> {
@@ -70,7 +70,7 @@ public final class SkinModel3D extends StackPane {
             event.consume();
         });
         scene.setOnScroll(event -> {
-            camera.setTranslateZ(clamp(camera.getTranslateZ() + event.getDeltaY() * 0.12, -170, -72));
+            camera.setTranslateZ(clamp(camera.getTranslateZ() + event.getDeltaY() * 0.12, -280, -125));
             event.consume();
         });
 
@@ -211,9 +211,9 @@ public final class SkinModel3D extends StackPane {
         }
 
         // Scale pixel-sized geometry to make the player comfortably visible.
-        player.setScaleX(3.4);
-        player.setScaleY(3.4);
-        player.setScaleZ(3.4);
+        player.setScaleX(2.6);
+        player.setScaleY(2.6);
+        player.setScaleZ(2.6);
         player.setTranslateY(5);
     }
 
