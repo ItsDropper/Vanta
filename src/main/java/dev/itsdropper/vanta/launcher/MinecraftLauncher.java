@@ -108,6 +108,23 @@ public class MinecraftLauncher {
         }
 
         // =============================================================
+        // OPTIONAL JDK MODULES
+        // =============================================================
+
+        /*
+         * Essential's shared resource-pack server uses
+         * com.sun.net.httpserver.HttpServer. Since Java 9, the
+         * jdk.httpserver module is not guaranteed to be resolved by
+         * default for class-path applications. Resolve it explicitly
+         * for modern Minecraft runtimes so Essential can initialize.
+         * Java 8 predates the module system and must not receive this
+         * option.
+         */
+        if (data.javaVersion >= 9) {
+            command.add("--add-modules=jdk.httpserver");
+        }
+
+        // =============================================================
         // JAVA LIBRARY PATH
         // =============================================================
 
