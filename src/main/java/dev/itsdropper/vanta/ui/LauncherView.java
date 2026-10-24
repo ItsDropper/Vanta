@@ -237,7 +237,8 @@ public class LauncherView {
                         accountService,
                         launchService,
                         this::showRepairView,
-                        this::launchFromHome
+                        this::launchFromHome,
+                        this::showCreateInstanceView
                 );
 
         accountsView =
