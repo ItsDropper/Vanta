@@ -126,6 +126,10 @@ public class Sidebar extends VBox {
         );
 
         build.setWrapText(true);
+        build.setAccessibleText("Vanta version " + loadVersion()
+                + ". Navigate with Control plus numbers one through seven.");
+        build.setTooltip(new Tooltip("Navigation shortcuts: Ctrl+1 Home · Ctrl+2 Instances · "
+                + "Ctrl+3 Mods · Ctrl+4 State · Ctrl+5 Skin · Ctrl+6 Accounts · Ctrl+7 Settings"));
 
         getChildren().add(
                 build
