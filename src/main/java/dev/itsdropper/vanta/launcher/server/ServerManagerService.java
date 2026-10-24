@@ -322,6 +322,47 @@ public final class ServerManagerService implements AutoCloseable {
         return normalizedTarget;
     }
 
+    /**
+     * Restore a previously created server backup. A fresh safety backup is
+     * created first, and every archive path is constrained to the server root.
+     */
+    public Path restoreBackup(String id, Path backup) throws IOException {
+        Profile p = profile(id).orElseThrow(() -> new IllegalArgumentException("Unknown server profile."));
+        Snapshot state = snapshot(id);
+        if (state.state() == State.RUNNING || state.state() == State.STARTING || state.state() == State.STOPPING) {
+            throw new IllegalStateException("Stop the server before restoring a backup.");
+        }
+        Path root = p.directoryPath().toRealPath();
+        Path backupDirectory = root.resolve("backups").normalize();
+        Path source = backup.toAbsolutePath().normalize();
+        if (!source.startsWith(backupDirectory) || !Files.isRegularFile(source)
+                || !source.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".zip")) {
+            throw new IllegalArgumentException("Choose a ZIP backup from this server's backups folder.");
+        }
+        Path safetyBackup = createBackup(id);
+        try (var input = new java.util.zip.ZipInputStream(Files.newInputStream(source))) {
+            ZipEntry entry;
+            while ((entry = input.getNextEntry()) != null) {
+                Path destination = root.resolve(entry.getName()).normalize();
+                if (!destination.startsWith(root) || destination.startsWith(backupDirectory)) {
+                    throw new IOException("Backup contains an unsafe path: " + entry.getName());
+                }
+                if (entry.isDirectory()) {
+                    Files.createDirectories(destination);
+                } else {
+                    Files.createDirectories(destination.getParent());
+                    Files.copy(input, destination, StandardCopyOption.REPLACE_EXISTING);
+                }
+                input.closeEntry();
+            }
+        } catch (IOException e) {
+            emit(id, "Vanta: backup restore failed. Safety backup retained at " + safetyBackup);
+            throw new IOException("Restore failed; a safety backup was retained at " + safetyBackup + ". " + safeMessage(e), e);
+        }
+        emit(id, "Vanta: restored backup " + source.getFileName() + ". Safety backup: " + safetyBackup.getFileName());
+        return safetyBackup;
+    }
+
     public List<Path> crashReports(String id) throws IOException {
         Profile p = profile(id).orElseThrow(() -> new IllegalArgumentException("Unknown server profile."));
         Path dir = p.directoryPath().resolve("crash-reports");
