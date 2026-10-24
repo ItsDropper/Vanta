@@ -70,6 +70,27 @@ public class LaunchFailureParser {
         }
 
         /*
+         * Essential's shared resource-pack server depends on the JDK
+         * HTTP server module. Vanta resolves it during launch, but keep
+         * this diagnosis for custom runtimes or older launcher builds
+         * that still fail before the client finishes initialization.
+         */
+        if (output.contains("com/sun/net/httpserver/HttpServer")
+                || output.contains("com.sun.net.httpserver.HttpServer")) {
+            issues.add(new RepairView.RepairIssue(
+                    "JAVA RUNTIME",
+                    "Essential could not load Java's HTTP server module",
+                    "This is a Java runtime/module-resolution problem, not a broken world or save. "
+                            + "Update Vanta and relaunch. Vanta now enables jdk.httpserver automatically "
+                            + "for Java 9 and newer. If it still fails, check that the selected Java runtime "
+                            + "is a complete JDK/JRE distribution and not a stripped custom runtime.",
+                    "essential",
+                    List.of()
+            ));
+            return issues;
+        }
+
+        /*
          * Fabric Loader:
          *
          * Mod 'Fabric API' (fabric-api) 0.155.3+26.1.2
