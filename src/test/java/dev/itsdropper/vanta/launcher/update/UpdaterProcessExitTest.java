@@ -22,10 +22,29 @@ class UpdaterProcessExitTest {
                 isWindows() ? "java.exe" : "java"
         );
 
+        String classPath = String.join(
+                java.io.File.pathSeparator,
+                System.getProperty("java.class.path"),
+                Path.of(
+                        UpdaterProcessExitTest.class
+                                .getProtectionDomain()
+                                .getCodeSource()
+                                .getLocation()
+                                .toURI()
+                ).toString(),
+                Path.of(
+                        UpdaterLauncher.class
+                                .getProtectionDomain()
+                                .getCodeSource()
+                                .getLocation()
+                                .toURI()
+                ).toString()
+        );
+
         Process child = new ProcessBuilder(
                 java.toString(),
                 "-cp",
-                System.getProperty("java.class.path"),
+                classPath,
                 UpdaterProcessExitTest.Child.class.getName()
         )
                 .redirectErrorStream(true)
