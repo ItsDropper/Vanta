@@ -133,8 +133,9 @@ public class InstancesView extends VBox {
                 new TextField();
 
         searchField.setPromptText(
-                "Search instances..."
+                "Search by name, Minecraft version, or loader..."
         );
+        searchField.setAccessibleText("Search installed Minecraft instances");
 
         searchField.getStyleClass().add(
                 "instance-search-field"
@@ -149,23 +150,26 @@ public class InstancesView extends VBox {
                         filterInstances(newValue)
         );
 
-        HBox header =
-                new HBox(
-                        18,
-                        headerText,
-                        countLabel,
-                        searchField,
-                        createButton
-                );
+        createButton.setAccessibleText("Create a Minecraft instance");
+        createButton.setTooltip(new javafx.scene.control.Tooltip("Create a new Minecraft instance"));
 
-        header.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        HBox headerTop = new HBox(18, headerText, countLabel, createButton);
+        headerTop.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(headerText, Priority.ALWAYS);
 
-        HBox.setHgrow(
-                headerText,
-                Priority.ALWAYS
-        );
+        Button refreshButton = new Button("REFRESH");
+        refreshButton.getStyleClass().add("secondary-button");
+        refreshButton.setAccessibleText("Refresh installed Minecraft instances");
+        refreshButton.setTooltip(new javafx.scene.control.Tooltip("Rescan installed instances"));
+        refreshButton.setOnAction(event -> refresh());
+
+        HBox searchRow = new HBox(10, searchField, refreshButton);
+        searchRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(searchField, Priority.ALWAYS);
+        searchField.setMaxWidth(Double.MAX_VALUE);
+
+        VBox header = new VBox(14, headerTop, searchRow);
+        header.getStyleClass().add("instances-header");
 
         // ---------------------------------------------------------
         // LIST
@@ -657,12 +661,18 @@ public class InstancesView extends VBox {
                 "instance-empty-description"
         );
 
+        Button createButton = new Button("CREATE INSTANCE");
+        createButton.getStyleClass().add("primary-button");
+        createButton.setAccessibleText("Create your first Minecraft instance");
+        createButton.setOnAction(event -> onCreateInstance.run());
+
         VBox empty =
                 new VBox(
-                        10,
+                        12,
                         icon,
                         title,
-                        description
+                        description,
+                        createButton
                 );
 
         empty.setAlignment(
