@@ -193,11 +193,21 @@ public class InstanceSettingsView extends VBox {
                 }
         );
 
+        HBox ramPresets = new HBox(6);
+        for (int gigabytes : new int[]{2, 4, 6, 8, 10, 12, 14, 16}) {
+            Button preset = new Button(gigabytes + " GB");
+            preset.getStyleClass().add("accent-preset");
+            preset.setOnAction(event -> ramSlider.setValue(gigabytes * 1024));
+            ramPresets.getChildren().add(preset);
+        }
+
         VBox ramBox =
                 new VBox(
                         10,
                         ramValueLabel,
-                        ramSlider
+                        ramSlider,
+                        new Label("Quick presets"),
+                        ramPresets
                 );
 
         ramBox.setMaxWidth(
