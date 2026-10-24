@@ -61,7 +61,9 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         add.setOnAction(event -> addProfile());
         Button create = actionButton("Create from JAR", IconView.Type.PLUS, "server-primary");
         create.setOnAction(event -> createProfileFromJar());
-        HBox actions = new HBox(8, add, create);
+        Button connectRemote = actionButton("Connect Remote", IconView.Type.ARROW_RIGHT, "server-secondary");
+        connectRemote.setOnAction(event -> RemoteServerConnectionDialog.open(getScene() == null ? null : getScene().getWindow()));
+        HBox actions = new HBox(8, connectRemote, add, create);
         HBox headingRow = new HBox(14, new VBox(5, eyebrow, heading, subtitle), spacer(), actions);
         headingRow.setAlignment(Pos.CENTER_LEFT);
         VBox.setVgrow(headingRow.getChildren().get(0), Priority.NEVER);
