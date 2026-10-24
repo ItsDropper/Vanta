@@ -4,6 +4,7 @@ import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
+import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -67,6 +68,23 @@ public final class AnimationUtils {
         }
 
         if (node instanceof Parent parent) {
+            if (parent.getProperties().putIfAbsent(
+                    "vanta.interactive-animation-child-listener",
+                    Boolean.TRUE
+            ) == null) {
+                parent.getChildrenUnmodifiable().addListener(
+                        (ListChangeListener<Node>) change -> {
+                            while (change.next()) {
+                                if (change.wasAdded()) {
+                                    for (Node child : change.getAddedSubList()) {
+                                        installInteractiveAnimations(child);
+                                    }
+                                }
+                            }
+                        }
+                );
+            }
+
             for (Node child : parent.getChildrenUnmodifiable()) {
                 installInteractiveAnimations(child);
             }
