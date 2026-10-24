@@ -43,7 +43,7 @@ jobs:
 
       - name: Run updater process-exit regression test
         if: runner.os != 'Windows'
-        run: ./gradlew --no-daemon test
+        run: bash gradlew --no-daemon test
 
       - name: Run updater process-exit regression test
         if: runner.os == 'Windows'
