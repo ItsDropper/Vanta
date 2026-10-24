@@ -4,6 +4,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
 
 import dev.itsdropper.vanta.ui.components.IconView;
 import javafx.scene.layout.Priority;
@@ -179,6 +180,11 @@ public class Sidebar extends VBox {
                 );
 
         button.setGraphicTextGap(10);
+        int shortcutNumber = page.ordinal() + 1;
+        button.setTooltip(new Tooltip(text + "  ·  Ctrl+" + shortcutNumber));
+        button.setAccessibleText(
+                text + " page. Keyboard shortcut Control plus " + shortcutNumber
+        );
 
         button.setMaxWidth(
                 Double.MAX_VALUE
