@@ -118,7 +118,8 @@ public class SettingsView extends BorderPane {
         navigation.getChildren().addAll(
                 sectionButton("General", false),
                 sectionButton("Minecraft", false),
-                sectionButton("Downloads", false)
+                sectionButton("Downloads", false),
+                sectionButton("Storage & Cache", false)
         );
 
         navigation.getChildren().add(group("SYSTEM"));
@@ -159,6 +160,7 @@ public class SettingsView extends BorderPane {
             case "General" -> buildGeneralPage();
             case "Minecraft" -> buildMinecraftPage();
             case "Downloads" -> buildDownloadsPage();
+            case "Storage & Cache" -> buildStoragePage();
             case "State" -> buildStatePage();
             case "Repair & Diagnostics" -> buildDiagnosticsPage();
             case "About Vanta" -> buildAboutPage();
@@ -1186,6 +1188,190 @@ public class SettingsView extends BorderPane {
         acceleration.getChildren().addAll(parallel, reuse, cache, adaptive, resume, segmented);
 
         content.getChildren().addAll(workers, reliability, acceleration, layout);
+    }
+
+    private void buildStoragePage() {
+        pageHeader(
+                "Storage & Cache",
+                "Inspect Vanta's local download cache and reclaim space without touching Minecraft instances or personal files."
+        );
+
+        Path vantaDirectory = MinecraftLocator.getVantaDirectory();
+        Path cacheDirectory = vantaDirectory.resolve("download-cache");
+
+        VBox overview = card(
+                "Verified download cache",
+                "Vanta can reuse checksum-verified files to avoid downloading the same Minecraft libraries again. Clearing this cache does not remove installed instances; files can be downloaded again when needed."
+        );
+
+        addInfoRow(overview, "Cache location", cacheDirectory.toString());
+        addInfoRow(overview, "Vanta data location", vantaDirectory.toString());
+
+        Label cacheSize = new Label("Calculating cache size…");
+        cacheSize.getStyleClass().add("instance-setting-value");
+        Label cacheStatus = new Label("Cache contents are inspected locally. No files are uploaded.");
+        cacheStatus.getStyleClass().add("settings-card-description");
+        cacheStatus.setWrapText(true);
+
+        Button refresh = new Button("REFRESH SIZE");
+        refresh.getStyleClass().add("secondary-button");
+        refresh.setOnAction(e -> refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh));
+
+        Button open = actionButton("OPEN CACHE FOLDER", () -> {
+            try {
+                Files.createDirectories(cacheDirectory);
+                openDirectory(cacheDirectory);
+            } catch (IOException ex) {
+                NotificationManager manager = NotificationManager.getGlobal();
+                if (manager != null) manager.error("Could not open cache", ex.getMessage() == null
+                        ? "Vanta could not open the download cache folder." : ex.getMessage());
+            }
+        });
+
+        Button clear = new Button("CLEAR DOWNLOAD CACHE");
+        clear.getStyleClass().add("danger-button");
+        clear.setTooltip(new javafx.scene.control.Tooltip(
+                "Delete only Vanta's verified download cache. Installed Minecraft files and instances are not affected."
+        ));
+        clear.setOnAction(e -> {
+            Alert confirm = new Alert(
+                    Alert.AlertType.CONFIRMATION,
+                    "Delete Vanta's verified download cache? Installed instances and Minecraft files will remain untouched. Cached files can be downloaded again later.",
+                    ButtonType.CANCEL,
+                    ButtonType.OK
+            );
+            confirm.setTitle("Clear Download Cache");
+            confirm.setHeaderText("Free space used by cached downloads");
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+            clear.setDisable(true);
+            refresh.setDisable(true);
+            cacheStatus.setText("Clearing cached downloads…");
+            Thread worker = new Thread(() -> {
+                Exception failure = null;
+                try {
+                    if (Files.exists(cacheDirectory)) {
+                        try (var walk = Files.walk(cacheDirectory)) {
+                            for (Path item : walk.sorted(java.util.Comparator.reverseOrder()).toList()) {
+                                Files.deleteIfExists(item);
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    failure = ex;
+                }
+                Exception result = failure;
+                Platform.runLater(() -> {
+                    clear.setDisable(false);
+                    refresh.setDisable(false);
+                    if (result == null) {
+                        cacheStatus.setText("Download cache cleared. Vanta will recreate it when needed.");
+                        cacheSize.setText("0 bytes");
+                        NotificationManager manager = NotificationManager.getGlobal();
+                        if (manager != null) manager.success("Cache cleared", "Verified download cache removed. Installed instances were not changed.");
+                    } else {
+                        cacheStatus.setText("Could not completely clear the cache: " +
+                                (result.getMessage() == null ? result.getClass().getSimpleName() : result.getMessage()));
+                        NotificationManager manager = NotificationManager.getGlobal();
+                        if (manager != null) manager.error("Cache cleanup incomplete", "Some cached files could not be removed.");
+                        refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh);
+                    }
+                });
+            }, "Vanta-Download-Cache-Cleanup");
+            worker.setDaemon(true);
+            worker.start();
+        });
+
+        HBox actions = new HBox(8, refresh, open, clear);
+        actions.setAlignment(Pos.CENTER_LEFT);
+        actions.setSpacing(8);
+        overview.getChildren().addAll(cacheSize, actions, cacheStatus);
+
+        VBox downloadPolicy = card(
+                "Download behavior",
+                "These options affect future downloads. Existing verified cache entries remain local until you clear them."
+        );
+        CheckBox cacheEnabled = new CheckBox("Reuse checksum-verified downloads");
+        cacheEnabled.setSelected(LauncherSettings.isDownloadCacheEnabled());
+        cacheEnabled.getStyleClass().add("settings-checkbox");
+        cacheEnabled.setTooltip(new javafx.scene.control.Tooltip(
+                "Reuse files only when their SHA-1 matches the expected checksum."
+        ));
+        cacheEnabled.setOnAction(e -> {
+            LauncherSettings.setDownloadCacheEnabled(cacheEnabled.isSelected());
+            cacheStatus.setText(cacheEnabled.isSelected()
+                    ? "Verified cache reuse enabled for future downloads."
+                    : "Cache reuse disabled. Existing cached files are retained until you clear them.");
+        });
+        downloadPolicy.getChildren().add(cacheEnabled);
+
+        VBox safety = card(
+                "Storage safety",
+                "Cache cleanup is restricted to the dedicated Vanta download-cache directory. It does not scan or delete files from your Windows profile, game saves, screenshots, mods, or instance folders."
+        );
+        content.getChildren().addAll(overview, downloadPolicy, safety);
+        refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh);
+    }
+
+    private void refreshDownloadCacheSize(
+            Path cacheDirectory,
+            Label sizeLabel,
+            Label statusLabel,
+            Button refreshButton
+    ) {
+        refreshButton.setDisable(true);
+        statusLabel.setText("Inspecting local cache files…");
+        Thread worker = new Thread(() -> {
+            long total = 0L;
+            long files = 0L;
+            Exception failure = null;
+            try {
+                if (Files.exists(cacheDirectory)) {
+                    try (var walk = Files.walk(cacheDirectory)) {
+                        for (Path path : walk.filter(Files::isRegularFile).toList()) {
+                            try {
+                                total = Math.addExact(total, Files.size(path));
+                                files++;
+                            } catch (ArithmeticException ignored) {
+                                total = Long.MAX_VALUE;
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                failure = ex;
+            }
+            final long bytes = total;
+            final long count = files;
+            final Exception error = failure;
+            Platform.runLater(() -> {
+                refreshButton.setDisable(false);
+                if (error != null) {
+                    sizeLabel.setText("Size unavailable");
+                    statusLabel.setText("Could not inspect the cache: " +
+                            (error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage()));
+                    return;
+                }
+                sizeLabel.setText(formatStorageSize(bytes) + " across " + count + " file" + (count == 1 ? "" : "s"));
+                statusLabel.setText(count == 0
+                        ? "The download cache is empty."
+                        : "Cache contents were measured locally. No file contents were uploaded or modified.");
+            });
+        }, "Vanta-Download-Cache-Size");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private static String formatStorageSize(long bytes) {
+        if (bytes < 1024) return bytes + " bytes";
+        double value = bytes;
+        String[] units = {"KB", "MB", "GB", "TB"};
+        int unit = -1;
+        do {
+            value /= 1024.0;
+            unit++;
+        } while (value >= 1024.0 && unit < units.length - 1);
+        return String.format(java.util.Locale.ROOT, "%.2f %s", value, units[unit]);
     }
 
     private void buildStatePage() {
