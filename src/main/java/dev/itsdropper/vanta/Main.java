@@ -112,7 +112,8 @@ public class Main extends Application {
                 "/css/modrinth.css",
                 "/css/title-bar.css",
                 "/css/design-system.css",
-                "/css/polish.css"
+                "/css/polish.css",
+                "/css/ux-foundation.css"
         };
 
         for (String stylesheet : stylesheets) {
