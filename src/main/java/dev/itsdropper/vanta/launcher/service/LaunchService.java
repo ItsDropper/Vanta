@@ -618,6 +618,10 @@ public class LaunchService {
                     || category ==
                     FailureCategory.MOD_CONFLICT
                     || category ==
+                    FailureCategory.MOD_MIXIN_FAILURE
+                    || category ==
+                    FailureCategory.MOD_CRASH
+                    || category ==
                     FailureCategory.DUPLICATE_MOD
                     || category ==
                     FailureCategory.MISSING_LIBRARY
@@ -627,6 +631,10 @@ public class LaunchService {
                     FailureCategory.MISSING_ASSET
                     || category ==
                     FailureCategory.JAVA_RUNTIME
+                    || category ==
+                    FailureCategory.AUTHENTICATION
+                    || category ==
+                    FailureCategory.GRAPHICS
                     || category ==
                     FailureCategory.JAVA_VERSION
                     || category ==
