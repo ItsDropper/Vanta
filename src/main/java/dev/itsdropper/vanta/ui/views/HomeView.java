@@ -329,7 +329,7 @@ public class HomeView extends StackPane {
         card.setMaxWidth(Double.MAX_VALUE);
         card.prefWidthProperty().bind(
                 Bindings.createDoubleBinding(
-                        () -> responsiveCardWidth(recentList),
+                        () -> Math.max(0, recentList.getWidth() - 2),
                         recentList.widthProperty()
                 )
         );
