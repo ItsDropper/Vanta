@@ -32,11 +32,27 @@ public class ModrinthService {
         return mapSearchHits(hits);
     }
 
+    /**
+     * First-paint query matching the global browser: filter by loader but do not
+     * wait for Modrinth's additional exact Minecraft-version facet.
+     */
+    public List<ModrinthProject> searchModsFastBroad(Instance instance, String query) throws IOException, InterruptedException {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
+        return mapSearchHits(client.search(query, ModrinthContentType.MOD, loader, null).getHits());
+    }
+
     public List<ModrinthProject> getMostDownloadedModsFast(Instance instance) throws IOException, InterruptedException {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
         String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
         List<ModrinthSearchHit> hits = client.getMostDownloaded(ModrinthContentType.MOD, loader, instance.getMinecraftVersion()).getHits();
         return mapSearchHits(hits);
+    }
+
+    public List<ModrinthProject> getMostDownloadedModsFastBroad(Instance instance) throws IOException, InterruptedException {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
+        return mapSearchHits(client.getMostDownloaded(ModrinthContentType.MOD, loader, null).getHits());
     }
 
     private List<ModrinthProject> mapSearchHits(List<ModrinthSearchHit> hits) {
