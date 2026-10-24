@@ -60,6 +60,18 @@ public final class ThemeManager {
                 "#FFF0F5", "#AE929E", "#7D6872", "#F08B99", "#73D6A0"));
         register(new Theme("Solar", "#F2C45F", "#12100A", "#1D1910", "#282116", "#352B1B", "#4B3E27",
                 "#FFF9E8", "#AEA486", "#7D735B", "#E58B91", "#76D39A"));
+        register(new Theme("Arctic", "#7DD3FC", "#07111B", "#0D1B29", "#132638", "#1B3448", "#29465C",
+                "#F0F9FF", "#93B4C8", "#66869B", "#FB7185", "#6EE7B7"));
+        register(new Theme("Amethyst", "#C4A7FF", "#100B1C", "#1A122B", "#251A3A", "#32234B", "#46335F",
+                "#F7F2FF", "#B2A1CB", "#82719B", "#FB879A", "#7BE0B0"));
+        register(new Theme("Crimson", "#FF647C", "#15090D", "#211017", "#2E1720", "#3D202C", "#58303D",
+                "#FFF1F3", "#B99AA2", "#876A73", "#FF7185", "#78DDA5"));
+        register(new Theme("Slate", "#A3B4CC", "#0D1117", "#161D27", "#1E2936", "#293747", "#38495C",
+                "#F0F4F9", "#9AAABD", "#718197", "#F08B98", "#78DDA5"));
+        register(new Theme("Cotton Candy", "#F0A6FF", "#140D19", "#211528", "#2C1C36", "#3A2545", "#52365F",
+                "#FFF4FF", "#C0A2C7", "#907499", "#FF819B", "#78DDA5"));
+        register(new Theme("Mono", "#E5E7EB", "#0B0B0C", "#151516", "#202022", "#2A2A2D", "#3B3B40",
+                "#FAFAFA", "#A1A1AA", "#71717A", "#F87171", "#86EFAC"));
     }
 
     private ThemeManager() {}
@@ -104,6 +116,11 @@ public final class ThemeManager {
 
         Theme base = loadTheme();
         String effectiveAccent = isValidAccent(accent) ? accent.toUpperCase() : base.accent();
+        String background = loadCustomColor("customBackground", base.background());
+        String surface = loadCustomColor("customSurface", base.surface());
+        String border = loadCustomColor("customBorder", base.border());
+        String textColor = loadCustomColor("customText", base.text());
+        String muted = loadCustomColor("customMuted", base.muted());
         Color color = Color.web(effectiveAccent);
 
         String soft = toHex(color.darker().darker());
@@ -117,13 +134,13 @@ public final class ThemeManager {
                 "-vanta-accent-soft: " + soft + ";" +
                 "-vanta-accent-hover: " + hover + ";" +
                 "-vanta-accent-rgb: " + rgb + ";" +
-                "-vanta-bg: " + base.background() + ";" +
-                "-vanta-surface: " + base.surface() + ";" +
+                "-vanta-bg: " + background + ";" +
+                "-vanta-surface: " + surface + ";" +
                 "-vanta-surface-raised: " + base.surfaceRaised() + ";" +
                 "-vanta-surface-hover: " + base.surfaceHover() + ";" +
-                "-vanta-border: " + base.border() + ";" +
-                "-vanta-text: " + base.text() + ";" +
-                "-vanta-muted: " + base.muted() + ";" +
+                "-vanta-border: " + border + ";" +
+                "-vanta-text: " + textColor + ";" +
+                "-vanta-muted: " + muted + ";" +
                 "-vanta-subtle: " + base.subtle() + ";" +
                 "-vanta-danger: " + base.danger() + ";" +
                 "-vanta-success: " + base.success() + ";"
@@ -134,6 +151,26 @@ public final class ThemeManager {
         if (!THEMES.containsKey(themeName)) return;
         saveThemeName(themeName);
         apply(node, loadAccent());
+    }
+
+    public static String loadCustomColor(String key, String fallback) {
+        String value = getString(key, "");
+        return isValidAccent(value) ? value.toUpperCase() : fallback;
+    }
+
+    public static void saveCustomColor(String key, String value) {
+        if (!isValidAccent(value)) return;
+        setString(key, value.toUpperCase());
+    }
+
+    public static void clearCustomColors() {
+        Properties properties = load();
+        properties.remove("customBackground");
+        properties.remove("customSurface");
+        properties.remove("customBorder");
+        properties.remove("customText");
+        properties.remove("customMuted");
+        save(properties);
     }
 
     public static boolean isValidAccent(String accent) {
