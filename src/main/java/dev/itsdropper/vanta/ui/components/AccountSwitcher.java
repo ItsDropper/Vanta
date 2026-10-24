@@ -120,6 +120,7 @@ public class AccountSwitcher extends HBox {
 
         popup.setAutoHide(true);
         popup.setHideOnEscape(true);
+        popup.setOnHidden(event -> Platform.runLater(this::requestFocus));
 
         accountList =
                 new VBox();
