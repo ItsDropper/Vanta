@@ -25,6 +25,7 @@ This document defines the interaction contract for Vanta's JavaFX interface. It 
 
 | Shortcut | Destination |
 | --- | --- |
+| Ctrl+N | Create a new instance |
 | Ctrl+1 | Home |
 | Ctrl+2 | Instances |
 | Ctrl+3 | Mods |
