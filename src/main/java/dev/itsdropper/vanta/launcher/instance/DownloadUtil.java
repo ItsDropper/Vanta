@@ -143,6 +143,26 @@ public class DownloadUtil {
             Path target,
             String expectedSha1
     ) throws Exception {
+        long taskId = dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                .getInstance().begin(url, target, expectedSha1);
+        try {
+            downloadFileInternal(url, target, expectedSha1, taskId);
+            long size = Files.isRegularFile(target) ? Files.size(target) : 0L;
+            dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                    .getInstance().complete(taskId, size);
+        } catch (Exception failure) {
+            dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                    .getInstance().fail(taskId, failure);
+            throw failure;
+        }
+    }
+
+    private static void downloadFileInternal(
+            String url,
+            Path target,
+            String expectedSha1,
+            long taskId
+    ) throws Exception {
 
         if (target.getParent() != null) Files.createDirectories(target.getParent());
         if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
@@ -212,13 +232,30 @@ public class DownloadUtil {
 
                 boolean append = existingBytes > 0 && response.statusCode() == 206;
                 if (existingBytes > 0 && response.statusCode() != 206) existingBytes = 0;
+                long responseLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
+                long totalBytes = responseLength > 0 ? responseLength + (append ? existingBytes : 0L) : -1L;
+                long receivedBytes = append ? existingBytes : 0L;
+                long lastProgressNanos = 0L;
+                byte[] buffer = new byte[64 * 1024];
                 try (InputStream input = response.body();
                      OutputStream output = Files.newOutputStream(temporary,
                              java.nio.file.StandardOpenOption.CREATE,
                              append ? java.nio.file.StandardOpenOption.APPEND
                                      : java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
-                    input.transferTo(output);
+                    int read;
+                    while ((read = input.read(buffer)) != -1) {
+                        output.write(buffer, 0, read);
+                        receivedBytes += read;
+                        long now = System.nanoTime();
+                        if (now - lastProgressNanos >= 200_000_000L) {
+                            dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                                    .getInstance().progress(taskId, receivedBytes, totalBytes);
+                            lastProgressNanos = now;
+                        }
+                    }
                 }
+                dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                        .getInstance().verifying(taskId, receivedBytes, totalBytes);
 
                 // -------------------------------------------------
                 // VERIFY SHA-1
