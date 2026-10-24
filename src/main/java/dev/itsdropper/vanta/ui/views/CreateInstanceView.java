@@ -26,6 +26,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 public class CreateInstanceView extends VBox {
 
     private static final String VERSION_MANIFEST_URL =
@@ -59,6 +60,8 @@ public class CreateInstanceView extends VBox {
      * If the user changes versions quickly, an older Fabric
      * check is ignored when it finishes.
      */
+    private final AtomicInteger manifestRequestId = new AtomicInteger();
+
     private final AtomicInteger fabricCheckId =
             new AtomicInteger();
 
@@ -411,6 +414,7 @@ public class CreateInstanceView extends VBox {
     // =============================================================
 
     private void loadVersions() {
+        int requestId = manifestRequestId.incrementAndGet();
         createButton.setDisable(true);
         versionBox.setDisable(true);
         versionBox.setPromptText("Loading Minecraft releases...");
@@ -451,6 +455,7 @@ public class CreateInstanceView extends VBox {
                 }
 
                 Platform.runLater(() -> {
+                    if (requestId != manifestRequestId.get()) return;
                     versionBox.getItems().setAll(releases);
                     if (releases.isEmpty()) {
                         versionBox.setDisable(true);
@@ -478,6 +483,7 @@ public class CreateInstanceView extends VBox {
             } catch (Throwable ex) {
                 ex.printStackTrace();
                 Platform.runLater(() -> {
+                    if (requestId != manifestRequestId.get()) return;
                     versionBox.getItems().clear();
                     versionBox.setDisable(true);
                     loaderBox.setDisable(true);
