@@ -4,6 +4,8 @@ public enum FailureCategory {
 
     MOD_DEPENDENCY,
     MOD_CONFLICT,
+    MOD_MIXIN_FAILURE,
+    MOD_CRASH,
     DUPLICATE_MOD,
 
     MISSING_LIBRARY,
@@ -11,6 +13,8 @@ public enum FailureCategory {
     MISSING_ASSET,
 
     JAVA_RUNTIME,
+    AUTHENTICATION,
+    GRAPHICS,
     JAVA_VERSION,
     JVM_ARGUMENTS,
 
