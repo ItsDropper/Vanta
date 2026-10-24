@@ -20,6 +20,15 @@ import dev.itsdropper.vanta.launcher.modrinth.ModrinthContentType;
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthProject;
 import dev.itsdropper.vanta.launcher.service.ModrinthContentService;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 
 public class ModpackBrowserView extends VBox {
@@ -27,6 +36,7 @@ public class ModpackBrowserView extends VBox {
     private final String minecraftVersion;
 
     private final ModrinthContentService contentService;
+    private final HttpClient httpClient;
 
     private final VBox resultsList;
     private final TextField searchField;
@@ -41,6 +51,7 @@ public class ModpackBrowserView extends VBox {
 
         this.minecraftVersion = minecraftVersion;
         this.contentService = new ModrinthContentService();
+        this.httpClient = HttpClient.newHttpClient();
         this.onInstanceImported = onInstanceImported;
 
         getStyleClass().add(
@@ -111,7 +122,11 @@ public class ModpackBrowserView extends VBox {
         searchField = new TextField();
 
         searchField.setPromptText(
-                "Search modpacks..."
+                "Search Modrinth modpacks..."
+        );
+
+        searchField.getStyleClass().add(
+                "create-field"
         );
 
         HBox.setHgrow(
@@ -629,11 +644,36 @@ public class ModpackBrowserView extends VBox {
         }
 
         Thread thread = new Thread(() -> {
-
             try {
+                HttpRequest request = HttpRequest.newBuilder(URI.create(url))
+                        .GET()
+                        .header("User-Agent", "VantaLauncher/1.0")
+                        .build();
+
+                HttpResponse<InputStream> response = httpClient.send(
+                        request,
+                        HttpResponse.BodyHandlers.ofInputStream()
+                );
+
+                if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                    response.body().close();
+                    return;
+                }
+
+                BufferedImage bufferedImage;
+                try (InputStream input = response.body()) {
+                    bufferedImage = ImageIO.read(input);
+                }
+
+                if (bufferedImage == null) {
+                    return;
+                }
+
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                ImageIO.write(bufferedImage, "png", output);
 
                 Image image = new Image(
-                        url,
+                        new ByteArrayInputStream(output.toByteArray()),
                         60,
                         60,
                         true,
@@ -641,19 +681,16 @@ public class ModpackBrowserView extends VBox {
                         true
                 );
 
-                Platform.runLater(() -> {
+                if (image.isError()) {
+                    return;
+                }
 
-                    if (!image.isError()) {
-
-                        imageView.setImage(
-                                image
-                        );
-                    }
-                });
-
-            } catch (Exception ignored) {
+                Platform.runLater(() -> imageView.setImage(image));
+            } catch (Exception ex) {
+                System.err.println("Failed to load Modrinth modpack icon: " + url);
+                ex.printStackTrace();
             }
-        });
+        }, "Vanta-Modpack-Icon");
 
         thread.setDaemon(true);
         thread.start();
