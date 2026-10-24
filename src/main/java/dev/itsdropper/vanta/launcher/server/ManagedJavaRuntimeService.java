@@ -174,11 +174,12 @@ final class ManagedJavaRuntimeService {
                 throw new IOException("Downloaded runtime reported Java " + installedMajor
                         + " instead of requested Java " + major + ".");
             }
+            Path runtimeRoot = javaExe.getParent().getParent();
             deleteTree(target);
             try {
-                Files.move(staging, target, StandardCopyOption.ATOMIC_MOVE);
+                Files.move(runtimeRoot, target, StandardCopyOption.ATOMIC_MOVE);
             } catch (AtomicMoveNotSupportedException e) {
-                Files.move(staging, target);
+                Files.move(runtimeRoot, target);
             }
             log.accept("Vanta: Java " + major + " is installed and ready.");
         } catch (InterruptedException e) {
