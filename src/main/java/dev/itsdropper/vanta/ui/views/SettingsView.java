@@ -37,6 +37,7 @@ import dev.itsdropper.vanta.ui.ThemeManager;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.io.File;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -917,6 +918,57 @@ public class SettingsView extends BorderPane {
         javaArguments.getStyleClass().add("create-field");
         javaArguments.setPromptText("Optional JVM arguments");
 
+        Button browseJava = new Button("BROWSE");
+        browseJava.getStyleClass().add("secondary-button");
+        browseJava.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select default Java executable");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+                    System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win")
+                            ? "Java executable (java.exe)" : "Java executable",
+                    System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win")
+                            ? "java.exe" : "*"
+            ));
+            File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
+            if (selected != null) javaPath.setText(selected.getAbsolutePath());
+        });
+        HBox javaPathRow = new HBox(8, javaPath, browseJava);
+        HBox.setHgrow(javaPath, Priority.ALWAYS);
+
+        ComboBox<String> jvmPreset = new ComboBox<>();
+        jvmPreset.getItems().addAll(
+                "Choose JVM preset…",
+                "Default (no extra arguments)",
+                "G1GC balanced",
+                "Low-pause G1GC",
+                "Diagnostics (GC logging)"
+        );
+        jvmPreset.getSelectionModel().selectFirst();
+        jvmPreset.setMaxWidth(Double.MAX_VALUE);
+        jvmPreset.setOnAction(event -> {
+            String selected = jvmPreset.getValue();
+            if (selected == null) return;
+            switch (selected) {
+                case "Default (no extra arguments)" -> javaArguments.clear();
+                case "G1GC balanced" -> javaArguments.setText("-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50");
+                case "Low-pause G1GC" -> javaArguments.setText("-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+ParallelRefProcEnabled");
+                case "Diagnostics (GC logging)" -> javaArguments.setText("-Xlog:gc*:file=gc.log:time,uptime,level,tags");
+                default -> { }
+            }
+        });
+
+        ComboBox<String> resolutionPreset = new ComboBox<>();
+        resolutionPreset.getItems().addAll("Custom resolution", "1280 × 720", "1600 × 900", "1920 × 1080", "2560 × 1440", "3840 × 2160");
+        resolutionPreset.getSelectionModel().selectFirst();
+        resolutionPreset.setMaxWidth(Double.MAX_VALUE);
+        resolutionPreset.setOnAction(event -> {
+            String selected = resolutionPreset.getValue();
+            if (selected == null || selected.equals("Custom resolution")) return;
+            String[] dimensions = selected.split(" × ");
+            width.setText(dimensions[0]);
+            height.setText(dimensions[1]);
+        });
+
         CheckBox fullscreen = new CheckBox("Start new instances in fullscreen");
         fullscreen.setSelected(LauncherSettings.isDefaultFullscreen());
         fullscreen.getStyleClass().add("settings-checkbox");
@@ -980,7 +1032,9 @@ public class SettingsView extends BorderPane {
                 ram,
                 createInput("Resolution width", width),
                 createInput("Resolution height", height),
-                createInput("Java executable", javaPath),
+                createInput("Resolution preset", resolutionPreset),
+                createInput("Java executable", javaPathRow),
+                createInput("JVM argument preset", jvmPreset),
                 createInput("JVM arguments", javaArguments),
                 createInput("Default Minecraft version", defaultVersion),
                 createInput("Default mod loader", defaultLoader),
