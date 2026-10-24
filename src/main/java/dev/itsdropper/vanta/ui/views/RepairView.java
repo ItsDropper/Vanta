@@ -12,6 +12,7 @@ import javafx.scene.layout.VBox;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.util.List;
+import java.nio.file.Files;
 
 public class RepairView extends VBox {
 
@@ -27,6 +28,18 @@ public class RepairView extends VBox {
             List<RepairIssue> issues,
             Runnable onBack,
             Runnable onRepair
+    ) {
+        this(instance, title, description, issues, onBack, onRepair, null);
+    }
+
+    public RepairView(
+            Instance instance,
+            String title,
+            String description,
+            List<RepairIssue> issues,
+            Runnable onBack,
+            Runnable onRepair,
+            Runnable onRestore
     ) {
 
         this.instance = instance;
@@ -190,9 +203,17 @@ public class RepairView extends VBox {
                 new HBox(
                         10,
                         statusLabel,
-                        cancelButton,
-                        repairButton
+                        cancelButton
                 );
+
+        if (onRestore != null && instance != null && instance.getDirectory() != null
+                && Files.isDirectory(instance.getDirectory().resolve(".vanta-repair-backups"))) {
+            Button restoreButton = new Button("RESTORE METADATA BACKUP");
+            restoreButton.getStyleClass().add("secondary-button");
+            restoreButton.setOnAction(event -> onRestore.run());
+            actions.getChildren().add(restoreButton);
+        }
+        actions.getChildren().add(repairButton);
 
         actions.setAlignment(
                 Pos.CENTER_RIGHT
