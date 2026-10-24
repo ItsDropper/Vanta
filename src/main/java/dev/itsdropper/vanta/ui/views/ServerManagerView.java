@@ -111,17 +111,21 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         col2.setHgrow(Priority.ALWAYS); col2.setPercentWidth(27);
         runtimeGrid.getColumnConstraints().addAll(col, col2, col2);
 
-        HBox tools = new HBox(8);
+        FlowPane tools = new FlowPane(8, 8);
         Button properties = actionButton("Server properties", IconView.Type.SETTINGS, "server-secondary");
         Button backup = actionButton("Create backup", IconView.Type.PACKAGE, "server-secondary");
+        Button restore = actionButton("Restore backup", IconView.Type.REFRESH, "server-secondary");
         Button players = actionButton("List players", IconView.Type.ACCOUNTS, "server-secondary");
         Button crashReport = actionButton("Crash diagnostics", IconView.Type.SHIELD, "server-secondary");
+        Button remove = actionButton("Remove profile", IconView.Type.TRASH, "server-danger");
         properties.setOnAction(event -> editProperties());
         backup.setOnAction(event -> runBackground("Creating server backup", () -> service.createBackup(requireSelectedId()),
                 path -> info("Backup created", "Consistent offline backup saved to:\n" + path)));
+        restore.setOnAction(event -> restoreBackupDialog());
         players.setOnAction(event -> runCommand("list"));
         crashReport.setOnAction(event -> showCrashDiagnostics());
-        tools.getChildren().addAll(properties, backup, players, crashReport);
+        remove.setOnAction(event -> removeProfile());
+        tools.getChildren().addAll(properties, backup, restore, players, crashReport, remove);
 
         console.setEditable(false);
         console.setWrapText(false);
