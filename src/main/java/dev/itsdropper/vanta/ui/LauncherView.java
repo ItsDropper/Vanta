@@ -1139,7 +1139,7 @@ public class LauncherView {
                                 applicationDirectory
                         );
 
-                        Platform.exit();
+                        UpdaterLauncher.exitOriginalProcess();
 
                     } catch (InterruptedException e) {
 

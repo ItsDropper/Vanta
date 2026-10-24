@@ -26,7 +26,9 @@ public class UpdateDownloaderTest {
 
         var zip =
                 downloader.downloadAndVerify(
-                        updateInfo
+                        updateInfo,
+                        System.out::println,
+                        null
                 );
 
         System.out.println(

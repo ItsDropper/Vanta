@@ -26,6 +26,15 @@ public final class UpdaterLauncher {
     private UpdaterLauncher() {
     }
 
+    /**
+     * Terminate the original launcher JVM once the external updater is running.
+     * Platform.exit() only shuts down JavaFX and does not guarantee that other
+     * non-daemon threads have stopped.
+     */
+    public static void exitOriginalProcess() {
+        System.exit(0);
+    }
+
     public static Path getUpdaterDirectory() {
 
         Path directory =
@@ -351,6 +360,11 @@ public final class UpdaterLauncher {
                                     tempUpdaterDirectory.toFile()
                             )
                             .redirectErrorStream(true)
+                            .redirectOutput(
+                                    ProcessBuilder.Redirect.appendTo(
+                                            getUpdaterOutputLog().toFile()
+                                    )
+                            )
                             .start();
 
             log(
@@ -379,42 +393,6 @@ public final class UpdaterLauncher {
                             + process.info()
                             .commandLine()
                             .orElse("<unknown>")
-            );
-
-            /*
-             * Read updater output in the background.
-             * This prevents the updater from blocking if its
-             * output buffer becomes full.
-             */
-            Thread outputThread =
-                    new Thread(() -> {
-
-                        try {
-
-                            process.getInputStream()
-                                    .transferTo(
-                                            Files.newOutputStream(
-                                                    getUpdaterOutputLog(),
-                                                    StandardOpenOption.CREATE,
-                                                    StandardOpenOption.APPEND
-                                            )
-                                    );
-
-                        } catch (Exception e) {
-
-                            log(
-                                    "Failed to capture updater output: "
-                                            + e
-                            );
-                        }
-
-                    }, "Vanta-Updater-Output");
-
-            outputThread.setDaemon(true);
-            outputThread.start();
-
-            log(
-                    "Updater output capture thread started."
             );
 
         } catch (Exception e) {
