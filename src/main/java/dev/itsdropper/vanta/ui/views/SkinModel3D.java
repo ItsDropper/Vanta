@@ -2,7 +2,6 @@ package dev.itsdropper.vanta.ui.views;
 
 import javafx.scene.AmbientLight;
 import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.PerspectiveCamera;
 import javafx.scene.PointLight;
 import javafx.scene.SceneAntialiasing;
@@ -30,6 +29,7 @@ public final class SkinModel3D extends StackPane {
     private final Rotate pitch = new Rotate(-8, Rotate.X_AXIS);
     private Image skin;
     private boolean slimArms;
+    private int atlasHeight = 64;
 
     public SkinModel3D() {
         setMinSize(240, 300);
@@ -97,19 +97,29 @@ public final class SkinModel3D extends StackPane {
             return;
         }
 
+        atlasHeight = (int) skin.getHeight();
         PhongMaterial material = new PhongMaterial(Color.WHITE);
         material.setDiffuseMap(skin);
         material.setSpecularColor(Color.rgb(25, 25, 25));
 
-        // Head and its transparent hat/outer layer.
-        addBox(material, 8, 8, 8, 0, -12, 0,
-                face(8, 8, 8, 8), face(24, 8, 8, 8),
-                face(0, 8, 8, 8), face(16, 8, 8, 8),
-                face(8, 0, 8, 8), face(16, 0, 8, 8));
-        addBox(material, 8.5, 8.5, 8.5, 0, -12, 0,
-                face(40, 8, 8, 8), face(56, 8, 8, 8),
-                face(32, 8, 8, 8), face(48, 8, 8, 8),
-                face(40, 0, 8, 8), face(48, 0, 8, 8));
+        if (atlasHeight >= 64) {
+            // Head and transparent hat layer.
+            addBox(material, 8, 8, 8, 0, -12, 0,
+                    face(8, 8, 8, 8), face(24, 8, 8, 8),
+                    face(0, 8, 8, 8), face(16, 8, 8, 8),
+                    face(8, 0, 8, 8), face(16, 0, 8, 8));
+            addBox(material, 8.5, 8.5, 8.5, 0, -12, 0,
+                    face(40, 8, 8, 8), face(56, 8, 8, 8),
+                    face(32, 8, 8, 8), face(48, 8, 8, 8),
+                    face(40, 0, 8, 8), face(48, 0, 8, 8));
+        } else {
+            // Legacy 64x32 skins have no hat or left-limb texture regions.
+            slimArms = false;
+            addBox(material, 8, 8, 8, 0, -12, 0,
+                    face(8, 8, 8, 8), face(24, 8, 8, 8),
+                    face(0, 8, 8, 8), face(16, 8, 8, 8),
+                    face(8, 0, 8, 8), face(16, 0, 8, 8));
+        }
 
         // Torso (front, back, right, left, top, bottom UV rectangles).
         addBox(material, 8, 12, 4, 0, 0, 0,
@@ -117,43 +127,51 @@ public final class SkinModel3D extends StackPane {
                 face(16, 20, 4, 12), face(28, 20, 4, 12),
                 face(20, 16, 8, 4), face(28, 16, 8, 4));
 
-        double armWidth = slimArms ? 3 : 4;
-        double armCenter = slimArms ? 5.5 : 6;
-        double armRightX = slimArms ? 32 : 40;
-        double armRightTop = slimArms ? 48 : 16;
-        double armLeftX = slimArms ? 40 : 48;
-        double armLeftTop = slimArms ? 48 : 16;
-
-        // Classic and slim arm UVs occupy different regions of the skin atlas.
-        if (slimArms) {
-            addBox(material, 3, 12, 4, -armCenter, 0, 0,
+        if (atlasHeight >= 64 && slimArms) {
+            addBox(material, 3, 12, 4, -5.5, 0, 0,
                     face(36, 52, 3, 12), face(44, 52, 3, 12),
                     face(32, 52, 4, 12), face(40, 52, 4, 12),
                     face(36, 48, 3, 4), face(39, 48, 3, 4));
-            addBox(material, 3, 12, 4, armCenter, 0, 0,
+            addBox(material, 3, 12, 4, 5.5, 0, 0,
                     face(44, 20, 3, 12), face(52, 20, 3, 12),
                     face(40, 20, 4, 12), face(48, 20, 4, 12),
                     face(44, 16, 3, 4), face(47, 16, 3, 4));
-        } else {
-            addBox(material, 4, 12, 4, -armCenter, 0, 0,
+        } else if (atlasHeight >= 64) {
+            addBox(material, 4, 12, 4, -6, 0, 0,
+                    face(36, 52, 4, 12), face(44, 52, 4, 12),
+                    face(32, 52, 4, 12), face(40, 52, 4, 12),
+                    face(36, 48, 4, 4), face(40, 48, 4, 4));
+            addBox(material, 4, 12, 4, 6, 0, 0,
                     face(44, 20, 4, 12), face(52, 20, 4, 12),
                     face(40, 20, 4, 12), face(48, 20, 4, 12),
                     face(44, 16, 4, 4), face(48, 16, 4, 4));
-            addBox(material, 4, 12, 4, armCenter, 0, 0,
+        } else {
+            addBox(material, 4, 12, 4, -6, 0, 0,
+                    face(44, 20, 4, 12), face(52, 20, 4, 12),
+                    face(40, 20, 4, 12), face(48, 20, 4, 12),
+                    face(44, 16, 4, 4), face(48, 16, 4, 4));
+            addBox(material, 4, 12, 4, 6, 0, 0,
                     face(44, 20, 4, 12), face(52, 20, 4, 12),
                     face(40, 20, 4, 12), face(48, 20, 4, 12),
                     face(44, 16, 4, 4), face(48, 16, 4, 4));
         }
 
-        // Legs: standard 64x64 skin layout.
+        // Legs: modern skins have independent left-leg UVs; legacy skins mirror the right leg.
         addBox(material, 4, 12, 4, -2, 12, 0,
                 face(4, 20, 4, 12), face(12, 20, 4, 12),
                 face(0, 20, 4, 12), face(8, 20, 4, 12),
                 face(4, 16, 4, 4), face(8, 16, 4, 4));
-        addBox(material, 4, 12, 4, 2, 12, 0,
-                face(20, 52, 4, 12), face(28, 52, 4, 12),
-                face(16, 52, 4, 12), face(24, 52, 4, 12),
-                face(20, 48, 4, 4), face(24, 48, 4, 4));
+        if (atlasHeight >= 64) {
+            addBox(material, 4, 12, 4, 2, 12, 0,
+                    face(20, 52, 4, 12), face(28, 52, 4, 12),
+                    face(16, 52, 4, 12), face(24, 52, 4, 12),
+                    face(20, 48, 4, 4), face(24, 48, 4, 4));
+        } else {
+            addBox(material, 4, 12, 4, 2, 12, 0,
+                    face(4, 20, 4, 12), face(12, 20, 4, 12),
+                    face(0, 20, 4, 12), face(8, 20, 4, 12),
+                    face(4, 16, 4, 4), face(8, 16, 4, 4));
+        }
 
         // Scale pixel-sized geometry to make the player comfortably visible.
         player.setScaleX(3.4);
@@ -212,8 +230,8 @@ public final class SkinModel3D extends StackPane {
             points.add((float) point[1]);
             points.add((float) point[2]);
         }
-        float u0 = uv.x / 64f, v0 = uv.y / 64f;
-        float u1 = (uv.x + uv.width) / 64f, v1 = (uv.y + uv.height) / 64f;
+        float u0 = uv.x / 64f, v0 = uv.y / (float) atlasHeight;
+        float u1 = (uv.x + uv.width) / 64f, v1 = (uv.y + uv.height) / (float) atlasHeight;
         texCoords.add(u0); texCoords.add(v0);
         texCoords.add(u1); texCoords.add(v0);
         texCoords.add(u1); texCoords.add(v1);
@@ -226,7 +244,7 @@ public final class SkinModel3D extends StackPane {
         faces.add(pointStart + 3); faces.add(texStart + 3);
     }
 
-    private static Uv face(int x, int y, int width, int height) {
+    private Uv face(int x, int y, int width, int height) {
         return new Uv(x, y, width, height);
     }
 
