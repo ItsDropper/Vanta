@@ -7,6 +7,7 @@ import javafx.animation.TranslateTransition;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.input.MouseEvent;
 import javafx.util.Duration;
 
 public final class AnimationUtils {
@@ -54,29 +55,17 @@ public final class AnimationUtils {
         }
 
         if (node instanceof Button) {
-            node.setOnMouseEntered(event -> {
-                ScaleTransition transition =
-                        new ScaleTransition(Duration.millis(120), node);
-                transition.setToX(1.025);
-                transition.setToY(1.025);
-                transition.play();
-            });
-
-            node.setOnMouseExited(event -> {
-                ScaleTransition transition =
-                        new ScaleTransition(Duration.millis(140), node);
-                transition.setToX(1);
-                transition.setToY(1);
-                transition.play();
-            });
-
-            node.setOnMousePressed(event -> {
-                ScaleTransition transition =
-                        new ScaleTransition(Duration.millis(70), node);
-                transition.setToX(0.975);
-                transition.setToY(0.975);
-                transition.play();
-            });
+            // Add handlers instead of replacing a control's existing
+            // mouse handlers. Views own behavior; this utility owns polish.
+            node.addEventHandler(MouseEvent.MOUSE_ENTERED,
+                    event -> animateScale(node, 1.025, Duration.millis(120)));
+            node.addEventHandler(MouseEvent.MOUSE_EXITED,
+                    event -> animateScale(node, 1.0, Duration.millis(140)));
+            node.addEventHandler(MouseEvent.MOUSE_PRESSED,
+                    event -> animateScale(node, 0.975, Duration.millis(70)));
+            node.addEventHandler(MouseEvent.MOUSE_RELEASED,
+                    event -> animateScale(node, node.isHover() ? 1.025 : 1.0,
+                            Duration.millis(100)));
         }
 
         if (node instanceof Parent parent) {
@@ -84,6 +73,19 @@ public final class AnimationUtils {
                 installInteractiveAnimations(child);
             }
         }
+    }
+
+    private static void animateScale(Node node, double target, Duration duration) {
+        Object previous = node.getProperties().get("vanta.scale-transition");
+        if (previous instanceof ScaleTransition transition) {
+            transition.stop();
+        }
+
+        ScaleTransition transition = new ScaleTransition(duration, node);
+        transition.setToX(target);
+        transition.setToY(target);
+        node.getProperties().put("vanta.scale-transition", transition);
+        transition.playFromStart();
     }
 
     public static void slideFadeVertical(Node node, double distance) {
