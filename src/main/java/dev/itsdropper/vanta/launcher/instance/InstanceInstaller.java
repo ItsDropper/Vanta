@@ -174,15 +174,25 @@ public class InstanceInstaller {
             String name,
             String minecraftVersion
     ) throws Exception {
+        return installFabric(
+                name,
+                minecraftVersion,
+                FabricInstaller.findLatestLoaderVersion(minecraftVersion)
+        );
+    }
 
-        /*
-         * Find the latest Fabric Loader compatible
-         * with this Minecraft version.
-         */
-        String loaderVersion =
-                FabricInstaller.findLatestLoaderVersion(
-                        minecraftVersion
-                );
+    /**
+     * Install Fabric using an explicitly selected loader version.
+     * This is required for importing modpacks that pin a specific loader.
+     */
+    public static Instance installFabric(
+            String name,
+            String minecraftVersion,
+            String loaderVersion
+    ) throws Exception {
+        if (loaderVersion == null || loaderVersion.isBlank()) {
+            throw new IllegalArgumentException("Fabric Loader version cannot be empty.");
+        }
 
         System.out.println(
                 "Installing Fabric "
