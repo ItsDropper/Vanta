@@ -227,6 +227,7 @@ public class HomeView extends StackPane {
      */
     public void onShown() {
         refreshAccount();
+        updateLaunchStatus(launchService.getState());
         refreshRecentInstances();
         refreshRecentServers();
     }
@@ -857,7 +858,13 @@ public class HomeView extends StackPane {
 
     private void onLaunchStateChanged(LaunchService.LaunchState state) {
         Platform.runLater(() -> {
-            updateLaunchStatus(state);
+            LaunchService.LaunchState aggregateState = launchService.getState();
+            updateLaunchStatus(
+                    aggregateState == LaunchService.LaunchState.IDLE
+                            && state == LaunchService.LaunchState.ERROR
+                            ? LaunchService.LaunchState.ERROR
+                            : aggregateState
+            );
             refreshRecentInstances();
             refreshRecentServers();
 
