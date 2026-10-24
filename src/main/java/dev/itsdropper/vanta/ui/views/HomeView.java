@@ -862,8 +862,14 @@ public class HomeView extends StackPane {
                             ? LaunchService.LaunchState.ERROR
                             : aggregateState
             );
-            refreshRecentInstances();
-            refreshRecentServers();
+            // Preparation/closing events only affect the status chip.
+            // Avoid rescanning the instance directory for every transition.
+            if (state == LaunchService.LaunchState.RUNNING
+                    || state == LaunchService.LaunchState.IDLE
+                    || state == LaunchService.LaunchState.ERROR) {
+                refreshRecentInstances();
+                refreshRecentServers();
+            }
 
             if (state == LaunchService.LaunchState.ERROR) {
                 LaunchFailure failure = launchService.getLastFailure();
