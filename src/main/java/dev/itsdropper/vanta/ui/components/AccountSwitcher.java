@@ -4,6 +4,9 @@ import dev.itsdropper.vanta.ui.ThemeManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.AccessibleRole;
+import javafx.scene.input.KeyCode;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -39,6 +42,10 @@ public class AccountSwitcher extends HBox {
         getStyleClass().add(
                 "account-switcher"
         );
+        setFocusTraversable(true);
+        setAccessibleRole(AccessibleRole.BUTTON);
+        setAccessibleText("Choose or add a Microsoft account");
+        Tooltip.install(this, new Tooltip("Switch or add a Microsoft account"));
 
         setAlignment(
                 Pos.CENTER_LEFT
@@ -137,17 +144,12 @@ public class AccountSwitcher extends HBox {
         // CLICK
         // -----------------------------------------------------
 
-        setOnMouseClicked(event -> {
+        setOnMouseClicked(event -> togglePopup());
 
-            if (loginInProgress) {
-                return;
-            }
-
-            if (popup.isShowing()) {
-                popup.hide();
-            } else {
-                updatePopup();
-                showPopup();
+        setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
+                togglePopup();
+                event.consume();
             }
         });
 
@@ -173,6 +175,16 @@ public class AccountSwitcher extends HBox {
         updateAccountDisplay(
                 accountService.getCurrentAccount()
         );
+    }
+
+    private void togglePopup() {
+        if (loginInProgress) return;
+        if (popup.isShowing()) {
+            popup.hide();
+        } else {
+            updatePopup();
+            showPopup();
+        }
     }
 
     private void updateAccountDisplay(
