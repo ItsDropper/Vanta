@@ -38,11 +38,19 @@ public class DownloadUtil {
     private static final Duration REQUEST_TIMEOUT =
             Duration.ofMinutes(5);
 
-    private static HttpClient httpClient() {
-        if (LauncherSettings.isConnectionReuseEnabled()) return HTTP;
-        return HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).followRedirects(HttpClient.Redirect.NORMAL).build();
-    }
     private static int maxRetries() { return LauncherSettings.getDownloadRetries(); }
+
+    private static <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> handler)
+            throws IOException, InterruptedException {
+        if (LauncherSettings.isConnectionReuseEnabled()) return HTTP.send(request, handler);
+        HttpClient oneShot = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15))
+                .followRedirects(HttpClient.Redirect.NORMAL).build();
+        try {
+            return oneShot.send(request, handler);
+        } finally {
+            oneShot.close();
+        }
+    }
 
     // =============================================================
     // JSON
@@ -266,7 +274,8 @@ public class DownloadUtil {
                 return;
             } catch (Exception e) {
                 lastException = e;
-                if (!LauncherSettings.isResumableDownloadsEnabled()) {
+                if (!LauncherSettings.isResumableDownloadsEnabled()
+                        || (e.getMessage() != null && e.getMessage().contains("SHA-1 verification failed"))) {
                     try { Files.deleteIfExists(temporary); } catch (IOException ignored) { }
                 }
 
