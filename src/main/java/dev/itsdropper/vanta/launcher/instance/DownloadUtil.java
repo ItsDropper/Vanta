@@ -35,7 +35,7 @@ public class DownloadUtil {
                     .followRedirects(HttpClient.Redirect.NORMAL)
                     .build();
 
-    private static final HttpClient HTTP_NO_REUSE =
+    private static final HttpClient HTTP_HTTP1 =
             HttpClient.newBuilder()
                     .version(HttpClient.Version.HTTP_1_1)
                     .connectTimeout(Duration.ofSeconds(15))
@@ -49,13 +49,10 @@ public class DownloadUtil {
 
     private static <T> HttpResponse<T> send(HttpRequest request, HttpResponse.BodyHandler<T> handler)
             throws IOException, InterruptedException {
-        if (LauncherSettings.isConnectionReuseEnabled()) return HTTP.send(request, handler);
-        // Connection: close is valid for HTTP/1.1 and avoids creating an unbounded
-        // number of short-lived HttpClient executors for streamed file responses.
-        HttpRequest noReuse = HttpRequest.newBuilder(request, (name, value) -> true)
-                .header("Connection", "close")
-                .build();
-        return HTTP_NO_REUSE.send(noReuse, handler);
+        if (LauncherSettings.isHttp2Enabled()) return HTTP.send(request, handler);
+        // HTTP/1.1 is the compatibility mode. Java's HttpClient manages
+        // connection pooling internally; this setting controls protocol preference.
+        return HTTP_HTTP1.send(request, handler);
     }
 
     // =============================================================
