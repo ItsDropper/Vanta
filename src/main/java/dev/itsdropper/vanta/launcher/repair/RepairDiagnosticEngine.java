@@ -69,6 +69,48 @@ public final class RepairDiagnosticEngine {
                     Pattern.CASE_INSENSITIVE
             );
 
+    private static final Pattern MIXIN_FAILURE =
+            Pattern.compile(
+                    "(mixin apply failed|invalidinjectionexception|critical injection failure|failed to apply mixin|could not find any targets matching)",
+                    Pattern.CASE_INSENSITIVE
+            );
+
+    private static final Pattern DUPLICATE_MOD =
+            Pattern.compile(
+                    "(duplicate mod(?: id)?|duplicate mods? found|mod id .{0,100} already exists|duplicate entry: .+\\.jar)",
+                    Pattern.CASE_INSENSITIVE
+            );
+
+    private static final Pattern MOD_INITIALIZATION_FAILURE =
+            Pattern.compile(
+                    "(failed to start mod .{1,120}|mod .{1,120} failed to initialize|exception during mod initialization|error during prelaunch)",
+                    Pattern.CASE_INSENSITIVE
+            );
+
+    private static final Pattern GRAPHICS_FAILURE =
+            Pattern.compile(
+                    "(failed to create (?:an? )?opengl context|could not create (?:an? )?opengl context|glfw error 65542|wgl: the driver does not appear to support opengl|pixel format not accelerated|no opengl context found)",
+                    Pattern.CASE_INSENSITIVE
+            );
+
+    private static final Pattern AUTHENTICATION_FAILURE =
+            Pattern.compile(
+                    "(invalid session|invalid token|token expired|not authenticated with minecraft\\.net|failed to verify username|minecraft services unavailable|authentication servers? (?:are )?(?:unavailable|down))",
+                    Pattern.CASE_INSENSITIVE
+            );
+
+    private static final Pattern CORRUPT_ARCHIVE =
+            Pattern.compile(
+                    "(zip end header not found|invalid loc header|unexpected end of zlib input stream|zip exception|zip file is empty|invalid or corrupt jarfile)",
+                    Pattern.CASE_INSENSITIVE
+            );
+
+    private static final Pattern JAVA_ARCHITECTURE =
+            Pattern.compile(
+                    "(wrong architecture|%1 is not a valid win32 application|not a valid win32 application|exec format error|cannot run .* executable)",
+                    Pattern.CASE_INSENSITIVE
+            );
+
     /*
      * Do NOT match the normal presence of Fabric Loader.
      *
@@ -553,6 +595,121 @@ public final class RepairDiagnosticEngine {
                             )
                     )
             );
+        }
+
+
+        if (MIXIN_FAILURE.matcher(text).find()) {
+            diagnoses.add(new RepairDiagnosis(
+                    FailureCategory.MOD_MIXIN_FAILURE,
+                    RepairConfidence.AMBIGUOUS,
+                    "Mod mixin compatibility failure",
+                    "A mod could not apply a code transformation, usually because of a mod/version conflict.",
+                    findEvidence(output, "mixin apply failed", "invalidinjectionexception",
+                            "critical injection failure", "failed to apply mixin",
+                            "could not find any targets matching"),
+                    List.of(
+                            "Identify the mod named in the mixin stack trace.",
+                            "Check compatibility with the exact Minecraft, loader and dependency versions.",
+                            "Disable or replace only the confirmed incompatible mod; preserve worlds and configuration."
+                    )
+            ));
+        }
+
+        if (DUPLICATE_MOD.matcher(text).find()) {
+            diagnoses.add(new RepairDiagnosis(
+                    FailureCategory.DUPLICATE_MOD,
+                    RepairConfidence.AMBIGUOUS,
+                    "Duplicate mod detected",
+                    "The loader reported a duplicate mod identifier or duplicate JAR entry.",
+                    findEvidence(output, "duplicate mod", "duplicate mods", "already exists", "duplicate entry"),
+                    List.of(
+                            "List mod JARs with duplicate mod IDs and compare their versions.",
+                            "Keep one compatible version after confirming which file is duplicated.",
+                            "Never remove a mod solely because its filename resembles another mod."
+                    )
+            ));
+        }
+
+        if (MOD_INITIALIZATION_FAILURE.matcher(text).find()) {
+            diagnoses.add(new RepairDiagnosis(
+                    FailureCategory.MOD_CRASH,
+                    RepairConfidence.AMBIGUOUS,
+                    "Mod initialization failed",
+                    "A mod failed during startup initialization.",
+                    findEvidence(output, "failed to start mod", "failed to initialize",
+                            "exception during mod initialization", "error during prelaunch"),
+                    List.of(
+                            "Trace the first relevant exception to its mod ID.",
+                            "Check that mod's dependencies and loader compatibility.",
+                            "Offer a reversible quarantine/disable action only after identifying the exact mod JAR."
+                    )
+            ));
+        }
+
+        if (GRAPHICS_FAILURE.matcher(text).find()) {
+            diagnoses.add(new RepairDiagnosis(
+                    FailureCategory.GRAPHICS,
+                    RepairConfidence.AMBIGUOUS,
+                    "OpenGL or graphics driver failure",
+                    "Minecraft could not create a usable graphics context.",
+                    findEvidence(output, "failed to create", "glfw error 65542",
+                            "wgl:", "pixel format not accelerated", "no opengl context"),
+                    List.of(
+                            "Check the active GPU and graphics driver version.",
+                            "Check whether Minecraft is running through Remote Desktop or a virtualized display.",
+                            "Do not replace drivers or change system-wide GPU settings automatically."
+                    )
+            ));
+        }
+
+        if (AUTHENTICATION_FAILURE.matcher(text).find()) {
+            diagnoses.add(new RepairDiagnosis(
+                    FailureCategory.AUTHENTICATION,
+                    RepairConfidence.AMBIGUOUS,
+                    "Minecraft authentication failure",
+                    "The session or authentication service was rejected or unavailable.",
+                    findEvidence(output, "invalid session", "invalid token", "token expired",
+                            "not authenticated with minecraft.net", "failed to verify username",
+                            "minecraft services unavailable"),
+                    List.of(
+                            "Check the Microsoft account session and refresh authentication if expired.",
+                            "Check Minecraft service status and retry transient service failures.",
+                            "Never delete account tokens or credentials as an automatic repair step."
+                    )
+            ));
+        }
+
+        if (CORRUPT_ARCHIVE.matcher(text).find()) {
+            diagnoses.add(new RepairDiagnosis(
+                    FailureCategory.CORRUPT_LIBRARY,
+                    RepairConfidence.AMBIGUOUS,
+                    "Corrupt JAR or ZIP archive",
+                    "Java reported an archive that may be incomplete or corrupted.",
+                    findEvidence(output, "zip end header not found", "invalid loc header",
+                            "unexpected end of zlib input stream", "zip exception",
+                            "zip file is empty", "invalid or corrupt jarfile"),
+                    List.of(
+                            "Identify the exact archive path from the surrounding exception.",
+                            "Redownload only Vanta-managed files with a trusted expected checksum.",
+                            "For user-installed mods, offer a backup-and-quarantine action instead of deleting the file."
+                    )
+            ));
+        }
+
+        if (JAVA_ARCHITECTURE.matcher(text).find()) {
+            diagnoses.add(new RepairDiagnosis(
+                    FailureCategory.JAVA_RUNTIME,
+                    RepairConfidence.DETERMINISTIC,
+                    "Java runtime architecture or executable problem",
+                    "The selected executable may be incompatible with this operating system or CPU architecture.",
+                    findEvidence(output, "wrong architecture", "not a valid win32 application",
+                            "exec format error", "cannot run"),
+                    List.of(
+                            "Detect the operating system and process architecture.",
+                            "Select or reinstall a matching Vanta-managed Java runtime.",
+                            "Keep the instance's mods, saves and configuration unchanged."
+                    )
+            ));
         }
 
         if (diagnoses.isEmpty()) {
