@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher.update;
 
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 
@@ -23,7 +24,7 @@ class UpdaterProcessExitTest {
         );
 
         String classPath = String.join(
-                java.io.File.pathSeparator,
+                File.pathSeparator,
                 System.getProperty("java.class.path"),
                 Path.of(
                         UpdaterProcessExitTest.class
