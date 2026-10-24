@@ -673,12 +673,7 @@ public class ModpackBrowserView extends VBox {
                 ImageIO.write(bufferedImage, "png", output);
 
                 Image image = new Image(
-                        new ByteArrayInputStream(output.toByteArray()),
-                        60,
-                        60,
-                        true,
-                        true,
-                        true
+                        new ByteArrayInputStream(output.toByteArray())
                 );
 
                 if (image.isError()) {
