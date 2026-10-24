@@ -20,6 +20,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
+import dev.itsdropper.vanta.launcher.instance.InstanceBackupService;
 import dev.itsdropper.vanta.launcher.instance.MrpackExporter;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
@@ -158,6 +159,14 @@ public class InstancesView extends VBox {
         createButton.setAccessibleText("Create a Minecraft instance");
         createButton.setTooltip(new javafx.scene.control.Tooltip("Create a new Minecraft instance"));
 
+        Button backupButton = new Button("BACK UP");
+        backupButton.getStyleClass().add("secondary-button");
+        backupButton.setAccessibleText("Create a full backup of an instance including worlds and settings");
+        backupButton.setTooltip(new javafx.scene.control.Tooltip(
+                "Create a ZIP backup that preserves saves, mods, configs, screenshots, and instance settings."
+        ));
+        backupButton.setOnAction(event -> backUpInstance());
+
         Button exportButton = new Button("EXPORT MODPACK");
         exportButton.getStyleClass().add("secondary-button");
         exportButton.setAccessibleText("Export a Minecraft instance as a Modrinth modpack");
@@ -166,7 +175,7 @@ public class InstancesView extends VBox {
         ));
         exportButton.setOnAction(event -> exportInstanceModpack());
 
-        HBox headerTop = new HBox(12, headerText, countLabel, exportButton, createButton);
+        HBox headerTop = new HBox(10, headerText, countLabel, backupButton, exportButton, createButton);
         headerTop.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(headerText, Priority.ALWAYS);
 
@@ -304,6 +313,73 @@ public class InstancesView extends VBox {
 
         thread.setDaemon(true);
         thread.start();
+    }
+
+    private void backUpInstance() {
+        if (loadedInstances.isEmpty()) {
+            statusLabel.setText("There are no instances to back up.");
+            return;
+        }
+
+        ChoiceDialog<Instance> chooser = new ChoiceDialog<>(loadedInstances.get(0), loadedInstances);
+        chooser.setTitle("Back Up Instance");
+        chooser.setHeaderText("Choose an instance to back up");
+        chooser.setContentText("Instance:");
+        chooser.setConverter(new StringConverter<>() {
+            @Override public String toString(Instance instance) {
+                return instance == null ? "" : instance.getName() + " · Minecraft "
+                        + instance.getMinecraftVersion() + " · " + instance.getDisplayLoader();
+            }
+            @Override public Instance fromString(String value) { return null; }
+        });
+        Instance selected = chooser.showAndWait().orElse(null);
+        if (selected == null) return;
+
+        if (launchService.isRunning(selected)) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Close this Minecraft instance before backing it up. Backing up a live world can produce an inconsistent save.")
+                    .showAndWait();
+            return;
+        }
+
+        FileChooser saveChooser = new FileChooser();
+        saveChooser.setTitle("Save Full Instance Backup");
+        saveChooser.setInitialFileName(safeFileName(selected.getName()) + "-backup.zip");
+        saveChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP backup (*.zip)", "*.zip"));
+        java.io.File selectedFile = saveChooser.showSaveDialog(getScene() == null ? null : getScene().getWindow());
+        if (selectedFile == null) return;
+
+        java.nio.file.Path destination = selectedFile.toPath();
+        if (!destination.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".zip")) {
+            destination = destination.resolveSibling(destination.getFileName() + ".zip");
+        }
+        final java.nio.file.Path output = destination;
+        backupButton.setDisable(true);
+        statusLabel.setText("Backing up " + selected.getName() + "… Worlds and settings are included.");
+
+        Thread worker = new Thread(() -> {
+            try {
+                InstanceBackupService.createBackup(selected, output);
+                Platform.runLater(() -> {
+                    backupButton.setDisable(false);
+                    statusLabel.setText("Backup created: " + output.getFileName());
+                    Alert success = new Alert(Alert.AlertType.INFORMATION,
+                            "Full instance backup created. Worlds, mods, configs, resource packs, shader packs, screenshots, options, and instance metadata are preserved. Transient logs and extracted native libraries are excluded.");
+                    success.setTitle("Backup Complete");
+                    success.setHeaderText(selected.getName());
+                    success.show();
+                });
+            } catch (Throwable ex) {
+                Platform.runLater(() -> {
+                    backupButton.setDisable(false);
+                    String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
+                    statusLabel.setText("Backup failed: " + message);
+                    new Alert(Alert.AlertType.ERROR, "Vanta could not create the backup.\n\n" + message).show();
+                });
+            }
+        }, "Vanta-Instance-Backup");
+        worker.setDaemon(true);
+        worker.start();
     }
 
     private void exportInstanceModpack() {
