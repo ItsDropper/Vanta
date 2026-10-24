@@ -12,6 +12,12 @@ import dev.itsdropper.vanta.ui.views.RepairView;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.stream.Stream;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
@@ -399,7 +405,7 @@ public class LaunchService {
             }
 
             String output =
-                    getRecentOutput();
+                    collectDiagnosticContext(getRecentOutput());
 
             /*
              * ---------------------------------------------------------
@@ -585,6 +591,72 @@ public class LaunchService {
                     LaunchState.ERROR
             );
         }
+    }
+
+    /**
+     * Combine process output with the instance's latest log and newest crash
+     * report. This is read-only and bounded so huge logs cannot stall repair
+     * detection or consume unbounded memory.
+     */
+    private String collectDiagnosticContext(String processOutput) {
+        StringBuilder combined = new StringBuilder();
+        appendDiagnosticText(combined, "PROCESS OUTPUT", processOutput, 120_000);
+
+        Instance instance = runningInstance;
+        if (instance == null || instance.getDirectory() == null) {
+            return combined.toString();
+        }
+
+        Path directory = instance.getDirectory();
+        appendDiagnosticFile(combined, "LATEST LOG", directory.resolve("logs").resolve("latest.log"), 180_000);
+
+        Path crashDirectory = directory.resolve("crash-reports");
+        if (Files.isDirectory(crashDirectory)) {
+            try (Stream<Path> files = Files.list(crashDirectory)) {
+                files.filter(Files::isRegularFile)
+                        .filter(p -> p.getFileName().toString().endsWith(".txt"))
+                        .sorted(Comparator.comparingLong(this::lastModified).reversed())
+                        .limit(2)
+                        .forEach(p -> appendDiagnosticFile(combined, "CRASH REPORT", p, 100_000));
+            } catch (IOException ex) {
+                System.err.println("[Vanta Repair] Could not inspect crash reports: " + ex.getMessage());
+            }
+        }
+        return combined.toString();
+    }
+
+    private long lastModified(Path path) {
+        try { return Files.getLastModifiedTime(path).toMillis(); }
+        catch (IOException ignored) { return 0L; }
+    }
+
+    private void appendDiagnosticFile(StringBuilder target, String label, Path path, int maxChars) {
+        try {
+            if (!Files.isRegularFile(path)) return;
+            long size = Files.size(path);
+            if (size <= 0) return;
+            String text;
+            try (var reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                StringBuilder contents = new StringBuilder((int) Math.min(size, maxChars));
+                char[] buffer = new char[8192];
+                int read;
+                while (contents.length() < maxChars && (read = reader.read(buffer, 0,
+                        Math.min(buffer.length, maxChars - contents.length()))) >= 0) {
+                    contents.append(buffer, 0, read);
+                }
+                text = contents.toString();
+            }
+            appendDiagnosticText(target, label + " (" + path.getFileName() + ")", text, maxChars);
+        } catch (IOException ex) {
+            System.err.println("[Vanta Repair] Could not read " + path + ": " + ex.getMessage());
+        }
+    }
+
+    private void appendDiagnosticText(StringBuilder target, String label, String text, int maxChars) {
+        if (text == null || text.isBlank() || target.length() >= 450_000) return;
+        int remaining = Math.min(maxChars, 450_000 - target.length());
+        target.append("\\n\\n===== ").append(label).append(" =====\\n");
+        target.append(text, 0, Math.min(text.length(), remaining));
     }
 
     private RepairDiagnosis findActionableDiagnosis(
