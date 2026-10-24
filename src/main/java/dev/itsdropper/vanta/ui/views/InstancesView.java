@@ -379,7 +379,7 @@ public class InstancesView extends VBox {
 
     private static String safeFileName(String name) {
         String safe = name == null ? "Vanta-Modpack" : name
-                .replaceAll("[\\\\/:*?\\"<>|]", "_")
+                .replaceAll("[^a-zA-Z0-9._ -]", "_")
                 .trim();
         return safe.isBlank() ? "Vanta-Modpack" : safe;
     }
