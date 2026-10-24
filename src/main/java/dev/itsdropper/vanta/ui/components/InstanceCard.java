@@ -1041,9 +1041,7 @@ public class InstanceCard extends StackPane {
                             true
                     );
 
-                    playButton.setText(
-                            "PREPARING..."
-                    );
+                    setPlayButtonAction("PREPARING...", "Preparing to launch " + instance.getName());
 
                     setPlayingStyle(
                             false
@@ -1065,9 +1063,7 @@ public class InstanceCard extends StackPane {
                             true
                     );
 
-                    playButton.setText(
-                            "STARTING..."
-                    );
+                    setPlayButtonAction("STARTING...", "Starting Minecraft instance " + instance.getName());
 
                     setPlayingStyle(
                             false
@@ -1089,9 +1085,7 @@ public class InstanceCard extends StackPane {
                             false
                     );
 
-                    playButton.setText(
-                            "CLOSE"
-                    );
+                    setPlayButtonAction("CLOSE", "Close Minecraft instance " + instance.getName());
 
                     setPlayingStyle(
                             true
@@ -1113,9 +1107,7 @@ public class InstanceCard extends StackPane {
                             true
                     );
 
-                    playButton.setText(
-                            "CLOSING..."
-                    );
+                    setPlayButtonAction("CLOSING...", "Closing Minecraft instance " + instance.getName());
 
                     setPlayingStyle(
                             true
@@ -1137,9 +1129,7 @@ public class InstanceCard extends StackPane {
                             false
                     );
 
-                    playButton.setText(
-                            "PLAY"
-                    );
+                    setPlayButtonAction("PLAY", "Launch Minecraft instance " + instance.getName());
 
                     setPlayingStyle(
                             false
@@ -1153,15 +1143,19 @@ public class InstanceCard extends StackPane {
         });
     }
 
+    private void setPlayButtonAction(String text, String accessibleText) {
+        playButton.setText(text);
+        playButton.setAccessibleText(accessibleText);
+        playButton.setTooltip(new Tooltip(accessibleText));
+    }
+
     private void resetToReady() {
 
         playButton.setDisable(
                 false
         );
 
-        playButton.setText(
-                "PLAY"
-        );
+        setPlayButtonAction("PLAY", "Launch Minecraft instance " + instance.getName());
 
         setPlayingStyle(
                 false
