@@ -119,7 +119,7 @@ public final class ThemeManager {
         String background = loadCustomColor("customBackground", base.background());
         String surface = loadCustomColor("customSurface", base.surface());
         String raised = loadCustomColor("customRaisedSurface", base.surfaceRaised());
-        String hover = loadCustomColor("customHoverSurface", base.surfaceHover());
+        String hoverSurface = loadCustomColor("customHoverSurface", base.surfaceHover());
         String border = loadCustomColor("customBorder", base.border());
         String textColor = loadCustomColor("customText", base.text());
         String muted = loadCustomColor("customMuted", base.muted());
@@ -128,7 +128,7 @@ public final class ThemeManager {
         Color color = Color.web(effectiveAccent);
 
         String soft = toHex(color.darker().darker());
-        String hover = toHex(color.brighter());
+        String accentHover = toHex(color.brighter());
         String rgb = Math.round(color.getRed() * 255) + "," +
                 Math.round(color.getGreen() * 255) + "," +
                 Math.round(color.getBlue() * 255);
@@ -136,18 +136,18 @@ public final class ThemeManager {
         node.setStyle(
                 "-vanta-accent: " + effectiveAccent + ";" +
                 "-vanta-accent-soft: " + soft + ";" +
-                "-vanta-accent-hover: " + hover + ";" +
+                "-vanta-accent-hover: " + accentHover + ";" +
                 "-vanta-accent-rgb: " + rgb + ";" +
                 "-vanta-bg: " + background + ";" +
                 "-vanta-surface: " + surface + ";" +
                 "-vanta-surface-raised: " + raised + ";" +
-                "-vanta-surface-hover: " + hover + ";" +
+                "-vanta-surface-hover: " + hoverSurface + ";" +
                 "-vanta-border: " + border + ";" +
                 "-vanta-text: " + textColor + ";" +
                 "-vanta-muted: " + muted + ";" +
                 "-vanta-subtle: " + base.subtle() + ";" +
-                "-vanta-danger: " + base.danger() + ";" +
-                "-vanta-success: " + base.success() + ";"
+                "-vanta-danger: " + danger + ";" +
+                "-vanta-success: " + success + ";"
         );
     }
 
