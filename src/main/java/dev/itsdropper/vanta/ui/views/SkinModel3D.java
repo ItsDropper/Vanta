@@ -113,18 +113,18 @@ public final class SkinModel3D extends StackPane {
 
         if (atlasHeight >= 64) {
             // Head and transparent hat layer.
-            addBox(material, 8, 8, 8, 0, -12, 0,
+            addBox(material, 8, 8, 8, 0, -10, 0,
                     face(8, 8, 8, 8), face(24, 8, 8, 8),
                     face(0, 8, 8, 8), face(16, 8, 8, 8),
                     face(8, 0, 8, 8), face(16, 0, 8, 8));
-            addBox(material, 8.5, 8.5, 8.5, 0, -12, 0,
+            addBox(material, 8.5, 8.5, 8.5, 0, -10, 0,
                     face(40, 8, 8, 8), face(56, 8, 8, 8),
                     face(32, 8, 8, 8), face(48, 8, 8, 8),
                     face(40, 0, 8, 8), face(48, 0, 8, 8));
         } else {
             // Legacy 64x32 skins have no hat or left-limb texture regions.
             slimArms = false;
-            addBox(material, 8, 8, 8, 0, -12, 0,
+            addBox(material, 8, 8, 8, 0, -10, 0,
                     face(8, 8, 8, 8), face(24, 8, 8, 8),
                     face(0, 8, 8, 8), face(16, 8, 8, 8),
                     face(8, 0, 8, 8), face(16, 0, 8, 8));
