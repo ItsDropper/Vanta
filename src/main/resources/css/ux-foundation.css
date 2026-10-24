@@ -397,3 +397,27 @@
     -fx-text-fill: -vanta-danger;
     -fx-border-color: derive(-vanta-danger, -50%);
 }
+
+.notification-title {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+}
+.notification-message {
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 12px;
+}
+.notification-message-error { -fx-text-fill: -vanta-danger; }
+.notification-accent-progress { -fx-fill: -vanta-accent; }
+.notification-accent-success { -fx-fill: -vanta-success; }
+.notification-accent-error { -fx-fill: -vanta-danger; }
+.notification-close {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 18px;
+    -fx-padding: 0;
+}
+.notification-close:hover {
+    -fx-background-color: -vanta-surface-hover;
+    -fx-text-fill: -vanta-text;
+}
