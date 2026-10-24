@@ -376,7 +376,10 @@ public class LauncherView {
 
         switch (page) {
 
-            case HOME -> showAnimatedContent(homeView);
+            case HOME -> {
+                homeView.onShown();
+                showAnimatedContent(homeView);
+            }
             case ACCOUNTS -> showAnimatedContent(accountsView);
             case SKIN -> showAnimatedContent(skinChangerView);
             case INSTANCES -> showAnimatedContent(instancesView);
