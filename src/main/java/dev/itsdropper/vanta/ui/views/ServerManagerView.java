@@ -249,7 +249,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             Profile p = service.addProfile(name.get().trim(), directory, targetJar);
             selectProfile(p.id);
             refreshProfileList();
-            console.appendText("Vanta: created a new server folder from the selected JAR. First startup may generate eula.txt and configuration files.\\n");
+            console.appendText("Vanta: created a new server folder from the selected JAR. First startup may generate eula.txt and configuration files.\n");
         } catch (Exception e) {
             try { Files.deleteIfExists(targetJar); } catch (IOException ignored) {}
             try { Files.deleteIfExists(directory); } catch (IOException ignored) {}
@@ -279,7 +279,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
             Path backup = selected.toPath();
             runBackground("Restoring server backup", () -> service.restoreBackup(id, backup),
-                    safety -> info("Backup restored", "The selected backup was restored. Safety backup of the previous state:\\n" + safety));
+                    safety -> info("Backup restored", "The selected backup was restored. Safety backup of the previous state:\n" + safety));
         } catch (Exception e) {
             error("Could not restore backup", e.getMessage());
         }
@@ -408,7 +408,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
                 Profile p = service.profile(selectedId).orElseThrow();
                 p.eulaAccepted = false;
                 service.updateProfile(p);
-                console.appendText("Vanta: EULA acceptance disabled for this profile. The server cannot start until you accept it again.\\n");
+                console.appendText("Vanta: EULA acceptance disabled for this profile. The server cannot start until you accept it again.\n");
             } catch (Exception e) {
                 error("Could not update EULA setting", e.getMessage());
             }
