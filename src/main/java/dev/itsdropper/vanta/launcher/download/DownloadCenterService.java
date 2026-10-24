@@ -18,7 +18,8 @@ import java.util.function.Consumer;
 
 /**
  * In-memory activity registry for real launcher file downloads.
- * It deliberately stores no response bodies or credentials and is local-only.
+ * It is local-only and never writes transfer history to disk. Displayed sources and errors
+ * are sanitized so signed query strings are not exposed in the interface.
  */
 public final class DownloadCenterService {
     public enum Status { DOWNLOADING, VERIFYING, COMPLETED, FAILED }
@@ -86,7 +87,7 @@ public final class DownloadCenterService {
     public synchronized void fail(long id, Throwable failure) {
         String message = failure == null || failure.getMessage() == null
                 ? "The download failed. Check the connection and try again."
-                : failure.getMessage();
+                : failure.getMessage().replaceAll("(?i)https?://[^\\s]+", "[remote URL]");
         if (message.length() > 280) message = message.substring(0, 277) + "...";
         final String reason = message;
         update(id, old -> new Task(old.id(), old.name(), old.source(), old.target(), old.expectedSha1(),
