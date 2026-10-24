@@ -263,9 +263,12 @@ public class InstancesView extends VBox {
                 ex.printStackTrace();
                 Platform.runLater(() -> {
                     if (requestId != refreshRequestId) return;
-                    instanceList.getChildren().clear();
-                    countLabel.setText("ERROR");
-                    statusLabel.setText("Failed to scan instances. Try refreshing again.");
+                    // A failed rescan must not erase the last successfully loaded list.
+                    // Keep existing cards and the real count visible so a transient filesystem
+                    // error cannot make the user's instances appear to have disappeared.
+                    statusLabel.setText(loadedInstances.isEmpty()
+                            ? "Failed to scan instances. Check the instance directory and try refreshing again."
+                            : "Refresh failed. Showing the last successfully loaded instances; try again.");
                 });
                 return;
             }
