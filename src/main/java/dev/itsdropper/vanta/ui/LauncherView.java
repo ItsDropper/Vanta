@@ -1390,7 +1390,8 @@ public class LauncherView {
                         () -> repairIssues(
                                 repairInstance,
                                 repairIssues
-                        )
+                        ),
+                        () -> restoreRepairMetadata(repairInstance)
                 );
 
         content.getChildren().setAll(
@@ -1670,6 +1671,23 @@ public class LauncherView {
     }
 
 
+
+    private void restoreRepairMetadata(Instance instance) {
+        try {
+            boolean restored = dev.itsdropper.vanta.launcher.repair.RepairBackupService
+                    .restoreLatest(instance.getDirectory());
+            if (restored) {
+                notifications.success(
+                        "Metadata restored",
+                        "The most recent Vanta repair metadata snapshot was restored. Mods, configs and worlds were not changed."
+                );
+            } else {
+                notifications.error("No backup found", "Vanta could not find a metadata backup to restore.");
+            }
+        } catch (Exception ex) {
+            notifications.error("Restore failed", getErrorMessage(ex));
+        }
+    }
 
     private void repairIssues(
             Instance instance,
