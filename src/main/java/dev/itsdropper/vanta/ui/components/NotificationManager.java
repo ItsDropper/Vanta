@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
+import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -53,6 +54,8 @@ public class NotificationManager {
     }
 
     public void showProgress(
+        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
+
             String title,
             String message
     ) {
@@ -109,6 +112,8 @@ public class NotificationManager {
     }
 
     public void success(
+        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
+
             String title,
             String message
     ) {
@@ -135,6 +140,8 @@ public class NotificationManager {
     }
 
     public void error(
+        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
+
             String title,
             String message
     ) {
