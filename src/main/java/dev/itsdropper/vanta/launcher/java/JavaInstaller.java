@@ -74,42 +74,7 @@ public class JavaInstaller {
                         "java.zip"
                 );
 
-        HttpRequest request =
-                HttpRequest.newBuilder(
-                                URI.create(url)
-                        )
-                        .GET()
-                        .build();
-
-        HttpResponse<InputStream> response =
-                HTTP.send(
-                        request,
-                        HttpResponse.BodyHandlers
-                                .ofInputStream()
-                );
-
-        if (response.statusCode() < 200
-                || response.statusCode() >= 300) {
-
-            response.body().close();
-
-            throw new IOException(
-                    "Failed to download Java "
-                            + version
-                            + ". HTTP "
-                            + response.statusCode()
-            );
-        }
-
-        try (InputStream input =
-                     response.body()) {
-
-            Files.copy(
-                    input,
-                    zip,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
-        }
+        dev.itsdropper.vanta.launcher.instance.DownloadUtil.downloadFile(url, zip, null);
 
         System.out.println(
                 "Extracting Java "
