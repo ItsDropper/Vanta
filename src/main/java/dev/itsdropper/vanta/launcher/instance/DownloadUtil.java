@@ -2,6 +2,15 @@ package dev.itsdropper.vanta.launcher.instance;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.ui.LauncherSettings;
+
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +38,11 @@ public class DownloadUtil {
     private static final Duration REQUEST_TIMEOUT =
             Duration.ofMinutes(5);
 
-    private static final int MAX_RETRIES = 3;
+    private static HttpClient httpClient() {
+        if (LauncherSettings.isConnectionReuseEnabled()) return HTTP;
+        return HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(15)).followRedirects(HttpClient.Redirect.NORMAL).build();
+    }
+    private static int maxRetries() { return LauncherSettings.getDownloadRetries(); }
 
     // =============================================================
     // JSON
@@ -41,7 +54,7 @@ public class DownloadUtil {
 
         Exception lastException = null;
 
-        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        for (int attempt = 1; attempt <= maxRetries(); attempt++) {
 
             try {
 
@@ -78,7 +91,7 @@ public class DownloadUtil {
 
                 lastException = e;
 
-                if (attempt < MAX_RETRIES) {
+                if (attempt < maxRetries()) {
 
                     sleepBeforeRetry(attempt);
                 }
@@ -87,7 +100,7 @@ public class DownloadUtil {
 
         throw new IOException(
                 "Failed to download JSON after "
-                        + MAX_RETRIES
+                        + maxRetries()
                         + " attempts: "
                         + url,
                 lastException
@@ -120,9 +133,22 @@ public class DownloadUtil {
             String expectedSha1
     ) throws Exception {
 
+        if (target.getParent() != null) Files.createDirectories(target.getParent());
+        if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
+            Path cached = cachePath(expectedSha1);
+            if (Files.isRegularFile(cached) && expectedSha1.equalsIgnoreCase(calculateSha1(cached))) {
+                Files.copy(cached, target, StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Reused verified download cache: " + target.getFileName());
+                return;
+            }
+        }
+        if (LauncherSettings.isSegmentedDownloadsEnabled()) {
+            try { if (downloadSegmented(url, target, expectedSha1)) return; }
+            catch (Exception ex) { System.err.println("Segmented transfer unavailable; falling back: " + ex.getMessage()); }
+        }
         Exception lastException = null;
 
-        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        for (int attempt = 1; attempt <= maxRetries(); attempt++) {
 
             Path temporary =
                     target.resolveSibling(
@@ -136,7 +162,7 @@ public class DownloadUtil {
                         "Downloading (attempt "
                                 + attempt
                                 + "/"
-                                + MAX_RETRIES
+                                + maxRetries()
                                 + "): "
                                 + url
                 );
@@ -148,19 +174,14 @@ public class DownloadUtil {
                     );
                 }
 
-                HttpRequest request =
-                        HttpRequest.newBuilder(
-                                        URI.create(url)
-                                )
-                                .timeout(REQUEST_TIMEOUT)
-                                .GET()
-                                .build();
-
-                HttpResponse<InputStream> response =
-                        HTTP.send(
-                                request,
-                                HttpResponse.BodyHandlers.ofInputStream()
-                        );
+                long existingBytes = LauncherSettings.isResumableDownloadsEnabled()
+                        && Files.isRegularFile(temporary) ? Files.size(temporary) : 0L;
+                HttpRequest.Builder requestBuilder = HttpRequest.newBuilder(URI.create(url))
+                        .timeout(REQUEST_TIMEOUT).GET();
+                if (existingBytes > 0) requestBuilder.header("Range", "bytes=" + existingBytes + "-");
+                HttpRequest request = requestBuilder.build();
+                HttpResponse<InputStream> response = httpClient().send(
+                        request, HttpResponse.BodyHandlers.ofInputStream());
 
                 if (response.statusCode() < 200
                         || response.statusCode() >= 300) {
@@ -178,14 +199,14 @@ public class DownloadUtil {
                     );
                 }
 
-                try (InputStream input =
-                             response.body()) {
-
-                    Files.copy(
-                            input,
-                            temporary,
-                            StandardCopyOption.REPLACE_EXISTING
-                    );
+                boolean append = existingBytes > 0 && response.statusCode() == 206;
+                if (existingBytes > 0 && response.statusCode() != 206) existingBytes = 0;
+                try (InputStream input = response.body();
+                     OutputStream output = Files.newOutputStream(temporary,
+                             java.nio.file.StandardOpenOption.CREATE,
+                             append ? java.nio.file.StandardOpenOption.APPEND
+                                     : java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
+                    input.transferTo(output);
                 }
 
                 // -------------------------------------------------
@@ -239,18 +260,19 @@ public class DownloadUtil {
 
                 return;
 
+                if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
+                    Path cached = cachePath(expectedSha1);
+                    Files.createDirectories(cached.getParent());
+                    Files.copy(temporary, cached, StandardCopyOption.REPLACE_EXISTING);
+                }
+                return;
             } catch (Exception e) {
-
                 lastException = e;
-
-                try {
-                    Files.deleteIfExists(
-                            temporary
-                    );
-                } catch (IOException ignored) {
+                if (!LauncherSettings.isResumableDownloadsEnabled()) {
+                    try { Files.deleteIfExists(temporary); } catch (IOException ignored) { }
                 }
 
-                if (attempt < MAX_RETRIES) {
+                if (attempt < maxRetries()) {
 
                     sleepBeforeRetry(attempt);
                 }
@@ -259,11 +281,76 @@ public class DownloadUtil {
 
         throw new IOException(
                 "Failed to download file after "
-                        + MAX_RETRIES
+                        + maxRetries()
                         + " attempts: "
                         + url,
                 lastException
         );
+    }
+
+    private static Path cachePath(String sha1) {
+        return MinecraftLocator.getVantaDirectory().resolve("download-cache").resolve("sha1")
+                .resolve(sha1.toLowerCase(java.util.Locale.ROOT));
+    }
+
+    private static boolean downloadSegmented(String url, Path target, String expectedSha1) throws Exception {
+        HttpRequest head = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(20))
+                .method("HEAD", HttpRequest.BodyPublishers.noBody()).build();
+        HttpResponse<Void> metadata = httpClient().send(head, HttpResponse.BodyHandlers.discarding());
+        if (metadata.statusCode() < 200 || metadata.statusCode() >= 300) return false;
+        long length = metadata.headers().firstValueAsLong("Content-Length").orElse(-1L);
+        boolean ranges = metadata.headers().firstValue("Accept-Ranges")
+                .map(v -> v.toLowerCase(java.util.Locale.ROOT).contains("bytes")).orElse(false);
+        if (!ranges || length < 32L * 1024 * 1024) return false;
+        final int segments = 4;
+        Path staging = target.resolveSibling(target.getFileName() + ".segments");
+        Files.createDirectories(staging);
+        ExecutorService pool = Executors.newFixedThreadPool(segments);
+        List<Future<?>> futures = new ArrayList<>();
+        try {
+            for (int i = 0; i < segments; i++) {
+                final int index = i; final long begin = (length * i) / segments;
+                final long finish = (length * (i + 1)) / segments - 1;
+                futures.add(pool.submit(() -> {
+                    Path part = staging.resolve("part-" + index);
+                    HttpRequest range = HttpRequest.newBuilder(URI.create(url)).timeout(REQUEST_TIMEOUT)
+                            .header("Range", "bytes=" + begin + "-" + finish).GET().build();
+                    HttpResponse<InputStream> response = httpClient().send(range, HttpResponse.BodyHandlers.ofInputStream());
+                    if (response.statusCode() != 206) {
+                        try { response.body().close(); } catch (IOException ignored) { }
+                        throw new IOException("Server did not honor range request (HTTP " + response.statusCode() + ")");
+                    }
+                    try (InputStream in = response.body()) { Files.copy(in, part, StandardCopyOption.REPLACE_EXISTING); }
+                    if (Files.size(part) != finish - begin + 1) throw new IOException("Incomplete segment " + index);
+                    return null;
+                }));
+            }
+            for (Future<?> future : futures) future.get();
+        } finally { pool.shutdownNow(); }
+        Path assembled = target.resolveSibling(target.getFileName() + ".download");
+        try {
+            try (OutputStream out = Files.newOutputStream(assembled, java.nio.file.StandardOpenOption.CREATE,
+                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
+                for (int i = 0; i < segments; i++) {
+                    try (InputStream in = Files.newInputStream(staging.resolve("part-" + i))) { in.transferTo(out); }
+                }
+            }
+            if (Files.size(assembled) != length) throw new IOException("Segmented download size mismatch");
+            if (expectedSha1 != null && !expectedSha1.isBlank() && !expectedSha1.equalsIgnoreCase(calculateSha1(assembled)))
+                throw new IOException("Segmented download checksum mismatch");
+            try { Files.move(assembled, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING); }
+            catch (java.nio.file.AtomicMoveNotSupportedException ex) { Files.move(assembled, target, StandardCopyOption.REPLACE_EXISTING); }
+            if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
+                Path cached = cachePath(expectedSha1); Files.createDirectories(cached.getParent());
+                Files.copy(target, cached, StandardCopyOption.REPLACE_EXISTING);
+            }
+            return true;
+        } finally {
+            Files.deleteIfExists(assembled);
+            try (var walk = Files.walk(staging)) {
+                walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> { try { Files.deleteIfExists(p); } catch (IOException ignored) { } });
+            }
+        }
     }
 
     // =============================================================
