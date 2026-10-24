@@ -467,3 +467,24 @@
     -fx-text-fill: -vanta-muted;
     -fx-font-size: 11px;
 }
+
+/* Settings navigation shares the exact active-state treatment used by the sidebar. */
+.settings-nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-text-fill: -vanta-muted;
+    -fx-padding: 10px 12px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+.settings-nav-button:hover {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-text-fill: -vanta-text;
+}
+.settings-nav-button.selected, .settings-nav-button.selected:hover {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-border-color: -vanta-accent;
+    -fx-border-width: 0 0 0 3px;
+    -fx-text-fill: -vanta-text;
+}
