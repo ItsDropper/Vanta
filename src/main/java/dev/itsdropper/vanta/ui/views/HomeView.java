@@ -45,6 +45,7 @@ public class HomeView extends StackPane {
     private final MultiLaunchService launchService;
     private final Consumer<LaunchFailure> onLaunchFailure;
     private final Consumer<Instance> onLaunchInstance;
+    private final Runnable onCreateInstance;
 
     private FlowPane recentServersList;
     private Label recentServersStatus;
@@ -61,12 +62,14 @@ public class HomeView extends StackPane {
             AccountService accountService,
             MultiLaunchService launchService,
             Consumer<LaunchFailure> onLaunchFailure,
-            Consumer<Instance> onLaunchInstance
+            Consumer<Instance> onLaunchInstance,
+            Runnable onCreateInstance
     ) {
         this.accountService = accountService;
         this.launchService = launchService;
         this.onLaunchFailure = onLaunchFailure;
         this.onLaunchInstance = onLaunchInstance;
+        this.onCreateInstance = onCreateInstance;
 
         getStyleClass().addAll("page", "home-page");
 
@@ -242,9 +245,8 @@ public class HomeView extends StackPane {
             recent = List.of(instances.get(0));
             recentStatus.setText("1 instance available");
         } else if (recent.isEmpty()) {
-            recentStatus.setText(
-                    "No instances yet. Create an instance to get started."
-            );
+            recentStatus.setText("Your library is ready for its first instance.");
+            recentList.getChildren().add(createFirstInstanceCard());
             return;
         } else {
             recentStatus.setText(
@@ -276,6 +278,42 @@ public class HomeView extends StackPane {
                             + " played"
             );
         }
+    }
+
+    private VBox createFirstInstanceCard() {
+        Label eyebrow = new Label("YOUR NEXT ADVENTURE");
+        eyebrow.getStyleClass().add("home-empty-eyebrow");
+
+        Label title = new Label("Nothing installed. Yet.");
+        title.getStyleClass().add("home-empty-title");
+
+        Label description = new Label(
+                "Create a clean Minecraft instance, import an existing profile, or start from a modpack. "
+                        + "Each instance keeps its own mods, settings and worlds."
+        );
+        description.setWrapText(true);
+        description.setMaxWidth(430);
+        description.getStyleClass().add("home-empty-description");
+
+        Button create = new Button("CREATE AN INSTANCE");
+        create.getStyleClass().add("primary-button");
+        create.setMinHeight(40);
+        create.setOnAction(event -> {
+            if (onCreateInstance != null) onCreateInstance.run();
+        });
+
+        VBox card = new VBox(12, eyebrow, title, description, create);
+        card.setPadding(new Insets(24));
+        card.setMinWidth(0);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.prefWidthProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> responsiveCardWidth(recentList),
+                        recentList.widthProperty()
+                )
+        );
+        card.getStyleClass().add("home-empty-card");
+        return card;
     }
 
     private double responsiveCardWidth(FlowPane list) {
