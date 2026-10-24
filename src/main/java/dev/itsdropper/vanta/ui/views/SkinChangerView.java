@@ -1,5 +1,8 @@
 package dev.itsdropper.vanta.ui.views;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.launcher.service.AccountSkinService;
@@ -11,10 +14,8 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -22,31 +23,41 @@ import javafx.stage.Window;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Duration;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public final class SkinChangerView extends VBox {
 
+    private static final URI PROFILE_ENDPOINT =
+            URI.create("https://api.minecraftservices.com/minecraft/profile");
     private static final URI SKIN_ENDPOINT =
             URI.create("https://api.minecraftservices.com/minecraft/profile/skins");
     private static final long MAX_SKIN_BYTES = 4L * 1024 * 1024;
+    private static final HttpClient HTTP = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(15))
+            .build();
 
     private final AccountService accountService;
     private final Label accountLabel = new Label("Checking account...");
-    private final Label fileLabel = new Label("No skin selected");
-    private final Label statusLabel = new Label("Choose a PNG skin file to get started.");
-    private final ImageView preview = new ImageView();
+    private final Label fileLabel = new Label("Loading current account skin...");
+    private final Label statusLabel = new Label("Loading the skin currently active on your account...");
+    private final SkinModel3D modelPreview = new SkinModel3D();
     private final ComboBox<String> modelChoice = new ComboBox<>();
     private final Button chooseButton = new Button("Choose PNG");
     private final Button uploadButton = new Button("Apply skin");
+
     private Path selectedFile;
+    private Image displayedSkin;
+    private String currentAccountUuid;
+    private int profileRequestGeneration;
     private boolean busy;
 
     public SkinChangerView(AccountService accountService) {
@@ -57,7 +68,7 @@ public final class SkinChangerView extends VBox {
         Label title = new Label("Skin changer");
         title.getStyleClass().add("accounts-title");
         Label subtitle = new Label(
-                "Change the skin on your authenticated Minecraft Java profile."
+                "Preview your active Minecraft skin in 3D, rotate it, and apply new skins to your profile."
         );
         subtitle.getStyleClass().add("accounts-subtitle");
 
@@ -65,18 +76,17 @@ public final class SkinChangerView extends VBox {
         header.getStyleClass().add("accounts-header");
         header.setPadding(new Insets(30, 38, 0, 38));
 
-        preview.setFitWidth(192);
-        preview.setFitHeight(192);
-        preview.setPreserveRatio(false);
-        preview.setSmooth(false);
-        preview.setImage(createPlaceholder());
-
-        VBox previewCard = new VBox(14);
+        VBox previewCard = new VBox(10);
         previewCard.setAlignment(Pos.CENTER);
-        previewCard.setPadding(new Insets(24));
+        previewCard.setPadding(new Insets(18, 18, 20, 18));
         previewCard.getStyleClass().add("accounts-hero");
-        previewCard.setMinWidth(250);
-        previewCard.getChildren().addAll(preview, fileLabel);
+        previewCard.setMinWidth(280);
+        previewCard.setPrefWidth(320);
+        Label previewHeading = new Label("Player preview");
+        previewHeading.getStyleClass().add("accounts-card-name");
+        Label rotateHint = new Label("Drag to rotate · Scroll to zoom");
+        rotateHint.getStyleClass().add("accounts-subtitle");
+        previewCard.getChildren().addAll(previewHeading, modelPreview, rotateHint, fileLabel);
 
         VBox controls = new VBox(14);
         controls.setPadding(new Insets(24));
@@ -92,9 +102,14 @@ public final class SkinChangerView extends VBox {
         modelChoice.getItems().setAll("Classic (Steve)", "Slim (Alex)");
         modelChoice.setValue("Classic (Steve)");
         modelChoice.setMaxWidth(Double.MAX_VALUE);
+        modelChoice.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                modelPreview.setSkinModel(newValue.startsWith("Slim"));
+            }
+        });
 
         Label formatHint = new Label(
-                "Use a 64×64 or legacy 64×32 PNG. The model setting must match your skin."
+                "Choose a 64×64 or legacy 64×32 PNG. Applying it uploads the skin to the signed-in Minecraft Java profile."
         );
         formatHint.setWrapText(true);
         formatHint.getStyleClass().add("accounts-subtitle");
@@ -129,20 +144,118 @@ public final class SkinChangerView extends VBox {
         VBox.setVgrow(scroll, Priority.ALWAYS);
         getChildren().add(scroll);
 
-        accountService.addListener(account -> Platform.runLater(() -> updateAccount(account)));
-        updateAccount(accountService.getCurrentAccount());
+        accountService.addListener(account ->
+                Platform.runLater(() -> onAccountChanged(account)));
+        onAccountChanged(accountService.getCurrentAccount());
     }
 
-    private void updateAccount(Account account) {
+    private void onAccountChanged(Account account) {
+        String nextUuid = account == null ? null : account.getUuid();
+        if (nextUuid == null ? currentAccountUuid != null : !nextUuid.equals(currentAccountUuid)) {
+            currentAccountUuid = nextUuid;
+            profileRequestGeneration++;
+            selectedFile = null;
+            displayedSkin = null;
+            modelPreview.setSkin(null, false);
+            fileLabel.setText(account == null
+                    ? "Connect a Minecraft account to preview its skin."
+                    : "Loading current account skin...");
+            if (account != null) {
+                statusLabel.setText("Fetching the skin currently active on your Minecraft profile...");
+                loadCurrentSkin(account, profileRequestGeneration);
+            } else {
+                statusLabel.setText("Connect a Minecraft Java account from Accounts first.");
+            }
+        }
+        updateAccountControls(account);
+    }
+
+    private void updateAccountControls(Account account) {
         if (account == null) {
             accountLabel.setText("No Minecraft account connected. Connect one from Accounts first.");
             uploadButton.setDisable(true);
             chooseButton.setDisable(busy);
+            modelChoice.setDisable(busy);
         } else {
             accountLabel.setText(account.getUsername() + "  ·  " + account.getUuid());
             uploadButton.setDisable(busy || selectedFile == null);
             chooseButton.setDisable(busy);
+            modelChoice.setDisable(busy);
         }
+    }
+
+    private void loadCurrentSkin(Account account, int generation) {
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(PROFILE_ENDPOINT)
+                        .header("Authorization", "Bearer " + account.getAccessToken())
+                        .header("Accept", "application/json")
+                        .timeout(Duration.ofSeconds(25))
+                        .GET()
+                        .build();
+                HttpResponse<String> response = HTTP.send(
+                        request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() != 200) {
+                    throw new IOException("Minecraft profile returned HTTP " + response.statusCode());
+                }
+
+                JsonObject profile = JsonParser.parseString(response.body()).getAsJsonObject();
+                JsonArray skins = profile.has("skins") && profile.get("skins").isJsonArray()
+                        ? profile.getAsJsonArray("skins") : new JsonArray();
+                JsonObject active = null;
+                for (var element : skins) {
+                    if (!element.isJsonObject()) continue;
+                    JsonObject candidate = element.getAsJsonObject();
+                    if (candidate.has("state")
+                            && "ACTIVE".equalsIgnoreCase(candidate.get("state").getAsString())) {
+                        active = candidate;
+                        break;
+                    }
+                }
+                if (active == null && !skins.isEmpty() && skins.get(0).isJsonObject()) {
+                    active = skins.get(0).getAsJsonObject();
+                }
+                if (active == null || !active.has("url") || active.get("url").isJsonNull()) {
+                    throw new IOException("Minecraft did not return an active skin for this profile.");
+                }
+
+                String skinUrl = active.get("url").getAsString();
+                String variant = active.has("variant") && !active.get("variant").isJsonNull()
+                        ? active.get("variant").getAsString() : "classic";
+                String alias = active.has("alias") && !active.get("alias").isJsonNull()
+                        ? active.get("alias").getAsString() : "Active account skin";
+                Image image = new Image(skinUrl, false);
+                if (image.isError() || image.getPixelReader() == null) {
+                    throw new IOException("Minecraft returned a skin URL but its image could not be loaded.");
+                }
+                return new SkinProfile(image, variant, alias, null);
+            } catch (Exception ex) {
+                return new SkinProfile(null, "classic", null, message(ex));
+            }
+        }).thenAccept(result -> Platform.runLater(() -> {
+            if (generation != profileRequestGeneration
+                    || accountService.getCurrentAccount() == null
+                    || !account.getUuid().equals(accountService.getCurrentAccount().getUuid())) {
+                return;
+            }
+            if (result.image() == null) {
+                fileLabel.setText("Current skin unavailable");
+                if (selectedFile == null) {
+                    statusLabel.setText("Could not load the active skin: " + result.error());
+                }
+                return;
+            }
+
+            displayedSkin = result.image();
+            boolean slim = "slim".equalsIgnoreCase(result.variant());
+            modelChoice.setValue(slim ? "Slim (Alex)" : "Classic (Steve)");
+            if (selectedFile == null) {
+                modelPreview.setSkin(displayedSkin, slim);
+                fileLabel.setText(result.alias());
+                statusLabel.setText("Showing the skin currently active on this Minecraft account.");
+            }
+        }));
     }
 
     private void chooseSkin() {
@@ -154,9 +267,7 @@ public final class SkinChangerView extends VBox {
 
         Window owner = getScene() == null ? null : getScene().getWindow();
         java.io.File file = chooser.showOpenDialog(owner);
-        if (file == null) {
-            return;
-        }
+        if (file == null) return;
 
         try {
             Path path = file.toPath();
@@ -180,9 +291,11 @@ public final class SkinChangerView extends VBox {
             }
 
             selectedFile = path;
-            preview.setImage(image);
-            fileLabel.setText(file.getName() + "  ·  " + width + "×" + height);
-            statusLabel.setText("Ready to upload. Your current profile skin will be replaced.");
+            displayedSkin = image;
+            boolean slim = modelChoice.getValue().startsWith("Slim");
+            modelPreview.setSkin(image, slim);
+            fileLabel.setText("Selected: " + file.getName());
+            statusLabel.setText("Skin loaded into the 3D preview. Select Apply skin to set it on your account.");
             uploadButton.setDisable(accountService.getCurrentAccount() == null || busy);
         } catch (Exception ex) {
             statusLabel.setText("Could not use this skin: " + message(ex));
@@ -191,19 +304,20 @@ public final class SkinChangerView extends VBox {
 
     private void uploadSkin() {
         Account account = accountService.getCurrentAccount();
-        if (busy || account == null || selectedFile == null) {
-            return;
-        }
+        if (busy || account == null || selectedFile == null) return;
 
         Path file = selectedFile;
         String variant = modelChoice.getValue().startsWith("Slim") ? "slim" : "classic";
-        setBusy(true, "Uploading skin to Minecraft...");
+        setBusy(true, "Uploading skin to your Minecraft account...");
         CompletableFuture.runAsync(() -> {
             try {
                 upload(account, file, variant);
                 AccountSkinService.clear(account);
                 Platform.runLater(() -> {
-                    setBusy(false, "Skin uploaded successfully. It may take a short time to appear in-game.");
+                    selectedFile = null;
+                    setBusy(false, "Skin applied to your Minecraft profile. Refreshing the active skin...");
+                    fileLabel.setText("Refreshing active account skin...");
+                    loadCurrentSkin(account, ++profileRequestGeneration);
                 });
             } catch (Exception ex) {
                 Platform.runLater(() -> setBusy(false, "Upload failed: " + message(ex)));
@@ -230,22 +344,16 @@ public final class SkinChangerView extends VBox {
                 .header("Authorization", "Bearer " + account.getAccessToken())
                 .header("Accept", "application/json")
                 .header("Content-Type", "multipart/form-data; boundary=" + boundary)
-                .timeout(java.time.Duration.ofSeconds(45))
+                .timeout(Duration.ofSeconds(45))
                 .POST(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray()))
                 .build();
 
-        HttpResponse<String> response = HttpClient.newHttpClient().send(
-                request, HttpResponse.BodyHandlers.ofString()
-        );
+        HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             String detail = response.body() == null ? "" : response.body().strip();
-            if (detail.length() > 300) {
-                detail = detail.substring(0, 300);
-            }
-            throw new IOException(
-                    "Minecraft Services returned HTTP " + response.statusCode()
-                            + (detail.isBlank() ? "." : ": " + detail)
-            );
+            if (detail.length() > 300) detail = detail.substring(0, 300);
+            throw new IOException("Minecraft Services returned HTTP " + response.statusCode()
+                    + (detail.isBlank() ? "." : ": " + detail));
         }
     }
 
@@ -256,11 +364,7 @@ public final class SkinChangerView extends VBox {
     private void setBusy(boolean value, String message) {
         busy = value;
         statusLabel.setText(message);
-        chooseButton.setDisable(value);
-        uploadButton.setDisable(value || selectedFile == null
-                || accountService.getCurrentAccount() == null);
-        modelChoice.setDisable(value);
-        updateAccount(accountService.getCurrentAccount());
+        updateAccountControls(accountService.getCurrentAccount());
         if (value) {
             chooseButton.setDisable(true);
             uploadButton.setDisable(true);
@@ -274,11 +378,5 @@ public final class SkinChangerView extends VBox {
                 : error.getMessage();
     }
 
-    private static Image createPlaceholder() {
-        // A neutral placeholder is used until the user selects a local skin.
-        return new Image(
-                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/lWQAAAAASUVORK5CYII=",
-                192, 192, false, false
-        );
-    }
+    private record SkinProfile(Image image, String variant, String alias, String error) { }
 }
