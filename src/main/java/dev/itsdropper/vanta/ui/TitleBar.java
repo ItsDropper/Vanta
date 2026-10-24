@@ -3,6 +3,8 @@ package dev.itsdropper.vanta.ui;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.Tooltip;
+import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.Priority;
@@ -139,6 +141,13 @@ public class TitleBar extends HBox {
                 closeIcon
         );
 
+        minimize.setAccessibleText("Minimize Vanta");
+        maximize.setAccessibleText("Maximize or restore Vanta");
+        close.setAccessibleText("Close Vanta");
+        minimize.setTooltip(new Tooltip("Minimize"));
+        maximize.setTooltip(new Tooltip("Maximize / restore"));
+        close.setTooltip(new Tooltip("Close"));
+
         minimize.getStyleClass().add(
                 "title-bar-button"
         );
@@ -214,31 +223,36 @@ public class TitleBar extends HBox {
         // =========================================================
 
         setOnMousePressed(event -> {
+            if (isInteractiveTarget(event.getTarget())) return;
 
-            dragX =
-                    event.getScreenX()
-                            - stage.getX();
+            dragX = event.getScreenX() - stage.getX();
+            dragY = event.getScreenY() - stage.getY();
 
-            dragY =
-                    event.getScreenY()
-                            - stage.getY();
+            if (event.getClickCount() == 2 && !stage.isMaximized()) {
+                stage.setMaximized(true);
+                maximize.setGraphic(restoreIcon);
+                event.consume();
+            }
         });
 
         setOnMouseDragged(event -> {
-
-            if (!stage.isMaximized()) {
-
-                stage.setX(
-                        event.getScreenX()
-                                - dragX
-                );
-
-                stage.setY(
-                        event.getScreenY()
-                                - dragY
-                );
-            }
+            if (isInteractiveTarget(event.getTarget()) || stage.isMaximized()) return;
+            stage.setX(event.getScreenX() - dragX);
+            stage.setY(event.getScreenY() - dragY);
         });
+    }
+
+    private boolean isInteractiveTarget(Object target) {
+        if (!(target instanceof Node node)) return false;
+        Node current = node;
+        while (current != null && current != this) {
+            if (current instanceof Button
+                    || current.getStyleClass().contains("account-switcher")) {
+                return true;
+            }
+            current = current.getParent();
+        }
+        return false;
     }
 
     public void showUpdate(
