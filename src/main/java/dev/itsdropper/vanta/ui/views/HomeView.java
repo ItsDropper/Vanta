@@ -51,6 +51,7 @@ public class HomeView extends StackPane {
     private FlowPane recentServersList;
     private Label recentServersStatus;
     private final Label accountLabel;
+    private final Label launchStatusLabel;
     private FlowPane recentList;
     private Label recentStatus;
     private final java.util.Map<String, Label> playtimeLabels =
@@ -93,6 +94,10 @@ public class HomeView extends StackPane {
         header.getStyleClass().add("home-header");
         HBox.setHgrow(headerText, Priority.ALWAYS);
 
+        launchStatusLabel = new Label("READY TO PLAY");
+        launchStatusLabel.getStyleClass().addAll("home-launch-indicator", "home-status-ready");
+        launchStatusLabel.setAccessibleText("Minecraft launch status: ready to play");
+
         Button createInstanceButton = new Button("＋  NEW INSTANCE");
         createInstanceButton.getStyleClass().add("primary-button");
         createInstanceButton.setMinHeight(40);
@@ -101,7 +106,7 @@ public class HomeView extends StackPane {
         createInstanceButton.setOnAction(event -> {
             if (this.onCreateInstance != null) this.onCreateInstance.run();
         });
-        header.getChildren().addAll(headerText, createInstanceButton);
+        header.getChildren().addAll(headerText, launchStatusLabel, createInstanceButton);
 
         VBox recentSection = createRecentInstancesSection();
         VBox serverCard = createRecentServersCard();
@@ -797,8 +802,47 @@ public class HomeView extends StackPane {
         Platform.runLater(() -> setAccount(account));
     }
 
+    private void updateLaunchStatus(LaunchService.LaunchState state) {
+        String label;
+        String style;
+        switch (state) {
+            case PREPARING, STARTING -> {
+                label = "STARTING MINECRAFT";
+                style = "home-status-progress";
+            }
+            case RUNNING -> {
+                label = "MINECRAFT RUNNING";
+                style = "home-status-running";
+            }
+            case CLOSING -> {
+                label = "CLOSING MINECRAFT";
+                style = "home-status-progress";
+            }
+            case ERROR -> {
+                label = "LAUNCH FAILED";
+                style = "home-status-error";
+            }
+            case IDLE -> {
+                label = "READY TO PLAY";
+                style = "home-status-ready";
+            }
+            default -> {
+                label = "VANTA READY";
+                style = "home-status-ready";
+            }
+        }
+        launchStatusLabel.setText(label);
+        launchStatusLabel.getStyleClass().removeAll(
+                "home-status-ready", "home-status-progress",
+                "home-status-running", "home-status-error"
+        );
+        launchStatusLabel.getStyleClass().add(style);
+        launchStatusLabel.setAccessibleText("Minecraft launch status: " + label.toLowerCase());
+    }
+
     private void onLaunchStateChanged(LaunchService.LaunchState state) {
         Platform.runLater(() -> {
+            updateLaunchStatus(state);
             refreshRecentInstances();
             refreshRecentServers();
 
