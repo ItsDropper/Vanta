@@ -83,6 +83,10 @@ public class MrpackInstaller {
                             .get("fabric-loader")
                             .asText();
 
+            if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
+                throw new IllegalStateException("Modpack Fabric Loader version is missing.");
+            }
+
         } else if (
                 dependencies.has("forge")
                         || dependencies.has("neoforge")
@@ -111,18 +115,12 @@ public class MrpackInstaller {
 
         if ("Fabric".equals(loader)) {
 
-            /*
-             * Vanta's existing Fabric installer currently resolves
-             * the latest compatible loader itself.
-             *
-             * The exact loader version from the mrpack is validated
-             * below, but the existing installer remains responsible
-             * for installing the Minecraft/Fabric environment.
-             */
+            // Respect the loader version pinned by the modpack index.
             instance =
                     InstanceInstaller.installFabric(
                             name,
-                            minecraftVersion
+                            minecraftVersion,
+                            loaderVersion
                     );
 
         } else {
