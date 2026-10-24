@@ -130,6 +130,7 @@ public final class InstanceBackupService {
                         continue;
                     }
                     String key = relative.toString().replace('\\', '/');
+                    key = key.toLowerCase(java.util.Locale.ROOT);
                     if (!names.add(key)) throw new IOException("Backup contains duplicate paths: " + rawName);
                     Path output = target.resolve(relative).normalize();
                     if (!output.startsWith(target)) throw new IOException("Backup path escapes the restore directory.");
