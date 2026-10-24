@@ -1,0 +1,198 @@
+.server-manager {
+    -fx-spacing: 0;
+}
+.server-eyebrow {
+    -fx-text-fill: -vanta-accent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.5px;
+}
+.server-heading {
+    -fx-text-fill: -vanta-text-primary;
+    -fx-font-size: 29px;
+    -fx-font-weight: 800;
+}
+.server-subtitle {
+    -fx-text-fill: -vanta-text-secondary;
+    -fx-font-size: 11px;
+}
+.server-workspace {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.server-workspace > .split-pane-divider {
+    -fx-background-color: transparent;
+    -fx-padding: 0 5px;
+}
+.server-sidebar, .server-detail {
+    -fx-background-color: transparent;
+}
+.server-list-header {
+    -fx-alignment: center-left;
+    -fx-padding: 0 4px;
+    -fx-text-fill: -vanta-text-secondary;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+.server-list-header .label {
+    -fx-text-fill: -vanta-text-secondary;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+.server-profile-list {
+    -fx-background-color: transparent;
+}
+.server-profile-card {
+    -fx-background-color: rgba(255,255,255,0.025);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(255,255,255,0.055);
+    -fx-border-radius: 10px;
+    -fx-cursor: hand;
+}
+.server-profile-card:hover {
+    -fx-background-color: rgba(255,255,255,0.055);
+    -fx-border-color: rgba(255,255,255,0.12);
+}
+.server-profile-selected {
+    -fx-background-color: rgba(72,139,255,0.12);
+    -fx-border-color: rgba(72,139,255,0.5);
+}
+.server-profile-name {
+    -fx-text-fill: -vanta-text-primary;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+.server-profile-meta {
+    -fx-text-fill: -vanta-text-secondary;
+    -fx-font-size: 10px;
+}
+.server-empty {
+    -fx-text-fill: -vanta-text-secondary;
+    -fx-font-size: 11px;
+    -fx-padding: 12px;
+}
+.server-title {
+    -fx-text-fill: -vanta-text-primary;
+    -fx-font-size: 22px;
+    -fx-font-weight: 800;
+}
+.server-status-row {
+    -fx-background-color: rgba(255,255,255,0.025);
+    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 11px 12px;
+}
+.server-status-label {
+    -fx-text-fill: -vanta-text-primary;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+.server-status-dot {
+    -fx-text-fill: #858b96;
+    -fx-font-size: 12px;
+}
+.server-state-running {
+    -fx-text-fill: #55d69e;
+}
+.server-state-starting {
+    -fx-text-fill: #f2bd5b;
+}
+.server-state-stopping {
+    -fx-text-fill: #f2bd5b;
+}
+.server-state-crashed {
+    -fx-text-fill: #ff737b;
+}
+.server-state-stopped {
+    -fx-text-fill: #858b96;
+}
+.server-action {
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 11px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+.server-primary {
+    -fx-background-color: -vanta-accent;
+    -fx-text-fill: white;
+}
+.server-primary:hover {
+    -fx-opacity: 0.88;
+}
+.server-secondary {
+    -fx-background-color: rgba(255,255,255,0.06);
+    -fx-border-color: rgba(255,255,255,0.08);
+    -fx-border-radius: 8px;
+    -fx-text-fill: -vanta-text-primary;
+}
+.server-secondary:hover {
+    -fx-background-color: rgba(255,255,255,0.1);
+}
+.server-danger {
+    -fx-background-color: rgba(245,83,93,0.12);
+    -fx-border-color: rgba(245,83,93,0.25);
+    -fx-border-radius: 8px;
+    -fx-text-fill: #ff858b;
+}
+.server-action:disabled {
+    -fx-opacity: 0.35;
+    -fx-cursor: default;
+}
+.server-panel {
+    -fx-background-color: rgba(255,255,255,0.025);
+    -fx-border-color: rgba(255,255,255,0.065);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 15px;
+}
+.server-section-title {
+    -fx-text-fill: -vanta-text-primary;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+.server-section-subtitle {
+    -fx-text-fill: -vanta-text-secondary;
+    -fx-font-size: 10px;
+}
+.server-field-label {
+    -fx-text-fill: -vanta-text-secondary;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+.server-input, .server-spinner {
+    -fx-background-color: rgba(0,0,0,0.22);
+    -fx-background-radius: 7px;
+    -fx-border-color: rgba(255,255,255,0.09);
+    -fx-border-radius: 7px;
+    -fx-text-fill: -vanta-text-primary;
+    -fx-prompt-text-fill: -vanta-text-secondary;
+    -fx-padding: 8px 10px;
+    -fx-font-size: 11px;
+}
+.server-spinner .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vanta-text-primary;
+}
+.server-eula {
+    -fx-text-fill: -vanta-text-secondary;
+    -fx-font-size: 10px;
+}
+.server-console {
+    -fx-control-inner-background: #080b10;
+    -fx-background-color: #080b10;
+    -fx-text-fill: #c8d5e7;
+    -fx-highlight-fill: rgba(72,139,255,0.4);
+    -fx-highlight-text-fill: white;
+    -fx-font-family: "Cascadia Mono", "Consolas", monospace;
+    -fx-font-size: 10px;
+}
+.server-scroll, .server-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+.server-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
