@@ -7,6 +7,9 @@ import javafx.scene.PointLight;
 import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
 import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
+import javafx.scene.image.PixelWriter;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
@@ -28,6 +31,7 @@ public final class SkinModel3D extends StackPane {
     private final Rotate yaw = new Rotate(-22, Rotate.Y_AXIS);
     private final Rotate pitch = new Rotate(-8, Rotate.X_AXIS);
     private Image skin;
+    private Image cape;
     private boolean slimArms;
     private int atlasHeight = 64;
 
@@ -83,6 +87,11 @@ public final class SkinModel3D extends StackPane {
         rebuild();
     }
 
+    public void setCape(Image cape) {
+        this.cape = cape;
+        rebuild();
+    }
+
     public void setSkinModel(boolean slimArms) {
         if (this.slimArms != slimArms) {
             this.slimArms = slimArms;
@@ -99,7 +108,7 @@ public final class SkinModel3D extends StackPane {
 
         atlasHeight = (int) skin.getHeight();
         PhongMaterial material = new PhongMaterial(Color.WHITE);
-        material.setDiffuseMap(skin);
+        material.setDiffuseMap(upscaleNearest(skin, 8));
         material.setSpecularColor(Color.rgb(25, 25, 25));
 
         if (atlasHeight >= 64) {
@@ -210,6 +219,11 @@ public final class SkinModel3D extends StackPane {
                     face(20, 48, 4, 4), face(24, 48, 4, 4));
         }
 
+        if (cape != null && !cape.isError() && cape.getPixelReader() != null
+                && cape.getWidth() >= 22 && cape.getHeight() >= 17) {
+            addCape(cape);
+        }
+
         // Scale pixel-sized geometry to make the player comfortably visible.
         player.setScaleX(2.6);
         player.setScaleY(2.6);
@@ -217,6 +231,35 @@ public final class SkinModel3D extends StackPane {
         player.setTranslateY(5);
     }
 
+    private void addCape(Image source) {
+        PhongMaterial capeMaterial = new PhongMaterial(Color.WHITE);
+        capeMaterial.setDiffuseMap(upscaleNearest(source, 8));
+        capeMaterial.setSpecularColor(Color.BLACK);
+        TriangleMesh mesh = new TriangleMesh();
+        mesh.getPoints().setAll(-5f,-6f,2.35f, 5f,-6f,2.35f, 5f,10f,2.35f, -5f,10f,2.35f);
+        mesh.getTexCoords().setAll(1f/64f,1f/32f, 11f/64f,1f/32f, 11f/64f,17f/32f, 1f/64f,17f/32f);
+        mesh.getFaces().setAll(0,0,1,1,2,2, 0,0,2,2,3,3);
+        mesh.getFaceSmoothingGroups().setAll(0, 0);
+        MeshView view = new MeshView(mesh);
+        view.setMaterial(capeMaterial);
+        view.setCullFace(CullFace.NONE);
+        player.getChildren().add(view);
+    }
+
+    private static Image upscaleNearest(Image source, int scale) {
+        if (source == null || source.isError() || source.getPixelReader() == null) return source;
+        int width = (int) source.getWidth();
+        int height = (int) source.getHeight();
+        PixelReader reader = source.getPixelReader();
+        WritableImage result = new WritableImage(width * scale, height * scale);
+        PixelWriter writer = result.getPixelWriter();
+        for (int y = 0; y < height * scale; y++) {
+            for (int x = 0; x < width * scale; x++) {
+                writer.setArgb(x, y, reader.getArgb(x / scale, y / scale));
+            }
+        }
+        return result;
+    }
     private void addBox(PhongMaterial material,
                         double width, double height, double depth,
                         double x, double y, double z,
