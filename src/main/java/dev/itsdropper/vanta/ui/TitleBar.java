@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui;
 
 import javafx.geometry.Pos;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
@@ -144,10 +145,10 @@ public class TitleBar extends HBox {
 
         minimize.setAccessibleText("Minimize Vanta");
         maximize.setAccessibleText("Maximize or restore Vanta");
-        close.setAccessibleText("Close Vanta");
+        close.setAccessibleText("Exit Vanta");
         minimize.setTooltip(new Tooltip("Minimize"));
         maximize.setTooltip(new Tooltip("Maximize / restore"));
-        close.setTooltip(new Tooltip("Close"));
+        close.setTooltip(new Tooltip("Exit Vanta"));
 
         minimize.getStyleClass().add(
                 "title-bar-button"
@@ -184,9 +185,12 @@ public class TitleBar extends HBox {
             );
         });
 
-        close.setOnAction(event ->
-                stage.close()
-        );
+        close.setOnAction(event -> {
+            stage.close();
+            // Main disables implicit exit so the launcher can hide while
+            // Minecraft runs. An explicit close must still terminate Vanta.
+            Platform.exit();
+        });
 
         // =========================================================
         // LAYOUT
