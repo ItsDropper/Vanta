@@ -51,6 +51,7 @@ public class LauncherView {
     private final StateCenterView stateCenterView;
     private final SettingsView settingsView;
     private final CreateInstanceTypeView createInstanceTypeView;
+    private final DownloadCenterView downloadCenterView;
 
     private final NotificationManager notifications;
 
@@ -290,6 +291,7 @@ public class LauncherView {
                 );
 
         stateCenterView = new StateCenterView();
+        downloadCenterView = new DownloadCenterView();
 
         settingsView =
                 new SettingsView(
@@ -363,6 +365,7 @@ public class LauncherView {
             case DIGIT5, NUMPAD5 -> Sidebar.Page.SKIN;
             case DIGIT6, NUMPAD6 -> Sidebar.Page.ACCOUNTS;
             case DIGIT7, NUMPAD7 -> Sidebar.Page.SETTINGS;
+            case DIGIT8, NUMPAD8 -> Sidebar.Page.DOWNLOADS;
             default -> null;
         };
 
@@ -392,6 +395,7 @@ public class LauncherView {
             case MODS -> showAnimatedContent(globalModsView);
             case STATE -> { showStatePage(); if (LauncherSettings.isStateScanOnOpenEnabled()) stateCenterView.onShown(); }
             case SETTINGS -> showAnimatedContent(settingsView);
+            case DOWNLOADS -> showAnimatedContent(downloadCenterView);
         }
     }
 
