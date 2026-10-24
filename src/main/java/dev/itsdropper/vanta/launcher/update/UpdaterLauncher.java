@@ -351,6 +351,11 @@ public final class UpdaterLauncher {
                                     tempUpdaterDirectory.toFile()
                             )
                             .redirectErrorStream(true)
+                            .redirectOutput(
+                                    ProcessBuilder.Redirect.appendTo(
+                                            getUpdaterOutputLog().toFile()
+                                    )
+                            )
                             .start();
 
             log(
@@ -381,26 +386,7 @@ public final class UpdaterLauncher {
                             .orElse("<unknown>")
             );
 
-            /*
-             * Read updater output in the background.
-             * This prevents the updater from blocking if its
-             * output buffer becomes full.
-             */
-            Thread outputThread =
-                    new Thread(() -> {
-
-                        try {
-
-                            process.getInputStream()
-                                    .transferTo(
-                                            Files.newOutputStream(
-                                                    getUpdaterOutputLog(),
-                                                    StandardOpenOption.CREATE,
-                                                    StandardOpenOption.APPEND
-                                            )
-                                    );
-
-                        } catch (Exception e) {
+        } catch (Exception e) {
 
                             log(
                                     "Failed to capture updater output: "
