@@ -118,7 +118,8 @@ public final class SkinChangerView extends VBox {
         capeChoice.setMaxWidth(Double.MAX_VALUE);
         capeChoice.setPromptText("Loading account capes...");
         capeChoice.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) modelPreview.setCape(newValue.texture());
+            modelPreview.setCape(newValue == null ? null : newValue.texture());
+            updateAccountControls(accountService.getCurrentAccount());
         });
         applyCapeButton.getStyleClass().add("accounts-primary-button");
         hideCapeButton.getStyleClass().add("accounts-card-use");
@@ -202,7 +203,8 @@ public final class SkinChangerView extends VBox {
         } else {
             accountLabel.setText(account.getUsername() + "  ·  " + account.getUuid());
             uploadButton.setDisable(busy || selectedFile == null);
-            applyCapeButton.setDisable(busy || capeChoice.getValue() == null || capeChoice.getValue().id().isBlank());
+            applyCapeButton.setDisable(busy || capeChoice.getValue() == null
+                    || capeChoice.getValue().id().isBlank());
             hideCapeButton.setDisable(busy);
             capeChoice.setDisable(busy);
             chooseButton.setDisable(busy);
