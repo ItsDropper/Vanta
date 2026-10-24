@@ -941,8 +941,80 @@ public class SettingsView extends BorderPane {
             File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
             if (selected != null) javaPath.setText(selected.getAbsolutePath());
         });
+
+        Label javaValidationStatus = new Label("Validate a Java executable before saving it as the default.");
+        javaValidationStatus.getStyleClass().add("settings-card-description");
+        javaValidationStatus.setWrapText(true);
+        Button validateJava = new Button("TEST JAVA");
+        validateJava.getStyleClass().add("secondary-button");
+        validateJava.setTooltip(new javafx.scene.control.Tooltip(
+                "Runs the selected Java executable with -version and checks that it starts successfully."
+        ));
+        validateJava.setOnAction(event -> {
+            String configured = javaPath.getText() == null ? "" : javaPath.getText().trim();
+            Path executable;
+            if (configured.isBlank()) {
+                executable = Path.of(System.getProperty("java.home"), "bin",
+                        System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win")
+                                ? "java.exe" : "java");
+            } else {
+                executable = Path.of(configured);
+            }
+            if (!Files.isRegularFile(executable)) {
+                javaValidationStatus.setText("Java executable not found: " + executable);
+                return;
+            }
+
+            validateJava.setDisable(true);
+            javaValidationStatus.setText("Starting Java version check…");
+            Thread worker = new Thread(() -> {
+                String result;
+                boolean success = false;
+                Process process = null;
+                try {
+                    process = new ProcessBuilder(executable.toString(), "-version")
+                            .redirectErrorStream(true)
+                            .start();
+                    boolean exited = process.waitFor(10, java.util.concurrent.TimeUnit.SECONDS);
+                    if (!exited) {
+                        process.destroyForcibly();
+                        result = "Java did not exit within 10 seconds. Check that the selected executable is valid.";
+                    } else {
+                        String output;
+                        try (var reader = new java.io.BufferedReader(
+                                new java.io.InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
+                            output = reader.lines().limit(8).collect(java.util.stream.Collectors.joining(" "));
+                        }
+                        success = process.exitValue() == 0;
+                        result = (success ? "Java check passed: " : "Java returned an error: ")
+                                + (output.isBlank() ? "No version output." : output);
+                    }
+                } catch (Exception ex) {
+                    result = "Java check failed: " +
+                            (ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage());
+                    if (process != null) process.destroyForcibly();
+                }
+                final String message = result;
+                final boolean passed = success;
+                Platform.runLater(() -> {
+                    validateJava.setDisable(false);
+                    javaValidationStatus.setText(message);
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        if (passed) manager.success("Java executable valid", message);
+                        else manager.error("Java validation failed", message);
+                    }
+                });
+            }, "Vanta-Java-Validation");
+            worker.setDaemon(true);
+            worker.start();
+        });
+
         HBox javaPathRow = new HBox(8, javaPath, browseJava);
         HBox.setHgrow(javaPath, Priority.ALWAYS);
+        HBox javaValidationRow = new HBox(8, validateJava, javaValidationStatus);
+        javaValidationRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(javaValidationStatus, Priority.ALWAYS);
 
         ComboBox<String> jvmPreset = new ComboBox<>();
         jvmPreset.getItems().addAll(
@@ -1043,6 +1115,7 @@ public class SettingsView extends BorderPane {
                 createInput("Resolution height", height),
                 createInput("Resolution preset", resolutionPreset),
                 createInput("Java executable", javaPathRow),
+                javaValidationRow,
                 createInput("JVM argument preset", jvmPreset),
                 createInput("JVM arguments", javaArguments),
                 createInput("Default Minecraft version", defaultVersion),
