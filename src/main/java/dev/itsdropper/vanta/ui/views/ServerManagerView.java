@@ -17,6 +17,8 @@ import javafx.stage.Window;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -55,9 +57,12 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         Label subtitle = new Label("Run, inspect and maintain your own Minecraft servers from Vanta.");
         subtitle.getStyleClass().add("server-subtitle");
 
-        Button add = actionButton("Add server", IconView.Type.PLUS, "server-primary");
+        Button add = actionButton("Import existing", IconView.Type.FOLDER, "server-secondary");
         add.setOnAction(event -> addProfile());
-        HBox headingRow = new HBox(14, new VBox(5, eyebrow, heading, subtitle), spacer(), add);
+        Button create = actionButton("Create from JAR", IconView.Type.PLUS, "server-primary");
+        create.setOnAction(event -> createProfileFromJar());
+        HBox actions = new HBox(8, add, create);
+        HBox headingRow = new HBox(14, new VBox(5, eyebrow, heading, subtitle), spacer(), actions);
         headingRow.setAlignment(Pos.CENTER_LEFT);
         VBox.setVgrow(headingRow.getChildren().get(0), Priority.NEVER);
 
@@ -205,6 +210,96 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             console.appendText("Vanta: profile added. Review RAM settings and EULA acceptance before starting.\n");
         } catch (Exception e) {
             error("Could not add server", e.getMessage());
+        }
+    }
+
+    private void createProfileFromJar() {
+        Window owner = getScene() == null ? null : getScene().getWindow();
+        TextInputDialog nameDialog = new TextInputDialog("My Minecraft Server");
+        nameDialog.setTitle("Create server");
+        nameDialog.setHeaderText("Create a new server directory");
+        nameDialog.setContentText("Server name:");
+        Optional<String> name = nameDialog.showAndWait();
+        if (name.isEmpty() || name.get().isBlank()) return;
+
+        DirectoryChooser parentChooser = new DirectoryChooser();
+        parentChooser.setTitle("Choose where the server folder should be created");
+        var parent = parentChooser.showDialog(owner);
+        if (parent == null) return;
+
+        FileChooser jarChooser = new FileChooser();
+        jarChooser.setTitle("Choose a server JAR (vanilla, Paper, Fabric, or compatible)");
+        jarChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Java server JAR", "*.jar"));
+        var jar = jarChooser.showOpenDialog(owner);
+        if (jar == null) return;
+
+        String slug = name.get().trim().toLowerCase(java.util.Locale.ROOT)
+                .replaceAll("[^a-z0-9._-]+", "-").replaceAll("^-+|-+$", "");
+        if (slug.isBlank()) slug = "minecraft-server";
+        Path directory = parent.toPath().resolve(slug).normalize();
+        Path targetJar = directory.resolve(jar.getName()).normalize();
+        try {
+            if (Files.exists(directory)) throw new IOException("That server folder already exists. Choose a different name or parent directory.");
+            Files.createDirectory(directory);
+            Files.copy(jar.toPath(), targetJar, StandardCopyOption.COPY_ATTRIBUTES);
+            Profile p = service.addProfile(name.get().trim(), directory, targetJar);
+            selectProfile(p.id);
+            refreshProfileList();
+            console.appendText("Vanta: created a new server folder from the selected JAR. First startup may generate eula.txt and configuration files.\\n");
+        } catch (Exception e) {
+            try { Files.deleteIfExists(targetJar); } catch (IOException ignored) {}
+            try { Files.deleteIfExists(directory); } catch (IOException ignored) {}
+            error("Could not create server", e.getMessage());
+        }
+    }
+
+    private void restoreBackupDialog() {
+        try {
+            String id = requireSelectedId();
+            Profile p = service.profile(id).orElseThrow();
+            Path backupDirectory = p.directoryPath().resolve("backups");
+            if (!Files.isDirectory(backupDirectory)) {
+                info("No backups found", "Create a backup first. Backups are stored in this server's backups folder.");
+                return;
+            }
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Choose a server backup to restore");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Vanta server backups", "*.zip"));
+            chooser.setInitialDirectory(backupDirectory.toFile());
+            var selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
+            if (selected == null) return;
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Restore server backup");
+            confirm.setHeaderText("Restore " + selected.getName() + "?");
+            confirm.setContentText("The server must be stopped. Vanta will create a safety backup of the current server before replacing files. Existing files not present in the selected backup will be left in place.");
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+            Path backup = selected.toPath();
+            runBackground("Restoring server backup", () -> service.restoreBackup(id, backup),
+                    safety -> info("Backup restored", "The selected backup was restored. Safety backup of the previous state:\\n" + safety));
+        } catch (Exception e) {
+            error("Could not restore backup", e.getMessage());
+        }
+    }
+
+    private void removeProfile() {
+        try {
+            String id = requireSelectedId();
+            Profile p = service.profile(id).orElseThrow();
+            Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Remove server profile");
+            confirm.setHeaderText("Remove " + p.name + " from Vanta?");
+            confirm.setContentText("This removes only the saved profile from Vanta. The server directory, world files, JAR and backups will not be deleted.");
+            if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+            service.removeProfile(id);
+            selectedId = null;
+            console.clear();
+            serverTitle.setText("No server selected");
+            serverMeta.setText("Select a profile or create a server.");
+            setActionsEnabled(false);
+            detail.setDisable(true);
+            refreshProfileList();
+        } catch (Exception e) {
+            error("Could not remove profile", e.getMessage());
         }
     }
 
