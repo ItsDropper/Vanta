@@ -149,7 +149,7 @@ public class MinecraftFileInstaller {
         }
 
         int workers = Math.min(
-                LauncherSettings.getDownloadThreads(),
+                LauncherSettings.getEffectiveDownloadThreads(downloads.size()),
                 downloads.size()
         );
 
