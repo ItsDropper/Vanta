@@ -57,6 +57,8 @@ public class LauncherView {
     private final TitleBar titleBar;
     private LaunchService.LaunchState previousLaunchState = LaunchService.LaunchState.IDLE;
     private final Runnable onReady;
+    private final javafx.event.EventHandler<javafx.scene.input.KeyEvent> keyboardShortcutHandler =
+            this::handleKeyboardShortcut;
 
 
     public LauncherView(Stage stage) {
@@ -74,7 +76,7 @@ public class LauncherView {
             if (previousScene != null) {
                 previousScene.removeEventFilter(
                         javafx.scene.input.KeyEvent.KEY_PRESSED,
-                        this::handleKeyboardShortcut
+                        keyboardShortcutHandler
                 );
             }
             if (nextScene != null) {
