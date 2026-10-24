@@ -258,7 +258,7 @@ public final class SkinModel3D extends StackPane {
         player.getChildren().add(view);
     }
 
-    private static void addFace(TriangleMesh mesh, List<Float> points, List<Float> texCoords,
+    private void addFace(TriangleMesh mesh, List<Float> points, List<Float> texCoords,
                                 List<Integer> faces, double[][] corners, Uv uv) {
         int pointStart = points.size() / 3;
         int texStart = texCoords.size() / 2;
