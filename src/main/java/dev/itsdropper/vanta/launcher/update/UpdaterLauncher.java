@@ -26,6 +26,15 @@ public final class UpdaterLauncher {
     private UpdaterLauncher() {
     }
 
+    /**
+     * Terminate the original launcher JVM once the external updater is running.
+     * Platform.exit() only shuts down JavaFX and does not guarantee that other
+     * non-daemon threads have stopped.
+     */
+    public static void exitOriginalProcess() {
+        System.exit(0);
+    }
+
     public static Path getUpdaterDirectory() {
 
         Path directory =
