@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.java.JavaLocator;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,10 +15,29 @@ public class MinecraftLauncher {
             LaunchData data
     ) throws Exception {
 
+        if (account == null) {
+            throw new IllegalArgumentException("A Microsoft account is required to launch Minecraft.");
+        }
+        if (account.getUsername() == null || account.getUsername().isBlank()
+                || account.getUuid() == null || account.getUuid().isBlank()
+                || account.getAccessToken() == null || account.getAccessToken().isBlank()) {
+            throw new IllegalStateException("The active Microsoft account session is incomplete. Sign in again before launching.");
+        }
+        if (data == null || data.minecraftDirectory == null) {
+            throw new IllegalArgumentException("Minecraft launch data or instance directory is missing.");
+        }
+
         Path minecraft =
                 data.minecraftDirectory
                         .toAbsolutePath()
                         .normalize();
+
+        if (!Files.isDirectory(minecraft)) {
+            throw new IllegalStateException("Minecraft instance directory does not exist: " + minecraft);
+        }
+        if (!Files.isWritable(minecraft)) {
+            throw new IllegalStateException("Minecraft instance directory is not writable: " + minecraft);
+        }
 
         // =============================================================
         // CLASSPATH
