@@ -391,7 +391,8 @@ public class MrpackInstaller {
 
         DownloadUtil.downloadFile(
                 url,
-                target
+                target,
+                expectedSha1
         );
 
         boolean verified =
