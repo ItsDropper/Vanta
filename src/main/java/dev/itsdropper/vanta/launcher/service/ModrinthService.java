@@ -5,7 +5,9 @@ import dev.itsdropper.vanta.launcher.modrinth.*;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ModrinthService {
     private final ModrinthClient client = new ModrinthClient();
@@ -17,6 +19,36 @@ public class ModrinthService {
 
     public List<ModrinthProject> searchMods(String query) throws IOException, InterruptedException { return catalog.searchMods(query); }
     public List<ModrinthProject> searchMods(Instance instance, String query) throws IOException, InterruptedException { return catalog.searchMods(instance, query); }
+
+    /**
+     * Fast list search for the instance browser. Modrinth's search payload already
+     * includes every field needed for result cards, so do not make a second request
+     * to /project/{id} for each hit.
+     */
+    public List<ModrinthProject> searchModsFast(Instance instance, String query) throws IOException, InterruptedException {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
+        List<ModrinthSearchHit> hits = client.search(query, ModrinthContentType.MOD, loader, instance.getMinecraftVersion()).getHits();
+        return mapSearchHits(hits);
+    }
+
+    public List<ModrinthProject> getMostDownloadedModsFast(Instance instance) throws IOException, InterruptedException {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
+        List<ModrinthSearchHit> hits = client.getMostDownloaded(ModrinthContentType.MOD, loader, instance.getMinecraftVersion()).getHits();
+        return mapSearchHits(hits);
+    }
+
+    private List<ModrinthProject> mapSearchHits(List<ModrinthSearchHit> hits) {
+        List<ModrinthProject> projects = new ArrayList<>();
+        if (hits == null) return projects;
+        for (ModrinthSearchHit hit : hits) {
+            if (hit == null || hit.getProjectId() == null || hit.getProjectId().isBlank()) continue;
+            projects.add(ModrinthProject.fromSearchHit(hit));
+        }
+        return projects;
+    }
+
     public List<ModrinthProject> search(String query, ModrinthContentType contentType, String loader, String minecraftVersion) throws IOException, InterruptedException { return catalog.search(query, contentType, loader, minecraftVersion); }
     public List<ModrinthProject> getMostDownloadedMods(Instance instance) throws IOException, InterruptedException { return catalog.getMostDownloadedMods(instance); }
     public List<ModrinthProject> getMostDownloaded(ModrinthContentType contentType, String loader, String minecraftVersion) throws IOException, InterruptedException { return catalog.getMostDownloaded(contentType, loader, minecraftVersion); }
