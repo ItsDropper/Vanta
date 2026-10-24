@@ -34,6 +34,31 @@ class RepairBackupServiceTest {
     }
 
     @Test
+    void restoreReturnsFalseWhenManifestContainsNoRestorableFiles() throws Exception {
+        Path instance = temporaryDirectory.resolve("instance-with-invalid-backup");
+        Path snapshot = instance.resolve(".vanta-repair-backups/snapshot");
+        Files.createDirectories(snapshot);
+        Files.writeString(snapshot.resolve("manifest.txt"), "../../outside.txt\ninstance.json\n");
+        Files.writeString(temporaryDirectory.resolve("outside.txt"), "must-not-be-restored");
+
+        assertEquals(false, RepairBackupService.restoreLatest(instance));
+        assertEquals(false, Files.exists(instance.resolve("instance.json")));
+        assertEquals("must-not-be-restored",
+                Files.readString(temporaryDirectory.resolve("outside.txt")));
+    }
+
+    @Test
+    void restoreReturnsFalseWhenManifestNamesMissingSnapshotFiles() throws Exception {
+        Path instance = temporaryDirectory.resolve("instance-with-missing-snapshot-file");
+        Path snapshot = instance.resolve(".vanta-repair-backups/snapshot");
+        Files.createDirectories(snapshot);
+        Files.writeString(snapshot.resolve("manifest.txt"), "instance.json\n");
+
+        assertEquals(false, RepairBackupService.restoreLatest(instance));
+        assertEquals(false, Files.exists(instance.resolve("instance.json")));
+    }
+
+    @Test
     void restoreReturnsFalseWhenNoSnapshotExists() throws Exception {
         Path instance = temporaryDirectory.resolve("empty-instance");
         Files.createDirectories(instance);

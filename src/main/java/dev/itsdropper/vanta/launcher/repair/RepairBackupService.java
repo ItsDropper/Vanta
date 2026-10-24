@@ -59,17 +59,29 @@ public final class RepairBackupService {
         }
         if (latest == null) return false;
         List<String> files = Files.readAllLines(latest.resolve("manifest.txt"), StandardCharsets.UTF_8);
+        Path normalizedInstance = instanceDirectory.toAbsolutePath().normalize();
+        Path normalizedSnapshot = latest.toAbsolutePath().normalize();
+        boolean restoredAny = false;
+
+        // A manifest is data, not authority: accept only exact known metadata paths,
+        // and require each snapshot source to remain inside the selected snapshot.
         for (String relative : files) {
             if (!PROTECTED_FILES.contains(relative)) continue;
-            Path source = latest.resolve(relative).normalize();
-            Path target = instanceDirectory.resolve(relative).normalize();
-            if (!source.startsWith(latest) || !target.startsWith(instanceDirectory.normalize())) continue;
-            if (!Files.isRegularFile(source)) continue;
+
+            Path source = normalizedSnapshot.resolve(relative).normalize();
+            Path target = normalizedInstance.resolve(relative).normalize();
+            if (!source.startsWith(normalizedSnapshot)
+                    || !target.startsWith(normalizedInstance)
+                    || !Files.isRegularFile(source)) {
+                continue;
+            }
+
             Files.createDirectories(target.getParent());
             Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.COPY_ATTRIBUTES);
+            restoredAny = true;
         }
-        return !files.isEmpty();
+        return restoredAny;
     }
 
     private static long modified(Path path) {
