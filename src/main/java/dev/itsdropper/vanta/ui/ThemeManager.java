@@ -118,9 +118,13 @@ public final class ThemeManager {
         String effectiveAccent = isValidAccent(accent) ? accent.toUpperCase() : base.accent();
         String background = loadCustomColor("customBackground", base.background());
         String surface = loadCustomColor("customSurface", base.surface());
+        String raised = loadCustomColor("customRaisedSurface", base.surfaceRaised());
+        String hover = loadCustomColor("customHoverSurface", base.surfaceHover());
         String border = loadCustomColor("customBorder", base.border());
         String textColor = loadCustomColor("customText", base.text());
         String muted = loadCustomColor("customMuted", base.muted());
+        String danger = loadCustomColor("customDanger", base.danger());
+        String success = loadCustomColor("customSuccess", base.success());
         Color color = Color.web(effectiveAccent);
 
         String soft = toHex(color.darker().darker());
@@ -136,8 +140,8 @@ public final class ThemeManager {
                 "-vanta-accent-rgb: " + rgb + ";" +
                 "-vanta-bg: " + background + ";" +
                 "-vanta-surface: " + surface + ";" +
-                "-vanta-surface-raised: " + base.surfaceRaised() + ";" +
-                "-vanta-surface-hover: " + base.surfaceHover() + ";" +
+                "-vanta-surface-raised: " + raised + ";" +
+                "-vanta-surface-hover: " + hover + ";" +
                 "-vanta-border: " + border + ";" +
                 "-vanta-text: " + textColor + ";" +
                 "-vanta-muted: " + muted + ";" +
@@ -167,9 +171,13 @@ public final class ThemeManager {
         Properties properties = load();
         properties.remove("customBackground");
         properties.remove("customSurface");
+        properties.remove("customRaisedSurface");
+        properties.remove("customHoverSurface");
         properties.remove("customBorder");
         properties.remove("customText");
         properties.remove("customMuted");
+        properties.remove("customDanger");
+        properties.remove("customSuccess");
         save(properties);
     }
 
