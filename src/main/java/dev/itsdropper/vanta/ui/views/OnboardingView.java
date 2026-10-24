@@ -165,12 +165,10 @@ public class OnboardingView extends BorderPane {
         );
 
         connectButton.getStyleClass().add("primary-button");
-        connectButton.setDisable(false);
-        connectButton.setText(
-                account == null
-                        ? "CONNECT"
-                        : "CONNECT"
-        );
+        connectButton.setAccessibleText("Connect a Microsoft account for Minecraft");
+        connectButton.setGraphic(null);
+        connectButton.setDisable(account != null);
+        connectButton.setText(account == null ? "CONNECT MICROSOFT ACCOUNT" : "ACCOUNT CONNECTED");
         connectButton.setOnAction(event -> connectAccount());
 
         Label note = new Label(
@@ -282,7 +280,7 @@ public class OnboardingView extends BorderPane {
         progress.setPrefSize(18, 18);
         connectButton.setGraphic(progress);
 
-        new Thread(() -> {
+        Thread loginThread = new Thread(() -> {
             try {
                 Account account = accountService.login();
 
@@ -307,6 +305,8 @@ public class OnboardingView extends BorderPane {
                     connectButton.setDisable(false);
                 });
             }
-        }, "Vanta-Onboarding-Account").start();
+        }, "Vanta-Onboarding-Account");
+        loginThread.setDaemon(true);
+        loginThread.start();
     }
 }
