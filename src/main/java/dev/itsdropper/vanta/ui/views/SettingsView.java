@@ -117,6 +117,44 @@ public class SettingsView extends BorderPane {
     private void buildNavigation() {
         navigation.getStyleClass().add("settings-navigation");
 
+        TextField sectionSearch = new TextField();
+        sectionSearch.setPromptText("Find a settings page…");
+        sectionSearch.setAccessibleText("Search settings pages");
+        sectionSearch.setTooltip(new javafx.scene.control.Tooltip(
+                "Filter settings pages by name. Clear the field to show every page."
+        ));
+        sectionSearch.getStyleClass().add("settings-search-field");
+        sectionSearch.textProperty().addListener((observable, oldValue, newValue) -> {
+            String query = newValue == null ? "" : newValue.trim().toLowerCase(java.util.Locale.ROOT);
+            for (var node : navigation.getChildren()) {
+                if (node instanceof Button button) {
+                    boolean visible = query.isEmpty()
+                            || button.getText().toLowerCase(java.util.Locale.ROOT).contains(query);
+                    button.setVisible(visible);
+                    button.setManaged(visible);
+                }
+            }
+            // Keep group headings only when at least one matching page exists beneath them.
+            String currentGroup = null;
+            java.util.Map<String, Boolean> groupMatches = new java.util.LinkedHashMap<>();
+            for (var node : navigation.getChildren()) {
+                if (node instanceof Label label && label.getStyleClass().contains("settings-nav-group")) {
+                    currentGroup = label.getText();
+                    groupMatches.putIfAbsent(currentGroup, false);
+                } else if (node instanceof Button button && button.isVisible() && currentGroup != null) {
+                    groupMatches.put(currentGroup, true);
+                }
+            }
+            for (var node : navigation.getChildren()) {
+                if (node instanceof Label label && label.getStyleClass().contains("settings-nav-group")) {
+                    boolean visible = query.isEmpty() || groupMatches.getOrDefault(label.getText(), false);
+                    label.setVisible(visible);
+                    label.setManaged(visible);
+                }
+            }
+        });
+        navigation.getChildren().add(sectionSearch);
+
         navigation.getChildren().add(group("PERSONALIZATION"));
         navigation.getChildren().add(sectionButton("Appearance", true));
 
