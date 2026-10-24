@@ -68,8 +68,8 @@ public final class RemoteRconClient implements AutoCloseable {
         if (length < 10 || length > MAX_PACKET) throw new IOException("Invalid RCON packet size: " + length);
         byte[] packet = input.readNBytes(length);
         if (packet.length != length) throw new EOFException("Incomplete RCON response.");
-        int id = Integer.reverseBytes(readLittleEndianInt(packet, 0));
-        int type = Integer.reverseBytes(readLittleEndianInt(packet, 4));
+        int id = readLittleEndianInt(packet, 0);
+        int type = readLittleEndianInt(packet, 4);
         int payloadEnd = length - 2;
         String payload = new String(packet, 8, Math.max(0, payloadEnd - 8), StandardCharsets.UTF_8);
         return new Packet(id, type, payload);
