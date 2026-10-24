@@ -47,6 +47,7 @@ public class CreateInstanceView extends VBox {
     private final Button backButton;
 
     private final Label statusLabel;
+    private final Button retryVersionsButton;
 
     private final Runnable onBack;
     private final Runnable onCreated;
@@ -277,6 +278,18 @@ public class CreateInstanceView extends VBox {
         statusLabel.getStyleClass().add(
                 "create-status"
         );
+        statusLabel.setWrapText(true);
+        HBox.setHgrow(statusLabel, Priority.ALWAYS);
+
+        retryVersionsButton = new Button("RETRY");
+        retryVersionsButton.getStyleClass().add("secondary-button");
+        retryVersionsButton.setAccessibleText("Retry loading Minecraft versions");
+        retryVersionsButton.setOnAction(event -> loadVersions());
+        retryVersionsButton.setVisible(false);
+        retryVersionsButton.setManaged(false);
+
+        HBox statusRow = new HBox(10, statusLabel, retryVersionsButton);
+        statusRow.setAlignment(Pos.CENTER_LEFT);
 
         // =========================================================
         // ACTIONS
@@ -359,7 +372,7 @@ public class CreateInstanceView extends VBox {
                 panelTitle,
                 panelSubtitle,
                 form,
-                statusLabel,
+                statusRow,
                 actions
         );
 
@@ -445,11 +458,15 @@ public class CreateInstanceView extends VBox {
                         createButton.setDisable(true);
                         versionBox.setPromptText("No releases available");
                         statusLabel.setText("No Minecraft releases were returned. Check your connection and retry.");
+                        retryVersionsButton.setVisible(true);
+                        retryVersionsButton.setManaged(true);
                         return;
                     }
 
                     versionBox.setDisable(false);
                     loaderBox.setDisable(false);
+                    retryVersionsButton.setVisible(false);
+                    retryVersionsButton.setManaged(false);
                     String preferredVersion = LauncherSettings.getDefaultMinecraftVersion();
                     if (!preferredVersion.isBlank() && releases.contains(preferredVersion)) {
                         versionBox.getSelectionModel().select(preferredVersion);
@@ -466,7 +483,9 @@ public class CreateInstanceView extends VBox {
                     loaderBox.setDisable(true);
                     createButton.setDisable(true);
                     versionBox.setPromptText("Could not load versions");
-                    statusLabel.setText("Could not load Minecraft releases. Check your connection and reopen this screen to retry.");
+                    statusLabel.setText("Could not load Minecraft releases. Check your connection and retry.");
+                    retryVersionsButton.setVisible(true);
+                    retryVersionsButton.setManaged(true);
                 });
             }
         }, "Vanta-Minecraft-Version-Manifest");
