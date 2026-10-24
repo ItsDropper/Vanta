@@ -495,3 +495,68 @@
     -fx-border-radius: 8px;
     -fx-faint-focus-color: transparent;
 }
+
+/* Dialogs, settings controls, content-browser rows and state surfaces. */
+.theme-selector-popup, .combo-box-popup .list-view, .context-menu,
+.dialog-pane, .dialog-pane.vanta-dialog {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+}
+.dialog-pane .header-panel, .dialog-pane.vanta-dialog .header-panel {
+    -fx-background-color: -vanta-surface-raised;
+}
+.dialog-pane .content, .dialog-pane.vanta-dialog .content,
+.dialog-pane.vanta-dialog .button-bar {
+    -fx-background-color: -vanta-surface;
+}
+.dialog-pane .label, .dialog-pane.vanta-dialog .label {
+    -fx-text-fill: -vanta-text;
+}
+.dialog-pane .dialog-scroll, .dialog-pane.vanta-dialog .dialog-scroll,
+.dialog-pane.vanta-dialog .dialog-scroll > .viewport {
+    -fx-background-color: -vanta-bg;
+}
+.settings-navigation { -fx-background-color: -vanta-surface; }
+.settings-card, .state-hero, .state-list-card, .onboarding-page,
+.onboarding-feature, .instance-empty, .instance-settings-card {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+}
+.accent-picker, .accent-preset, .verification-code,
+.instance-search-field, .instances-search, .instance-playtime,
+.instance-icon-box, .mod-icon-box {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+}
+.instance-search-field:focused {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-accent;
+}
+.account-sign-out-button {
+    -fx-background-color: derive(-vanta-danger, -78%);
+    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-text-fill: -vanta-danger;
+}
+.modrinth-versions-button, .modrinth-version-row, .state-refresh-button {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+    -fx-text-fill: -vanta-text;
+}
+.modrinth-versions-button:hover, .modrinth-version-row:hover {
+    -fx-background-color: -vanta-surface-hover;
+}
+.state-refresh-button:hover {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-border-color: -vanta-accent;
+}
+.list-cell:hover, .table-row-cell:hover, .tree-cell:hover {
+    -fx-background-color: -vanta-surface-raised;
+}
+.mod-toggle-enabled {
+    -fx-background-color: derive(-vanta-success, -68%);
+    -fx-text-fill: -vanta-success;
+}
+.mod-toggle-disabled {
+    -fx-background-color: derive(-vanta-danger, -68%);
+    -fx-text-fill: -vanta-danger;
+}
