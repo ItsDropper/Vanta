@@ -1324,6 +1324,18 @@ public class LauncherView {
                         failure.details()
                 );
 
+        // Always give the user a repair path, even when no specialized
+        // dependency signature matched. The fallback only repairs
+        // Vanta-managed Minecraft files and preserves user content.
+        if (issues.isEmpty()) {
+            issues = new java.util.ArrayList<>();
+            issues.add(new RepairView.RepairIssue(
+                    "GENERAL DIAGNOSTIC",
+                    failure.title(),
+                    failure.description()
+            ));
+        }
+
         boolean hasAutomaticRepair =
                 issues.stream()
                         .anyMatch(
@@ -1695,12 +1707,19 @@ public class LauncherView {
                         }
 
                         if (!repaired) {
-
-                            notifications.error(
-                                    "Repair failed",
-                                    "No automatically repairable dependencies were found."
+                            notifications.updateProgress(
+                                    "Repairing managed files",
+                                    "Verifying Minecraft metadata, libraries, natives and assets..."
                             );
 
+                            dev.itsdropper.vanta.launcher.instance.InstanceRepairService.repair(instance);
+
+                            notifications.success(
+                                    "Repair complete",
+                                    "Vanta-managed Minecraft files were verified and restored. Your mods, configs, worlds and resource packs were preserved."
+                            );
+
+                            Platform.runLater(() -> showPage(Sidebar.Page.HOME));
                             return;
                         }
 
