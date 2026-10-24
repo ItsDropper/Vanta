@@ -353,7 +353,7 @@ public class BrowseModsView extends VBox {
 
                         List<ModrinthProject> projects =
                                 modrinthService
-                                        .getMostDownloadedMods(
+                                        .getMostDownloadedModsFast(
                                                 instance
                                         );
 
@@ -685,7 +685,7 @@ public class BrowseModsView extends VBox {
                     try {
 
                         List<ModrinthProject> projects =
-                                modrinthService.searchMods(
+                                modrinthService.searchModsFast(
                                         instance,
                                         query
                                 );
