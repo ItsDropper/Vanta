@@ -23,7 +23,8 @@ public final class RepairCoordinator {
             String signature = ((issue.type() == null ? "" : issue.type()) + " "
                     + (issue.title() == null ? "" : issue.title()) + " "
                     + (issue.details() == null ? "" : issue.details()))
-                    .toLowerCase(Locale.ROOT);
+                    .toLowerCase(Locale.ROOT)
+                    .replace('_', ' ');
 
             if (signature.contains("authentication") || signature.contains("invalid session")
                     || signature.contains("expired token") || signature.contains("graphics")
