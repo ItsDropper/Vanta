@@ -188,7 +188,7 @@ public class DownloadUtil {
                         .timeout(REQUEST_TIMEOUT).GET();
                 if (existingBytes > 0) requestBuilder.header("Range", "bytes=" + existingBytes + "-");
                 HttpRequest request = requestBuilder.build();
-                HttpResponse<InputStream> response = httpClient().send(
+                HttpResponse<InputStream> response = send(
                         request, HttpResponse.BodyHandlers.ofInputStream());
 
                 if (response.statusCode() < 200
@@ -303,7 +303,7 @@ public class DownloadUtil {
     private static boolean downloadSegmented(String url, Path target, String expectedSha1) throws Exception {
         HttpRequest head = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(20))
                 .method("HEAD", HttpRequest.BodyPublishers.noBody()).build();
-        HttpResponse<Void> metadata = httpClient().send(head, HttpResponse.BodyHandlers.discarding());
+        HttpResponse<Void> metadata = send(head, HttpResponse.BodyHandlers.discarding());
         if (metadata.statusCode() < 200 || metadata.statusCode() >= 300) return false;
         long length = metadata.headers().firstValueAsLong("Content-Length").orElse(-1L);
         boolean ranges = metadata.headers().firstValue("Accept-Ranges")
@@ -322,7 +322,7 @@ public class DownloadUtil {
                     Path part = staging.resolve("part-" + index);
                     HttpRequest range = HttpRequest.newBuilder(URI.create(url)).timeout(REQUEST_TIMEOUT)
                             .header("Range", "bytes=" + begin + "-" + finish).GET().build();
-                    HttpResponse<InputStream> response = httpClient().send(range, HttpResponse.BodyHandlers.ofInputStream());
+                    HttpResponse<InputStream> response = send(range, HttpResponse.BodyHandlers.ofInputStream());
                     if (response.statusCode() != 206) {
                         try { response.body().close(); } catch (IOException ignored) { }
                         throw new IOException("Server did not honor range request (HTTP " + response.statusCode() + ")");
