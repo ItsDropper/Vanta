@@ -355,7 +355,7 @@ public class InstancesView extends VBox {
                     backupButton.setDisable(false);
                     String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
                     statusLabel.setText("Restore failed: " + message);
-                    new Alert(Alert.AlertType.ERROR, "Vanta could not restore this backup.\\n\\n" + message).show();
+                    new Alert(Alert.AlertType.ERROR, "Vanta could not restore this backup.\n\n" + message).show();
                 });
             }
         }, "Vanta-Instance-Restore");
