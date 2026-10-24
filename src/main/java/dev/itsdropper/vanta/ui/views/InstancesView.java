@@ -26,6 +26,7 @@ import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 public class InstancesView extends VBox {
@@ -42,6 +43,9 @@ public class InstancesView extends VBox {
 
     private List<Instance> loadedInstances =
             List.of();
+
+    // Only the newest scan may replace the visible instance list.
+    private long refreshRequestId;
 
 
     public InstancesView(
@@ -242,132 +246,100 @@ public class InstancesView extends VBox {
 
     public void refresh() {
 
-        statusLabel.setText(
-                "Scanning installed instances..."
-        );
+        long requestId = ++refreshRequestId;
+        statusLabel.setText("Scanning installed instances...");
 
-        Thread thread =
-                new Thread(() -> {
-
-                    List<Instance> instances;
-
-                    try {
-
-                        instances =
-                                InstanceManager
-                                        .discoverInstances();
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        Platform.runLater(() -> {
-
-                            instanceList
-                                    .getChildren()
-                                    .clear();
-
-                            countLabel.setText(
-                                    "ERROR"
-                            );
-
-                            statusLabel.setText(
-                                    "Failed to scan instances."
-                            );
-                        });
-
-                        return;
-                    }
-
-                    Platform.runLater(() -> {
-
-                        instanceList
-                                .getChildren()
-                                .clear();
-
-                        loadedInstances =
-                                List.copyOf(instances);
-
-                        updateCount(
-                                loadedInstances.size()
-                        );
-
-                        if (loadedInstances.isEmpty()) {
-
-                            instanceList
-                                    .getChildren()
-                                    .add(
-                                            createEmptyState()
-                                    );
-
-                            statusLabel.setText(
-                                    "No Minecraft instances installed."
-                            );
-
-                            return;
-                        }
-
-                        renderInstances(
-                                loadedInstances
-                        );
-
-                        statusLabel.setText(
-                                "Select an instance to use it on the home screen."
-                        );
-                    });
+        Thread thread = new Thread(() -> {
+            List<Instance> instances;
+            try {
+                instances = InstanceManager.discoverInstances();
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    if (requestId != refreshRequestId) return;
+                    instanceList.getChildren().clear();
+                    countLabel.setText("ERROR");
+                    statusLabel.setText("Failed to scan instances. Try refreshing again.");
                 });
+                return;
+            }
 
-        thread.setDaemon(
-                true
-        );
+            Platform.runLater(() -> {
+                if (requestId != refreshRequestId) return;
 
-        thread.setName(
-                "Vanta-Instance-Refresh"
-        );
+                loadedInstances = List.copyOf(instances);
+                updateCount(loadedInstances.size());
 
+                if (loadedInstances.isEmpty()) {
+                    instanceList.getChildren().setAll(createEmptyState());
+                    statusLabel.setText("No Minecraft instances installed. Create one to get started.");
+                    return;
+                }
+
+                // Re-apply the current query instead of unexpectedly clearing it
+                // after rename, duplicate, icon change, or manual refresh.
+                filterInstances(searchField.getText());
+            });
+        }, "Vanta-Instance-Refresh");
+
+        thread.setDaemon(true);
         thread.start();
     }
 
     private void filterInstances(String query) {
-
         if (loadedInstances.isEmpty()) {
             return;
         }
 
-        String normalized =
-                query == null
-                        ? ""
-                        : query.trim().toLowerCase();
+        String normalized = query == null
+                ? ""
+                : query.trim().toLowerCase(Locale.ROOT);
 
-        List<Instance> filtered =
-                loadedInstances.stream()
-                        .filter(instance ->
-                                normalized.isBlank()
-                                        || instance.getName()
-                                        .toLowerCase()
-                                        .contains(normalized)
-                                        || instance.getMinecraftVersion()
-                                        .toLowerCase()
-                                        .contains(normalized)
-                                        || instance.getDisplayLoader()
-                                        .toLowerCase()
-                                        .contains(normalized)
-                        )
-                        .toList();
-
-        renderInstances(filtered);
+        List<Instance> filtered = loadedInstances.stream()
+                .filter(instance ->
+                        normalized.isBlank()
+                                || safeLower(instance.getName()).contains(normalized)
+                                || safeLower(instance.getMinecraftVersion()).contains(normalized)
+                                || safeLower(instance.getDisplayLoader()).contains(normalized))
+                .toList();
 
         if (filtered.isEmpty()) {
-            statusLabel.setText(
-                    "No instances match your search."
-            );
-        } else {
-            statusLabel.setText(
-                    filtered.size()
-                            + " matching instance"
-                            + (filtered.size() == 1 ? "" : "s")
-            );
+            instanceList.getChildren().setAll(createSearchEmptyState(query));
+            statusLabel.setText("No instances match your search.");
+            return;
         }
+
+        renderInstances(filtered);
+        statusLabel.setText(filtered.size() + " of " + loadedInstances.size()
+                + " instance" + (loadedInstances.size() == 1 ? "" : "s") + " shown");
+    }
+
+    private static String safeLower(String value) {
+        return value == null ? "" : value.toLowerCase(Locale.ROOT);
+    }
+
+    private VBox createSearchEmptyState(String query) {
+        Label icon = new Label("⌕");
+        icon.getStyleClass().add("instance-empty-icon");
+
+        Label title = new Label("No matching instances");
+        title.getStyleClass().add("instance-empty-title");
+
+        Label description = new Label("No instance matches \"" + (query == null ? "" : query.trim())
+                + "\". Try a name, Minecraft version, or loader.");
+        description.setWrapText(true);
+        description.getStyleClass().add("instance-empty-description");
+
+        Button clearButton = new Button("CLEAR SEARCH");
+        clearButton.getStyleClass().add("secondary-button");
+        clearButton.setOnAction(event -> searchField.clear());
+
+        VBox empty = new VBox(10, icon, title, description, clearButton);
+        empty.setAlignment(Pos.CENTER);
+        empty.setPadding(new Insets(48));
+        empty.getStyleClass().add("instance-empty");
+        empty.setMaxWidth(Double.MAX_VALUE);
+        return empty;
     }
 
     private void updateCount(int count) {
