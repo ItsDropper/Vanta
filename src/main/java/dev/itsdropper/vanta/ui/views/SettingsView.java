@@ -903,6 +903,14 @@ public class SettingsView extends BorderPane {
         ram.valueProperty().addListener((o, oldValue, newValue) -> updateRam.run());
         updateRam.run();
 
+        HBox ramPresets = new HBox(6);
+        for (int gigabytes : new int[]{2, 4, 6, 8, 10, 12, 14, 16}) {
+            Button preset = new Button(gigabytes + " GB");
+            preset.getStyleClass().add("accent-preset");
+            preset.setOnAction(event -> ram.setValue(gigabytes * 1024));
+            ramPresets.getChildren().add(preset);
+        }
+
         TextField width = new TextField(String.valueOf(LauncherSettings.getDefaultWidth()));
         width.getStyleClass().add("create-field");
 
