@@ -45,31 +45,18 @@ public class NotificationView extends VBox {
 
         setMouseTransparent(false);
 
-        setStyle(
-                "-fx-background-color: #181a1f;" +
-                        "-fx-background-radius: 12;" +
-                        "-fx-border-color: #2a2d35;" +
-                        "-fx-border-radius: 12;" +
-                        "-fx-border-width: 1;"
-        );
+        getStyleClass().add("notification");
 
-        accent = new Rectangle(
-                4,
-                44
-        );
-
+        accent = new Rectangle(4, 44);
         accent.setArcWidth(4);
         accent.setArcHeight(4);
+        accent.getStyleClass().addAll("notification-accent", "notification-accent-progress");
 
         titleLabel = new Label(
                 title
         );
 
-        titleLabel.setStyle(
-                "-fx-font-size: 14px;" +
-                        "-fx-font-weight: bold;" +
-                        "-fx-text-fill: #ffffff;"
-        );
+        titleLabel.getStyleClass().add("notification-title");
 
         messageLabel = new Label(
                 message
@@ -78,10 +65,7 @@ public class NotificationView extends VBox {
         messageLabel.setWrapText(true);
         messageLabel.setMaxWidth(290);
 
-        messageLabel.setStyle(
-                "-fx-font-size: 12px;" +
-                        "-fx-text-fill: #aeb3bd;"
-        );
+        messageLabel.getStyleClass().add("notification-message");
 
         progressIndicator =
                 new ProgressIndicator();
@@ -138,12 +122,9 @@ public class NotificationView extends VBox {
                 28
         );
 
-        closeButton.setStyle(
-                "-fx-background-color: transparent;" +
-                        "-fx-text-fill: #8f949e;" +
-                        "-fx-font-size: 18px;" +
-                        "-fx-padding: 0;"
-        );
+        closeButton.getStyleClass().add("notification-close");
+        closeButton.setAccessibleText("Dismiss notification");
+        closeButton.setTooltip(new javafx.scene.control.Tooltip("Dismiss"));
 
         closeButton.setOnAction(event -> {
 
@@ -185,6 +166,15 @@ public class NotificationView extends VBox {
         );
 
         setType(type);
+    }
+
+    private void setAccentStyle(String styleClass) {
+        accent.getStyleClass().removeAll(
+                "notification-accent-progress",
+                "notification-accent-success",
+                "notification-accent-error"
+        );
+        accent.getStyleClass().add(styleClass);
     }
 
     public void setTitle(
@@ -252,14 +242,8 @@ public class NotificationView extends VBox {
                         false
                 );
 
-                accent.setStyle(
-                        "-fx-fill: #4d8dff;"
-                );
-
-                messageLabel.setStyle(
-                        "-fx-font-size: 12px;" +
-                                "-fx-text-fill: #aeb3bd;"
-                );
+                setAccentStyle("notification-accent-progress");
+                messageLabel.getStyleClass().remove("notification-message-error");
             }
 
             case SUCCESS -> {
@@ -288,14 +272,8 @@ public class NotificationView extends VBox {
                         false
                 );
 
-                accent.setStyle(
-                        "-fx-fill: #55d187;"
-                );
-
-                messageLabel.setStyle(
-                        "-fx-font-size: 12px;" +
-                                "-fx-text-fill: #aeb3bd;"
-                );
+                setAccentStyle("notification-accent-success");
+                messageLabel.getStyleClass().remove("notification-message-error");
             }
 
             case ERROR -> {
@@ -324,14 +302,10 @@ public class NotificationView extends VBox {
                         true
                 );
 
-                accent.setStyle(
-                        "-fx-fill: #ff4d5a;"
-                );
-
-                messageLabel.setStyle(
-                        "-fx-font-size: 12px;" +
-                                "-fx-text-fill: #ff8f8f;"
-                );
+                setAccentStyle("notification-accent-error");
+                if (!messageLabel.getStyleClass().contains("notification-message-error")) {
+                    messageLabel.getStyleClass().add("notification-message-error");
+                }
             }
         }
     }
