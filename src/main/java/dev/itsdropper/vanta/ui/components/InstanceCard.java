@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -201,6 +202,8 @@ public class InstanceCard extends StackPane {
         playButton.getStyleClass().add(
                 "instance-play-button"
         );
+        playButton.setAccessibleText("Launch Minecraft instance " + instance.getName());
+        playButton.setTooltip(new Tooltip("Launch " + instance.getName()));
 
         playButton.setMinWidth(
                 90
@@ -247,6 +250,8 @@ public class InstanceCard extends StackPane {
         settingsButton.getStyleClass().add(
                 "instance-settings-button"
         );
+        settingsButton.setAccessibleText("Options for " + instance.getName());
+        settingsButton.setTooltip(new Tooltip("Instance options"));
 
         settingsButton.setMinWidth(
                 82
@@ -336,10 +341,10 @@ public class InstanceCard extends StackPane {
         menuButton.getStyleClass().add(
                 "instance-menu-button"
         );
+        menuButton.setAccessibleText("More actions for " + instance.getName());
+        menuButton.setTooltip(new Tooltip("More actions"));
 
-        menuButton.setFocusTraversable(
-                false
-        );
+        menuButton.setFocusTraversable(true);
 
         menuButton.setMinWidth(
                 28
