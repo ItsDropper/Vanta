@@ -5,6 +5,7 @@ on:
     paths:
       - 'src/main/java/dev/itsdropper/vanta/launcher/update/**'
       - 'src/main/java/dev/itsdropper/vanta/ui/LauncherView.java'
+      - 'src/main/java/dev/itsdropper/vanta/ui/views/SkinChangerView.java'
       - 'src/test/java/dev/itsdropper/vanta/launcher/update/**'
       - 'build.gradle'
       - '.github/workflows/auto-update-process-exit.yml'
