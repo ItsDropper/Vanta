@@ -398,141 +398,78 @@ public class CreateInstanceView extends VBox {
     // =============================================================
 
     private void loadVersions() {
+        createButton.setDisable(true);
+        versionBox.setDisable(true);
+        versionBox.setPromptText("Loading Minecraft releases...");
+        statusLabel.setText("Loading Minecraft version manifest...");
 
-        Thread thread =
-                new Thread(() -> {
+        Thread thread = new Thread(() -> {
+            try {
+                HttpRequest request = HttpRequest.newBuilder(URI.create(VERSION_MANIFEST_URL))
+                        .timeout(Duration.ofSeconds(15))
+                        .header("User-Agent", "VantaLauncher/1.0")
+                        .GET()
+                        .build();
+                HttpResponse<String> response = HTTP.send(
+                        request, HttpResponse.BodyHandlers.ofString()
+                );
 
-                    try {
+                if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                    throw new IllegalStateException(
+                            "Minecraft version service returned HTTP " + response.statusCode()
+                    );
+                }
 
-                        HttpRequest request =
-                                HttpRequest.newBuilder(
-                                                URI.create(
-                                                        VERSION_MANIFEST_URL
-                                                )
-                                        )
-                                        .timeout(Duration.ofSeconds(15))
-                                        .GET()
-                                        .build();
+                JsonNode manifest = MAPPER.readTree(response.body());
+                JsonNode versions = manifest.get("versions");
+                if (versions == null || !versions.isArray()) {
+                    throw new IllegalStateException("Invalid Minecraft version manifest.");
+                }
 
-                        HttpResponse<String> response =
-                                HTTP.send(
-                                        request,
-                                        HttpResponse.BodyHandlers.ofString()
-                                );
+                java.util.List<String> releases = new java.util.ArrayList<>();
+                for (JsonNode version : versions) {
+                    JsonNode idNode = version.get("id");
+                    JsonNode typeNode = version.get("type");
+                    if (idNode == null || typeNode == null || !typeNode.isTextual()
+                            || !"release".equals(typeNode.asText()) || !idNode.isTextual()) {
+                        continue;
+                    }
+                    releases.add(idNode.asText());
+                }
 
-                        if (response.statusCode() < 200
-                                || response.statusCode() >= 300) {
-
-                            throw new IllegalStateException(
-                                    "Failed to load Minecraft versions."
-                            );
-                        }
-
-                        JsonNode manifest =
-                                MAPPER.readTree(
-                                        response.body()
-                                );
-
-                        JsonNode versions =
-                                manifest.get("versions");
-
-                        if (versions == null
-                                || !versions.isArray()) {
-
-                            throw new IllegalStateException(
-                                    "Invalid Minecraft version manifest."
-                            );
-                        }
-
-                        for (JsonNode version : versions) {
-
-                            String id =
-                                    version
-                                            .get("id")
-                                            .asText();
-
-                            String type =
-                                    version
-                                            .get("type")
-                                            .asText();
-
-                            if (!"release".equals(type)) {
-                                continue;
-                            }
-
-                            Platform.runLater(() ->
-                                    versionBox
-                                            .getItems()
-                                            .add(id)
-                            );
-                        }
-
-                        Platform.runLater(() -> {
-
-                            if (versionBox
-                                    .getItems()
-                                    .isEmpty()) {
-
-                                versionBox.setDisable(
-                                        true
-                                );
-
-                                loaderBox.setDisable(
-                                        true
-                                );
-
-                                createButton.setDisable(
-                                        true
-                                );
-
-                                statusLabel.setText(
-                                        "No Minecraft versions found."
-                                );
-
-                                return;
-                            }
-
-                            String preferredVersion =
-                                    LauncherSettings.getDefaultMinecraftVersion();
-
-                            if (!preferredVersion.isBlank()
-                                    && versionBox.getItems().contains(preferredVersion)) {
-                                versionBox.getSelectionModel().select(preferredVersion);
-                            } else {
-                                versionBox.getSelectionModel().selectFirst();
-                            }
-
-                            statusLabel.setText(
-                                    "Checking mod loader support..."
-                            );
-                        });
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        Platform.runLater(() -> {
-
-                            versionBox.setDisable(
-                                    true
-                            );
-
-                            loaderBox.setDisable(
-                                    true
-                            );
-
-                            createButton.setDisable(
-                                    true
-                            );
-
-                            statusLabel.setText(
-                                    "Failed to load Minecraft versions."
-                            );
-                        });
+                Platform.runLater(() -> {
+                    versionBox.getItems().setAll(releases);
+                    if (releases.isEmpty()) {
+                        versionBox.setDisable(true);
+                        loaderBox.setDisable(true);
+                        createButton.setDisable(true);
+                        versionBox.setPromptText("No releases available");
+                        statusLabel.setText("No Minecraft releases were returned. Check your connection and retry.");
+                        return;
                     }
 
+                    versionBox.setDisable(false);
+                    loaderBox.setDisable(false);
+                    String preferredVersion = LauncherSettings.getDefaultMinecraftVersion();
+                    if (!preferredVersion.isBlank() && releases.contains(preferredVersion)) {
+                        versionBox.getSelectionModel().select(preferredVersion);
+                    } else {
+                        versionBox.getSelectionModel().selectFirst();
+                    }
+                    statusLabel.setText("Minecraft releases loaded. Checking loader compatibility...");
                 });
-
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    versionBox.getItems().clear();
+                    versionBox.setDisable(true);
+                    loaderBox.setDisable(true);
+                    createButton.setDisable(true);
+                    versionBox.setPromptText("Could not load versions");
+                    statusLabel.setText("Could not load Minecraft releases. Check your connection and reopen this screen to retry.");
+                });
+            }
+        }, "Vanta-Minecraft-Version-Manifest");
         thread.setDaemon(true);
         thread.start();
     }
