@@ -374,3 +374,26 @@
     -fx-font-size: 12px;
     -fx-line-spacing: 3px;
 }
+
+.home-launch-indicator {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-background-radius: 999px;
+    -fx-border-color: -vanta-border;
+    -fx-border-radius: 999px;
+    -fx-padding: 7px 10px;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+.home-status-ready { -fx-text-fill: -vanta-success; }
+.home-status-running {
+    -fx-text-fill: -vanta-success;
+    -fx-border-color: derive(-vanta-success, -50%);
+}
+.home-status-progress {
+    -fx-text-fill: -vanta-accent;
+    -fx-border-color: derive(-vanta-accent, -50%);
+}
+.home-status-error {
+    -fx-text-fill: -vanta-danger;
+    -fx-border-color: derive(-vanta-danger, -50%);
+}
