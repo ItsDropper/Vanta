@@ -149,6 +149,16 @@ public class AccountSwitcher extends HBox {
         setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
                 togglePopup();
+                if (popup.isShowing()) {
+                    Platform.runLater(() -> {
+                        for (javafx.scene.Node child : accountList.getChildren()) {
+                            if (child instanceof Button button) {
+                                button.requestFocus();
+                                break;
+                            }
+                        }
+                    });
+                }
                 event.consume();
             }
         });
