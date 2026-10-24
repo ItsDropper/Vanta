@@ -45,6 +45,7 @@ public class LauncherView {
 
     private final HomeView homeView;
     private final AccountsView accountsView;
+    private final SkinChangerView skinChangerView;
     private final InstancesView instancesView;
     private final GlobalModsView globalModsView;
     private final StateCenterView stateCenterView;
@@ -244,6 +245,11 @@ public class LauncherView {
                         accountService
                 );
 
+        skinChangerView =
+                new SkinChangerView(
+                        accountService
+                );
+
         instancesView =
                 new InstancesView(
                         launchService,
@@ -328,6 +334,7 @@ public class LauncherView {
 
             case HOME -> showAnimatedContent(homeView);
             case ACCOUNTS -> showAnimatedContent(accountsView);
+            case SKIN -> showAnimatedContent(skinChangerView);
             case INSTANCES -> showAnimatedContent(instancesView);
             case MODS -> showAnimatedContent(globalModsView);
             case STATE -> { showStatePage(); if (LauncherSettings.isStateScanOnOpenEnabled()) stateCenterView.onShown(); }
