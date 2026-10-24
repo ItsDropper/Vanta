@@ -42,6 +42,8 @@ public class ModpackBrowserView extends VBox {
     private final TextField searchField;
     private final Label statusLabel;
     private final Runnable onInstanceImported;
+    private long catalogRequestId;
+    private long searchRequestId;
 
     public ModpackBrowserView(
             String minecraftVersion,
@@ -100,6 +102,7 @@ public class ModpackBrowserView extends VBox {
         backButton.getStyleClass().add(
                 "secondary-button"
         );
+        backButton.setAccessibleText("Return to instance creation");
 
         backButton.setOnAction(
                 event -> onBack.run()
@@ -141,6 +144,9 @@ public class ModpackBrowserView extends VBox {
         searchButton.getStyleClass().add(
                 "primary-button"
         );
+        searchButton.setAccessibleText("Search Modrinth modpacks");
+        searchButton.setTooltip(new javafx.scene.control.Tooltip("Search modpacks compatible with Minecraft " + minecraftVersion));
+        searchField.setAccessibleText("Search Modrinth modpacks");
 
         searchButton.setOnAction(
                 event -> search()
@@ -228,42 +234,28 @@ public class ModpackBrowserView extends VBox {
     // =============================================================
 
     private void loadPopular() {
-
-        statusLabel.setText(
-                "Loading popular modpacks..."
-        );
-
-        resultsList
-                .getChildren()
-                .clear();
+        long requestId = ++catalogRequestId;
+        ++searchRequestId;
+        statusLabel.setText("Loading popular modpacks...");
+        resultsList.getChildren().clear();
 
         Thread thread = new Thread(() -> {
-
             try {
-
-                List<ModrinthProject> projects =
-                        contentService.getMostDownloaded(
-                                ModrinthContentType.MODPACK,
-                                null,
-                                minecraftVersion
-                        );
-
-                Platform.runLater(() ->
-                        showResults(projects)
+                List<ModrinthProject> projects = contentService.getMostDownloaded(
+                        ModrinthContentType.MODPACK, null, minecraftVersion
                 );
-
+                Platform.runLater(() -> {
+                    if (requestId != catalogRequestId) return;
+                    showResults(projects);
+                });
             } catch (Exception e) {
-
                 e.printStackTrace();
-
-                Platform.runLater(() ->
-                        statusLabel.setText(
-                                "Failed to load modpacks."
-                        )
-                );
+                Platform.runLater(() -> {
+                    if (requestId != catalogRequestId) return;
+                    statusLabel.setText("Failed to load modpacks. Check your connection and try again.");
+                });
             }
-        });
-
+        }, "Vanta-Modpack-Popular");
         thread.setDaemon(true);
         thread.start();
     }
@@ -273,53 +265,37 @@ public class ModpackBrowserView extends VBox {
     // =============================================================
 
     private void search() {
-
-        String query =
-                searchField.getText()
-                        .trim();
-
+        String query = searchField.getText() == null ? "" : searchField.getText().trim();
         if (query.isEmpty()) {
-
             loadPopular();
             return;
         }
 
-        statusLabel.setText(
-                "Searching..."
-        );
-
-        resultsList
-                .getChildren()
-                .clear();
+        long requestId = ++searchRequestId;
+        ++catalogRequestId;
+        statusLabel.setText("Searching Modrinth...");
+        resultsList.getChildren().clear();
 
         Thread thread = new Thread(() -> {
-
             try {
-
-                List<ModrinthProject> projects =
-                        contentService.search(
-                                query,
-                                ModrinthContentType.MODPACK,
-                                null,
-                                minecraftVersion
-                        );
-
-                Platform.runLater(() ->
-                        showResults(projects)
+                List<ModrinthProject> projects = contentService.search(
+                        query, ModrinthContentType.MODPACK, null, minecraftVersion
                 );
-
+                Platform.runLater(() -> {
+                    if (requestId != searchRequestId
+                            || !query.equals(searchField.getText() == null ? "" : searchField.getText().trim())) {
+                        return;
+                    }
+                    showResults(projects);
+                });
             } catch (Exception e) {
-
                 e.printStackTrace();
-
-                Platform.runLater(() ->
-                        statusLabel.setText(
-                                "Search failed."
-                        )
-                );
+                Platform.runLater(() -> {
+                    if (requestId != searchRequestId) return;
+                    statusLabel.setText("Search failed. Check your connection and try again.");
+                });
             }
-        });
-
+        }, "Vanta-Modpack-Search");
         thread.setDaemon(true);
         thread.start();
     }
