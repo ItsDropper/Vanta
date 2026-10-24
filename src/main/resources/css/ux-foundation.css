@@ -421,3 +421,34 @@
     -fx-background-color: -vanta-surface-hover;
     -fx-text-fill: -vanta-text;
 }
+
+/* Popup surfaces inherit the same theme tokens as the main window. */
+.account-switcher {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+.account-switcher:hover {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: derive(-vanta-border, 18%);
+}
+.account-switcher-name, .account-popup-username { -fx-text-fill: -vanta-text; }
+.account-switcher-arrow, .account-popup-header { -fx-text-fill: -vanta-muted; }
+.account-popup {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+.account-popup-account:hover, .account-popup-add:hover {
+    -fx-background-color: -vanta-surface-raised;
+}
+.account-popup-account.active, .account-popup-account.active:hover {
+    -fx-background-color: -vanta-accent-soft;
+}
+.account-popup-active, .account-popup-plus { -fx-text-fill: -vanta-accent; }
+.account-popup-add-text { -fx-text-fill: -vanta-muted; }
+.account-popup-separator { -fx-background-color: -vanta-border; }
