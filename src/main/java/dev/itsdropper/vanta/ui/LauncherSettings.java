@@ -220,6 +220,10 @@ public final class LauncherSettings {
     public static void setNotificationsEnabled(boolean value) { setBoolean("notificationsEnabled", value); }
     public static boolean isRememberLastSettingsPageEnabled() { return getBoolean("rememberLastSettingsPage", true); }
     public static void setRememberLastSettingsPageEnabled(boolean value) { setBoolean("rememberLastSettingsPage", value); }
+    public static String getLastSettingsPage() { return getString("lastSettingsPage", "Appearance"); }
+    public static void setLastSettingsPage(String value) {
+        if (value != null && !value.isBlank()) setString("lastSettingsPage", value.trim());
+    }
     public static int getDownloadRetries() { return getInt("downloadRetries", 3, 1, 8); }
     public static void setDownloadRetries(int value) { setInt("downloadRetries", clamp(value, 1, 8)); }
     public static boolean isVerifyDownloadsEnabled() { return getBoolean("verifyDownloads", true); }
