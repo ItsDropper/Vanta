@@ -87,8 +87,21 @@ public class HomeView extends StackPane {
         accountLabel = new Label("Checking account...");
         accountLabel.getStyleClass().add("home-account-label");
 
-        VBox header = new VBox(4, title, accountLabel);
+        VBox headerText = new VBox(4, title, accountLabel);
+        HBox header = new HBox(16);
+        header.setAlignment(Pos.CENTER_LEFT);
         header.getStyleClass().add("home-header");
+        HBox.setHgrow(headerText, Priority.ALWAYS);
+
+        Button createInstanceButton = new Button("＋  NEW INSTANCE");
+        createInstanceButton.getStyleClass().add("primary-button");
+        createInstanceButton.setMinHeight(40);
+        createInstanceButton.setAccessibleText("Create a new Minecraft instance");
+        createInstanceButton.setTooltip(new Tooltip("Create, import, or install a modpack"));
+        createInstanceButton.setOnAction(event -> {
+            if (this.onCreateInstance != null) this.onCreateInstance.run();
+        });
+        header.getChildren().addAll(headerText, createInstanceButton);
 
         VBox recentSection = createRecentInstancesSection();
         VBox serverCard = createRecentServersCard();
