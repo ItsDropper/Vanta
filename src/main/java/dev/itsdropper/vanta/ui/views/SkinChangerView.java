@@ -32,6 +32,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public final class SkinChangerView extends VBox {
@@ -51,6 +53,9 @@ public final class SkinChangerView extends VBox {
     private final Label statusLabel = new Label("Loading the skin currently active on your account...");
     private final SkinModel3D modelPreview = new SkinModel3D();
     private final ComboBox<String> modelChoice = new ComboBox<>();
+    private final ComboBox<CapeOption> capeChoice = new ComboBox<>();
+    private final Button applyCapeButton = new Button("Equip selected cape");
+    private final Button hideCapeButton = new Button("Hide cape");
     private final Button chooseButton = new Button("Choose & apply PNG");
     private final Button uploadButton = new Button("Apply skin");
 
@@ -108,6 +113,20 @@ public final class SkinChangerView extends VBox {
             }
         });
 
+        Label capeHeading = new Label("Owned capes");
+        capeHeading.getStyleClass().add("accounts-card-name");
+        capeChoice.setMaxWidth(Double.MAX_VALUE);
+        capeChoice.setPromptText("Loading account capes...");
+        capeChoice.valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) modelPreview.setCape(newValue.texture());
+        });
+        applyCapeButton.getStyleClass().add("accounts-primary-button");
+        hideCapeButton.getStyleClass().add("accounts-card-use");
+        applyCapeButton.setOnAction(event -> applySelectedCape());
+        hideCapeButton.setOnAction(event -> hideCape());
+        HBox capeActions = new HBox(10, applyCapeButton, hideCapeButton);
+        capeActions.setAlignment(Pos.CENTER_LEFT);
+
         Label formatHint = new Label(
                 "Choose Classic or Slim first, then select a 64×64 or legacy 64×32 PNG. Selecting a file uploads it to your signed-in Minecraft Java profile immediately."
         );
@@ -128,6 +147,7 @@ public final class SkinChangerView extends VBox {
         controls.getChildren().addAll(
                 accountHeading, accountLabel,
                 modelHeading, modelChoice,
+                capeHeading, capeChoice, capeActions,
                 formatHint, actions, statusLabel
         );
         HBox.setHgrow(controls, Priority.ALWAYS);
@@ -174,11 +194,17 @@ public final class SkinChangerView extends VBox {
         if (account == null) {
             accountLabel.setText("No Minecraft account connected. Connect one from Accounts first.");
             uploadButton.setDisable(true);
+            applyCapeButton.setDisable(true);
+            hideCapeButton.setDisable(true);
+            capeChoice.setDisable(true);
             chooseButton.setDisable(busy);
             modelChoice.setDisable(busy);
         } else {
             accountLabel.setText(account.getUsername() + "  ·  " + account.getUuid());
             uploadButton.setDisable(busy || selectedFile == null);
+            applyCapeButton.setDisable(busy || capeChoice.getValue() == null || capeChoice.getValue().id().isBlank());
+            hideCapeButton.setDisable(busy);
+            capeChoice.setDisable(busy);
             chooseButton.setDisable(busy);
             modelChoice.setDisable(busy);
         }
@@ -229,9 +255,35 @@ public final class SkinChangerView extends VBox {
                 if (image.isError() || image.getPixelReader() == null) {
                     throw new IOException("Minecraft returned a skin URL but its image could not be loaded.");
                 }
-                return new SkinProfile(image, variant, alias, null);
+
+                List<CapeOption> capes = new ArrayList<>();
+                String activeCapeId = "";
+                Image activeCapeImage = null;
+                JsonArray capeArray = profile.has("capes") && profile.get("capes").isJsonArray()
+                        ? profile.getAsJsonArray("capes") : new JsonArray();
+                for (var element : capeArray) {
+                    if (!element.isJsonObject()) continue;
+                    JsonObject capeObject = element.getAsJsonObject();
+                    String id = capeObject.has("id") ? capeObject.get("id").getAsString() : "";
+                    String capeAlias = capeObject.has("alias") && !capeObject.get("alias").isJsonNull()
+                            ? capeObject.get("alias").getAsString() : "Minecraft cape";
+                    String capeUrl = capeObject.has("url") && !capeObject.get("url").isJsonNull()
+                            ? capeObject.get("url").getAsString() : "";
+                    boolean isActive = capeObject.has("state")
+                            && "ACTIVE".equalsIgnoreCase(capeObject.get("state").getAsString());
+                    Image capeTexture = capeUrl.isBlank() ? null : new Image(capeUrl, false);
+                    if (capeTexture != null && (capeTexture.isError() || capeTexture.getPixelReader() == null)) {
+                        capeTexture = null;
+                    }
+                    capes.add(new CapeOption(id, capeAlias, capeUrl, isActive, capeTexture));
+                    if (isActive) {
+                        activeCapeId = id;
+                        activeCapeImage = capeTexture;
+                    }
+                }
+                return new SkinProfile(image, variant, alias, null, capes, activeCapeId, activeCapeImage);
             } catch (Exception ex) {
-                return new SkinProfile(null, "classic", null, message(ex));
+                return new SkinProfile(null, "classic", null, message(ex), List.of(), "", null);
             }
         }).thenAccept(result -> Platform.runLater(() -> {
             if (generation != profileRequestGeneration
@@ -248,6 +300,13 @@ public final class SkinChangerView extends VBox {
             }
 
             displayedSkin = result.image();
+            CapeOption noCape = new CapeOption("", "No cape", "", false, null);
+            capeChoice.getItems().setAll(noCape);
+            capeChoice.getItems().addAll(result.capes());
+            CapeOption selectedCape = result.capes().stream()
+                    .filter(CapeOption::active).findFirst().orElse(noCape);
+            capeChoice.setValue(selectedCape);
+            modelPreview.setCape(result.capeImage());
             boolean slim = "slim".equalsIgnoreCase(result.variant());
             modelChoice.setValue(slim ? "Slim (Alex)" : "Classic (Steve)");
             if (selectedFile == null) {
@@ -326,6 +385,53 @@ public final class SkinChangerView extends VBox {
         });
     }
 
+    private void applySelectedCape() {
+        CapeOption selected = capeChoice.getValue();
+        Account account = accountService.getCurrentAccount();
+        if (busy || account == null || selected == null || selected.id().isBlank()) return;
+        changeCape(account, selected.id(), false);
+    }
+
+    private void hideCape() {
+        Account account = accountService.getCurrentAccount();
+        if (busy || account == null) return;
+        changeCape(account, null, true);
+    }
+
+    private void changeCape(Account account, String capeId, boolean hide) {
+        setBusy(true, hide ? "Hiding cape on your Minecraft profile..." : "Equipping cape on your Minecraft profile...");
+        CompletableFuture.runAsync(() -> {
+            try {
+                HttpRequest.Builder builder = HttpRequest.newBuilder()
+                        .uri(URI.create("https://api.minecraftservices.com/minecraft/profile/capes/active"))
+                        .header("Authorization", "Bearer " + account.getAccessToken())
+                        .header("Accept", "application/json")
+                        .timeout(Duration.ofSeconds(30));
+                if (hide) {
+                    builder.DELETE();
+                } else {
+                    builder.header("Content-Type", "application/json")
+                            .PUT(HttpRequest.BodyPublishers.ofString(
+                                    "{\\"capeId\\":\\"" + capeId + "\\"}", StandardCharsets.UTF_8));
+                }
+                HttpResponse<String> response = HTTP.send(builder.build(), HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                    String detail = response.body() == null ? "" : response.body().strip();
+                    if (detail.length() > 250) detail = detail.substring(0, 250);
+                    throw new IOException("Minecraft Services returned HTTP " + response.statusCode()
+                            + (detail.isBlank() ? "." : ": " + detail));
+                }
+                AccountSkinService.clear(account);
+                Platform.runLater(() -> {
+                    setBusy(false, hide ? "Cape hidden. Refreshing profile..." : "Cape equipped. Refreshing profile...");
+                    loadCurrentSkin(account, ++profileRequestGeneration);
+                });
+            } catch (Exception ex) {
+                Platform.runLater(() -> setBusy(false, "Cape update failed: " + message(ex)));
+            }
+        });
+    }
+
     private static void upload(Account account, Path file, String variant) throws Exception {
         String boundary = "VantaSkin" + UUID.randomUUID().toString().replace("-", "");
         byte[] png = Files.readAllBytes(file);
@@ -379,5 +485,13 @@ public final class SkinChangerView extends VBox {
                 : error.getMessage();
     }
 
-    private record SkinProfile(Image image, String variant, String alias, String error) { }
+    private record SkinProfile(Image image, String variant, String alias, String error,
+                               List<CapeOption> capes, String activeCapeId, Image capeImage) { }
+
+    private record CapeOption(String id, String alias, String url, boolean active, Image texture) {
+        @Override
+        public String toString() {
+            return alias + (active ? " (equipped)" : "");
+        }
+    }
 }
