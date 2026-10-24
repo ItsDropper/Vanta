@@ -207,7 +207,7 @@
 .info-card, .account-card, .account-panel, .instance-card, .instance-empty,
 .create-panel, .instance-settings-card, .mod-details-card, .mod-details-header,
 .create-instance-panel, .home-info-card, .home-launch-card, .home-recent-servers-card,
-.state-card, .accounts-card, .settings-card, .home-recent-card {
+.state-card, .accounts-card, .settings-card, .home-recent-card, .home-server-card {
     -fx-background-color: -vanta-surface;
     -fx-background-radius: 12px;
     -fx-border-color: -vanta-border;
@@ -216,7 +216,7 @@
 }
 
 .info-card:hover, .account-card:hover, .instance-card:hover,
-.home-info-card:hover, .home-recent-card:hover {
+.home-info-card:hover, .home-recent-card:hover, .home-server-card:hover {
     -fx-background-color: -vanta-surface-raised;
     -fx-border-color: derive(-vanta-border, 18%);
 }
@@ -452,3 +452,18 @@
 .account-popup-active, .account-popup-plus { -fx-text-fill: -vanta-accent; }
 .account-popup-add-text { -fx-text-fill: -vanta-muted; }
 .account-popup-separator { -fx-background-color: -vanta-border; }
+
+.home-server-card {
+    -fx-padding: 12px 14px;
+    -fx-spacing: 14px;
+    -fx-cursor: hand;
+}
+.home-server-name {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+.home-server-meta {
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 11px;
+}
