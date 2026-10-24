@@ -81,4 +81,105 @@ public final class InstanceBackupService {
             throw new IOException("Could not create instance backup.", ex);
         }
     }
+
+    /**
+     * Restores a full backup as a separate instance. Archive paths are validated
+     * before writing, and an installation marker hides partial restores from discovery.
+     */
+    public static Instance restoreBackup(Path archive, String requestedName) throws IOException {
+        if (archive == null || !Files.isRegularFile(archive)) {
+            throw new IOException("Select an existing Vanta ZIP backup.");
+        }
+        if (requestedName == null || requestedName.isBlank()) {
+            throw new IllegalArgumentException("Restored instance name cannot be empty.");
+        }
+
+        Path instancesRoot = MinecraftLocator.getInstancesDirectory().toAbsolutePath().normalize();
+        String id = "restored-" + UUID.randomUUID().toString().substring(0, 12);
+        Path target = instancesRoot.resolve(id).normalize();
+        if (!target.startsWith(instancesRoot) || Files.exists(target)) {
+            throw new IOException("Could not allocate a safe restore destination.");
+        }
+
+        Files.createDirectories(target);
+        Path marker = target.resolve(".installing");
+        Files.createFile(marker);
+        boolean completed = false;
+        try {
+            Set<String> names = new HashSet<>();
+            long expandedBytes = 0;
+            int entries = 0;
+            byte[] buffer = new byte[64 * 1024];
+            try (InputStream input = Files.newInputStream(archive);
+                 ZipInputStream zip = new ZipInputStream(input)) {
+                java.util.zip.ZipEntry entry;
+                while ((entry = zip.getNextEntry()) != null) {
+                    if (++entries > 100_000) throw new IOException("Backup contains too many entries.");
+                    String rawName = entry.getName();
+                    if (rawName == null || rawName.isBlank() || rawName.indexOf('\0') >= 0) {
+                        throw new IOException("Backup contains an invalid path.");
+                    }
+                    String normalizedName = rawName.replace('\\', '/');
+                    Path relative = Path.of(normalizedName).normalize();
+                    if (relative.isAbsolute() || relative.startsWith("..")
+                            || normalizedName.startsWith("/") || normalizedName.matches("^[A-Za-z]:.*")) {
+                        throw new IOException("Backup contains an unsafe path: " + rawName);
+                    }
+                    if (relative.toString().isBlank()) {
+                        zip.closeEntry();
+                        continue;
+                    }
+                    String key = relative.toString().replace('\\', '/');
+                    if (!names.add(key)) throw new IOException("Backup contains duplicate paths: " + rawName);
+                    Path output = target.resolve(relative).normalize();
+                    if (!output.startsWith(target)) throw new IOException("Backup path escapes the restore directory.");
+                    if (entry.isDirectory()) {
+                        Files.createDirectories(output);
+                    } else {
+                        Files.createDirectories(output.getParent());
+                        try (OutputStream out = Files.newOutputStream(output)) {
+                            int read;
+                            while ((read = zip.read(buffer)) != -1) {
+                                expandedBytes += read;
+                                if (expandedBytes > 100L * 1024 * 1024 * 1024) {
+                                    throw new IOException("Backup expands beyond the 100 GiB safety limit.");
+                                }
+                                out.write(buffer, 0, read);
+                            }
+                        }
+                    }
+                    zip.closeEntry();
+                }
+            }
+
+            Path metadata = target.resolve("instance.json");
+            if (!Files.isRegularFile(metadata)) throw new IOException("This ZIP is not a Vanta instance backup (instance.json is missing).");
+            ObjectMapper mapper = new ObjectMapper();
+            Instance original;
+            try {
+                original = mapper.readValue(metadata.toFile(), Instance.class);
+            } catch (Exception ex) {
+                throw new IOException("The backup's instance metadata is invalid.", ex);
+            }
+            if (original.getMinecraftVersion() == null || original.getMinecraftVersion().isBlank()
+                    || original.getLoader() == null || original.getLoader().isBlank()) {
+                throw new IOException("The backup is missing Minecraft version or loader metadata.");
+            }
+            Instance restored = new Instance(id, requestedName.trim(), original.getMinecraftVersion(),
+                    original.getLoader(), original.getLoaderVersion(), target, original.getIcon());
+            mapper.writerWithDefaultPrettyPrinter().writeValue(metadata.toFile(), restored);
+            Files.deleteIfExists(marker);
+            completed = true;
+            return restored;
+        } finally {
+            if (!completed) {
+                try (var walk = Files.walk(target)) {
+                    walk.sorted(Comparator.reverseOrder()).forEach(path -> {
+                        try { Files.deleteIfExists(path); } catch (IOException ignored) { }
+                    });
+                } catch (IOException ignored) { }
+            }
+        }
+    }
+
 }
