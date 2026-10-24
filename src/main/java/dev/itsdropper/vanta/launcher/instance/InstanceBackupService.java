@@ -1,9 +1,16 @@
 package dev.itsdropper.vanta.launcher.instance;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.InputStream;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.zip.ZipInputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
