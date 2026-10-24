@@ -1329,11 +1329,27 @@ public class LauncherView {
         // Vanta-managed Minecraft files and preserves user content.
         if (issues.isEmpty()) {
             issues = new java.util.ArrayList<>();
-            issues.add(new RepairView.RepairIssue(
-                    "GENERAL DIAGNOSTIC",
-                    failure.title(),
-                    failure.description()
-            ));
+            List<dev.itsdropper.vanta.launcher.repair.RepairDiagnosis> diagnoses =
+                    dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine.diagnose(
+                            failure.details()
+                    );
+            for (dev.itsdropper.vanta.launcher.repair.RepairDiagnosis diagnosis : diagnoses) {
+                String details = diagnosis.description()
+                        + "\nEvidence: " + diagnosis.evidence()
+                        + "\nRecommended steps: " + String.join("; ", diagnosis.suggestedActions());
+                issues.add(new RepairView.RepairIssue(
+                        diagnosis.category().name(),
+                        diagnosis.title(),
+                        details
+                ));
+            }
+            if (issues.isEmpty()) {
+                issues.add(new RepairView.RepairIssue(
+                        "GENERAL DIAGNOSTIC",
+                        failure.title(),
+                        failure.description()
+                ));
+            }
         }
 
         final List<RepairView.RepairIssue> repairIssues = List.copyOf(issues);
