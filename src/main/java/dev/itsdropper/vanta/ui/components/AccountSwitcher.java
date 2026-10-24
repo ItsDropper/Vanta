@@ -196,6 +196,7 @@ public class AccountSwitcher extends HBox {
             usernameLabel.setText(
                     "Not signed in"
             );
+            setAccessibleText("Account menu. No account signed in. Activate to add or switch accounts.");
 
             playerHead.setImage(null);
 
@@ -205,6 +206,8 @@ public class AccountSwitcher extends HBox {
         usernameLabel.setText(
                 account.getUsername()
         );
+        setAccessibleText("Account menu. Signed in as " + account.getUsername()
+                + ". Activate to switch accounts.");
 
         AccountSkinService.loadHead(
                 account,
