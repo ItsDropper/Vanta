@@ -114,17 +114,20 @@ public final class ThemeManager {
     public static void apply(Node node, String accent) {
         if (node == null) return;
 
-        Theme base = loadTheme();
+        // Read appearance settings once. Applying a theme is on the UI path
+        // and can happen for many popups; repeated disk reads here add latency.
+        Properties settings = load();
+        Theme base = getTheme(settings.getProperty("themePreset", DEFAULT_THEME));
         String effectiveAccent = isValidAccent(accent) ? accent.toUpperCase() : base.accent();
-        String background = loadCustomColor("customBackground", base.background());
-        String surface = loadCustomColor("customSurface", base.surface());
-        String raised = loadCustomColor("customRaisedSurface", base.surfaceRaised());
-        String hoverSurface = loadCustomColor("customHoverSurface", base.surfaceHover());
-        String border = loadCustomColor("customBorder", base.border());
-        String textColor = loadCustomColor("customText", base.text());
-        String muted = loadCustomColor("customMuted", base.muted());
-        String danger = loadCustomColor("customDanger", base.danger());
-        String success = loadCustomColor("customSuccess", base.success());
+        String background = loadCustomColor(settings, "customBackground", base.background());
+        String surface = loadCustomColor(settings, "customSurface", base.surface());
+        String raised = loadCustomColor(settings, "customRaisedSurface", base.surfaceRaised());
+        String hoverSurface = loadCustomColor(settings, "customHoverSurface", base.surfaceHover());
+        String border = loadCustomColor(settings, "customBorder", base.border());
+        String textColor = loadCustomColor(settings, "customText", base.text());
+        String muted = loadCustomColor(settings, "customMuted", base.muted());
+        String danger = loadCustomColor(settings, "customDanger", base.danger());
+        String success = loadCustomColor(settings, "customSuccess", base.success());
         Color color = Color.web(effectiveAccent);
 
         String soft = toHex(color.darker().darker());
@@ -159,6 +162,15 @@ public final class ThemeManager {
 
     public static String loadCustomColor(String key, String fallback) {
         String value = getString(key, "");
+        return isValidAccent(value) ? value.toUpperCase() : fallback;
+    }
+
+    private static String loadCustomColor(
+            Properties settings,
+            String key,
+            String fallback
+    ) {
+        String value = settings.getProperty(key, "");
         return isValidAccent(value) ? value.toUpperCase() : fallback;
     }
 
