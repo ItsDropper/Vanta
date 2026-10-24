@@ -52,6 +52,8 @@ public class BrowseModsView extends VBox {
     private final ScrollPane searchScrollPane;
 
     private final java.util.function.Consumer<ModrinthProject> onModSelected;
+    private long searchRequestId;
+    private long popularRequestId;
 
     public BrowseModsView(
             Instance instance,
@@ -341,44 +343,35 @@ public class BrowseModsView extends VBox {
     // =============================================================
 
     private void loadMostDownloadedMods() {
+        long requestId = ++popularRequestId;
+        popularStatusLabel.setText("Loading popular mods...");
 
-        popularStatusLabel.setText(
-                "Loading popular mods..."
-        );
-
-        Thread thread =
-                new Thread(() -> {
-
-                    try {
-
-                        List<ModrinthProject> projects =
-                                modrinthService
-                                        .getMostDownloadedModsFast(
-                                                instance
-                                        );
-
-                        Platform.runLater(() ->
-                                showMostDownloadedMods(
-                                        projects
-                                )
-                        );
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        Platform.runLater(() ->
-                                popularStatusLabel.setText(
-                                        "Could not load popular mods."
-                                )
-                        );
-                    }
+        Thread thread = new Thread(() -> {
+            try {
+                List<ModrinthProject> broad =
+                        modrinthService.getMostDownloadedModsFastBroad(instance);
+                Platform.runLater(() -> {
+                    if (requestId != popularRequestId) return;
+                    showMostDownloadedMods(broad, true);
                 });
 
-        thread.setDaemon(
-                true
-        );
-
+                List<ModrinthProject> compatible =
+                        modrinthService.getMostDownloadedModsFast(instance);
+                Platform.runLater(() -> {
+                    if (requestId != popularRequestId) return;
+                    showMostDownloadedMods(compatible, false);
+                });
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    if (requestId != popularRequestId) return;
+                    if (popularResults.getChildren().isEmpty()) {
+                        popularStatusLabel.setText("Could not load popular mods.");
+                    }
+                });
+            }
+        });
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -387,7 +380,8 @@ public class BrowseModsView extends VBox {
     // =============================================================
 
     private void showMostDownloadedMods(
-            List<ModrinthProject> projects
+            List<ModrinthProject> projects,
+            boolean checkingCompatibility
     ) {
 
         popularResults
@@ -420,7 +414,9 @@ public class BrowseModsView extends VBox {
 
         popularStatusLabel.setText(
                 projects.size()
-                        + " popular mods."
+                        + (checkingCompatibility
+                            ? " popular mods • checking version compatibility..."
+                            : " compatible popular mods.")
         );
     }
 
@@ -640,80 +636,52 @@ public class BrowseModsView extends VBox {
     // =============================================================
 
     private void search() {
-
-        String query =
-                searchField
-                        .getText()
-                        .trim();
-
-        // =========================================================
-        // EMPTY SEARCH = MOST DOWNLOADED
-        // =========================================================
+        String query = searchField.getText().trim();
+        long requestId = ++searchRequestId;
 
         if (query.isBlank()) {
-
             showPopularSection();
-
-            results
-                    .getChildren()
-                    .clear();
-
-            statusLabel.setText(
-                    "Search Modrinth for compatible mods."
-            );
-
+            results.getChildren().clear();
+            statusLabel.setText("Search Modrinth for compatible mods.");
             return;
         }
 
-        // =========================================================
-        // SEARCH ACTIVE
-        // =========================================================
-
         hidePopularSection();
+        statusLabel.setText("Searching Modrinth...");
+        results.getChildren().clear();
 
-        statusLabel.setText(
-                "Searching Modrinth..."
-        );
+        // First paint uses the same broad loader-only query as GlobalModsView.
+        // The exact-version query follows in the background and replaces these
+        // provisional results once Modrinth returns compatible projects.
+        Thread thread = new Thread(() -> {
+            try {
+                List<ModrinthProject> broad =
+                        modrinthService.searchModsFastBroad(instance, query);
 
-        results
-                .getChildren()
-                .clear();
-
-        Thread thread =
-                new Thread(() -> {
-
-                    try {
-
-                        List<ModrinthProject> projects =
-                                modrinthService.searchModsFast(
-                                        instance,
-                                        query
-                                );
-
-                        Platform.runLater(() ->
-                                showResults(
-                                        projects
-                                )
-                        );
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        Platform.runLater(() ->
-                                statusLabel.setText(
-                                        ex.getMessage() != null
-                                                ? ex.getMessage()
-                                                : "Failed to search Modrinth."
-                                )
-                        );
-                    }
+                Platform.runLater(() -> {
+                    if (requestId != searchRequestId) return;
+                    showResults(broad, true);
                 });
 
-        thread.setDaemon(
-                true
-        );
+                List<ModrinthProject> compatible =
+                        modrinthService.searchModsFast(instance, query);
 
+                Platform.runLater(() -> {
+                    if (requestId != searchRequestId) return;
+                    showResults(compatible, false);
+                });
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    if (requestId != searchRequestId) return;
+                    if (results.getChildren().isEmpty()) {
+                        statusLabel.setText(ex.getMessage() != null
+                                ? ex.getMessage() : "Failed to search Modrinth.");
+                    }
+                });
+            }
+        });
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -812,7 +780,8 @@ public class BrowseModsView extends VBox {
     // =============================================================
 
     private void showResults(
-            List<ModrinthProject> projects
+            List<ModrinthProject> projects,
+            boolean checkingCompatibility
     ) {
 
         results
@@ -845,7 +814,9 @@ public class BrowseModsView extends VBox {
 
         statusLabel.setText(
                 projects.size()
-                        + " compatible projects found."
+                        + (checkingCompatibility
+                            ? " results • checking Minecraft version compatibility..."
+                            : " compatible projects found.")
         );
     }
 
