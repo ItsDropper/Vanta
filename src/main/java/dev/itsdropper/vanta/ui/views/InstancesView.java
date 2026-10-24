@@ -39,6 +39,7 @@ public class InstancesView extends VBox {
     private final VBox instanceList;
     private final Label statusLabel;
     private final Label countLabel;
+    private Button backupButton;
 
     private final Consumer<Instance> onInstanceSettings;
     private final Runnable onCreateInstance;
@@ -158,7 +159,7 @@ public class InstancesView extends VBox {
         createButton.setAccessibleText("Create a Minecraft instance");
         createButton.setTooltip(new javafx.scene.control.Tooltip("Create a new Minecraft instance"));
 
-        Button backupButton = new Button("BACK UP");
+        backupButton = new Button("BACK UP");
         backupButton.getStyleClass().add("secondary-button");
         backupButton.setAccessibleText("Create a full backup of an instance including worlds and settings");
         backupButton.setTooltip(new javafx.scene.control.Tooltip(
