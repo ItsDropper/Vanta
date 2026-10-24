@@ -130,7 +130,7 @@ public class NotificationManager {
                     currentNotification
             );
 
-            scheduleDismiss(3000);
+            scheduleDismiss(LauncherSettings.getNotificationDurationSeconds() * 1000L);
         });
     }
 
