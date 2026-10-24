@@ -167,8 +167,11 @@ public final class DownloadCenterView extends VBox {
         card.getStyleClass().addAll("download-task-card", "download-task-" + task.status().name().toLowerCase(Locale.ROOT));
         card.setPadding(new Insets(15, 16, 15, 16));
         if (task.status() == Status.FAILED) {
-            Button retry = new Button("Retry", IconView.create(IconView.Type.REFRESH, 14));
+            boolean retryRequested = service.isRetryRequested(task.id());
+            Button retry = new Button(retryRequested ? "Retry queued" : "Retry",
+                    IconView.create(IconView.Type.REFRESH, 14));
             retry.getStyleClass().add("secondary-button");
+            retry.setDisable(retryRequested);
             retry.setOnAction(event -> service.retry(task));
             HBox actions = new HBox(retry);
             actions.setAlignment(Pos.CENTER_RIGHT);
