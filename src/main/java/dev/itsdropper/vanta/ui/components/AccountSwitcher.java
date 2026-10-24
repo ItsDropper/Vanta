@@ -310,6 +310,8 @@ public class AccountSwitcher extends HBox {
         addAccount.getStyleClass().add(
                 "account-popup-add"
         );
+        addAccount.setAccessibleText("Add a Microsoft account");
+        addAccount.setTooltip(new Tooltip("Sign in with another Microsoft account"));
 
         addAccount.setMaxWidth(
                 Double.MAX_VALUE
@@ -408,6 +410,14 @@ public class AccountSwitcher extends HBox {
         button.getStyleClass().add(
                 "account-popup-account"
         );
+        button.setAccessibleText(
+                (active ? "Current account: " : "Switch to account: ")
+                        + account.getUsername()
+        );
+        button.setTooltip(new Tooltip(
+                active ? account.getUsername() + " (current account)"
+                        : "Switch to " + account.getUsername()
+        ));
 
         if (active) {
             button.getStyleClass().add(
