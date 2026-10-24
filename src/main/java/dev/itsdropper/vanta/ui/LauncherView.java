@@ -1336,8 +1336,10 @@ public class LauncherView {
             ));
         }
 
+        final List<RepairView.RepairIssue> repairIssues = List.copyOf(issues);
+
         boolean hasAutomaticRepair =
-                issues.stream()
+                repairIssues.stream()
                         .anyMatch(
                                 RepairView.RepairIssue::canRepair
                         );
@@ -1346,7 +1348,7 @@ public class LauncherView {
 
             attemptAutomaticRepair(
                     instance,
-                    issues
+                    repairIssues
             );
 
             return;
@@ -1365,13 +1367,13 @@ public class LauncherView {
                         repairInstance,
                         failure.title(),
                         failure.description(),
-                        issues,
+                        repairIssues,
                         () -> showPage(
                                 Sidebar.Page.HOME
                         ),
                         () -> repairIssues(
                                 repairInstance,
-                                issues
+                                repairIssues
                         )
                 );
 
