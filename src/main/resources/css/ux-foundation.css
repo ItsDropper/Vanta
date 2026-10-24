@@ -560,3 +560,15 @@
     -fx-background-color: derive(-vanta-danger, -68%);
     -fx-text-fill: -vanta-danger;
 }
+
+/* Override legacy fixed-width primary-button rules where copy is longer. */
+.home-header .primary-button {
+    -fx-min-width: 148px;
+    -fx-pref-width: 148px;
+    -fx-max-width: 148px;
+}
+.home-empty-card .primary-button {
+    -fx-min-width: 178px;
+    -fx-pref-width: 178px;
+    -fx-max-width: 178px;
+}
