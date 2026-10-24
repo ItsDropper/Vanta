@@ -138,6 +138,8 @@ public class ImportInstanceView extends VBox {
         importButton.getStyleClass().add(
                 "primary-button"
         );
+        importButton.setAccessibleText("Choose a Modrinth modpack file to import");
+        importButton.setTooltip(new javafx.scene.control.Tooltip("Select a readable .mrpack file"));
 
         importButton.setPrefHeight(
                 46
@@ -192,6 +194,8 @@ public class ImportInstanceView extends VBox {
         statusLabel.getStyleClass().add(
                 "create-status"
         );
+        statusLabel.setWrapText(true);
+        statusLabel.setAccessibleText("Modpack import status");
 
         // =========================================================
         // ACTIONS
@@ -295,6 +299,12 @@ public class ImportInstanceView extends VBox {
             File file
     ) {
 
+        if (file == null || !file.isFile() || !file.canRead()
+                || !file.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".mrpack")) {
+            statusLabel.setText("Choose an existing, readable .mrpack file and try again.");
+            return;
+        }
+
         importButton.setDisable(
                 true
         );
@@ -367,7 +377,7 @@ public class ImportInstanceView extends VBox {
                             );
                         });
                     }
-                });
+                }, "Vanta-Modpack-Import");
 
         thread.setDaemon(
                 true
