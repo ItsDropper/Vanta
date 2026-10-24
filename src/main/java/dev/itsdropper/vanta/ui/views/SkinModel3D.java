@@ -235,11 +235,75 @@ public final class SkinModel3D extends StackPane {
         PhongMaterial capeMaterial = new PhongMaterial(Color.WHITE);
         capeMaterial.setDiffuseMap(upscaleNearest(source, 8));
         capeMaterial.setSpecularColor(Color.BLACK);
+
+        // A Minecraft cape is cloth, not a single rigid card. Build front and back
+        // surfaces from horizontal segments so it hangs away from the player's back.
         TriangleMesh mesh = new TriangleMesh();
-        mesh.getPoints().setAll(-5f,-6f,2.35f, 5f,-6f,2.35f, 5f,10f,2.35f, -5f,10f,2.35f);
-        mesh.getTexCoords().setAll(1f/64f,1f/32f, 11f/64f,1f/32f, 11f/64f,17f/32f, 1f/64f,17f/32f);
-        mesh.getFaces().setAll(0,0,1,1,2,2, 0,0,2,2,3,3);
-        mesh.getFaceSmoothingGroups().setAll(0, 0);
+        final int segments = 5;
+        final float topY = -5.5f;
+        final float bottomY = 12.0f;
+        final float halfWidth = 5.0f;
+        final float thickness = 0.22f;
+        for (int side = 0; side < 2; side++) {
+            for (int row = 0; row <= segments; row++) {
+                float t = row / (float) segments;
+                float y = topY + (bottomY - topY) * t;
+                // The lower cloth hangs farther back; subtle alternating offsets
+                // create a soft cloth-like silhouette without distorting the texture.
+                float z = 2.25f + 0.25f * t + 2.1f * t * t + 0.12f * (float) Math.sin(t * Math.PI);
+                if (side == 1) z += thickness;
+                float width = halfWidth * (1.0f - 0.035f * t);
+                mesh.getPoints().addAll(-width, y, z, width, y, z);
+            }
+        }
+
+        // Standard 64x32 cape atlas: front at (1,1), reverse at (12,1).
+        for (int side = 0; side < 2; side++) {
+            int pointBase = side * (segments + 1) * 2;
+            float uLeft = (side == 0 ? 1f : 12f) / 64f;
+            float uRight = (side == 0 ? 11f : 22f) / 64f;
+            float vTop = 1f / 32f;
+            float vBottom = 17f / 32f;
+            for (int row = 0; row < segments; row++) {
+                int p0 = pointBase + row * 2;
+                int p1 = p0 + 1;
+                int p2 = p0 + 3;
+                int p3 = p0 + 2;
+                int t0 = mesh.getTexCoords().size() / 2;
+                float v0 = vTop + (vBottom - vTop) * row / segments;
+                float v1 = vTop + (vBottom - vTop) * (row + 1) / segments;
+                mesh.getTexCoords().addAll(uLeft, v0, uRight, v0, uRight, v1, uLeft, v1);
+                if (side == 0) {
+                    mesh.getFaces().addAll(p0, t0, p1, t0 + 1, p2, t0 + 2,
+                            p0, t0, p2, t0 + 2, p3, t0 + 3);
+                } else {
+                    mesh.getFaces().addAll(p0, t0, p2, t0 + 2, p1, t0 + 1,
+                            p0, t0, p3, t0 + 3, p2, t0 + 2);
+                }
+                mesh.getFaceSmoothingGroups().addAll(0, 0);
+            }
+        }
+
+        // Close the cloth edges with narrow textured side strips.
+        for (int edge = 0; edge < 2; edge++) {
+            for (int row = 0; row < segments; row++) {
+                int frontBase = row * 2;
+                int backBase = (segments + 1) * 2 + row * 2;
+                int frontNext = frontBase + 2;
+                int backNext = backBase + 2;
+                int left = edge == 0 ? frontBase : frontBase + 1;
+                int leftNext = edge == 0 ? frontNext : frontNext + 1;
+                int back = edge == 0 ? backBase : backBase + 1;
+                int backNextEdge = edge == 0 ? backNext : backNext + 1;
+                int t = mesh.getTexCoords().size() / 2;
+                mesh.getTexCoords().addAll(1f / 64f, 1f / 32f,
+                        2f / 64f, 1f / 32f, 2f / 64f, 17f / 32f, 1f / 64f, 17f / 32f);
+                mesh.getFaces().addAll(left, t, back, t + 1, backNextEdge, t + 2,
+                        left, t, backNextEdge, t + 2, leftNext, t + 3);
+                mesh.getFaceSmoothingGroups().addAll(0, 0);
+            }
+        }
+
         MeshView view = new MeshView(mesh);
         view.setMaterial(capeMaterial);
         view.setCullFace(CullFace.NONE);
