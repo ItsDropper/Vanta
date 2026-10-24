@@ -23,5 +23,5 @@ jobs:
           cache: gradle
       - name: Make Gradle wrapper executable
         run: chmod +x ./gradlew
-      - name: Compile launcher and tests
-        run: ./gradlew compileJava compileTestJava
+      - name: Compile launcher and run regression tests
+        run: ./gradlew test
