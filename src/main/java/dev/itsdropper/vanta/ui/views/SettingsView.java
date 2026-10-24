@@ -100,7 +100,16 @@ public class SettingsView extends BorderPane {
         setCenter(scroll);
         BorderPane.setMargin(navigation, new Insets(0, 22, 0, 0));
 
-        selectSection("Appearance");
+        String rememberedSection = LauncherSettings.isRememberLastSettingsPageEnabled()
+                ? LauncherSettings.getLastSettingsPage()
+                : "Appearance";
+        if (!java.util.Set.of(
+                "Appearance", "Discord", "General", "Minecraft", "Downloads",
+                "Storage & Cache", "State", "Repair & Diagnostics", "About Vanta"
+        ).contains(rememberedSection)) {
+            rememberedSection = "Appearance";
+        }
+        selectSection(rememberedSection);
         applyAccent(accentColor);
         onAccentChanged.accept(accentColor);
     }
@@ -152,6 +161,9 @@ public class SettingsView extends BorderPane {
 
     private void selectSection(String section) {
         currentSection = section;
+        if (LauncherSettings.isRememberLastSettingsPageEnabled()) {
+            LauncherSettings.setLastSettingsPage(section);
+        }
         content.getChildren().clear();
 
         switch (section) {
