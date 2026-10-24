@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -298,6 +299,8 @@ public class HomeView extends StackPane {
         Button create = new Button("CREATE AN INSTANCE");
         create.getStyleClass().add("primary-button");
         create.setMinHeight(40);
+        create.setAccessibleText("Create a Minecraft instance");
+        create.setTooltip(new Tooltip("Create, import, or install a modpack"));
         create.setOnAction(event -> {
             if (onCreateInstance != null) onCreateInstance.run();
         });
@@ -387,6 +390,14 @@ public class HomeView extends StackPane {
         play.setCursor(Cursor.HAND);
         play.setPickOnBounds(true);
         play.setFocusTraversable(true);
+        play.setAccessibleText(
+                (launchService.isRunning(instance) ? "Close " : "Launch ")
+                        + instance.getName()
+        );
+        play.setTooltip(new Tooltip(
+                (launchService.isRunning(instance) ? "Close " : "Launch ")
+                        + instance.getName()
+        ));
         play.setDisable(false);
         play.setMouseTransparent(false);
 
