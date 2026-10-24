@@ -231,7 +231,7 @@ public final class SkinChangerView extends VBox {
                 .header("Accept", "application/json")
                 .header("Content-Type", "multipart/form-data; boundary=" + boundary)
                 .timeout(java.time.Duration.ofSeconds(45))
-                .PUT(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray()))
+                .POST(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray()))
                 .build();
 
         HttpResponse<String> response = HttpClient.newHttpClient().send(
