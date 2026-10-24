@@ -52,6 +52,7 @@ public class LauncherView {
     private final SettingsView settingsView;
     private final CreateInstanceTypeView createInstanceTypeView;
     private final DownloadCenterView downloadCenterView;
+    private final ServerManagerView serverManagerView;
 
     private final NotificationManager notifications;
 
@@ -292,6 +293,7 @@ public class LauncherView {
 
         stateCenterView = new StateCenterView();
         downloadCenterView = new DownloadCenterView();
+        serverManagerView = new ServerManagerView();
 
         settingsView =
                 new SettingsView(
@@ -366,6 +368,7 @@ public class LauncherView {
             case DIGIT6, NUMPAD6 -> Sidebar.Page.ACCOUNTS;
             case DIGIT7, NUMPAD7 -> Sidebar.Page.SETTINGS;
             case DIGIT8, NUMPAD8 -> Sidebar.Page.DOWNLOADS;
+            case DIGIT9, NUMPAD9 -> Sidebar.Page.SERVERS;
             default -> null;
         };
 
@@ -396,6 +399,7 @@ public class LauncherView {
             case STATE -> { showStatePage(); if (LauncherSettings.isStateScanOnOpenEnabled()) stateCenterView.onShown(); }
             case SETTINGS -> showAnimatedContent(settingsView);
             case DOWNLOADS -> showAnimatedContent(downloadCenterView);
+            case SERVERS -> showAnimatedContent(serverManagerView);
         }
     }
 
