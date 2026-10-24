@@ -436,7 +436,24 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
     private void startServer() {
         try {
             if (!saveRuntimeSettings(false)) return;
-            service.start(requireSelectedId());
+            String id = requireSelectedId();
+            startButton.setDisable(true);
+            console.appendText("Vanta: checking the server's Java requirement...\\n");
+            Thread starter = new Thread(() -> {
+                Exception failure = null;
+                try {
+                    service.start(id);
+                } catch (Exception e) {
+                    failure = e;
+                }
+                Exception result = failure;
+                Platform.runLater(() -> {
+                    startButton.setDisable(false);
+                    if (result != null) error("Could not start server", result.getMessage());
+                });
+            }, "vanta-server-start");
+            starter.setDaemon(true);
+            starter.start();
         } catch (Exception e) { error("Could not start server", e.getMessage()); }
     }
 
