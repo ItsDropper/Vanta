@@ -33,6 +33,7 @@ import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
 import dev.itsdropper.vanta.launcher.service.ServerHistoryManager;
 import dev.itsdropper.vanta.launcher.service.ServerTarget;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
+import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
@@ -100,6 +101,7 @@ public class HomeView extends StackPane {
 
         Button createInstanceButton = new Button("＋  NEW INSTANCE");
         createInstanceButton.getStyleClass().add("primary-button");
+        AnimationUtils.installInteractiveAnimations(createInstanceButton);
         createInstanceButton.setMinHeight(40);
         createInstanceButton.setAccessibleText("Create a new Minecraft instance");
         createInstanceButton.setTooltip(new Tooltip("Create, import, or install a modpack"));
@@ -325,6 +327,7 @@ public class HomeView extends StackPane {
 
         Button create = new Button("CREATE AN INSTANCE");
         create.getStyleClass().add("primary-button");
+        AnimationUtils.installInteractiveAnimations(create);
         create.setMinHeight(40);
         create.setAccessibleText("Create a Minecraft instance");
         create.setTooltip(new Tooltip("Create, import, or install a modpack"));
@@ -428,31 +431,6 @@ public class HomeView extends StackPane {
         play.setDisable(false);
         play.setMouseTransparent(false);
 
-        play.setOnMousePressed(event -> {
-            play.getProperties().put("vanta-home-pressed", true);
-            play.setScaleX(0.96);
-            play.setScaleY(0.96);
-            event.consume();
-        });
-
-        play.setOnMouseReleased(event -> {
-            play.getProperties().put("vanta-home-pressed", false);
-            play.setScaleX(1.0);
-            play.setScaleY(1.0);
-            event.consume();
-        });
-
-        play.setOnMouseEntered(event -> {
-            play.setScaleX(1.025);
-            play.setScaleY(1.025);
-        });
-
-        play.setOnMouseExited(event -> {
-            play.setScaleX(1.0);
-            play.setScaleY(1.0);
-            play.getProperties().put("vanta-home-pressed", false);
-        });
-
         play.setDisable(instance == null);
 
         play.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
@@ -505,6 +483,7 @@ public class HomeView extends StackPane {
             thread.start();
         });
 
+        AnimationUtils.installInteractiveAnimations(play);
         HBox card = new HBox(14, icon, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(14, 16, 14, 16));
@@ -744,6 +723,7 @@ public class HomeView extends StackPane {
             thread.start();
         });
 
+        AnimationUtils.installInteractiveAnimations(play);
         HBox card = new HBox(14, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(12, 14, 12, 14));
