@@ -14,7 +14,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 - **Modrinth integration** — search projects, install content, resolve dependencies, scan installed mods, and repair dependencies.
 - **State Center** — inspect instance and shared-resource health and identify missing or invalid files.
 - **Recovery-oriented updates** — download release packages, verify SHA-256 checksums, and use an external updater with staging and rollback.
-- **Local server management** — manage Java server profiles, process lifecycle, live console, basic properties, player-list commands, offline backups/restores, and crash reports.
+- **Local server management** — manage Java server profiles, process lifecycle, live console, basic properties, offline backups/restores, and crash reports. On Windows x64, Vanta detects the Java class-file requirement of supported vanilla server JARs and downloads a private Eclipse Temurin JRE when the selected runtime is too old.
 - **Local-first data** — keep launcher and instance data on the user's device wherever possible.
 - **JavaFX interface** — a native Java desktop application rather than an embedded web application.
 
@@ -78,7 +78,7 @@ Downloaded metadata and archives are untrusted input. Installation, extraction, 
 
 Vanta is designed to avoid intentional usage analytics or telemetry sent to a Vanta-operated analytics service. This describes the project's intended behavior; it is not a guarantee about every dependency or future build.
 
-Depending on the features used, Vanta may contact Microsoft/Xbox/Minecraft services, Modrinth, loader metadata services, and configured GitHub release endpoints. Those third parties have their own privacy policies and terms.
+Depending on the features used, Vanta may contact Microsoft/Xbox/Minecraft services, Modrinth, loader metadata services, configured GitHub release endpoints, and Eclipse Adoptium's API/GitHub releases when a compatible server Java runtime must be provisioned. Those third parties have their own privacy policies and terms.
 
 - Read the [Privacy Policy](PRIVACY.md).
 - Never publish account tokens, session credentials, private account data, or unreviewed logs.
