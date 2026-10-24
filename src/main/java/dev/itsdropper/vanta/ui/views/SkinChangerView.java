@@ -51,7 +51,7 @@ public final class SkinChangerView extends VBox {
     private final Label statusLabel = new Label("Loading the skin currently active on your account...");
     private final SkinModel3D modelPreview = new SkinModel3D();
     private final ComboBox<String> modelChoice = new ComboBox<>();
-    private final Button chooseButton = new Button("Choose PNG");
+    private final Button chooseButton = new Button("Choose & apply PNG");
     private final Button uploadButton = new Button("Apply skin");
 
     private Path selectedFile;
@@ -109,7 +109,7 @@ public final class SkinChangerView extends VBox {
         });
 
         Label formatHint = new Label(
-                "Choose a 64×64 or legacy 64×32 PNG. Applying it uploads the skin to the signed-in Minecraft Java profile."
+                "Choose Classic or Slim first, then select a 64×64 or legacy 64×32 PNG. Selecting a file uploads it to your signed-in Minecraft Java profile immediately."
         );
         formatHint.setWrapText(true);
         formatHint.getStyleClass().add("accounts-subtitle");
@@ -295,8 +295,9 @@ public final class SkinChangerView extends VBox {
             boolean slim = modelChoice.getValue().startsWith("Slim");
             modelPreview.setSkin(image, slim);
             fileLabel.setText("Selected: " + file.getName());
-            statusLabel.setText("Skin loaded into the 3D preview. Select Apply skin to set it on your account.");
+            statusLabel.setText("Skin loaded into the 3D preview. Applying it to your Minecraft account...");
             uploadButton.setDisable(accountService.getCurrentAccount() == null || busy);
+            uploadSkin();
         } catch (Exception ex) {
             statusLabel.setText("Could not use this skin: " + message(ex));
         }
