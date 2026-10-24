@@ -58,7 +58,7 @@ public final class DownloadCenterService {
     public synchronized long begin(String url, Path target, String sha1) {
         long id = sequence.incrementAndGet();
         String name = target == null || target.getFileName() == null ? "Download" : target.getFileName().toString();
-        tasks.add(new Task(id, name, safeSource(url), target, sha1, Status.DOWNLOADING,
+        tasks.add(new Task(id, name, url, target, sha1, Status.DOWNLOADING,
                 0, -1, Instant.now(), null, null));
         trimHistory();
         publish();
