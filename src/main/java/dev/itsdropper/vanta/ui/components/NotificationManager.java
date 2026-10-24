@@ -54,11 +54,10 @@ public class NotificationManager {
     }
 
     public void showProgress(
-        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
-
             String title,
             String message
     ) {
+        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
 
         runOnFxThread(() -> {
 
@@ -112,11 +111,10 @@ public class NotificationManager {
     }
 
     public void success(
-        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
-
             String title,
             String message
     ) {
+        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
 
         runOnFxThread(() -> {
 
@@ -140,11 +138,10 @@ public class NotificationManager {
     }
 
     public void error(
-        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
-
             String title,
             String message
     ) {
+        if (!LauncherSettings.isNotificationsEnabled()) { dismiss(); return; }
 
         runOnFxThread(() -> {
 
