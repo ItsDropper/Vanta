@@ -65,7 +65,8 @@ class RepairDiagnosticEngineTest {
                         || d.category() == FailureCategory.AUTHENTICATION
                         || d.category() == FailureCategory.MOD_MIXIN_FAILURE
                         || d.category() == FailureCategory.MOD_CRASH
-                        || d.category() == FailureCategory.DUPLICATE_MOD));
+                        || d.category() == FailureCategory.DUPLICATE_MOD
+                        || d.category() == FailureCategory.CONFIGURATION));
     }
 
     private static void assertCategory(String output, FailureCategory expected) {
