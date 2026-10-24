@@ -23,7 +23,8 @@ class RepairCoordinatorTest {
     @Test
     void unrelatedFailuresDoNotTriggerPointlessReinstall() {
         for (String category : List.of("AUTHENTICATION", "GRAPHICS", "NETWORK",
-                "DISK_SPACE", "PERMISSION", "MOD_MIXIN_FAILURE", "MOD_CRASH", "JVM_ARGUMENTS")) {
+                "DISK_SPACE", "PERMISSION", "MOD_MIXIN_FAILURE", "MOD_CRASH", "JVM_ARGUMENTS",
+                "MOD_DEPENDENCY", "JAVA_RUNTIME", "JAVA_VERSION", "MINECRAFT_VERSION")) {
             assertFalse(RepairCoordinator.shouldRepairManagedInstallation(List.of(
                     new RepairView.RepairIssue(category, category, "Detected " + category)
             )), category);
