@@ -1161,11 +1161,11 @@ public class SettingsView extends BorderPane {
         parallel.setSelected(LauncherSettings.isParallelDownloadsEnabled());
         parallel.getStyleClass().add("settings-checkbox");
         parallel.setOnAction(e -> LauncherSettings.setParallelDownloadsEnabled(parallel.isSelected()));
-        CheckBox reuse = new CheckBox("Reuse HTTP connections");
-        reuse.setSelected(LauncherSettings.isConnectionReuseEnabled());
+        CheckBox reuse = new CheckBox("Prefer HTTP/2 multiplexing");
+        reuse.setSelected(LauncherSettings.isHttp2Enabled());
         reuse.getStyleClass().add("settings-checkbox");
-        reuse.setTooltip(new javafx.scene.control.Tooltip("Keep a shared HTTP client for connection pooling and TLS reuse. Disabling this creates short-lived clients and is usually slower."));
-        reuse.setOnAction(e -> LauncherSettings.setConnectionReuseEnabled(reuse.isSelected()));
+        reuse.setTooltip(new javafx.scene.control.Tooltip("Prefer HTTP/2 multiplexing when the server supports it. HTTP/1.1 remains available as a compatibility fallback."));
+        reuse.setOnAction(e -> LauncherSettings.setHttp2Enabled(reuse.isSelected()));
         CheckBox cache = new CheckBox("Cache verified files for reuse across instances");
         cache.setSelected(LauncherSettings.isDownloadCacheEnabled());
         cache.getStyleClass().add("settings-checkbox");
