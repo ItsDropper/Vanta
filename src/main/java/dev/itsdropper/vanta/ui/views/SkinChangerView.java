@@ -412,7 +412,7 @@ public final class SkinChangerView extends VBox {
                 } else {
                     builder.header("Content-Type", "application/json")
                             .PUT(HttpRequest.BodyPublishers.ofString(
-                                    "{\\"capeId\\":\\"" + capeId + "\\"}", StandardCharsets.UTF_8));
+                                    "{\"capeId\":\"" + capeId + "\"}", StandardCharsets.UTF_8));
                 }
                 HttpResponse<String> response = HTTP.send(builder.build(), HttpResponse.BodyHandlers.ofString());
                 if (response.statusCode() < 200 || response.statusCode() >= 300) {
