@@ -1,0 +1,110 @@
+/* Vanta interface polish: consistent focus, depth and interaction feedback. */
+
+.button,
+.text-field,
+.text-area,
+.combo-box-base,
+.choice-box,
+.check-box .box,
+.slider .thumb {
+    -fx-focus-color: -vanta-accent;
+    -fx-faint-focus-color: -vanta-accent-soft;
+}
+
+.button:focused,
+.text-field:focused,
+.text-area:focused,
+.combo-box-base:focused,
+.choice-box:focused {
+    -fx-border-color: -vanta-accent;
+    -fx-border-width: 1px;
+}
+
+.instance-card,
+.settings-card,
+.info-card,
+.account-card,
+.home-info-card,
+.home-launch-card,
+.home-recent-servers-card,
+.mod-details-card,
+.mod-details-header,
+.state-card,
+.accounts-card {
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+}
+
+.sidebar-button,
+.settings-nav-button,
+.title-bar-button,
+.secondary-button,
+.primary-button,
+.instance-play-button,
+.instance-menu-button,
+.modrinth-versions-button,
+.state-refresh-button {
+    -fx-background-insets: 0;
+}
+
+.sidebar-button:focused,
+.settings-nav-button:focused,
+.title-bar-button:focused,
+.instance-menu-button:focused {
+    -fx-border-color: -vanta-accent;
+    -fx-border-radius: 8px;
+}
+
+.text-field,
+.text-area,
+.create-field,
+.create-combo,
+.search-field,
+.modrinth-search-field,
+.content-search-field,
+.instance-search-field,
+.accent-hex-field {
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+    -fx-padding: 9px 12px;
+}
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.scroll-bar .thumb {
+    -fx-background-radius: 999px;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.page-title,
+.settings-page-title,
+.home-title,
+.accounts-title {
+    -fx-font-weight: 800;
+}
+
+.page-subtitle,
+.settings-page-subtitle,
+.accounts-subtitle {
+    -fx-line-spacing: 2px;
+}
+
+.notification {
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-padding: 12px 14px;
+}
+
+.tooltip {
+    -fx-background-radius: 7px;
+    -fx-padding: 7px 10px;
+}
