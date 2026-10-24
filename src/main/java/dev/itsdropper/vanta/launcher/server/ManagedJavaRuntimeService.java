@@ -118,10 +118,13 @@ final class ManagedJavaRuntimeService {
                 throw new IOException("Temurin metadata request failed (HTTP " + metadata.statusCode() + ").");
             }
             JsonNode assets = JSON.readTree(metadata.body());
-            String downloadUrl = assets.isArray() && !assets.isEmpty()
-                    ? assets.get(0).path("binary").path("package").path("link").asText("") : "";
-            if (!downloadUrl.startsWith("https://github.com/adoptium/")) {
-                throw new IOException("Temurin did not return a trusted Windows JRE download URL.");
+            JsonNode packageInfo = assets.isArray() && !assets.isEmpty()
+                    ? assets.get(0).path("binary").path("package") : JSON.nullNode();
+            String downloadUrl = packageInfo.path("link").asText("");
+            String expectedSha256 = packageInfo.path("checksum").asText("").toLowerCase(Locale.ROOT);
+            if (!downloadUrl.startsWith("https://github.com/adoptium/")
+                    || !expectedSha256.matches("[0-9a-f]{64}")) {
+                throw new IOException("Temurin did not return a trusted URL and SHA-256 checksum for the Windows JRE.");
             }
 
             log.accept("Vanta: downloading Java " + major + " runtime from Eclipse Temurin...");
@@ -143,8 +146,12 @@ final class ManagedJavaRuntimeService {
             if (Files.size(archive) == 0 || Files.size(archive) > MAX_ARCHIVE_BYTES) {
                 throw new IOException("Downloaded Java runtime archive has an invalid size.");
             }
+            String actualSha256 = sha256(archive);
+            if (!actualSha256.equals(expectedSha256)) {
+                throw new IOException("Java runtime SHA-256 verification failed; the archive was rejected.");
+            }
 
-            log.accept("Vanta: verifying and installing Java " + major + " into Vanta's local runtime directory...");
+            log.accept("Vanta: SHA-256 verified. Installing Java " + major + " into Vanta's local runtime directory...");
             try (ZipInputStream zip = new ZipInputStream(Files.newInputStream(archive))) {
                 ZipEntry entry;
                 while ((entry = zip.getNextEntry()) != null) {
@@ -188,6 +195,23 @@ final class ManagedJavaRuntimeService {
         } finally {
             Files.deleteIfExists(archive);
             deleteTree(staging);
+        }
+    }
+
+    private static String sha256(Path file) throws IOException {
+        try (InputStream input = Files.newInputStream(file)) {
+            java.security.MessageDigest digest;
+            try {
+                digest = java.security.MessageDigest.getInstance("SHA-256");
+            } catch (java.security.NoSuchAlgorithmException impossible) {
+                throw new IllegalStateException("SHA-256 is unavailable in this Java runtime.", impossible);
+            }
+            byte[] buffer = new byte[64 * 1024];
+            int read;
+            while ((read = input.read(buffer)) != -1) digest.update(buffer, 0, read);
+            StringBuilder result = new StringBuilder(64);
+            for (byte value : digest.digest()) result.append(String.format("%02x", value & 0xff));
+            return result.toString();
         }
     }
 
