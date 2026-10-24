@@ -20,7 +20,6 @@ import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.instance.InstanceBackupService;
-import dev.itsdropper.vanta.launcher.instance.MrpackExporter;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
@@ -167,15 +166,7 @@ public class InstancesView extends VBox {
         ));
         backupButton.setOnAction(event -> backUpInstance());
 
-        Button exportButton = new Button("EXPORT MODPACK");
-        exportButton.getStyleClass().add("secondary-button");
-        exportButton.setAccessibleText("Export a Minecraft instance as a Modrinth modpack");
-        exportButton.setTooltip(new javafx.scene.control.Tooltip(
-                "Create a shareable .mrpack containing mods, configs, resource packs, and shaders—not saves or personal data."
-        ));
-        exportButton.setOnAction(event -> exportInstanceModpack());
-
-        HBox headerTop = new HBox(10, headerText, countLabel, backupButton, exportButton, createButton);
+        HBox headerTop = new HBox(10, headerText, countLabel, backupButton, createButton);
         headerTop.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(headerText, Priority.ALWAYS);
 
@@ -377,70 +368,6 @@ public class InstancesView extends VBox {
                 });
             }
         }, "Vanta-Instance-Backup");
-        worker.setDaemon(true);
-        worker.start();
-    }
-
-    private void exportInstanceModpack() {
-        if (loadedInstances.isEmpty()) {
-            statusLabel.setText("Create or install an instance before exporting a modpack.");
-            return;
-        }
-
-        List<String> instanceLabels = loadedInstances.stream()
-                .map(instance -> instance.getName() + " · Minecraft " + instance.getMinecraftVersion()
-                        + " · " + instance.getDisplayLoader() + " [" + instance.getId() + "]")
-                .toList();
-        ChoiceDialog<String> chooser = new ChoiceDialog<>(instanceLabels.get(0), instanceLabels);
-        chooser.setTitle("Export Modrinth Modpack");
-        chooser.setHeaderText("Choose an instance to export");
-        chooser.setContentText("Instance:");
-        String selectedLabel = chooser.showAndWait().orElse(null);
-        if (selectedLabel == null) return;
-        Instance selected = loadedInstances.get(instanceLabels.indexOf(selectedLabel));
-        if (selected == null) return;
-
-        FileChooser saveChooser = new FileChooser();
-        saveChooser.setTitle("Save Modrinth Modpack");
-        saveChooser.setInitialFileName(safeFileName(selected.getName()) + ".mrpack");
-        saveChooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Modrinth modpack (*.mrpack)", "*.mrpack")
-        );
-        java.io.File output = saveChooser.showSaveDialog(getScene() == null ? null : getScene().getWindow());
-        if (output == null) return;
-
-        java.nio.file.Path outputPath = output.toPath();
-        if (!outputPath.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".mrpack")) {
-            outputPath = outputPath.resolveSibling(outputPath.getFileName() + ".mrpack");
-        }
-        final java.nio.file.Path destination = outputPath;
-        statusLabel.setText("Exporting " + selected.getName() + " as a Modrinth modpack…");
-
-        Thread worker = new Thread(() -> {
-            try {
-                MrpackExporter.exportMrpack(selected, destination);
-                Platform.runLater(() -> {
-                    statusLabel.setText("Modpack exported: " + destination.getFileName());
-                    javafx.scene.control.Alert success = new javafx.scene.control.Alert(
-                            javafx.scene.control.Alert.AlertType.INFORMATION,
-                            "Export complete. The .mrpack contains supported mods, configs, resource packs, and shaders. Saves, screenshots, logs, and launcher settings are excluded."
-                    );
-                    success.setTitle("Modpack Export Complete");
-                    success.setHeaderText(selected.getName());
-                    success.show();
-                });
-            } catch (Throwable ex) {
-                Platform.runLater(() -> {
-                    String message = ex.getMessage() == null
-                            ? ex.getClass().getSimpleName() : ex.getMessage();
-                    statusLabel.setText("Modpack export failed: " + message);
-                    new javafx.scene.control.Alert(
-                            javafx.scene.control.Alert.AlertType.ERROR,
-                            "Vanta could not export this instance.\n\n" + message
-                    ).show();
-                });
-            }
-        }, "Vanta-Modpack-Export");
         worker.setDaemon(true);
         worker.start();
     }
