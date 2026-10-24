@@ -5,6 +5,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ComboBox;
+import javafx.stage.FileChooser;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextArea;
@@ -17,6 +19,8 @@ import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
 import dev.itsdropper.vanta.ui.components.IconView;
+
+import java.io.File;
 
 public class InstanceSettingsView extends VBox {
 
@@ -221,6 +225,21 @@ public class InstanceSettingsView extends VBox {
                 "Automatic"
         );
 
+        Button browseJavaButton = new Button("BROWSE");
+        browseJavaButton.getStyleClass().add("secondary-button");
+        browseJavaButton.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select Java executable");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
+                    System.getProperty("os.name", "").toLowerCase().contains("win")
+                            ? "Java executable (java.exe)" : "Java executable",
+                    System.getProperty("os.name", "").toLowerCase().contains("win")
+                            ? "java.exe" : "*"
+            ));
+            File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
+            if (selected != null) javaPathField.setText(selected.getAbsolutePath());
+        });
+
         javaPathField.getStyleClass().add(
                 "create-field"
         );
@@ -244,16 +263,36 @@ public class InstanceSettingsView extends VBox {
                 "create-field"
         );
 
+        HBox javaPathRow = new HBox(8, javaPathField, browseJavaButton);
+        HBox.setHgrow(javaPathField, Priority.ALWAYS);
+
+        ComboBox<String> jvmPreset = new ComboBox<>();
+        jvmPreset.getItems().addAll(
+                "Choose JVM preset…",
+                "Default (no extra arguments)",
+                "G1GC balanced",
+                "Low-memory / garbage collection",
+                "Diagnostics (GC logging)"
+        );
+        jvmPreset.getSelectionModel().selectFirst();
+        jvmPreset.setMaxWidth(Double.MAX_VALUE);
+        jvmPreset.setOnAction(event -> {
+            String selected = jvmPreset.getValue();
+            if (selected == null) return;
+            switch (selected) {
+                case "Default (no extra arguments)" -> javaArgumentsArea.clear();
+                case "G1GC balanced" -> javaArgumentsArea.setText("-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:G1NewSizePercent=20 -XX:G1ReservePercent=20 -XX:MaxGCPauseMillis=50");
+                case "Low-memory / garbage collection" -> javaArgumentsArea.setText("-XX:+UseG1GC -XX:MaxGCPauseMillis=100 -XX:+ParallelRefProcEnabled");
+                case "Diagnostics (GC logging)" -> javaArgumentsArea.setText("-Xlog:gc*:file=gc.log:time,uptime,level,tags");
+                default -> { }
+            }
+        });
+
         VBox javaCard =
                 createCard(
-                        createInput(
-                                "Java executable",
-                                javaPathField
-                        ),
-                        createInput(
-                                "Java arguments",
-                                javaArgumentsArea
-                        )
+                        createInput("Java executable", javaPathRow),
+                        createInput("JVM argument preset", jvmPreset),
+                        createInput("Java arguments", javaArgumentsArea)
                 );
 
         // ---------------------------------------------------------
