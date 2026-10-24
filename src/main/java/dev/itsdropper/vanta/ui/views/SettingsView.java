@@ -37,7 +37,6 @@ import dev.itsdropper.vanta.ui.ThemeManager;
 import java.awt.Desktop;
 import java.io.IOException;
 import java.io.File;
-import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
