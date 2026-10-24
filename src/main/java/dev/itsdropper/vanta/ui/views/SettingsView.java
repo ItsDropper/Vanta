@@ -321,16 +321,24 @@ public class SettingsView extends BorderPane {
 
         ColorPicker backgroundColor = customColorPicker("customBackground", ThemeManager.loadTheme().background());
         ColorPicker surfaceColor = customColorPicker("customSurface", ThemeManager.loadTheme().surface());
+        ColorPicker raisedColor = customColorPicker("customRaisedSurface", ThemeManager.loadTheme().surfaceRaised());
+        ColorPicker hoverColor = customColorPicker("customHoverSurface", ThemeManager.loadTheme().surfaceHover());
         ColorPicker borderColor = customColorPicker("customBorder", ThemeManager.loadTheme().border());
         ColorPicker textColor = customColorPicker("customText", ThemeManager.loadTheme().text());
         ColorPicker mutedColor = customColorPicker("customMuted", ThemeManager.loadTheme().muted());
+        ColorPicker dangerColor = customColorPicker("customDanger", ThemeManager.loadTheme().danger());
+        ColorPicker successColor = customColorPicker("customSuccess", ThemeManager.loadTheme().success());
 
         customColors.getChildren().addAll(
                 colorSettingRow("Window background", "Main application shell and page canvas", backgroundColor),
-                colorSettingRow("Card surfaces", "Panels, cards and raised content surfaces", surfaceColor),
+                colorSettingRow("Card surfaces", "Panels and standard cards", surfaceColor),
+                colorSettingRow("Raised surfaces", "Elevated cards, menus and focused surfaces", raisedColor),
+                colorSettingRow("Hover surfaces", "Interactive hover states and highlighted panels", hoverColor),
                 colorSettingRow("Borders", "Separators and control outlines", borderColor),
                 colorSettingRow("Primary text", "Headings and high-priority text", textColor),
-                colorSettingRow("Muted text", "Descriptions and secondary labels", mutedColor)
+                colorSettingRow("Muted text", "Descriptions and secondary labels", mutedColor),
+                colorSettingRow("Error color", "Warnings and destructive-action states", dangerColor),
+                colorSettingRow("Success color", "Successful actions and completion states", successColor)
         );
 
         Button resetPalette = new Button("RESET CUSTOM PALETTE");
@@ -341,9 +349,13 @@ public class SettingsView extends BorderPane {
             onAccentChanged.accept(accentColor);
             backgroundColor.setValue(Color.web(ThemeManager.loadTheme().background()));
             surfaceColor.setValue(Color.web(ThemeManager.loadTheme().surface()));
+            raisedColor.setValue(Color.web(ThemeManager.loadTheme().surfaceRaised()));
+            hoverColor.setValue(Color.web(ThemeManager.loadTheme().surfaceHover()));
             borderColor.setValue(Color.web(ThemeManager.loadTheme().border()));
             textColor.setValue(Color.web(ThemeManager.loadTheme().text()));
             mutedColor.setValue(Color.web(ThemeManager.loadTheme().muted()));
+            dangerColor.setValue(Color.web(ThemeManager.loadTheme().danger()));
+            successColor.setValue(Color.web(ThemeManager.loadTheme().success()));
             NotificationManager manager = NotificationManager.getGlobal();
             if (manager != null) manager.success("Palette reset", "Theme colors restored to their defaults.");
         });
@@ -635,6 +647,29 @@ public class SettingsView extends BorderPane {
         notifications.setSelected(LauncherSettings.isNotificationsEnabled());
         notifications.getStyleClass().add("settings-checkbox");
         notifications.setOnAction(e -> LauncherSettings.setNotificationsEnabled(notifications.isSelected()));
+        Label notificationDurationLabel = new Label();
+        notificationDurationLabel.getStyleClass().add("instance-setting-value");
+        Slider notificationDuration = new Slider(1, 10, LauncherSettings.getNotificationDurationSeconds());
+        notificationDuration.setMajorTickUnit(1);
+        notificationDuration.setMinorTickCount(0);
+        notificationDuration.setSnapToTicks(true);
+        notificationDuration.setShowTickLabels(true);
+        notificationDuration.setShowTickMarks(true);
+        notificationDuration.setMaxWidth(Double.MAX_VALUE);
+        Runnable updateNotificationDuration = () -> notificationDurationLabel.setText(
+                (int) Math.round(notificationDuration.getValue()) + " seconds"
+        );
+        notificationDuration.valueProperty().addListener((o, oldValue, newValue) -> updateNotificationDuration.run());
+        updateNotificationDuration.run();
+        Button saveNotificationDuration = new Button("SAVE NOTIFICATION DURATION");
+        saveNotificationDuration.getStyleClass().add("secondary-button");
+        saveNotificationDuration.setOnAction(e -> {
+            LauncherSettings.setNotificationDurationSeconds((int) Math.round(notificationDuration.getValue()));
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.success("Notification timing saved", "Success notifications will stay visible for " +
+                    LauncherSettings.getNotificationDurationSeconds() + " seconds.");
+        });
+
         CheckBox remember = new CheckBox("Remember the last Settings section");
         remember.setSelected(LauncherSettings.isRememberLastSettingsPageEnabled());
         remember.getStyleClass().add("settings-checkbox");
@@ -643,7 +678,11 @@ public class SettingsView extends BorderPane {
         stateScan.setSelected(LauncherSettings.isStateScanOnOpenEnabled());
         stateScan.getStyleClass().add("settings-checkbox");
         stateScan.setOnAction(e -> LauncherSettings.setStateScanOnOpenEnabled(stateScan.isSelected()));
-        workspace.getChildren().addAll(playtime, compact, notifications, remember, stateScan);
+        workspace.getChildren().addAll(
+                playtime, compact, notifications,
+                new Label("Success notification duration"), notificationDurationLabel,
+                notificationDuration, saveNotificationDuration, remember, stateScan
+        );
 
         VBox rollback = card(
                 "Vanta version rollback",
