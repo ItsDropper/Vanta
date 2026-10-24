@@ -46,3 +46,11 @@ For any significant UI change:
 5. Confirm window dragging does not steal clicks from interactive title-bar controls.
 6. Ensure a first-run user can create or import an instance without having to discover a hidden workflow.
 7. Preserve existing user data and settings; UI polish must not alter launcher behavior.
+
+## Motion and responsiveness
+
+- Interactive animation handlers must be additive; they must never replace a control's click, press, or release behavior.
+- Stop an existing scale transition before starting another so hover and press states cannot race.
+- Respect the user's animation setting even after controls have been created.
+- Newly inserted controls should receive the same interaction behavior as controls present at first render.
+- Pause view-specific polling when a view is detached, and ignore stale asynchronous refresh results.
