@@ -17,6 +17,7 @@ import javafx.scene.shape.Rectangle;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthProject;
 import dev.itsdropper.vanta.launcher.service.ModrinthService;
+import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -569,9 +570,12 @@ public class BrowseModsView extends VBox {
                 new VBox(
                         5,
                         title,
-                        description,
-                        downloads
+                        description
                 );
+
+        if (LauncherSettings.isShowModrinthDownloadsEnabled()) {
+            information.getChildren().add(downloads);
+        }
 
         // =========================================================
         // ROW
