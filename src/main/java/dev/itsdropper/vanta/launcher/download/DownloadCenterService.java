@@ -8,6 +8,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -34,6 +36,7 @@ public final class DownloadCenterService {
     private static final int MAX_HISTORY = 100;
     private final AtomicLong sequence = new AtomicLong();
     private final List<Task> tasks = new ArrayList<>();
+    private final Set<Long> retryRequested = new HashSet<>();
     private final CopyOnWriteArrayList<Consumer<List<Task>>> listeners = new CopyOnWriteArrayList<>();
     private final ExecutorService retryExecutor = Executors.newFixedThreadPool(2, runnable -> {
         Thread thread = new Thread(runnable, "vanta-download-retry");
@@ -95,8 +98,14 @@ public final class DownloadCenterService {
         publish();
     }
 
-    public void retry(Task task) {
-        if (task == null || task.status() != Status.FAILED || task.target() == null || task.source() == null) return;
+    public synchronized boolean isRetryRequested(long taskId) {
+        return retryRequested.contains(taskId);
+    }
+
+    public synchronized void retry(Task task) {
+        if (task == null || task.status() != Status.FAILED || task.target() == null || task.source() == null
+                || !retryRequested.add(task.id())) return;
+        publish();
         retryExecutor.submit(() -> {
             try {
                 DownloadUtil.downloadFile(task.source(), task.target(), task.expectedSha1());
