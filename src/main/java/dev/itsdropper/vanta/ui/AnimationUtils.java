@@ -76,6 +76,14 @@ public final class AnimationUtils {
     }
 
     private static void animateScale(Node node, double target, Duration duration) {
+        if (!LauncherSettings.isAnimationsEnabled()) {
+            Object previous = node.getProperties().get("vanta.scale-transition");
+            if (previous instanceof ScaleTransition transition) transition.stop();
+            node.setScaleX(1.0);
+            node.setScaleY(1.0);
+            return;
+        }
+
         Object previous = node.getProperties().get("vanta.scale-transition");
         if (previous instanceof ScaleTransition transition) {
             transition.stop();
