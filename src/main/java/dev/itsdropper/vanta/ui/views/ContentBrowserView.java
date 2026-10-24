@@ -58,6 +58,10 @@ public class ContentBrowserView extends VBox {
     private final ScrollPane popularScrollPane;
     private final ScrollPane searchScrollPane;
 
+    // Discard stale network responses when the query or content category changes.
+    private long popularRequestId;
+    private long searchRequestId;
+
     private Button modsButton;
     private Button packsButton;
     private Button shadersButton;
@@ -133,6 +137,8 @@ public class ContentBrowserView extends VBox {
         backButton.getStyleClass().add(
                 "secondary-button"
         );
+        backButton.setAccessibleText("Return to the previous page");
+
 
         backButton.setOnAction(
                 event ->
@@ -238,8 +244,10 @@ public class ContentBrowserView extends VBox {
                 new TextField();
 
         searchField.setPromptText(
-                "Search Modrinth..."
+                "Search Modrinth projects..."
         );
+        searchField.setAccessibleText("Search compatible Modrinth projects");
+
 
         searchField.getStyleClass().add(
                 "create-field"
@@ -258,6 +266,9 @@ public class ContentBrowserView extends VBox {
         searchButton.getStyleClass().add(
                 "primary-button"
         );
+        searchButton.setAccessibleText("Search Modrinth");
+        searchButton.setTooltip(new javafx.scene.control.Tooltip("Search compatible projects"));
+
 
         searchButton.setOnAction(
                 event ->
@@ -428,6 +439,8 @@ public class ContentBrowserView extends VBox {
         contentType =
                 newType;
 
+        ++popularRequestId;
+        ++searchRequestId;
         searchField.clear();
 
         results
@@ -522,52 +535,35 @@ public class ContentBrowserView extends VBox {
     // =============================================================
 
     private void loadMostDownloaded() {
-
+        ModrinthContentType requestedType = contentType;
+        long requestId = ++popularRequestId;
         popularStatusLabel.setText(
-                "Loading popular "
-                        + contentType.getDisplayName()
-                        .toLowerCase()
-                        + "s..."
+                "Loading popular " + requestedType.getDisplayName().toLowerCase() + "s..."
         );
 
-        Thread thread =
-                new Thread(() -> {
-
-                    try {
-
-                        List<ModrinthProject> projects =
-                                contentService.getMostDownloaded(
-                                        contentType,
-                                        instance.getLoader(),
-                                        instance.getMinecraftVersion()
-                                );
-
-                        Platform.runLater(() ->
-                                showMostDownloaded(
-                                        projects
-                                )
-                        );
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        Platform.runLater(() ->
-                                popularStatusLabel.setText(
-                                        "Could not load popular "
-                                                + contentType
-                                                .getDisplayName()
-                                                .toLowerCase()
-                                                + "s."
-                                )
-                        );
-                    }
+        Thread thread = new Thread(() -> {
+            try {
+                List<ModrinthProject> projects = contentService.getMostDownloaded(
+                        requestedType,
+                        instance.getLoader(),
+                        instance.getMinecraftVersion()
+                );
+                Platform.runLater(() -> {
+                    if (requestId != popularRequestId || requestedType != contentType) return;
+                    showMostDownloaded(projects);
                 });
-
-        thread.setDaemon(
-                true
-        );
-
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    if (requestId != popularRequestId || requestedType != contentType) return;
+                    popularStatusLabel.setText(
+                            "Could not load popular " + requestedType.getDisplayName().toLowerCase()
+                                    + "s. Check your connection and try again."
+                    );
+                });
+            }
+        }, "Vanta-Modrinth-Popular");
+        thread.setDaemon(true);
         thread.start();
     }
 
@@ -627,78 +623,51 @@ public class ContentBrowserView extends VBox {
     // =============================================================
 
     private void search() {
-
-        String query =
-                searchField
-                        .getText()
-                        .trim();
-
+        String query = searchField.getText() == null ? "" : searchField.getText().trim();
         if (query.isBlank()) {
-
+            ++searchRequestId;
             showPopularSection();
-
-            results
-                    .getChildren()
-                    .clear();
-
+            results.getChildren().clear();
             statusLabel.setText(
-                    "Search Modrinth for compatible "
-                            + contentType
-                            .getDisplayName()
-                            .toLowerCase()
-                            + "s."
+                    "Search Modrinth for compatible " + contentType.getDisplayName().toLowerCase() + "s."
             );
-
             return;
         }
 
         hidePopularSection();
+        ModrinthContentType requestedType = contentType;
+        long requestId = ++searchRequestId;
+        statusLabel.setText("Searching Modrinth...");
+        results.getChildren().clear();
 
-        statusLabel.setText(
-                "Searching Modrinth..."
-        );
-
-        results
-                .getChildren()
-                .clear();
-
-        Thread thread =
-                new Thread(() -> {
-
-                    try {
-
-                        List<ModrinthProject> projects =
-                                contentService.search(
-                                        query,
-                                        contentType,
-                                        instance.getLoader(),
-                                        instance.getMinecraftVersion()
-                                );
-
-                        Platform.runLater(() ->
-                                showResults(
-                                        projects
-                                )
-                        );
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        Platform.runLater(() ->
-                                statusLabel.setText(
-                                        ex.getMessage() != null
-                                                ? ex.getMessage()
-                                                : "Failed to search Modrinth."
-                                )
-                        );
+        Thread thread = new Thread(() -> {
+            try {
+                List<ModrinthProject> projects = contentService.search(
+                        query,
+                        requestedType,
+                        instance.getLoader(),
+                        instance.getMinecraftVersion()
+                );
+                Platform.runLater(() -> {
+                    if (requestId != searchRequestId || requestedType != contentType
+                            || !query.equals(searchField.getText() == null ? "" : searchField.getText().trim())) {
+                        return;
                     }
+                    showResults(projects);
                 });
-
-        thread.setDaemon(
-                true
-        );
-
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                Platform.runLater(() -> {
+                    if (requestId != searchRequestId || requestedType != contentType) return;
+                    statusLabel.setText(
+                            ex.getMessage() != null && !ex.getMessage().isBlank()
+                                    ? ex.getMessage()
+                                    : "Failed to search Modrinth. Check your connection and try again."
+                    );
+                });
+            }
+        }, "Vanta-Modrinth-Search");
+        thread.setDaemon(true);
         thread.start();
     }
 
