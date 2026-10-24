@@ -270,15 +270,20 @@ public class DownloadUtil {
                 }
 
                 if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
-                    Path cached = cachePath(expectedSha1);
-                    Files.createDirectories(cached.getParent());
-                    Files.copy(target, cached, StandardCopyOption.REPLACE_EXISTING);
+                    try {
+                        Path cached = cachePath(expectedSha1);
+                        Files.createDirectories(cached.getParent());
+                        Files.copy(target, cached, StandardCopyOption.REPLACE_EXISTING);
+                    } catch (IOException cacheFailure) {
+                        System.err.println("Could not save download cache entry: " + cacheFailure.getMessage());
+                    }
                 }
                 return;
             } catch (Exception e) {
                 lastException = e;
                 if (!LauncherSettings.isResumableDownloadsEnabled()
-                        || (e.getMessage() != null && e.getMessage().contains("SHA-1 verification failed"))) {
+                        || (e.getMessage() != null && (e.getMessage().contains("SHA-1 verification failed")
+                        || e.getMessage().matches("HTTP 4[0-9][0-9].*")))) {
                     try { Files.deleteIfExists(temporary); } catch (IOException ignored) { }
                 }
 
@@ -299,6 +304,9 @@ public class DownloadUtil {
     }
 
     private static Path cachePath(String sha1) {
+        if (sha1 == null || !sha1.matches("(?i)[0-9a-f]{40}")) {
+            throw new IllegalArgumentException("Invalid SHA-1 cache key.");
+        }
         return MinecraftLocator.getVantaDirectory().resolve("download-cache").resolve("sha1")
                 .resolve(sha1.toLowerCase(java.util.Locale.ROOT));
     }
