@@ -115,7 +115,7 @@ public class AssetDownloader {
             return;
         }
 
-        int threadCount = LauncherSettings.getDownloadThreads();
+        int threadCount = LauncherSettings.getEffectiveDownloadThreads(tasks.size());
 
         System.out.println(
                 "Downloading "
@@ -200,70 +200,7 @@ public class AssetDownloader {
                         + "/"
                         + task.hash;
 
-        Path temporary =
-                task.target.resolveSibling(
-                        task.hash + ".download"
-                );
-
-        HttpRequest request =
-                HttpRequest.newBuilder(
-                                URI.create(url)
-                        )
-                        .GET()
-                        .build();
-
-        HttpResponse<InputStream> response =
-                HTTP.send(
-                        request,
-                        HttpResponse.BodyHandlers.ofInputStream()
-                );
-
-        if (response.statusCode() < 200
-                || response.statusCode() >= 300) {
-
-            response.body().close();
-
-            throw new IllegalStateException(
-                    "HTTP "
-                            + response.statusCode()
-                            + " while downloading asset: "
-                            + task.assetPath
-            );
-        }
-
-        try (InputStream input =
-                     response.body()) {
-
-            Files.copy(
-                    input,
-                    temporary,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
-        }
-
-        /*
-         * Never install a corrupted asset.
-         */
-        if (!verifySha1(
-                temporary,
-                task.hash
-        )) {
-
-            Files.deleteIfExists(
-                    temporary
-            );
-
-            throw new IllegalStateException(
-                    "SHA-1 mismatch for asset: "
-                            + task.assetPath
-            );
-        }
-
-        Files.move(
-                temporary,
-                task.target,
-                StandardCopyOption.REPLACE_EXISTING
-        );
+        DownloadUtil.downloadFile(url, task.target, task.hash);
     }
 
     private static boolean verifySha1(
