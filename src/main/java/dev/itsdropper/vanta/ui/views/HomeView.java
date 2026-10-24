@@ -39,6 +39,7 @@ import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 public class HomeView extends StackPane {
@@ -60,6 +61,8 @@ public class HomeView extends StackPane {
     private final java.util.Map<String, Instance> displayedInstances =
             new java.util.HashMap<>();
     private final Timeline playtimeTimer;
+    private final AtomicLong instanceRefreshSequence = new AtomicLong();
+    private final AtomicLong serverRefreshSequence = new AtomicLong();
 
     public HomeView(
             AccountService accountService,
@@ -241,6 +244,7 @@ public class HomeView extends StackPane {
     }
 
     public void refreshRecentInstances() {
+        long request = instanceRefreshSequence.incrementAndGet();
         Thread thread = new Thread(() -> {
             try {
                 List<Instance> instances =
@@ -248,11 +252,15 @@ public class HomeView extends StackPane {
                                 InstanceManager.discoverInstances()
                         );
 
-                Platform.runLater(() -> renderRecentInstances(instances));
+                Platform.runLater(() -> {
+                    if (request != instanceRefreshSequence.get()) return;
+                    renderRecentInstances(instances);
+                });
 
             } catch (Throwable ex) {
                 ex.printStackTrace();
                 Platform.runLater(() -> {
+                    if (request != instanceRefreshSequence.get()) return;
                     recentList.getChildren().clear();
                     recentStatus.setText("Failed to load recent instances.");
                 });
@@ -557,6 +565,7 @@ public class HomeView extends StackPane {
     }
 
     public void refreshRecentServers() {
+        long request = serverRefreshSequence.incrementAndGet();
         Thread thread = new Thread(() -> {
             try {
                 List<Instance> instances =
@@ -565,12 +574,14 @@ public class HomeView extends StackPane {
                 List<ServerHistoryEntry> history =
                         ServerHistoryManager.getRecent();
 
-                Platform.runLater(() ->
-                        renderRecentServers(instances, history)
-                );
+                Platform.runLater(() -> {
+                    if (request != serverRefreshSequence.get()) return;
+                    renderRecentServers(instances, history);
+                });
             } catch (Throwable ex) {
                 ex.printStackTrace();
                 Platform.runLater(() -> {
+                    if (request != serverRefreshSequence.get()) return;
                     recentServersList.getChildren().clear();
                     recentServersStatus.setText(
                             "Failed to load recent servers."
