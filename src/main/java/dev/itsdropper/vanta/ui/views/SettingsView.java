@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
@@ -35,6 +36,7 @@ import dev.itsdropper.vanta.ui.ThemeManager;
 
 import java.awt.Desktop;
 import java.io.IOException;
+import java.io.File;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -43,6 +45,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 import java.util.function.Consumer;
 
@@ -624,9 +627,14 @@ public class SettingsView extends BorderPane {
         addInfoRow(dataCard, "Data directory", vantaDirectory.toString());
         addInfoRow(dataCard, "Settings", vantaDirectory.resolve("settings.properties").toString());
 
-        dataCard.getChildren().add(
-                actionButton("OPEN VANTA FOLDER", () -> openDirectory(vantaDirectory))
+        HBox dataActions = new HBox(8,
+                actionButton("OPEN VANTA FOLDER", () -> openDirectory(vantaDirectory)),
+                actionButton("EXPORT SETTINGS", this::exportSettingsBackup),
+                actionButton("IMPORT SETTINGS", this::importSettingsBackup)
         );
+        dataActions.setAlignment(Pos.CENTER_LEFT);
+        dataActions.setSpacing(8);
+        dataCard.getChildren().add(dataActions);
 
         VBox runtimeCard = card(
                 "Runtime",
@@ -645,6 +653,16 @@ public class SettingsView extends BorderPane {
         compact.setSelected(LauncherSettings.isCompactInstancesEnabled());
         compact.getStyleClass().add("settings-checkbox");
         compact.setOnAction(e -> LauncherSettings.setCompactInstancesEnabled(compact.isSelected()));
+        CheckBox modrinthDownloads = new CheckBox("Show download counts in Modrinth browsing");
+        modrinthDownloads.setSelected(LauncherSettings.isShowModrinthDownloadsEnabled());
+        modrinthDownloads.getStyleClass().add("settings-checkbox");
+        modrinthDownloads.setOnAction(e -> LauncherSettings.setShowModrinthDownloadsEnabled(modrinthDownloads.isSelected()));
+
+        CheckBox autoRepairOnLaunch = new CheckBox("Attempt automatic instance repair on launch");
+        autoRepairOnLaunch.setSelected(LauncherSettings.isAutoRepairOnLaunchEnabled());
+        autoRepairOnLaunch.getStyleClass().add("settings-checkbox");
+        autoRepairOnLaunch.setOnAction(e -> LauncherSettings.setAutoRepairOnLaunchEnabled(autoRepairOnLaunch.isSelected()));
+
         CheckBox notifications = new CheckBox("Show launcher notifications");
         notifications.setSelected(LauncherSettings.isNotificationsEnabled());
         notifications.getStyleClass().add("settings-checkbox");
@@ -681,7 +699,7 @@ public class SettingsView extends BorderPane {
         stateScan.getStyleClass().add("settings-checkbox");
         stateScan.setOnAction(e -> LauncherSettings.setStateScanOnOpenEnabled(stateScan.isSelected()));
         workspace.getChildren().addAll(
-                playtime, compact, notifications,
+                playtime, compact, modrinthDownloads, autoRepairOnLaunch, notifications,
                 new Label("Success notification duration"), notificationDurationLabel,
                 notificationDuration, saveNotificationDuration, remember, stateScan
         );
@@ -751,6 +769,74 @@ public class SettingsView extends BorderPane {
         loadRollbackVersions(versions, rollbackButton);
     }
 
+
+    private void exportSettingsBackup() {
+        Path settingsFile = MinecraftLocator.getVantaDirectory().resolve("settings.properties");
+        if (!Files.isRegularFile(settingsFile)) {
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.error("Export failed", "The settings file does not exist yet.");
+            return;
+        }
+
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Export Vanta settings");
+        chooser.setInitialFileName("vanta-settings.properties");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Vanta settings (*.properties)", "*.properties"));
+        File selected = chooser.showSaveDialog(getScene() == null ? null : getScene().getWindow());
+        if (selected == null) return;
+
+        Path target = selected.toPath();
+        if (!target.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".properties")) {
+            target = target.resolveSibling(target.getFileName() + ".properties");
+        }
+
+        try {
+            Files.copy(settingsFile, target, StandardCopyOption.REPLACE_EXISTING);
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.success("Settings exported", "Backup saved to " + target);
+        } catch (IOException ex) {
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.error("Export failed", ex.getMessage() == null ? "Could not write the backup." : ex.getMessage());
+        }
+    }
+
+    private void importSettingsBackup() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Import Vanta settings");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Vanta settings (*.properties)", "*.properties"));
+        File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
+        if (selected == null) return;
+
+        Properties parsed = new Properties();
+        try (var reader = Files.newBufferedReader(selected.toPath())) {
+            parsed.load(reader);
+        } catch (IOException | IllegalArgumentException ex) {
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.error("Import failed", "The selected file is not a valid settings backup.");
+            return;
+        }
+
+        Alert confirm = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "Import these settings and replace the current Vanta settings file? Export a backup first if you want to preserve the current configuration.",
+                ButtonType.CANCEL,
+                ButtonType.OK
+        );
+        confirm.setTitle("Import Vanta settings");
+        confirm.setHeaderText("Replace current launcher settings");
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+        Path settingsFile = MinecraftLocator.getVantaDirectory().resolve("settings.properties");
+        try {
+            Files.createDirectories(settingsFile.getParent());
+            Files.copy(selected.toPath(), settingsFile, StandardCopyOption.REPLACE_EXISTING);
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.success("Settings imported", "Restart Vanta to apply every imported option consistently.");
+        } catch (IOException ex) {
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) manager.error("Import failed", ex.getMessage() == null ? "Could not replace the settings file." : ex.getMessage());
+        }
+    }
 
     private void loadRollbackVersions(
             ComboBox<UpdateInfo> versions,
