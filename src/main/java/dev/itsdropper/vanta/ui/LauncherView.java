@@ -82,7 +82,7 @@ public class LauncherView {
             if (nextScene != null) {
                 nextScene.addEventFilter(
                         javafx.scene.input.KeyEvent.KEY_PRESSED,
-                        this::handleKeyboardShortcut
+                        keyboardShortcutHandler
                 );
             }
         });
