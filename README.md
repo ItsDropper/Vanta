@@ -14,6 +14,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 - **Modrinth integration** — search projects, install content, resolve dependencies, scan installed mods, and repair dependencies.
 - **State Center** — inspect instance and shared-resource health and identify missing or invalid files.
 - **Recovery-oriented updates** — download release packages, verify SHA-256 checksums, and use an external updater with staging and rollback.
+- **Local server management** — manage Java server profiles, process lifecycle, live console, basic properties, player-list commands, offline backups/restores, and crash reports.
 - **Local-first data** — keep launcher and instance data on the user's device wherever possible.
 - **JavaFX interface** — a native Java desktop application rather than an embedded web application.
 
@@ -61,6 +62,7 @@ To run from an IDE, use the configured Gradle application task or create a run c
 | Modrinth | Catalog search, dependency graph resolution, installation, scanning, and repair |
 | State Center | Instance/shared-resource inspection and health classification |
 | Update system | Release discovery, SHA-256 verification, external replacement, and rollback |
+| Server manager | Local Java server processes, console commands, properties, backups, restores, and crash diagnostics |
 
 See [Architecture Overview](docs/ARCHITECTURE.md) for subsystem boundaries and reliability expectations.
 
