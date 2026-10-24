@@ -153,7 +153,13 @@ public class HomeView extends StackPane {
                 )
         );
         playtimeTimer.setCycleCount(Timeline.INDEFINITE);
-        playtimeTimer.play();
+        sceneProperty().addListener((observable, previousScene, nextScene) -> {
+            if (nextScene == null) {
+                playtimeTimer.stop();
+            } else if (isVisible() && playtimeTimer.getStatus() != javafx.animation.Animation.Status.RUNNING) {
+                playtimeTimer.play();
+            }
+        });
 
     }
 
