@@ -14,6 +14,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
+import dev.itsdropper.vanta.ui.LauncherSettings;
+
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthContentType;
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthProject;
 import dev.itsdropper.vanta.launcher.service.ModrinthContentService;
@@ -476,9 +478,12 @@ public class ModpackBrowserView extends VBox {
         VBox information = new VBox(
                 5,
                 title,
-                descriptionLabel,
-                metadata
+                descriptionLabel
         );
+
+        if (LauncherSettings.isShowModrinthDownloadsEnabled()) {
+            information.getChildren().add(metadata);
+        }
 
         HBox.setHgrow(
                 information,
