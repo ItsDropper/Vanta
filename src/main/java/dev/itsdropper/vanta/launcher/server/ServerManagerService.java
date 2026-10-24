@@ -190,6 +190,26 @@ public final class ServerManagerService implements AutoCloseable {
             rt.exitCode = Integer.MIN_VALUE;
             rt.lastExitReason = "";
             publish(id);
+            String selectedJava = p.javaExecutable == null || p.javaExecutable.isBlank() ? "java" : p.javaExecutable.trim();
+            try {
+                String compatibleJava = ManagedJavaRuntimeService.resolveForServer(p.jarPath(), selectedJava,
+                        message -> emit(id, message));
+                if (!compatibleJava.equals(selectedJava)) {
+                    p.javaExecutable = compatibleJava;
+                    synchronized (this) {
+                        profiles.put(id, copy(p));
+                        save();
+                    }
+                    emit(id, "Vanta: saved the managed Java runtime to this server profile.");
+                }
+            } catch (IOException runtimeFailure) {
+                rt.state = State.CRASHED;
+                rt.lastExitReason = "Could not prepare a compatible Java runtime: " + safeMessage(runtimeFailure);
+                emit(id, "Vanta: " + rt.lastExitReason);
+                publish(id);
+                throw runtimeFailure;
+            }
+
             List<String> command = new ArrayList<>();
             command.add(p.javaExecutable == null || p.javaExecutable.isBlank() ? "java" : p.javaExecutable.trim());
             command.add("-Xms" + p.minRamMb + "M");
