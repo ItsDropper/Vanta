@@ -93,19 +93,6 @@ public class JavaLocator {
                 return java.toString();
             }
 
-            Path javaw =
-                    Path.of(
-                                    System.getProperty(
-                                            "java.home"
-                                    )
-                            )
-                            .resolve("bin")
-                            .resolve("javaw.exe");
-
-            if (Files.isRegularFile(javaw)) {
-                JavaVerifier.verify(javaw, requiredVersion);
-                return javaw.toString();
-            }
         }
 
         /*
