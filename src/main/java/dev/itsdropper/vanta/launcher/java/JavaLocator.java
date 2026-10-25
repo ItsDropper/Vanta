@@ -61,13 +61,18 @@ public class JavaLocator {
         }
 
         /*
-         * For older Java versions, first check the Java currently
-         * running Vanta.
+         * For older Java versions, reuse the Java currently running Vanta
+         * only when it is suitable for launching Minecraft. jpackage builds
+         * commonly use a trimmed private runtime; that runtime may omit
+         * jdk.httpserver, which Vanta enables for Minecraft/Essential. Passing
+         * --add-modules=jdk.httpserver to such a runtime makes the child JVM
+         * exit immediately with code 1.
          */
         int currentVersion =
                 getCurrentJavaVersion();
 
-        if (currentVersion == requiredVersion) {
+        if (currentVersion == requiredVersion
+                && hasSystemModule("jdk.httpserver")) {
 
             Path java =
                     Path.of(
@@ -87,6 +92,7 @@ public class JavaLocator {
 
                 return java.toString();
             }
+
         }
 
         /*
@@ -170,6 +176,16 @@ public class JavaLocator {
 
         return Runtime.version()
                 .feature();
+    }
+
+    private static boolean hasSystemModule(String moduleName) {
+        try {
+            return java.lang.module.ModuleFinder.ofSystem()
+                    .find(moduleName)
+                    .isPresent();
+        } catch (RuntimeException ignored) {
+            return false;
+        }
     }
 
     // =============================================================
