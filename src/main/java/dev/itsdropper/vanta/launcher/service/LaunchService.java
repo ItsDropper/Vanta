@@ -404,8 +404,14 @@ public class LaunchService {
                 return;
             }
 
+            /*
+             * Live repair detection must use only this process's output.
+             * latest.log and crash-reports may be left over from previous
+             * launches; using them here can falsely classify this launch and
+             * forcibly terminate a healthy Minecraft process.
+             */
             String output =
-                    collectDiagnosticContext(getRecentOutput());
+                    getRecentOutput();
 
             /*
              * ---------------------------------------------------------
@@ -787,8 +793,10 @@ public class LaunchService {
 
                                     lastFailure =
                                             new LaunchFailure(
-                                                    "Minecraft stopped unexpectedly",
-                                                    "Minecraft closed with an error that Vanta could not identify.",
+                                                    "Minecraft exited with code " + exitCode,
+                                                    "Minecraft exited with a non-zero code (" + exitCode
+                                                            + "). This does not by itself confirm a Minecraft crash. "
+                                                            + "No specific failure was identified from the current process output.",
                                                     output
                                             );
                                 }
