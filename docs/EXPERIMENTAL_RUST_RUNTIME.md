@@ -1,24 +1,34 @@
 # Experimental Rust runtime integration
 
-Status: prototype planning and UI entry only. This is not a playable runtime integration yet.
+Status: early Windows prototype. Java remains the default engine.
 
-Vanta's default engine remains the normal Java client. The experimental target is [Horizon](https://github.com/horizon-rust/horizon), a separate MIT-licensed Rust implementation of Minecraft Java Edition 26.3.
+The experimental target is [Horizon](https://github.com/horizon-rust/horizon), a separate MIT-licensed native Rust implementation targeting Minecraft Java Edition 26.3.
 
-## Compatibility boundary
+## Implemented on this branch
 
-- Horizon currently targets Minecraft 26.3; do not silently map arbitrary Java Edition versions to it.
-- Ordinary Java mods, including Fabric and Forge mods, do not run in Horizon. Horizon has its own native mod system and supports only the compatible content it documents.
-- Worlds and resource/data packs need to be validated against Horizon's compatibility notes before Vanta advertises them as supported.
-- Vanta must never route a Horizon profile through the existing Java classpath launcher. The engine choice must be persisted per instance and dispatch to an engine-specific launch adapter.
-- Java must remain the default, existing instances must remain Java instances when reading older metadata, and the experimental path must not mutate existing worlds or mod directories.
+- The engine is persisted in instance.json. Older metadata without the field defaults to JAVA.
+- Engine metadata is preserved when renaming, changing icons, updating the Minecraft version, or duplicating an instance.
+- Instance creation has a separate, explicitly experimental Horizon flow.
+- Launch dispatch prevents Horizon profiles from going through Java classpath construction or Java account-argument injection.
+- The Windows x64 Horizon launcher archive is resolved from GitHub Releases, downloaded into Vanta's own data directory, checked against GitHub's SHA-256 asset digest and declared size, and extracted with path traversal and expanded-size limits.
+- A focused metadata regression test covers legacy JSON, round-trip serialization, icon changes, display labels and invalid engine IDs.
 
-## Implementation sequence
+## Known limitations — not a finished native runtime
 
-1. Add a clearly labelled, disabled Horizon entry in the instance creation type picker. This makes the direction visible without allowing users to create profiles that Vanta cannot launch.
-2. Add a persisted engine identifier with a backward-compatible default of JAVA, plus tests for old instance metadata and engine selection.
-3. Implement a Horizon installation adapter that obtains the upstream Windows x64 release, verifies its published SHA-256 digest, constrains extraction to the dedicated Horizon data directory, and records the installed version.
-4. Implement engine-specific profile preparation and launch integration based on upstream-supported interfaces; do not assume the Horizon GUI launcher accepts Minecraft arguments that it does not document.
-5. Add explicit compatibility checks, diagnostics, opt-in warnings, and tests. Only enable the UI option when the Windows launch path is supported and validated.
+- Currently Windows x64 only.
+- Horizon 26.3 only.
+- The current bridge opens the upstream Horizon launcher. It does not yet launch the exact Vanta profile directly or synchronize the selected Vanta instance with a Horizon profile. Choose and launch the game inside Horizon.
+- Vanta's process tracking currently sees the Horizon launcher process, not necessarily the game process. Playtime/status should therefore be treated as approximate for this prototype.
+- Java mods, Fabric and Forge are not supported by Horizon. Do not copy Java mod folders into Horizon or imply they will work.
+- The installer currently trusts the SHA-256 digest and size published by GitHub's release API over HTTPS. Signature verification of the checksum manifest is a potential hardening task.
+
+## Next implementation sequence
+
+1. Verify the metadata and installation code through CI and fix any regressions.
+2. Add robust Horizon process ownership and state reporting, distinct from Java Minecraft process tracking.
+3. Integrate documented Horizon instance/CLI interfaces, so Vanta can select or create the corresponding Horizon profile rather than merely opening the launcher.
+4. Add migration/duplicate behavior tests and installation failure cleanup tests.
+5. Keep the option explicitly experimental until direct profile launch and compatibility checks are verified.
 
 ## Upstream references
 
