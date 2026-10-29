@@ -815,12 +815,20 @@ public class LaunchService {
                                     String output =
                                             getRecentOutput();
 
+                                    boolean horizonFailure =
+                                            failedInstance != null && failedInstance.isHorizon();
+
                                     lastFailure =
                                             new LaunchFailure(
-                                                    "Minecraft exited with code " + exitCode,
-                                                    "Minecraft exited with a non-zero code (" + exitCode
-                                                            + "). This does not by itself confirm a Minecraft crash. "
-                                                            + "No specific failure was identified from the current process output.",
+                                                    horizonFailure
+                                                            ? "Horizon launch failed (exit " + exitCode + ")"
+                                                            : "Minecraft exited with code " + exitCode,
+                                                    horizonFailure
+                                                            ? "Horizon could not start or keep running. Check the output below. "
+                                                                    + "If this is the first launch, open Horizon once and sign in with an account that owns Minecraft: Java Edition."
+                                                            : "Minecraft exited with a non-zero code (" + exitCode
+                                                                    + "). This does not by itself confirm a Minecraft crash. "
+                                                                    + "No specific failure was identified from the current process output.",
                                                     output
                                             );
                                 }
