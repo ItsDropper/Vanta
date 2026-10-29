@@ -12,7 +12,8 @@ The experimental target is [Horizon](https://github.com/horizon-rust/horizon), a
 - Launch dispatch prevents Horizon profiles from going through Java classpath construction or Java account-argument injection.
 - The Windows x64 Horizon launcher archive is resolved from GitHub Releases, downloaded into Vanta's own data directory, checked against GitHub's SHA-256 asset digest and declared size, and extracted with path traversal and expanded-size limits.
 - Vanta creates or finds a matching Horizon profile using Horizon's documented CLI, updates its display name, and invokes the documented play command for that profile.
-- A focused metadata regression test covers legacy JSON, round-trip serialization, icon changes, display labels and invalid engine IDs.
+- Focused regression tests cover legacy JSON, round-trip serialization, icon changes, display labels, invalid engine IDs, deterministic opaque Horizon profile IDs, normal archive extraction, and rejection of ZIP path traversal.
+- Horizon process output is labeled separately and bypasses Vanta's Java/Fabric repair detector, preventing Java-specific diagnostics from terminating a native Horizon process.
 - The current branch's Java compile check and auto-update process-exit regression workflow both passed on commit `c2319fea8a707479fcc319030e57477da2529e85`.
 
 ## Known limitations — not a finished native runtime
@@ -23,7 +24,7 @@ The experimental target is [Horizon](https://github.com/horizon-rust/horizon), a
 - Java mods, Fabric and Forge are not supported by Horizon. Do not copy Java mod folders into Horizon or imply they will work.
 - A Microsoft account that owns Minecraft: Java Edition may need to be signed into Horizon separately.
 - Release tags are restricted to safe single-component directory names, and downloads must be HTTPS URLs hosted by GitHub. The installer still trusts the SHA-256 digest and size published by GitHub's release API over HTTPS; signature verification of the checksum manifest is a potential hardening task.
-- Non-interactive Horizon CLI commands have stdin closed and bounded timeouts; timed-out processes are forcibly stopped and their output streams are closed.
+- Non-interactive Horizon CLI commands have stdin closed and bounded timeouts; timed-out processes are forcibly stopped and their output streams are closed. The final download redirect is also required to remain on HTTPS GitHub or GitHub-hosted asset domains.
 - CI compilation and regression checks do not prove the game launches successfully on a real Windows x64 machine. A real-device smoke test is still required before treating this as ready for general use.
 - No performance claim is made. Any benchmark must compare the same world, settings, render distance, and hardware against Vanta's Java runtime.
 
