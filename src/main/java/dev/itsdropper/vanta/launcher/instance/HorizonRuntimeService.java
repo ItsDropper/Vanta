@@ -93,6 +93,11 @@ public final class HorizonRuntimeService {
         if (instance == null || !instance.isHorizon()) {
             throw new IllegalArgumentException("A Horizon instance is required.");
         }
+        if (instance.getId() == null || instance.getId().isBlank()
+                || instance.getName() == null || instance.getName().isBlank()
+                || instance.getDirectory() == null) {
+            throw new IOException("The Horizon instance metadata is incomplete. Rename or recreate this instance in Vanta.");
+        }
         if (!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win")) {
             throw new IOException("The experimental Horizon integration currently supports Windows x64 only.");
         }
@@ -236,6 +241,9 @@ public final class HorizonRuntimeService {
 
     private static CommandResult runCommand(List<String> command, Duration timeout) throws Exception {
         Process process = new ProcessBuilder(command).redirectErrorStream(false).start();
+        // These are non-interactive CLI operations. Closing stdin prevents a prompt from
+        // waiting indefinitely for input that Vanta cannot provide.
+        process.getOutputStream().close();
         CompletableFuture<String> stdout = CompletableFuture.supplyAsync(
                 () -> readStream(process.getInputStream()));
         CompletableFuture<String> stderr = CompletableFuture.supplyAsync(
@@ -243,6 +251,10 @@ public final class HorizonRuntimeService {
         if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
             process.destroyForcibly();
             process.waitFor(5, TimeUnit.SECONDS);
+            process.getInputStream().close();
+            process.getErrorStream().close();
+            stdout.cancel(true);
+            stderr.cancel(true);
             throw new IOException("Horizon command timed out: " + command.get(1));
         }
         return new CommandResult(
@@ -301,14 +313,22 @@ public final class HorizonRuntimeService {
                 String url = asset.path("browser_download_url").asText("");
                 String digest = asset.path("digest").asText("");
                 long size = asset.path("size").asLong(-1);
-                if (tag.isBlank() || url.isBlank()
+                URI downloadUri;
+                try {
+                    downloadUri = URI.create(url);
+                } catch (IllegalArgumentException ex) {
+                    throw new IOException("Horizon launcher release contains an invalid download URL.", ex);
+                }
+                if (tag.isBlank()
+                        || !"https".equalsIgnoreCase(downloadUri.getScheme())
+                        || !"github.com".equalsIgnoreCase(downloadUri.getHost())
                         || !digest.matches("sha256:[0-9a-fA-F]{64}")) {
-                    throw new IOException("Horizon launcher release is missing a valid tag, URL, or SHA-256 digest.");
+                    throw new IOException("Horizon launcher release is missing a valid tag, HTTPS GitHub URL, or SHA-256 digest.");
                 }
                 if (size <= 0 || size > MAX_DOWNLOAD_BYTES) {
                     throw new IOException("Horizon Windows archive has an unexpected size.");
                 }
-                return new InstalledRelease(tag, URI.create(url), digest.substring("sha256:".length()), size);
+                return new InstalledRelease(tag, downloadUri, digest.substring("sha256:".length()), size);
             }
         }
         throw new IOException("No stable Windows x64 Horizon launcher archive was found in the latest 30 releases.");
