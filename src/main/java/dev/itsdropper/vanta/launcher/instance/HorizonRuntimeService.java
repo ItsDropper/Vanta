@@ -47,7 +47,7 @@ public final class HorizonRuntimeService {
     private HorizonRuntimeService() {
     }
 
-    public static Process launch(Instance instance) throws Exception {
+    public static synchronized Process launch(Instance instance) throws Exception {
         validateTarget(instance);
         InstalledRelease release = resolveLatestRelease();
         Path installRoot = MinecraftLocator.getVantaDirectory()
@@ -153,15 +153,18 @@ public final class HorizonRuntimeService {
         }
 
         boolean exists = false;
+        boolean displayNameTaken = false;
         for (JsonNode entry : instances) {
-            if (!profileId.equals(entry.path("id").asText())) {
-                continue;
+            String existingId = entry.path("id").asText();
+            String existingName = entry.path("name").asText();
+            if (profileId.equals(existingId)) {
+                if (!entry.path("java").isMissingNode() && !entry.path("java").isNull()) {
+                    throw new IOException("The matching Horizon profile ID is already used by a Java instance.");
+                }
+                exists = true;
+            } else if (("Vanta - " + displayName).equalsIgnoreCase(existingName)) {
+                displayNameTaken = true;
             }
-            if (!entry.path("java").isMissingNode() && !entry.path("java").isNull()) {
-                throw new IOException("The matching Horizon profile ID is already used by a Java instance.");
-            }
-            exists = true;
-            break;
         }
 
         if (!exists) {
@@ -174,7 +177,10 @@ public final class HorizonRuntimeService {
             }
         }
 
-        String safeDisplayName = ("Vanta - " + displayName).trim();
+        String safeDisplayName = "Vanta - " + displayName;
+        if (displayNameTaken) {
+            safeDisplayName += " (" + profileId + ")";
+        }
         CommandResult rename = runCommand(
                 List.of(executable.toString(), "instance", "rename", profileId, safeDisplayName),
                 Duration.ofSeconds(45)
@@ -221,7 +227,8 @@ public final class HorizonRuntimeService {
     }
 
     private static InstalledRelease resolveLatestRelease() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(RELEASES_API))
+        HttpRequest request = HttpRequest.newBuilder(
+                        URI.create("https://api.github.com/repos/horizon-rust/horizon/releases?per_page=30"))
                 .timeout(Duration.ofSeconds(20))
                 .header("Accept", "application/vnd.github+json")
                 .header("User-Agent", "Vanta-Experimental-Horizon")
@@ -231,31 +238,36 @@ public final class HorizonRuntimeService {
                 HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (response.statusCode() != 200) {
             throw new IOException("GitHub returned HTTP " + response.statusCode()
-                    + " while checking the latest Horizon release.");
+                    + " while checking Horizon launcher releases.");
         }
 
-        JsonNode release = MAPPER.readTree(response.body());
-        String tag = release.path("tag_name").asText("");
-        if (tag.isBlank()) {
-            throw new IOException("The Horizon release response had no tag name.");
+        JsonNode releases = MAPPER.readTree(response.body());
+        if (!releases.isArray()) {
+            throw new IOException("GitHub returned an unexpected Horizon releases response.");
         }
-
-        for (JsonNode asset : release.path("assets")) {
-            if (!WINDOWS_ASSET.equals(asset.path("name").asText())) {
+        for (JsonNode release : releases) {
+            if (release.path("draft").asBoolean(true) || release.path("prerelease").asBoolean(true)) {
                 continue;
             }
-            String url = asset.path("browser_download_url").asText("");
-            String digest = asset.path("digest").asText("");
-            long size = asset.path("size").asLong(-1);
-            if (url.isBlank() || !digest.matches("sha256:[0-9a-fA-F]{64}")) {
-                throw new IOException("Horizon release is missing a valid SHA-256 digest for its Windows archive.");
+            String tag = release.path("tag_name").asText("");
+            for (JsonNode asset : release.path("assets")) {
+                if (!WINDOWS_ASSET.equals(asset.path("name").asText())) {
+                    continue;
+                }
+                String url = asset.path("browser_download_url").asText("");
+                String digest = asset.path("digest").asText("");
+                long size = asset.path("size").asLong(-1);
+                if (tag.isBlank() || url.isBlank()
+                        || !digest.matches("sha256:[0-9a-fA-F]{64}")) {
+                    throw new IOException("Horizon launcher release is missing a valid tag, URL, or SHA-256 digest.");
+                }
+                if (size <= 0 || size > MAX_DOWNLOAD_BYTES) {
+                    throw new IOException("Horizon Windows archive has an unexpected size.");
+                }
+                return new InstalledRelease(tag, URI.create(url), digest.substring("sha256:".length()), size);
             }
-            if (size <= 0 || size > MAX_DOWNLOAD_BYTES) {
-                throw new IOException("Horizon Windows archive has an unexpected size.");
-            }
-            return new InstalledRelease(tag, URI.create(url), digest.substring("sha256:".length()), size);
         }
-        throw new IOException("No Windows x64 launcher archive was published in the latest Horizon release.");
+        throw new IOException("No stable Windows x64 Horizon launcher archive was found in the latest 30 releases.");
     }
 
     private static void downloadAndVerify(InstalledRelease release, Path destination) throws Exception {
