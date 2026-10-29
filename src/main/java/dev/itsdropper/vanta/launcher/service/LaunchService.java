@@ -153,6 +153,30 @@ public class LaunchService {
                     LaunchState.PREPARING
             );
 
+            /*
+             * Horizon is a separate native engine. Never send its instance
+             * through Java classpath construction, account argument injection,
+             * or the Java installation repair path.
+             */
+            if (instance.isHorizon()) {
+                setState(LaunchState.STARTING);
+
+                Process process =
+                        dev.itsdropper.vanta.launcher.instance.HorizonRuntimeService.launch(instance);
+
+                if (process == null) {
+                    throw new IllegalStateException("Horizon launcher process was not created.");
+                }
+
+                minecraftProcess = process;
+                runningInstance = instance;
+                runningServerTarget = null;
+                monitorOutput(process);
+                monitorProcess(process);
+                setState(LaunchState.RUNNING);
+                return process;
+            }
+
             Account account =
                     accountService.getCurrentAccount();
 
