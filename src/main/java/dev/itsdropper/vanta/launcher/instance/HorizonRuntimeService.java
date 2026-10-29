@@ -270,7 +270,6 @@ public final class HorizonRuntimeService {
              var output = new java.io.ByteArrayOutputStream()) {
             byte[] buffer = new byte[8192];
             int read;
-            long total = 0;
             boolean truncated = false;
             while ((read = stream.read(buffer)) >= 0) {
                 if (read == 0) {
@@ -286,10 +285,9 @@ public final class HorizonRuntimeService {
                 } else {
                     truncated = true;
                 }
-                total += read;
             }
             String text = output.toString(StandardCharsets.UTF_8);
-            return truncated ? text + "\\n[Horizon output truncated after "
+            return truncated ? text + "\n[Horizon output truncated after "
                     + MAX_COMMAND_OUTPUT_BYTES + " bytes]" : text;
         } catch (IOException ex) {
             return "";
