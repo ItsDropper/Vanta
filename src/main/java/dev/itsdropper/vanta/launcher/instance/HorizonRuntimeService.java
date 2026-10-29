@@ -6,28 +6,29 @@ import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 /**
- * Experimental bridge to the upstream Horizon launcher.
- *
- * This intentionally opens Horizon's own launcher rather than pretending its
- * process is the Java Minecraft process. Per-instance direct play is not yet
- * supported by an upstream integration contract.
+ * Experimental bridge to Horizon's documented command-line interface.
+ * A Vanta profile is mapped to an isolated Horizon profile using a stable ID.
  */
 public final class HorizonRuntimeService {
 
@@ -37,7 +38,6 @@ public final class HorizonRuntimeService {
             "horizon-launcher-windows-x64.zip";
     private static final long MAX_DOWNLOAD_BYTES = 200L * 1024 * 1024;
     private static final long MAX_EXTRACTED_BYTES = 512L * 1024 * 1024;
-
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(20))
@@ -48,6 +48,33 @@ public final class HorizonRuntimeService {
     }
 
     public static Process launch(Instance instance) throws Exception {
+        validateTarget(instance);
+        InstalledRelease release = resolveLatestRelease();
+        Path installRoot = MinecraftLocator.getVantaDirectory()
+                .resolve("experimental")
+                .resolve("horizon");
+        Path versionDirectory = installRoot.resolve(release.version());
+        Path executable = findLauncher(versionDirectory);
+
+        if (executable == null) {
+            executable = installLauncher(release, installRoot, versionDirectory);
+        }
+
+        String profileId = stableProfileId(instance);
+        ensureHorizonProfile(executable, profileId, instance.getName());
+
+        System.out.println("[Vanta Horizon] Launching Horizon profile " + profileId
+                + " for Vanta instance '" + instance.getName() + "'.");
+        System.out.println("[Vanta Horizon] Horizon owns its profile data; Vanta's Java mods and settings are not copied.");
+        return new ProcessBuilder(
+                executable.toString(),
+                "play",
+                "--instance",
+                profileId
+        ).directory(instance.getDirectory().toFile()).redirectErrorStream(true).start();
+    }
+
+    private static void validateTarget(Instance instance) throws IOException {
         if (instance == null || !instance.isHorizon()) {
             throw new IllegalArgumentException("A Horizon instance is required.");
         }
@@ -61,47 +88,135 @@ public final class HorizonRuntimeService {
         if (!"26.3".equals(instance.getMinecraftVersion())) {
             throw new IOException("Horizon currently targets Minecraft 26.3 only.");
         }
+    }
 
-        InstalledRelease release = resolveLatestRelease();
-        Path installRoot = MinecraftLocator.getVantaDirectory()
-                .resolve("experimental")
-                .resolve("horizon");
-        Path versionDirectory = installRoot.resolve(release.version());
-        Path executable = findLauncher(versionDirectory);
+    private static Path installLauncher(
+            InstalledRelease release,
+            Path installRoot,
+            Path versionDirectory
+    ) throws Exception {
+        Files.createDirectories(installRoot);
+        Path archive = Files.createTempFile(installRoot, "horizon-", ".zip");
+        Path staging = Files.createTempDirectory(installRoot, "extract-");
+        try {
+            downloadAndVerify(release, archive);
+            extractSafely(archive, staging);
+            if (findLauncher(staging) == null) {
+                throw new IOException("The verified Horizon archive did not contain horizon-launcher.exe.");
+            }
+            if (Files.exists(versionDirectory)) {
+                deleteTree(versionDirectory);
+            }
+            moveDirectory(staging, versionDirectory);
+            staging = null;
+            Path executable = findLauncher(versionDirectory);
+            if (executable == null) {
+                throw new IOException("Horizon launcher was not found after installation.");
+            }
+            return executable;
+        } finally {
+            Files.deleteIfExists(archive);
+            if (staging != null) {
+                deleteTree(staging);
+            }
+        }
+    }
 
-        if (executable == null) {
-            Files.createDirectories(installRoot);
-            Path archive = Files.createTempFile(installRoot, "horizon-", ".zip");
-            Path staging = Files.createTempDirectory(installRoot, "extract-");
-            try {
-                downloadAndVerify(release, archive);
-                extractSafely(archive, staging);
-                Path stagedExecutable = findLauncher(staging);
-                if (stagedExecutable == null) {
-                    throw new IOException("The verified Horizon archive did not contain horizon-launcher.exe.");
-                }
-                if (Files.exists(versionDirectory)) {
-                    deleteTree(versionDirectory);
-                }
-                moveDirectory(staging, versionDirectory);
-                staging = null;
-                executable = findLauncher(versionDirectory);
-                if (executable == null) {
-                    throw new IOException("Horizon launcher was not found after installation.");
-                }
-            } finally {
-                Files.deleteIfExists(archive);
-                if (staging != null) {
-                    deleteTree(staging);
-                }
+    private static String stableProfileId(Instance instance) {
+        String id = instance.getId().toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9_-]", "-");
+        return "vanta-" + id;
+    }
+
+    private static void ensureHorizonProfile(
+            Path executable,
+            String profileId,
+            String displayName
+    ) throws Exception {
+        CommandResult list = runCommand(
+                List.of(executable.toString(), "--json", "instance", "list"),
+                Duration.ofSeconds(45)
+        );
+        if (list.exitCode() != 0) {
+            throw commandFailure("Could not inspect Horizon instances", list);
+        }
+
+        JsonNode instances;
+        try {
+            instances = MAPPER.readTree(list.stdout());
+        } catch (Exception ex) {
+            throw new IOException("Horizon returned invalid JSON while listing profiles.", ex);
+        }
+        if (!instances.isArray()) {
+            throw new IOException("Horizon returned an unexpected instance-list response.");
+        }
+
+        boolean exists = false;
+        for (JsonNode entry : instances) {
+            if (!profileId.equals(entry.path("id").asText())) {
+                continue;
+            }
+            if (!entry.path("java").isMissingNode() && !entry.path("java").isNull()) {
+                throw new IOException("The matching Horizon profile ID is already used by a Java instance.");
+            }
+            exists = true;
+            break;
+        }
+
+        if (!exists) {
+            CommandResult create = runCommand(
+                    List.of(executable.toString(), "instance", "create", profileId),
+                    Duration.ofMinutes(2)
+            );
+            if (create.exitCode() != 0) {
+                throw commandFailure("Could not create the Horizon profile", create);
             }
         }
 
-        System.out.println("[Vanta Horizon] Opening Horizon launcher " + release.version()
-                + ". Select the game/profile in Horizon; direct per-instance play is not wired yet.");
-        return new ProcessBuilder(executable.toString())
-                .directory(instance.getDirectory().toFile())
-                .start();
+        String safeDisplayName = ("Vanta - " + displayName).trim();
+        CommandResult rename = runCommand(
+                List.of(executable.toString(), "instance", "rename", profileId, safeDisplayName),
+                Duration.ofSeconds(45)
+        );
+        if (rename.exitCode() != 0) {
+            throw commandFailure("Could not name the Horizon profile", rename);
+        }
+    }
+
+    private static CommandResult runCommand(List<String> command, Duration timeout) throws Exception {
+        Process process = new ProcessBuilder(command).redirectErrorStream(false).start();
+        CompletableFuture<String> stdout = CompletableFuture.supplyAsync(
+                () -> readStream(process.getInputStream()));
+        CompletableFuture<String> stderr = CompletableFuture.supplyAsync(
+                () -> readStream(process.getErrorStream()));
+        if (!process.waitFor(timeout.toMillis(), TimeUnit.MILLISECONDS)) {
+            process.destroyForcibly();
+            process.waitFor(5, TimeUnit.SECONDS);
+            throw new IOException("Horizon command timed out: " + command.get(1));
+        }
+        return new CommandResult(
+                process.exitValue(),
+                stdout.get(10, TimeUnit.SECONDS),
+                stderr.get(10, TimeUnit.SECONDS)
+        );
+    }
+
+    private static String readStream(java.io.InputStream stream) {
+        try (stream) {
+            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            return "";
+        }
+    }
+
+    private static IOException commandFailure(String action, CommandResult result) {
+        String detail = result.stderr().isBlank() ? result.stdout() : result.stderr();
+        if (detail.length() > 1200) {
+            detail = detail.substring(detail.length() - 1200);
+        }
+        return new IOException(action + " (exit " + result.exitCode() + "). "
+                + detail.trim()
+                + " If Horizon has not been signed in, open its launcher and sign in first.");
     }
 
     private static InstalledRelease resolveLatestRelease() throws Exception {
@@ -112,7 +227,7 @@ public final class HorizonRuntimeService {
                 .GET()
                 .build();
         HttpResponse<String> response = HTTP.send(request,
-                HttpResponse.BodyHandlers.ofString(java.nio.charset.StandardCharsets.UTF_8));
+                HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         if (response.statusCode() != 200) {
             throw new IOException("GitHub returned HTTP " + response.statusCode()
                     + " while checking the latest Horizon release.");
@@ -124,8 +239,7 @@ public final class HorizonRuntimeService {
             throw new IOException("The Horizon release response had no tag name.");
         }
 
-        JsonNode assets = release.path("assets");
-        for (JsonNode asset : assets) {
+        for (JsonNode asset : release.path("assets")) {
             if (!WINDOWS_ASSET.equals(asset.path("name").asText())) {
                 continue;
             }
@@ -149,8 +263,7 @@ public final class HorizonRuntimeService {
                 .header("User-Agent", "Vanta-Experimental-Horizon")
                 .GET()
                 .build();
-        HttpResponse<Path> response = HTTP.send(request,
-                HttpResponse.BodyHandlers.ofFile(destination));
+        HttpResponse<Path> response = HTTP.send(request, HttpResponse.BodyHandlers.ofFile(destination));
         if (response.statusCode() != 200) {
             Files.deleteIfExists(destination);
             throw new IOException("Horizon download failed with HTTP " + response.statusCode() + ".");
@@ -160,13 +273,11 @@ public final class HorizonRuntimeService {
             throw new IOException("Horizon archive size did not match GitHub release metadata.");
         }
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        try (InputStream input = Files.newInputStream(destination)) {
+        try (var input = Files.newInputStream(destination)) {
             byte[] buffer = new byte[64 * 1024];
             int read;
             while ((read = input.read(buffer)) >= 0) {
-                if (read > 0) {
-                    digest.update(buffer, 0, read);
-                }
+                if (read > 0) digest.update(buffer, 0, read);
             }
         }
         String actual = HexFormat.of().formatHex(digest.digest());
@@ -180,7 +291,7 @@ public final class HorizonRuntimeService {
         Path root = destination.toAbsolutePath().normalize();
         long total = 0;
         int entries = 0;
-        try (InputStream file = Files.newInputStream(archive);
+        try (var file = Files.newInputStream(archive);
              ZipInputStream zip = new ZipInputStream(file)) {
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
@@ -240,5 +351,8 @@ public final class HorizonRuntimeService {
     }
 
     private record InstalledRelease(String version, URI downloadUri, String sha256, long expectedSize) {
+    }
+
+    private record CommandResult(int exitCode, String stdout, String stderr) {
     }
 }
