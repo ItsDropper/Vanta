@@ -124,7 +124,8 @@ public final class HorizonRuntimeService {
 
     private static String stableProfileId(Instance instance) {
         String id = instance.getId().toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9_-]", "-");
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-+|-+$", "");
         return "vanta-" + id;
     }
 
