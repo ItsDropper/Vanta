@@ -51,8 +51,10 @@ public final class CreateHorizonInstanceView extends VBox {
 
         Label compatibility = new Label(
                 "Experimental limitations: Windows x64 only; Minecraft 26.3 only. " +
-                "Vanta downloads and verifies Horizon's launcher, then opens it. " +
-                "You must select/play the game inside Horizon for now. Java mods, Fabric and Forge are not supported."
+                "On first launch, Vanta downloads and verifies Horizon's launcher, creates a matching " +
+                "Horizon profile, and asks Horizon to start that profile. Horizon stores its worlds, " +
+                "settings and resource packs separately from this Vanta instance. Java mods, Fabric and " +
+                "Forge are not supported. You may need to sign into your Microsoft account inside Horizon."
         );
         compatibility.setWrapText(true);
         compatibility.getStyleClass().add("page-subtitle");
