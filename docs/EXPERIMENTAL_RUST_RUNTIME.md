@@ -22,7 +22,8 @@ The experimental target is [Horizon](https://github.com/horizon-rust/horizon), a
 - Horizon profile data is stored by Horizon in its own game directory. Vanta does not copy or synchronize Vanta saves, settings, resource packs or mods into the Horizon profile.
 - Java mods, Fabric and Forge are not supported by Horizon. Do not copy Java mod folders into Horizon or imply they will work.
 - A Microsoft account that owns Minecraft: Java Edition may need to be signed into Horizon separately.
-- The installer currently trusts the SHA-256 digest and size published by GitHub's release API over HTTPS. Signature verification of the checksum manifest is a potential hardening task.
+- Release tags are restricted to safe single-component directory names, and downloads must be HTTPS URLs hosted by GitHub. The installer still trusts the SHA-256 digest and size published by GitHub's release API over HTTPS; signature verification of the checksum manifest is a potential hardening task.
+- Non-interactive Horizon CLI commands have stdin closed and bounded timeouts; timed-out processes are forcibly stopped and their output streams are closed.
 - CI compilation and regression checks do not prove the game launches successfully on a real Windows x64 machine. A real-device smoke test is still required before treating this as ready for general use.
 - No performance claim is made. Any benchmark must compare the same world, settings, render distance, and hardware against Vanta's Java runtime.
 
