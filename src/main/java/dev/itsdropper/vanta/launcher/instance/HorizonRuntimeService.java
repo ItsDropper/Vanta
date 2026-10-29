@@ -32,8 +32,6 @@ import java.util.zip.ZipInputStream;
  */
 public final class HorizonRuntimeService {
 
-    private static final String RELEASES_API =
-            "https://api.github.com/repos/horizon-rust/horizon/releases/latest";
     private static final String WINDOWS_ASSET =
             "horizon-launcher-windows-x64.zip";
     private static final long MAX_DOWNLOAD_BYTES = 200L * 1024 * 1024;
