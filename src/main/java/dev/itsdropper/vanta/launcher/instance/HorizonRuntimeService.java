@@ -142,7 +142,7 @@ public final class HorizonRuntimeService {
         }
     }
 
-    private static String stableProfileId(Instance instance) {
+    static String stableProfileId(Instance instance) {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256")
                     .digest(instance.getId().getBytes(StandardCharsets.UTF_8));
@@ -364,7 +364,7 @@ public final class HorizonRuntimeService {
         }
     }
 
-    private static void extractSafely(Path archive, Path destination) throws IOException {
+    static void extractSafely(Path archive, Path destination) throws IOException {
         Path root = destination.toAbsolutePath().normalize();
         long total = 0;
         int entries = 0;
