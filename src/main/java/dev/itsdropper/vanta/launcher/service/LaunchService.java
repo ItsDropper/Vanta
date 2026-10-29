@@ -362,10 +362,11 @@ public class LaunchService {
                                 }
                             }
 
-                            System.out.println(
-                                    "[Minecraft] "
-                                            + line
-                            );
+                            Instance outputInstance = runningInstance;
+                            String outputLabel = outputInstance != null && outputInstance.isHorizon()
+                                    ? "[Horizon] "
+                                    : "[Minecraft] ";
+                            System.out.println(outputLabel + line);
 
                             recordServerConnection(line);
 
@@ -436,6 +437,16 @@ public class LaunchService {
              */
             String output =
                     getRecentOutput();
+
+            /*
+             * Horizon is a separate native engine and does not use Java,
+             * Fabric, Forge, or Vanta's Java repair pipeline. In particular,
+             * never terminate its process because its output happens to
+             * match a Java-loader diagnostic pattern.
+             */
+            if (runningInstance != null && runningInstance.isHorizon()) {
+                return;
+            }
 
             /*
              * ---------------------------------------------------------
