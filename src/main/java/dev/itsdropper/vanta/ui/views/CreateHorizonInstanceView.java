@@ -34,7 +34,7 @@ public final class CreateHorizonInstanceView extends VBox {
         title.getStyleClass().add("page-title");
 
         Label subtitle = new Label(
-                "Creates an isolated Vanta profile for the native Horizon launcher."
+                "Creates a Vanta profile that launches a matching native Horizon profile."
         );
         subtitle.getStyleClass().add("page-subtitle");
 
