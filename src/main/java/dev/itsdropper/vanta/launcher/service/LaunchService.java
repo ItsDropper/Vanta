@@ -153,6 +153,30 @@ public class LaunchService {
                     LaunchState.PREPARING
             );
 
+            /*
+             * Horizon is a separate native engine. Never send its instance
+             * through Java classpath construction, account argument injection,
+             * or the Java installation repair path.
+             */
+            if (instance.isHorizon()) {
+                setState(LaunchState.STARTING);
+
+                Process process =
+                        dev.itsdropper.vanta.launcher.instance.HorizonRuntimeService.launch(instance);
+
+                if (process == null) {
+                    throw new IllegalStateException("Horizon launcher process was not created.");
+                }
+
+                minecraftProcess = process;
+                runningInstance = instance;
+                runningServerTarget = null;
+                monitorOutput(process);
+                monitorProcess(process);
+                setState(LaunchState.RUNNING);
+                return process;
+            }
+
             Account account =
                     accountService.getCurrentAccount();
 
@@ -338,10 +362,11 @@ public class LaunchService {
                                 }
                             }
 
-                            System.out.println(
-                                    "[Minecraft] "
-                                            + line
-                            );
+                            Instance outputInstance = runningInstance;
+                            String outputLabel = outputInstance != null && outputInstance.isHorizon()
+                                    ? "[Horizon] "
+                                    : "[Minecraft] ";
+                            System.out.println(outputLabel + line);
 
                             recordServerConnection(line);
 
@@ -412,6 +437,16 @@ public class LaunchService {
              */
             String output =
                     getRecentOutput();
+
+            /*
+             * Horizon is a separate native engine and does not use Java,
+             * Fabric, Forge, or Vanta's Java repair pipeline. In particular,
+             * never terminate its process because its output happens to
+             * match a Java-loader diagnostic pattern.
+             */
+            if (runningInstance != null && runningInstance.isHorizon()) {
+                return;
+            }
 
             /*
              * ---------------------------------------------------------
@@ -791,12 +826,20 @@ public class LaunchService {
                                     String output =
                                             getRecentOutput();
 
+                                    boolean horizonFailure =
+                                            failedInstance != null && failedInstance.isHorizon();
+
                                     lastFailure =
                                             new LaunchFailure(
-                                                    "Minecraft exited with code " + exitCode,
-                                                    "Minecraft exited with a non-zero code (" + exitCode
-                                                            + "). This does not by itself confirm a Minecraft crash. "
-                                                            + "No specific failure was identified from the current process output.",
+                                                    horizonFailure
+                                                            ? "Horizon launch failed (exit " + exitCode + ")"
+                                                            : "Minecraft exited with code " + exitCode,
+                                                    horizonFailure
+                                                            ? "Horizon could not start or keep running. Check the output below. "
+                                                                    + "If this is the first launch, open Horizon once and sign in with an account that owns Minecraft: Java Edition."
+                                                            : "Minecraft exited with a non-zero code (" + exitCode
+                                                                    + "). This does not by itself confirm a Minecraft crash. "
+                                                                    + "No specific failure was identified from the current process output.",
                                                     output
                                             );
                                 }

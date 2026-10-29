@@ -14,258 +14,121 @@ public class CreateInstanceTypeView extends VBox {
     private final Runnable onImport;
     private final Runnable onPreset;
     private final Runnable onModrinth;
+    private final Runnable onHorizon;
 
     public CreateInstanceTypeView(
             Runnable onBack,
             Runnable onCustom,
             Runnable onImport,
             Runnable onPreset,
-            Runnable onModrinth
+            Runnable onModrinth,
+            Runnable onHorizon
     ) {
-
         this.onBack = onBack;
         this.onCustom = onCustom;
         this.onImport = onImport;
         this.onPreset = onPreset;
         this.onModrinth = onModrinth;
-
-        // =========================================================
-        // PAGE
-        // =========================================================
+        this.onHorizon = onHorizon;
 
         getStyleClass().add("page");
+        setPadding(new Insets(28, 32, 32, 32));
+        setSpacing(18);
 
-        setPadding(
-                new Insets(28, 32, 32, 32)
-        );
-
-        setSpacing(
-                18
-        );
-
-        // =========================================================
-        // HEADER
-        // =========================================================
-
-        Label eyebrow =
-                new Label("NEW INSTANCE");
+        Label eyebrow = new Label("NEW INSTANCE");
         eyebrow.getStyleClass().add("settings-nav-group");
 
-        Label title =
-                new Label("Create an instance");
+        Label title = new Label("Create an instance");
+        title.getStyleClass().add("page-title");
 
-        title.getStyleClass().add(
-                "page-title"
+        Label subtitle = new Label(
+                "Choose how you want to create your Minecraft instance."
         );
+        subtitle.getStyleClass().add("page-subtitle");
 
-        Label subtitle =
-                new Label(
-                        "Choose how you want to create your Minecraft instance."
-                );
+        VBox header = new VBox(5, eyebrow, title, subtitle);
 
-        subtitle.getStyleClass().add(
-                "page-subtitle"
+        VBox options = new VBox(12);
+        options.setMaxWidth(680);
+
+        Button customButton = createOption(
+                "Custom instance",
+                "Choose the Minecraft version, loader and installation settings yourself.",
+                false
         );
+        customButton.setOnAction(event -> onCustom.run());
 
-        VBox header =
-                new VBox(
-                        5,
-                        eyebrow,
-                        title,
-                        subtitle
-                );
-
-        // =========================================================
-        // OPTIONS
-        // =========================================================
-
-        VBox options =
-                new VBox(
-                        12
-                );
-
-        options.setMaxWidth(
-                680
+        Button importButton = createOption(
+                "Import an instance",
+                "Bring an existing Vanta instance or supported .mrpack into Vanta.",
+                false
         );
+        importButton.setOnAction(event -> onImport.run());
 
-        // ---------------------------------------------------------
-        // CUSTOM
-        // ---------------------------------------------------------
-
-        Button customButton =
-                createOption(
-                        "Custom instance",
-                        "Choose the Minecraft version, loader and installation settings yourself.",
-                        false
-                );
-
-        customButton.setOnAction(
-                event -> onCustom.run()
+        Button presetButton = createOption(
+                "Use a preset",
+                "Start from a predefined Vanta configuration.",
+                false
         );
+        presetButton.setOnAction(event -> onPreset.run());
 
-        // ---------------------------------------------------------
-        // IMPORT
-        // ---------------------------------------------------------
-
-        Button importButton =
-                createOption(
-                        "Import an instance",
-                        "Bring an existing Vanta instance or supported .mrpack into Vanta.",
-                        false
-                );
-
-        importButton.setOnAction(
-                event -> onImport.run()
+        Button modrinthButton = createOption(
+                "Browse Modrinth",
+                "Find and install a modpack directly from Modrinth.",
+                false
         );
+        modrinthButton.setOnAction(event -> onModrinth.run());
 
-        // ---------------------------------------------------------
-        // PRESET
-        // ---------------------------------------------------------
-
-        Button presetButton =
-                createOption(
-                        "Use a preset",
-                        "Start from a predefined Vanta configuration.",
-                        false
-                );
-
-        presetButton.setOnAction(
-                event -> onPreset.run()
+        Button horizonButton = createOption(
+                "Experimental Rust runtime · Horizon",
+                "Native Rust client for Minecraft 26.3. Opens Horizon separately; Java/Fabric/Forge mods are not supported.",
+                false
         );
-
-        // ---------------------------------------------------------
-        // MODRINTH
-        // ---------------------------------------------------------
-
-        Button modrinthButton =
-                createOption(
-                        "Browse Modrinth",
-                        "Find and install a modpack directly from Modrinth.",
-                        false
-                );
-
-        modrinthButton.setOnAction(
-                event -> onModrinth.run()
-        );
+        horizonButton.setOnAction(event -> onHorizon.run());
 
         options.getChildren().addAll(
                 customButton,
                 importButton,
                 presetButton,
-                modrinthButton
+                modrinthButton,
+                horizonButton
         );
 
-        // =========================================================
-        // BACK
-        // =========================================================
+        Button backButton = new Button("Back");
+        backButton.getStyleClass().add("secondary-button");
+        backButton.setPrefWidth(92);
+        backButton.setPrefHeight(46);
+        backButton.setOnAction(event -> onBack.run());
 
-        Button backButton =
-                new Button(
-                        "Back"
-                );
+        HBox actions = new HBox(backButton);
+        actions.setAlignment(Pos.CENTER_RIGHT);
 
-        backButton.getStyleClass().add(
-                "secondary-button"
-        );
-
-        backButton.setPrefWidth(
-                92
-        );
-
-        backButton.setPrefHeight(
-                46
-        );
-
-        backButton.setOnAction(
-                event -> onBack.run()
-        );
-
-        HBox actions =
-                new HBox(
-                        backButton
-                );
-
-        actions.setAlignment(
-                Pos.CENTER_RIGHT
-        );
-
-        // =========================================================
-        // BUILD
-        // =========================================================
-
-        getChildren().addAll(
-                header,
-                options,
-                actions
-        );
+        getChildren().addAll(header, options, actions);
     }
-
-    // =============================================================
-    // OPTION BUTTON
-    // =============================================================
 
     private Button createOption(
             String title,
             String description,
             boolean disabled
     ) {
+        Button button = new Button();
+        button.getStyleClass().add("create-option");
+        button.setMaxWidth(Double.MAX_VALUE);
+        button.setPrefHeight(82);
+        button.setDisable(disabled);
 
-        Button button =
-                new Button();
-
-        button.getStyleClass().add(
-                "create-option"
+        Label titleLabel = new Label(
+                title + (disabled ? "  •  COMING SOON" : "")
         );
+        titleLabel.getStyleClass().add("create-option-title");
 
-        button.setMaxWidth(
-                Double.MAX_VALUE
-        );
+        Label descriptionLabel = new Label(description);
+        descriptionLabel.getStyleClass().add("create-option-description");
+        descriptionLabel.setWrapText(true);
 
-        button.setPrefHeight(
-                82
-        );
-
-        button.setDisable(
-                disabled
-        );
-
-        Label titleLabel =
-                new Label(
-                        title
-                                + (disabled
-                                ? "  •  COMING SOON"
-                                : "")
-                );
-
-        titleLabel.getStyleClass().add(
-                "create-option-title"
-        );
-
-        Label descriptionLabel =
-                new Label(
-                        description
-                );
-
-        descriptionLabel.getStyleClass().add(
-                "create-option-description"
-        );
-
-        VBox text =
-                new VBox(
-                        5,
-                        titleLabel,
-                        descriptionLabel
-                );
-
-        text.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        button.setGraphic(
-                text
-        );
-
+        VBox text = new VBox(5, titleLabel, descriptionLabel);
+        text.setAlignment(Pos.CENTER_LEFT);
+        button.setGraphic(text);
         return button;
     }
 }
-
