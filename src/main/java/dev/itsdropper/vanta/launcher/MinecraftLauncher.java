@@ -96,6 +96,16 @@ public class MinecraftLauncher {
                 javaExecutable
         );
 
+        /*
+         * Match desktop launchers that allow Java networking to use the
+         * operating system's configured proxy. Without this property, the
+         * JDK normally ignores system proxy settings, so mods making their
+         * own HTTP requests can fail even when the same instance works in
+         * another launcher. This does not override explicit proxy settings
+         * supplied by a mod or the user's JVM arguments.
+         */
+        command.add("-Djava.net.useSystemProxies=true");
+
         // =============================================================
         // MEMORY
         // =============================================================
