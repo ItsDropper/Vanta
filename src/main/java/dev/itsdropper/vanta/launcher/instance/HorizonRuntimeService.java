@@ -49,15 +49,32 @@ public final class HorizonRuntimeService {
 
     public static synchronized Process launch(Instance instance) throws Exception {
         validateTarget(instance);
-        InstalledRelease release = resolveLatestRelease();
         Path installRoot = MinecraftLocator.getVantaDirectory()
                 .resolve("experimental")
                 .resolve("horizon");
-        Path versionDirectory = installRoot.resolve(release.version());
-        Path executable = findLauncher(versionDirectory);
+        InstalledRelease release = null;
+        Path executable = null;
+        Exception releaseLookupFailure = null;
+        try {
+            release = resolveLatestRelease();
+            Path versionDirectory = installRoot.resolve(release.version());
+            executable = findLauncher(versionDirectory);
+            if (executable == null) {
+                executable = installLauncher(release, installRoot, versionDirectory);
+            }
+        } catch (Exception ex) {
+            releaseLookupFailure = ex;
+        }
 
         if (executable == null) {
-            executable = installLauncher(release, installRoot, versionDirectory);
+            executable = findNewestInstalledLauncher(installRoot);
+            if (executable == null) {
+                if (releaseLookupFailure != null) {
+                    throw releaseLookupFailure;
+                }
+                throw new IOException("No usable Horizon launcher is installed.");
+            }
+            System.out.println("[Vanta Horizon] Using the cached Horizon launcher because the latest release could not be checked.");
         }
 
         String profileId = stableProfileId(instance);
@@ -123,10 +140,39 @@ public final class HorizonRuntimeService {
     }
 
     private static String stableProfileId(Instance instance) {
-        String id = instance.getId().toLowerCase(Locale.ROOT)
-                .replaceAll("[^a-z0-9]+", "-")
-                .replaceAll("^-+|-+$", "");
-        return "vanta-" + id;
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(instance.getId().getBytes(StandardCharsets.UTF_8));
+            return "vanta-" + HexFormat.of().formatHex(digest).substring(0, 32);
+        } catch (java.security.NoSuchAlgorithmException ex) {
+            throw new IllegalStateException("SHA-256 is unavailable in this Java runtime.", ex);
+        }
+    }
+
+    private static Path findNewestInstalledLauncher(Path installRoot) throws IOException {
+        if (!Files.isDirectory(installRoot)) {
+            return null;
+        }
+        try (var directories = Files.list(installRoot)) {
+            List<Path> candidates = new ArrayList<>(directories
+                    .filter(Files::isDirectory)
+                    .toList());
+            candidates.sort((left, right) -> {
+                try {
+                    return Files.getLastModifiedTime(right)
+                            .compareTo(Files.getLastModifiedTime(left));
+                } catch (IOException ignored) {
+                    return 0;
+                }
+            });
+            for (Path candidate : candidates) {
+                Path launcher = findLauncher(candidate);
+                if (launcher != null) {
+                    return launcher;
+                }
+            }
+        }
+        return null;
     }
 
     private static void ensureHorizonProfile(
