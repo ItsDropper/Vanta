@@ -475,7 +475,7 @@ public class InstanceManager {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
         String safeIcon = icon == null || icon.isBlank() ? "SHIELD" : icon.trim().toUpperCase();
         Instance updated = new Instance(instance.getId(), instance.getName(), instance.getMinecraftVersion(),
-                instance.getLoader(), instance.getLoaderVersion(), instance.getDirectory(), safeIcon);
+                instance.getLoader(), instance.getLoaderVersion(), instance.getDirectory(), safeIcon, instance.getEngine());
         saveInstance(updated);
         return updated;
     }
@@ -552,7 +552,8 @@ public class InstanceManager {
                     source.getLoader(),
                     source.getLoaderVersion(),
                     target,
-                    source.getIcon()
+                    source.getIcon(),
+                    source.getEngine()
             );
             saveInstance(duplicate);
             return duplicate;
