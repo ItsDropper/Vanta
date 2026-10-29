@@ -345,6 +345,15 @@ public final class HorizonRuntimeService {
             Files.deleteIfExists(destination);
             throw new IOException("Horizon download failed with HTTP " + response.statusCode() + ".");
         }
+        URI finalUri = response.uri();
+        String finalHost = finalUri.getHost();
+        boolean trustedRedirectHost = finalHost != null
+                && ("github.com".equalsIgnoreCase(finalHost)
+                || finalHost.toLowerCase(Locale.ROOT).endsWith(".githubusercontent.com"));
+        if (!"https".equalsIgnoreCase(finalUri.getScheme()) || !trustedRedirectHost) {
+            Files.deleteIfExists(destination);
+            throw new IOException("Horizon download redirected outside trusted HTTPS GitHub hosts.");
+        }
         long downloaded = Files.size(destination);
         if (downloaded != release.expectedSize() || downloaded > MAX_DOWNLOAD_BYTES) {
             throw new IOException("Horizon archive size did not match GitHub release metadata.");
