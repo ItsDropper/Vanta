@@ -14,19 +14,22 @@ public class CreateInstanceTypeView extends VBox {
     private final Runnable onImport;
     private final Runnable onPreset;
     private final Runnable onModrinth;
+    private final Runnable onHorizon;
 
     public CreateInstanceTypeView(
             Runnable onBack,
             Runnable onCustom,
             Runnable onImport,
             Runnable onPreset,
-            Runnable onModrinth
+            Runnable onModrinth,
+            Runnable onHorizon
     ) {
         this.onBack = onBack;
         this.onCustom = onCustom;
         this.onImport = onImport;
         this.onPreset = onPreset;
         this.onModrinth = onModrinth;
+        this.onHorizon = onHorizon;
 
         getStyleClass().add("page");
         setPadding(new Insets(28, 32, 32, 32));
@@ -78,9 +81,10 @@ public class CreateInstanceTypeView extends VBox {
 
         Button horizonButton = createOption(
                 "Experimental Rust runtime · Horizon",
-                "Native Rust client for Minecraft 26.3. Early integration work; Java/Fabric/Forge mods are not supported.",
-                true
+                "Native Rust client for Minecraft 26.3. Opens Horizon separately; Java/Fabric/Forge mods are not supported.",
+                false
         );
+        horizonButton.setOnAction(event -> onHorizon.run());
 
         options.getChildren().addAll(
                 customButton,
