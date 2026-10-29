@@ -36,6 +36,7 @@ public final class HorizonRuntimeService {
             "horizon-launcher-windows-x64.zip";
     private static final long MAX_DOWNLOAD_BYTES = 200L * 1024 * 1024;
     private static final long MAX_EXTRACTED_BYTES = 512L * 1024 * 1024;
+    private static final int MAX_COMMAND_OUTPUT_BYTES = 1024 * 1024;
     private static final ObjectMapper MAPPER = new ObjectMapper();
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(20))
@@ -265,8 +266,31 @@ public final class HorizonRuntimeService {
     }
 
     private static String readStream(java.io.InputStream stream) {
-        try (stream) {
-            return new String(stream.readAllBytes(), StandardCharsets.UTF_8);
+        try (stream;
+             var output = new java.io.ByteArrayOutputStream()) {
+            byte[] buffer = new byte[8192];
+            int read;
+            long total = 0;
+            boolean truncated = false;
+            while ((read = stream.read(buffer)) >= 0) {
+                if (read == 0) {
+                    continue;
+                }
+                int remaining = MAX_COMMAND_OUTPUT_BYTES - output.size();
+                if (remaining > 0) {
+                    int retained = Math.min(remaining, read);
+                    output.write(buffer, 0, retained);
+                    if (retained < read) {
+                        truncated = true;
+                    }
+                } else {
+                    truncated = true;
+                }
+                total += read;
+            }
+            String text = output.toString(StandardCharsets.UTF_8);
+            return truncated ? text + "\\n[Horizon output truncated after "
+                    + MAX_COMMAND_OUTPUT_BYTES + " bytes]" : text;
         } catch (IOException ex) {
             return "";
         }
