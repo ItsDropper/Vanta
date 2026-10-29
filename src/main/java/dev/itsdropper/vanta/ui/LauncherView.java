@@ -283,7 +283,8 @@ public class LauncherView {
                         this::showCustomCreateInstanceView,
                         this::showImportInstanceView,
                         this::showPresetInstanceView,
-                        this::showModrinthModpackView
+                        this::showModrinthModpackView,
+                        this::showHorizonCreateInstanceView
                 );
 
         globalModsView =
@@ -524,6 +525,14 @@ public class LauncherView {
         content.getChildren().setAll(
                 createInstanceTypeView
         );
+    }
+
+    private void showHorizonCreateInstanceView() {
+        CreateHorizonInstanceView view = new CreateHorizonInstanceView(
+                this::showCreateInstanceView,
+                this::instanceCreated
+        );
+        content.getChildren().setAll(view);
     }
 
     private void showCustomCreateInstanceView() {
