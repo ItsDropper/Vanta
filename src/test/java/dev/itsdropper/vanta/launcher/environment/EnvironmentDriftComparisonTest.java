@@ -1,0 +1,71 @@
+package dev.itsdropper.vanta.launcher.environment;
+
+import dev.itsdropper.vanta.launcher.model.Instance;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class EnvironmentDriftComparisonTest {
+    @TempDir
+    Path temporaryDirectory;
+
+    @Test
+    void reportsVersionAndModFileDriftWithoutChangingInstanceFiles() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
+        Path mods = Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path changed = Files.writeString(mods.resolve("changed.jar"), "before");
+        Files.writeString(mods.resolve("removed.jar"), "remove");
+
+        Instance baselineInstance = new Instance(
+                "instance", "Instance", "1.21.1", "fabric", "0.16.9", instanceDirectory
+        );
+        EnvironmentLockfileService service = new EnvironmentLockfileService();
+        EnvironmentLockfile baseline = service.capture(baselineInstance);
+
+        Files.writeString(changed, "after");
+        Files.delete(mods.resolve("removed.jar"));
+        Files.writeString(mods.resolve("added.jar"), "new");
+        Instance currentInstance = new Instance(
+                "instance", "Instance", "1.21.2", "fabric", "0.16.9", instanceDirectory
+        );
+
+        EnvironmentDriftReport report = service.compare(currentInstance, baseline);
+
+        Set<EnvironmentDriftReport.ChangeType> types = report.changes().stream()
+                .map(EnvironmentDriftReport.Change::type)
+                .collect(Collectors.toSet());
+        assertEquals(Set.of(
+                EnvironmentDriftReport.ChangeType.MINECRAFT_VERSION_CHANGED,
+                EnvironmentDriftReport.ChangeType.MOD_MODIFIED,
+                EnvironmentDriftReport.ChangeType.MOD_REMOVED,
+                EnvironmentDriftReport.ChangeType.MOD_ADDED
+        ), types);
+        assertEquals(4, report.changes().size());
+        assertFalse(report.isClean());
+        assertTrue(Files.exists(changed));
+        assertTrue(Files.exists(mods.resolve("added.jar")));
+    }
+
+    @Test
+    void reportsCleanWhenLiveEnvironmentMatchesBaseline() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("clean-instance"));
+        Path mods = Files.createDirectory(instanceDirectory.resolve("mods"));
+        Files.writeString(mods.resolve("same.jar"), "same");
+
+        Instance instance = new Instance(
+                "clean", "Clean", "1.21.1", "fabric", "0.16.9", instanceDirectory
+        );
+        EnvironmentLockfileService service = new EnvironmentLockfileService();
+
+        EnvironmentDriftReport report = service.compare(instance, service.capture(instance));
+
+        assertTrue(report.isClean());
+        assertTrue(report.changes().isEmpty());
+    }
+}
