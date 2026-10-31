@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-public class HomeView extends StackPane {
+public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
 
     private final AccountService accountService;
     private final MultiLaunchService launchService;

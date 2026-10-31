@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
-public final class StateCenterView extends VBox {
+public final class StateCenterView extends VBox implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
     private final VBox instanceList = new VBox(10);
     private final VBox sharedList = new VBox(10);
     private final ScrollPane instanceScroll = new ScrollPane(instanceList);
@@ -120,8 +120,11 @@ public final class StateCenterView extends VBox {
         }
     }
 
+    @Override
     public void onShown() {
-        refresh();
+        if (LauncherSettings.isStateScanOnOpenEnabled()) {
+            refresh();
+        }
     }
 
     public void refresh() {

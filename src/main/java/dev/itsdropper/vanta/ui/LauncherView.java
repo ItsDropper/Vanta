@@ -392,15 +392,12 @@ public class LauncherView {
 
         switch (page) {
 
-            case HOME -> {
-                homeView.onShown();
-                showAnimatedContent(homeView);
-            }
+            case HOME -> showAnimatedContent(homeView);
             case ACCOUNTS -> showAnimatedContent(accountsView);
             case SKIN -> showAnimatedContent(skinChangerView);
             case INSTANCES -> showAnimatedContent(instancesView);
             case MODS -> showAnimatedContent(globalModsView);
-            case STATE -> { showStatePage(); if (LauncherSettings.isStateScanOnOpenEnabled()) stateCenterView.onShown(); }
+            case STATE -> showStatePage();
             case SETTINGS -> showAnimatedContent(settingsView);
             case DOWNLOADS -> showAnimatedContent(downloadCenterView);
             case SERVERS -> showAnimatedContent(serverManagerView);

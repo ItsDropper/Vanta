@@ -30,12 +30,21 @@ public final class ViewHost {
     public void show(Node view) {
         Objects.requireNonNull(view, "view");
 
+        Node previousView = getActiveView();
+        if (previousView != view && previousView instanceof LauncherViewLifecycle lifecycle) {
+            lifecycle.onHidden();
+        }
+
         container.getChildren().setAll(view);
         view.setVisible(true);
         view.setManaged(true);
         view.setOpacity(1.0);
         view.setTranslateX(0.0);
         view.setTranslateY(0.0);
+
+        if (view instanceof LauncherViewLifecycle lifecycle) {
+            lifecycle.onShown();
+        }
     }
 
     /**
