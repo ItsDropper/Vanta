@@ -223,11 +223,18 @@ public class LauncherView {
         sidebar =
                 new Sidebar();
 
+        root.widthProperty().addListener((observable, oldWidth, newWidth) -> {
+            boolean compact = newWidth.doubleValue() < 1120;
+            sidebar.setCompact(compact);
+            BorderPane.setMargin(
+                    sidebar,
+                    new Insets(compact ? 12 : 16)
+            );
+        });
+
         BorderPane.setMargin(
                 sidebar,
-                new Insets(
-                        16
-                )
+                new Insets(16)
         );
 
         window.setLeft(
