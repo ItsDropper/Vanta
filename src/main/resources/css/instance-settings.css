@@ -7,32 +7,32 @@
 }
 
 .settings-section-title {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
 
 
 .instance-setting-label {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
     -fx-font-weight: bold;
 }
 
 .instance-setting-value {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 15px;
     -fx-font-weight: bold;
 }
 
 .instance-directory {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
     -fx-wrap-text: true;
 }
 
 .instance-settings-divider {
-    -fx-background-color: -vanta-border;
+    -fx-background-color: -vantaborder;
 
     -fx-min-height: 1px;
     -fx-pref-height: 1px;
@@ -41,22 +41,22 @@
 
 
 .instance-settings-danger-card {
-    -fx-background-color: derive(-vanta-danger, -82%);
+    -fx-background-color: derive(-vantadanger, -82%);
     -fx-background-radius: 13px;
 
-    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-border-color: derive(-vantadanger, -45%);
     -fx-border-width: 1px;
     -fx-border-radius: 13px;
 }
 
 .instance-settings-danger-title {
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
 
 .instance-settings-danger-description {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
     -fx-wrap-text: true;
 }
@@ -65,24 +65,24 @@
 /* Settings checkbox */
 
 .settings-checkbox {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
 }
 
 .settings-checkbox .box {
-    -fx-background-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurfaceraised;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
 }
 
 .settings-checkbox:hover .box {
-    -fx-border-color: derive(-vanta-border, 20%);
+    -fx-border-color: derive(-vantaborder, 20%);
 }
 
 .settings-checkbox:selected .box {
-    -fx-background-color: -vanta-accent;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
 }
