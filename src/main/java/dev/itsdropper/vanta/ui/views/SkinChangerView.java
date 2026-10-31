@@ -17,6 +17,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
@@ -131,9 +132,9 @@ public final class SkinChangerView extends VBox {
                 modelPreview.setLayerVisible(SkinModel3D.Layer.SLEEVES, visible));
         trousersLayer.selectedProperty().addListener((obs, oldValue, visible) ->
                 modelPreview.setLayerVisible(SkinModel3D.Layer.TROUSERS, visible));
-        HBox layerControls = new HBox(12, hatLayer, jacketLayer, sleevesLayer, trousersLayer);
+        FlowPane layerControls = new FlowPane(12, 8,
+                hatLayer, jacketLayer, sleevesLayer, trousersLayer);
         layerControls.setAlignment(Pos.CENTER_LEFT);
-        layerControls.setSpacing(12);
         updateLayerControls(null);
 
         Label capeHeading = new Label("Owned capes");
