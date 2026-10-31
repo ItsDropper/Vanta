@@ -648,7 +648,7 @@
 .instance-name {
     -fx-text-fill: -vanta-text;
     -fx-font-size: 14px;
-    -fx-font-weight: 750;
+    -fx-font-weight: 700;
 }
 .instance-version, .instance-playtime {
     -fx-text-fill: -vanta-muted;
