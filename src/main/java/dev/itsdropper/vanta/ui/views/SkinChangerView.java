@@ -200,6 +200,7 @@ public final class SkinChangerView extends VBox {
             profileRequestGeneration++;
             selectedFile = null;
             displayedSkin = null;
+            updateLayerControls(null);
             modelPreview.setSkin(null, false);
             fileLabel.setText(account == null
                     ? "Connect a Minecraft account to preview its skin."
@@ -325,6 +326,7 @@ public final class SkinChangerView extends VBox {
             }
 
             displayedSkin = result.image();
+            updateLayerControls(displayedSkin);
             CapeOption noCape = new CapeOption("", "No cape", "", false, null);
             capeChoice.getItems().setAll(noCape);
             capeChoice.getItems().addAll(result.capes());
@@ -340,6 +342,13 @@ public final class SkinChangerView extends VBox {
                 statusLabel.setText("Showing the skin currently active on this Minecraft account.");
             }
         }));
+    }
+
+    private void updateLayerControls(Image image) {
+        boolean supported = image != null && image.getHeight() >= 64;
+        for (CheckBox control : List.of(hatLayer, jacketLayer, sleevesLayer, trousersLayer)) {
+            control.setDisable(!supported);
+        }
     }
 
     private void chooseSkin() {
@@ -376,6 +385,7 @@ public final class SkinChangerView extends VBox {
 
             selectedFile = path;
             displayedSkin = image;
+            updateLayerControls(displayedSkin);
             boolean slim = modelChoice.getValue().startsWith("Slim");
             modelPreview.setSkin(image, slim);
             fileLabel.setText("Selected: " + file.getName());
