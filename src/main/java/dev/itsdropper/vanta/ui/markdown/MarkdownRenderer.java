@@ -85,6 +85,7 @@ public class MarkdownRenderer {
 
         httpClient =
                 HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(8))
                         .followRedirects(
                                 HttpClient.Redirect.NORMAL
                         )
