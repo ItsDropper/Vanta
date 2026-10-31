@@ -142,6 +142,23 @@
 }
 .title-bar-button:hover SVGPath, .title-bar-close:hover SVGPath { -fx-stroke: -vanta-text; }
 
+.title-bar-update {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-background-radius: 7px;
+    -fx-border-color: derive(-vanta-accent, -55%);
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+    -fx-text-fill: -vanta-accent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-padding: 0 11px;
+}
+.title-bar-update:hover {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-accent;
+    -fx-text-fill: -vanta-text;
+}
+
 /* Buttons: clear primary action, quiet secondary actions, explicit destructive states. */
 .button {
     -fx-font-family: "Segoe UI Variable", "Segoe UI", "Inter", sans-serif;
