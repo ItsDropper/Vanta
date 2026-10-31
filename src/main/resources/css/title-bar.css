@@ -3,7 +3,7 @@
    ========================================================= */
 
 .title-bar {
-    -fx-background-color: #080a09;
+    -fx-background-color: -vanta-bg;
 
     -fx-min-height: 40px;
     -fx-pref-height: 40px;
@@ -47,7 +47,7 @@
 
     -fx-fill: transparent;
 
-    -fx-stroke: #89948a;
+    -fx-stroke: -vanta-muted;
 
     -fx-stroke-width: 1.25px;
 
@@ -63,12 +63,12 @@
 
 .title-bar-button:hover {
 
-    -fx-background-color: #171b18;
+    -fx-background-color: -vanta-surface-hover;
 }
 
 .title-bar-button:hover SVGPath {
 
-    -fx-stroke: #f0f4f0;
+    -fx-stroke: -vanta-text;
 }
 
 
@@ -78,12 +78,12 @@
 
 .title-bar-close:hover {
 
-    -fx-background-color: #c42b2b;
+    -fx-background-color: -vanta-danger;
 }
 
 .title-bar-close:hover SVGPath {
 
-    -fx-stroke: #ffffff;
+    -fx-stroke: -vanta-text;
 }
 
 
@@ -93,12 +93,12 @@
 
 .title-bar-button:pressed {
 
-    -fx-background-color: #222722;
+    -fx-background-color: -vanta-surface-raised;
 }
 
 .title-bar-close:pressed {
 
-    -fx-background-color: #a52222;
+    -fx-background-color: -vanta-danger;
 }
 
 /* =========================================================
@@ -106,10 +106,10 @@
    ========================================================= */
 
 .account-switcher {
-    -fx-background-color: #121612;
+    -fx-background-color: -vanta-surface;
     -fx-background-radius: 8px;
 
-    -fx-border-color: #252d26;
+    -fx-border-color: -vanta-border;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
@@ -117,12 +117,12 @@
 }
 
 .account-switcher:hover {
-    -fx-background-color: #171c17;
-    -fx-border-color: #39443a;
+    -fx-background-color: -vanta-surface-hover;
+    -fx-border-color: -vanta-border;
 }
 
 .account-switcher:pressed {
-    -fx-background-color: #1d241d;
+    -fx-background-color: -vanta-surface-raised;
 }
 
 
@@ -136,7 +136,7 @@
 /* Username */
 
 .account-switcher-name {
-    -fx-text-fill: #e5ebe5;
+    -fx-text-fill: -vanta-text;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -146,7 +146,7 @@
 /* Arrow */
 
 .account-switcher-arrow {
-    -fx-text-fill: #778078;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 10px;
 }
 
@@ -156,11 +156,11 @@
    ========================================================= */
 
 .account-popup {
-    -fx-background-color: #101410;
+    -fx-background-color: -vanta-bg;
 
     -fx-background-radius: 11px;
 
-    -fx-border-color: #293129;
+    -fx-border-color: -vanta-border;
     -fx-border-width: 1px;
     -fx-border-radius: 11px;
 
@@ -182,7 +182,7 @@
 /* Header */
 
 .account-popup-header {
-    -fx-text-fill: #687268;
+    -fx-text-fill: -vanta-muted;
 
     -fx-font-size: 9px;
     -fx-font-weight: bold;
@@ -206,15 +206,15 @@
 }
 
 .account-popup-account:hover {
-    -fx-background-color: #1a201a;
+    -fx-background-color: -vanta-surface;
 }
 
 .account-popup-account.active {
-    -fx-background-color: #182119;
+    -fx-background-color: -vanta-surface;
 }
 
 .account-popup-account.active:hover {
-    -fx-background-color: #1c271d;
+    -fx-background-color: -vanta-surface-hover;
 }
 
 
@@ -228,7 +228,7 @@
 /* Username */
 
 .account-popup-username {
-    -fx-text-fill: #e2e8e2;
+    -fx-text-fill: -vanta-text;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -238,7 +238,7 @@
 /* Active */
 
 .account-popup-active {
-    -fx-text-fill: #70c77b;
+    -fx-text-fill: -vanta-success;
 
     -fx-font-size: 9px;
     -fx-font-weight: bold;
@@ -250,7 +250,7 @@
    ========================================================= */
 
 .account-popup-separator {
-    -fx-background-color: #242b24;
+    -fx-background-color: -vanta-surface-hover;
 
     -fx-min-height: 1px;
     -fx-pref-height: 1px;
@@ -277,28 +277,28 @@
 }
 
 .account-popup-add:hover {
-    -fx-background-color: #1a201a;
+    -fx-background-color: -vanta-surface;
 }
 
 .account-popup-plus {
-    -fx-text-fill: #7b867c;
+    -fx-text-fill: -vanta-muted;
 
     -fx-font-size: 17px;
     -fx-font-weight: normal;
 }
 
 .account-popup-add-text {
-    -fx-text-fill: #9ca69d;
+    -fx-text-fill: -vanta-muted;
 
     -fx-font-size: 11px;
 }
 
 .account-popup-add:hover .account-popup-plus {
-    -fx-text-fill: #79d181;
+    -fx-text-fill: -vanta-success;
 }
 
 .account-popup-add:hover .account-popup-add-text {
-    -fx-text-fill: #e3e9e3;
+    -fx-text-fill: -vanta-text;
 }
 
 /* =========================================================
@@ -306,9 +306,9 @@
    ========================================================= */
 
 .title-bar-update {
-    -fx-background-color: #151b16;
+    -fx-background-color: -vanta-surface;
 
-    -fx-text-fill: #9bd6a1;
+    -fx-text-fill: -vanta-success;
 
     -fx-font-size: 10px;
     -fx-font-weight: bold;
@@ -321,7 +321,7 @@
 
     -fx-background-radius: 7px;
 
-    -fx-border-color: #29372b;
+    -fx-border-color: -vanta-accent-soft;
     -fx-border-width: 1px;
     -fx-border-radius: 7px;
 
@@ -329,15 +329,15 @@
 }
 
 .title-bar-update:hover {
-    -fx-background-color: #1b251c;
+    -fx-background-color: -vanta-surface;
 
-    -fx-text-fill: #b5e8bb;
+    -fx-text-fill: -vanta-success;
 
-    -fx-border-color: #3d5941;
+    -fx-border-color: -vanta-border;
 }
 
 .title-bar-update:pressed {
-    -fx-background-color: #222d23;
+    -fx-background-color: -vanta-surface-hover;
 
-    -fx-border-color: #49664d;
+    -fx-border-color: -vanta-border;
 }
