@@ -30,7 +30,7 @@ class EnvironmentLockfileServiceTest {
         assertEquals("test-instance", lockfile.instanceId());
         assertEquals(1, lockfile.mods().size());
         assertEquals("unmanaged.bin", lockfile.mods().getFirst().filename());
-        assertEquals(42, lockfile.mods().getFirst().sha256().length());
+        assertEquals(64, lockfile.mods().getFirst().sha256().length());
         assertNull(lockfile.mods().getFirst().modId());
         assertNull(lockfile.mods().getFirst().modVersion());
         assertFalse(lockfile.generatedAt().contains(instanceDirectory.toString()));
