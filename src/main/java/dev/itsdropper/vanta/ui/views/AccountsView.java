@@ -23,7 +23,7 @@ import dev.itsdropper.vanta.launcher.service.AccountSkinService;
 
 import java.util.List;
 
-public class AccountsView extends VBox {
+public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
 
     private final AccountService accountService;
 
@@ -40,6 +40,13 @@ public class AccountsView extends VBox {
     private final FlowPane accountList = new FlowPane();
     private final Label accountCount = new Label();
     private final Label errorLabel = new Label();
+    private boolean listenersRegistered;
+    private final AccountService.AccountListener accountListener = account ->
+            Platform.runLater(() -> {
+                if (listenersRegistered) {
+                    renderAccounts();
+                }
+            });
 
     public AccountsView(AccountService accountService) {
 
@@ -83,11 +90,25 @@ public class AccountsView extends VBox {
         VBox.setVgrow(scroll, Priority.ALWAYS);
         getChildren().add(scroll);
 
-        accountService.addListener(account ->
-                Platform.runLater(() -> renderAccounts())
-        );
-
         renderAccounts();
+    }
+
+
+    @Override
+    public void onShown() {
+        if (!listenersRegistered) {
+            listenersRegistered = true;
+            accountService.addListener(accountListener);
+        }
+        renderAccounts();
+    }
+
+    @Override
+    public void onHidden() {
+        if (listenersRegistered) {
+            accountService.removeListener(accountListener);
+            listenersRegistered = false;
+        }
     }
 
     private StackPane createHero() {
