@@ -572,3 +572,24 @@
     -fx-pref-width: 178px;
     -fx-max-width: 178px;
 }
+
+
+/* Instance library toolbar and count are part of the same surface system. */
+.instances-toolbar {
+    -fx-alignment: center-left;
+    -fx-spacing: 10px;
+    -fx-padding: 8px;
+    -fx-background-color: -vanta-surface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vanta-border;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+.instances-count {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-background-radius: 999px;
+    -fx-padding: 5px 9px;
+    -fx-text-fill: -vanta-accent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
