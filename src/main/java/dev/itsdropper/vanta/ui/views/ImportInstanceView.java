@@ -7,6 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -221,16 +222,9 @@ public class ImportInstanceView extends VBox {
                         onBack.run()
         );
 
-        HBox actions =
-                new HBox(
-                        12,
-                        backButton,
-                        importButton
-                );
-
-        actions.setAlignment(
-                Pos.CENTER_RIGHT
-        );
+        FlowPane actions = new FlowPane(12, 8, backButton, importButton);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.setMaxWidth(Double.MAX_VALUE);
 
         // =========================================================
         // BUILD
