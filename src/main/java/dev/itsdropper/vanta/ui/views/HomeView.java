@@ -100,10 +100,10 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         accountLabel.getStyleClass().add("home-account-label");
 
         VBox headerText = new VBox(4, title, accountLabel);
-        HBox header = new HBox(16);
+        FlowPane header = new FlowPane(16, 10);
         header.setAlignment(Pos.CENTER_LEFT);
+        header.setRowValignment(javafx.geometry.VPos.CENTER);
         header.getStyleClass().add("home-header");
-        HBox.setHgrow(headerText, Priority.ALWAYS);
 
         launchStatusLabel = new Label("READY TO PLAY");
         launchStatusLabel.getStyleClass().addAll("home-launch-indicator", "home-status-ready");
@@ -132,7 +132,22 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 serverCard
         );
         contentBox.setFillWidth(true);
-        contentBox.setPadding(new Insets(24, 36, 28, 36));
+        contentBox.paddingProperty().bind(
+                Bindings.createObjectBinding(() -> {
+                    double width = getWidth();
+                    double horizontalPadding = width < 900
+                            ? 20
+                            : width < 1200
+                                    ? 28
+                                    : 36;
+                    return new Insets(
+                            24,
+                            horizontalPadding,
+                            28,
+                            horizontalPadding
+                    );
+                }, widthProperty())
+        );
         contentBox.setMaxWidth(Double.MAX_VALUE);
         contentBox.setMaxHeight(Double.MAX_VALUE);
 
