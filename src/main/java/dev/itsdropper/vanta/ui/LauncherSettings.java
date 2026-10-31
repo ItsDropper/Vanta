@@ -11,15 +11,17 @@ public final class LauncherSettings {
 
     private static final Path SETTINGS_FILE =
             MinecraftLocator.getVantaDirectory().resolve("settings.properties");
+    private static volatile boolean animationsEnabledCache = getBoolean("animationsEnabled", true);
 
     private LauncherSettings() {
     }
 
     public static boolean isAnimationsEnabled() {
-        return getBoolean("animationsEnabled", true);
+        return animationsEnabledCache;
     }
 
     public static void setAnimationsEnabled(boolean value) {
+        animationsEnabledCache = value;
         setBoolean("animationsEnabled", value);
     }
 
