@@ -19,6 +19,10 @@ class EnvironmentDriftComparisonTest {
     void reportsVersionAndModFileDriftWithoutChangingInstanceFiles() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
         Path mods = Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path config = Files.createDirectories(instanceDirectory.resolve("config/example"));
+        Files.writeString(config.resolve("options.json"), "before");
+        Path resourcepacks = Files.createDirectory(instanceDirectory.resolve("resourcepacks"));
+        Files.writeString(resourcepacks.resolve("added.zip"), "new pack");
         Path changed = Files.writeString(mods.resolve("changed.jar"), "before");
         Files.writeString(mods.resolve("removed.jar"), "remove");
 
@@ -29,6 +33,9 @@ class EnvironmentDriftComparisonTest {
         EnvironmentLockfile baseline = service.capture(baselineInstance);
 
         Files.writeString(changed, "after");
+        Files.writeString(config.resolve("options.json"), "after");
+        Files.writeString(instanceDirectory.resolve("config/example/new.json"), "new config");
+        Files.delete(resourcepacks.resolve("added.zip"));
         Files.delete(mods.resolve("removed.jar"));
         Files.writeString(mods.resolve("added.jar"), "new");
         Instance currentInstance = new Instance(
@@ -44,9 +51,12 @@ class EnvironmentDriftComparisonTest {
                 EnvironmentDriftReport.ChangeType.MINECRAFT_VERSION_CHANGED,
                 EnvironmentDriftReport.ChangeType.MOD_MODIFIED,
                 EnvironmentDriftReport.ChangeType.MOD_REMOVED,
-                EnvironmentDriftReport.ChangeType.MOD_ADDED
+                EnvironmentDriftReport.ChangeType.MOD_ADDED,
+                EnvironmentDriftReport.ChangeType.ENVIRONMENT_FILE_MODIFIED,
+                EnvironmentDriftReport.ChangeType.ENVIRONMENT_FILE_ADDED,
+                EnvironmentDriftReport.ChangeType.ENVIRONMENT_FILE_REMOVED
         ), types);
-        assertEquals(4, report.changes().size());
+        assertEquals(7, report.changes().size());
         assertFalse(report.isClean());
         assertTrue(Files.exists(changed));
         assertTrue(Files.exists(mods.resolve("added.jar")));
