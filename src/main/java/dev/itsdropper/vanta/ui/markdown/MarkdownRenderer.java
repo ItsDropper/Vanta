@@ -43,11 +43,14 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static com.vladsch.flexmark.html.renderer.CoreNodeRenderer.renderHtmlBlock;
 
 public class MarkdownRenderer {
 
+    private static final Logger LOGGER = Logger.getLogger(MarkdownRenderer.class.getName());
     private static final double MAX_IMAGE_WIDTH = 900;
 
     /*
@@ -755,11 +758,6 @@ public class MarkdownRenderer {
 
                     try {
 
-                        System.out.println(
-                                "[MarkdownRenderer] Loading image: "
-                                        + url
-                        );
-
                         URI uri =
                                 URI.create(
                                         url
@@ -799,16 +797,6 @@ public class MarkdownRenderer {
                                                 "unknown"
                                         );
 
-                        System.out.println(
-                                "[MarkdownRenderer] HTTP status: "
-                                        + status
-                        );
-
-                        System.out.println(
-                                "[MarkdownRenderer] Content-Type: "
-                                        + contentType
-                        );
-
                         if (status < 200
                                 || status >= 300) {
 
@@ -826,12 +814,6 @@ public class MarkdownRenderer {
                         byte[] data =
                                 response.body();
 
-                        System.out.println(
-                                "[MarkdownRenderer] Downloaded "
-                                        + data.length
-                                        + " bytes"
-                        );
-
                         byte[] pngData;
 
                         /*
@@ -846,10 +828,6 @@ public class MarkdownRenderer {
                                 data,
                                 contentType
                         )) {
-
-                            System.out.println(
-                                    "[MarkdownRenderer] Detected SVG."
-                            );
 
                             pngData =
                                     convertSvgToPng(
@@ -882,11 +860,6 @@ public class MarkdownRenderer {
 
                             if (bufferedImage == null) {
 
-                                System.out.println(
-                                        "[MarkdownRenderer] "
-                                                + "ImageIO could not decode image."
-                                );
-
                                 Platform.runLater(() ->
                                         showInlineImageError(
                                                 imageView,
@@ -896,13 +869,6 @@ public class MarkdownRenderer {
 
                                 return;
                             }
-
-                            System.out.println(
-                                    "[MarkdownRenderer] ImageIO decoded: "
-                                            + bufferedImage.getWidth()
-                                            + "x"
-                                            + bufferedImage.getHeight()
-                            );
 
                             ByteArrayOutputStream output =
                                     new ByteArrayOutputStream();
@@ -944,11 +910,6 @@ public class MarkdownRenderer {
 
                         if (image.isError()) {
 
-                            System.out.println(
-                                    "[MarkdownRenderer] "
-                                            + "JavaFX could not decode converted PNG."
-                            );
-
                             Platform.runLater(() ->
                                     showInlineImageError(
                                             imageView,
@@ -959,25 +920,9 @@ public class MarkdownRenderer {
                             return;
                         }
 
-                        System.out.println(
-                                "[MarkdownRenderer] Final image: "
-                                        + image.getWidth()
-                                        + "x"
-                                        + image.getHeight()
-                        );
-
                         Platform.runLater(() -> {
 
                             imageView.setImage(image);
-
-                            System.out.println(
-                                    "[MarkdownRenderer] VIEW BEFORE: "
-                                            + imageView.getBoundsInParent()
-                                            + " fit="
-                                            + imageView.getFitWidth()
-                                            + "x"
-                                            + imageView.getFitHeight()
-                            );
 
                             double width = image.getWidth();
                             double height = image.getHeight();
@@ -1022,13 +967,8 @@ public class MarkdownRenderer {
                             imageView.setOpacity(1);
                         });
 
-                    } catch (Throwable ex) {
-
-                        System.out.println(
-                                "[MarkdownRenderer] IMAGE LOAD FAILED"
-                        );
-
-                        ex.printStackTrace();
+                    } catch (Exception ex) {
+                        LOGGER.log(Level.WARNING, "Failed to load remote Markdown image: " + url, ex);
 
                         Platform.runLater(() ->
                                 showInlineImageError(
@@ -1154,15 +1094,10 @@ public class MarkdownRenderer {
 
         /*
          * ImageView cannot display an error label itself.
-         *
-         * Keep it invisible instead of destroying the paragraph
-         * layout with a giant error message.
+         * Keep the paragraph layout stable and record the failure only
+         * at FINE level to avoid noisy console output for remote assets.
          */
-
-        System.out.println(
-                "[MarkdownRenderer] "
-                        + message
-        );
+        LOGGER.fine(() -> "Markdown image unavailable: " + message);
     }
 
     // =============================================================
