@@ -1,9 +1,11 @@
 package dev.itsdropper.vanta.ui.components;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Region;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.util.Timer;
@@ -23,15 +25,13 @@ public class NotificationManager {
 
         container = new StackPane();
 
-        container.setMaxSize(
-                380,
-                120
-        );
-
-        container.setPrefSize(
-                380,
-                120
-        );
+        container.setPrefWidth(380);
+        container.setMaxHeight(Double.MAX_VALUE);
+        container.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        container.maxWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> Math.max(0, Math.min(380, root.getWidth() - 32)),
+                root.widthProperty()
+        ));
 
         container.setPickOnBounds(false);
 
