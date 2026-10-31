@@ -25,6 +25,7 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.util.ArrayList;
@@ -86,31 +87,6 @@ public class InstancesView extends VBox {
         // ---------------------------------------------------------
         // HEADER
         // ---------------------------------------------------------
-
-        Label title =
-                new Label(
-                        "Instances"
-                );
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        "Manage your Minecraft installations."
-                );
-
-        subtitle.getStyleClass().add(
-                "page-subtitle"
-        );
-
-        VBox headerText =
-                new VBox(
-                        5,
-                        title,
-                        subtitle
-                );
 
         countLabel =
                 new Label(
@@ -175,9 +151,16 @@ public class InstancesView extends VBox {
         ));
         restoreButton.setOnAction(event -> restoreInstanceBackup());
 
-        HBox headerTop = new HBox(10, headerText, countLabel, backupButton, restoreButton, createButton);
-        headerTop.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(headerText, Priority.ALWAYS);
+        PageHeader headerTop = new PageHeader(
+                "Instances",
+                "Manage your Minecraft installations.",
+                "page-title",
+                "page-subtitle",
+                countLabel,
+                backupButton,
+                restoreButton,
+                createButton
+        );
 
         Button refreshButton = new Button("REFRESH");
         refreshButton.getStyleClass().add("secondary-button");

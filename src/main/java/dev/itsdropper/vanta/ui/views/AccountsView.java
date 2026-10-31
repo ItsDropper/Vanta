@@ -17,6 +17,7 @@ import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.service.AccountService;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.launcher.service.AccountSkinService;
 
 import java.util.List;
@@ -46,15 +47,12 @@ public class AccountsView extends VBox {
         getStyleClass().addAll("page", "accounts-page");
         setFillWidth(true);
 
-        Label title = new Label("Accounts");
-        title.getStyleClass().add("accounts-title");
-
-        Label subtitle = new Label(
-                "Manage the Minecraft accounts Vanta uses to launch your game."
+        PageHeader header = new PageHeader(
+                "Accounts",
+                "Manage the Minecraft accounts Vanta uses to launch your game.",
+                "accounts-title",
+                "accounts-subtitle"
         );
-        subtitle.getStyleClass().add("accounts-subtitle");
-
-        VBox header = new VBox(5, title, subtitle);
         header.getStyleClass().add("accounts-header");
 
         StackPane hero = createHero();

@@ -1,0 +1,16 @@
+/*
+ * Shared page-level layout primitives.
+ * Typography remains owned by each page's semantic style classes.
+ */
+.page-header {
+    -fx-alignment: center-left;
+    -fx-spacing: 16px;
+}
+.page-header-copy {
+    -fx-spacing: 5px;
+    -fx-min-width: 0;
+}
+.page-header-actions {
+    -fx-alignment: center-right;
+    -fx-spacing: 8px;
+}
