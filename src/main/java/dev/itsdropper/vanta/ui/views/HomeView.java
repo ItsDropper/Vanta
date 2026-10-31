@@ -711,7 +711,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         for (ServerHistoryEntry entry : recent) {
             Instance instance = instances.stream()
                     .filter(candidate ->
-                            candidate.getId().equals(entry.getInstanceId())
+                            entry.getInstanceId() != null
+                                    && candidate.getId().equals(entry.getInstanceId())
                     )
                     .findFirst()
                     .orElseGet(() -> instances.stream()
