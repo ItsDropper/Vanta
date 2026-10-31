@@ -34,6 +34,7 @@ public final class EnvironmentLockfileService {
     private static final String LOCKFILE_DIRECTORY = ".vanta";
     private static final String LOCKFILE_NAME = "environment.lock.json";
     private static final int BUFFER_SIZE = 64 * 1024;
+    private static final int MAX_MOD_FILES = 10_000;
     private static final int MAX_ENVIRONMENT_FILES = 20_000;
     private static final List<String> ENVIRONMENT_DIRECTORIES = List.of("resourcepacks", "shaderpacks", "config");
     private static final Set<Integer> SUPPORTED_SCHEMA_VERSIONS = Set.of(1, EnvironmentLockfile.CURRENT_SCHEMA_VERSION);
@@ -69,18 +70,21 @@ public final class EnvironmentLockfileService {
         if (Files.isDirectory(modsDirectory, LinkOption.NOFOLLOW_LINKS)) {
             List<Path> files;
             try (var stream = Files.list(modsDirectory)) {
-                files = stream.sorted(Comparator.comparing(
-                        path -> path.getFileName().toString(),
-                        String.CASE_INSENSITIVE_ORDER
-                )).toList();
+                files = stream
+                        .filter(path -> !Files.isSymbolicLink(path))
+                        .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                        .limit(MAX_MOD_FILES + 1L)
+                        .sorted(Comparator.comparing(
+                                path -> path.getFileName().toString(),
+                                String.CASE_INSENSITIVE_ORDER
+                        )).toList();
+            }
+            if (files.size() > MAX_MOD_FILES) {
+                throw new IOException("Instance contains more than " + MAX_MOD_FILES
+                        + " mod-directory files; refusing an incomplete baseline.");
             }
 
             for (Path file : files) {
-                if (Files.isSymbolicLink(file)
-                        || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
-                    continue;
-                }
-
                 InstalledMod metadata = modScanner.scanFile(file);
                 artifacts.add(new EnvironmentLockfile.ModArtifact(
                         file.getFileName().toString(),
@@ -435,6 +439,7 @@ public final class EnvironmentLockfileService {
                     || blank(artifact.relativePath())
                     || artifact.relativePath().startsWith("/")
                     || artifact.relativePath().contains("\\")
+                    || artifact.relativePath().contains(":")
                     || java.util.Arrays.stream(artifact.relativePath().split("/"))
                             .anyMatch(part -> part.isBlank() || part.equals(".") || part.equals(".."))
                     || artifact.sizeBytes() < 0
