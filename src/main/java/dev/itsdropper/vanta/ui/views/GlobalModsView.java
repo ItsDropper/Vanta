@@ -16,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -127,13 +128,14 @@ public class GlobalModsView extends VBox {
         versionBox.setPrefHeight(42);
         versionBox.getStyleClass().add("create-combo");
 
-        HBox filters = new HBox(
-                10,
+        FlowPane filters = new FlowPane(
+                10, 8,
                 contentTypeBox,
                 loaderBox,
                 versionBox
         );
         filters.setAlignment(Pos.CENTER_LEFT);
+        filters.setMaxWidth(Double.MAX_VALUE);
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
@@ -176,6 +178,8 @@ public class GlobalModsView extends VBox {
         searchField.setPromptText(
                 "Search Modrinth..."
         );
+        searchField.setMinWidth(0);
+        searchField.setAccessibleText("Search Modrinth content");
 
         searchField.getStyleClass().add(
                 "create-field"
