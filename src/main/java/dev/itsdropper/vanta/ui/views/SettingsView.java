@@ -31,6 +31,7 @@ import dev.itsdropper.vanta.launcher.update.UpdateInfo;
 import dev.itsdropper.vanta.launcher.update.UpdateService;
 import dev.itsdropper.vanta.ui.DebugAccess;
 import dev.itsdropper.vanta.ui.components.NotificationManager;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.ThemeManager;
 
@@ -1941,14 +1942,12 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private void pageHeader(String title, String subtitle) {
-        Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add("settings-page-title");
-
-        Label subtitleLabel = new Label(subtitle);
-        subtitleLabel.getStyleClass().add("settings-page-subtitle");
-        subtitleLabel.setWrapText(true);
-
-        content.getChildren().addAll(titleLabel, subtitleLabel);
+        content.getChildren().add(new PageHeader(
+                title,
+                subtitle,
+                "settings-page-title",
+                "settings-page-subtitle"
+        ));
     }
 
     private VBox card(String title, String description) {
