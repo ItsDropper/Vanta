@@ -42,6 +42,7 @@ public class LauncherView {
 
     private final Sidebar sidebar;
     private final StackPane content;
+    private final ViewHost viewHost;
 
     private final HomeView homeView;
     private final AccountsView accountsView;
@@ -238,6 +239,8 @@ public class LauncherView {
                 "content"
         );
 
+        viewHost = new ViewHost(content);
+
         content.setPadding(
                 new Insets(
                         16,
@@ -404,27 +407,11 @@ public class LauncherView {
     }
 
     private void showStatePage() {
-        content.getChildren().setAll(stateCenterView);
-        stateCenterView.setVisible(true);
-        stateCenterView.setManaged(true);
-        stateCenterView.setOpacity(1);
-        stateCenterView.setTranslateX(0);
-        stateCenterView.setTranslateY(0);
+        viewHost.show(stateCenterView);
     }
 
     private void showAnimatedContent(Parent view) {
-        content.getChildren().setAll(view);
-        view.setVisible(true);
-        view.setManaged(true);
-        view.setOpacity(1);
-        view.setTranslateX(0);
-        view.setTranslateY(0);
-
-        AnimationUtils.installInteractiveAnimations(view);
-
-        if (LauncherSettings.isAnimationsEnabled()) {
-            AnimationUtils.slideFadeIn(view, 14);
-        }
+        viewHost.showAnimated(view);
     }
 
     // =============================================================
@@ -453,7 +440,7 @@ public class LauncherView {
                                 )
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 view
         );
     }
@@ -486,7 +473,7 @@ public class LauncherView {
                                 )
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 viewHolder[0]
         );
     }
@@ -501,7 +488,7 @@ public class LauncherView {
             ModrinthContentType contentType
     ) {
 
-        content.getChildren().setAll(
+        viewHost.show(
                 new ModDetailsView(
                         instance,
                         project.getProjectId(),
@@ -521,7 +508,7 @@ public class LauncherView {
 
     private void showCreateInstanceView() {
 
-        content.getChildren().setAll(
+        viewHost.show(
                 createInstanceTypeView
         );
     }
@@ -535,7 +522,7 @@ public class LauncherView {
                         this::showModrinthModpackView
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 createInstanceView
         );
     }
@@ -548,7 +535,7 @@ public class LauncherView {
                         this::instanceCreated
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 importInstanceView
         );
     }
@@ -561,7 +548,7 @@ public class LauncherView {
                         this::showCreateInstanceView
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 presetView
         );
     }
@@ -578,7 +565,7 @@ public class LauncherView {
                         this::showModrinthModpackView
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 configurationView
         );
     }
@@ -942,7 +929,7 @@ public class LauncherView {
                         this::instanceCreated
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 modpackBrowserView
         );
     }
@@ -961,7 +948,7 @@ public class LauncherView {
         instancesView.refresh();
         homeView.refreshRecentInstances();
 
-        content.getChildren().setAll(
+        viewHost.show(
                 instancesView
         );
     }
@@ -995,7 +982,7 @@ public class LauncherView {
 
     private void showInstances() {
 
-        content.getChildren().setAll(
+        viewHost.show(
                 instancesView
         );
     }
@@ -1021,7 +1008,7 @@ public class LauncherView {
                                 )
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 instanceSettingsView
         );
     }
@@ -1039,7 +1026,7 @@ public class LauncherView {
                                 )
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 screenshotsView
         );
     }
@@ -1343,13 +1330,13 @@ public class LauncherView {
             ModrinthContentType contentType
     ) {
 
-        content.getChildren().setAll(
+        viewHost.show(
                 new ModDetailsView(
                         null,
                         projectId,
                         contentType,
                         () ->
-                                content.getChildren().setAll(
+                                viewHost.show(
                                         globalModsView
                                 )
                 )
@@ -1455,7 +1442,7 @@ public class LauncherView {
                         () -> restoreRepairMetadata(repairInstance)
                 );
 
-        content.getChildren().setAll(
+        viewHost.show(
                 repairView
         );
     }
