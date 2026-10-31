@@ -5,35 +5,35 @@
     -fx-fill: rgba(3, 6, 12, 0.76);
 }
 .command-palette-panel {
-    -fx-background-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurfaceraised;
     -fx-background-radius: 18px;
-    -fx-border-color: derive(-vanta-border, 15%);
+    -fx-border-color: derive(-vantaborder, 15%);
     -fx-border-radius: 18px;
     -fx-border-width: 1px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.48), 34, 0.16, 0, 12);
 }
 .command-palette-eyebrow {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 9px;
     -fx-font-weight: 900;
     -fx-letter-spacing: 1.4px;
 }
 .command-palette-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 21px;
     -fx-font-weight: 800;
 }
 .command-palette-search {
-    -fx-background-color: -vanta-surface;
-    -fx-text-fill: -vanta-text;
-    -fx-prompt-text-fill: -vanta-subtle;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurface;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantasubtle;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 9px;
     -fx-background-radius: 9px;
     -fx-padding: 13px 14px;
     -fx-font-size: 13px;
 }
-.command-palette-search:focused { -fx-border-color: -vanta-accent; }
+.command-palette-search:focused { -fx-border-color: -vantaaccent; }
 .command-palette-results { -fx-spacing: 4px; }
 .command-result {
     -fx-background-color: transparent;
@@ -43,46 +43,46 @@
     -fx-cursor: hand;
 }
 .command-result:hover, .command-result-selected {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-border-color: derive(-vanta-accent, -50%);
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: derive(-vantaaccent, -50%);
     -fx-border-radius: 9px;
 }
 .command-result-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
     -fx-font-weight: 800;
 }
 .command-result-description {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
 }
 .command-result-shortcut {
-    -fx-text-fill: -vanta-subtle;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 10px;
     -fx-font-weight: 700;
 }
 .command-palette-empty {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-padding: 18px 10px;
     -fx-font-size: 12px;
 }
 .command-palette-footer {
-    -fx-border-color: -vanta-border transparent transparent transparent;
+    -fx-border-color: -vantaborder transparent transparent transparent;
     -fx-border-width: 1px 0 0 0;
     -fx-padding: 12px 0 0 0;
 }
 .command-palette-key {
-    -fx-background-color: -vanta-surface;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
     -fx-padding: 3px 6px;
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 9px;
     -fx-font-weight: 800;
 }
 .command-palette-hint {
-    -fx-text-fill: -vanta-subtle;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 9px;
 }
 
@@ -101,9 +101,9 @@
     -fx-padding: 0 0 0 4px;
 }
 .command-palette-scroll .scroll-bar:vertical .thumb {
-    -fx-background-color: -vanta-border;
+    -fx-background-color: -vantaborder;
     -fx-background-radius: 99px;
 }
 .command-palette-scroll .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: -vanta-muted;
+    -fx-background-color: -vantamuted;
 }
