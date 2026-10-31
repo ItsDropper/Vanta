@@ -172,6 +172,18 @@ public class InstancesView extends VBox {
         HBox.setHgrow(searchField, Priority.ALWAYS);
         searchField.setMaxWidth(Double.MAX_VALUE);
 
+        Button clearSearchButton = new Button("CLEAR");
+        clearSearchButton.getStyleClass().add("secondary-button");
+        clearSearchButton.setAccessibleText("Clear the instance search");
+        clearSearchButton.setTooltip(new javafx.scene.control.Tooltip("Clear search"));
+        clearSearchButton.visibleProperty().bind(Bindings.isNotEmpty(searchField.textProperty()));
+        clearSearchButton.managedProperty().bind(clearSearchButton.visibleProperty());
+        clearSearchButton.setOnAction(event -> {
+            searchField.clear();
+            searchField.requestFocus();
+        });
+        searchRow.getChildren().add(1, clearSearchButton);
+
         VBox header = new VBox(14, headerTop, searchRow);
         header.getStyleClass().add("instances-header");
 
