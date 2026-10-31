@@ -62,6 +62,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     private final java.util.Map<String, Instance> displayedInstances =
             new java.util.HashMap<>();
     private final Timeline playtimeTimer;
+    private final AccountService.AccountListener accountListener = this::onAccountChanged;
+    private final Consumer<LaunchService.LaunchState> launchStateListener =
+            this::onLaunchStateChanged;
+    private final Runnable serverHistoryListener =
+            () -> Platform.runLater(this::refreshRecentServers);
+    private boolean listenersRegistered;
     private final AtomicLong instanceRefreshSequence = new AtomicLong();
     private final AtomicLong serverRefreshSequence = new AtomicLong();
 
@@ -146,13 +152,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         // Keeping the header inside the ScrollPane prevents an overlay node
         // from ever sitting above the recent-instance controls.
 
-        accountService.addListener(this::onAccountChanged);
-        launchService.addStateListener(this::onLaunchStateChanged);
-        ServerHistoryManager.addListener(() ->
-                Platform.runLater(this::refreshRecentServers)
-        );
-
-        playtimeTimer = new Timeline(
+         playtimeTimer = new Timeline(
                 new KeyFrame(
                         Duration.seconds(1),
                         event -> updatePlaytimeLabels()
@@ -259,10 +259,35 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
      * state transition, so relying only on launch listeners leaves stale UI.
      */
     public void onShown() {
+        if (!listenersRegistered) {
+            accountService.addListener(accountListener);
+            launchService.addStateListener(launchStateListener);
+            ServerHistoryManager.addListener(serverHistoryListener);
+            listenersRegistered = true;
+        }
+
+        if (playtimeTimer.getStatus() != javafx.animation.Animation.Status.RUNNING) {
+            playtimeTimer.play();
+        }
+
         refreshAccount();
         updateLaunchStatus(launchService.getState());
         refreshRecentInstances();
         refreshRecentServers();
+    }
+
+    @Override
+    public void onHidden() {
+        if (listenersRegistered) {
+            accountService.removeListener(accountListener);
+            launchService.removeStateListener(launchStateListener);
+            ServerHistoryManager.removeListener(serverHistoryListener);
+            listenersRegistered = false;
+        }
+
+        playtimeTimer.stop();
+        instanceRefreshSequence.incrementAndGet();
+        serverRefreshSequence.incrementAndGet();
     }
 
     public void refreshRecentInstances() {
