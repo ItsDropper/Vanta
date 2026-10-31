@@ -7,8 +7,8 @@
 .choice-box,
 .check-box .box,
 .slider .thumb {
-    -fx-focus-color: -vanta-accent;
-    -fx-faint-focus-color: -vanta-accent-soft;
+    -fx-focus-color: -vantaaccent;
+    -fx-faint-focus-color: -vantaaccentsoft;
 }
 
 .button:focused,
@@ -16,7 +16,7 @@
 .text-area:focused,
 .combo-box-base:focused,
 .choice-box:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
     -fx-border-width: 1px;
 }
 
@@ -51,7 +51,7 @@
 .settings-nav-button:focused,
 .title-bar-button:focused,
 .instance-menu-button:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
     -fx-border-radius: 8px;
 }
 
