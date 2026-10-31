@@ -1151,3 +1151,12 @@
 .overengineered-ui .notification-accent {
     -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -42%), 6, 0.16, 0, 0);
 }
+
+
+/* Clickable Modrinth result cards must expose the same clear focus state as buttons. */
+.instance-card:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 13px;
+    -fx-faint-focus-color: transparent;
+}
