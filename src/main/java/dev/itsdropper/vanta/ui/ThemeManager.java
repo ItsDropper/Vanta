@@ -114,6 +114,15 @@ public final class ThemeManager {
     public static void apply(Node node, String accent) {
         if (node == null) return;
 
+        boolean overengineered = LauncherSettings.isOverengineeredUiEnabled();
+        if (overengineered) {
+            if (!node.getStyleClass().contains("overengineered-ui")) {
+                node.getStyleClass().add("overengineered-ui");
+            }
+        } else {
+            node.getStyleClass().remove("overengineered-ui");
+        }
+
         // Read appearance settings once. Applying a theme is on the UI path
         // and can happen for many popups; repeated disk reads here add latency.
         Properties settings = load();
