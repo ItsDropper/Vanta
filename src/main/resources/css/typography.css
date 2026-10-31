@@ -1,11 +1,11 @@
 .page-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 32px;
     -fx-font-weight: 800;
 }
 
 .page-subtitle {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 13px;
 }
 
@@ -13,12 +13,12 @@
 .create-section-title,
 .settings-section-title,
 .instances-count {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
 
 .footer-label {
-    -fx-text-fill: -vanta-subtle;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
 }
