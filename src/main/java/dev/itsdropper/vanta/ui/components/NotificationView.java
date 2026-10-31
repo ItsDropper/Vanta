@@ -30,6 +30,7 @@ public class NotificationView extends VBox {
     private final ProgressBar progressBar;
     private final Button closeButton;
     private final Rectangle accent;
+    private String fullMessage = "";
 
     public NotificationView(
             String title,
@@ -64,7 +65,8 @@ public class NotificationView extends VBox {
         messageLabel.setMinHeight(0);
         messageLabel.setMaxHeight(32);
         messageLabel.getStyleClass().add("notification-message");
-        setDisplayText(messageLabel, message, MAX_MESSAGE_LENGTH);
+        messageLabel.widthProperty().addListener((observable, previousWidth, width) -> updateMessagePresentation());
+        setMessage(message);
 
         progressIndicator = new ProgressIndicator();
         progressIndicator.setPrefSize(16, 16);
@@ -130,7 +132,20 @@ public class NotificationView extends VBox {
     }
 
     public void setMessage(String message) {
-        setDisplayText(messageLabel, message, MAX_MESSAGE_LENGTH);
+        fullMessage = message == null ? "" : message.strip();
+        updateMessagePresentation();
+    }
+
+    private void updateMessagePresentation() {
+        double availableWidth = messageLabel.getWidth();
+        int widthBasedLimit = availableWidth > 0
+                ? Math.max(24, (int) Math.floor(availableWidth / 5.8) * 2)
+                : MAX_MESSAGE_LENGTH;
+        setDisplayText(
+                messageLabel,
+                fullMessage,
+                Math.min(MAX_MESSAGE_LENGTH, widthBasedLimit)
+        );
     }
 
     public void setProgress(double progress) {
