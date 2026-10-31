@@ -37,9 +37,11 @@ import org.apache.batik.transcoder.image.PNGTranscoder;
 
 import java.awt.Desktop;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.net.URI;
+import java.time.Duration;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -52,6 +54,7 @@ public class MarkdownRenderer {
 
     private static final Logger LOGGER = Logger.getLogger(MarkdownRenderer.class.getName());
     private static final double MAX_IMAGE_WIDTH = 900;
+    private static final int MAX_REMOTE_IMAGE_BYTES = 12 * 1024 * 1024;
 
     /*
      * Badges such as Shields.io are normally SVGs.
@@ -767,6 +770,7 @@ public class MarkdownRenderer {
                                 HttpRequest.newBuilder(
                                                 uri
                                         )
+                                        .timeout(Duration.ofSeconds(20))
                                         .GET()
                                         .header(
                                                 "User-Agent",
@@ -778,11 +782,10 @@ public class MarkdownRenderer {
                                         )
                                         .build();
 
-                        HttpResponse<byte[]> response =
+                        HttpResponse<InputStream> response =
                                 httpClient.send(
                                         request,
-                                        HttpResponse.BodyHandlers
-                                                .ofByteArray()
+                                        HttpResponse.BodyHandlers.ofInputStream()
                                 );
 
                         int status =
@@ -800,6 +803,7 @@ public class MarkdownRenderer {
                         if (status < 200
                                 || status >= 300) {
 
+                            response.body().close();
                             Platform.runLater(() ->
                                     showInlineImageError(
                                             imageView,
@@ -811,8 +815,23 @@ public class MarkdownRenderer {
                             return;
                         }
 
-                        byte[] data =
-                                response.body();
+                        byte[] data;
+                        try (
+                                InputStream body = response.body();
+                                ByteArrayOutputStream output = new ByteArrayOutputStream()
+                        ) {
+                            byte[] buffer = new byte[8192];
+                            int totalBytes = 0;
+                            int read;
+                            while ((read = body.read(buffer)) != -1) {
+                                totalBytes += read;
+                                if (totalBytes > MAX_REMOTE_IMAGE_BYTES) {
+                                    throw new IOException("Remote image exceeds the 12 MiB limit.");
+                                }
+                                output.write(buffer, 0, read);
+                            }
+                            data = output.toByteArray();
+                        }
 
                         byte[] pngData;
 
