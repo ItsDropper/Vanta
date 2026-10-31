@@ -132,7 +132,7 @@
 }
 
 .instance-playing-button:pressed {
-    -fx-background-color: #202620;
+    -fx-background-color: -vanta-surface-hover;
 }
 
 
@@ -1040,7 +1040,7 @@
 
 
 /* Instance management popups */
-.instance-action-popup{-vanta-accent:-vanta-accent;-vanta-accent-soft:-vanta-accent-soft;-vanta-accent-hover:-vanta-accent-hover;-vanta-accent-rgb:86,136,237;-fx-background-color:-vanta-bg;-fx-background-radius:14px;-fx-border-color:-vanta-border;-fx-border-width:1px;-fx-border-radius:14px;-fx-padding:20px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.38),24,.15,0,8)}
+.instance-action-popup{-fx-background-color:-vanta-bg;-fx-background-radius:14px;-fx-border-color:-vanta-border;-fx-border-width:1px;-fx-border-radius:14px;-fx-padding:20px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.38),24,.15,0,8)}
 .instance-action-title{-fx-text-fill:-vanta-text;-fx-font-size:14px;-fx-font-weight:900}
 .instance-action-subtitle{-fx-text-fill:-vanta-muted;-fx-font-size:10px}
 .instance-action-field{-fx-background-color:-vanta-bg;-fx-background-radius:8px;-fx-border-color:-vanta-border;-fx-border-radius:8px;-fx-text-fill:-vanta-text;-fx-prompt-text-fill:-vanta-muted;-fx-padding:10px 12px;-fx-min-height:40px}
