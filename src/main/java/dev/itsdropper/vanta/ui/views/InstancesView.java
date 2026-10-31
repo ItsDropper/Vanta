@@ -9,6 +9,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceDialog;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.stage.Popup;
 import javafx.scene.control.ScrollPane;
@@ -16,6 +17,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -31,6 +33,7 @@ import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Comparator;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -47,6 +50,7 @@ public class InstancesView extends VBox {
     private final Runnable onCreateInstance;
 
     private final TextField searchField;
+    private final ComboBox<String> sortField;
 
     private List<Instance> loadedInstances =
             List.of();
@@ -113,7 +117,7 @@ public class InstancesView extends VBox {
                 new TextField();
 
         searchField.setPromptText(
-                "Search by name, Minecraft version, or loader..."
+                "Search name, version, loader, or instance ID..."
         );
         searchField.setAccessibleText("Search installed Minecraft instances");
 
@@ -166,11 +170,9 @@ public class InstancesView extends VBox {
         refreshButton.setTooltip(new javafx.scene.control.Tooltip("Rescan installed instances"));
         refreshButton.setOnAction(event -> refresh());
 
-        HBox searchRow = new HBox(10, searchField, refreshButton);
-        searchRow.getStyleClass().add("instances-toolbar");
-        searchRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(searchField, Priority.ALWAYS);
-        searchField.setMaxWidth(Double.MAX_VALUE);
+        searchField.setMinWidth(180);
+        searchField.setPrefWidth(360);
+        searchField.setMaxWidth(560);
 
         Button clearSearchButton = new Button("CLEAR");
         clearSearchButton.getStyleClass().add("secondary-button");
@@ -182,7 +184,23 @@ public class InstancesView extends VBox {
             searchField.clear();
             searchField.requestFocus();
         });
-        searchRow.getChildren().add(1, clearSearchButton);
+
+        sortField = new ComboBox<>();
+        sortField.getItems().setAll("Name (A–Z)", "Minecraft version", "Loader");
+        sortField.setValue("Name (A–Z)");
+        sortField.setPromptText("Sort instances");
+        sortField.setAccessibleText("Sort installed Minecraft instances");
+        sortField.setTooltip(new javafx.scene.control.Tooltip("Choose how instances are ordered"));
+        sortField.setMinWidth(150);
+        sortField.setPrefWidth(170);
+        sortField.setOnAction(event -> filterInstances(searchField.getText()));
+
+        FlowPane searchRow = new FlowPane(10, 10);
+        searchRow.getStyleClass().add("instances-toolbar");
+        searchRow.setAlignment(Pos.CENTER_LEFT);
+        searchRow.setRowValignment(javafx.geometry.VPos.CENTER);
+        searchRow.prefWrapLengthProperty().bind(searchRow.widthProperty());
+        searchRow.getChildren().addAll(searchField, clearSearchButton, sortField, refreshButton);
 
         VBox header = new VBox(14, headerTop, searchRow);
         header.getStyleClass().add("instances-header");
@@ -439,12 +457,28 @@ public class InstancesView extends VBox {
                 ? ""
                 : query.trim().toLowerCase(Locale.ROOT);
 
+        Comparator<Instance> nameOrder = Comparator.comparing(
+                instance -> safeLower(instance.getName())
+        );
+        Comparator<Instance> selectedOrder = switch (sortField.getValue() == null
+                ? "Name (A–Z)" : sortField.getValue()) {
+            case "Minecraft version" -> Comparator.comparing(
+                    instance -> safeLower(instance.getMinecraftVersion())
+            ).thenComparing(nameOrder);
+            case "Loader" -> Comparator.comparing(
+                    instance -> safeLower(instance.getDisplayLoader())
+            ).thenComparing(nameOrder);
+            default -> nameOrder;
+        };
+
         List<Instance> filtered = loadedInstances.stream()
                 .filter(instance ->
                         normalized.isBlank()
                                 || safeLower(instance.getName()).contains(normalized)
+                                || safeLower(instance.getId()).contains(normalized)
                                 || safeLower(instance.getMinecraftVersion()).contains(normalized)
                                 || safeLower(instance.getDisplayLoader()).contains(normalized))
+                .sorted(selectedOrder)
                 .toList();
 
         if (filtered.isEmpty()) {
