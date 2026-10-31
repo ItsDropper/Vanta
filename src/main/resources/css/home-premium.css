@@ -4,67 +4,67 @@
  */
 
 .home-page {
-    -fx-background-color: -vanta-bg;
+    -fx-background-color: -vantabg;
 }
 
 .home-featured-section { -fx-spacing: 5px; }
 .home-featured-section-eyebrow {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
     -fx-letter-spacing: 1px;
 }
 .home-featured-section-subtitle {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
 }
 .home-featured-container { -fx-background-color: transparent; }
 .home-featured-loading {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
     -fx-padding: 24px;
 }
 .home-featured-card {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 14px;
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 14px;
 }
 .home-featured-card:hover {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-border-color: derive(-vanta-border, 18%);
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: derive(-vantaborder, 18%);
 }
 .home-featured-icon-frame {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-background-radius: 14px;
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 14px;
     -fx-border-width: 1px;
 }
 .home-featured-eyebrow {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
     -fx-letter-spacing: 1px;
 }
 .home-featured-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 25px;
     -fx-font-weight: 800;
 }
 .home-featured-meta {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
     -fx-font-weight: 600;
 }
 .home-featured-playtime {
-    -fx-text-fill: -vanta-subtle;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 10px;
     -fx-font-weight: 600;
 }
 .home-featured-play-button {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-background-radius: 8px;
     -fx-border-color: transparent;
     -fx-text-fill: white;
@@ -73,6 +73,6 @@
     -fx-padding: 0 20px;
     -fx-cursor: hand;
 }
-.home-featured-play-button:hover { -fx-background-color: -vanta-accent-hover; }
-.home-featured-play-button:pressed { -fx-background-color: derive(-vanta-accent, -14%); }
+.home-featured-play-button:hover { -fx-background-color: -vantaaccenthover; }
+.home-featured-play-button:pressed { -fx-background-color: derive(-vantaaccent, -14%); }
 .home-featured-play-button:disabled { -fx-opacity: 0.5; }
