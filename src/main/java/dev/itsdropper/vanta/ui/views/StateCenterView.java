@@ -990,7 +990,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         );
 
         String details = report.isClean()
-                ? "No differences were found in the Minecraft version, loader identity, or files in the mods directory."
+                ? "No differences were found in the Minecraft version, loader identity, mods, resource packs, shader packs, or tracked configuration files."
                 : report.changes().stream()
                         .map(change -> {
                             StringBuilder line = new StringBuilder(change.type().name())
