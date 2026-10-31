@@ -7,9 +7,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -65,6 +65,7 @@ public final class CommandPalette extends StackPane {
         searchField.setAccessibleText("Search Vanta commands");
         searchField.getStyleClass().add("command-palette-search");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> refreshResults());
+        searchField.addEventFilter(KeyEvent.KEY_PRESSED, this::handleSearchKeyPressed);
         searchField.setOnAction(event -> executeSelected());
 
         resultList.getStyleClass().add("command-palette-results");
@@ -88,9 +89,6 @@ public final class CommandPalette extends StackPane {
         StackPane.setMargin(panel, new Insets(88, 24, 24, 24));
 
         getChildren().addAll(scrim, panel);
-        panel.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED,
-                javafx.scene.input.MouseEvent::consume);
-
         setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
                 hide();
@@ -108,6 +106,22 @@ public final class CommandPalette extends StackPane {
         });
 
         refreshResults();
+    }
+
+    private void handleSearchKeyPressed(KeyEvent event) {
+        if (event.getCode() == KeyCode.ESCAPE) {
+            hide();
+            event.consume();
+        } else if (event.getCode() == KeyCode.DOWN) {
+            moveSelection(1);
+            event.consume();
+        } else if (event.getCode() == KeyCode.UP) {
+            moveSelection(-1);
+            event.consume();
+        } else if (event.getCode() == KeyCode.ENTER) {
+            executeSelected();
+            event.consume();
+        }
     }
 
     private HBox hint(String key, String label) {
