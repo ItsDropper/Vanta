@@ -110,6 +110,7 @@ public class GlobalModsView extends VBox {
                 ModrinthContentType.SHADER
         );
         contentTypeBox.setValue(ModrinthContentType.MOD);
+        contentTypeBox.setAccessibleText("Modrinth content type filter");
         contentTypeBox.setPrefWidth(170);
         contentTypeBox.setPrefHeight(42);
         contentTypeBox.getStyleClass().add("create-combo");
@@ -117,6 +118,7 @@ public class GlobalModsView extends VBox {
         loaderBox = new ComboBox<>();
         loaderBox.getItems().addAll("Fabric", "Forge");
         loaderBox.setValue("Fabric");
+        loaderBox.setAccessibleText("Minecraft mod loader filter");
         loaderBox.setPrefWidth(140);
         loaderBox.setPrefHeight(42);
         loaderBox.getStyleClass().add("create-combo");
@@ -124,6 +126,7 @@ public class GlobalModsView extends VBox {
         versionBox = new ComboBox<>();
         versionBox.getItems().add("All versions");
         versionBox.setValue("All versions");
+        versionBox.setAccessibleText("Minecraft version filter");
         versionBox.setPrefWidth(170);
         versionBox.setPrefHeight(42);
         versionBox.getStyleClass().add("create-combo");
@@ -198,6 +201,7 @@ public class GlobalModsView extends VBox {
         searchButton.getStyleClass().add(
                 "primary-button"
         );
+        searchButton.setAccessibleText("Search Modrinth content");
 
         searchButton.setOnAction(
                 event ->
