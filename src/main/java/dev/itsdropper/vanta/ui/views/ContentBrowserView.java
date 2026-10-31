@@ -12,6 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -212,17 +213,14 @@ public class ContentBrowserView extends VBox {
                         )
         );
 
-        HBox typeNavigation =
-                new HBox(
-                        10,
-                        modsButton,
-                        packsButton,
-                        shadersButton
-                );
-
-        typeNavigation.setAlignment(
-                Pos.CENTER_LEFT
+        FlowPane typeNavigation = new FlowPane(
+                10, 8,
+                modsButton,
+                packsButton,
+                shadersButton
         );
+        typeNavigation.setAlignment(Pos.CENTER_LEFT);
+        typeNavigation.setMaxWidth(Double.MAX_VALUE);
 
         updateTypeButtons();
 
@@ -244,6 +242,7 @@ public class ContentBrowserView extends VBox {
         searchField.setPromptText(
                 "Search Modrinth projects..."
         );
+        searchField.setMinWidth(0);
         searchField.setAccessibleText("Search compatible Modrinth projects");
 
 
@@ -821,6 +820,7 @@ public class ContentBrowserView extends VBox {
         information.setFillWidth(
                 true
         );
+        information.setMinWidth(0);
 
         HBox.setHgrow(
                 information,
