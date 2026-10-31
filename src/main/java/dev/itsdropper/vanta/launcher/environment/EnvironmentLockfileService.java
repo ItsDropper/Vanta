@@ -223,6 +223,32 @@ public final class EnvironmentLockfileService {
         return destination;
     }
 
+    /**
+     * Returns the canonical local lockfile path for an instance.
+     */
+    public Path getLockfilePath(Instance instance) {
+        validateInstance(instance);
+        return instance.getDirectory().toAbsolutePath().normalize()
+                .resolve(LOCKFILE_DIRECTORY)
+                .resolve(LOCKFILE_NAME);
+    }
+
+    /**
+     * Checks whether a regular, non-symbolic-link baseline exists for this instance.
+     */
+    public boolean hasBaseline(Instance instance) {
+        Path path = getLockfilePath(instance);
+        return !Files.isSymbolicLink(path)
+                && Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
+    }
+
+    /**
+     * Reads the saved baseline belonging to an instance.
+     */
+    public EnvironmentLockfile readBaseline(Instance instance) throws IOException {
+        return read(getLockfilePath(instance));
+    }
+
     public EnvironmentLockfile read(Path lockfilePath) throws IOException {
         if (lockfilePath == null) {
             throw new IllegalArgumentException("Lockfile path cannot be null.");
