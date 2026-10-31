@@ -318,6 +318,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                     if (request != instanceRefreshSequence.get()) return;
                     recentList.getChildren().clear();
                     recentStatus.setText("Failed to load recent instances.");
+                    featuredContainer.getChildren().setAll(createInstanceLoadErrorCard());
                 });
             }
         });
@@ -383,6 +384,41 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                             + " played"
             );
         }
+    }
+
+    private VBox createInstanceLoadErrorCard() {
+        Label eyebrow = new Label("LIBRARY UNAVAILABLE");
+        eyebrow.getStyleClass().add("home-empty-eyebrow");
+
+        Label title = new Label("Couldn't load your instances.");
+        title.getStyleClass().add("home-load-error-title");
+
+        Label description = new Label(
+                "Vanta couldn't read the local instance library. Your installations have not been changed."
+        );
+        description.setWrapText(true);
+        description.setMaxWidth(480);
+        description.getStyleClass().add("home-load-error-description");
+
+        Button retry = new Button("TRY AGAIN");
+        retry.getStyleClass().add("secondary-button");
+        retry.setMinHeight(38);
+        retry.setAccessibleText("Retry loading Minecraft instances");
+        retry.setOnAction(event -> refreshRecentInstances());
+        AnimationUtils.installInteractiveAnimations(retry);
+
+        VBox card = new VBox(12, eyebrow, title, description, retry);
+        card.setPadding(new Insets(24));
+        card.setMinWidth(0);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.prefWidthProperty().bind(
+                Bindings.createDoubleBinding(
+                        () -> Math.max(0, featuredContainer.getWidth() - 2),
+                        featuredContainer.widthProperty()
+                )
+        );
+        card.getStyleClass().add("home-load-error-card");
+        return card;
     }
 
     private VBox createFirstInstanceCard() {
