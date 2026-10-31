@@ -87,6 +87,7 @@ Depending on the features used, Vanta may contact Microsoft/Xbox/Minecraft servi
 ## Documentation
 
 - [Architecture Overview](docs/ARCHITECTURE.md) — subsystem responsibilities and design principles
+- [Product Direction](docs/PRODUCT_DIRECTION.md) — differentiated environment-management subsystems and delivery order
 - [Development Guide](docs/DEVELOPMENT.md) — setup, build, packaging, and debugging
 - [Contributing](CONTRIBUTING.md) — change expectations, checks, and pull request guidance
 - [Security Policy](SECURITY.md) — responsible vulnerability reporting
