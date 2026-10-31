@@ -1092,3 +1092,20 @@
     -fx-background-color: -vantaaccent;
     -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -45%), 9, 0.18, 0, 0);
 }
+
+
+.overengineered-ui .notification {
+    -fx-background-color: linear-gradient(to bottom right, derive(-vantasurfaceraised, 12%), -vantasurface 58%, derive(-vantabg, 8%));
+    -fx-border-color: derive(-vantaaccent, -62%), derive(-vantaborder, 24%);
+    -fx-border-width: 1px;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.48), 24, 0.2, 0, 8);
+}
+.overengineered-ui .notification-title {
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+.overengineered-ui .notification-accent {
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -42%), 9, 0.2, 0, 0);
+}
