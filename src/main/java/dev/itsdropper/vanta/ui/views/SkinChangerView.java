@@ -224,7 +224,7 @@ public final class SkinChangerView extends VBox {
             hideCapeButton.setDisable(true);
             capeChoice.setDisable(true);
             chooseButton.setDisable(busy);
-            modelChoice.setDisable(busy);
+            modelChoice.setDisable(true);
         } else {
             accountLabel.setText(account.getUsername() + "  ·  " + account.getUuid());
             uploadButton.setDisable(busy || selectedFile == null);
@@ -233,7 +233,8 @@ public final class SkinChangerView extends VBox {
             hideCapeButton.setDisable(busy);
             capeChoice.setDisable(busy);
             chooseButton.setDisable(busy);
-            modelChoice.setDisable(busy);
+            modelChoice.setDisable(busy || displayedSkin == null
+                    || displayedSkin.getHeight() < 64);
         }
     }
 
