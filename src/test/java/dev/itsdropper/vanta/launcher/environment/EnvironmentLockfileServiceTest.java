@@ -50,8 +50,10 @@ class EnvironmentLockfileServiceTest {
         );
 
         EnvironmentLockfileService service = new EnvironmentLockfileService();
+        assertFalse(service.hasBaseline(instance));
         Path lockfilePath = service.write(instance);
-        EnvironmentLockfile loaded = service.read(lockfilePath);
+        assertTrue(service.hasBaseline(instance));
+        EnvironmentLockfile loaded = service.readBaseline(instance);
 
         assertEquals(instance.getId(), loaded.instanceId());
         assertEquals(instance.getMinecraftVersion(), loaded.minecraftVersion());
