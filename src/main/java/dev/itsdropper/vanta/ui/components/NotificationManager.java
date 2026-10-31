@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.components;
 
 import javafx.application.Platform;
+import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -8,8 +9,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class NotificationManager {
 
@@ -19,7 +18,7 @@ public class NotificationManager {
 
     private NotificationView currentNotification;
 
-    private Timer dismissTimer;
+    private PauseTransition dismissTransition;
 
     public NotificationManager(StackPane root) {
 
@@ -184,34 +183,18 @@ public class NotificationManager {
 
         cancelDismissTimer();
 
-        dismissTimer =
-                new Timer(
-                        "Vanta-Notification",
-                        true
-                );
-
-        dismissTimer.schedule(
-                new TimerTask() {
-
-                    @Override
-                    public void run() {
-
-                        Platform.runLater(
-                                NotificationManager.this::dismiss
-                        );
-                    }
-
-                },
-                milliseconds
+        dismissTransition = new PauseTransition(
+                javafx.util.Duration.millis(milliseconds)
         );
+        dismissTransition.setOnFinished(event -> dismiss());
+        dismissTransition.play();
     }
 
     private void cancelDismissTimer() {
 
-        if (dismissTimer != null) {
-
-            dismissTimer.cancel();
-            dismissTimer = null;
+        if (dismissTransition != null) {
+            dismissTransition.stop();
+            dismissTransition = null;
         }
     }
 
