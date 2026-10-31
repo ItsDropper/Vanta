@@ -19,7 +19,7 @@ public record EnvironmentLockfile(
         List<ModArtifact> mods,
         List<EnvironmentArtifact> environmentFiles
 ) {
-    public static final int CURRENT_SCHEMA_VERSION = 1;
+    public static final int CURRENT_SCHEMA_VERSION = 2;
 
     public EnvironmentLockfile {
         mods = mods == null ? List.of() : List.copyOf(mods);
