@@ -113,9 +113,7 @@ public class ModDetailsView extends VBox {
                 "page"
         );
 
-        setPadding(
-                new Insets(36)
-        );
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
         setSpacing(
                 20
