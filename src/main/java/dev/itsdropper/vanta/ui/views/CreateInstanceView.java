@@ -11,6 +11,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -291,8 +292,10 @@ public class CreateInstanceView extends VBox {
         retryVersionsButton.setVisible(false);
         retryVersionsButton.setManaged(false);
 
-        HBox statusRow = new HBox(10, statusLabel, retryVersionsButton);
+        statusLabel.setMinWidth(0);
+        FlowPane statusRow = new FlowPane(10, 8, statusLabel, retryVersionsButton);
         statusRow.setAlignment(Pos.CENTER_LEFT);
+        statusRow.setMaxWidth(Double.MAX_VALUE);
 
         // =========================================================
         // ACTIONS
@@ -355,17 +358,14 @@ public class CreateInstanceView extends VBox {
                 event -> onBrowseModpacks.run()
         );
 
-        HBox actions =
-                new HBox(
-                        12,
-                        backButton,
-                        browseModpacksButton,
-                        createButton
-                );
-
-        actions.setAlignment(
-                Pos.CENTER_RIGHT
+        FlowPane actions = new FlowPane(
+                12, 8,
+                backButton,
+                browseModpacksButton,
+                createButton
         );
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.setMaxWidth(Double.MAX_VALUE);
 
         // =========================================================
         // PANEL BUILD
