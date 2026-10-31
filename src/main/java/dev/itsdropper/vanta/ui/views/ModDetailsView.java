@@ -9,6 +9,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -375,6 +376,8 @@ public class ModDetailsView extends VBox {
         title.getStyleClass().add(
                 "mod-details-title"
         );
+        title.setMinWidth(0);
+        title.setWrapText(true);
 
         // =========================================================
         // AUTHOR
@@ -479,16 +482,13 @@ public class ModDetailsView extends VBox {
                 Pos.CENTER_LEFT
         );
 
-        HBox metadata =
-                new HBox(
-                        32,
-                        downloadsStat,
-                        followersStat
-                );
-
-        metadata.setAlignment(
-                Pos.CENTER_LEFT
+        FlowPane metadata = new FlowPane(
+                32, 8,
+                downloadsStat,
+                followersStat
         );
+        metadata.setAlignment(Pos.CENTER_LEFT);
+        metadata.setMaxWidth(Double.MAX_VALUE);
 
         // =========================================================
         // HEADER INFORMATION
@@ -506,6 +506,7 @@ public class ModDetailsView extends VBox {
         headerInformation.setFillWidth(
                 true
         );
+        headerInformation.setMinWidth(0);
 
         HBox.setHgrow(
                 headerInformation,
@@ -571,6 +572,7 @@ public class ModDetailsView extends VBox {
         installButton.setAlignment(
                 Pos.CENTER
         );
+        installButton.setAccessibleText("Install " + safe(project.getTitle(), "this project"));
 
         installButton.setOnAction(
                 event ->
