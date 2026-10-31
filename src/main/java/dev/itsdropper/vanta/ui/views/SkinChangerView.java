@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public final class SkinChangerView extends VBox {
+public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
 
     private static final URI PROFILE_ENDPOINT =
             URI.create("https://api.minecraftservices.com/minecraft/profile");
@@ -71,6 +71,14 @@ public final class SkinChangerView extends VBox {
     private String currentAccountUuid;
     private int profileRequestGeneration;
     private boolean busy;
+    private boolean active;
+    private boolean listenerRegistered;
+    private final AccountService.AccountListener accountListener = account ->
+            Platform.runLater(() -> {
+                if (active) {
+                    onAccountChanged(account);
+                }
+            });
 
     public SkinChangerView(AccountService accountService) {
         this.accountService = accountService;
@@ -208,9 +216,29 @@ public final class SkinChangerView extends VBox {
         VBox.setVgrow(scroll, Priority.ALWAYS);
         getChildren().add(scroll);
 
-        accountService.addListener(account ->
-                Platform.runLater(() -> onAccountChanged(account)));
+        fileLabel.setText("Skin preview loads when this screen is opened.");
+        statusLabel.setText("Open this screen to load the skin currently active on your Minecraft account.");
+    }
+
+    @Override
+    public void onShown() {
+        active = true;
+        if (!listenerRegistered) {
+            listenerRegistered = true;
+            accountService.addListener(accountListener);
+        }
         onAccountChanged(accountService.getCurrentAccount());
+    }
+
+    @Override
+    public void onHidden() {
+        active = false;
+        if (listenerRegistered) {
+            accountService.removeListener(accountListener);
+            listenerRegistered = false;
+        }
+        profileRequestGeneration++;
+        currentAccountUuid = null;
     }
 
     private void onAccountChanged(Account account) {
@@ -258,6 +286,9 @@ public final class SkinChangerView extends VBox {
     }
 
     private void loadCurrentSkin(Account account, int generation) {
+        if (!active) {
+            return;
+        }
         CompletableFuture.supplyAsync(() -> {
             try {
                 HttpRequest request = HttpRequest.newBuilder()
@@ -333,7 +364,8 @@ public final class SkinChangerView extends VBox {
                 return new SkinProfile(null, "classic", null, message(ex), List.of(), "", null);
             }
         }).thenAccept(result -> Platform.runLater(() -> {
-            if (generation != profileRequestGeneration
+            if (!active
+                    || generation != profileRequestGeneration
                     || accountService.getCurrentAccount() == null
                     || !account.getUuid().equals(accountService.getCurrentAccount().getUuid())) {
                 return;
