@@ -59,8 +59,10 @@ public final class ServerHistoryManager {
         // remaining the same logical server. Keep one Home entry for that
         // server+instance instead of creating a new entry for every lobby.
         entries.removeIf(entry ->
-                entry.getInstanceId().equals(instance.getId())
-                        && serverIdentity(entry.getHost()).equals(serverIdentity)
+                java.util.Objects.equals(
+                        entry.getInstanceId(),
+                        instance.getId()
+                ) && serverIdentity(entry.getHost()).equals(serverIdentity)
         );
 
         entries.add(new ServerHistoryEntry(
