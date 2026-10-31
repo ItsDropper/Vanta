@@ -213,7 +213,7 @@ public class AccountsView extends VBox {
 
         accountList.setHgap(12);
         accountList.setVgap(12);
-        accountList.setPrefWrapLength(760);
+        accountList.prefWrapLengthProperty().bind(accountList.widthProperty());
         accountList.setMaxWidth(Double.MAX_VALUE);
         accountList.getStyleClass().add("accounts-grid");
 
@@ -309,6 +309,16 @@ public class AccountsView extends VBox {
     private VBox createAccountCard(Account account, boolean active) {
 
         VBox card = new VBox(14);
+        card.setMinWidth(0);
+        card.setMaxWidth(Double.MAX_VALUE);
+        card.prefWidthProperty().bind(
+                Bindings.createDoubleBinding(() -> {
+                    double width = accountList.getWidth();
+                    if (width <= 1) return 360;
+                    if (width < 700) return Math.max(0, width - 2);
+                    return Math.min(520, (width - accountList.getHgap()) / 2.0);
+                }, accountList.widthProperty())
+        );
         card.getStyleClass().add("accounts-card");
 
         if (active) {
