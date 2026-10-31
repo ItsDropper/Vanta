@@ -362,18 +362,19 @@ public class LauncherView {
             return;
         }
 
-        Sidebar.Page page = switch (event.getCode()) {
-            case DIGIT1, NUMPAD1 -> Sidebar.Page.HOME;
-            case DIGIT2, NUMPAD2 -> Sidebar.Page.INSTANCES;
-            case DIGIT3, NUMPAD3 -> Sidebar.Page.MODS;
-            case DIGIT4, NUMPAD4 -> Sidebar.Page.STATE;
-            case DIGIT5, NUMPAD5 -> Sidebar.Page.SKIN;
-            case DIGIT6, NUMPAD6 -> Sidebar.Page.ACCOUNTS;
-            case DIGIT7, NUMPAD7 -> Sidebar.Page.SETTINGS;
-            case DIGIT8, NUMPAD8 -> Sidebar.Page.DOWNLOADS;
-            case DIGIT9, NUMPAD9 -> Sidebar.Page.SERVERS;
-            default -> null;
+        int shortcutNumber = switch (event.getCode()) {
+            case DIGIT1, NUMPAD1 -> 1;
+            case DIGIT2, NUMPAD2 -> 2;
+            case DIGIT3, NUMPAD3 -> 3;
+            case DIGIT4, NUMPAD4 -> 4;
+            case DIGIT5, NUMPAD5 -> 5;
+            case DIGIT6, NUMPAD6 -> 6;
+            case DIGIT7, NUMPAD7 -> 7;
+            case DIGIT8, NUMPAD8 -> 8;
+            case DIGIT9, NUMPAD9 -> 9;
+            default -> 0;
         };
+        Sidebar.Page page = Sidebar.Page.fromShortcutNumber(shortcutNumber);
 
         if (page != null) {
             showPage(page);

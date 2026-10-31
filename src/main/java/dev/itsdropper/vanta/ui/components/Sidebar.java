@@ -21,15 +21,46 @@ import java.util.function.Consumer;
 public class Sidebar extends VBox {
 
     public enum Page {
-        HOME,
-        INSTANCES,
-        MODS,
-        STATE,
-        SKIN,
-        ACCOUNTS,
-        SETTINGS,
-        DOWNLOADS,
-        SERVERS
+        HOME("Home", 1, IconView.Type.HOME),
+        INSTANCES("Instances", 2, IconView.Type.INSTANCES),
+        MODS("Mods", 3, IconView.Type.MODS),
+        STATE("State", 4, IconView.Type.SHIELD),
+        SKIN("Skin changer", 5, IconView.Type.SKIN),
+        ACCOUNTS("Accounts", 6, IconView.Type.ACCOUNTS),
+        SETTINGS("Settings", 7, IconView.Type.SETTINGS),
+        DOWNLOADS("Downloads", 8, IconView.Type.DOWNLOAD),
+        SERVERS("Server Manager", 9, IconView.Type.TERMINAL);
+
+        private final String title;
+        private final int shortcutNumber;
+        private final IconView.Type iconType;
+
+        Page(String title, int shortcutNumber, IconView.Type iconType) {
+            this.title = title;
+            this.shortcutNumber = shortcutNumber;
+            this.iconType = iconType;
+        }
+
+        public String title() {
+            return title;
+        }
+
+        public int shortcutNumber() {
+            return shortcutNumber;
+        }
+
+        public IconView.Type iconType() {
+            return iconType;
+        }
+
+        public static Page fromShortcutNumber(int shortcutNumber) {
+            for (Page page : values()) {
+                if (page.shortcutNumber == shortcutNumber) {
+                    return page;
+                }
+            }
+            return null;
+        }
     }
 
     private Consumer<Page> pageListener;
@@ -92,15 +123,13 @@ public class Sidebar extends VBox {
         // NAVIGATION
         // ---------------------------------------------------------
 
-        addButton("Home", Page.HOME, IconView.Type.HOME);
-
-        addButton("Instances", Page.INSTANCES, IconView.Type.INSTANCES);
-
-        addButton("Mods", Page.MODS, IconView.Type.MODS);
-        addButton("State", Page.STATE, IconView.Type.SHIELD);
-        addButton("Skin changer", Page.SKIN, IconView.Type.SKIN);
-        addButton("Downloads", Page.DOWNLOADS, IconView.Type.DOWNLOAD);
-        addButton("Server Manager", Page.SERVERS, IconView.Type.TERMINAL);
+        addButton(Page.HOME);
+        addButton(Page.INSTANCES);
+        addButton(Page.MODS);
+        addButton(Page.STATE);
+        addButton(Page.SKIN);
+        addButton(Page.DOWNLOADS);
+        addButton(Page.SERVERS);
 
         Region spacer =
                 new Region();
@@ -114,9 +143,8 @@ public class Sidebar extends VBox {
                 spacer
         );
 
-        addButton("Accounts", Page.ACCOUNTS, IconView.Type.ACCOUNTS);
-
-        addButton("Settings", Page.SETTINGS, IconView.Type.SETTINGS);
+        addButton(Page.ACCOUNTS);
+        addButton(Page.SETTINGS);
 
         Label build =
                 new Label(
@@ -175,23 +203,19 @@ public class Sidebar extends VBox {
         return "1.1.8";
     }
 
-    private void addButton(
-            String text,
-            Page page,
-            IconView.Type iconType
-    ) {
+    private void addButton(Page page) {
 
         Button button =
                 new Button(
-                        text,
-                        IconView.create(iconType, 18)
+                        page.title(),
+                        IconView.create(page.iconType(), 18)
                 );
 
         button.setGraphicTextGap(10);
-        int shortcutNumber = page.ordinal() + 1;
-        button.setTooltip(new Tooltip(text + "  ·  Ctrl+" + shortcutNumber));
+        int shortcutNumber = page.shortcutNumber();
+        button.setTooltip(new Tooltip(page.title() + "  ·  Ctrl+" + shortcutNumber));
         button.setAccessibleText(
-                text + " page. Keyboard shortcut Control plus " + shortcutNumber
+                page.title() + " page. Keyboard shortcut Control plus " + shortcutNumber
         );
 
         button.setMaxWidth(
