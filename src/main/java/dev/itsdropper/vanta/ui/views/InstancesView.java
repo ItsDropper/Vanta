@@ -458,15 +458,15 @@ public class InstancesView extends VBox {
                 ? ""
                 : query.trim().toLowerCase(Locale.ROOT);
 
-        Comparator<Instance> nameOrder = Comparator.comparing(
+        Comparator<Instance> nameOrder = Comparator.<Instance, String>comparing(
                 instance -> safeLower(instance.getName())
         );
         Comparator<Instance> selectedOrder = switch (sortField.getValue() == null
                 ? "Name (A–Z)" : sortField.getValue()) {
-            case "Minecraft version" -> Comparator.comparing(
+            case "Minecraft version" -> Comparator.<Instance, String>comparing(
                     instance -> safeLower(instance.getMinecraftVersion())
             ).thenComparing(nameOrder);
-            case "Loader" -> Comparator.comparing(
+            case "Loader" -> Comparator.<Instance, String>comparing(
                     instance -> safeLower(instance.getDisplayLoader())
             ).thenComparing(nameOrder);
             default -> nameOrder;
