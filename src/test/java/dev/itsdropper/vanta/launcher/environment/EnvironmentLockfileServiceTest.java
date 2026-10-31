@@ -114,6 +114,28 @@ class EnvironmentLockfileServiceTest {
         assertTrue(loaded.environmentFiles().isEmpty());
     }
 
+
+    @Test
+    void doesNotFollowSymbolicLinksInsideTrackedDirectories() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("symlink-instance"));
+        Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path config = Files.createDirectory(instanceDirectory.resolve("config"));
+        Path outside = Files.writeString(temporaryDirectory.resolve("outside-secret.txt"), "outside");
+        try {
+            Files.createSymbolicLink(config.resolve("linked.txt"), outside);
+        } catch (UnsupportedOperationException | java.io.IOException | SecurityException unavailable) {
+            org.junit.jupiter.api.Assumptions.assumeTrue(false,
+                    "Symbolic links are unavailable in this test environment.");
+        }
+
+        Instance instance = new Instance(
+                "symlink", "Symlink", "1.21.1", "fabric", "0.16.9", instanceDirectory
+        );
+        EnvironmentLockfile lockfile = new EnvironmentLockfileService().capture(instance);
+
+        assertTrue(lockfile.environmentFiles().isEmpty());
+    }
+
     @Test
     void rejectsEnvironmentArtifactPathTraversalInSavedLockfile() throws Exception {
         Path lockfilePath = temporaryDirectory.resolve("traversal.json");
