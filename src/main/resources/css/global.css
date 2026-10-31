@@ -1,6 +1,6 @@
 .root,
 .launcher {
-    -fx-background-color: -vanta-bg;
+    -fx-background-color: -vantabg;
     -fx-background-radius: 12px;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
 }
