@@ -867,3 +867,42 @@
     -fx-background-color: derive(-vanta-danger, -70%);
     -fx-border-color: -vanta-danger;
 }
+
+/* Settings switches from a fixed sidebar to a compact section picker. */
+.settings-compact-navigation {
+    -fx-background-color: -vanta-surface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vanta-border;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px 12px;
+}
+.settings-compact-label {
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+.settings-compact-navigation .combo-box {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vanta-border;
+    -fx-border-radius: 8px;
+}
+.settings-compact-navigation .combo-box .list-cell {
+    -fx-text-fill: -vanta-text;
+}
+.settings-compact-navigation .combo-box .arrow {
+    -fx-background-color: -vanta-muted;
+}
+.settings-compact-navigation .combo-box-popup .list-view {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+}
+.settings-compact-navigation .combo-box-popup .list-cell {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-text-fill: -vanta-text;
+}
+.settings-compact-navigation .combo-box-popup .list-cell:hover,
+.settings-compact-navigation .combo-box-popup .list-cell:selected {
+    -fx-background-color: -vanta-accent-soft;
+}
