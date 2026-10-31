@@ -1049,3 +1049,51 @@
 .instance-icon-choice:hover{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaaccent}
 .instance-card-compact{-fx-min-height:62px}
 .instance-card-compact .instance-playtime{-fx-font-size:9px}
+
+
+/* Instance library controls */
+.instances-toolbar {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 11px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 11px;
+    -fx-padding: 10px;
+}
+.instances-toolbar .instance-search-field {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantasubtle;
+    -fx-padding: 9px 12px;
+    -fx-min-height: 38px;
+}
+.instances-toolbar .instance-search-field:focused {
+    -fx-border-color: -vantaaccent;
+}
+.instances-toolbar .instance-sort-field {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 8px;
+    -fx-min-height: 38px;
+}
+.instances-toolbar .instance-sort-field .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 11px;
+}
+.instances-toolbar .instance-sort-field .arrow {
+    -fx-background-color: -vantamuted;
+}
+.overengineered-ui .instances-toolbar {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantasurface, 9%), -vantasurface 65%, derive(-vantabg, 4%));
+    -fx-border-color: derive(-vantaborder, 24%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 16, 0.16, 0, 4);
+}
+.overengineered-ui .instances-toolbar .instance-sort-field {
+    -fx-border-color: derive(-vantaborder, 30%);
+}
