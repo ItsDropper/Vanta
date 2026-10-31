@@ -383,8 +383,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         card.setMaxWidth(Double.MAX_VALUE);
         card.prefWidthProperty().bind(
                 Bindings.createDoubleBinding(
-                        () -> Math.max(0, recentList.getWidth() - 2),
-                        recentList.widthProperty()
+                        () -> Math.max(0, featuredContainer.getWidth() - 2),
+                        featuredContainer.widthProperty()
                 )
         );
         card.getStyleClass().add("home-empty-card");
