@@ -25,9 +25,12 @@ public final class PageHeader extends HBox {
         getStyleClass().add("page-header");
         setAlignment(Pos.CENTER_LEFT);
         setSpacing(16);
+        setMinWidth(0);
+        setMaxWidth(Double.MAX_VALUE);
 
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().addAll("page-header-title", titleStyleClass);
+        titleLabel.setWrapText(true);
 
         Label subtitleLabel = new Label(subtitle);
         subtitleLabel.getStyleClass().addAll("page-header-subtitle", subtitleStyleClass);
@@ -35,17 +38,15 @@ public final class PageHeader extends HBox {
 
         VBox copy = new VBox(5, titleLabel, subtitleLabel);
         copy.getStyleClass().add("page-header-copy");
+        copy.setMinWidth(0);
         HBox.setHgrow(copy, Priority.ALWAYS);
 
         getChildren().add(copy);
 
         if (actions != null && actions.length > 0) {
-            Region spacer = new Region();
-            HBox.setHgrow(spacer, Priority.ALWAYS);
-            getChildren().add(spacer);
-
             HBox actionGroup = new HBox(8, actions);
             actionGroup.setAlignment(Pos.CENTER_RIGHT);
+            actionGroup.setMinWidth(Region.USE_PREF_SIZE);
             actionGroup.getStyleClass().add("page-header-actions");
             getChildren().add(actionGroup);
         }
