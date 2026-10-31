@@ -100,6 +100,7 @@ public class LoginPopup {
             closeButton.getStyleClass().add(
                     "login-title-bar-close"
             );
+            closeButton.setAccessibleText("Close Microsoft sign-in window");
 
             closeButton.setOnAction(event ->
                     stage.close()
@@ -194,6 +195,7 @@ public class LoginPopup {
                     new TextField(code);
 
             codeField.setEditable(false);
+            codeField.setAccessibleText("Microsoft verification code. Read only.");
 
             codeField.setFocusTraversable(false);
 
@@ -215,6 +217,7 @@ public class LoginPopup {
             copyButton.getStyleClass().add(
                     "secondary-button"
             );
+            copyButton.setAccessibleText("Copy Microsoft verification code");
 
             copyButton.setMaxWidth(
                     Double.MAX_VALUE
@@ -262,6 +265,7 @@ public class LoginPopup {
             openButton.getStyleClass().add(
                     "primary-button"
             );
+            openButton.setAccessibleText("Open the Microsoft device sign-in page in your browser");
 
             openButton.setMaxWidth(
                     Double.MAX_VALUE
@@ -281,6 +285,7 @@ public class LoginPopup {
             status.getStyleClass().add(
                     "login-status"
             );
+            status.setAccessibleText("Microsoft authentication status");
 
             // -----------------------------------------------------
             // CONTENT
