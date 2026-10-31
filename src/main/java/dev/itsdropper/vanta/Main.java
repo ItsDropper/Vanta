@@ -120,7 +120,8 @@ public class Main extends Application {
                 "/css/server-manager.css",
                 "/css/home-premium.css",
                 "/css/command-palette.css",
-                "/css/ui-components.css"
+                "/css/ui-components.css",
+                "/css/vanta-identity.css"
         };
 
         for (String stylesheet : stylesheets) {
