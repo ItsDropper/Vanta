@@ -50,7 +50,7 @@ public final class AnimationUtils {
     }
 
     public static void installInteractiveAnimations(Node node) {
-        if (!LauncherSettings.isAnimationsEnabled() || node == null) {
+        if (node == null) {
             return;
         }
 
