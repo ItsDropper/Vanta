@@ -2,18 +2,18 @@
     -fx-spacing: 0;
 }
 .server-eyebrow {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
     -fx-letter-spacing: 1.5px;
 }
 .server-heading {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 29px;
     -fx-font-weight: 800;
 }
 .server-subtitle {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
 }
 .server-workspace {
@@ -30,12 +30,12 @@
 .server-list-header {
     -fx-alignment: center-left;
     -fx-padding: 0 4px;
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
 .server-list-header .label {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
@@ -43,69 +43,69 @@
     -fx-background-color: transparent;
 }
 .server-profile-card {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 10px;
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
     -fx-cursor: hand;
 }
 .server-profile-card:hover {
-    -fx-background-color: -vanta-border;
-    -fx-border-color: derive(-vanta-border, 20%);
+    -fx-background-color: -vantaborder;
+    -fx-border-color: derive(-vantaborder, 20%);
 }
 .server-profile-selected {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
 }
 .server-profile-name {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
     -fx-font-weight: 700;
 }
 .server-profile-meta {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
 }
 .server-empty {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
     -fx-padding: 12px;
 }
 .server-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 22px;
     -fx-font-weight: 800;
 }
 .server-status-row {
-    -fx-background-color: -vanta-surface;
-    -fx-border-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantasurfaceraised;
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
     -fx-padding: 11px 12px;
 }
 .server-status-label {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
     -fx-font-weight: 700;
 }
 .server-status-dot {
-    -fx-text-fill: -vanta-subtle;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 12px;
 }
 .server-state-running {
-    -fx-text-fill: -vanta-success;
+    -fx-text-fill: -vantasuccess;
 }
 .server-state-starting {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 .server-state-stopping {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 .server-state-crashed {
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
 }
 .server-state-stopped {
-    -fx-text-fill: -vanta-subtle;
+    -fx-text-fill: -vantasubtle;
 }
 .server-action {
     -fx-background-radius: 8px;
@@ -115,75 +115,75 @@
     -fx-cursor: hand;
 }
 .server-primary {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-text-fill: white;
 }
 .server-primary:hover {
     -fx-opacity: 0.88;
 }
 .server-secondary {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 .server-secondary:hover {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 }
 .server-danger {
-    -fx-background-color: derive(-vanta-danger, -78%);
-    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-background-color: derive(-vantadanger, -78%);
+    -fx-border-color: derive(-vantadanger, -45%);
     -fx-border-radius: 8px;
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
 }
 .server-action:disabled {
     -fx-opacity: 0.35;
     -fx-cursor: default;
 }
 .server-panel {
-    -fx-background-color: -vanta-surface;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
     -fx-padding: 15px;
 }
 .server-section-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
     -fx-font-weight: 800;
 }
 .server-section-subtitle {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
 }
 .server-field-label {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
     -fx-font-weight: 700;
 }
 .server-input, .server-spinner {
-    -fx-background-color: -vanta-bg;
+    -fx-background-color: -vantabg;
     -fx-background-radius: 7px;
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 7px;
-    -fx-text-fill: -vanta-text;
-    -fx-prompt-text-fill: -vanta-muted;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantamuted;
     -fx-padding: 8px 10px;
     -fx-font-size: 11px;
 }
 .server-spinner .text-field {
     -fx-background-color: transparent;
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 .server-eula {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
 }
 .server-console {
-    -fx-control-inner-background: -vanta-bg;
-    -fx-background-color: -vanta-bg;
-    -fx-text-fill: -vanta-text;
-    -fx-highlight-fill: -vanta-accent-soft;
+    -fx-control-inner-background: -vantabg;
+    -fx-background-color: -vantabg;
+    -fx-text-fill: -vantatext;
+    -fx-highlight-fill: -vantaaccentsoft;
     -fx-highlight-text-fill: white;
     -fx-font-family: "Cascadia Mono", "Consolas", monospace;
     -fx-font-size: 10px;
