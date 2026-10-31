@@ -107,3 +107,27 @@
 .command-palette-scroll .scroll-bar:vertical .thumb:hover {
     -fx-background-color: -vantamuted;
 }
+
+
+/* Deluxe presentation: give the command surface a distinct layered treatment. */
+.overengineered-ui .command-palette-panel {
+    -fx-background-color: linear-gradient(to bottom right, derive(-vantasurfaceraised, 12%), -vantasurfaceraised 48%, derive(-vantabg, 8%));
+    -fx-border-color: derive(-vantaaccent, -58%), derive(-vantaborder, 22%);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.58), 42, 0.2, 0, 16);
+}
+.overengineered-ui .command-palette-search {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantasurface, 8%), -vantasurface);
+    -fx-border-color: derive(-vantaborder, 24%);
+    -fx-border-width: 1px;
+}
+.overengineered-ui .command-palette-search:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -58%), 14, 0.2, 0, 0);
+}
+.overengineered-ui .command-result-selected,
+.overengineered-ui .command-result:hover {
+    -fx-background-color: linear-gradient(to right, derive(-vantaaccent, -78%), derive(-vantaaccent, -88%));
+    -fx-border-color: derive(-vantaaccent, -35%);
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -72%), 10, 0.12, 0, 2);
+}
