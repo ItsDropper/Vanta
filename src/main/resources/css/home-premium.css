@@ -1,0 +1,72 @@
+/*
+ * Vanta Home — featured-instance presentation.
+ * Uses launcher theme tokens so custom themes remain fully supported.
+ */
+
+.home-featured-section { -fx-spacing: 4px; }
+.home-featured-section-eyebrow {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.1px;
+}
+.home-featured-section-subtitle {
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 12px;
+}
+.home-featured-container { -fx-background-color: transparent; }
+.home-featured-loading {
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 12px;
+    -fx-padding: 24px;
+}
+.home-featured-card {
+    -fx-background-color: linear-gradient(to bottom right, derive(-vanta-surface-raised, 12%), -vanta-surface 68%, derive(-vanta-bg, 5%));
+    -fx-background-radius: 18px;
+    -fx-border-color: derive(-vanta-accent, -58%);
+    -fx-border-width: 1px;
+    -fx-border-radius: 18px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 26, 0.12, 0, 9);
+}
+.home-featured-icon-frame {
+    -fx-background-color: derive(-vanta-accent, -82%);
+    -fx-background-radius: 18px;
+    -fx-border-color: derive(-vanta-accent, -55%);
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+}
+.home-featured-eyebrow {
+    -fx-text-fill: -vanta-accent;
+    -fx-font-size: 9px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.25px;
+}
+.home-featured-title {
+    -fx-text-fill: -vanta-text;
+    -fx-font-size: 27px;
+    -fx-font-weight: 900;
+}
+.home-featured-meta {
+    -fx-text-fill: -vanta-muted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+.home-featured-playtime {
+    -fx-text-fill: -vanta-subtle;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.7px;
+}
+.home-featured-play-button {
+    -fx-background-color: -vanta-accent;
+    -fx-background-radius: 9px;
+    -fx-border-color: transparent;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 20px;
+    -fx-cursor: hand;
+}
+.home-featured-play-button:hover { -fx-background-color: -vanta-accent-hover; }
+.home-featured-play-button:pressed { -fx-background-color: derive(-vanta-accent, -14%); }
+.home-featured-play-button:disabled { -fx-opacity: 0.5; }

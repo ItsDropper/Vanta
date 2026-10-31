@@ -50,6 +50,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     private final Consumer<Instance> onLaunchInstance;
     private final Runnable onCreateInstance;
 
+    private final StackPane featuredContainer = new StackPane();
     private FlowPane recentServersList;
     private Label recentServersStatus;
     private final Label accountLabel;
@@ -113,12 +114,14 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         });
         header.getChildren().addAll(headerText, launchStatusLabel, createInstanceButton);
 
+        VBox featuredSection = createFeaturedSection();
         VBox recentSection = createRecentInstancesSection();
         VBox serverCard = createRecentServersCard();
 
         VBox contentBox = new VBox(
-                18,
+                22,
                 header,
+                featuredSection,
                 recentSection,
                 serverCard
         );
@@ -164,6 +167,25 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             }
         });
 
+    }
+
+    private VBox createFeaturedSection() {
+        Label eyebrow = new Label("YOUR WORLD, ONE CLICK AWAY");
+        eyebrow.getStyleClass().add("home-featured-section-eyebrow");
+
+        Label subtitle = new Label("Pick up where you left off.");
+        subtitle.getStyleClass().add("home-featured-section-subtitle");
+
+        Label loading = new Label("Loading your Minecraft library...");
+        loading.getStyleClass().add("home-featured-loading");
+        featuredContainer.getStyleClass().add("home-featured-container");
+        featuredContainer.getChildren().setAll(loading);
+        featuredContainer.setMinHeight(220);
+
+        VBox section = new VBox(10, eyebrow, subtitle, featuredContainer);
+        section.getStyleClass().add("home-featured-section");
+        section.setFillWidth(true);
+        return section;
     }
 
     private VBox createRecentInstancesSection() {
@@ -274,6 +296,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
     private void renderRecentInstances(List<Instance> instances) {
         recentList.getChildren().clear();
+        featuredContainer.getChildren().clear();
         playtimeLabels.clear();
         displayedInstances.clear();
 
@@ -281,27 +304,32 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 .filter(instance ->
                         InstanceUsageManager.getLastPlayed(instance) > 0
                 )
-                .limit(2)
+                .limit(3)
                 .toList();
 
-        // Keep the Home layout useful even when play history is empty.
+        // A newly installed library still gets a useful featured launch surface.
         if (recent.isEmpty() && !instances.isEmpty()) {
             recent = List.of(instances.get(0));
-            recentStatus.setText("1 instance available");
-        } else if (recent.isEmpty()) {
-            recentStatus.setText("Your library is ready for its first instance.");
-            recentList.getChildren().add(createFirstInstanceCard());
-            return;
-        } else {
-            recentStatus.setText(
-                    recent.size() + " recent instance"
-                            + (recent.size() == 1 ? "" : "s")
-            );
         }
 
-        for (Instance instance : recent) {
+        if (recent.isEmpty()) {
+            recentStatus.setText("No additional instances yet.");
+            featuredContainer.getChildren().setAll(createFirstInstanceCard());
+            return;
+        }
+
+        Instance featured = recent.get(0);
+        featuredContainer.getChildren().setAll(createFeaturedInstanceCard(featured));
+
+        List<Instance> secondary = recent.stream().skip(1).toList();
+        for (Instance instance : secondary) {
             recentList.getChildren().add(createRecentCard(instance));
         }
+
+        recentStatus.setText(
+                recent.size() + " recently played instance"
+                        + (recent.size() == 1 ? "" : "s")
+        );
     }
 
     private void updatePlaytimeLabels() {
@@ -377,6 +405,83 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         return Math.max(0, (width - list.getHgap()) / 2.0);
     }
 
+    private StackPane createFeaturedInstanceCard(Instance instance) {
+        StackPane card = new StackPane();
+        card.getStyleClass().add("home-featured-card");
+        card.setMinHeight(220);
+        card.setMaxWidth(Double.MAX_VALUE);
+
+        HBox layout = new HBox(24);
+        layout.setAlignment(Pos.CENTER_LEFT);
+        layout.setPadding(new Insets(26, 30, 26, 30));
+
+        StackPane iconFrame = new StackPane();
+        iconFrame.getStyleClass().add("home-featured-icon-frame");
+        iconFrame.setMinSize(104, 104);
+        iconFrame.setPrefSize(104, 104);
+        iconFrame.setMaxSize(104, 104);
+
+        if ("CUSTOM".equalsIgnoreCase(instance.getIcon())
+                && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
+            ImageView customIcon = new ImageView(new Image(
+                    instance.getDirectory().resolve("icon.png").toUri().toString(),
+                    88, 88, true, true
+            ));
+            customIcon.setFitWidth(88);
+            customIcon.setFitHeight(88);
+            customIcon.setPreserveRatio(true);
+            iconFrame.getChildren().add(customIcon);
+        } else {
+            iconFrame.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 76));
+        }
+
+        VBox information = new VBox(10);
+        information.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(information, Priority.ALWAYS);
+
+        Label eyebrow = new Label("FEATURED INSTANCE");
+        eyebrow.getStyleClass().add("home-featured-eyebrow");
+
+        Label name = new Label(instance.getName());
+        name.getStyleClass().add("home-featured-title");
+        name.setWrapText(true);
+
+        Label metadata = new Label(
+                "MINECRAFT " + instance.getMinecraftVersion()
+                        + "   /   " + instance.getDisplayLoader()
+        );
+        metadata.getStyleClass().add("home-featured-meta");
+
+        Label playtime = new Label(
+                InstanceUsageManager.formatPlaytime(
+                        InstanceUsageManager.getPlaytimeSeconds(instance)
+                                + launchService.getSessionPlaytimeSeconds(instance)
+                ) + " PLAYED"
+        );
+        playtime.getStyleClass().add("home-featured-playtime");
+        playtimeLabels.put(instance.getId(), playtime);
+        displayedInstances.put(instance.getId(), instance);
+
+        information.getChildren().addAll(eyebrow, name, metadata, playtime);
+
+        boolean running = launchService.isRunning(instance);
+        Button play = new Button(running ? "CLOSE GAME" : "PLAY NOW");
+        play.getStyleClass().add("home-featured-play-button");
+        play.setMinWidth(142);
+        play.setMinHeight(48);
+        play.setAccessibleText((running ? "Close " : "Launch ") + instance.getName());
+        play.setTooltip(new Tooltip((running ? "Close " : "Launch ") + instance.getName()));
+        play.setOnAction(event -> launchOrCloseInstance(instance));
+        AnimationUtils.installInteractiveAnimations(play);
+
+        VBox action = new VBox(8, play);
+        action.setAlignment(Pos.CENTER_RIGHT);
+
+        layout.getChildren().addAll(iconFrame, information, action);
+        card.getChildren().add(layout);
+        return card;
+    }
+
     private HBox createRecentCard(Instance instance) {
         StackPane icon = new StackPane();
         icon.getStyleClass().add("home-recent-icon");
@@ -447,55 +552,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         play.setDisable(instance == null);
 
-        play.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) {
-                return;
-            }
-
-            event.consume();
-
-            if (instance == null) {
-                return;
-            }
-
-            if (launchService.isRunning(instance)) {
-                launchService.close(instance);
-                return;
-            }
-
-            Thread thread = new Thread(() -> {
-                try {
-                    // Recently played INSTANCE means exactly that: launch
-                    // the instance normally. Server quick-play is handled by
-                    // the separate Recently Played Servers section.
-                    launchService.launch(instance);
-                } catch (Throwable ex) {
-                    ex.printStackTrace();
-
-                    LaunchFailure failure = launchService.getLastFailure();
-
-                    Platform.runLater(() -> {
-                        if (failure != null) {
-                            onLaunchFailure.accept(failure);
-                        } else {
-                            onLaunchFailure.accept(
-                                    new LaunchFailure(
-                                            "Minecraft failed to launch",
-                                            ex.getMessage() != null
-                                                    ? ex.getMessage()
-                                                    : "Vanta could not start this instance.",
-                                            ""
-                                    )
-                            );
-                        }
-                    });
-                }
-            });
-
-            thread.setDaemon(true);
-            thread.setName("Vanta-Home-Launch");
-            thread.start();
-        });
+        play.setOnAction(event -> launchOrCloseInstance(instance));
 
         AnimationUtils.installInteractiveAnimations(play);
         HBox card = new HBox(14, icon, info, play);
@@ -513,55 +570,52 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         card.setMouseTransparent(false);
         card.getStyleClass().add("home-recent-card");
 
-        // The whole card is a fallback hit target. The visible PLAY button
-        // remains the primary control, but clicking its area always launches.
-        card.addEventFilter(MouseEvent.MOUSE_PRESSED, event -> {
+        // The card is a secondary hit target; the explicit button remains primary.
+        card.setOnMouseClicked(event -> {
             if (event.getTarget() == play || play.isHover()) {
                 return;
             }
-        });
-
-        card.setOnMouseClicked(event -> {
-            if (event.getTarget() == play) {
-                return;
-            }
-
-            if (launchService.isRunning(instance)) {
-                launchService.close(instance);
-                return;
-            }
-
-            Thread thread = new Thread(() -> {
-                try {
-                    launchService.launch(instance);
-                } catch (Throwable ex) {
-                    ex.printStackTrace();
-                    LaunchFailure failure = launchService.getLastFailure();
-
-                    Platform.runLater(() -> {
-                        if (failure != null) {
-                            onLaunchFailure.accept(failure);
-                        } else {
-                            onLaunchFailure.accept(
-                                    new LaunchFailure(
-                                            "Minecraft failed to launch",
-                                            ex.getMessage() != null
-                                                    ? ex.getMessage()
-                                                    : "Vanta could not start this instance.",
-                                            ""
-                                    )
-                            );
-                        }
-                    });
-                }
-            });
-
-            thread.setDaemon(true);
-            thread.setName("Vanta-Home-Launch-Fallback");
-            thread.start();
+            launchOrCloseInstance(instance);
         });
 
         return card;
+    }
+
+    private void launchOrCloseInstance(Instance instance) {
+        if (instance == null) {
+            return;
+        }
+
+        if (launchService.isRunning(instance)) {
+            launchService.close(instance);
+            return;
+        }
+
+        Thread thread = new Thread(() -> {
+            try {
+                // Server quick-play is handled by the separate server history section.
+                launchService.launch(instance);
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                LaunchFailure failure = launchService.getLastFailure();
+
+                Platform.runLater(() -> {
+                    if (failure != null) {
+                        onLaunchFailure.accept(failure);
+                    } else {
+                        onLaunchFailure.accept(new LaunchFailure(
+                                "Minecraft failed to launch",
+                                ex.getMessage() != null
+                                        ? ex.getMessage()
+                                        : "Vanta could not start this instance.",
+                                ""
+                        ));
+                    }
+                });
+            }
+        }, "Vanta-Home-Launch");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public void refreshRecentServers() {
