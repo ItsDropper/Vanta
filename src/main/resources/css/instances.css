@@ -158,7 +158,7 @@
 }
 
 .instance-settings-button:hover {
-    -fx-background-color: #202620;
+    -fx-background-color: -vanta-surface-hover;
     -fx-border-color: -vanta-border;
     -fx-text-fill: -vanta-text;
 }
@@ -193,7 +193,7 @@
 }
 
 .instance-menu-button:hover {
-    -fx-background-color: #202620;
+    -fx-background-color: -vanta-surface-hover;
     -fx-border-color: -vanta-border;
     -fx-text-fill: -vanta-text;
 }
@@ -236,11 +236,11 @@
 }
 
 .context-menu .menu-item:hover {
-    -fx-background-color: #202620;
+    -fx-background-color: -vanta-surface-hover;
 }
 
 .context-menu .menu-item:focused {
-    -fx-background-color: #202620;
+    -fx-background-color: -vanta-surface-hover;
 }
 
 .context-menu .menu-item:pressed {
