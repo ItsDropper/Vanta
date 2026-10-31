@@ -1,20 +1,20 @@
 .sidebar {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 14px;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 14px;
 }
 
 .sidebar-logo {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 24px;
     -fx-font-weight: 800;
 }
 
 .sidebar-subtitle {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 9px;
     -fx-font-weight: bold;
 }
@@ -23,7 +23,7 @@
     -fx-background-color: transparent;
     -fx-background-radius: 10px;
 
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -32,21 +32,21 @@
 }
 
 .sidebar-button:hover {
-    -fx-background-color: -vanta-surface-hover;
-    -fx-text-fill: -vanta-text;
+    -fx-background-color: -vantasurfacehover;
+    -fx-text-fill: -vantatext;
 }
 
 .sidebar-button:pressed {
-    -fx-background-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurfaceraised;
 }
 
 .sidebar-button-active,
 .sidebar-button-active:hover {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
 
-    -fx-border-color: transparent transparent transparent -vanta-accent;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
     -fx-border-width: 0 0 0 3px;
     -fx-border-radius: 10px;
 
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
