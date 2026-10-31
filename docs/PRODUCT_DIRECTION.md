@@ -20,6 +20,16 @@ The first Environment Engine foundation is now present in the codebase:
 - A structured drift comparison for Minecraft version, loader identity, and added, removed, or modified mod files.
 - Initial JUnit coverage for capture, persistence, validation, and drift detection.
 
+The State Center now exposes the first user-facing workflow:
+
+- Each inspected instance shows whether a saved environment baseline exists.
+- Users can save or update the baseline without changing Minecraft files.
+- Users can run a background drift comparison and inspect the detailed changes in an expandable report.
+- Comparison rejects a baseline whose instance identity does not match the selected instance.
+- Lockfile capture and comparison run off the JavaFX Application Thread.
+
+The current report is intentionally scoped to Minecraft/loader identity and the direct contents of the instance `mods/` directory. It does not yet inspect resource packs, shader packs, configs, worlds, or the resolved runtime classpath. The UI does not automatically reconcile or repair environment drift.
+
 This is deliberately a foundation, not yet a complete portable environment specification. Java major version is reserved in the schema but remains unknown until Vanta can inspect the selected runtime reliably. Resource packs, shader packs, configuration, and runtime dependency closure are not yet included. Drift detection is read-only; it does not change an instance.
 
 ## Existing foundations
