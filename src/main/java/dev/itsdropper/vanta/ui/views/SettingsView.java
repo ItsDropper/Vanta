@@ -309,8 +309,12 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         themeBox.setValue(ThemeManager.loadThemeName());
         themeBox.setMaxWidth(Double.MAX_VALUE);
         themeBox.setPromptText("Choose a theme");
+        themeBox.setPrefWidth(260);
+        themeBox.setAccessibleText("Launcher theme");
 
         Label themePreview = new Label();
+        themePreview.setWrapText(true);
+        themePreview.setMaxWidth(260);
         themePreview.getStyleClass().add("theme-preview-label");
 
         themeBox.setOnAction(event -> {
@@ -341,9 +345,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                         ThemeManager.getTheme(ThemeManager.loadThemeName()).accent()
         );
 
-        HBox themeRow = new HBox(12, themeBox, themePreview);
+        FlowPane themeRow = new FlowPane(12, 8, themeBox, themePreview);
         themeRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(themeBox, Priority.ALWAYS);
 
         themeCard.getChildren().add(themeRow);
 
@@ -365,12 +368,14 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         accentPicker = new ColorPicker(Color.web(accentColor));
         accentPicker.getStyleClass().add("accent-picker");
+        accentPicker.setAccessibleText("Choose launcher accent color");
         accentPicker.setTooltip(new javafx.scene.control.Tooltip("Choose an accent color"));
 
         accentHexField = new TextField(accentColor);
         accentHexField.getStyleClass().add("accent-hex-field");
         accentHexField.setPromptText("#5688ED");
         accentHexField.setPrefWidth(110);
+        accentHexField.setAccessibleText("Accent color hexadecimal value");
 
         Button applyHex = new Button("APPLY");
         applyHex.getStyleClass().add("primary-button");
@@ -387,8 +392,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 }
         );
 
-        HBox pickerRow = new HBox(
-                10,
+        FlowPane pickerRow = new FlowPane(
+                10, 8,
                 new Label("Picker"),
                 accentPicker,
                 new Label("HEX"),
