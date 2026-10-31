@@ -10,6 +10,7 @@ import javafx.util.Duration;
 
 import dev.itsdropper.vanta.ui.LauncherView;
 import dev.itsdropper.vanta.ui.LoadingScreen;
+import dev.itsdropper.vanta.ui.ThemeManager;
 
 public class Main extends Application {
 
@@ -26,6 +27,7 @@ public class Main extends Application {
         stage.initStyle(StageStyle.TRANSPARENT);
 
         LoadingScreen loadingScreen = new LoadingScreen();
+        ThemeManager.apply(loadingScreen.getRoot(), ThemeManager.loadAccent());
 
         Scene scene = new Scene(
                 loadingScreen.getRoot(),
