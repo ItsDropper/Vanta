@@ -36,6 +36,7 @@ public final class EnvironmentLockfileService {
     private static final int BUFFER_SIZE = 64 * 1024;
     private static final int MAX_ENVIRONMENT_FILES = 20_000;
     private static final List<String> ENVIRONMENT_DIRECTORIES = List.of("resourcepacks", "shaderpacks", "config");
+    private static final Set<Integer> SUPPORTED_SCHEMA_VERSIONS = Set.of(1, EnvironmentLockfile.CURRENT_SCHEMA_VERSION);
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
@@ -249,11 +250,17 @@ public final class EnvironmentLockfileService {
                         .filter(path -> !path.equals(root))
                         .filter(path -> !Files.isSymbolicLink(path))
                         .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                        .limit(MAX_ENVIRONMENT_FILES - artifacts.size() + 1L)
                         .sorted(Comparator.comparing(
                                 path -> root.relativize(path).toString().replace(java.io.File.separatorChar, '/'),
                                 String.CASE_INSENSITIVE_ORDER
                         ))
                         .toList();
+
+                if (files.size() > MAX_ENVIRONMENT_FILES - artifacts.size()) {
+                    throw new IOException("Environment contains more than "
+                            + MAX_ENVIRONMENT_FILES + " tracked files; refusing an incomplete baseline.");
+                }
 
                 for (Path file : files) {
                     if (artifacts.size() >= MAX_ENVIRONMENT_FILES) {
@@ -396,7 +403,7 @@ public final class EnvironmentLockfileService {
 
     private static void validateLockfile(EnvironmentLockfile lockfile) throws IOException {
         if (lockfile == null
-                || lockfile.schemaVersion() != EnvironmentLockfile.CURRENT_SCHEMA_VERSION
+                || !SUPPORTED_SCHEMA_VERSIONS.contains(lockfile.schemaVersion())
                 || blank(lockfile.generatedAt())
                 || blank(lockfile.instanceId())
                 || blank(lockfile.minecraftVersion())
