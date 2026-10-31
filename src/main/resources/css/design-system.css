@@ -11,10 +11,10 @@
 }
 
 .launcher {
-    -vanta-accent: #5688ED;
-    -vanta-accent-soft: #1E2D49;
-    -vanta-accent-hover: #6E9BF2;
-    -vanta-accent-rgb: 86,136,237;
+    -vantaaccent: #5688ED;
+    -vantaaccentsoft: #1E2D49;
+    -vantaaccenthover: #6E9BF2;
+    -vantaaccentrgb: 86,136,237;
     -fx-background-color: #0b0e13;
     -fx-background-radius: 16px;
     -fx-border-color: #202733;
@@ -50,7 +50,7 @@
 .create-section-title,
 .settings-section-title,
 .instances-count {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 
 .footer-label {
@@ -89,29 +89,29 @@
 /* ---------- sidebar ---------- */
 
 .sidebar {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 14px;
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 14px;
 }
 
 .sidebar-logo {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 23px;
     -fx-font-weight: 900;
     -fx-letter-spacing: 1.4px;
 }
 
 .sidebar-subtitle {
-    -fx-text-fill: -vanta-subtle;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 8px;
     -fx-font-weight: 800;
     -fx-letter-spacing: 0.8px;
 }
 
 .sidebar-section-label {
-    -fx-text-fill: -vanta-subtle;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 9px;
     -fx-font-weight: 800;
     -fx-letter-spacing: 1px;
@@ -121,7 +121,7 @@
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-background-radius: 8px;
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
     -fx-font-weight: 600;
     -fx-padding: 10px 12px;
@@ -131,19 +131,19 @@
 }
 
 .sidebar-button:hover {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-text-fill: -vanta-text;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
 }
 
 .sidebar-button:pressed {
-    -fx-background-color: -vanta-border;
+    -fx-background-color: -vantaborder;
 }
 
 .sidebar-button-active,
 .sidebar-button-active:hover {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-text-fill: -vanta-text;
-    -fx-border-color: transparent transparent transparent -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantatext;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
     -fx-border-width: 0 0 0 2px;
 }
 
@@ -191,8 +191,8 @@
 }
 
 .title-bar-update {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-text-fill: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantaaccent;
     -fx-border-color: #2e4770;
 }
 
@@ -208,7 +208,7 @@
 .instance-create-button,
 .instance-play-button,
 .home-play-button {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-background-radius: 8px;
     -fx-text-fill: #ffffff;
     -fx-font-size: 11px;
@@ -220,14 +220,14 @@
 .instance-create-button:hover,
 .instance-play-button:hover,
 .home-play-button:hover {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
 }
 
 .primary-button:pressed,
 .instance-create-button:pressed,
 .instance-play-button:pressed,
 .home-play-button:pressed {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
 }
 
 .primary-button:disabled,
@@ -303,7 +303,7 @@
 
 .home-loader,
 .instance-loader {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-text-fill: #9fc0ff;
     -fx-background-radius: 6px;
     -fx-padding: 5px 9px;
@@ -347,7 +347,7 @@
 .home-card-status,
 .ready-label,
 .account-connected {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 
 /* ---------- instance library ---------- */
@@ -366,8 +366,8 @@
 }
 
 .instance-card.selected-instance {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
 }
 
 .instance-icon-box {
@@ -391,7 +391,7 @@
 }
 
 .instance-ready {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 
 .instance-settings-button {
@@ -462,7 +462,7 @@
 .text-area:focused,
 .create-combo:focused {
     -fx-background-color: #101721;
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
 }
 
 .create-combo .list-cell {
@@ -472,7 +472,7 @@
 
 .create-combo .list-cell:hover,
 .create-combo .list-cell:filled:selected {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
 }
 
 .slider .track {
@@ -480,11 +480,11 @@
 }
 
 .slider .thumb {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
 }
 
 .slider .thumb:hover {
-    -fx-background-color: -vanta-accent-hover;
+    -fx-background-color: -vantaaccenthover;
 }
 
 /* ---------- theme selector popup ---------- */
@@ -535,8 +535,8 @@
 }
 
 .check-box:selected .box {
-    -fx-background-color: -vanta-accent;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
 }
 
 .combo-box-base,
@@ -555,7 +555,7 @@
 
 .combo-box-base:focused,
 .choice-box:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
 }
 
 .tab-pane .tab-header-area {
@@ -687,7 +687,7 @@
 .modrinth-search-field:focused,
 .content-search-field:focused,
 .search-field:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
 }
 
 /* ---------- notifications ---------- */
@@ -701,7 +701,7 @@
 }
 
 .notification-progress > .bar {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
 }
 
 .notification-progress > .track {
@@ -727,7 +727,7 @@
 }
 
 .connected-label {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 
 .account-switcher {
@@ -746,7 +746,7 @@
 }
 
 .settings-section-title {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 
 .instance-setting-label {
@@ -775,8 +775,8 @@
 }
 
 .settings-checkbox:selected .box {
-    -fx-background-color: -vanta-accent;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
 }
 
 /* ---------- login ---------- */
@@ -810,11 +810,11 @@
 }
 
 .verification-code:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
 }
 
 .login-status.active {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 
 /* ---------- Modrinth/content browsing ---------- */
@@ -851,9 +851,9 @@
 }
 
 .mod-details-header .instance-play-button {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-border-color: #36588c;
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 
 .mod-details-header .instance-play-button:hover {
@@ -873,7 +873,7 @@
 }
 
 .progress-bar > .bar {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-background-radius: 5px;
     -fx-background-insets: 0;
 }
@@ -903,7 +903,7 @@
 .list-cell:selected,
 .table-row-cell:selected,
 .tree-cell:selected {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-text-fill: #eef4ff;
 }
 
@@ -966,7 +966,7 @@
 
 .settings-nav-button:selected,
 .settings-nav-button.selected {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-text-fill: #f0f5ff;
 }
 
@@ -1045,7 +1045,7 @@
 }
 
 .accent-hex-field:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
 }
 
 .accent-hex-field:hover {
@@ -1082,19 +1082,19 @@
 }
 
 .home-launch-card:hover {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
 }
 
 .home-play-button:hover,
 .primary-button:hover,
 .instance-create-button:hover,
 .instance-play-button:hover {
-    -fx-effect: dropshadow(gaussian, -vanta-accent, 14, 0.16, 0, 3);
+    -fx-effect: dropshadow(gaussian, -vantaaccent, 14, 0.16, 0, 3);
 }
 
 .instance-card.selected-instance {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
 }
 
 .instance-card:hover {
@@ -1115,11 +1115,11 @@
 
 .settings-nav-button.selected,
 .settings-nav-button:hover {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
 }
 
 .settings-nav-button.selected {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
     -fx-border-width: 0 0 0 2px;
 }
 
@@ -1154,13 +1154,13 @@
 }
 
 .accent-preset:hover {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
     -fx-text-fill: #f2f6ff;
 }
 
 .accent-preset:pressed {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-text-fill: #ffffff;
 }
 
@@ -1174,54 +1174,54 @@
 
 .progress-bar > .bar,
 .notification-progress > .bar {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
 }
 
 .title-bar-update {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
 }
 
 .title-bar-update:hover {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-text-fill: #ffffff;
 }
 
 .home-loader,
 .instance-loader {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-text-fill: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantaaccent;
 }
 
 .mod-details-header .instance-play-button {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-border-color: -vanta-accent;
-    -fx-text-fill: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+    -fx-text-fill: -vantaaccent;
 }
 
 .mod-details-header .instance-play-button:hover {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-text-fill: #ffffff;
 }
 
 .check-box:selected .box,
 .settings-checkbox:selected .box {
-    -fx-background-color: -vanta-accent;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
 }
 
 .slider .thumb {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
 }
 
 .slider .thumb:hover {
-    -fx-background-color: -vanta-accent-hover;
+    -fx-background-color: -vantaaccenthover;
 }
 
 .list-cell:selected,
 .table-row-cell:selected,
 .tree-cell:selected {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-text-fill: #eef4ff;
 }
 
@@ -1244,7 +1244,7 @@
 }
 
 .home-info-card:hover {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-border-color: #3c4c64;
 }
 
@@ -1274,7 +1274,7 @@
 }
 
 .instance-search-field:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
     -fx-background-color: #141b25;
 }
 
@@ -1304,7 +1304,7 @@
 }
 
 .instances-search:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
     -fx-effect: dropshadow(gaussian, rgba(86,136,237,0.18), 10, 0.2, 0, 0);
 }
 
@@ -1314,7 +1314,7 @@
 
 .instance-settings-footer {
     -fx-padding: 12px 0 0 0;
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1 0 0 0;
 }
 
@@ -1399,7 +1399,7 @@
 }
 
 .onboarding-step {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
@@ -1441,9 +1441,9 @@
 }
 
 .onboarding-feature-number {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-background-radius: 7px;
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 12px;
     -fx-font-weight: 900;
     -fx-alignment: CENTER;
@@ -1483,7 +1483,7 @@
 .home-recent-list { -fx-background-color: transparent; }
 .home-recent-card { -fx-background-color: #141a22; -fx-border-color: #252e3a; -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 14, 0.08, 0, 4); }
 .home-recent-card:hover { -fx-background-color: #1b2430; -fx-border-color: #3a485a; }
-.home-recent-icon { -fx-min-width: 36px; -fx-pref-width: 36px; -fx-min-height: 36px; -fx-pref-height: 36px; -fx-background-color: -vanta-accent-soft; -fx-background-radius: 9px; -fx-alignment: CENTER; }
+.home-recent-icon { -fx-min-width: 36px; -fx-pref-width: 36px; -fx-min-height: 36px; -fx-pref-height: 36px; -fx-background-color: -vantaaccentsoft; -fx-background-radius: 9px; -fx-alignment: CENTER; }
 .home-recent-name { -fx-text-fill: #edf2f8; -fx-font-size: 14px; -fx-font-weight: 800; }
 .home-recent-meta { -fx-text-fill: #8491a3; -fx-font-size: 11px; }
 .home-recent-playtime { -fx-text-fill: #697789; -fx-font-size: 10px; }
@@ -1501,12 +1501,12 @@
     -fx-cursor: hand;
 }
 .home-recent-play {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-border-color: #78a2f0;
     -fx-text-fill: white;
 }
 .home-recent-play:hover {
-    -fx-background-color: -vanta-accent-hover;
+    -fx-background-color: -vantaaccenthover;
     -fx-border-color: #9ab9f6;
 }
 .home-recent-play:pressed {
@@ -1695,7 +1695,7 @@
 
 .create-instance-panel .create-field:focused,
 .create-instance-panel .create-combo:focused {
-    -fx-border-color: -vanta-accent;
+    -fx-border-color: -vantaaccent;
     -fx-effect: dropshadow(gaussian, rgba(86,136,237,0.12), 8, 0.15, 0, 0);
 }
 
@@ -1831,9 +1831,9 @@
 }
 
 .modrinth-version-type {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
     -fx-background-radius: 5px;
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 8px;
     -fx-font-weight: 900;
     -fx-padding: 4px 6px;
@@ -1855,9 +1855,9 @@
 .state-hero-title{-fx-font-size:20px}
 .state-hero-subtitle{-fx-font-size:11px}
 .state-progress-label{-fx-text-fill:#667487;-fx-font-size:9px;-fx-font-weight:900;-fx-letter-spacing:1.2px}
-.state-progress{-fx-accent:-vanta-accent;-fx-pref-height:7px;-fx-min-height:7px;-fx-max-height:7px}
+.state-progress{-fx-accent:-vantaaccent;-fx-pref-height:7px;-fx-min-height:7px;-fx-max-height:7px}
 .state-progress > .track{-fx-background-color:#202a36;-fx-background-radius:5px}
-.state-progress > .bar{-fx-background-color:-vanta-accent;-fx-background-radius:5px}
+.state-progress > .bar{-fx-background-color:-vantaaccent;-fx-background-radius:5px}
 .state-refresh-button{-fx-min-height:36px;-fx-pref-height:36px;-fx-padding:0 13px;-fx-cursor:hand}
 .state-list-card{-fx-background-color:#10161e;-fx-background-radius:14px;-fx-border-color:#27303d;-fx-border-width:1px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.20),18,.08,0,5)}
 .state-instance-scroll,.state-instance-scroll>.viewport{-fx-background-color:transparent;-fx-border-color:transparent}
@@ -1901,11 +1901,11 @@
 .modrinth-view,
 .create-instance-panel,
 .login-window {
-    -fx-background-color: -vanta-bg;
+    -fx-background-color: -vantabg;
 }
 
 .launcher {
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
 }
 
 .launcher .label,
@@ -1913,7 +1913,7 @@
 .launcher .list-cell,
 .launcher .table-row-cell,
 .launcher .tree-cell {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 
 .sidebar,
@@ -1937,8 +1937,8 @@
 .accounts-section,
 .accounts-card,
 .accounts-empty {
-    -fx-background-color: -vanta-surface;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
 }
 
 .sidebar-button:hover,
@@ -1950,7 +1950,7 @@
 .accounts-card:hover,
 .state-card:hover,
 .home-server-card:hover {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 }
 
 .sidebar-button-active,
@@ -1961,22 +1961,22 @@
 .list-cell:selected,
 .table-row-cell:selected,
 .tree-cell:selected {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
 }
 
 .sidebar-button-active,
 .sidebar-button-active:hover {
-    -fx-border-color: transparent transparent transparent -vanta-accent;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
 }
 
 .title-bar {
-    -fx-background-color: -vanta-bg;
-    -fx-border-color: transparent transparent -vanta-border transparent;
+    -fx-background-color: -vantabg;
+    -fx-border-color: transparent transparent -vantaborder transparent;
 }
 
 .title-bar-button:hover,
 .account-switcher:hover {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 }
 
 .account-switcher,
@@ -1992,37 +1992,37 @@
 .modrinth-search-field,
 .content-search-field,
 .verification-code {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-border-color: -vanta-border;
-    -fx-text-fill: -vanta-text;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
 }
 
 .secondary-button,
 .settings-back-button,
 .instance-settings-button {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-border-color: -vanta-border;
-    -fx-text-fill: -vanta-text;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
 }
 
 .secondary-button:hover,
 .settings-back-button:hover,
 .instance-settings-button:hover {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 }
 
 .primary-button,
 .instance-create-button,
 .instance-play-button,
 .home-play-button {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
 }
 
 .primary-button:hover,
 .instance-create-button:hover,
 .instance-play-button:hover,
 .home-play-button:hover {
-    -fx-background-color: -vanta-accent-hover;
+    -fx-background-color: -vantaaccenthover;
 }
 
 .card-title,
@@ -2035,7 +2035,7 @@
 .instance-ready,
 .connected-label,
 .login-status.active {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
 }
 
 .page-subtitle,
@@ -2050,7 +2050,7 @@
 .state-instance-detail,
 .home-recent-meta,
 .accounts-subtitle {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
 }
 
 .sidebar-logo,
@@ -2067,143 +2067,143 @@
 .mod-details-title,
 .state-instance-name,
 .state-hero-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 
 .instance-icon-box,
 .accounts-hero-head-frame,
 .accounts-card-head-frame,
 .home-recent-icon {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
 }
 
 .instance-loader,
 .home-loader,
 .modrinth-version-type,
 .title-bar-update {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-text-fill: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantaaccent;
 }
 
 .slider .track,
 .progress-bar > .track,
 .notification-progress > .track {
-    -fx-background-color: -vanta-border;
+    -fx-background-color: -vantaborder;
 }
 
 .slider .thumb,
 .progress-bar > .bar,
 .notification-progress > .bar {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
 }
 
 .check-box {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 
 .check-box .box {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
 }
 
 .check-box:selected .box,
 .settings-checkbox:selected .box {
-    -fx-background-color: -vanta-accent;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
 }
 
 .tab-pane .tab-label {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
 }
 
 .tab-pane .tab:selected .tab-label {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 
 .separator .line,
 .instance-settings-divider {
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
 }
 
 .context-menu,
 .tooltip,
 .dialog-pane,
 .dialog-pane.vanta-dialog {
-    -fx-background-color: -vanta-surface;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
 }
 
 .context-menu .menu-item {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 
 .context-menu .menu-item:hover,
 .context-menu .menu-item:focused {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 }
 
 .scroll-bar .thumb {
-    -fx-background-color: -vanta-border;
+    -fx-background-color: -vantaborder;
 }
 
 .scroll-bar .thumb:hover {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
 }
 
 .notification {
-    -fx-background-color: -vanta-surface;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
 }
 
 .mod-details-header,
 .mod-details-card,
 .mod-details-header-container,
 .modrinth-version-row {
-    -fx-background-color: -vanta-surface;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
 }
 
 .modrinth-version-row:hover {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 }
 
 .state-refresh-button,
 .modrinth-versions-button {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
 }
 
 .state-refresh-button:hover,
 .modrinth-versions-button:hover {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
 }
 
 .state-status-healthy,
 .accounts-status-connected,
 .accounts-card-active-label {
-    -fx-text-fill: -vanta-success;
+    -fx-text-fill: -vantasuccess;
 }
 
 .debug-button {
-    -fx-accent: -vanta-accent;
+    -fx-accent: -vantaaccent;
 }
 
 .theme-preview-label {
-    -fx-background-color: -vanta-accent-soft;
-    -fx-text-fill: -vanta-accent;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantaaccent;
     -fx-background-radius: 8px;
     -fx-padding: 9px 12px;
     -fx-font-size: 10px;
     -fx-font-weight: 900;
 }
 
-.state-shared-row { -fx-background-color: -vanta-surface-raised; -fx-background-radius: 10px; -fx-border-color: -vanta-border; -fx-border-radius: 10px; -fx-padding: 12px; }
-.state-shared-row:hover { -fx-background-color: -vanta-surface-hover; }
-.state-shared-icon { -fx-background-color: -vanta-accent-soft; -fx-background-radius: 9px; -fx-padding: 8px; }
-.state-shared-name { -fx-text-fill: -vanta-text; -fx-font-size: 12px; -fx-font-weight: 800; }
-.state-shared-summary, .state-shared-count { -fx-text-fill: -vanta-muted; -fx-font-size: 10px; }
-.state-shared-healthy { -fx-text-fill: -vanta-success; -fx-font-size: 10px; -fx-font-weight: 900; }
+.state-shared-row { -fx-background-color: -vantasurfaceraised; -fx-background-radius: 10px; -fx-border-color: -vantaborder; -fx-border-radius: 10px; -fx-padding: 12px; }
+.state-shared-row:hover { -fx-background-color: -vantasurfacehover; }
+.state-shared-icon { -fx-background-color: -vantaaccentsoft; -fx-background-radius: 9px; -fx-padding: 8px; }
+.state-shared-name { -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-weight: 800; }
+.state-shared-summary, .state-shared-count { -fx-text-fill: -vantamuted; -fx-font-size: 10px; }
+.state-shared-healthy { -fx-text-fill: -vantasuccess; -fx-font-size: 10px; -fx-font-weight: 900; }
 .state-shared-attention { -fx-text-fill: #e7bd68; -fx-font-size: 10px; -fx-font-weight: 900; }
-.state-shared-broken { -fx-text-fill: -vanta-danger; -fx-font-size: 10px; -fx-font-weight: 900; }
+.state-shared-broken { -fx-text-fill: -vantadanger; -fx-font-size: 10px; -fx-font-weight: 900; }
