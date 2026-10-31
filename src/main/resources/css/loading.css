@@ -1,8 +1,8 @@
 .vanta-loading {
     -fx-background-color:
         linear-gradient(to bottom,
-            #10161b 0%,
-            #0c1115 100%);
+            -vanta-bg 0%,
+            -vanta-bg 100%);
     -fx-background-radius: 14px;
 }
 
@@ -11,12 +11,12 @@
 }
 
 .loading-mark {
-    -fx-fill: #35c7f5;
-    -fx-effect: dropshadow(gaussian, rgba(53, 199, 245, 0.35), 10, 0.18, 0, 0);
+    -fx-fill: -vanta-accent;
+    -fx-effect: dropshadow(gaussian, derive(-vanta-accent, -35%), 10, 0.18, 0, 0);
 }
 
 .loading-logo {
-    -fx-text-fill: #f3f7f9;
+    -fx-text-fill: -vanta-text;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 28px;
     -fx-font-weight: 800;
@@ -24,7 +24,7 @@
 }
 
 .loading-subtitle {
-    -fx-text-fill: rgba(184, 197, 204, 0.58);
+    -fx-text-fill: -vanta-muted;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 9px;
     -fx-font-weight: 700;
@@ -33,7 +33,7 @@
 
 .loading-status {
     -fx-padding: 14px 0 2px 0;
-    -fx-text-fill: rgba(220, 229, 233, 0.58);
+    -fx-text-fill: -vanta-muted;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 9px;
     -fx-font-weight: 600;
@@ -45,7 +45,7 @@
     -fx-max-width: 280px;
     -fx-pref-height: 4px;
     -fx-max-height: 4px;
-    -fx-background-color: rgba(255, 255, 255, 0.09);
+    -fx-background-color: -vanta-border;
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
 }
@@ -53,8 +53,8 @@
 .loading-progress-fill {
     -fx-pref-height: 4px;
     -fx-max-height: 4px;
-    -fx-background-color: #35c7f5;
+    -fx-background-color: -vanta-accent;
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
-    -fx-effect: dropshadow(gaussian, rgba(53, 199, 245, 0.35), 7, 0.18, 0, 0);
+    -fx-effect: dropshadow(gaussian, derive(-vanta-accent, -35%), 7, 0.18, 0, 0);
 }
