@@ -8,6 +8,20 @@ Vanta should manage the lifecycle and reliability of a Minecraft environment, no
 
 The differentiator should be the quality of the system connecting installation state, changes, diagnostics, recovery, and reproducibility. Individual features such as instance isolation, mod browsing, backups, or Java selection are useful but are already established launcher capabilities.
 
+## Current implementation progress
+
+The first Environment Engine foundation is now present in the codebase:
+
+- A versioned `EnvironmentLockfile` model with portable, relative artifact identities.
+- A read-only capture service that records every regular file directly inside an instance's `mods/` directory, including files whose mod metadata Vanta cannot identify.
+- SHA-256 and byte-size recording for each artifact.
+- Fabric mod ID/version metadata when the existing scanner can read it.
+- Atomic local persistence under `<instance>/.vanta/environment.lock.json`.
+- A structured drift comparison for Minecraft version, loader identity, and added, removed, or modified mod files.
+- Initial JUnit coverage for capture, persistence, validation, and drift detection.
+
+This is deliberately a foundation, not yet a complete portable environment specification. Java major version is reserved in the schema but remains unknown until Vanta can inspect the selected runtime reliably. Resource packs, shader packs, configuration, and runtime dependency closure are not yet included. Drift detection is read-only; it does not change an instance.
+
 ## Existing foundations
 
 Vanta already has meaningful building blocks:
