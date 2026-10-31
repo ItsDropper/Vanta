@@ -3,9 +3,9 @@
    ========================================================= */
 
 .login-window {
-    -fx-background-color: #0a0d0b;
+    -fx-background-color: -vanta-bg;
     -fx-background-radius: 16px;
-    -fx-border-color: #1d251f;
+    -fx-border-color: -vanta-border;
     -fx-border-width: 1px;
     -fx-border-radius: 16px;
 }
@@ -16,7 +16,7 @@
    ========================================================= */
 
 .login-logo {
-    -fx-text-fill: #e9eee9;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 17px;
     -fx-font-weight: bold;
     -fx-letter-spacing: 5px;
@@ -28,7 +28,7 @@
    ========================================================= */
 
 .login-title {
-    -fx-text-fill: #f5f7f5;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 25px;
     -fx-font-weight: bold;
 }
@@ -39,7 +39,7 @@
    ========================================================= */
 
 .login-subtitle {
-    -fx-text-fill: #788178;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 13px;
 }
 
@@ -49,7 +49,7 @@
    ========================================================= */
 
 .login-instruction {
-    -fx-text-fill: #a2aaa3;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 12px;
 }
 
@@ -59,14 +59,14 @@
    ========================================================= */
 
 .verification-code {
-    -fx-background-color: #111611;
+    -fx-background-color: -vanta-surface;
     -fx-background-radius: 12px;
 
-    -fx-border-color: #29332b;
+    -fx-border-color: -vanta-border;
     -fx-border-width: 1px;
     -fx-border-radius: 12px;
 
-    -fx-text-fill: #f1f5f1;
+    -fx-text-fill: -vanta-text;
 
     -fx-font-size: 26px;
     -fx-font-weight: bold;
@@ -92,12 +92,12 @@
    ========================================================= */
 
 .verification-code:hover {
-    -fx-background-color: #141a14;
-    -fx-border-color: #39483c;
+    -fx-background-color: -vanta-surface-hover;
+    -fx-border-color: -vanta-border;
 }
 
 .verification-code:focused {
-    -fx-border-color: #5f8f67;
+    -fx-border-color: -vanta-accent;
 }
 
 
@@ -106,7 +106,7 @@
    ========================================================= */
 
 .login-status {
-    -fx-text-fill: #687269;
+    -fx-text-fill: -vanta-subtle;
     -fx-font-size: 11px;
 }
 
@@ -116,11 +116,11 @@
    ========================================================= */
 
 .login-status.active {
-    -fx-text-fill: #78c982;
+    -fx-text-fill: -vanta-success;
 }
 
 .login-status.error {
-    -fx-text-fill: #d66d75;
+    -fx-text-fill: -vanta-danger;
 }
 
 
@@ -129,21 +129,21 @@
    ========================================================= */
 
 .login-window {
-    -fx-background-color: #10151d;
+    -fx-background-color: -vanta-bg;
     -fx-background-radius: 14px;
-    -fx-border-color: #283241;
+    -fx-border-color: -vanta-border;
     -fx-border-radius: 14px;
 }
 
 .login-title-bar {
-    -fx-background-color: #151b24;
-    -fx-border-color: transparent transparent #252e3a transparent;
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: transparent transparent -vanta-border transparent;
     -fx-border-width: 0 0 1px 0;
     -fx-padding: 10px 12px 10px 16px;
 }
 
 .login-title-bar-text {
-    -fx-text-fill: #9aa7b8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
     -fx-letter-spacing: 1.2px;
@@ -152,13 +152,13 @@
 .login-title-bar-close {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-text-fill: #7c8898;
+    -fx-text-fill: -vanta-muted;
     -fx-padding: 5px 8px;
 }
 
 .login-title-bar-close:hover {
-    -fx-background-color: #222a35;
-    -fx-text-fill: #edf2f8;
+    -fx-background-color: -vanta-surface-hover;
+    -fx-text-fill: -vanta-text;
 }
 
 .login-logo {
@@ -183,18 +183,18 @@
 }
 
 .login-subtitle {
-    -fx-text-fill: #8a96a7;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 12px;
 }
 
 .login-instruction {
-    -fx-text-fill: #b2bdcb;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 11px;
 }
 
 .verification-code {
-    -fx-background-color: #151c26;
-    -fx-border-color: #344154;
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
     -fx-font-size: 25px;
@@ -210,6 +210,6 @@
 }
 
 .login-status {
-    -fx-text-fill: #697789;
+    -fx-text-fill: -vanta-muted;
     -fx-padding: 3px 0 0 0;
 }
