@@ -40,13 +40,13 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
     private final FlowPane accountList = new FlowPane();
     private final Label accountCount = new Label();
     private final Label errorLabel = new Label();
+    private boolean listenersRegistered;
     private final AccountService.AccountListener accountListener = account ->
             Platform.runLater(() -> {
                 if (listenersRegistered) {
                     renderAccounts();
                 }
             });
-    private boolean listenersRegistered;
 
     public AccountsView(AccountService accountService) {
 
