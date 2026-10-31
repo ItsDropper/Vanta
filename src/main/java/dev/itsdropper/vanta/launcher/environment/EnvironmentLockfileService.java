@@ -98,7 +98,7 @@ public final class EnvironmentLockfileService {
 
         List<EnvironmentLockfile.EnvironmentArtifact> environmentFiles = captureEnvironmentFiles(instanceDirectory);
 
-        return new EnvironmentLockfile(
+        EnvironmentLockfile lockfile = new EnvironmentLockfile(
                 EnvironmentLockfile.CURRENT_SCHEMA_VERSION,
                 OffsetDateTime.now(ZoneOffset.UTC).toString(),
                 instance.getId(),
@@ -109,6 +109,8 @@ public final class EnvironmentLockfileService {
                 artifacts,
                 environmentFiles
         );
+        validateLockfile(lockfile);
+        return lockfile;
     }
 
     /**
@@ -424,6 +426,7 @@ public final class EnvironmentLockfileService {
                     || artifact.filename().equals("..")
                     || artifact.filename().contains("/")
                     || artifact.filename().contains("\\")
+                    || artifact.filename().contains(":")
                     || artifact.sizeBytes() < 0
                     || artifact.sha256() == null
                     || !artifact.sha256().matches("(?i)[0-9a-f]{64}")
