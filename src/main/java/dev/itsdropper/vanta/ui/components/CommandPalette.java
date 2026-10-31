@@ -95,7 +95,7 @@ public final class CommandPalette extends StackPane {
         panel.setPadding(new Insets(22));
         panel.setMinWidth(0);
         panel.setMaxWidth(620);
-        panel.prefWidthProperty().bind(widthProperty().subtract(48).min(620));
+        panel.prefWidthProperty().bind(javafx.beans.binding.Bindings.max(0, javafx.beans.binding.Bindings.min(620, widthProperty().subtract(48))));
         panel.setMaxHeight(560);
         VBox.setVgrow(resultScroll, Priority.ALWAYS);
         StackPane.setAlignment(panel, Pos.TOP_CENTER);
