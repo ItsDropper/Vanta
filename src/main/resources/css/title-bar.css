@@ -3,7 +3,7 @@
    ========================================================= */
 
 .title-bar {
-    -fx-background-color: -vanta-bg;
+    -fx-background-color: -vantabg;
 
     -fx-min-height: 40px;
     -fx-pref-height: 40px;
@@ -47,7 +47,7 @@
 
     -fx-fill: transparent;
 
-    -fx-stroke: -vanta-muted;
+    -fx-stroke: -vantamuted;
 
     -fx-stroke-width: 1.25px;
 
@@ -63,12 +63,12 @@
 
 .title-bar-button:hover {
 
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 }
 
 .title-bar-button:hover SVGPath {
 
-    -fx-stroke: -vanta-text;
+    -fx-stroke: -vantatext;
 }
 
 
@@ -78,12 +78,12 @@
 
 .title-bar-close:hover {
 
-    -fx-background-color: -vanta-danger;
+    -fx-background-color: -vantadanger;
 }
 
 .title-bar-close:hover SVGPath {
 
-    -fx-stroke: -vanta-text;
+    -fx-stroke: -vantatext;
 }
 
 
@@ -93,12 +93,12 @@
 
 .title-bar-button:pressed {
 
-    -fx-background-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurfaceraised;
 }
 
 .title-bar-close:pressed {
 
-    -fx-background-color: -vanta-danger;
+    -fx-background-color: -vantadanger;
 }
 
 /* =========================================================
@@ -106,10 +106,10 @@
    ========================================================= */
 
 .account-switcher {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 8px;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
@@ -117,12 +117,12 @@
 }
 
 .account-switcher:hover {
-    -fx-background-color: -vanta-surface-hover;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: -vantaborder;
 }
 
 .account-switcher:pressed {
-    -fx-background-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurfaceraised;
 }
 
 
@@ -136,7 +136,7 @@
 /* Username */
 
 .account-switcher-name {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -146,7 +146,7 @@
 /* Arrow */
 
 .account-switcher-arrow {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
 }
 
@@ -156,11 +156,11 @@
    ========================================================= */
 
 .account-popup {
-    -fx-background-color: -vanta-bg;
+    -fx-background-color: -vantabg;
 
     -fx-background-radius: 11px;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 11px;
 
@@ -182,7 +182,7 @@
 /* Header */
 
 .account-popup-header {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
 
     -fx-font-size: 9px;
     -fx-font-weight: bold;
@@ -206,15 +206,15 @@
 }
 
 .account-popup-account:hover {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
 }
 
 .account-popup-account.active {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
 }
 
 .account-popup-account.active:hover {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 }
 
 
@@ -228,7 +228,7 @@
 /* Username */
 
 .account-popup-username {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -238,7 +238,7 @@
 /* Active */
 
 .account-popup-active {
-    -fx-text-fill: -vanta-success;
+    -fx-text-fill: -vantasuccess;
 
     -fx-font-size: 9px;
     -fx-font-weight: bold;
@@ -250,7 +250,7 @@
    ========================================================= */
 
 .account-popup-separator {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 
     -fx-min-height: 1px;
     -fx-pref-height: 1px;
@@ -277,28 +277,28 @@
 }
 
 .account-popup-add:hover {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
 }
 
 .account-popup-plus {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
 
     -fx-font-size: 17px;
     -fx-font-weight: normal;
 }
 
 .account-popup-add-text {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
 
     -fx-font-size: 11px;
 }
 
 .account-popup-add:hover .account-popup-plus {
-    -fx-text-fill: -vanta-success;
+    -fx-text-fill: -vantasuccess;
 }
 
 .account-popup-add:hover .account-popup-add-text {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 
 /* =========================================================
@@ -306,9 +306,9 @@
    ========================================================= */
 
 .title-bar-update {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
 
-    -fx-text-fill: -vanta-success;
+    -fx-text-fill: -vantasuccess;
 
     -fx-font-size: 10px;
     -fx-font-weight: bold;
@@ -321,7 +321,7 @@
 
     -fx-background-radius: 7px;
 
-    -fx-border-color: -vanta-accent-soft;
+    -fx-border-color: -vantaaccentsoft;
     -fx-border-width: 1px;
     -fx-border-radius: 7px;
 
@@ -329,15 +329,15 @@
 }
 
 .title-bar-update:hover {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
 
-    -fx-text-fill: -vanta-success;
+    -fx-text-fill: -vantasuccess;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
 }
 
 .title-bar-update:pressed {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
 }
