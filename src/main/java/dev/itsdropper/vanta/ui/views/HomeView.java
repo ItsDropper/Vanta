@@ -36,7 +36,6 @@ import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
-import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -85,13 +84,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         this.onCreateInstance = onCreateInstance;
 
         getStyleClass().addAll("page", "home-page");
-
-        MinecraftBackdrop backdrop = new MinecraftBackdrop();
-        backdrop.setManaged(false);
-        backdrop.prefWidthProperty().bind(widthProperty());
-        backdrop.prefHeightProperty().bind(heightProperty());
-        backdrop.setMinSize(0, 0);
-        backdrop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         Label title = new Label("Home");
         title.getStyleClass().add("home-title");
@@ -160,7 +152,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         homeScroll.getStyleClass().add("home-content-scroll");
         homeScroll.setManaged(true);
 
-        getChildren().addAll(backdrop, homeScroll);
+        getChildren().add(homeScroll);
         StackPane.setAlignment(homeScroll, Pos.TOP_LEFT);
 
         // Home content is a single interactive hierarchy.
