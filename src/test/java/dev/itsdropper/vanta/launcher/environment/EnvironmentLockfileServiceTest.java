@@ -47,6 +47,10 @@ class EnvironmentLockfileServiceTest {
     void writesAndReadsLockfileWithoutMachineSpecificPaths() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("portable-instance"));
         Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path resourcepacks = Files.createDirectory(instanceDirectory.resolve("resourcepacks"));
+        Files.writeString(resourcepacks.resolve("pack.zip"), "portable-pack");
+        Path config = Files.createDirectories(instanceDirectory.resolve("config/example"));
+        Files.writeString(config.resolve("settings.json"), "portable-settings");
         Instance instance = new Instance(
                 "portable-instance", "Portable", "1.20.4", "fabric", "0.15.11", instanceDirectory
         );
@@ -60,6 +64,10 @@ class EnvironmentLockfileServiceTest {
         assertEquals(instance.getId(), loaded.instanceId());
         assertEquals(instance.getMinecraftVersion(), loaded.minecraftVersion());
         assertEquals(instance.getLoaderVersion(), loaded.loaderVersion());
+        assertEquals(2, loaded.environmentFiles().size());
+        assertTrue(loaded.environmentFiles().stream()
+                .anyMatch(file -> file.category().equals("resourcepacks")
+                        && file.relativePath().equals("pack.zip")));
         assertTrue(Files.isRegularFile(lockfilePath));
         assertFalse(Files.readString(lockfilePath).contains(instanceDirectory.toAbsolutePath().toString()));
     }
