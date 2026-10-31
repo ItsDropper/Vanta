@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -65,7 +66,13 @@ public class AccountsView extends VBox {
                 accountsSection
         );
         content.setFillWidth(true);
-        content.setPadding(new Insets(30, 38, 36, 38));
+        content.paddingProperty().bind(
+                Bindings.createObjectBinding(() -> {
+                    double width = getWidth();
+                    double horizontal = width < 620 ? 16 : width < 900 ? 24 : 38;
+                    return new Insets(24, horizontal, 28, horizontal);
+                }, widthProperty())
+        );
 
         ScrollPane scroll = new ScrollPane(content);
         scroll.setFitToWidth(true);
@@ -111,18 +118,27 @@ public class AccountsView extends VBox {
         headFrame.getChildren().addAll(heroHead, heroFallback);
 
         VBox identity = new VBox(7);
+        identity.setMinWidth(0);
+        HBox identityRow = new HBox(22, headFrame, identity);
+        identityRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(identity, Priority.ALWAYS);
 
         Label eyebrow = new Label("ACTIVE MINECRAFT ACCOUNT");
         eyebrow.getStyleClass().add("accounts-eyebrow");
 
         heroUsername.getStyleClass().add("accounts-hero-name");
+        heroUsername.setMinWidth(0);
+        heroUsername.setWrapText(true);
 
         HBox statusRow = new HBox(8);
+        statusRow.setMinWidth(0);
         statusRow.setAlignment(Pos.CENTER_LEFT);
 
         heroStatus.getStyleClass().add("accounts-status-pill");
 
         heroUuid.getStyleClass().add("accounts-hero-uuid");
+        heroUuid.setMinWidth(0);
+        heroUuid.setWrapText(true);
 
         statusRow.getChildren().addAll(heroStatus, heroUuid);
         identity.getChildren().addAll(eyebrow, heroUsername, statusRow);
@@ -145,10 +161,27 @@ public class AccountsView extends VBox {
         topActions.setAlignment(Pos.CENTER_RIGHT);
         actions.getChildren().addAll(topActions, signOutButton);
 
-        content.getChildren().addAll(headFrame, identity, spacer, actions);
+        content.getChildren().addAll(identityRow, spacer, actions);
 
         hero.getChildren().add(content);
         StackPane.setMargin(content, new Insets(24));
+
+        hero.widthProperty().addListener((observable, previousWidth, nextWidth) -> {
+            boolean compact = nextWidth.doubleValue() < 700;
+            if (compact && content.getChildren().contains(spacer)) {
+                content.getChildren().setAll(identityRow, actions);
+                content.setSpacing(16);
+                actions.setAlignment(Pos.CENTER_LEFT);
+                topActions.setAlignment(Pos.CENTER_LEFT);
+                StackPane.setMargin(content, new Insets(16));
+            } else if (!compact && !content.getChildren().contains(spacer)) {
+                content.getChildren().setAll(headFrame, identity, spacer, actions);
+                content.setSpacing(0);
+                actions.setAlignment(Pos.CENTER_RIGHT);
+                topActions.setAlignment(Pos.CENTER_RIGHT);
+                StackPane.setMargin(content, new Insets(24));
+            }
+        });
 
         return hero;
     }
