@@ -445,6 +445,35 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         HBox layout = new HBox(24);
         layout.setAlignment(Pos.CENTER_LEFT);
+
+        VBox compactLayout = new VBox(16);
+        compactLayout.setFillWidth(true);
+
+        // The launch action moves below the instance identity on narrow windows.
+        // This preserves readable metadata instead of squeezing it between the
+        // icon and a permanently wide action button.
+        layout.widthProperty().addListener((observable, previousWidth, nextWidth) -> {
+            boolean compact = nextWidth.doubleValue() < 620;
+            if (compact && card.getChildren().contains(layout)) {
+                layout.getChildren().remove(action);
+                compactLayout.getChildren().setAll(layout, action);
+                compactLayout.setPadding(new Insets(18));
+                action.setAlignment(Pos.CENTER_LEFT);
+                card.getChildren().setAll(compactLayout);
+                iconFrame.setMinSize(76, 76);
+                iconFrame.setPrefSize(76, 76);
+                iconFrame.setMaxSize(76, 76);
+            } else if (!compact && card.getChildren().contains(compactLayout)) {
+                compactLayout.getChildren().clear();
+                layout.getChildren().setAll(iconFrame, information, action);
+                layout.setPadding(new Insets(26, 30, 26, 30));
+                action.setAlignment(Pos.CENTER_RIGHT);
+                card.getChildren().setAll(layout);
+                iconFrame.setMinSize(104, 104);
+                iconFrame.setPrefSize(104, 104);
+                iconFrame.setMaxSize(104, 104);
+            }
+        });
         layout.setPadding(new Insets(26, 30, 26, 30));
 
         StackPane iconFrame = new StackPane();
