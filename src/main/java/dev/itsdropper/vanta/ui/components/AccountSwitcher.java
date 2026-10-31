@@ -9,6 +9,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -94,6 +95,9 @@ public class AccountSwitcher extends HBox {
         usernameLabel.getStyleClass().add(
                 "account-switcher-name"
         );
+        usernameLabel.setMinWidth(0);
+        usernameLabel.setMaxWidth(150);
+        usernameLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
 
         // -----------------------------------------------------
         // ARROW
