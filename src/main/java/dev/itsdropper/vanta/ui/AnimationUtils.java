@@ -113,10 +113,10 @@ public final class AnimationUtils {
         Object previous = node.getProperties().remove("vanta.entrance-transition");
         if (previous instanceof Transition active) {
             active.stop();
+            node.setOpacity(1.0);
+            node.setTranslateX(0.0);
+            node.setTranslateY(0.0);
         }
-        node.setOpacity(1.0);
-        node.setTranslateX(0.0);
-        node.setTranslateY(0.0);
     }
 
     /**
