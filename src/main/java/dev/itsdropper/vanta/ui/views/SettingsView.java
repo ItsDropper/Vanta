@@ -49,7 +49,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Properties;
 import java.util.function.Consumer;
 
-public class SettingsView extends BorderPane {
+public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
 
     private final AccountService accountService;
     private final Consumer<String> onAccentChanged;
@@ -57,6 +57,11 @@ public class SettingsView extends BorderPane {
     private final Consumer<UpdateInfo> onVantaUpdate;
     private final VBox navigation = new VBox(4);
     private final VBox content = new VBox(22);
+    private final ComboBox<String> compactNavigation = new ComboBox<>();
+    private final HBox compactNavigationBar = new HBox(12);
+    private final Consumer<Account> accountListener = account -> refreshDebugAccess();
+    private boolean accountListenerRegistered;
+    private boolean updatingNavigation;
 
     private ColorPicker accentPicker;
     private TextField accentHexField;
@@ -77,7 +82,6 @@ public class SettingsView extends BorderPane {
         this.onDebugOnboarding = onDebugOnboarding;
         this.onVantaUpdate = onVantaUpdate;
 
-        accountService.addListener(account -> refreshDebugAccess());
         this.accentColor = ThemeManager.loadAccent();
 
         getStyleClass().add("settings-shell");
@@ -99,6 +103,10 @@ public class SettingsView extends BorderPane {
         setLeft(navigation);
         setCenter(scroll);
         BorderPane.setMargin(navigation, new Insets(0, 22, 0, 0));
+        buildCompactNavigation();
+        widthProperty().addListener((observable, oldWidth, newWidth) ->
+                updateNavigationLayout(newWidth.doubleValue())
+        );
 
         String rememberedSection = LauncherSettings.isRememberLastSettingsPageEnabled()
                 ? LauncherSettings.getLastSettingsPage()
@@ -110,8 +118,61 @@ public class SettingsView extends BorderPane {
             rememberedSection = "Appearance";
         }
         selectSection(rememberedSection);
+        refreshDebugAccess();
         applyAccent(accentColor);
         onAccentChanged.accept(accentColor);
+    }
+
+    private void buildCompactNavigation() {
+        Label label = new Label("SETTINGS");
+        label.getStyleClass().add("settings-compact-label");
+        compactNavigation.getItems().setAll(
+                "Appearance", "Discord", "General", "Minecraft", "Downloads",
+                "Storage & Cache", "State", "Repair & Diagnostics", "About Vanta"
+        );
+        compactNavigation.setMaxWidth(Double.MAX_VALUE);
+        compactNavigation.setAccessibleText("Settings section");
+        compactNavigation.setOnAction(event -> {
+            if (!updatingNavigation && compactNavigation.getValue() != null) {
+                selectSection(compactNavigation.getValue());
+            }
+        });
+        HBox.setHgrow(compactNavigation, Priority.ALWAYS);
+        compactNavigationBar.getStyleClass().add("settings-compact-navigation");
+        compactNavigationBar.setAlignment(Pos.CENTER_LEFT);
+        compactNavigationBar.setPadding(new Insets(0, 0, 14, 0));
+        compactNavigationBar.getChildren().setAll(label, compactNavigation);
+    }
+
+    private void updateNavigationLayout(double width) {
+        if (width <= 1) return;
+        boolean compact = width < 760;
+        if (compact) {
+            if (getLeft() != null) setLeft(null);
+            if (getTop() != compactNavigationBar) setTop(compactNavigationBar);
+            setMargin(compactNavigationBar, new Insets(0, 0, 16, 0));
+        } else {
+            if (getTop() != null) setTop(null);
+            if (getLeft() != navigation) setLeft(navigation);
+            BorderPane.setMargin(navigation, new Insets(0, 22, 0, 0));
+        }
+    }
+
+    @Override
+    public void onShown() {
+        if (!accountListenerRegistered) {
+            accountService.addListener(accountListener);
+            accountListenerRegistered = true;
+        }
+        refreshDebugAccess();
+    }
+
+    @Override
+    public void onHidden() {
+        if (accountListenerRegistered) {
+            accountService.removeListener(accountListener);
+            accountListenerRegistered = false;
+        }
     }
 
     private void buildNavigation() {
@@ -199,6 +260,9 @@ public class SettingsView extends BorderPane {
 
     private void selectSection(String section) {
         currentSection = section;
+        updatingNavigation = true;
+        compactNavigation.setValue(section);
+        updatingNavigation = false;
         if (LauncherSettings.isRememberLastSettingsPageEnabled()) {
             LauncherSettings.setLastSettingsPage(section);
         }
