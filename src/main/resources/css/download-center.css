@@ -3,7 +3,7 @@
     -fx-spacing: 18px;
 }
 .download-eyebrow {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 900;
     -fx-letter-spacing: 1.4px;
@@ -12,33 +12,33 @@
     -fx-spacing: 10px;
 }
 .download-stat-card {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 12px;
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 12px;
     -fx-border-width: 1px;
     -fx-min-height: 82px;
 }
 .download-stat-label {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 9px;
     -fx-font-weight: 800;
     -fx-letter-spacing: 0.8px;
 }
 .download-stat-value {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 24px;
     -fx-font-weight: 800;
 }
-.download-stat-active .download-stat-value { -fx-text-fill: -vanta-accent; }
-.download-stat-complete .download-stat-value { -fx-text-fill: -vanta-success; }
-.download-stat-failed .download-stat-value { -fx-text-fill: -vanta-danger; }
+.download-stat-active .download-stat-value { -fx-text-fill: -vantaaccent; }
+.download-stat-complete .download-stat-value { -fx-text-fill: -vantasuccess; }
+.download-stat-failed .download-stat-value { -fx-text-fill: -vantadanger; }
 .download-summary {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
 }
 .download-section-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 14px;
     -fx-font-weight: 800;
 }
@@ -55,22 +55,22 @@
     -fx-padding: 1px 5px 8px 1px;
 }
 .download-task-card, .download-empty-card {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 12px;
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 12px;
     -fx-border-width: 1px;
 }
 .download-task-card:hover {
-    -fx-background-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurfaceraised;
 }
 .download-task-name {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
     -fx-font-weight: 750;
 }
 .download-task-source {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
 }
 .download-status {
@@ -81,29 +81,29 @@
     -fx-letter-spacing: 0.4px;
 }
 .download-status-downloading {
-    -fx-text-fill: -vanta-accent;
-    -fx-background-color: -vanta-accent-soft;
+    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -vantaaccentsoft;
 }
 .download-status-verifying {
-    -fx-text-fill: -vanta-accent;
-    -fx-background-color: -vanta-accent-soft;
+    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -vantaaccentsoft;
 }
 .download-status-completed {
-    -fx-text-fill: -vanta-success;
-    -fx-background-color: derive(-vanta-success, -84%);
+    -fx-text-fill: -vantasuccess;
+    -fx-background-color: derive(-vantasuccess, -84%);
 }
 .download-status-failed {
-    -fx-text-fill: -vanta-danger;
-    -fx-background-color: derive(-vanta-danger, -84%);
+    -fx-text-fill: -vantadanger;
+    -fx-background-color: derive(-vantadanger, -84%);
 }
 .download-progress {
-    -fx-accent: -vanta-accent;
+    -fx-accent: -vantaaccent;
     -fx-pref-height: 6px;
     -fx-min-height: 6px;
     -fx-max-height: 6px;
 }
 .download-progress > .track {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
     -fx-background-radius: 99px;
 }
 .download-progress > .bar {
@@ -111,11 +111,11 @@
     -fx-background-insets: 0;
 }
 .download-task-detail {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
 }
 .download-task-error {
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
     -fx-font-size: 10px;
 }
 .download-empty-card {
@@ -123,17 +123,17 @@
     -fx-padding: 28px;
 }
 .download-empty-icon {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 38px;
     -fx-font-weight: 800;
 }
 .download-empty-title {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 15px;
     -fx-font-weight: 800;
 }
 .download-empty-body {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
     -fx-text-alignment: center;
 }
