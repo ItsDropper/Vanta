@@ -912,8 +912,9 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             } catch (Throwable failure) {
                 Platform.runLater(() -> {
                     captureButton.setDisable(false);
-                    captureButton.setText("SAVE BASELINE");
-                    compareButton.setDisable(!environmentLockfileService.hasBaseline(instance));
+                    boolean baselineExists = environmentLockfileService.hasBaseline(instance);
+                    captureButton.setText(baselineExists ? "UPDATE BASELINE" : "SAVE BASELINE");
+                    compareButton.setDisable(!baselineExists);
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.error(
@@ -952,7 +953,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             } catch (Throwable failure) {
                 Platform.runLater(() -> {
                     captureButton.setDisable(false);
-                    compareButton.setDisable(false);
+                    compareButton.setDisable(!environmentLockfileService.hasBaseline(instance));
                     compareButton.setText("CHECK DRIFT");
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
