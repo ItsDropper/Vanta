@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
@@ -560,21 +561,15 @@ public class PresetConfigurationView extends VBox {
                 event -> onBrowseModpacks.run()
         );
 
-        HBox actions =
-                new HBox(
-                        12,
-                        backButton,
-                        browseModpacksButton,
-                        createButton
-                );
-
-        actions.getStyleClass().add(
-                "preset-actions"
+        FlowPane actions = new FlowPane(
+                12, 8,
+                backButton,
+                browseModpacksButton,
+                createButton
         );
-
-        actions.setAlignment(
-                Pos.CENTER_RIGHT
-        );
+        actions.getStyleClass().add("preset-actions");
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        actions.setMaxWidth(Double.MAX_VALUE);
 
         // =========================================================
         // PANEL BUILD
