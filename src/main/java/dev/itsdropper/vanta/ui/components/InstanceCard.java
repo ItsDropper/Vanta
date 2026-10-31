@@ -15,6 +15,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -149,17 +150,18 @@ public class InstanceCard extends StackPane {
                 "instance-playtime"
         );
 
-        HBox metadata =
-                new HBox(
-                        8,
-                        versionLabel,
-                        loaderLabel,
-                        playtimeLabel
-                );
-
-        metadata.setAlignment(
-                Pos.CENTER_LEFT
+        // Metadata must wrap instead of forcing the action buttons off-screen
+        // when the launcher window is narrow or the instance name is long.
+        FlowPane metadata = new FlowPane(
+                8,
+                4,
+                versionLabel,
+                loaderLabel,
+                playtimeLabel
         );
+        metadata.setAlignment(Pos.CENTER_LEFT);
+        metadata.setMinWidth(0);
+        metadata.setMaxWidth(Double.MAX_VALUE);
 
         VBox information =
                 new VBox(
