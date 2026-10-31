@@ -7,6 +7,8 @@ import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
@@ -19,6 +21,9 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.environment.EnvironmentDriftReport;
+import dev.itsdropper.vanta.launcher.environment.EnvironmentLockfile;
+import dev.itsdropper.vanta.launcher.environment.EnvironmentLockfileService;
 import dev.itsdropper.vanta.launcher.state.InstanceState;
 import dev.itsdropper.vanta.launcher.state.SharedState;
 import dev.itsdropper.vanta.launcher.state.InstanceStateEngine;
@@ -38,6 +43,7 @@ import java.util.Map;
 
 public final class StateCenterView extends VBox implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
     private final VBox instanceList = new VBox(10);
+    private final EnvironmentLockfileService environmentLockfileService = new EnvironmentLockfileService();
     private final VBox sharedList = new VBox(10);
     private final ScrollPane instanceScroll = new ScrollPane(instanceList);
     private final Label overallTitle = new Label("READY");
@@ -842,9 +848,172 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             right.getChildren().add(repair);
         }
 
-        right.getChildren().addAll(status, stats);
+        Label baselineState = new Label(
+                environmentLockfileService.hasBaseline(instance)
+                        ? "BASELINE SAVED"
+                        : "NO BASELINE"
+        );
+        baselineState.getStyleClass().add("state-environment-baseline");
+
+        Button captureBaseline = new Button(
+                environmentLockfileService.hasBaseline(instance)
+                        ? "UPDATE BASELINE"
+                        : "SAVE BASELINE"
+        );
+        captureBaseline.getStyleClass().add("state-environment-button");
+        captureBaseline.setFocusTraversable(false);
+
+        Button compareEnvironment = new Button("CHECK DRIFT");
+        compareEnvironment.getStyleClass().add("state-environment-button");
+        compareEnvironment.setFocusTraversable(false);
+        compareEnvironment.setDisable(!environmentLockfileService.hasBaseline(instance));
+
+        captureBaseline.setOnAction(event -> captureEnvironmentBaseline(
+                instance, captureBaseline, compareEnvironment, baselineState
+        ));
+        compareEnvironment.setOnAction(event -> compareEnvironmentBaseline(
+                instance, captureBaseline, compareEnvironment
+        ));
+
+        HBox environmentActions = new HBox(6, captureBaseline, compareEnvironment);
+        environmentActions.setAlignment(Pos.CENTER_RIGHT);
+        right.getChildren().addAll(status, stats, baselineState, environmentActions);
         card.getChildren().addAll(icon, text, right);
         return card;
+    }
+
+    private void captureEnvironmentBaseline(
+            Instance instance,
+            Button captureButton,
+            Button compareButton,
+            Label baselineState
+    ) {
+        captureButton.setDisable(true);
+        compareButton.setDisable(true);
+        captureButton.setText("SAVING...");
+
+        Thread worker = new Thread(() -> {
+            try {
+                environmentLockfileService.write(instance);
+                Platform.runLater(() -> {
+                    captureButton.setDisable(false);
+                    captureButton.setText("UPDATE BASELINE");
+                    compareButton.setDisable(false);
+                    baselineState.setText("BASELINE SAVED");
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.success(
+                                "Environment baseline saved",
+                                safe(instance.getName(), "Instance")
+                                        + " can now be checked for changes."
+                        );
+                    }
+                });
+            } catch (Throwable failure) {
+                Platform.runLater(() -> {
+                    captureButton.setDisable(false);
+                    captureButton.setText("SAVE BASELINE");
+                    compareButton.setDisable(!environmentLockfileService.hasBaseline(instance));
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error(
+                                "Could not save environment baseline",
+                                failure.getMessage() == null
+                                        ? failure.getClass().getSimpleName()
+                                        : failure.getMessage()
+                        );
+                    }
+                });
+            }
+        }, "Vanta-Environment-Lockfile-Capture");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private void compareEnvironmentBaseline(
+            Instance instance,
+            Button captureButton,
+            Button compareButton
+    ) {
+        captureButton.setDisable(true);
+        compareButton.setDisable(true);
+        compareButton.setText("CHECKING...");
+
+        Thread worker = new Thread(() -> {
+            try {
+                EnvironmentLockfile baseline = environmentLockfileService.readBaseline(instance);
+                EnvironmentDriftReport report = environmentLockfileService.compare(instance, baseline);
+                Platform.runLater(() -> {
+                    captureButton.setDisable(false);
+                    compareButton.setDisable(false);
+                    compareButton.setText("CHECK DRIFT");
+                    showEnvironmentDrift(instance, report);
+                });
+            } catch (Throwable failure) {
+                Platform.runLater(() -> {
+                    captureButton.setDisable(false);
+                    compareButton.setDisable(false);
+                    compareButton.setText("CHECK DRIFT");
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.error(
+                                "Environment comparison failed",
+                                failure.getMessage() == null
+                                        ? failure.getClass().getSimpleName()
+                                        : failure.getMessage()
+                        );
+                    }
+                });
+            }
+        }, "Vanta-Environment-Drift-Check");
+        worker.setDaemon(true);
+        worker.start();
+    }
+
+    private void showEnvironmentDrift(Instance instance, EnvironmentDriftReport report) {
+        Alert alert = new Alert(
+                report.isClean() ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING
+        );
+        alert.setTitle("Environment comparison");
+        alert.setHeaderText(
+                report.isClean()
+                        ? "Environment matches its saved baseline"
+                        : report.changes().size() + " environment change"
+                                + (report.changes().size() == 1 ? "" : "s") + " detected"
+        );
+        alert.setContentText(
+                safe(instance.getName(), "Instance")
+                        + " • baseline captured " + report.baselineGeneratedAt()
+                        + "\nCurrent scan " + report.observedAt()
+                        + "\n\nThis comparison is read-only. No instance files were changed."
+        );
+
+        String details = report.isClean()
+                ? "No differences were found in the Minecraft version, loader identity, or files in the mods directory."
+                : report.changes().stream()
+                        .map(change -> {
+                            StringBuilder line = new StringBuilder(change.type().name())
+                                    .append(": ").append(change.description());
+                            if (change.filename() != null) {
+                                line.append("\n  File: ").append(change.filename());
+                            }
+                            if (change.expectedSha256() != null) {
+                                line.append("\n  Expected SHA-256: ").append(change.expectedSha256());
+                            }
+                            if (change.actualSha256() != null) {
+                                line.append("\n  Actual SHA-256:   ").append(change.actualSha256());
+                            }
+                            return line.toString();
+                        })
+                        .collect(java.util.stream.Collectors.joining("\n\n"));
+
+        TextArea detailsArea = new TextArea(details);
+        detailsArea.setEditable(false);
+        detailsArea.setWrapText(true);
+        detailsArea.setPrefColumnCount(76);
+        detailsArea.setPrefRowCount(Math.min(18, Math.max(5, report.changes().size() * 3)));
+        alert.getDialogPane().setExpandableContent(detailsArea);
+        alert.show();
     }
 
     private void animateRefreshButton(boolean scanning) {
