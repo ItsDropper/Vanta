@@ -20,7 +20,7 @@ import java.util.Properties;
  */
 public final class ThemeManager {
 
-    public static final String DEFAULT_ACCENT = "#5688ED";
+    public static final String DEFAULT_ACCENT = "#3978F6";
     public static final String DEFAULT_THEME = "Vanta";
 
     public record Theme(
@@ -44,8 +44,8 @@ public final class ThemeManager {
     private static final Map<String, Theme> THEMES = new LinkedHashMap<>();
 
     static {
-        register(new Theme("Vanta", "#5688ED", "#0B0E13", "#151A22", "#1A202A", "#202936", "#293443",
-                "#F4F7FB", "#8B96A8", "#667386", "#E48A94", "#69D99B"));
+        register(new Theme("Vanta", "#3978F6", "#0B0D12", "#121620", "#191F2B", "#202838", "#252C39",
+                "#F3F5FA", "#929BAD", "#6E788A", "#E48A94", "#69D99B"));
         register(new Theme("Midnight", "#7C9CFF", "#090B12", "#121622", "#181E2C", "#222A3A", "#2B3447",
                 "#F2F5FF", "#8994AA", "#646F84", "#EF8C98", "#69D9A2"));
         register(new Theme("Nord", "#88C0D0", "#0E1419", "#182127", "#202B33", "#293740", "#354651",
