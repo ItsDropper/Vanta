@@ -27,7 +27,17 @@ import java.util.List;
  */
 public final class SkinModel3D extends StackPane {
 
+    public enum Layer {
+        HAT,
+        JACKET,
+        SLEEVES,
+        TROUSERS
+    }
+
+
     private final Group player = new Group();
+    private final java.util.EnumMap<Layer, Group> layerGroups =
+            new java.util.EnumMap<>(Layer.class);
     private final Rotate yaw = new Rotate(-22, Rotate.Y_AXIS);
     private final Rotate pitch = new Rotate(-8, Rotate.X_AXIS);
     private Image skin;
@@ -101,6 +111,7 @@ public final class SkinModel3D extends StackPane {
 
     private void rebuild() {
         player.getChildren().clear();
+        layerGroups.clear();
         if (skin == null || skin.isError() || skin.getPixelReader() == null
                 || skin.getWidth() < 64 || skin.getHeight() < 32) {
             return;
@@ -117,7 +128,7 @@ public final class SkinModel3D extends StackPane {
                     face(8, 8, 8, 8), face(24, 8, 8, 8),
                     face(0, 8, 8, 8), face(16, 8, 8, 8),
                     face(8, 0, 8, 8), face(16, 0, 8, 8));
-            addBox(material, 8.5, 8.5, 8.5, 0, -10, 0,
+            addLayerBox(Layer.HAT, material, 8.5, 8.5, 8.5, 0, -10, 0,
                     face(40, 8, 8, 8), face(56, 8, 8, 8),
                     face(32, 8, 8, 8), face(48, 8, 8, 8),
                     face(40, 0, 8, 8), face(48, 0, 8, 8));
@@ -184,36 +195,36 @@ public final class SkinModel3D extends StackPane {
 
         // Transparent second-layer jacket, sleeves, and trousers.
         if (atlasHeight >= 64) {
-            addBox(material, 8.35, 12.35, 4.35, 0, 0, 0,
+            addLayerBox(Layer.JACKET, material, 8.35, 12.35, 4.35, 0, 0, 0,
                     face(20, 36, 8, 12), face(32, 36, 8, 12),
                     face(16, 36, 4, 12), face(28, 36, 4, 12),
                     face(20, 32, 8, 4), face(28, 32, 8, 4));
 
             if (slimArms) {
-                addBox(material, 3.35, 12.35, 4.35, -5.5, 0, 0,
-                        face(36, 52, 3, 12), face(44, 52, 3, 12),
-                        face(32, 52, 4, 12), face(40, 52, 4, 12),
-                        face(36, 48, 3, 4), face(39, 48, 3, 4));
-                addBox(material, 3.35, 12.35, 4.35, 5.5, 0, 0,
+                SkinAtlasLayout.Uv[] leftSleeve = SkinAtlasLayout.leftArmOverlay(true);
+                addLayerBox(Layer.SLEEVES, material, 3.35, 12.35, 4.35, -5.5, 0, 0,
+                        uv(leftSleeve[0]), uv(leftSleeve[1]), uv(leftSleeve[2]),
+                        uv(leftSleeve[3]), uv(leftSleeve[4]), uv(leftSleeve[5]));
+                addLayerBox(Layer.SLEEVES, material, 3.35, 12.35, 4.35, 5.5, 0, 0,
                         face(44, 36, 3, 12), face(52, 36, 3, 12),
                         face(40, 36, 4, 12), face(48, 36, 4, 12),
                         face(44, 32, 3, 4), face(47, 32, 3, 4));
             } else {
-                addBox(material, 4.35, 12.35, 4.35, -6, 0, 0,
-                        face(36, 52, 4, 12), face(44, 52, 4, 12),
-                        face(32, 52, 4, 12), face(40, 52, 4, 12),
-                        face(36, 48, 4, 4), face(40, 48, 4, 4));
-                addBox(material, 4.35, 12.35, 4.35, 6, 0, 0,
+                SkinAtlasLayout.Uv[] leftSleeve = SkinAtlasLayout.leftArmOverlay(false);
+                addLayerBox(Layer.SLEEVES, material, 4.35, 12.35, 4.35, -6, 0, 0,
+                        uv(leftSleeve[0]), uv(leftSleeve[1]), uv(leftSleeve[2]),
+                        uv(leftSleeve[3]), uv(leftSleeve[4]), uv(leftSleeve[5]));
+                addLayerBox(Layer.SLEEVES, material, 4.35, 12.35, 4.35, 6, 0, 0,
                         face(44, 36, 4, 12), face(52, 36, 4, 12),
                         face(40, 36, 4, 12), face(48, 36, 4, 12),
                         face(44, 32, 4, 4), face(48, 32, 4, 4));
             }
 
-            addBox(material, 4.35, 12.35, 4.35, -2, 12, 0,
+            addLayerBox(Layer.TROUSERS, material, 4.35, 12.35, 4.35, -2, 12, 0,
                     face(4, 36, 4, 12), face(12, 36, 4, 12),
                     face(0, 36, 4, 12), face(8, 36, 4, 12),
                     face(4, 32, 4, 4), face(8, 32, 4, 4));
-            addBox(material, 4.35, 12.35, 4.35, 2, 12, 0,
+            addLayerBox(Layer.TROUSERS, material, 4.35, 12.35, 4.35, 2, 12, 0,
                     face(20, 52, 4, 12), face(28, 52, 4, 12),
                     face(16, 52, 4, 12), face(24, 52, 4, 12),
                     face(20, 48, 4, 4), face(24, 48, 4, 4));
@@ -328,6 +339,28 @@ public final class SkinModel3D extends StackPane {
                         double width, double height, double depth,
                         double x, double y, double z,
                         Uv front, Uv back, Uv right, Uv left, Uv top, Uv bottom) {
+        addBox(player, material, width, height, depth, x, y, z,
+                front, back, right, left, top, bottom);
+    }
+
+    private void addLayerBox(Layer layer, PhongMaterial material,
+                             double width, double height, double depth,
+                             double x, double y, double z,
+                             Uv front, Uv back, Uv right, Uv left, Uv top, Uv bottom) {
+        Group group = layerGroups.computeIfAbsent(layer, key -> {
+            Group created = new Group();
+            created.setVisible(true);
+            player.getChildren().add(created);
+            return created;
+        });
+        addBox(group, material, width, height, depth, x, y, z,
+                front, back, right, left, top, bottom);
+    }
+
+    private void addBox(Group target, PhongMaterial material,
+                        double width, double height, double depth,
+                        double x, double y, double z,
+                        Uv front, Uv back, Uv right, Uv left, Uv top, Uv bottom) {
         TriangleMesh mesh = new TriangleMesh();
         List<Float> points = new ArrayList<>(72);
         List<Float> texCoords = new ArrayList<>(48);
@@ -362,7 +395,7 @@ public final class SkinModel3D extends StackPane {
         view.setTranslateX(x);
         view.setTranslateY(y);
         view.setTranslateZ(z);
-        player.getChildren().add(view);
+        target.getChildren().add(view);
     }
 
     private void addFace(TriangleMesh mesh, List<Float> points, List<Float> texCoords,
@@ -390,6 +423,10 @@ public final class SkinModel3D extends StackPane {
 
     private Uv face(int x, int y, int width, int height) {
         return new Uv(x, y, width, height);
+    }
+
+    private Uv uv(SkinAtlasLayout.Uv uv) {
+        return face(uv.x(), uv.y(), uv.width(), uv.height());
     }
 
     private static float[] toFloatArray(List<Float> values) {

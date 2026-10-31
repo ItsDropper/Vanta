@@ -11,6 +11,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.CheckBox;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -54,6 +56,10 @@ public final class SkinChangerView extends VBox {
     private final SkinModel3D modelPreview = new SkinModel3D();
     private final ComboBox<String> modelChoice = new ComboBox<>();
     private final ComboBox<CapeOption> capeChoice = new ComboBox<>();
+    private final CheckBox hatLayer = new CheckBox("Hat");
+    private final CheckBox jacketLayer = new CheckBox("Jacket");
+    private final CheckBox sleevesLayer = new CheckBox("Sleeves");
+    private final CheckBox trousersLayer = new CheckBox("Trousers");
     private final Button applyCapeButton = new Button("Equip selected cape");
     private final Button hideCapeButton = new Button("Hide cape");
     private final Button chooseButton = new Button("Choose & apply PNG");
@@ -70,14 +76,12 @@ public final class SkinChangerView extends VBox {
         getStyleClass().addAll("page", "skin-changer-page");
         setFillWidth(true);
 
-        Label title = new Label("Skin changer");
-        title.getStyleClass().add("accounts-title");
-        Label subtitle = new Label(
-                "Preview your active Minecraft skin in 3D, rotate it, and apply new skins to your profile."
+        PageHeader header = new PageHeader(
+                "Skin changer",
+                "Preview your Minecraft skin with independently adjustable 3D outer layers.",
+                "accounts-title",
+                "accounts-subtitle"
         );
-        subtitle.getStyleClass().add("accounts-subtitle");
-
-        VBox header = new VBox(5, title, subtitle);
         header.getStyleClass().add("accounts-header");
         header.setPadding(new Insets(30, 38, 0, 38));
 
@@ -112,6 +116,24 @@ public final class SkinChangerView extends VBox {
                 modelPreview.setSkinModel(newValue.startsWith("Slim"));
             }
         });
+
+        Label layersHeading = new Label("3D skin layers");
+        layersHeading.getStyleClass().add("accounts-card-name");
+        for (CheckBox layerControl : List.of(hatLayer, jacketLayer, sleevesLayer, trousersLayer)) {
+            layerControl.setSelected(true);
+            layerControl.getStyleClass().add("skin-layer-toggle");
+        }
+        hatLayer.selectedProperty().addListener((obs, oldValue, visible) ->
+                modelPreview.setLayerVisible(SkinModel3D.Layer.HAT, visible));
+        jacketLayer.selectedProperty().addListener((obs, oldValue, visible) ->
+                modelPreview.setLayerVisible(SkinModel3D.Layer.JACKET, visible));
+        sleevesLayer.selectedProperty().addListener((obs, oldValue, visible) ->
+                modelPreview.setLayerVisible(SkinModel3D.Layer.SLEEVES, visible));
+        trousersLayer.selectedProperty().addListener((obs, oldValue, visible) ->
+                modelPreview.setLayerVisible(SkinModel3D.Layer.TROUSERS, visible));
+        HBox layerControls = new HBox(12, hatLayer, jacketLayer, sleevesLayer, trousersLayer);
+        layerControls.setAlignment(Pos.CENTER_LEFT);
+        layerControls.setSpacing(12);
 
         Label capeHeading = new Label("Owned capes");
         capeHeading.getStyleClass().add("accounts-card-name");
@@ -148,6 +170,7 @@ public final class SkinChangerView extends VBox {
         controls.getChildren().addAll(
                 accountHeading, accountLabel,
                 modelHeading, modelChoice,
+                layersHeading, layerControls,
                 capeHeading, capeChoice, capeActions,
                 formatHint, actions, statusLabel
         );
