@@ -133,6 +133,8 @@ public class BrowseModsView extends VBox {
         searchField.setPromptText(
                 "Search Modrinth..."
         );
+        searchField.setMinWidth(0);
+        searchField.setAccessibleText("Search mods for this instance");
 
         searchField.getStyleClass().add(
                 "create-field"
