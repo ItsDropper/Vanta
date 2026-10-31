@@ -13,6 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -47,12 +48,12 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         );
         VBox heading = new VBox(8, eyebrow, pageHeader);
 
-        HBox stats = new HBox(10,
+        FlowPane stats = new FlowPane(10, 10,
                 statCard("IN PROGRESS", activeCount, "download-stat-active"),
                 statCard("COMPLETED", completedCount, "download-stat-complete"),
                 statCard("FAILED", failedCount, "download-stat-failed"));
         stats.getStyleClass().add("download-stats");
-        for (Node child : stats.getChildren()) HBox.setHgrow(child, Priority.ALWAYS);
+        stats.setMaxWidth(Double.MAX_VALUE);
 
         HBox listHeading = new HBox(10);
         listHeading.setAlignment(Pos.CENTER_LEFT);
@@ -62,6 +63,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Button clear = new Button("Clear history", IconView.create(IconView.Type.TRASH, 14));
         clear.getStyleClass().add("secondary-button");
+        clear.setAccessibleText("Clear completed and failed download history");
         clear.setOnAction(event -> service.clearFinished());
         listHeading.getChildren().addAll(queueTitle, spacer, clear);
 
