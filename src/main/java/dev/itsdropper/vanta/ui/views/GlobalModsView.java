@@ -5,7 +5,10 @@ import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.AccessibleRole;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Separator;
 import javafx.stage.Popup;
@@ -13,6 +16,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.input.KeyCode;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -801,32 +805,49 @@ public class GlobalModsView extends VBox {
                 "instance-card"
         );
 
-        card.setCursor(
-                javafx.scene.Cursor.HAND
-        );
-
-        card.setOnMouseClicked(
-                event -> {
-
-                    if (event.getButton() ==
-                            javafx.scene.input.MouseButton.PRIMARY) {
-
-                        String projectId =
-                                project.getProjectId();
-
-                        if (projectId != null
-                                && !projectId.isBlank()) {
-
-                            onModSelected.accept(
-                                    projectId,
-                                    contentTypeBox.getValue()
-                            );
-                        }
-                    }
-                }
-        );
+        makeProjectCardInteractive(card, project);
 
         return card;
+    }
+
+
+    private void makeProjectCardInteractive(VBox card, ModrinthProject project) {
+        card.setCursor(javafx.scene.Cursor.HAND);
+        card.setAccessibleRole(AccessibleRole.BUTTON);
+        card.setAccessibleText("Open details for " + safe(project.getTitle(), "project"));
+        card.setFocusTraversable(true);
+
+        Runnable openDetails = () -> {
+            String projectId = project.getProjectId();
+            if (projectId != null && !projectId.isBlank()) {
+                onModSelected.accept(projectId, contentTypeBox.getValue());
+            }
+        };
+
+        card.setOnMouseClicked(event -> {
+            if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY
+                    && event.getTarget() instanceof Node target
+                    && !isInsideButton(target, card)) {
+                openDetails.run();
+            }
+        });
+
+        card.setOnKeyPressed(event -> {
+            if (event.getTarget() == card
+                    && (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE)) {
+                openDetails.run();
+                event.consume();
+            }
+        });
+    }
+
+    private static boolean isInsideButton(Node target, Node boundary) {
+        for (Node current = target; current != null && current != boundary; current = current.getParent()) {
+            if (current instanceof ButtonBase) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // =============================================================
@@ -1382,30 +1403,7 @@ public class GlobalModsView extends VBox {
                 "instance-card"
         );
 
-        card.setCursor(
-                javafx.scene.Cursor.HAND
-        );
-
-        card.setOnMouseClicked(
-                event -> {
-
-                    if (event.getButton() ==
-                            javafx.scene.input.MouseButton.PRIMARY) {
-
-                        String projectId =
-                                project.getProjectId();
-
-                        if (projectId != null
-                                && !projectId.isBlank()) {
-
-                            onModSelected.accept(
-                                    projectId,
-                                    contentTypeBox.getValue()
-                            );
-                        }
-                    }
-                }
-        );
+        makeProjectCardInteractive(card, project);
 
         return card;
     }
