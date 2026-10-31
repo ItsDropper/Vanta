@@ -13,6 +13,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -51,7 +52,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
     public StateCenterView() {
         getStyleClass().add("state-center");
-        setPadding(new Insets(32));
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
         setSpacing(20);
 
         PageHeader heading = new PageHeader(
@@ -62,8 +63,10 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         );
 
         VBox heroText = new VBox(5, overallTitle, overallSubtitle);
+        heroText.setMinWidth(0);
         overallTitle.getStyleClass().add("state-hero-title");
         overallSubtitle.getStyleClass().add("state-hero-subtitle");
+        overallSubtitle.setWrapText(true);
 
         progress.setPrefWidth(220);
         progress.setPrefHeight(6);
@@ -72,9 +75,9 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         progressLabel.getStyleClass().add("state-progress-label");
         VBox progressBox = new VBox(6, progressLabel, progress);
 
-        HBox heroRow = new HBox(20, heroText, progressBox);
+        FlowPane heroRow = new FlowPane(20, 12, heroText, progressBox);
         heroRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(heroText, Priority.ALWAYS);
+        heroRow.setMaxWidth(Double.MAX_VALUE);
 
         StackPane hero = new StackPane(heroRow);
         hero.getStyleClass().add("state-hero");
