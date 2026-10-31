@@ -463,8 +463,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                     instance.getDirectory().resolve("icon.png").toUri().toString(),
                     88, 88, true, true
             ));
-            customIcon.setFitWidth(88);
-            customIcon.setFitHeight(88);
+            customIcon.fitWidthProperty().bind(iconFrame.widthProperty().subtract(16));
+            customIcon.fitHeightProperty().bind(iconFrame.heightProperty().subtract(16));
             customIcon.setPreserveRatio(true);
             iconFrame.getChildren().add(customIcon);
         } else {
@@ -473,6 +473,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         VBox information = new VBox(10);
         information.setAlignment(Pos.CENTER_LEFT);
+        information.setMinWidth(0);
         HBox.setHgrow(information, Priority.ALWAYS);
 
         Label eyebrow = new Label("FEATURED INSTANCE");
@@ -480,6 +481,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         Label name = new Label(instance.getName());
         name.getStyleClass().add("home-featured-title");
+        name.setMinWidth(0);
         name.setWrapText(true);
 
         Label metadata = new Label(
@@ -487,6 +489,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                         + "   /   " + instance.getDisplayLoader()
         );
         metadata.getStyleClass().add("home-featured-meta");
+        metadata.setMinWidth(0);
+        metadata.setWrapText(true);
 
         Label playtime = new Label(
                 InstanceUsageManager.formatPlaytime(
