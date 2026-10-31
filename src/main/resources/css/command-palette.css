@@ -85,3 +85,25 @@
     -fx-text-fill: -vanta-subtle;
     -fx-font-size: 9px;
 }
+
+.command-palette-scroll,
+.command-palette-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+.command-palette-scroll {
+    -fx-padding: 0;
+    -fx-max-height: 360px;
+}
+.command-palette-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 0 4px;
+}
+.command-palette-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: -vanta-border;
+    -fx-background-radius: 99px;
+}
+.command-palette-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -vanta-muted;
+}
