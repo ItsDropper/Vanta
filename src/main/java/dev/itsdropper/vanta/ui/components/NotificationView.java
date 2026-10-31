@@ -35,7 +35,8 @@ public class NotificationView extends VBox {
     ) {
 
         setPrefWidth(380);
-        setMaxWidth(380);
+        setMinWidth(0);
+        setMaxWidth(Double.MAX_VALUE);
 
         setPadding(
                 new Insets(16)
@@ -56,6 +57,8 @@ public class NotificationView extends VBox {
                 title
         );
 
+        titleLabel.setWrapText(true);
+        titleLabel.setMaxWidth(Double.MAX_VALUE);
         titleLabel.getStyleClass().add("notification-title");
 
         messageLabel = new Label(
@@ -63,7 +66,7 @@ public class NotificationView extends VBox {
         );
 
         messageLabel.setWrapText(true);
-        messageLabel.setMaxWidth(290);
+        messageLabel.setMaxWidth(Double.MAX_VALUE);
 
         messageLabel.getStyleClass().add("notification-message");
 
