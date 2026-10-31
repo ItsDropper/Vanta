@@ -37,6 +37,12 @@ public final class ServerHistoryManager {
         }
     }
 
+    public static void removeListener(Runnable listener) {
+        if (listener != null) {
+            listeners.remove(listener);
+        }
+    }
+
     public static synchronized void recordConnection(
             Instance instance,
             String host,
