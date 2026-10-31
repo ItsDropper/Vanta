@@ -23,7 +23,10 @@ public record EnvironmentDriftReport(
         LOADER_CHANGED,
         MOD_ADDED,
         MOD_REMOVED,
-        MOD_MODIFIED
+        MOD_MODIFIED,
+        ENVIRONMENT_FILE_ADDED,
+        ENVIRONMENT_FILE_REMOVED,
+        ENVIRONMENT_FILE_MODIFIED
     }
 
     public record Change(
