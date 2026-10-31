@@ -25,6 +25,14 @@ public final class LauncherSettings {
         setBoolean("animationsEnabled", value);
     }
 
+    public static boolean isOverengineeredUiEnabled() {
+        return getBoolean("overengineeredUi", false);
+    }
+
+    public static void setOverengineeredUiEnabled(boolean value) {
+        setBoolean("overengineeredUi", value);
+    }
+
     public static boolean isUpdateChecksEnabled() {
         return getBoolean("updateChecksEnabled", true);
     }
