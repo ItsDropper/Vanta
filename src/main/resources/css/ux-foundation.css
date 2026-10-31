@@ -1052,8 +1052,43 @@
     -fx-background-color: linear-gradient(to right, derive(-vantaaccent, -8%), derive(-vantaaccent, 25%));
     -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -38%), 8, 0.2, 0, 0);
 }
-.overengineered-ui .overengineered-state {
+.overengineered-state {
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 900;
+}
+.overengineered-ui .notification,
+.overengineered-ui .tooltip,
+.overengineered-ui .dialog-pane {
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 22, 0.18, 0, 7);
+}
+.overengineered-ui .settings-navigation,
+.overengineered-ui .settings-compact-navigation,
+.overengineered-ui .instances-toolbar {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantasurface, 8%), -vantasurface);
+    -fx-border-color: derive(-vantaborder, 20%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 15, 0.14, 0, 4);
+}
+.overengineered-ui .accent-picker,
+.overengineered-ui .accent-preset,
+.overengineered-ui .verification-code,
+.overengineered-ui .instance-icon-box,
+.overengineered-ui .mod-icon-box {
+    -fx-background-radius: 11px;
+    -fx-border-radius: 11px;
+    -fx-border-color: derive(-vantaborder, 24%);
+}
+.overengineered-ui .check-box:selected .box {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantaaccent, 18%), -vantaaccent);
+    -fx-border-color: derive(-vantaaccent, 28%);
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -48%), 10, 0.18, 0, 2);
+}
+.overengineered-ui .scroll-bar .thumb {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantamuted, 12%), -vantamuted);
+    -fx-background-radius: 999px;
+}
+.overengineered-ui .scroll-bar .thumb:hover {
+    -fx-background-color: -vantaaccent;
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -45%), 9, 0.18, 0, 0);
 }
