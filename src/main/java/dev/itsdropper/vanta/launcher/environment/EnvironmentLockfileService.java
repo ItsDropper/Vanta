@@ -109,7 +109,11 @@ public final class EnvironmentLockfileService {
             Instance instance,
             EnvironmentLockfile baseline
     ) throws IOException {
+        validateInstance(instance);
         validateLockfile(baseline);
+        if (!baseline.instanceId().equals(instance.getId())) {
+            throw new IOException("The saved environment baseline belongs to a different instance.");
+        }
         EnvironmentLockfile current = capture(instance);
         validateLockfile(current);
         List<EnvironmentDriftReport.Change> changes = new ArrayList<>();
