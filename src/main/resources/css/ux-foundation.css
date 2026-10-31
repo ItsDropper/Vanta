@@ -332,7 +332,7 @@
     -fx-background-radius: 8px;
 }
 .combo-box-base .list-cell, .choice-box .label { -fx-text-fill: -vantatext; }
-.combo-box-popup .list-view, .context-menu, .menu-item {
+.combo-box-popup .list-view, .menu-item {
     -fx-background-color: -vantasurfaceraised;
     -fx-text-fill: -vantatext;
 }
@@ -522,7 +522,7 @@
 }
 
 /* Dialogs, settings controls, content-browser rows and state surfaces. */
-.theme-selector-popup, .combo-box-popup .list-view, .context-menu,
+.theme-selector-popup, .combo-box-popup .list-view,
 .dialog-pane, .dialog-pane.vanta-dialog {
     -fx-background-color: -vantasurface;
     -fx-border-color: -vantaborder;
@@ -780,7 +780,11 @@
 }
 
 /* Final compatibility layer: legacy view styles must obey the active theme. */
-.root, .launcher {
+.root {
+    /* The scene root is a host surface, not a themed content panel. */
+    -fx-background-color: transparent;
+}
+.launcher {
     -fx-background-color: -vantabg;
 }
 .create-label, .create-status, .form-label, .field-label {
@@ -923,4 +927,133 @@
 .sidebar-compact .sidebar-logo {
     -fx-font-size: 22px;
     -fx-alignment: center;
+}
+
+
+/* Popup windows have their own scene roots; use explicit safe fallbacks here
+   rather than unresolved looked-up colors outside the launcher scene graph. */
+.context-menu {
+    -fx-background-color: #151A22;
+    -fx-border-color: #293443;
+    -fx-border-width: 1px;
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+    -fx-padding: 5px;
+}
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 12px;
+}
+.context-menu .menu-item .label {
+    -fx-text-fill: #F4F7FB;
+}
+.context-menu .menu-item:focused,
+.context-menu .menu-item:hover {
+    -fx-background-color: #202936;
+    -fx-background-radius: 6px;
+}
+
+/* Deluxe presentation mode. It is opt-in and scoped to themed launcher roots. */
+.overengineered-ui .sidebar {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantasurface, 7%), -vantasurface 42%, derive(-vantabg, 4%));
+    -fx-border-color: derive(-vantaaccent, -58%), -vantaborder;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.42), 26, 0.22, 0, 9);
+}
+.overengineered-ui .sidebar-logo {
+    -fx-text-fill: linear-gradient(to bottom right, derive(-vantatext, 8%), -vantaaccent);
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -48%), 12, 0.18, 0, 2);
+}
+.overengineered-ui .sidebar-button {
+    -fx-background-radius: 11px;
+    -fx-padding: 11px 12px;
+}
+.overengineered-ui .sidebar-button:hover {
+    -fx-border-color: derive(-vantaaccent, -48%);
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -72%), 12, 0.16, 0, 2);
+}
+.overengineered-ui .sidebar-button-active,
+.overengineered-ui .sidebar-button-active:hover {
+    -fx-background-color: linear-gradient(to right, derive(-vantaaccent, -78%), derive(-vantaaccent, -88%));
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 0 0 0 4px;
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -55%), 15, 0.2, 0, 2);
+}
+.overengineered-ui .title-bar {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantabg, 9%), -vantabg);
+}
+.overengineered-ui .settings-card,
+.overengineered-ui .info-card,
+.overengineered-ui .account-card,
+.overengineered-ui .accounts-card,
+.overengineered-ui .accounts-hero,
+.overengineered-ui .accounts-section,
+.overengineered-ui .instance-card,
+.overengineered-ui .home-info-card,
+.overengineered-ui .home-launch-card,
+.overengineered-ui .home-recent-servers-card,
+.overengineered-ui .state-card,
+.overengineered-ui .state-list-card,
+.overengineered-ui .mod-details-card,
+.overengineered-ui .mod-details-header,
+.overengineered-ui .create-panel,
+.overengineered-ui .instance-settings-card {
+    -fx-background-color: linear-gradient(to bottom right, derive(-vantasurface, 8%), -vantasurface 58%, derive(-vantabg, 5%));
+    -fx-border-color: derive(-vantaborder, 18%);
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.34), 18, 0.16, 0, 6);
+}
+.overengineered-ui .instance-card:hover,
+.overengineered-ui .account-card:hover,
+.overengineered-ui .accounts-card:hover,
+.overengineered-ui .home-info-card:hover,
+.overengineered-ui .state-card:hover {
+    -fx-border-color: derive(-vantaaccent, 5%);
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -62%), 20, 0.18, 0, 5);
+}
+.overengineered-ui .primary-button,
+.overengineered-ui .instance-create-button,
+.overengineered-ui .instance-play-button,
+.overengineered-ui .home-play-button,
+.overengineered-ui .accounts-primary-button {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantaaccent, 18%), -vantaaccent 58%, derive(-vantaaccent, -12%));
+    -fx-border-color: derive(-vantaaccent, 28%);
+    -fx-border-width: 1px;
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -58%), 13, 0.18, 0, 3);
+}
+.overengineered-ui .primary-button:hover,
+.overengineered-ui .instance-create-button:hover,
+.overengineered-ui .instance-play-button:hover,
+.overengineered-ui .home-play-button:hover,
+.overengineered-ui .accounts-primary-button:hover {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantaaccent, 28%), derive(-vantaaccent, 3%));
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -38%), 18, 0.24, 0, 4);
+}
+.overengineered-ui .secondary-button,
+.overengineered-ui .settings-back-button,
+.overengineered-ui .instance-settings-button,
+.overengineered-ui .accounts-secondary-button {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantasurfaceraised, 12%), -vantasurfaceraised);
+    -fx-border-color: derive(-vantaborder, 28%);
+    -fx-border-width: 1px;
+}
+.overengineered-ui .text-field:focused,
+.overengineered-ui .text-area:focused,
+.overengineered-ui .combo-box-base:focused,
+.overengineered-ui .search-field:focused,
+.overengineered-ui .instance-search-field:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -58%), 13, 0.2, 0, 0);
+}
+.overengineered-ui .progress-bar > .bar,
+.overengineered-ui .notification-progress > .bar {
+    -fx-background-color: linear-gradient(to right, derive(-vantaaccent, -8%), derive(-vantaaccent, 25%));
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -38%), 8, 0.2, 0, 0);
+}
+.overengineered-ui .overengineered-state {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
 }
