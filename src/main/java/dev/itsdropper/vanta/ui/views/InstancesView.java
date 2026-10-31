@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.ui.views;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -71,18 +72,15 @@ public class InstancesView extends VBox {
                 "instances-page"
         );
 
-        setPadding(
-                new Insets(
-                        36,
-                        36,
-                        36,
-                        36
-                )
+        paddingProperty().bind(
+                Bindings.createObjectBinding(() -> {
+                    double width = getWidth();
+                    double horizontal = width < 850 ? 20 : width < 1100 ? 28 : 36;
+                    return new Insets(28, horizontal, 24, horizontal);
+                }, widthProperty())
         );
 
-        setSpacing(
-                24
-        );
+        setSpacing(20);
 
         // ---------------------------------------------------------
         // HEADER
@@ -169,6 +167,7 @@ public class InstancesView extends VBox {
         refreshButton.setOnAction(event -> refresh());
 
         HBox searchRow = new HBox(10, searchField, refreshButton);
+        searchRow.getStyleClass().add("instances-toolbar");
         searchRow.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(searchField, Priority.ALWAYS);
         searchField.setMaxWidth(Double.MAX_VALUE);
