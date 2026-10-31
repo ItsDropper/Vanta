@@ -250,7 +250,7 @@ public final class EnvironmentLockfileService {
                         .filter(path -> !Files.isSymbolicLink(path))
                         .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
                         .sorted(Comparator.comparing(
-                                path -> root.relativize(path).toString().replace('\\\\', '/'),
+                                path -> root.relativize(path).toString().replace(java.io.File.separatorChar, '/'),
                                 String.CASE_INSENSITIVE_ORDER
                         ))
                         .toList();
@@ -260,7 +260,7 @@ public final class EnvironmentLockfileService {
                         throw new IOException("Environment contains more than "
                                 + MAX_ENVIRONMENT_FILES + " tracked files; refusing an incomplete baseline.");
                     }
-                    String relativePath = root.relativize(file).toString().replace('\\\\', '/');
+                    String relativePath = root.relativize(file).toString().replace(java.io.File.separatorChar, '/');
                     artifacts.add(new EnvironmentLockfile.EnvironmentArtifact(
                             category,
                             relativePath,
@@ -270,6 +270,10 @@ public final class EnvironmentLockfileService {
                 }
             }
         }
+        artifacts.sort(Comparator
+                .comparing(EnvironmentLockfile.EnvironmentArtifact::category)
+                .thenComparing(EnvironmentLockfile.EnvironmentArtifact::relativePath,
+                        String.CASE_INSENSITIVE_ORDER));
         return List.copyOf(artifacts);
     }
 
@@ -423,7 +427,7 @@ public final class EnvironmentLockfileService {
                     || !ENVIRONMENT_DIRECTORIES.contains(artifact.category())
                     || blank(artifact.relativePath())
                     || artifact.relativePath().startsWith("/")
-                    || artifact.relativePath().contains("\\\\")
+                    || artifact.relativePath().contains("\\")
                     || java.util.Arrays.stream(artifact.relativePath().split("/"))
                             .anyMatch(part -> part.isBlank() || part.equals(".") || part.equals(".."))
                     || artifact.sizeBytes() < 0
