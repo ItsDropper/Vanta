@@ -31,6 +31,7 @@ class EnvironmentLockfileServiceTest {
         assertEquals(EnvironmentLockfile.CURRENT_SCHEMA_VERSION, lockfile.schemaVersion());
         assertEquals("test-instance", lockfile.instanceId());
         assertEquals(1, lockfile.mods().size());
+        assertTrue(lockfile.environmentFiles().isEmpty());
         assertEquals("unmanaged.bin", lockfile.mods().getFirst().filename());
         assertEquals(HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(contents)),
                 lockfile.mods().getFirst().sha256());
@@ -60,6 +61,57 @@ class EnvironmentLockfileServiceTest {
         assertEquals(instance.getLoaderVersion(), loaded.loaderVersion());
         assertTrue(Files.isRegularFile(lockfilePath));
         assertFalse(Files.readString(lockfilePath).contains(instanceDirectory.toAbsolutePath().toString()));
+    }
+
+
+    @Test
+    void capturesResourcePacksShadersAndNestedConfigFilesDeterministically() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("tracked-instance"));
+        Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path resourcepacks = Files.createDirectory(instanceDirectory.resolve("resourcepacks"));
+        Path shaderpacks = Files.createDirectory(instanceDirectory.resolve("shaderpacks"));
+        Path config = Files.createDirectories(instanceDirectory.resolve("config/example"));
+        Files.writeString(resourcepacks.resolve("pack.zip"), "resource-pack");
+        Files.writeString(shaderpacks.resolve("shader.zip"), "shader-pack");
+        Files.writeString(config.resolve("settings.json"), "{\\"enabled\\":true}");
+
+        Instance instance = new Instance(
+                "tracked", "Tracked", "1.21.1", "fabric", "0.16.9", instanceDirectory
+        );
+        EnvironmentLockfile lockfile = new EnvironmentLockfileService().capture(instance);
+
+        assertEquals(3, lockfile.environmentFiles().size());
+        assertEquals(List.of("config", "resourcepacks", "shaderpacks"),
+                lockfile.environmentFiles().stream()
+                        .map(EnvironmentLockfile.EnvironmentArtifact::category)
+                        .toList());
+        assertEquals("example/settings.json", lockfile.environmentFiles().getFirst().relativePath());
+        assertEquals(64, lockfile.environmentFiles().getFirst().sha256().length());
+        assertFalse(lockfile.environmentFiles().stream()
+                .anyMatch(file -> file.relativePath().contains(instanceDirectory.toString())));
+    }
+
+    @Test
+    void rejectsEnvironmentArtifactPathTraversalInSavedLockfile() throws Exception {
+        Path lockfilePath = temporaryDirectory.resolve("traversal.json");
+        Files.writeString(lockfilePath, """
+                {
+                  "schemaVersion": 1,
+                  "generatedAt": "2026-10-31T00:00:00Z",
+                  "instanceId": "test",
+                  "minecraftVersion": "1.21.1",
+                  "loader": "fabric",
+                  "loaderVersion": "0.16.9",
+                  "mods": [],
+                  "environmentFiles": [
+                    {"category":"config","relativePath":"../outside.txt","sizeBytes":1,
+                     "sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+                  ]
+                }
+                """);
+
+        assertThrows(java.io.IOException.class,
+                () -> new EnvironmentLockfileService().read(lockfilePath));
     }
 
     @Test
