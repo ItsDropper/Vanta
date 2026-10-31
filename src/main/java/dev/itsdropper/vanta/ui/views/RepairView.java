@@ -215,9 +215,7 @@ public class RepairView extends VBox {
                         actions
                 );
 
-        content.setPadding(
-                new Insets(36)
-        );
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(content);
 
         content.setFillWidth(
                 true
