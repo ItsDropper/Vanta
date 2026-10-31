@@ -10,6 +10,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -106,15 +107,12 @@ public class ModpackBrowserView extends VBox {
                 event -> onBack.run()
         );
 
-        HBox header = new HBox(
-                16,
-                backButton,
-                headerText
-        );
-
-        header.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        title.setWrapText(true);
+        subtitle.setWrapText(true);
+        headerText.setMinWidth(0);
+        FlowPane header = new FlowPane(16, 8, backButton, headerText);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setMaxWidth(Double.MAX_VALUE);
 
         // =========================================================
         // SEARCH
@@ -125,6 +123,7 @@ public class ModpackBrowserView extends VBox {
         searchField.setPromptText(
                 "Search Modrinth modpacks..."
         );
+        searchField.setMinWidth(0);
 
         searchField.getStyleClass().add(
                 "create-field"
