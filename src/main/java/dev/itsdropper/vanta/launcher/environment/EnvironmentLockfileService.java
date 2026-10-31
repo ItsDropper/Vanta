@@ -102,11 +102,6 @@ public final class EnvironmentLockfileService {
     }
 
     /**
-     * Captures the instance and atomically replaces its local lockfile.
-     * The lockfile is stored under .vanta/ and contains no absolute paths.
-     */
-
-    /**
      * Compares a live instance with a previously captured lockfile.
      * The comparison is read-only and reports only observed drift; it never reconciles files.
      */
@@ -188,6 +183,10 @@ public final class EnvironmentLockfileService {
         return loader + " " + (version == null || version.isBlank() ? "(version unknown)" : version);
     }
 
+    /**
+     * Captures the instance and atomically replaces its local lockfile.
+     * The lockfile is stored under .vanta/ and contains no absolute paths.
+     */
     public Path write(Instance instance) throws IOException {
         EnvironmentLockfile lockfile = capture(instance);
         Path instanceDirectory = instance.getDirectory().toAbsolutePath().normalize();
