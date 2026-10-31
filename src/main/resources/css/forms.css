@@ -65,7 +65,7 @@
 
 
 .create-status {
-    -fx-text-fill: #68717d;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 11px;
 }
 
