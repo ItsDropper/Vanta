@@ -84,7 +84,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         hero.setPadding(new Insets(22));
 
         refreshButton.getStyleClass().add("state-refresh-button");
-        refreshButton.setFocusTraversable(false);
+        refreshButton.setAccessibleText("Scan installed environments now");
         refreshButton.setOnAction(e -> refresh());
 
         Label sectionTitle = new Label("ENVIRONMENTS");
