@@ -73,6 +73,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
     private boolean busy;
     private boolean active;
     private boolean listenerRegistered;
+    private boolean accountStateInitialized;
     private final AccountService.AccountListener accountListener = account ->
             Platform.runLater(() -> {
                 if (active) {
@@ -239,11 +240,14 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         }
         profileRequestGeneration++;
         currentAccountUuid = null;
+        accountStateInitialized = false;
     }
 
     private void onAccountChanged(Account account) {
         String nextUuid = account == null ? null : account.getUuid();
-        if (nextUuid == null ? currentAccountUuid != null : !nextUuid.equals(currentAccountUuid)) {
+        if (!accountStateInitialized
+                || (nextUuid == null ? currentAccountUuid != null : !nextUuid.equals(currentAccountUuid))) {
+            accountStateInitialized = true;
             currentAccountUuid = nextUuid;
             profileRequestGeneration++;
             selectedFile = null;
