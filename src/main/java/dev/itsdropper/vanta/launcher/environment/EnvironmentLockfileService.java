@@ -96,6 +96,7 @@ public final class EnvironmentLockfileService {
                 instance.getMinecraftVersion(),
                 instance.getLoader(),
                 instance.getLoaderVersion(),
+                null,
                 artifacts
         );
     }
@@ -115,6 +116,7 @@ public final class EnvironmentLockfileService {
     ) throws IOException {
         validateLockfile(baseline);
         EnvironmentLockfile current = capture(instance);
+        validateLockfile(current);
         List<EnvironmentDriftReport.Change> changes = new ArrayList<>();
 
         if (!baseline.minecraftVersion().equals(current.minecraftVersion())) {
