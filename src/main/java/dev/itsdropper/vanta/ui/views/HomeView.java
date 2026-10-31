@@ -8,12 +8,13 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.Cursor;
+import javafx.scene.AccessibleRole;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -637,11 +638,21 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         card.getStyleClass().add("home-recent-card");
 
         // The card is a secondary hit target; the explicit button remains primary.
+        card.setAccessibleRole(AccessibleRole.BUTTON);
+        card.setAccessibleText("Launch or close " + instance.getName());
+        card.setFocusTraversable(true);
         card.setOnMouseClicked(event -> {
             if (event.getTarget() == play || play.isHover()) {
                 return;
             }
             launchOrCloseInstance(instance);
+        });
+        card.setOnKeyPressed(event -> {
+            if (event.getTarget() == card
+                    && (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE)) {
+                launchOrCloseInstance(instance);
+                event.consume();
+            }
         });
 
         return card;
@@ -816,50 +827,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         play.setAccessibleText(serverActionDescription);
         play.setTooltip(new Tooltip(serverActionDescription));
 
-        play.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            if (event.getButton() != javafx.scene.input.MouseButton.PRIMARY) {
-                return;
-            }
-
-            event.consume();
-
-            if (instance == null) {
-                return;
-            }
-
-            if (launchService.isRunning(instance)) {
-                launchService.close(instance);
-                return;
-            }
-
-            Thread thread = new Thread(() -> {
-                try {
-                    // Server cards are intentionally different from instance
-                    // cards: they always launch the selected server target.
-                    launchService.launch(
-                            instance,
-                            new ServerTarget(
-                                    server.getHost(),
-                                    server.getPort()
-                            )
-                    );
-                } catch (Exception ex) {
-                    LaunchFailure failure = launchService.getLastFailure();
-
-                    if (failure != null) {
-                        Platform.runLater(() ->
-                                onLaunchFailure.accept(failure)
-                        );
-                    } else {
-                        ex.printStackTrace();
-                    }
-                }
-            });
-
-            thread.setDaemon(true);
-            thread.setName("Vanta-Server-Launch");
-            thread.start();
-        });
+        play.setOnAction(event -> launchServer(instance, server));
 
         AnimationUtils.installInteractiveAnimations(play);
         HBox card = new HBox(14, info, play);
@@ -878,45 +846,53 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         card.setPickOnBounds(true);
         card.setMouseTransparent(false);
 
+        card.setAccessibleRole(AccessibleRole.BUTTON);
+        card.setAccessibleText("Join " + server.getDisplayName()
+                + (instanceAvailable ? " using " + instance.getName() : ", unavailable"));
+        card.setFocusTraversable(instanceAvailable);
         card.setOnMouseClicked(event -> {
-            if (event.getTarget() == play
-                    || instance == null) {
+            if (event.getTarget() == play || instance == null) {
                 return;
             }
-
-            if (launchService.isRunning(instance)) {
-                launchService.close(instance);
-                return;
+            launchServer(instance, server);
+        });
+        card.setOnKeyPressed(event -> {
+            if (event.getTarget() == card && instanceAvailable
+                    && (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE)) {
+                launchServer(instance, server);
+                event.consume();
             }
-
-            Thread thread = new Thread(() -> {
-                try {
-                    launchService.launch(
-                            instance,
-                            new ServerTarget(
-                                    server.getHost(),
-                                    server.getPort()
-                            )
-                    );
-                } catch (Exception ex) {
-                    LaunchFailure failure = launchService.getLastFailure();
-
-                    if (failure != null) {
-                        Platform.runLater(() ->
-                                onLaunchFailure.accept(failure)
-                        );
-                    } else {
-                        ex.printStackTrace();
-                    }
-                }
-            });
-
-            thread.setDaemon(true);
-            thread.setName("Vanta-Server-Launch-Card");
-            thread.start();
         });
 
         return card;
+    }
+
+    private void launchServer(Instance instance, ServerHistoryEntry server) {
+        if (instance == null) {
+            return;
+        }
+        if (launchService.isRunning(instance)) {
+            launchService.close(instance);
+            return;
+        }
+
+        Thread thread = new Thread(() -> {
+            try {
+                launchService.launch(
+                        instance,
+                        new ServerTarget(server.getHost(), server.getPort())
+                );
+            } catch (Exception ex) {
+                LaunchFailure failure = launchService.getLastFailure();
+                if (failure != null) {
+                    Platform.runLater(() -> onLaunchFailure.accept(failure));
+                } else {
+                    ex.printStackTrace();
+                }
+            }
+        }, "Vanta-Server-Launch");
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public void refreshAccount() {
