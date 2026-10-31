@@ -94,6 +94,7 @@ public final class SkinChangerView extends VBox {
         previewCard.setAlignment(Pos.CENTER);
         previewCard.setPadding(new Insets(18, 12, 20, 12));
         previewCard.getStyleClass().add("accounts-hero");
+        modelPreview.setAccessibleText("Interactive 3D preview of the selected Minecraft skin");
         previewCard.setMinWidth(264);
         previewCard.setPrefWidth(300);
         previewCard.setMaxWidth(320);
@@ -147,6 +148,7 @@ public final class SkinChangerView extends VBox {
         Label capeHeading = new Label("Owned capes");
         capeHeading.getStyleClass().add("accounts-card-name");
         capeChoice.setMaxWidth(Double.MAX_VALUE);
+        capeChoice.setAccessibleText("Select an owned Minecraft cape");
         capeChoice.setPromptText("Loading account capes...");
         capeChoice.valueProperty().addListener((observable, oldValue, newValue) -> {
             modelPreview.setCape(newValue == null ? null : newValue.texture());
@@ -154,6 +156,8 @@ public final class SkinChangerView extends VBox {
         });
         applyCapeButton.getStyleClass().add("accounts-primary-button");
         hideCapeButton.getStyleClass().add("accounts-card-use");
+        applyCapeButton.setAccessibleText("Apply the selected cape to the Minecraft profile");
+        hideCapeButton.setAccessibleText("Hide the currently applied cape");
         applyCapeButton.setOnAction(event -> applySelectedCape());
         hideCapeButton.setOnAction(event -> hideCape());
         FlowPane capeActions = new FlowPane(10, 8, applyCapeButton, hideCapeButton);
@@ -168,6 +172,8 @@ public final class SkinChangerView extends VBox {
 
         chooseButton.getStyleClass().add("accounts-card-use");
         uploadButton.getStyleClass().add("accounts-primary-button");
+        chooseButton.setAccessibleText("Choose a Minecraft skin PNG file");
+        uploadButton.setAccessibleText("Upload the selected skin to the signed-in Minecraft profile");
         chooseButton.setOnAction(event -> chooseSkin());
         uploadButton.setOnAction(event -> uploadSkin());
 
