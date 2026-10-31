@@ -3,13 +3,13 @@
 }
 
 .create-section-title {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
 
 .create-label {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
@@ -18,15 +18,15 @@
 .create-field,
 .text-area,
 .create-combo {
-    -fx-background-color: -vanta-bg;
+    -fx-background-color: -vantabg;
     -fx-background-radius: 8px;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: -vanta-text;
-    -fx-prompt-text-fill: -vanta-muted;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantamuted;
 }
 
 .create-field {
@@ -37,35 +37,35 @@
 .create-field:hover,
 .text-area:hover,
 .create-combo:hover {
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
 }
 
 .create-field:focused,
 .text-area:focused,
 .create-combo:focused {
-    -fx-background-color: -vanta-surface;
-    -fx-border-color: -vanta-accent;
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaaccent;
 }
 
 
 .create-combo .list-cell {
-    -fx-background-color: -vanta-surface-raised;
-    -fx-text-fill: -vanta-text;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 13px;
 }
 
 .create-combo .list-cell:hover,
 .create-combo .list-cell:filled:selected {
-    -fx-background-color: -vanta-accent-soft;
+    -fx-background-color: -vantaaccentsoft;
 }
 
 .create-combo .arrow {
-    -fx-background-color: -vanta-muted;
+    -fx-background-color: -vantamuted;
 }
 
 
 .create-status {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
 }
 
@@ -73,28 +73,28 @@
 /* Text area */
 
 .text-area {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 
 .text-area .content {
-    -fx-background-color: -vanta-bg;
+    -fx-background-color: -vantabg;
 }
 
 .text-area:focused .content {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
 }
 
 
 /* Slider */
 
 .slider .track {
-    -fx-background-color: -vanta-border;
+    -fx-background-color: -vantaborder;
     -fx-background-radius: 4px;
     -fx-pref-height: 6px;
 }
 
 .slider .thumb {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-background-radius: 50%;
 
     -fx-pref-width: 16px;
@@ -102,5 +102,5 @@
 }
 
 .slider .thumb:hover {
-    -fx-background-color: -vanta-accent-hover;
+    -fx-background-color: -vantaaccenthover;
 }
