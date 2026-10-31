@@ -50,7 +50,7 @@ public final class PageHeader extends HBox {
             actionGroup.setMaxWidth(Double.MAX_VALUE);
             actionGroup.getStyleClass().add("page-header-actions");
 
-            VBox compactLayout = new VBox(10, copy, actionGroup);
+            VBox compactLayout = new VBox(10);
             compactLayout.setFillWidth(true);
             compactLayout.setMinWidth(0);
             compactLayout.setMaxWidth(Double.MAX_VALUE);
