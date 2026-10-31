@@ -14,8 +14,8 @@ import dev.itsdropper.vanta.ui.ThemeManager;
 
 public class Main extends Application {
 
-    private static final double WINDOW_WIDTH = 1180;
-    private static final double WINDOW_HEIGHT = 760;
+    private static final double WINDOW_WIDTH = 1440;
+    private static final double WINDOW_HEIGHT = 900;
     private static final long MINIMUM_LOADING_MS = 520;
 
     @Override
@@ -43,8 +43,8 @@ public class Main extends Application {
         scene.getStylesheets().add(loadingCss.toExternalForm());
 
         stage.setTitle("Vanta");
-        stage.setMinWidth(1024);
-        stage.setMinHeight(680);
+        stage.setMinWidth(1180);
+        stage.setMinHeight(760);
         stage.setScene(scene);
         stage.show();
 
