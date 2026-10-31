@@ -1,10 +1,10 @@
 .primary-button,
 .instance-create-button,
 .instance-play-button {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-background-radius: 8px;
 
-    -fx-text-fill: -vanta-bg;
+    -fx-text-fill: -vantabg;
 
     -fx-font-size: 11px;
     -fx-font-weight: 800;
@@ -23,13 +23,13 @@
 .primary-button:hover,
 .instance-create-button:hover,
 .instance-play-button:hover {
-    -fx-background-color: -vanta-accent-hover;
+    -fx-background-color: -vantaaccenthover;
 }
 
 .primary-button:pressed,
 .instance-create-button:pressed,
 .instance-play-button:pressed {
-    -fx-background-color: -vanta-accent-hover;
+    -fx-background-color: -vantaaccenthover;
 }
 
 .primary-button:disabled,
@@ -43,15 +43,15 @@
    ============================================================= */
 
 .instance-play-button.instance-playing-button {
-    -fx-background-color: derive(-vanta-danger, -82%);
+    -fx-background-color: derive(-vantadanger, -82%);
 
     -fx-background-radius: 8px;
 
-    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-border-color: derive(-vantadanger, -45%);
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
 
     -fx-font-size: 11px;
     -fx-font-weight: 800;
@@ -72,19 +72,19 @@
 }
 
 .instance-play-button.instance-playing-button:hover {
-    -fx-background-color: derive(-vanta-danger, -70%);
+    -fx-background-color: derive(-vantadanger, -70%);
 
-    -fx-border-color: -vanta-danger;
+    -fx-border-color: -vantadanger;
 
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
 }
 
 .instance-play-button.instance-playing-button:pressed {
-    -fx-background-color: derive(-vanta-danger, -70%);
+    -fx-background-color: derive(-vantadanger, -70%);
 
-    -fx-border-color: -vanta-danger;
+    -fx-border-color: -vantadanger;
 
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
 }
 
 .instance-play-button.instance-playing-button:disabled {
@@ -99,14 +99,14 @@
 .secondary-button,
 .settings-back-button,
 .instance-settings-button {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 8px;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -121,17 +121,17 @@
 .secondary-button:hover,
 .settings-back-button:hover,
 .instance-settings-button:hover {
-    -fx-background-color: -vanta-surface-hover;
+    -fx-background-color: -vantasurfacehover;
 
-    -fx-border-color: derive(-vanta-border, 20%);
+    -fx-border-color: derive(-vantaborder, 20%);
 
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
 }
 
 .secondary-button:pressed,
 .settings-back-button:pressed,
 .instance-settings-button:pressed {
-    -fx-background-color: -vanta-border;
+    -fx-background-color: -vantaborder;
 }
 
 .instance-settings-button {
@@ -153,14 +153,14 @@
    ============================================================= */
 
 .danger-button {
-    -fx-background-color: derive(-vanta-danger, -82%);
+    -fx-background-color: derive(-vantadanger, -82%);
     -fx-background-radius: 8px;
 
-    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-border-color: derive(-vantadanger, -45%);
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -173,19 +173,19 @@
 }
 
 .danger-button:hover {
-    -fx-background-color: derive(-vanta-danger, -70%);
+    -fx-background-color: derive(-vantadanger, -70%);
 
-    -fx-border-color: -vanta-danger;
+    -fx-border-color: -vantadanger;
 
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
 }
 
 .danger-button:pressed {
-    -fx-background-color: derive(-vanta-danger, -70%);
+    -fx-background-color: derive(-vantadanger, -70%);
 
-    -fx-border-color: -vanta-danger;
+    -fx-border-color: -vantadanger;
 
-    -fx-text-fill: -vanta-danger;
+    -fx-text-fill: -vantadanger;
 }
 
 .danger-button:disabled {
@@ -201,21 +201,21 @@
     -fx-min-height: 5px;
     -fx-max-height: 5px;
 
-    -fx-background-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurfaceraised;
     -fx-background-radius: 3px;
 
-    -fx-control-inner-background: -vanta-surface-raised;
+    -fx-control-inner-background: -vantasurfaceraised;
 }
 
 .notification-progress > .bar {
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-background-radius: 3px;
     -fx-background-insets: 0;
     -fx-padding: 0;
 }
 
 .notification-progress > .track {
-    -fx-background-color: -vanta-surface-raised;
+    -fx-background-color: -vantasurfaceraised;
     -fx-background-radius: 3px;
     -fx-background-insets: 0;
 }
