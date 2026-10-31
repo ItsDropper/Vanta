@@ -38,6 +38,8 @@ public final class SkinModel3D extends StackPane {
     private final Group player = new Group();
     private final java.util.EnumMap<Layer, Group> layerGroups =
             new java.util.EnumMap<>(Layer.class);
+    private final java.util.EnumMap<Layer, Boolean> layerVisibility =
+            new java.util.EnumMap<>(Layer.class);
     private final Rotate yaw = new Rotate(-22, Rotate.Y_AXIS);
     private final Rotate pitch = new Rotate(-8, Rotate.X_AXIS);
     private Image skin;
@@ -46,6 +48,9 @@ public final class SkinModel3D extends StackPane {
     private int atlasHeight = 64;
 
     public SkinModel3D() {
+        for (Layer layer : Layer.values()) {
+            layerVisibility.put(layer, true);
+        }
         setMinSize(240, 300);
         setPrefSize(280, 340);
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -107,6 +112,20 @@ public final class SkinModel3D extends StackPane {
             this.slimArms = slimArms;
             rebuild();
         }
+    }
+
+    /** Enables or disables an outer layer without rebuilding the player mesh. */
+    public void setLayerVisible(Layer layer, boolean visible) {
+        layerVisibility.put(layer, visible);
+        Group group = layerGroups.get(layer);
+        if (group != null) {
+            group.setVisible(visible);
+            group.setManaged(visible);
+        }
+    }
+
+    public boolean isLayerVisible(Layer layer) {
+        return layerVisibility.getOrDefault(layer, true);
     }
 
     private void rebuild() {
@@ -349,7 +368,9 @@ public final class SkinModel3D extends StackPane {
                              Uv front, Uv back, Uv right, Uv left, Uv top, Uv bottom) {
         Group group = layerGroups.computeIfAbsent(layer, key -> {
             Group created = new Group();
-            created.setVisible(true);
+            boolean visible = layerVisibility.getOrDefault(key, true);
+            created.setVisible(visible);
+            created.setManaged(visible);
             player.getChildren().add(created);
             return created;
         });
