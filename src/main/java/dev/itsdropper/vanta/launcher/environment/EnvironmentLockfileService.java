@@ -242,7 +242,9 @@ public final class EnvironmentLockfileService {
      */
     public boolean hasBaseline(Instance instance) {
         Path path = getLockfilePath(instance);
-        return !Files.isSymbolicLink(path)
+        Path metadataDirectory = path.getParent();
+        return !Files.isSymbolicLink(metadataDirectory)
+                && !Files.isSymbolicLink(path)
                 && Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS);
     }
 
@@ -250,7 +252,11 @@ public final class EnvironmentLockfileService {
      * Reads the saved baseline belonging to an instance.
      */
     public EnvironmentLockfile readBaseline(Instance instance) throws IOException {
-        return read(getLockfilePath(instance));
+        Path path = getLockfilePath(instance);
+        if (Files.isSymbolicLink(path.getParent())) {
+            throw new IOException("Refusing to read an environment baseline through a symbolic-link metadata directory.");
+        }
+        return read(path);
     }
 
     public EnvironmentLockfile read(Path lockfilePath) throws IOException {
