@@ -186,6 +186,7 @@ public class InstancesView extends VBox {
         });
 
         sortField = new ComboBox<>();
+        sortField.getStyleClass().add("instance-sort-field");
         sortField.getItems().setAll("Name (A–Z)", "Minecraft version", "Loader");
         sortField.setValue("Name (A–Z)");
         sortField.setPromptText("Sort instances");
