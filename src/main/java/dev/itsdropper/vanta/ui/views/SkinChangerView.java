@@ -7,6 +7,7 @@ import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.launcher.service.AccountSkinService;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -84,7 +85,11 @@ public final class SkinChangerView extends VBox {
                 "accounts-subtitle"
         );
         header.getStyleClass().add("accounts-header");
-        header.setPadding(new Insets(30, 38, 0, 38));
+        header.paddingProperty().bind(Bindings.createObjectBinding(() -> {
+            double horizontal = header.getWidth() < 600 ? 16
+                    : header.getWidth() < 900 ? 24 : 38;
+            return new Insets(30, horizontal, 0, horizontal);
+        }, header.widthProperty()));
 
         VBox previewCard = new VBox(10);
         previewCard.setAlignment(Pos.CENTER);
@@ -92,6 +97,7 @@ public final class SkinChangerView extends VBox {
         previewCard.getStyleClass().add("accounts-hero");
         previewCard.setMinWidth(280);
         previewCard.setPrefWidth(320);
+        previewCard.setMaxWidth(320);
         Label previewHeading = new Label("Player preview");
         previewHeading.getStyleClass().add("accounts-card-name");
         Label rotateHint = new Label("Drag to rotate · Scroll to zoom");
@@ -101,6 +107,8 @@ public final class SkinChangerView extends VBox {
         VBox controls = new VBox(14);
         controls.setPadding(new Insets(24));
         controls.getStyleClass().add("accounts-hero");
+        controls.setMinWidth(0);
+        controls.setPrefWidth(420);
         controls.setMaxWidth(Double.MAX_VALUE);
 
         Label accountHeading = new Label("Minecraft account");
@@ -149,8 +157,9 @@ public final class SkinChangerView extends VBox {
         hideCapeButton.getStyleClass().add("accounts-card-use");
         applyCapeButton.setOnAction(event -> applySelectedCape());
         hideCapeButton.setOnAction(event -> hideCape());
-        HBox capeActions = new HBox(10, applyCapeButton, hideCapeButton);
+        FlowPane capeActions = new FlowPane(10, 8, applyCapeButton, hideCapeButton);
         capeActions.setAlignment(Pos.CENTER_LEFT);
+        capeActions.setMaxWidth(Double.MAX_VALUE);
 
         Label formatHint = new Label(
                 "Choose Classic or Slim first, then select a 64×64 or legacy 64×32 PNG. Selecting a file uploads it to your signed-in Minecraft Java profile immediately."
@@ -163,8 +172,9 @@ public final class SkinChangerView extends VBox {
         chooseButton.setOnAction(event -> chooseSkin());
         uploadButton.setOnAction(event -> uploadSkin());
 
-        HBox actions = new HBox(10, chooseButton, uploadButton);
+        FlowPane actions = new FlowPane(10, 8, chooseButton, uploadButton);
         actions.setAlignment(Pos.CENTER_LEFT);
+        actions.setMaxWidth(Double.MAX_VALUE);
 
         statusLabel.setWrapText(true);
         statusLabel.getStyleClass().add("accounts-subtitle");
@@ -176,11 +186,14 @@ public final class SkinChangerView extends VBox {
                 capeHeading, capeChoice, capeActions,
                 formatHint, actions, statusLabel
         );
-        HBox.setHgrow(controls, Priority.ALWAYS);
-
-        HBox body = new HBox(20, previewCard, controls);
-        body.setAlignment(Pos.TOP_LEFT);
-        body.setPadding(new Insets(24, 38, 36, 38));
+        FlowPane body = new FlowPane(20, 20, previewCard, controls);
+        body.setAlignment(Pos.TOP_CENTER);
+        body.setMaxWidth(Double.MAX_VALUE);
+        body.paddingProperty().bind(Bindings.createObjectBinding(() -> {
+            double horizontal = body.getWidth() < 600 ? 16
+                    : body.getWidth() < 900 ? 24 : 38;
+            return new Insets(24, horizontal, 36, horizontal);
+        }, body.widthProperty()));
 
         ScrollPane scroll = new ScrollPane(new VBox(header, body));
         scroll.setFitToWidth(true);
