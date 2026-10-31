@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -44,13 +45,13 @@ public class OnboardingView extends BorderPane {
         this.onCreateInstance = onCreateInstance;
 
         getStyleClass().add("onboarding-page");
-        setMinWidth(700);
+        setMinWidth(0);
         setPrefWidth(820);
         setMaxWidth(900);
-        setMinHeight(500);
+        setMinHeight(0);
         setPrefHeight(560);
         setMaxHeight(620);
-        setPadding(new Insets(36));
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
         Label logo = new Label("VANTA");
         logo.getStyleClass().add("onboarding-logo");
@@ -63,7 +64,14 @@ public class OnboardingView extends BorderPane {
         setTop(top);
 
         pageContainer.getStyleClass().add("onboarding-content");
-        setCenter(pageContainer);
+        pageContainer.setMinWidth(0);
+        pageContainer.setMaxWidth(Double.MAX_VALUE);
+        ScrollPane onboardingScroll = new ScrollPane(pageContainer);
+        onboardingScroll.setFitToWidth(true);
+        onboardingScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        onboardingScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        onboardingScroll.getStyleClass().add("onboarding-scroll");
+        setCenter(onboardingScroll);
 
         Label hint = new Label(
                 "You can change everything later in Settings."
