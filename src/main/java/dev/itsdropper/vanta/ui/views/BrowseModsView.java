@@ -153,6 +153,7 @@ public class BrowseModsView extends VBox {
         searchButton.getStyleClass().add(
                 "primary-button"
         );
+        searchButton.setAccessibleText("Search mods for this instance");
 
         searchButton.setOnAction(
                 event ->
