@@ -6,13 +6,17 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 public class NotificationView extends VBox {
 
+    private static final int MAX_TITLE_LENGTH = 72;
+    private static final int MAX_MESSAGE_LENGTH = 96;
 
     public enum Type {
         PROGRESS,
@@ -33,142 +37,83 @@ public class NotificationView extends VBox {
             Type type,
             Runnable onClose
     ) {
-
-        setPrefWidth(380);
+        setPrefWidth(360);
         setMinWidth(0);
         setMaxWidth(Double.MAX_VALUE);
-
-        setPadding(
-                new Insets(16)
-        );
-
-        setSpacing(10);
-
+        setPadding(new Insets(9, 12, 9, 12));
+        setSpacing(6);
+        setFillWidth(true);
         setMouseTransparent(false);
-
         getStyleClass().add("notification");
 
-        accent = new Rectangle(4, 44);
-        accent.setArcWidth(4);
-        accent.setArcHeight(4);
+        accent = new Rectangle(3, 30);
+        accent.setArcWidth(3);
+        accent.setArcHeight(3);
         accent.getStyleClass().addAll("notification-accent", "notification-accent-progress");
 
-        titleLabel = new Label(
-                title
-        );
-
-        titleLabel.setWrapText(true);
+        titleLabel = new Label();
+        titleLabel.setWrapText(false);
         titleLabel.setMaxWidth(Double.MAX_VALUE);
         titleLabel.getStyleClass().add("notification-title");
+        HBox.setHgrow(titleLabel, Priority.ALWAYS);
+        setDisplayText(titleLabel, title, MAX_TITLE_LENGTH);
 
-        messageLabel = new Label(
-                message
-        );
-
+        messageLabel = new Label();
         messageLabel.setWrapText(true);
         messageLabel.setMaxWidth(Double.MAX_VALUE);
-
+        messageLabel.setMinHeight(0);
+        messageLabel.setMaxHeight(32);
         messageLabel.getStyleClass().add("notification-message");
+        setDisplayText(messageLabel, message, MAX_MESSAGE_LENGTH);
 
-        progressIndicator =
-                new ProgressIndicator();
+        progressIndicator = new ProgressIndicator();
+        progressIndicator.setPrefSize(16, 16);
+        progressIndicator.setMinSize(16, 16);
+        progressIndicator.setMaxSize(16, 16);
 
-        progressIndicator.setPrefSize(
-                22,
-                22
-        );
+        progressBar = new ProgressBar(0);
+        progressBar.getStyleClass().add("notification-progress");
+        progressBar.setMaxWidth(Double.MAX_VALUE);
+        progressBar.setMinHeight(4);
+        progressBar.setPrefHeight(4);
+        progressBar.setMaxHeight(4);
 
-        progressIndicator.setMaxSize(
-                22,
-                22
-        );
-
-        progressBar =
-                new ProgressBar(0);
-
-        progressBar.getStyleClass().add(
-                "notification-progress"
-        );
-
-        progressBar.setMaxWidth(
-                Double.MAX_VALUE
-        );
-
-        progressBar.setPrefHeight(
-                5
-        );
-
-        progressBar.setMinHeight(
-                5
-        );
-
-        progressBar.setMaxHeight(
-                5
-        );
-
-
-        closeButton =
-                new Button("×");
-
-        closeButton.setPrefSize(
-                28,
-                28
-        );
-
-        closeButton.setMinSize(
-                28,
-                28
-        );
-
-        closeButton.setMaxSize(
-                28,
-                28
-        );
-
+        closeButton = new Button("×");
+        closeButton.setPrefSize(22, 22);
+        closeButton.setMinSize(22, 22);
+        closeButton.setMaxSize(22, 22);
         closeButton.getStyleClass().add("notification-close");
         closeButton.setAccessibleText("Dismiss notification");
-        closeButton.setTooltip(new javafx.scene.control.Tooltip("Dismiss"));
-
+        closeButton.setTooltip(new Tooltip("Dismiss"));
         closeButton.setOnAction(event -> {
-
             if (onClose != null) {
                 onClose.run();
             }
         });
 
-        VBox text =
-                new VBox(3);
+        VBox text = new VBox(2, titleLabel, messageLabel);
+        text.setMinWidth(0);
+        text.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(text, Priority.ALWAYS);
 
-        text.getChildren().addAll(
-                titleLabel,
-                messageLabel
-        );
+        HBox header = new HBox(8);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setMinWidth(0);
+        header.getChildren().addAll(accent, text, progressIndicator, closeButton);
 
-        HBox.setHgrow(
-                text,
-                Priority.ALWAYS
-        );
-
-        HBox header =
-                new HBox(10);
-
-        header.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        header.getChildren().addAll(
-                accent,
-                text,
-                progressIndicator,
-                closeButton
-        );
-
-        getChildren().addAll(
-                header,
-                progressBar
-        );
-
+        getChildren().addAll(header, progressBar);
         setType(type);
+    }
+
+    private static void setDisplayText(Label label, String value, int maxLength) {
+        String fullText = value == null ? "" : value.strip();
+        boolean truncated = fullText.length() > maxLength;
+        String visibleText = truncated
+                ? fullText.substring(0, maxLength - 1).stripTrailing() + "…"
+                : fullText;
+
+        label.setText(visibleText);
+        label.setTooltip(truncated ? new Tooltip(fullText) : null);
     }
 
     private void setAccentStyle(String styleClass) {
@@ -180,131 +125,47 @@ public class NotificationView extends VBox {
         accent.getStyleClass().add(styleClass);
     }
 
-    public void setTitle(
-            String title
-    ) {
-
-        titleLabel.setText(
-                title
-        );
+    public void setTitle(String title) {
+        setDisplayText(titleLabel, title, MAX_TITLE_LENGTH);
     }
 
-    public void setMessage(
-            String message
-    ) {
-
-        messageLabel.setText(
-                message
-        );
+    public void setMessage(String message) {
+        setDisplayText(messageLabel, message, MAX_MESSAGE_LENGTH);
     }
 
-    public void setProgress(
-            double progress
-    ) {
-
-        progressBar.setProgress(
-                Math.max(
-                        0,
-                        Math.min(
-                                1,
-                                progress
-                        )
-                )
-        );
+    public void setProgress(double progress) {
+        progressBar.setProgress(Math.max(0, Math.min(1, progress)));
     }
 
-    public void setType(
-            Type type
-    ) {
-
+    public void setType(Type type) {
         switch (type) {
-
             case PROGRESS -> {
-
-                progressIndicator.setVisible(
-                        true
-                );
-
-                progressIndicator.setManaged(
-                        true
-                );
-
-                progressBar.setVisible(
-                        true
-                );
-
-                progressBar.setManaged(
-                        true
-                );
-
-                closeButton.setVisible(
-                        false
-                );
-
-                closeButton.setManaged(
-                        false
-                );
-
+                progressIndicator.setVisible(true);
+                progressIndicator.setManaged(true);
+                progressBar.setVisible(true);
+                progressBar.setManaged(true);
+                closeButton.setVisible(false);
+                closeButton.setManaged(false);
                 setAccentStyle("notification-accent-progress");
                 messageLabel.getStyleClass().remove("notification-message-error");
             }
-
             case SUCCESS -> {
-
-                progressIndicator.setVisible(
-                        false
-                );
-
-                progressIndicator.setManaged(
-                        false
-                );
-
-                progressBar.setVisible(
-                        false
-                );
-
-                progressBar.setManaged(
-                        false
-                );
-
-                closeButton.setVisible(
-                        false
-                );
-
-                closeButton.setManaged(
-                        false
-                );
-
+                progressIndicator.setVisible(false);
+                progressIndicator.setManaged(false);
+                progressBar.setVisible(false);
+                progressBar.setManaged(false);
+                closeButton.setVisible(false);
+                closeButton.setManaged(false);
                 setAccentStyle("notification-accent-success");
                 messageLabel.getStyleClass().remove("notification-message-error");
             }
-
             case ERROR -> {
-
-                progressIndicator.setVisible(
-                        false
-                );
-
-                progressIndicator.setManaged(
-                        false
-                );
-
-                progressBar.setVisible(
-                        false
-                );
-
-                progressBar.setManaged(
-                        false
-                );
-
-                closeButton.setVisible(
-                        true
-                );
-
-                closeButton.setManaged(
-                        true
-                );
-
+                progressIndicator.setVisible(false);
+                progressIndicator.setManaged(false);
+                progressBar.setVisible(false);
+                progressBar.setManaged(false);
+                closeButton.setVisible(true);
+                closeButton.setManaged(true);
                 setAccentStyle("notification-accent-error");
                 if (!messageLabel.getStyleClass().contains("notification-message-error")) {
                     messageLabel.getStyleClass().add("notification-message-error");
@@ -312,6 +173,4 @@ public class NotificationView extends VBox {
             }
         }
     }
-
-
 }
