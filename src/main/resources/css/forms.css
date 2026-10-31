@@ -3,13 +3,13 @@
 }
 
 .create-section-title {
-    -fx-text-fill: #89c78e;
+    -fx-text-fill: -vanta-accent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
 
 .create-label {
-    -fx-text-fill: #aeb5bf;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
@@ -18,15 +18,15 @@
 .create-field,
 .text-area,
 .create-combo {
-    -fx-background-color: #0d100d;
+    -fx-background-color: -vanta-bg;
     -fx-background-radius: 8px;
 
-    -fx-border-color: #353b35;
+    -fx-border-color: -vanta-border;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: #f2f5f2;
-    -fx-prompt-text-fill: #747d75;
+    -fx-text-fill: -vanta-text;
+    -fx-prompt-text-fill: -vanta-muted;
 }
 
 .create-field {
@@ -37,30 +37,30 @@
 .create-field:hover,
 .text-area:hover,
 .create-combo:hover {
-    -fx-border-color: #59635a;
+    -fx-border-color: -vanta-border;
 }
 
 .create-field:focused,
 .text-area:focused,
 .create-combo:focused {
-    -fx-background-color: #111511;
-    -fx-border-color: #7bdc80;
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-accent;
 }
 
 
 .create-combo .list-cell {
-    -fx-background-color: #171c17;
-    -fx-text-fill: #e6ece6;
+    -fx-background-color: -vanta-surface-raised;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 13px;
 }
 
 .create-combo .list-cell:hover,
 .create-combo .list-cell:filled:selected {
-    -fx-background-color: #243125;
+    -fx-background-color: -vanta-accent-soft;
 }
 
 .create-combo .arrow {
-    -fx-background-color: #7d877d;
+    -fx-background-color: -vanta-muted;
 }
 
 
@@ -73,28 +73,28 @@
 /* Text area */
 
 .text-area {
-    -fx-text-fill: #f2f4f8;
+    -fx-text-fill: -vanta-text;
 }
 
 .text-area .content {
-    -fx-background-color: #0d100d;
+    -fx-background-color: -vanta-bg;
 }
 
 .text-area:focused .content {
-    -fx-background-color: #111511;
+    -fx-background-color: -vanta-surface;
 }
 
 
 /* Slider */
 
 .slider .track {
-    -fx-background-color: #303a31;
+    -fx-background-color: -vanta-border;
     -fx-background-radius: 4px;
     -fx-pref-height: 6px;
 }
 
 .slider .thumb {
-    -fx-background-color: #79d67e;
+    -fx-background-color: -vanta-accent;
     -fx-background-radius: 50%;
 
     -fx-pref-width: 16px;
@@ -102,5 +102,5 @@
 }
 
 .slider .thumb:hover {
-    -fx-background-color: #91e994;
+    -fx-background-color: -vanta-accent-hover;
 }
