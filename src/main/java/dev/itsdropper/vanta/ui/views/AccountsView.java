@@ -346,12 +346,18 @@ public class AccountsView extends VBox {
         headFrame.getChildren().addAll(head, placeholder);
 
         VBox identity = new VBox(3);
+        identity.setMinWidth(0);
+        HBox.setHgrow(identity, Priority.ALWAYS);
 
         Label name = new Label(account.getUsername());
         name.getStyleClass().add("accounts-card-name");
+        name.setMinWidth(0);
+        name.setWrapText(true);
 
         Label uuid = new Label(account.getUuid());
         uuid.getStyleClass().add("accounts-card-uuid");
+        uuid.setMinWidth(0);
+        uuid.setWrapText(true);
 
         identity.getChildren().addAll(name, uuid);
 
