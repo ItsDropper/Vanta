@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.ui.components;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -41,6 +42,7 @@ public final class CommandPalette extends StackPane {
     private final Label emptyState = new Label("No matching commands");
     private final List<Command> visibleCommands = new ArrayList<>();
     private int selectedIndex;
+    private Node previousFocusOwner;
 
     public CommandPalette(List<Command> commands) {
         this.commands = List.copyOf(Objects.requireNonNull(commands, "commands"));
@@ -91,9 +93,11 @@ public final class CommandPalette extends StackPane {
         VBox panel = new VBox(14, eyebrow, title, searchField, resultScroll, footer);
         panel.getStyleClass().add("command-palette-panel");
         panel.setPadding(new Insets(22));
+        panel.setMinWidth(0);
         panel.setMaxWidth(620);
-        panel.setPrefWidth(620);
+        panel.prefWidthProperty().bind(widthProperty().subtract(48).min(620));
         panel.setMaxHeight(560);
+        VBox.setVgrow(resultScroll, Priority.ALWAYS);
         StackPane.setAlignment(panel, Pos.TOP_CENTER);
         StackPane.setMargin(panel, new Insets(88, 24, 24, 24));
 
@@ -142,6 +146,7 @@ public final class CommandPalette extends StackPane {
     }
 
     public void show() {
+        previousFocusOwner = getScene() == null ? null : getScene().getFocusOwner();
         setManaged(true);
         setVisible(true);
         setOpacity(1.0);
@@ -151,8 +156,21 @@ public final class CommandPalette extends StackPane {
     }
 
     public void hide() {
+        hide(true);
+    }
+
+    private void hide(boolean restoreFocus) {
         setVisible(false);
         setManaged(false);
+        Node focusTarget = previousFocusOwner;
+        previousFocusOwner = null;
+        if (restoreFocus && focusTarget != null) {
+            Platform.runLater(() -> {
+                if (focusTarget.getScene() != null && focusTarget.isVisible() && !focusTarget.isDisabled()) {
+                    focusTarget.requestFocus();
+                }
+            });
+        }
     }
 
     public boolean isShowing() {
@@ -243,7 +261,7 @@ public final class CommandPalette extends StackPane {
     }
 
     private void execute(Command command) {
-        hide();
+        hide(false);
         command.action().run();
     }
 }
