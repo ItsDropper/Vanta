@@ -54,6 +54,7 @@ public class NotificationView extends VBox {
 
         titleLabel = new Label();
         titleLabel.setWrapText(false);
+        titleLabel.setMinWidth(0);
         titleLabel.setMaxWidth(Double.MAX_VALUE);
         titleLabel.getStyleClass().add("notification-title");
         HBox.setHgrow(titleLabel, Priority.ALWAYS);
@@ -61,6 +62,7 @@ public class NotificationView extends VBox {
 
         messageLabel = new Label();
         messageLabel.setWrapText(true);
+        messageLabel.setMinWidth(0);
         messageLabel.setMaxWidth(Double.MAX_VALUE);
         messageLabel.setMinHeight(0);
         messageLabel.setMaxHeight(32);
