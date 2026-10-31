@@ -488,7 +488,38 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         });
         customColors.getChildren().add(resetPalette);
 
-        content.getChildren().addAll(themeCard, accentCard, presetsCard, customColors, reset);
+
+        VBox presentationCard = card(
+                "Overengineered UI",
+                "Turn on the deluxe presentation layer across Vanta: richer surfaces, stronger depth, sharper active states and more expressive controls. This is purely visual."
+        );
+        CheckBox overengineeredToggle = new CheckBox("Overengineered UI");
+        overengineeredToggle.setSelected(LauncherSettings.isOverengineeredUiEnabled());
+        overengineeredToggle.setAccessibleText("Enable or disable the overengineered user interface");
+        Label presentationState = new Label(
+                overengineeredToggle.isSelected() ? "ON  ·  DELUXE PRESENTATION" : "OFF  ·  STANDARD PRESENTATION"
+        );
+        presentationState.getStyleClass().add("overengineered-state");
+        overengineeredToggle.selectedProperty().addListener((observable, wasEnabled, enabled) -> {
+            LauncherSettings.setOverengineeredUiEnabled(enabled);
+            presentationState.setText(enabled
+                    ? "ON  ·  DELUXE PRESENTATION"
+                    : "OFF  ·  STANDARD PRESENTATION");
+            applyAccent(accentColor);
+            onAccentChanged.accept(accentColor);
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.success(
+                        enabled ? "Deluxe presentation enabled" : "Standard presentation restored",
+                        enabled ? "The overengineered visual layer is now active." : "Vanta is using its standard appearance."
+                );
+            }
+        });
+        FlowPane presentationRow = new FlowPane(14, 8, overengineeredToggle, presentationState);
+        presentationRow.setAlignment(Pos.CENTER_LEFT);
+        presentationCard.getChildren().add(presentationRow);
+
+        content.getChildren().addAll(themeCard, presentationCard, accentCard, presetsCard, customColors, reset);
     }
 
     private ColorPicker customColorPicker(String key, String fallback) {
