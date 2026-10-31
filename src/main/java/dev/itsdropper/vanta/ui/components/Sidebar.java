@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.ui.components;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 
@@ -72,6 +73,13 @@ public class Sidebar extends VBox {
     private Consumer<Page> pageListener;
     private final Map<Page, Button> navigationButtons =
             new EnumMap<>(Page.class);
+    private final Map<Page, String> navigationTitles = new EnumMap<>(Page.class);
+    private final java.util.List<Label> sectionLabels = new java.util.ArrayList<>();
+    private VBox branding;
+    private Label logo;
+    private Label subtitle;
+    private Label build;
+    private boolean compact;
 
     public Sidebar() {
 
@@ -92,22 +100,19 @@ public class Sidebar extends VBox {
         // BRAND
         // ---------------------------------------------------------
 
-        Label logo =
-                new Label("VANTA");
+        logo = new Label("VANTA");
 
         logo.getStyleClass().add(
                 "sidebar-logo"
         );
 
-        Label subtitle =
-                new Label("MINECRAFT LAUNCHER");
+        subtitle = new Label("MINECRAFT LAUNCHER");
 
         subtitle.getStyleClass().add(
                 "sidebar-subtitle"
         );
 
-        VBox branding =
-                new VBox(
+        branding = new VBox(
                         4,
                         logo,
                         subtitle
@@ -160,8 +165,7 @@ public class Sidebar extends VBox {
 
         addButton(Page.SETTINGS);
 
-        Label build =
-                new Label(
+        build = new Label(
                         "VANTA "
                                 + loadVersion()
                                 + "  •  LOCAL"
@@ -219,6 +223,7 @@ public class Sidebar extends VBox {
 
     private void addSectionLabel(String title) {
         Label label = new Label(title);
+        sectionLabels.add(label);
         label.getStyleClass().add("sidebar-section-label");
         label.setMaxWidth(Double.MAX_VALUE);
         VBox.setMargin(label, new Insets(12, 8, 2, 8));
@@ -256,6 +261,7 @@ public class Sidebar extends VBox {
                 page,
                 button
         );
+        navigationTitles.put(page, page.title());
 
         button.setOnAction(
                 event -> {
@@ -273,6 +279,59 @@ public class Sidebar extends VBox {
         getChildren().add(
                 button
         );
+    }
+
+    /**
+     * Switches the navigation rail between its full and icon-only layouts.
+     * Tooltips and accessible names remain available in compact mode.
+     */
+    public void setCompact(boolean compact) {
+        if (this.compact == compact) {
+            return;
+        }
+        this.compact = compact;
+
+        if (compact) {
+            getStyleClass().add("sidebar-compact");
+            setPadding(new Insets(16, 8, 14, 8));
+            setPrefWidth(76);
+            setMinWidth(72);
+            logo.setText("V");
+            subtitle.setVisible(false);
+            subtitle.setManaged(false);
+            branding.setPadding(new Insets(4, 0, 20, 0));
+            build.setVisible(false);
+            build.setManaged(false);
+            sectionLabels.forEach(label -> {
+                label.setVisible(false);
+                label.setManaged(false);
+            });
+        } else {
+            getStyleClass().remove("sidebar-compact");
+            setPadding(new Insets(22, 14, 18, 14));
+            setPrefWidth(224);
+            setMinWidth(204);
+            logo.setText("VANTA");
+            subtitle.setVisible(true);
+            subtitle.setManaged(true);
+            branding.setPadding(new Insets(4, 8, 28, 8));
+            build.setVisible(true);
+            build.setManaged(true);
+            sectionLabels.forEach(label -> {
+                label.setVisible(true);
+                label.setManaged(true);
+            });
+        }
+
+        navigationButtons.forEach((page, button) -> {
+            button.setText(compact ? "" : navigationTitles.get(page));
+            button.setContentDisplay(compact
+                    ? ContentDisplay.GRAPHIC_ONLY
+                    : ContentDisplay.LEFT);
+            button.setGraphicTextGap(compact ? 0 : 10);
+            button.setAlignment(compact ? Pos.CENTER : Pos.CENTER_LEFT);
+            button.setMinHeight(compact ? 42 : Region.USE_COMPUTED_SIZE);
+        });
     }
 
     public void setOnPageSelected(
