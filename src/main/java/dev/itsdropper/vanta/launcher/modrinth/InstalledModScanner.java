@@ -63,6 +63,23 @@ public class InstalledModScanner {
         return mods;
     }
 
+    /**
+     * Reads Fabric metadata from one installed JAR.
+     *
+     * <p>Returns {@code null} for non-JAR files, non-Fabric JARs, malformed
+     * archives, and files that cannot be read. The caller remains responsible
+     * for recording the artifact itself even when metadata is unavailable.</p>
+     */
+    public InstalledMod scanFile(Path file) {
+        if (file == null
+                || !Files.isRegularFile(file, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+                || Files.isSymbolicLink(file)
+                || !file.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar")) {
+            return null;
+        }
+        return readMod(file);
+    }
+
     private InstalledMod readMod(
             Path file
     ) {
