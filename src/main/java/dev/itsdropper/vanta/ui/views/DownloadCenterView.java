@@ -4,6 +4,7 @@ import dev.itsdropper.vanta.launcher.download.DownloadCenterService;
 import dev.itsdropper.vanta.launcher.download.DownloadCenterService.Task;
 import dev.itsdropper.vanta.launcher.download.DownloadCenterService.Status;
 import dev.itsdropper.vanta.ui.components.IconView;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Locale;
 
 /** Live, local-only view of downloads initiated by Vanta's existing installers. */
-public final class DownloadCenterView extends VBox {
+public final class DownloadCenterView extends VBox implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
     private final DownloadCenterService service = DownloadCenterService.getInstance();
     private final VBox taskList = new VBox(10);
     private final Label activeCount = new Label("0 active");
@@ -28,6 +29,7 @@ public final class DownloadCenterView extends VBox {
     private final Label failedCount = new Label("0 failed");
     private final Label summary = new Label("Downloads started by Vanta appear here automatically.");
     private final java.util.function.Consumer<List<Task>> listener = this::renderTasks;
+    private boolean listening;
 
     public DownloadCenterView() {
         getStyleClass().addAll("page", "download-center-page");
@@ -37,12 +39,13 @@ public final class DownloadCenterView extends VBox {
 
         Label eyebrow = new Label("TRANSFER ACTIVITY");
         eyebrow.getStyleClass().add("download-eyebrow");
-        Label title = new Label("Download Center");
-        title.getStyleClass().add("page-title");
-        Label subtitle = new Label("One place to track installs, libraries, mods, assets and updates.");
-        subtitle.getStyleClass().add("page-subtitle");
-
-        VBox heading = new VBox(5, eyebrow, title, subtitle);
+        PageHeader pageHeader = new PageHeader(
+                "Download Center",
+                "One place to track installs, libraries, mods, assets and updates.",
+                "page-title",
+                "page-subtitle"
+        );
+        VBox heading = new VBox(8, eyebrow, pageHeader);
 
         HBox stats = new HBox(10,
                 statCard("IN PROGRESS", activeCount, "download-stat-active"),
@@ -71,7 +74,22 @@ public final class DownloadCenterView extends VBox {
 
         summary.getStyleClass().add("download-summary");
         getChildren().addAll(heading, stats, summary, listHeading, scroll);
-        service.addListener(listener);
+    }
+
+    @Override
+    public void onShown() {
+        if (!listening) {
+            listening = true;
+            service.addListener(listener);
+        }
+    }
+
+    @Override
+    public void onHidden() {
+        if (listening) {
+            service.removeListener(listener);
+            listening = false;
+        }
     }
 
     private VBox statCard(String caption, Label value, String style) {

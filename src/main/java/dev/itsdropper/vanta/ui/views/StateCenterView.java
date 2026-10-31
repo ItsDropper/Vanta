@@ -25,6 +25,7 @@ import dev.itsdropper.vanta.launcher.instance.InstanceRepairService;
 import dev.itsdropper.vanta.launcher.instance.SharedResourceRepairService;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.components.NotificationManager;
 import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.LauncherSettings;
@@ -53,11 +54,12 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         setPadding(new Insets(32));
         setSpacing(20);
 
-        Label title = new Label("State");
-        title.getStyleClass().add("page-title");
-        Label subtitle = new Label("Understand what Vanta knows about every installed environment.");
-        subtitle.getStyleClass().add("page-subtitle");
-        VBox heading = new VBox(5, title, subtitle);
+        PageHeader heading = new PageHeader(
+                "State Center",
+                "Understand what Vanta knows about every installed environment.",
+                "page-title",
+                "page-subtitle"
+        );
 
         VBox heroText = new VBox(5, overallTitle, overallSubtitle);
         overallTitle.getStyleClass().add("state-hero-title");

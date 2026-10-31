@@ -5,6 +5,7 @@ import dev.itsdropper.vanta.launcher.server.ServerManagerService.Profile;
 import dev.itsdropper.vanta.launcher.server.ServerManagerService.Snapshot;
 import dev.itsdropper.vanta.launcher.server.ServerManagerService.State;
 import dev.itsdropper.vanta.ui.components.IconView;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -52,10 +53,12 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
         Label eyebrow = new Label("LOCAL HOSTING");
         eyebrow.getStyleClass().add("server-eyebrow");
-        Label heading = new Label("Server Manager");
-        heading.getStyleClass().add("server-heading");
-        Label subtitle = new Label("Run, inspect and maintain your own Minecraft servers from Vanta.");
-        subtitle.getStyleClass().add("server-subtitle");
+        PageHeader pageHeader = new PageHeader(
+                "Server Manager",
+                "Run, inspect and maintain your own Minecraft servers from Vanta.",
+                "server-heading",
+                "server-subtitle"
+        );
 
         Button add = actionButton("Import existing", IconView.Type.FOLDER, "server-secondary");
         add.setOnAction(event -> addProfile());
@@ -63,10 +66,16 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         create.setOnAction(event -> createProfileFromJar());
         Button connectRemote = actionButton("Connect Remote", IconView.Type.ARROW_RIGHT, "server-secondary");
         connectRemote.setOnAction(event -> RemoteServerConnectionDialog.open(getScene() == null ? null : getScene().getWindow()));
-        HBox actions = new HBox(8, connectRemote, add, create);
-        HBox headingRow = new HBox(14, new VBox(5, eyebrow, heading, subtitle), spacer(), actions);
-        headingRow.setAlignment(Pos.CENTER_LEFT);
-        VBox.setVgrow(headingRow.getChildren().get(0), Priority.NEVER);
+        PageHeader pageHeaderWithActions = new PageHeader(
+                "Server Manager",
+                "Run, inspect and maintain your own Minecraft servers from Vanta.",
+                "server-heading",
+                "server-subtitle",
+                connectRemote,
+                add,
+                create
+        );
+        VBox headingRow = new VBox(8, eyebrow, pageHeaderWithActions);
 
         profileList.getStyleClass().add("server-profile-list");
         profileList.setPadding(new Insets(10));
