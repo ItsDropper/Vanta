@@ -818,3 +818,52 @@
     -fx-control-inner-background: -vanta-surface-raised;
 }
 .notification-progress > .bar { -fx-background-color: -vanta-accent; }
+
+/* Semantic color migration for screens that still have legacy palette rules. */
+.page-title, .settings-page-title, .accounts-title, .home-card-title,
+.login-title, .instance-setting-value, .mod-details-title,
+.modrinth-project-title, .modrinth-version-title {
+    -fx-text-fill: -vanta-text;
+}
+.page-subtitle, .footer-label, .home-card-eyebrow, .home-card-description,
+.login-subtitle, .login-instruction, .login-status,
+.instance-setting-label, .instance-directory, .server-eula,
+.modrinth-project-author, .modrinth-project-description {
+    -fx-text-fill: -vanta-muted;
+}
+.settings-section-title, .create-section-title, .home-card-eyebrow {
+    -fx-text-fill: -vanta-accent;
+}
+.home-card-status, .state-status-healthy, .accounts-status-connected {
+    -fx-text-fill: -vanta-success;
+}
+.selected-instance, .selected-instance:hover {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-border-color: -vanta-accent;
+}
+.instance-settings-danger-card {
+    -fx-background-color: derive(-vanta-danger, -82%);
+    -fx-border-color: derive(-vanta-danger, -48%);
+}
+.verification-code {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+    -fx-text-fill: -vanta-text;
+}
+.login-instruction, .login-subtitle { -fx-text-fill: -vanta-muted; }
+.server-console {
+    -fx-control-inner-background: -vanta-bg;
+    -fx-background-color: -vanta-bg;
+    -fx-text-fill: -vanta-text;
+    -fx-highlight-fill: -vanta-accent-soft;
+    -fx-highlight-text-fill: -vanta-text;
+}
+.modrinth-popup-danger {
+    -fx-background-color: derive(-vanta-danger, -78%);
+    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-text-fill: -vanta-danger;
+}
+.modrinth-popup-danger:hover {
+    -fx-background-color: derive(-vanta-danger, -70%);
+    -fx-border-color: -vanta-danger;
+}
