@@ -34,6 +34,8 @@ public final class EnvironmentLockfileService {
     private static final String LOCKFILE_DIRECTORY = ".vanta";
     private static final String LOCKFILE_NAME = "environment.lock.json";
     private static final int BUFFER_SIZE = 64 * 1024;
+    private static final int MAX_ENVIRONMENT_FILES = 20_000;
+    private static final List<String> ENVIRONMENT_DIRECTORIES = List.of("resourcepacks", "shaderpacks", "config");
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
@@ -89,6 +91,8 @@ public final class EnvironmentLockfileService {
             }
         }
 
+        List<EnvironmentLockfile.EnvironmentArtifact> environmentFiles = captureEnvironmentFiles(instanceDirectory);
+
         return new EnvironmentLockfile(
                 EnvironmentLockfile.CURRENT_SCHEMA_VERSION,
                 OffsetDateTime.now(ZoneOffset.UTC).toString(),
@@ -97,7 +101,8 @@ public final class EnvironmentLockfileService {
                 instance.getLoader(),
                 instance.getLoaderVersion(),
                 null,
-                artifacts
+                artifacts,
+                environmentFiles
         );
     }
 
@@ -176,11 +181,107 @@ public final class EnvironmentLockfileService {
             }
         }
 
+
+        java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> expectedFiles =
+                environmentFileMap(baseline.environmentFiles());
+        java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> actualFiles =
+                environmentFileMap(current.environmentFiles());
+
+        for (var entry : expectedFiles.entrySet()) {
+            EnvironmentLockfile.EnvironmentArtifact recorded = entry.getValue();
+            EnvironmentLockfile.EnvironmentArtifact observed = actualFiles.get(entry.getKey());
+            String displayPath = recorded.category() + "/" + recorded.relativePath();
+            if (observed == null) {
+                changes.add(new EnvironmentDriftReport.Change(
+                        EnvironmentDriftReport.ChangeType.ENVIRONMENT_FILE_REMOVED,
+                        displayPath, recorded.sha256(), null,
+                        "Previously recorded " + recorded.category() + " file is missing"
+                ));
+            } else if (!recorded.sha256().equalsIgnoreCase(observed.sha256())) {
+                changes.add(new EnvironmentDriftReport.Change(
+                        EnvironmentDriftReport.ChangeType.ENVIRONMENT_FILE_MODIFIED,
+                        displayPath, recorded.sha256(), observed.sha256(),
+                        "Recorded " + recorded.category() + " file contents differ"
+                ));
+            }
+        }
+
+        for (var entry : actualFiles.entrySet()) {
+            if (!expectedFiles.containsKey(entry.getKey())) {
+                EnvironmentLockfile.EnvironmentArtifact artifact = entry.getValue();
+                changes.add(new EnvironmentDriftReport.Change(
+                        EnvironmentDriftReport.ChangeType.ENVIRONMENT_FILE_ADDED,
+                        artifact.category() + "/" + artifact.relativePath(),
+                        null, artifact.sha256(),
+                        "Unrecorded " + artifact.category() + " file is present"
+                ));
+            }
+        }
+
         return new EnvironmentDriftReport(
                 baseline.generatedAt(),
                 current.generatedAt(),
                 changes
         );
+    }
+
+
+    /**
+     * Captures selected user-visible environment files without following symbolic links.
+     * Worlds, logs, caches, and Vanta's own metadata are deliberately excluded.
+     */
+    private static List<EnvironmentLockfile.EnvironmentArtifact> captureEnvironmentFiles(
+            Path instanceDirectory
+    ) throws IOException {
+        List<EnvironmentLockfile.EnvironmentArtifact> artifacts = new ArrayList<>();
+        for (String category : ENVIRONMENT_DIRECTORIES) {
+            Path root = instanceDirectory.resolve(category);
+            if (!Files.exists(root, LinkOption.NOFOLLOW_LINKS)) {
+                continue;
+            }
+            if (Files.isSymbolicLink(root)
+                    || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
+                throw new IOException("Instance " + category + " path must be a real directory.");
+            }
+
+            try (var stream = Files.walk(root)) {
+                List<Path> files = stream
+                        .filter(path -> !path.equals(root))
+                        .filter(path -> !Files.isSymbolicLink(path))
+                        .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                        .sorted(Comparator.comparing(
+                                path -> root.relativize(path).toString().replace('\\\\', '/'),
+                                String.CASE_INSENSITIVE_ORDER
+                        ))
+                        .toList();
+
+                for (Path file : files) {
+                    if (artifacts.size() >= MAX_ENVIRONMENT_FILES) {
+                        throw new IOException("Environment contains more than "
+                                + MAX_ENVIRONMENT_FILES + " tracked files; refusing an incomplete baseline.");
+                    }
+                    String relativePath = root.relativize(file).toString().replace('\\\\', '/');
+                    artifacts.add(new EnvironmentLockfile.EnvironmentArtifact(
+                            category,
+                            relativePath,
+                            Files.size(file),
+                            sha256(file)
+                    ));
+                }
+            }
+        }
+        return List.copyOf(artifacts);
+    }
+
+    private static java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> environmentFileMap(
+            List<EnvironmentLockfile.EnvironmentArtifact> artifacts
+    ) {
+        java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> result = new java.util.TreeMap<>();
+        for (EnvironmentLockfile.EnvironmentArtifact artifact : artifacts) {
+            result.put((artifact.category() + "/" + artifact.relativePath())
+                    .toLowerCase(java.util.Locale.ROOT), artifact);
+        }
+        return result;
     }
 
     private static String loaderIdentity(String loader, String version) {
@@ -313,6 +414,24 @@ public final class EnvironmentLockfileService {
                     || !artifact.sha256().matches("(?i)[0-9a-f]{64}")
                     || !filenames.add(artifact.filename().toLowerCase(java.util.Locale.ROOT))) {
                 throw new IOException("Environment lockfile contains an invalid or duplicate mod artifact.");
+            }
+        }
+
+        Set<String> environmentPaths = new HashSet<>();
+        for (EnvironmentLockfile.EnvironmentArtifact artifact : lockfile.environmentFiles()) {
+            if (artifact == null
+                    || !ENVIRONMENT_DIRECTORIES.contains(artifact.category())
+                    || blank(artifact.relativePath())
+                    || artifact.relativePath().startsWith("/")
+                    || artifact.relativePath().contains("\\\\")
+                    || java.util.Arrays.stream(artifact.relativePath().split("/"))
+                            .anyMatch(part -> part.isBlank() || part.equals(".") || part.equals(".."))
+                    || artifact.sizeBytes() < 0
+                    || artifact.sha256() == null
+                    || !artifact.sha256().matches("(?i)[0-9a-f]{64}")
+                    || !environmentPaths.add((artifact.category() + "/" + artifact.relativePath())
+                            .toLowerCase(java.util.Locale.ROOT))) {
+                throw new IOException("Environment lockfile contains an invalid or duplicate environment file.");
             }
         }
     }
