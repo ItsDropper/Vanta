@@ -233,7 +233,7 @@
 }
 
 .modrinth-popup-primary:hover {
-    -fx-background-color: #6E9BF2;
+    -fx-background-color: -vanta-accent-hover;
 }
 
 .modrinth-popup-secondary {
