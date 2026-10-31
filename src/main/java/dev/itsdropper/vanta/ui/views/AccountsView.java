@@ -314,7 +314,7 @@ public class AccountsView extends VBox {
         card.prefWidthProperty().bind(
                 Bindings.createDoubleBinding(() -> {
                     double width = accountList.getWidth();
-                    if (width <= 1) return 360;
+                    if (width <= 1) return 360.0;
                     if (width < 700) return Math.max(0, width - 2);
                     return Math.min(520, (width - accountList.getHgap()) / 2.0);
                 }, accountList.widthProperty())
