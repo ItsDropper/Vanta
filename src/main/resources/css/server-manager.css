@@ -8,12 +8,12 @@
     -fx-letter-spacing: 1.5px;
 }
 .server-heading {
-    -fx-text-fill: #f4f7fb;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 29px;
     -fx-font-weight: 800;
 }
 .server-subtitle {
-    -fx-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 11px;
 }
 .server-workspace {
@@ -30,12 +30,12 @@
 .server-list-header {
     -fx-alignment: center-left;
     -fx-padding: 0 4px;
-    -fx-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
 .server-list-header .label {
-    -fx-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
@@ -43,69 +43,69 @@
     -fx-background-color: transparent;
 }
 .server-profile-card {
-    -fx-background-color: rgba(255,255,255,0.025);
+    -fx-background-color: -vanta-surface;
     -fx-background-radius: 10px;
-    -fx-border-color: rgba(255,255,255,0.055);
+    -fx-border-color: -vanta-border;
     -fx-border-radius: 10px;
     -fx-cursor: hand;
 }
 .server-profile-card:hover {
-    -fx-background-color: rgba(255,255,255,0.055);
-    -fx-border-color: rgba(255,255,255,0.12);
+    -fx-background-color: -vanta-border;
+    -fx-border-color: derive(-vanta-border, 20%);
 }
 .server-profile-selected {
-    -fx-background-color: rgba(72,139,255,0.12);
-    -fx-border-color: rgba(72,139,255,0.5);
+    -fx-background-color: -vanta-accent-soft;
+    -fx-border-color: -vanta-accent;
 }
 .server-profile-name {
-    -fx-text-fill: #f4f7fb;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 12px;
     -fx-font-weight: 700;
 }
 .server-profile-meta {
-    -fx-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 10px;
 }
 .server-empty {
-    -fx-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 11px;
     -fx-padding: 12px;
 }
 .server-title {
-    -fx-text-fill: #f4f7fb;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 22px;
     -fx-font-weight: 800;
 }
 .server-status-row {
-    -fx-background-color: rgba(255,255,255,0.025);
-    -fx-border-color: rgba(255,255,255,0.06);
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-surface-raised;
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
     -fx-padding: 11px 12px;
 }
 .server-status-label {
-    -fx-text-fill: #f4f7fb;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 11px;
     -fx-font-weight: 700;
 }
 .server-status-dot {
-    -fx-text-fill: #858b96;
+    -fx-text-fill: -vanta-subtle;
     -fx-font-size: 12px;
 }
 .server-state-running {
-    -fx-text-fill: #55d69e;
+    -fx-text-fill: -vanta-success;
 }
 .server-state-starting {
-    -fx-text-fill: #f2bd5b;
+    -fx-text-fill: -vanta-accent;
 }
 .server-state-stopping {
-    -fx-text-fill: #f2bd5b;
+    -fx-text-fill: -vanta-accent;
 }
 .server-state-crashed {
-    -fx-text-fill: #ff737b;
+    -fx-text-fill: -vanta-danger;
 }
 .server-state-stopped {
-    -fx-text-fill: #858b96;
+    -fx-text-fill: -vanta-subtle;
 }
 .server-action {
     -fx-background-radius: 8px;
@@ -122,68 +122,68 @@
     -fx-opacity: 0.88;
 }
 .server-secondary {
-    -fx-background-color: rgba(255,255,255,0.06);
-    -fx-border-color: rgba(255,255,255,0.08);
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
     -fx-border-radius: 8px;
-    -fx-text-fill: #f4f7fb;
+    -fx-text-fill: -vanta-text;
 }
 .server-secondary:hover {
-    -fx-background-color: rgba(255,255,255,0.1);
+    -fx-background-color: -vanta-surface-hover;
 }
 .server-danger {
-    -fx-background-color: rgba(245,83,93,0.12);
-    -fx-border-color: rgba(245,83,93,0.25);
+    -fx-background-color: derive(-vanta-danger, -78%);
+    -fx-border-color: derive(-vanta-danger, -45%);
     -fx-border-radius: 8px;
-    -fx-text-fill: #ff858b;
+    -fx-text-fill: -vanta-danger;
 }
 .server-action:disabled {
     -fx-opacity: 0.35;
     -fx-cursor: default;
 }
 .server-panel {
-    -fx-background-color: rgba(255,255,255,0.025);
-    -fx-border-color: rgba(255,255,255,0.065);
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
     -fx-padding: 15px;
 }
 .server-section-title {
-    -fx-text-fill: #f4f7fb;
+    -fx-text-fill: -vanta-text;
     -fx-font-size: 11px;
     -fx-font-weight: 800;
 }
 .server-section-subtitle {
-    -fx-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 10px;
 }
 .server-field-label {
-    -fx-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 10px;
     -fx-font-weight: 700;
 }
 .server-input, .server-spinner {
-    -fx-background-color: rgba(0,0,0,0.22);
+    -fx-background-color: -vanta-bg;
     -fx-background-radius: 7px;
-    -fx-border-color: rgba(255,255,255,0.09);
+    -fx-border-color: -vanta-border;
     -fx-border-radius: 7px;
-    -fx-text-fill: #f4f7fb;
-    -fx-prompt-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-text;
+    -fx-prompt-text-fill: -vanta-muted;
     -fx-padding: 8px 10px;
     -fx-font-size: 11px;
 }
 .server-spinner .text-field {
     -fx-background-color: transparent;
-    -fx-text-fill: #f4f7fb;
+    -fx-text-fill: -vanta-text;
 }
 .server-eula {
-    -fx-text-fill: #8b96a8;
+    -fx-text-fill: -vanta-muted;
     -fx-font-size: 10px;
 }
 .server-console {
-    -fx-control-inner-background: #080b10;
-    -fx-background-color: #080b10;
-    -fx-text-fill: #c8d5e7;
-    -fx-highlight-fill: rgba(72,139,255,0.4);
+    -fx-control-inner-background: -vanta-bg;
+    -fx-background-color: -vanta-bg;
+    -fx-text-fill: -vanta-text;
+    -fx-highlight-fill: -vanta-accent-soft;
     -fx-highlight-text-fill: white;
     -fx-font-family: "Cascadia Mono", "Consolas", monospace;
     -fx-font-size: 10px;
