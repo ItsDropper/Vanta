@@ -20,6 +20,7 @@ import javafx.scene.shape.SVGPath;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -78,32 +79,12 @@ public class ScreenshotsView extends VBox {
                 event -> onBack.run()
         );
 
-        Label title =
-                new Label(
-                        "Screenshots"
-                );
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        instance.getName()
-                                + " • "
-                                + "Minecraft screenshots"
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader headerText = new PageHeader(
+                "Screenshots",
+                instance.getName() + " • Minecraft screenshots",
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox headerText =
-                new VBox(
-                        5,
-                        title,
-                        subtitle
-                );
 
         VBox header =
                 new VBox(

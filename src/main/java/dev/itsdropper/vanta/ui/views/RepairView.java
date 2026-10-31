@@ -10,6 +10,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 
 import java.util.List;
 import java.nio.file.Files;
@@ -71,34 +72,12 @@ public class RepairView extends VBox {
                 event -> onBack.run()
         );
 
-        Label titleLabel =
-                new Label(
-                        title
-                );
-
-        titleLabel.getStyleClass().add(
-                "page-title"
-        );
-
-        Label descriptionLabel =
-                new Label(
-                        description
-                );
-
-        descriptionLabel.setWrapText(
-                true
-        );
-
-        descriptionLabel.getStyleClass().add(
+        PageHeader headerText = new PageHeader(
+                title,
+                description,
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox headerText =
-                new VBox(
-                        6,
-                        titleLabel,
-                        descriptionLabel
-                );
 
         VBox header =
                 new VBox(

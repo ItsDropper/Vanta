@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.application.Platform;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
@@ -100,34 +101,16 @@ public class ModsView extends VBox {
         // HEADER
         // =========================================================
 
-        Label title =
-                new Label(
-                        "Installed Content"
-                );
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        instance.getName()
-                                + " • Minecraft "
-                                + instance.getMinecraftVersion()
-                                + " • "
-                                + instance.getDisplayLoader()
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader headerText = new PageHeader(
+                "Installed Content",
+                instance.getName()
+                        + " • Minecraft "
+                        + instance.getMinecraftVersion()
+                        + " • "
+                        + instance.getDisplayLoader(),
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox headerText =
-                new VBox(
-                        5,
-                        title,
-                        subtitle
-                );
 
         searchField = new TextField();
         searchField.setPromptText("Search installed content...");

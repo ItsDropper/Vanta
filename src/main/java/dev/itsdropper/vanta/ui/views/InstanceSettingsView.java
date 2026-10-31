@@ -19,6 +19,7 @@ import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
 import dev.itsdropper.vanta.ui.components.IconView;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 
 import java.io.File;
 
@@ -90,30 +91,12 @@ public class InstanceSettingsView extends VBox {
                         backButton
                 );
 
-        Label title =
-                new Label(
-                        instance.getName()
-                );
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        "Configure how this instance launches."
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader headerText = new PageHeader(
+                instance.getName(),
+                "Configure how this instance launches.",
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox headerText =
-                new VBox(
-                        5,
-                        title,
-                        subtitle
-                );
 
         VBox header =
                 new VBox(

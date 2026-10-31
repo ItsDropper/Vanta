@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import javafx.geometry.Insets;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -51,29 +52,13 @@ public class CreateInstanceTypeView extends VBox {
                 new Label("NEW INSTANCE");
         eyebrow.getStyleClass().add("settings-nav-group");
 
-        Label title =
-                new Label("Create an instance");
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        "Choose how you want to create your Minecraft instance."
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader pageHeader = new PageHeader(
+                "Create an instance",
+                "Choose how you want to create your Minecraft instance.",
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox header =
-                new VBox(
-                        5,
-                        eyebrow,
-                        title,
-                        subtitle
-                );
+        VBox header = new VBox(8, eyebrow, pageHeader);
 
         // =========================================================
         // OPTIONS

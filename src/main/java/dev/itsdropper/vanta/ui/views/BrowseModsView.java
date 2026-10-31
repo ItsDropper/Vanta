@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import javafx.application.Platform;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -106,34 +107,16 @@ public class BrowseModsView extends VBox {
                         onBack.run()
         );
 
-        Label title =
-                new Label(
-                        "Browse Mods"
-                );
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        instance.getName()
-                                + " • Minecraft "
-                                + instance.getMinecraftVersion()
-                                + " • "
-                                + instance.getDisplayLoader()
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader headerText = new PageHeader(
+                "Browse Mods",
+                instance.getName()
+                        + " • Minecraft "
+                        + instance.getMinecraftVersion()
+                        + " • "
+                        + instance.getDisplayLoader(),
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox headerText =
-                new VBox(
-                        5,
-                        title,
-                        subtitle
-                );
 
         VBox header =
                 new VBox(

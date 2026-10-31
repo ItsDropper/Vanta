@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -92,30 +93,12 @@ public class GlobalModsView extends VBox {
         // HEADER
         // =========================================================
 
-        Label title =
-                new Label(
-                        "Modrinth"
-                );
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        "Browse mods, resource packs, and shaders on Modrinth."
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader header = new PageHeader(
+                "Modrinth",
+                "Browse mods, resource packs, and shaders on Modrinth.",
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox header =
-                new VBox(
-                        5,
-                        title,
-                        subtitle
-                );
 
         // =========================================================
         // GLOBAL CONTENT FILTERS
