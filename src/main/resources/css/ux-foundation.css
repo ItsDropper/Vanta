@@ -914,3 +914,13 @@
     -fx-border-color: transparent;
 }
 .onboarding-scroll { -fx-padding: 0; }
+
+.sidebar-compact .sidebar-button {
+    -fx-padding: 10px 8px;
+    -fx-alignment: center;
+    -fx-background-radius: 10px;
+}
+.sidebar-compact .sidebar-logo {
+    -fx-font-size: 22px;
+    -fx-alignment: center;
+}
