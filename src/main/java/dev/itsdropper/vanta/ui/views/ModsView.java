@@ -16,6 +16,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -762,10 +763,13 @@ public class ModsView extends VBox {
 
             VBox root = new VBox(12);
             root.getStyleClass().add("modrinth-popup");
-            root.setPrefWidth(430);
+            double popupWidth = Math.min(430,
+                    Math.max(280, removeButton.getScene().getWidth() - 32));
+            root.setPrefWidth(popupWidth);
+            root.setMaxWidth(popupWidth);
 
             Label removeTitle = new Label("REMOVE MOD");
-            title.getStyleClass().add("modrinth-popup-title");
+            removeTitle.getStyleClass().add("modrinth-popup-title");
 
             Label message = new Label(
                     "Remove " + cleanName(filename) + "?\\nThis will permanently remove the mod from this instance."
@@ -779,8 +783,9 @@ public class ModsView extends VBox {
             Button remove = new Button("REMOVE");
             remove.getStyleClass().add("modrinth-popup-danger");
 
-            HBox actions = new HBox(8, cancel, remove);
+            FlowPane actions = new FlowPane(8, 8, cancel, remove);
             actions.setAlignment(Pos.CENTER_RIGHT);
+            actions.setMaxWidth(Double.MAX_VALUE);
 
             root.getChildren().addAll(removeTitle, message, actions);
         ThemeManager.apply(root, ThemeManager.loadAccent());
@@ -797,7 +802,7 @@ public class ModsView extends VBox {
                     removeButton.localToScreen(removeButton.getBoundsInLocal());
             if (bounds != null) {
                 popup.show(removeButton,
-                        Math.max(20, bounds.getMaxX() - 430),
+                        Math.max(20, bounds.getMaxX() - popupWidth),
                         bounds.getMinY() - 110);
             }
         });
