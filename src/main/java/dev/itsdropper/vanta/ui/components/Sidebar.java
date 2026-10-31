@@ -80,12 +80,13 @@ public class Sidebar extends VBox {
         );
 
         setPadding(
-                new Insets(24, 16, 24, 16)
+                new Insets(22, 14, 18, 14)
         );
 
-        setSpacing(8);
+        setSpacing(6);
 
-        setPrefWidth(210);
+        setPrefWidth(224);
+        setMinWidth(204);
 
         // ---------------------------------------------------------
         // BRAND
@@ -129,13 +130,21 @@ public class Sidebar extends VBox {
         // NAVIGATION
         // ---------------------------------------------------------
 
+        addSectionLabel("OVERVIEW");
         addButton(Page.HOME);
+
+        addSectionLabel("LIBRARY");
         addButton(Page.INSTANCES);
         addButton(Page.MODS);
+
+        addSectionLabel("MANAGE");
         addButton(Page.STATE);
-        addButton(Page.SKIN);
-        addButton(Page.DOWNLOADS);
         addButton(Page.SERVERS);
+        addButton(Page.DOWNLOADS);
+
+        addSectionLabel("PROFILE");
+        addButton(Page.SKIN);
+        addButton(Page.ACCOUNTS);
 
         Region spacer =
                 new Region();
@@ -149,7 +158,6 @@ public class Sidebar extends VBox {
                 spacer
         );
 
-        addButton(Page.ACCOUNTS);
         addButton(Page.SETTINGS);
 
         Label build =
@@ -207,6 +215,14 @@ public class Sidebar extends VBox {
         }
 
         return "1.1.8";
+    }
+
+    private void addSectionLabel(String title) {
+        Label label = new Label(title);
+        label.getStyleClass().add("sidebar-section-label");
+        label.setMaxWidth(Double.MAX_VALUE);
+        VBox.setMargin(label, new Insets(12, 8, 2, 8));
+        getChildren().add(label);
     }
 
     private void addButton(Page page) {
