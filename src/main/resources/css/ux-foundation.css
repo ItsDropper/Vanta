@@ -714,3 +714,67 @@
 }
 .instance-search-field:focused { -fx-border-color: -vanta-accent; }
 
+
+
+/* Accounts: align the account manager with the active launcher theme. */
+.accounts-hero, .accounts-section, .accounts-card, .accounts-empty {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+    -fx-effect: none;
+}
+.accounts-hero {
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+}
+.accounts-section, .accounts-card, .accounts-empty {
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+}
+.accounts-hero-name, .accounts-section-title, .accounts-card-name,
+.accounts-empty-title {
+    -fx-text-fill: -vanta-text;
+}
+.accounts-subtitle, .accounts-hero-uuid, .accounts-section-count,
+.accounts-privacy, .accounts-card-uuid, .accounts-card-hint,
+.accounts-empty-text {
+    -fx-text-fill: -vanta-muted;
+}
+.accounts-hero-head-frame, .accounts-card-head-frame {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+}
+.accounts-card:hover, .accounts-empty:hover {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: derive(-vanta-border, 18%);
+}
+.accounts-card-active {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-border-color: -vanta-accent;
+    -fx-effect: none;
+}
+.accounts-primary-button {
+    -fx-background-color: -vanta-accent;
+    -fx-border-color: -vanta-accent;
+    -fx-text-fill: white;
+}
+.accounts-primary-button:hover {
+    -fx-background-color: -vanta-accent-hover;
+    -fx-border-color: -vanta-accent-hover;
+}
+.accounts-secondary-button, .accounts-card-use {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-border-color: -vanta-border;
+    -fx-text-fill: -vanta-text;
+}
+.accounts-secondary-button:hover, .accounts-card-use:hover {
+    -fx-background-color: -vanta-surface-hover;
+    -fx-border-color: derive(-vanta-border, 20%);
+}
+.accounts-danger-button {
+    -fx-background-color: derive(-vanta-danger, -78%);
+    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-text-fill: -vanta-danger;
+}
+.accounts-danger-button:hover {
+    -fx-background-color: derive(-vanta-danger, -70%);
+}
