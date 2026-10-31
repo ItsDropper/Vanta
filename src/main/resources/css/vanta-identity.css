@@ -36,7 +36,6 @@
 .sidebar-logo {
     -fx-font-size: 24px;
     -fx-font-weight: 900;
-    -fx-letter-spacing: 1.8px;
 }
 
 .sidebar-subtitle,
@@ -95,7 +94,6 @@
 .home-empty-eyebrow {
     -fx-font-size: 10px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1.2px;
 }
 
 .home-featured-section-subtitle,
@@ -161,7 +159,6 @@
 .home-section-title {
     -fx-font-size: 12px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 0.6px;
 }
 
 .home-recent-card,
