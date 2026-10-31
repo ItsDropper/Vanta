@@ -53,20 +53,13 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
         Label eyebrow = new Label("LOCAL HOSTING");
         eyebrow.getStyleClass().add("server-eyebrow");
-        PageHeader pageHeader = new PageHeader(
-                "Server Manager",
-                "Run, inspect and maintain your own Minecraft servers from Vanta.",
-                "server-heading",
-                "server-subtitle"
-        );
-
         Button add = actionButton("Import existing", IconView.Type.FOLDER, "server-secondary");
         add.setOnAction(event -> addProfile());
         Button create = actionButton("Create from JAR", IconView.Type.PLUS, "server-primary");
         create.setOnAction(event -> createProfileFromJar());
         Button connectRemote = actionButton("Connect Remote", IconView.Type.ARROW_RIGHT, "server-secondary");
         connectRemote.setOnAction(event -> RemoteServerConnectionDialog.open(getScene() == null ? null : getScene().getWindow()));
-        PageHeader pageHeaderWithActions = new PageHeader(
+        PageHeader pageHeader = new PageHeader(
                 "Server Manager",
                 "Run, inspect and maintain your own Minecraft servers from Vanta.",
                 "server-heading",
@@ -75,7 +68,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
                 add,
                 create
         );
-        VBox headingRow = new VBox(8, eyebrow, pageHeaderWithActions);
+        VBox headingRow = new VBox(8, eyebrow, pageHeader);
 
         profileList.getStyleClass().add("server-profile-list");
         profileList.setPadding(new Insets(10));
