@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.ui;
 
 import javafx.animation.FadeTransition;
 import javafx.animation.ParallelTransition;
+import javafx.animation.Transition;
 import javafx.animation.ScaleTransition;
 import javafx.animation.TranslateTransition;
 import javafx.collections.ListChangeListener;
@@ -37,10 +38,17 @@ public final class AnimationUtils {
         slide.setFromX(distance);
         slide.setToX(0);
 
-        new ParallelTransition(
-                fade,
-                slide
-        ).play();
+        ParallelTransition transition = new ParallelTransition(fade, slide);
+        replaceEntranceTransition(node, transition);
+        transition.setOnFinished(event -> {
+            if (node.getProperties().get("vanta.entrance-transition") == transition) {
+                node.getProperties().remove("vanta.entrance-transition");
+            }
+            node.setOpacity(1.0);
+            node.setTranslateX(0.0);
+            node.setTranslateY(0.0);
+        });
+        transition.playFromStart();
     }
 
     public static void installInteractiveAnimations(Node node) {
@@ -91,6 +99,28 @@ public final class AnimationUtils {
         }
     }
 
+    private static void replaceEntranceTransition(Node node, ParallelTransition transition) {
+        Object previous = node.getProperties().get("vanta.entrance-transition");
+        if (previous instanceof Transition active) {
+            active.stop();
+        }
+        node.getProperties().put("vanta.entrance-transition", transition);
+    }
+
+    /** Stops a pending entrance animation before its view leaves the host. */
+    public static void cancelEntrance(Node node) {
+        if (node == null) {
+            return;
+        }
+        Object previous = node.getProperties().remove("vanta.entrance-transition");
+        if (previous instanceof Transition active) {
+            active.stop();
+        }
+        node.setOpacity(1.0);
+        node.setTranslateX(0.0);
+        node.setTranslateY(0.0);
+    }
+
     private static void animateScale(Node node, double target, Duration duration) {
         if (!LauncherSettings.isAnimationsEnabled()) {
             Object previous = node.getProperties().get("vanta.scale-transition");
@@ -133,9 +163,16 @@ public final class AnimationUtils {
         slide.setFromY(distance);
         slide.setToY(0);
 
-        new ParallelTransition(
-                fade,
-                slide
-        ).play();
+        ParallelTransition transition = new ParallelTransition(fade, slide);
+        replaceEntranceTransition(node, transition);
+        transition.setOnFinished(event -> {
+            if (node.getProperties().get("vanta.entrance-transition") == transition) {
+                node.getProperties().remove("vanta.entrance-transition");
+            }
+            node.setOpacity(1.0);
+            node.setTranslateX(0.0);
+            node.setTranslateY(0.0);
+        });
+        transition.playFromStart();
     }
 }

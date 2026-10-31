@@ -31,8 +31,12 @@ public final class ViewHost {
         Objects.requireNonNull(view, "view");
 
         Node previousView = getActiveView();
-        if (previousView != view && previousView instanceof LauncherViewLifecycle lifecycle) {
-            lifecycle.onHidden();
+        boolean changingView = previousView != view;
+        if (changingView && previousView != null) {
+            AnimationUtils.cancelEntrance(previousView);
+            if (previousView instanceof LauncherViewLifecycle lifecycle) {
+                lifecycle.onHidden();
+            }
         }
 
         container.getChildren().setAll(view);
@@ -42,7 +46,7 @@ public final class ViewHost {
         view.setTranslateX(0.0);
         view.setTranslateY(0.0);
 
-        if (view instanceof LauncherViewLifecycle lifecycle) {
+        if (changingView && view instanceof LauncherViewLifecycle lifecycle) {
             lifecycle.onShown();
         }
     }
