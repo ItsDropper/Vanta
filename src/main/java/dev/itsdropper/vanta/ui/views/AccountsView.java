@@ -175,7 +175,7 @@ public class AccountsView extends VBox {
                 topActions.setAlignment(Pos.CENTER_LEFT);
                 StackPane.setMargin(content, new Insets(16));
             } else if (!compact && !content.getChildren().contains(spacer)) {
-                content.getChildren().setAll(headFrame, identity, spacer, actions);
+                content.getChildren().setAll(identityRow, spacer, actions);
                 content.setSpacing(0);
                 actions.setAlignment(Pos.CENTER_RIGHT);
                 topActions.setAlignment(Pos.CENTER_RIGHT);
