@@ -15,6 +15,7 @@ public record EnvironmentLockfile(
         String minecraftVersion,
         String loader,
         String loaderVersion,
+        Integer javaMajorVersion,
         List<ModArtifact> mods
 ) {
     public static final int CURRENT_SCHEMA_VERSION = 1;
