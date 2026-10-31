@@ -11,6 +11,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -128,6 +129,9 @@ public class InstanceCard extends StackPane {
         nameLabel.getStyleClass().add(
                 "instance-name"
         );
+        nameLabel.setMinWidth(0);
+        nameLabel.setMaxWidth(Double.MAX_VALUE);
+        nameLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
 
         versionLabel =
                 new Label();
