@@ -2207,3 +2207,29 @@
 .state-shared-healthy { -fx-text-fill: -vantasuccess; -fx-font-size: 10px; -fx-font-weight: 900; }
 .state-shared-attention { -fx-text-fill: #e7bd68; -fx-font-size: 10px; -fx-font-weight: 900; }
 .state-shared-broken { -fx-text-fill: -vantadanger; -fx-font-size: 10px; -fx-font-weight: 900; }
+
+
+/* Environment lockfile actions in State Center. */
+.state-environment-baseline {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+.state-environment-button {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+    -fx-background-radius: 7px;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-padding: 6px 8px;
+}
+.state-environment-button:hover {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+}
+.state-environment-button:disabled {
+    -fx-opacity: 0.55;
+}
