@@ -19,9 +19,7 @@ public final class AnimationUtils {
 
     public static void slideFadeIn(Node node, double distance) {
         if (!LauncherSettings.isAnimationsEnabled()) {
-            node.setOpacity(1);
-            node.setTranslateX(0);
-            node.setTranslateY(0);
+            cancelEntrance(node);
             return;
         }
 
@@ -121,9 +119,32 @@ public final class AnimationUtils {
         node.setTranslateY(0.0);
     }
 
+    /**
+     * Cancels launcher-owned animations throughout a view subtree.
+     * Only properties owned by AnimationUtils are reset; authored transforms
+     * on unrelated controls and 3D previews are left untouched.
+     */
+    public static void cancelAnimations(Node node) {
+        if (node == null) {
+            return;
+        }
+        cancelEntrance(node);
+        Object scale = node.getProperties().remove("vanta.scale-transition");
+        if (scale instanceof ScaleTransition transition) {
+            transition.stop();
+            node.setScaleX(1.0);
+            node.setScaleY(1.0);
+        }
+        if (node instanceof Parent parent) {
+            for (Node child : parent.getChildrenUnmodifiable()) {
+                cancelAnimations(child);
+            }
+        }
+    }
+
     private static void animateScale(Node node, double target, Duration duration) {
         if (!LauncherSettings.isAnimationsEnabled()) {
-            Object previous = node.getProperties().get("vanta.scale-transition");
+            Object previous = node.getProperties().remove("vanta.scale-transition");
             if (previous instanceof ScaleTransition transition) transition.stop();
             node.setScaleX(1.0);
             node.setScaleY(1.0);
@@ -144,9 +165,7 @@ public final class AnimationUtils {
 
     public static void slideFadeVertical(Node node, double distance) {
         if (!LauncherSettings.isAnimationsEnabled()) {
-            node.setOpacity(1);
-            node.setTranslateX(0);
-            node.setTranslateY(0);
+            cancelEntrance(node);
             return;
         }
 

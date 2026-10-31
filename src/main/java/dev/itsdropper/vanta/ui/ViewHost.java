@@ -33,7 +33,7 @@ public final class ViewHost {
         Node previousView = getActiveView();
         boolean changingView = previousView != view;
         if (changingView && previousView != null) {
-            AnimationUtils.cancelEntrance(previousView);
+            AnimationUtils.cancelAnimations(previousView);
             if (previousView instanceof LauncherViewLifecycle lifecycle) {
                 lifecycle.onHidden();
             }
