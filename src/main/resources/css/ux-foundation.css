@@ -778,3 +778,43 @@
 .accounts-danger-button:hover {
     -fx-background-color: derive(-vanta-danger, -70%);
 }
+
+/* Final compatibility layer: legacy view styles must obey the active theme. */
+.root, .launcher {
+    -fx-background-color: -vanta-bg;
+}
+.create-label, .create-status, .form-label, .field-label {
+    -fx-text-fill: -vanta-muted;
+}
+.create-field, .create-combo, .create-field:hover, .create-combo:hover,
+.create-field:focused, .create-combo:focused {
+    -fx-background-color: -vanta-surface;
+    -fx-border-color: -vanta-border;
+    -fx-text-fill: -vanta-text;
+    -fx-prompt-text-fill: -vanta-subtle;
+}
+.create-combo .list-cell, .create-combo .list-cell:filled {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-text-fill: -vanta-text;
+}
+.create-combo .list-cell:hover, .create-combo .list-cell:filled:selected {
+    -fx-background-color: -vanta-accent-soft;
+    -fx-text-fill: -vanta-text;
+}
+.slider .track { -fx-background-color: -vanta-border; }
+.slider .thumb { -fx-background-color: -vanta-accent; }
+.slider .thumb:hover { -fx-background-color: -vanta-accent-hover; }
+.danger-button {
+    -fx-background-color: derive(-vanta-danger, -78%);
+    -fx-border-color: derive(-vanta-danger, -45%);
+    -fx-text-fill: -vanta-danger;
+}
+.danger-button:hover {
+    -fx-background-color: derive(-vanta-danger, -70%);
+    -fx-border-color: -vanta-danger;
+}
+.notification-progress, .notification-progress > .track {
+    -fx-background-color: -vanta-surface-raised;
+    -fx-control-inner-background: -vanta-surface-raised;
+}
+.notification-progress > .bar { -fx-background-color: -vanta-accent; }
