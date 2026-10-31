@@ -8,6 +8,7 @@ import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -49,7 +50,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
     public ServerManagerView() {
         getStyleClass().add("page");
         getStyleClass().add("server-manager");
-        setPadding(new Insets(22, 24, 24, 24));
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
         Label eyebrow = new Label("LOCAL HOSTING");
         eyebrow.getStyleClass().add("server-eyebrow");
@@ -89,7 +90,8 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         serverMeta.getStyleClass().add("server-subtitle");
         status.getStyleClass().add("server-status-label");
         statusDot.getStyleClass().add("server-status-dot");
-        HBox statusRow = new HBox(8, statusDot, status, spacer(), restartButton, stopButton, forceButton, startButton);
+        FlowPane statusRow = new FlowPane(8, 8, statusDot, status,
+                restartButton, stopButton, forceButton, startButton);
         statusRow.setAlignment(Pos.CENTER_LEFT);
         statusRow.getStyleClass().add("server-status-row");
 
@@ -167,6 +169,20 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         SplitPane workspace = new SplitPane(left, detailScroll);
         workspace.setDividerPositions(0.27);
         workspace.getStyleClass().add("server-workspace");
+        left.setMinWidth(0);
+        detailScroll.setMinWidth(0);
+        workspace.widthProperty().addListener((observable, oldWidth, newWidth) -> {
+            double width = newWidth.doubleValue();
+            if (width <= 1) return;
+
+            boolean compact = width < 900;
+            workspace.setOrientation(compact ? Orientation.VERTICAL : Orientation.HORIZONTAL);
+            workspace.setDividerPositions(compact ? 0.30 : 0.27);
+            profileScroll.setMinWidth(compact ? 0 : 220);
+            profileScroll.setPrefWidth(compact ? Region.USE_COMPUTED_SIZE : 245);
+            profileScroll.setPrefHeight(compact ? 150 : Region.USE_COMPUTED_SIZE);
+            left.setPrefHeight(compact ? 200 : Region.USE_COMPUTED_SIZE);
+        });
         VBox main = new VBox(18, headingRow, workspace);
         VBox.setVgrow(workspace, Priority.ALWAYS);
         setCenter(main);
