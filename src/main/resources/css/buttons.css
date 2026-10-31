@@ -1,10 +1,10 @@
 .primary-button,
 .instance-create-button,
 .instance-play-button {
-    -fx-background-color: #78d47b;
+    -fx-background-color: -vanta-accent;
     -fx-background-radius: 8px;
 
-    -fx-text-fill: #0a160c;
+    -fx-text-fill: -vanta-bg;
 
     -fx-font-size: 11px;
     -fx-font-weight: 800;
@@ -15,10 +15,6 @@
 
     -fx-alignment: center;
 
-    -fx-min-width: 110px;
-    -fx-pref-width: 110px;
-    -fx-max-width: 110px;
-
     -fx-min-height: 38px;
     -fx-pref-height: 38px;
     -fx-max-height: 38px;
@@ -27,13 +23,13 @@
 .primary-button:hover,
 .instance-create-button:hover,
 .instance-play-button:hover {
-    -fx-background-color: #91e994;
+    -fx-background-color: -vanta-accent-hover;
 }
 
 .primary-button:pressed,
 .instance-create-button:pressed,
 .instance-play-button:pressed {
-    -fx-background-color: #59ad5d;
+    -fx-background-color: -vanta-accent-hover;
 }
 
 .primary-button:disabled,
@@ -47,15 +43,15 @@
    ============================================================= */
 
 .instance-play-button.instance-playing-button {
-    -fx-background-color: #351b1b;
+    -fx-background-color: derive(-vanta-danger, -82%);
 
     -fx-background-radius: 8px;
 
-    -fx-border-color: #7f3030;
+    -fx-border-color: derive(-vanta-danger, -45%);
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: #ffb5b5;
+    -fx-text-fill: -vanta-danger;
 
     -fx-font-size: 11px;
     -fx-font-weight: 800;
@@ -76,19 +72,19 @@
 }
 
 .instance-play-button.instance-playing-button:hover {
-    -fx-background-color: #492020;
+    -fx-background-color: derive(-vanta-danger, -70%);
 
-    -fx-border-color: #a94545;
+    -fx-border-color: -vanta-danger;
 
-    -fx-text-fill: #ffb5b5;
+    -fx-text-fill: -vanta-danger;
 }
 
 .instance-play-button.instance-playing-button:pressed {
-    -fx-background-color: #5b2525;
+    -fx-background-color: derive(-vanta-danger, -70%);
 
-    -fx-border-color: #bd5555;
+    -fx-border-color: -vanta-danger;
 
-    -fx-text-fill: #ffb5b5;
+    -fx-text-fill: -vanta-danger;
 }
 
 .instance-play-button.instance-playing-button:disabled {
@@ -103,14 +99,14 @@
 .secondary-button,
 .settings-back-button,
 .instance-settings-button {
-    -fx-background-color: #1a1e1a;
+    -fx-background-color: -vanta-surface;
     -fx-background-radius: 8px;
 
-    -fx-border-color: #363d37;
+    -fx-border-color: -vanta-border;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: #d3d9d3;
+    -fx-text-fill: -vanta-text;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -125,17 +121,17 @@
 .secondary-button:hover,
 .settings-back-button:hover,
 .instance-settings-button:hover {
-    -fx-background-color: #242a24;
+    -fx-background-color: -vanta-surface-hover;
 
-    -fx-border-color: #59655a;
+    -fx-border-color: derive(-vanta-border, 20%);
 
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: -vanta-text;
 }
 
 .secondary-button:pressed,
 .settings-back-button:pressed,
 .instance-settings-button:pressed {
-    -fx-background-color: #2a302a;
+    -fx-background-color: -vanta-border;
 }
 
 .instance-settings-button {
@@ -157,14 +153,14 @@
    ============================================================= */
 
 .danger-button {
-    -fx-background-color: #21191b;
+    -fx-background-color: derive(-vanta-danger, -82%);
     -fx-background-radius: 8px;
 
-    -fx-border-color: #4a3033;
+    -fx-border-color: derive(-vanta-danger, -45%);
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: #d98a92;
+    -fx-text-fill: -vanta-danger;
 
     -fx-font-size: 11px;
     -fx-font-weight: bold;
@@ -177,19 +173,19 @@
 }
 
 .danger-button:hover {
-    -fx-background-color: #2b1d20;
+    -fx-background-color: derive(-vanta-danger, -70%);
 
-    -fx-border-color: #704148;
+    -fx-border-color: -vanta-danger;
 
-    -fx-text-fill: #f0a1a8;
+    -fx-text-fill: -vanta-danger;
 }
 
 .danger-button:pressed {
-    -fx-background-color: #351f23;
+    -fx-background-color: derive(-vanta-danger, -70%);
 
-    -fx-border-color: #8a5058;
+    -fx-border-color: -vanta-danger;
 
-    -fx-text-fill: #f5b0b6;
+    -fx-text-fill: -vanta-danger;
 }
 
 .danger-button:disabled {
@@ -205,21 +201,21 @@
     -fx-min-height: 5px;
     -fx-max-height: 5px;
 
-    -fx-background-color: #252932;
+    -fx-background-color: -vanta-surface-raised;
     -fx-background-radius: 3px;
 
-    -fx-control-inner-background: #252932;
+    -fx-control-inner-background: -vanta-surface-raised;
 }
 
 .notification-progress > .bar {
-    -fx-background-color: #4d8dff;
+    -fx-background-color: -vanta-accent;
     -fx-background-radius: 3px;
     -fx-background-insets: 0;
     -fx-padding: 0;
 }
 
 .notification-progress > .track {
-    -fx-background-color: #252932;
+    -fx-background-color: -vanta-surface-raised;
     -fx-background-radius: 3px;
     -fx-background-insets: 0;
 }
