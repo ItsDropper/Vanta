@@ -1109,3 +1109,45 @@
 .overengineered-ui .notification-accent {
     -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -42%), 9, 0.2, 0, 0);
 }
+
+
+/* Compact notification sizing is intentionally shared by standard and deluxe UI. */
+.notification {
+    -fx-padding: 9px 12px;
+    -fx-spacing: 6px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+.notification-title {
+    -fx-font-size: 12px;
+    -fx-font-weight: 750;
+}
+.notification-message {
+    -fx-font-size: 11px;
+    -fx-line-spacing: 0;
+}
+.notification-accent {
+    -fx-arc-width: 3px;
+    -fx-arc-height: 3px;
+}
+.notification-close {
+    -fx-font-size: 16px;
+    -fx-padding: 0;
+}
+.notification-progress {
+    -fx-pref-height: 4px;
+    -fx-min-height: 4px;
+    -fx-max-height: 4px;
+}
+.overengineered-ui .notification {
+    -fx-padding: 9px 12px;
+    -fx-background-radius: 11px;
+    -fx-border-radius: 11px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.38), 15, 0.16, 0, 4);
+}
+.overengineered-ui .notification-title {
+    -fx-font-size: 12px;
+}
+.overengineered-ui .notification-accent {
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -42%), 6, 0.16, 0, 0);
+}
