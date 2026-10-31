@@ -6,6 +6,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
@@ -36,6 +37,7 @@ public final class CommandPalette extends StackPane {
     private final List<Command> commands;
     private final TextField searchField = new TextField();
     private final VBox resultList = new VBox(4);
+    private final ScrollPane resultScroll = new ScrollPane(resultList);
     private final Label emptyState = new Label("No matching commands");
     private final List<Command> visibleCommands = new ArrayList<>();
     private int selectedIndex;
@@ -72,6 +74,13 @@ public final class CommandPalette extends StackPane {
         emptyState.getStyleClass().add("command-palette-empty");
         resultList.setFillWidth(true);
 
+        resultScroll.setFitToWidth(true);
+        resultScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        resultScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        resultScroll.setMaxHeight(360);
+        resultScroll.getStyleClass().add("command-palette-scroll");
+        resultScroll.setAccessibleText("Command search results");
+
         HBox footer = new HBox(12,
                 hint("↑↓", "navigate"),
                 hint("Enter", "open"),
@@ -79,7 +88,7 @@ public final class CommandPalette extends StackPane {
         footer.setAlignment(Pos.CENTER_LEFT);
         footer.getStyleClass().add("command-palette-footer");
 
-        VBox panel = new VBox(14, eyebrow, title, searchField, resultList, footer);
+        VBox panel = new VBox(14, eyebrow, title, searchField, resultScroll, footer);
         panel.getStyleClass().add("command-palette-panel");
         panel.setPadding(new Insets(22));
         panel.setMaxWidth(620);
@@ -193,6 +202,8 @@ public final class CommandPalette extends StackPane {
         shortcut.getStyleClass().add("command-result-shortcut");
 
         Button row = new Button();
+        row.setAccessibleText(command.title() + ". " + command.description()
+                + (command.shortcut().isBlank() ? "" : ". Shortcut: " + command.shortcut()));
         row.setGraphic(new HBox(12, text, shortcut));
         row.setMaxWidth(Double.MAX_VALUE);
         row.setAlignment(Pos.CENTER_LEFT);
@@ -214,6 +225,9 @@ public final class CommandPalette extends StackPane {
     }
 
     private void updateSelection() {
+        if (visibleCommands.size() > 1) {
+            resultScroll.setVvalue((double) selectedIndex / (visibleCommands.size() - 1));
+        }
         for (int i = 0; i < resultList.getChildren().size(); i++) {
             resultList.getChildren().get(i).getStyleClass().remove("command-result-selected");
             if (i == selectedIndex && resultList.getChildren().get(i) instanceof Button button) {
