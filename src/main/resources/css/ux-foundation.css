@@ -906,3 +906,11 @@
 .settings-compact-navigation .combo-box-popup .list-cell:selected {
     -fx-background-color: -vanta-accent-soft;
 }
+
+.onboarding-scroll,
+.onboarding-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+.onboarding-scroll { -fx-padding: 0; }
