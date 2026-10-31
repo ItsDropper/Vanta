@@ -135,7 +135,7 @@
 }
 
 .title-bar-button:hover { -fx-background-color: -vanta-surface-raised; }
-.title-bar-close:hover { -fx-background-color: #B93848; }
+.title-bar-close:hover { -fx-background-color: -vanta-danger; }
 .title-bar-button SVGPath, .title-bar-close SVGPath {
     -fx-stroke: -vanta-muted;
     -fx-stroke-width: 1.4px;
