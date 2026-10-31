@@ -67,7 +67,7 @@
 .download-task-name {
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
-    -fx-font-weight: 750;
+    -fx-font-weight: 700;
 }
 .download-task-source {
     -fx-text-fill: -vantamuted;
