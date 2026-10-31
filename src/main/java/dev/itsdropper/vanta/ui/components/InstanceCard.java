@@ -330,6 +330,39 @@ public class InstanceCard extends StackPane {
                 right
         );
 
+        /*
+         * Keep the primary actions usable in narrow launcher windows.
+         * Secondary status text yields space before the action controls do.
+         */
+        widthProperty().addListener((observable, oldWidth, newWidth) -> {
+            double width = newWidth.doubleValue();
+
+            if (width < 520) {
+                content.setSpacing(width < 420 ? 9 : 12);
+                content.setPadding(new Insets(width < 420 ? 12 : 14, width < 420 ? 14 : 16,
+                        width < 420 ? 12 : 14, width < 420 ? 14 : 16));
+                statusLabel.setVisible(false);
+                statusLabel.setManaged(false);
+                settingsButton.setText("⚙");
+                settingsButton.setMinWidth(36);
+                settingsButton.setPrefWidth(36);
+                settingsButton.setMaxWidth(36);
+                right.setSpacing(7);
+                right.setPadding(new Insets(0, 34, 0, 0));
+            } else {
+                content.setSpacing(18);
+                content.setPadding(new Insets(18, 20, 18, 20));
+                statusLabel.setVisible(true);
+                statusLabel.setManaged(true);
+                settingsButton.setText("OPTIONS");
+                settingsButton.setMinWidth(82);
+                settingsButton.setPrefWidth(82);
+                settingsButton.setMaxWidth(82);
+                right.setSpacing(10);
+                right.setPadding(new Insets(0, 42, 0, 0));
+            }
+        });
+
         StackPane.setAlignment(
                 content,
                 Pos.CENTER
