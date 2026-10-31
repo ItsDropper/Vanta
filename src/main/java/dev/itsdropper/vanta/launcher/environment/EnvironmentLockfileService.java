@@ -104,6 +104,88 @@ public final class EnvironmentLockfileService {
      * Captures the instance and atomically replaces its local lockfile.
      * The lockfile is stored under .vanta/ and contains no absolute paths.
      */
+
+    /**
+     * Compares a live instance with a previously captured lockfile.
+     * The comparison is read-only and reports only observed drift; it never reconciles files.
+     */
+    public EnvironmentDriftReport compare(
+            Instance instance,
+            EnvironmentLockfile baseline
+    ) throws IOException {
+        validateLockfile(baseline);
+        EnvironmentLockfile current = capture(instance);
+        List<EnvironmentDriftReport.Change> changes = new ArrayList<>();
+
+        if (!baseline.minecraftVersion().equals(current.minecraftVersion())) {
+            changes.add(new EnvironmentDriftReport.Change(
+                    EnvironmentDriftReport.ChangeType.MINECRAFT_VERSION_CHANGED,
+                    null, null, null,
+                    "Minecraft version changed from " + baseline.minecraftVersion()
+                            + " to " + current.minecraftVersion()
+            ));
+        }
+
+        String expectedLoader = loaderIdentity(baseline.loader(), baseline.loaderVersion());
+        String actualLoader = loaderIdentity(current.loader(), current.loaderVersion());
+        if (!expectedLoader.equals(actualLoader)) {
+            changes.add(new EnvironmentDriftReport.Change(
+                    EnvironmentDriftReport.ChangeType.LOADER_CHANGED,
+                    null, null, null,
+                    "Loader changed from " + expectedLoader + " to " + actualLoader
+            ));
+        }
+
+        java.util.Map<String, EnvironmentLockfile.ModArtifact> expected = new java.util.TreeMap<>();
+        for (EnvironmentLockfile.ModArtifact artifact : baseline.mods()) {
+            expected.put(artifact.filename().toLowerCase(java.util.Locale.ROOT), artifact);
+        }
+
+        java.util.Map<String, EnvironmentLockfile.ModArtifact> actual = new java.util.TreeMap<>();
+        for (EnvironmentLockfile.ModArtifact artifact : current.mods()) {
+            actual.put(artifact.filename().toLowerCase(java.util.Locale.ROOT), artifact);
+        }
+
+        for (var entry : expected.entrySet()) {
+            EnvironmentLockfile.ModArtifact observed = actual.get(entry.getKey());
+            EnvironmentLockfile.ModArtifact recorded = entry.getValue();
+            if (observed == null) {
+                changes.add(new EnvironmentDriftReport.Change(
+                        EnvironmentDriftReport.ChangeType.MOD_REMOVED,
+                        recorded.filename(), recorded.sha256(), null,
+                        "Previously recorded mod file is missing"
+                ));
+            } else if (!recorded.sha256().equalsIgnoreCase(observed.sha256())) {
+                changes.add(new EnvironmentDriftReport.Change(
+                        EnvironmentDriftReport.ChangeType.MOD_MODIFIED,
+                        observed.filename(), recorded.sha256(), observed.sha256(),
+                        "File contents differ from the recorded SHA-256"
+                ));
+            }
+        }
+
+        for (var entry : actual.entrySet()) {
+            if (!expected.containsKey(entry.getKey())) {
+                EnvironmentLockfile.ModArtifact artifact = entry.getValue();
+                changes.add(new EnvironmentDriftReport.Change(
+                        EnvironmentDriftReport.ChangeType.MOD_ADDED,
+                        artifact.filename(), null, artifact.sha256(),
+                        "File is present but was not recorded in the lockfile"
+                ));
+            }
+        }
+
+        return new EnvironmentDriftReport(
+                baseline.generatedAt(),
+                current.generatedAt(),
+                changes
+        );
+    }
+
+    private static String loaderIdentity(String loader, String version) {
+        return loader + " " + (version == null || version.isBlank() ? "(version unknown)" : version);
+    }
+
     public Path write(Instance instance) throws IOException {
         EnvironmentLockfile lockfile = capture(instance);
         Path instanceDirectory = instance.getDirectory().toAbsolutePath().normalize();
