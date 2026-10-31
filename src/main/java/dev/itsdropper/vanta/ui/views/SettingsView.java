@@ -59,7 +59,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     private final VBox content = new VBox(22);
     private final ComboBox<String> compactNavigation = new ComboBox<>();
     private final HBox compactNavigationBar = new HBox(12);
-    private final Consumer<Account> accountListener = account -> refreshDebugAccess();
+    private final AccountService.AccountListener accountListener = account -> refreshDebugAccess();
     private boolean accountListenerRegistered;
     private boolean updatingNavigation;
 
