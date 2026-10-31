@@ -137,20 +137,20 @@ public final class ThemeManager {
                 Math.round(color.getBlue() * 255);
 
         node.setStyle(
-                "-vanta-accent: " + effectiveAccent + ";" +
-                "-vanta-accent-soft: " + soft + ";" +
-                "-vanta-accent-hover: " + accentHover + ";" +
-                "-vanta-accent-rgb: " + rgb + ";" +
-                "-vanta-bg: " + background + ";" +
-                "-vanta-surface: " + surface + ";" +
-                "-vanta-surface-raised: " + raised + ";" +
-                "-vanta-surface-hover: " + hoverSurface + ";" +
-                "-vanta-border: " + border + ";" +
-                "-vanta-text: " + textColor + ";" +
-                "-vanta-muted: " + muted + ";" +
-                "-vanta-subtle: " + base.subtle() + ";" +
-                "-vanta-danger: " + danger + ";" +
-                "-vanta-success: " + success + ";"
+                "-vantaaccent: " + effectiveAccent + ";" +
+                "-vantaaccentsoft: " + soft + ";" +
+                "-vantaaccenthover: " + accentHover + ";" +
+                "-vantaaccentrgb: " + rgb + ";" +
+                "-vantabg: " + background + ";" +
+                "-vantasurface: " + surface + ";" +
+                "-vantasurfaceraised: " + raised + ";" +
+                "-vantasurfacehover: " + hoverSurface + ";" +
+                "-vantaborder: " + border + ";" +
+                "-vantatext: " + textColor + ";" +
+                "-vantamuted: " + muted + ";" +
+                "-vantasubtle: " + base.subtle() + ";" +
+                "-vantadanger: " + danger + ";" +
+                "-vantasuccess: " + success + ";"
         );
     }
 
