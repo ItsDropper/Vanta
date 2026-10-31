@@ -16,12 +16,23 @@ public record EnvironmentLockfile(
         String loader,
         String loaderVersion,
         Integer javaMajorVersion,
-        List<ModArtifact> mods
+        List<ModArtifact> mods,
+        List<EnvironmentArtifact> environmentFiles
 ) {
     public static final int CURRENT_SCHEMA_VERSION = 1;
 
     public EnvironmentLockfile {
         mods = mods == null ? List.of() : List.copyOf(mods);
+        environmentFiles = environmentFiles == null ? List.of() : List.copyOf(environmentFiles);
+    }
+
+    /** Files from resourcepacks/, shaderpacks/, and config/, stored with portable relative paths. */
+    public record EnvironmentArtifact(
+            String category,
+            String relativePath,
+            long sizeBytes,
+            String sha256
+    ) {
     }
 
     public record ModArtifact(
