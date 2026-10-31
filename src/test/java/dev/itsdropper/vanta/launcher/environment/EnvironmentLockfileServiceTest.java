@@ -92,6 +92,28 @@ class EnvironmentLockfileServiceTest {
                 .anyMatch(file -> file.relativePath().contains(instanceDirectory.toString())));
     }
 
+
+    @Test
+    void readsPreviousSchemaOneLockfilesWithoutEnvironmentFileMetadata() throws Exception {
+        Path lockfilePath = temporaryDirectory.resolve("legacy-v1.json");
+        Files.writeString(lockfilePath, """
+                {
+                  "schemaVersion": 1,
+                  "generatedAt": "2026-10-30T00:00:00Z",
+                  "instanceId": "legacy",
+                  "minecraftVersion": "1.21.1",
+                  "loader": "fabric",
+                  "loaderVersion": "0.16.9",
+                  "mods": []
+                }
+                """);
+
+        EnvironmentLockfile loaded = new EnvironmentLockfileService().read(lockfilePath);
+
+        assertEquals(1, loaded.schemaVersion());
+        assertTrue(loaded.environmentFiles().isEmpty());
+    }
+
     @Test
     void rejectsEnvironmentArtifactPathTraversalInSavedLockfile() throws Exception {
         Path lockfilePath = temporaryDirectory.resolve("traversal.json");
