@@ -12,7 +12,7 @@ The differentiator should be the quality of the system connecting installation s
 
 The first Environment Engine foundation is now present in the codebase:
 
-- A versioned `EnvironmentLockfile` model with portable, relative artifact identities.
+- A versioned `EnvironmentLockfile` model with portable, relative artifact identities (schema 2 writes; schema 1 remains readable).
 - A read-only capture service that records every regular file directly inside an instance's `mods/` directory, including files whose mod metadata Vanta cannot identify.
 - SHA-256 and byte-size recording for each artifact.
 - Fabric mod ID/version metadata when the existing scanner can read it.
