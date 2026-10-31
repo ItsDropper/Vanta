@@ -187,7 +187,7 @@ public class InstancesView extends VBox {
 
         sortField = new ComboBox<>();
         sortField.getStyleClass().add("instance-sort-field");
-        sortField.getItems().setAll("Name (A–Z)", "Minecraft version", "Loader");
+        sortField.getItems().setAll("Name (A–Z)", "Name (Z–A)", "Version (newest)", "Loader");
         sortField.setValue("Name (A–Z)");
         sortField.setPromptText("Sort instances");
         sortField.setAccessibleText("Sort installed Minecraft instances");
@@ -463,9 +463,11 @@ public class InstancesView extends VBox {
         );
         Comparator<Instance> selectedOrder = switch (sortField.getValue() == null
                 ? "Name (A–Z)" : sortField.getValue()) {
-            case "Minecraft version" -> Comparator.<Instance, String>comparing(
-                    instance -> safeLower(instance.getMinecraftVersion())
-            ).thenComparing(nameOrder);
+            case "Name (Z–A)" -> nameOrder.reversed();
+            case "Version (newest)" -> (left, right) -> {
+                int versionOrder = compareNatural(right.getMinecraftVersion(), left.getMinecraftVersion());
+                return versionOrder != 0 ? versionOrder : nameOrder.compare(left, right);
+            };
             case "Loader" -> Comparator.<Instance, String>comparing(
                     instance -> safeLower(instance.getDisplayLoader())
             ).thenComparing(nameOrder);
@@ -495,6 +497,42 @@ public class InstancesView extends VBox {
 
     private static String safeLower(String value) {
         return value == null ? "" : value.toLowerCase(Locale.ROOT);
+    }
+
+    private static int compareNatural(String left, String right) {
+        String a = safeLower(left);
+        String b = safeLower(right);
+        int ai = 0;
+        int bi = 0;
+        while (ai < a.length() && bi < b.length()) {
+            char ac = a.charAt(ai);
+            char bc = b.charAt(bi);
+            if (Character.isDigit(ac) && Character.isDigit(bc)) {
+                int aEnd = ai;
+                int bEnd = bi;
+                while (aEnd < a.length() && Character.isDigit(a.charAt(aEnd))) aEnd++;
+                while (bEnd < b.length() && Character.isDigit(b.charAt(bEnd))) bEnd++;
+                int aSignificant = ai;
+                int bSignificant = bi;
+                while (aSignificant < aEnd && a.charAt(aSignificant) == '0') aSignificant++;
+                while (bSignificant < bEnd && b.charAt(bSignificant) == '0') bSignificant++;
+                int aLength = aEnd - aSignificant;
+                int bLength = bEnd - bSignificant;
+                if (aLength != bLength) return Integer.compare(aLength, bLength);
+                for (int offset = 0; offset < aLength; offset++) {
+                    int digitOrder = Character.compare(a.charAt(aSignificant + offset), b.charAt(bSignificant + offset));
+                    if (digitOrder != 0) return digitOrder;
+                }
+                ai = aEnd;
+                bi = bEnd;
+                continue;
+            }
+            int characterOrder = Character.compare(ac, bc);
+            if (characterOrder != 0) return characterOrder;
+            ai++;
+            bi++;
+        }
+        return Integer.compare(a.length() - ai, b.length() - bi);
     }
 
     private VBox createSearchEmptyState(String query) {
