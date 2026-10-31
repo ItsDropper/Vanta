@@ -312,30 +312,7 @@ public class LauncherView {
                 this::showPage
         );
 
-        commandPalette = new CommandPalette(List.of(
-                new CommandPalette.Command("Home", "Return to your launcher dashboard", "Ctrl+1",
-                        () -> showPage(Sidebar.Page.HOME)),
-                new CommandPalette.Command("Instances", "Manage, back up and restore installations", "Ctrl+2",
-                        () -> showPage(Sidebar.Page.INSTANCES)),
-                new CommandPalette.Command("Mods", "Manage global mods and browse Modrinth", "Ctrl+3",
-                        () -> showPage(Sidebar.Page.MODS)),
-                new CommandPalette.Command("State Center", "Inspect and repair Minecraft installations", "Ctrl+4",
-                        () -> showPage(Sidebar.Page.STATE)),
-                new CommandPalette.Command("Skin Changer", "Manage your Minecraft appearance", "Ctrl+5",
-                        () -> showPage(Sidebar.Page.SKIN)),
-                new CommandPalette.Command("Accounts", "Switch or manage Microsoft accounts", "Ctrl+6",
-                        () -> showPage(Sidebar.Page.ACCOUNTS)),
-                new CommandPalette.Command("Settings", "Configure Vanta and its runtime", "Ctrl+7",
-                        () -> showPage(Sidebar.Page.SETTINGS)),
-                new CommandPalette.Command("Download Center", "Review active and completed downloads", "Ctrl+8",
-                        () -> showPage(Sidebar.Page.DOWNLOADS)),
-                new CommandPalette.Command("Server Manager", "Manage and connect to Minecraft servers", "Ctrl+9",
-                        () -> showPage(Sidebar.Page.SERVERS)),
-                new CommandPalette.Command("Create instance", "Install vanilla, Fabric, Forge or a modpack", "Ctrl+N",
-                        this::showCreateInstanceView),
-                new CommandPalette.Command("Import instance", "Import an existing Minecraft profile", "",
-                        this::showImportInstanceView)
-        ));
+        commandPalette = new CommandPalette(createCommands());
         root.getChildren().add(commandPalette);
         StackPane.setAlignment(commandPalette, javafx.geometry.Pos.CENTER);
 
@@ -356,6 +333,35 @@ public class LauncherView {
         if (OnboardingManager.shouldShow()) {
             Platform.runLater(this::showOnboarding);
         }
+    }
+
+    private List<CommandPalette.Command> createCommands() {
+        List<CommandPalette.Command> commands = new ArrayList<>();
+
+        // Sidebar.Page is the single source of truth for navigation labels,
+        // descriptions and keyboard shortcuts used by both navigation surfaces.
+        for (Sidebar.Page page : Sidebar.Page.values()) {
+            commands.add(new CommandPalette.Command(
+                    page.title(),
+                    page.description(),
+                    "Ctrl+" + page.shortcutNumber(),
+                    () -> showPage(page)
+            ));
+        }
+
+        commands.add(new CommandPalette.Command(
+                "Create instance",
+                "Install vanilla, Fabric, Forge or a modpack",
+                "Ctrl+N",
+                this::showCreateInstanceView
+        ));
+        commands.add(new CommandPalette.Command(
+                "Import instance",
+                "Import an existing Minecraft profile",
+                "",
+                this::showImportInstanceView
+        ));
+        return List.copyOf(commands);
     }
 
     private void showOnboarding() {

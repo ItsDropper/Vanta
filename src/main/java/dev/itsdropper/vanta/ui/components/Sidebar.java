@@ -21,28 +21,34 @@ import java.util.function.Consumer;
 public class Sidebar extends VBox {
 
     public enum Page {
-        HOME("Home", 1, IconView.Type.HOME),
-        INSTANCES("Instances", 2, IconView.Type.INSTANCES),
-        MODS("Mods", 3, IconView.Type.MODS),
-        STATE("State", 4, IconView.Type.SHIELD),
-        SKIN("Skin changer", 5, IconView.Type.SKIN),
-        ACCOUNTS("Accounts", 6, IconView.Type.ACCOUNTS),
-        SETTINGS("Settings", 7, IconView.Type.SETTINGS),
-        DOWNLOADS("Downloads", 8, IconView.Type.DOWNLOAD),
-        SERVERS("Server Manager", 9, IconView.Type.TERMINAL);
+        HOME("Home", 1, IconView.Type.HOME, "Return to your launcher dashboard"),
+        INSTANCES("Instances", 2, IconView.Type.INSTANCES, "Manage, back up and restore installations"),
+        MODS("Mods", 3, IconView.Type.MODS, "Manage global mods and browse Modrinth"),
+        STATE("State Center", 4, IconView.Type.SHIELD, "Inspect and repair Minecraft installations"),
+        SKIN("Skin Changer", 5, IconView.Type.SKIN, "Manage your Minecraft appearance"),
+        ACCOUNTS("Accounts", 6, IconView.Type.ACCOUNTS, "Switch or manage Microsoft accounts"),
+        SETTINGS("Settings", 7, IconView.Type.SETTINGS, "Configure Vanta and its runtime"),
+        DOWNLOADS("Download Center", 8, IconView.Type.DOWNLOAD, "Review active and completed downloads"),
+        SERVERS("Server Manager", 9, IconView.Type.TERMINAL, "Manage and connect to Minecraft servers");
 
         private final String title;
         private final int shortcutNumber;
         private final IconView.Type iconType;
+        private final String description;
 
-        Page(String title, int shortcutNumber, IconView.Type iconType) {
+        Page(String title, int shortcutNumber, IconView.Type iconType, String description) {
             this.title = title;
             this.shortcutNumber = shortcutNumber;
             this.iconType = iconType;
+            this.description = description;
         }
 
         public String title() {
             return title;
+        }
+
+        public String description() {
+            return description;
         }
 
         public int shortcutNumber() {
