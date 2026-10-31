@@ -1,8 +1,8 @@
 .vanta-loading {
     -fx-background-color:
         linear-gradient(to bottom,
-            -vanta-bg 0%,
-            -vanta-bg 100%);
+            -vantabg 0%,
+            -vantabg 100%);
     -fx-background-radius: 14px;
 }
 
@@ -11,12 +11,12 @@
 }
 
 .loading-mark {
-    -fx-fill: -vanta-accent;
-    -fx-effect: dropshadow(gaussian, derive(-vanta-accent, -35%), 10, 0.18, 0, 0);
+    -fx-fill: -vantaaccent;
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -35%), 10, 0.18, 0, 0);
 }
 
 .loading-logo {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 28px;
     -fx-font-weight: 800;
@@ -24,7 +24,7 @@
 }
 
 .loading-subtitle {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 9px;
     -fx-font-weight: 700;
@@ -33,7 +33,7 @@
 
 .loading-status {
     -fx-padding: 14px 0 2px 0;
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 9px;
     -fx-font-weight: 600;
@@ -45,7 +45,7 @@
     -fx-max-width: 280px;
     -fx-pref-height: 4px;
     -fx-max-height: 4px;
-    -fx-background-color: -vanta-border;
+    -fx-background-color: -vantaborder;
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
 }
@@ -53,8 +53,8 @@
 .loading-progress-fill {
     -fx-pref-height: 4px;
     -fx-max-height: 4px;
-    -fx-background-color: -vanta-accent;
+    -fx-background-color: -vantaaccent;
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
-    -fx-effect: dropshadow(gaussian, derive(-vanta-accent, -35%), 7, 0.18, 0, 0);
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -35%), 7, 0.18, 0, 0);
 }
