@@ -6,6 +6,8 @@ import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.HexFormat;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,7 +32,10 @@ class EnvironmentLockfileServiceTest {
         assertEquals("test-instance", lockfile.instanceId());
         assertEquals(1, lockfile.mods().size());
         assertEquals("unmanaged.bin", lockfile.mods().getFirst().filename());
-        assertEquals(64, lockfile.mods().getFirst().sha256().length());
+        assertEquals(HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(contents)),
+                lockfile.mods().getFirst().sha256());
+        assertEquals(contents.length, lockfile.mods().getFirst().sizeBytes());
+        assertNull(lockfile.javaMajorVersion());
         assertNull(lockfile.mods().getFirst().modId());
         assertNull(lockfile.mods().getFirst().modVersion());
         assertFalse(lockfile.generatedAt().contains(instanceDirectory.toString()));
