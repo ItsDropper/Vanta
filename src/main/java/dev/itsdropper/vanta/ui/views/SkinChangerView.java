@@ -134,6 +134,7 @@ public final class SkinChangerView extends VBox {
         HBox layerControls = new HBox(12, hatLayer, jacketLayer, sleevesLayer, trousersLayer);
         layerControls.setAlignment(Pos.CENTER_LEFT);
         layerControls.setSpacing(12);
+        updateLayerControls(null);
 
         Label capeHeading = new Label("Owned capes");
         capeHeading.getStyleClass().add("accounts-card-name");
@@ -334,7 +335,8 @@ public final class SkinChangerView extends VBox {
                     .filter(CapeOption::active).findFirst().orElse(noCape);
             capeChoice.setValue(selectedCape);
             modelPreview.setCape(result.capeImage());
-            boolean slim = "slim".equalsIgnoreCase(result.variant());
+            boolean slim = result.image().getHeight() >= 64
+                    && "slim".equalsIgnoreCase(result.variant());
             modelChoice.setValue(slim ? "Slim (Alex)" : "Classic (Steve)");
             if (selectedFile == null) {
                 modelPreview.setSkin(displayedSkin, slim);
@@ -349,6 +351,8 @@ public final class SkinChangerView extends VBox {
         for (CheckBox control : List.of(hatLayer, jacketLayer, sleevesLayer, trousersLayer)) {
             control.setDisable(!supported);
         }
+        modelChoice.setDisable(!supported || busy
+                || accountService.getCurrentAccount() == null);
     }
 
     private void chooseSkin() {
@@ -385,8 +389,11 @@ public final class SkinChangerView extends VBox {
 
             selectedFile = path;
             displayedSkin = image;
+            if (height == 32) {
+                modelChoice.setValue("Classic (Steve)");
+            }
             updateLayerControls(displayedSkin);
-            boolean slim = modelChoice.getValue().startsWith("Slim");
+            boolean slim = height >= 64 && modelChoice.getValue().startsWith("Slim");
             modelPreview.setSkin(image, slim);
             fileLabel.setText("Selected: " + file.getName());
             statusLabel.setText("Skin loaded into the 3D preview. Applying it to your Minecraft account...");
