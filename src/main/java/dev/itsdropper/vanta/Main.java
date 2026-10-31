@@ -116,7 +116,8 @@ public class Main extends Application {
                 "/css/ux-foundation.css",
                 "/css/download-center.css",
                 "/css/server-manager.css",
-                "/css/home-premium.css"
+                "/css/home-premium.css",
+                "/css/command-palette.css"
         };
 
         for (String stylesheet : stylesheets) {

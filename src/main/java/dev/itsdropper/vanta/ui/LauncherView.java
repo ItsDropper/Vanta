@@ -16,6 +16,7 @@ import dev.itsdropper.vanta.launcher.modrinth.ModrinthProject;
 import dev.itsdropper.vanta.launcher.service.*;
 import dev.itsdropper.vanta.launcher.update.*;
 import dev.itsdropper.vanta.ui.components.NotificationManager;
+import dev.itsdropper.vanta.ui.components.CommandPalette;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.components.Sidebar;
@@ -56,6 +57,7 @@ public class LauncherView {
     private final ServerManagerView serverManagerView;
 
     private final NotificationManager notifications;
+    private final CommandPalette commandPalette;
 
     private final TitleBar titleBar;
     private LaunchService.LaunchState previousLaunchState = LaunchService.LaunchState.IDLE;
@@ -310,6 +312,33 @@ public class LauncherView {
                 this::showPage
         );
 
+        commandPalette = new CommandPalette(List.of(
+                new CommandPalette.Command("Home", "Return to your launcher dashboard", "Ctrl+1",
+                        () -> showPage(Sidebar.Page.HOME)),
+                new CommandPalette.Command("Instances", "Manage, back up and restore installations", "Ctrl+2",
+                        () -> showPage(Sidebar.Page.INSTANCES)),
+                new CommandPalette.Command("Mods", "Manage global mods and browse Modrinth", "Ctrl+3",
+                        () -> showPage(Sidebar.Page.MODS)),
+                new CommandPalette.Command("State Center", "Inspect and repair Minecraft installations", "Ctrl+4",
+                        () -> showPage(Sidebar.Page.STATE)),
+                new CommandPalette.Command("Skin Changer", "Manage your Minecraft appearance", "Ctrl+5",
+                        () -> showPage(Sidebar.Page.SKIN)),
+                new CommandPalette.Command("Accounts", "Switch or manage Microsoft accounts", "Ctrl+6",
+                        () -> showPage(Sidebar.Page.ACCOUNTS)),
+                new CommandPalette.Command("Settings", "Configure Vanta and its runtime", "Ctrl+7",
+                        () -> showPage(Sidebar.Page.SETTINGS)),
+                new CommandPalette.Command("Download Center", "Review active and completed downloads", "Ctrl+8",
+                        () -> showPage(Sidebar.Page.DOWNLOADS)),
+                new CommandPalette.Command("Server Manager", "Manage and connect to Minecraft servers", "Ctrl+9",
+                        () -> showPage(Sidebar.Page.SERVERS)),
+                new CommandPalette.Command("Create instance", "Install vanilla, Fabric, Forge or a modpack", "Ctrl+N",
+                        this::showCreateInstanceView),
+                new CommandPalette.Command("Import instance", "Import an existing Minecraft profile", "",
+                        this::showImportInstanceView)
+        ));
+        root.getChildren().add(commandPalette);
+        StackPane.setAlignment(commandPalette, javafx.geometry.Pos.CENTER);
+
         AnimationUtils.installInteractiveAnimations(sidebar);
         AnimationUtils.installInteractiveAnimations(titleBar);
 
@@ -353,6 +382,20 @@ public class LauncherView {
      */
     private void handleKeyboardShortcut(javafx.scene.input.KeyEvent event) {
         if (!event.isControlDown() || event.isAltDown() || event.isMetaDown()) {
+            return;
+        }
+
+        if (event.getCode() == javafx.scene.input.KeyCode.K) {
+            if (commandPalette.isShowing()) {
+                commandPalette.hide();
+            } else {
+                commandPalette.show();
+            }
+            event.consume();
+            return;
+        }
+
+        if (commandPalette.isShowing()) {
             return;
         }
 
