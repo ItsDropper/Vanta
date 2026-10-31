@@ -6,6 +6,7 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.AccessibleRole;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
@@ -825,7 +826,8 @@ public class GlobalModsView extends VBox {
 
         card.setOnMouseClicked(event -> {
             if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY
-                    && !(event.getTarget() instanceof ButtonBase)) {
+                    && event.getTarget() instanceof Node target
+                    && !isInsideButton(target, card)) {
                 openDetails.run();
             }
         });
@@ -837,6 +839,15 @@ public class GlobalModsView extends VBox {
                 event.consume();
             }
         });
+    }
+
+    private static boolean isInsideButton(Node target, Node boundary) {
+        for (Node current = target; current != null && current != boundary; current = current.getParent()) {
+            if (current instanceof ButtonBase) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // =============================================================
