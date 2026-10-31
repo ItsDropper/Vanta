@@ -7,10 +7,10 @@
 .instance-settings-card,
 .mod-details-card,
 .mod-details-header {
-    -fx-background-color: -vanta-surface;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 10px;
 
-    -fx-border-color: -vanta-border;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
 }
@@ -18,23 +18,23 @@
 .info-card:hover,
 .account-card:hover,
 .instance-card:hover {
-    -fx-background-color: -vanta-surface-hover;
-    -fx-border-color: -vanta-border;
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: -vantaborder;
 }
 
 .card-title {
-    -fx-text-fill: -vanta-accent;
+    -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
 }
 
 .card-main {
-    -fx-text-fill: -vanta-text;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
 
 .card-secondary {
-    -fx-text-fill: -vanta-muted;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
 }
