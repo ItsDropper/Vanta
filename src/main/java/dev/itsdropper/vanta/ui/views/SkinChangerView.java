@@ -92,10 +92,10 @@ public final class SkinChangerView extends VBox {
 
         VBox previewCard = new VBox(10);
         previewCard.setAlignment(Pos.CENTER);
-        previewCard.setPadding(new Insets(18, 18, 20, 18));
+        previewCard.setPadding(new Insets(18, 12, 20, 12));
         previewCard.getStyleClass().add("accounts-hero");
-        previewCard.setMinWidth(280);
-        previewCard.setPrefWidth(320);
+        previewCard.setMinWidth(264);
+        previewCard.setPrefWidth(300);
         previewCard.setMaxWidth(320);
         Label previewHeading = new Label("Player preview");
         previewHeading.getStyleClass().add("accounts-card-name");
