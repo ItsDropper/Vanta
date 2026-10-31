@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * Portable description of the resolved, locally observed parts of a Vanta instance.
  *
- * <p>Paths are intentionally relative (filenames only). Machine-specific Java paths,
+ * <p>Artifact paths are intentionally relative to their managed directory roots. Machine-specific Java paths,
  * account data, worlds, and private server details do not belong in this manifest.</p>
  */
 public record EnvironmentLockfile(
