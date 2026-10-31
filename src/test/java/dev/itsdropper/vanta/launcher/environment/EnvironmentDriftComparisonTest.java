@@ -53,6 +53,30 @@ class EnvironmentDriftComparisonTest {
     }
 
     @Test
+    void rejectsBaselineOwnedByAnotherInstance() throws Exception {
+        Path firstDirectory = Files.createDirectory(temporaryDirectory.resolve("first"));
+        Path secondDirectory = Files.createDirectory(temporaryDirectory.resolve("second"));
+        Files.createDirectory(firstDirectory.resolve("mods"));
+        Files.createDirectory(secondDirectory.resolve("mods"));
+
+        Instance first = new Instance(
+                "first-id", "First", "1.21.1", "fabric", "0.16.9", firstDirectory
+        );
+        Instance second = new Instance(
+                "second-id", "Second", "1.21.1", "fabric", "0.16.9", secondDirectory
+        );
+
+        EnvironmentLockfileService service = new EnvironmentLockfileService();
+        EnvironmentLockfile baseline = service.capture(first);
+
+        java.io.IOException failure = assertThrows(
+                java.io.IOException.class,
+                () -> service.compare(second, baseline)
+        );
+        assertTrue(failure.getMessage().contains("different instance"));
+    }
+
+    @Test
     void reportsCleanWhenLiveEnvironmentMatchesBaseline() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("clean-instance"));
         Path mods = Files.createDirectory(instanceDirectory.resolve("mods"));
