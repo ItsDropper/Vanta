@@ -706,7 +706,7 @@ public class InstanceCard extends StackPane {
         scene.getStylesheets().add(
                 getClass()
                         .getResource(
-                                "/css/instances.css"
+                                "/css/library.css"
                         )
                         .toExternalForm()
         );
