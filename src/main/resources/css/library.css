@@ -1192,3 +1192,44 @@
     -fx-background-color: -vantaaccent;
     -fx-border-color: -vantaaccent;
 }
+
+/* Instance library: an editorial list instead of a wall of identical tiles. */
+.instances-page .instance-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+}
+.instances-page .instance-card:hover {
+    -fx-background-color: derive(-vantabg, 5%);
+    -fx-border-color: transparent transparent derive(-vantaborder, 30%) transparent;
+}
+.instances-page .instance-card .instance-icon-box {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+    -fx-border-color: derive(-vantaborder, 12%);
+}
+.instances-page .instance-card .instance-name {
+    -fx-font-size: 16px;
+    -fx-font-weight: 700;
+}
+.instances-page .instance-card .instance-version { -fx-font-size: 11px; }
+.instances-page .instance-card .instance-play-button {
+    -fx-background-color: #d5e4d8;
+    -fx-text-fill: #102019;
+    -fx-background-radius: 6px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+}
+.instances-page .instance-card .instance-play-button:hover { -fx-background-color: #ffffff; }
+.instances-page .instance-card .instance-settings-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -vantamuted;
+}
+.instances-page .instance-card .instance-settings-button:hover {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
+}
