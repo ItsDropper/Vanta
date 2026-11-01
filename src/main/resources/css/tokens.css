@@ -16,10 +16,6 @@
 }
 
 .launcher {
-    -vantaaccent: #5688ED;
-    -vantaaccentsoft: #1E2D49;
-    -vantaaccenthover: #6E9BF2;
-    -vantaaccentrgb: 86,136,237;
     -fx-background-color: #0b0e13;
     -fx-background-radius: 16px;
     -fx-border-color: #202733;
