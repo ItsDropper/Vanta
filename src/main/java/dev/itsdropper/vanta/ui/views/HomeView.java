@@ -196,32 +196,29 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private VBox createFeaturedSection() {
-        Label eyebrow = new Label("YOUR WORLD, ONE CLICK AWAY");
-        eyebrow.getStyleClass().add("home-featured-section-eyebrow");
+        Label eyebrow = new Label("THE WORLD YOU LEFT BEHIND");
+        eyebrow.setStyle("-fx-text-fill: #9dbba5; -fx-font-size: 9px; -fx-font-weight: 900; -fx-letter-spacing: 2px;");
+        Label subtitle = new Label("Your last session is always one click away.");
+        subtitle.setStyle("-fx-text-fill: #819087; -fx-font-size: 11px;");
 
-        Label subtitle = new Label("Pick up where you left off.");
-        subtitle.getStyleClass().add("home-featured-section-subtitle");
-
-        Label loading = new Label("Loading your Minecraft library...");
-        loading.getStyleClass().add("home-featured-loading");
+        Label loading = new Label("Preparing your worlds...");
+        loading.setStyle("-fx-text-fill: #a9b8ad; -fx-font-size: 12px; -fx-padding: 22px;");
         featuredContainer.getStyleClass().add("home-featured-container");
         featuredContainer.getChildren().setAll(loading);
-        featuredContainer.setMinHeight(220);
+        featuredContainer.setMinHeight(292);
+        featuredContainer.setMaxWidth(Double.MAX_VALUE);
 
-        VBox section = new VBox(10, eyebrow, subtitle, featuredContainer);
+        VBox section = new VBox(11, eyebrow, subtitle, featuredContainer);
         section.getStyleClass().add("home-featured-section");
         section.setFillWidth(true);
         return section;
     }
 
     private VBox createRecentInstancesSection() {
-        Label recentTitle = new Label("RECENTLY PLAYED");
-        recentTitle.getStyleClass().add("home-section-title");
-
-        Label recentSubtitle = new Label(
-                "Jump back into the instances you played most recently."
-        );
-        recentSubtitle.getStyleClass().add("home-section-subtitle");
+        Label recentTitle = new Label("YOUR INSTANCES");
+        recentTitle.setStyle("-fx-text-fill: #edf2ed; -fx-font-size: 15px; -fx-font-weight: 900; -fx-letter-spacing: .4px;");
+        Label recentSubtitle = new Label("Jump back into a world or close a running session.");
+        recentSubtitle.setStyle("-fx-text-fill: #849389; -fx-font-size: 10px;");
 
         recentList = new FlowPane();
         recentList.setHgap(10);
@@ -231,51 +228,48 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         recentList.setMinHeight(0);
         recentList.getStyleClass().add("home-recent-list");
 
-        recentStatus = new Label("Loading instances...");
-        recentStatus.getStyleClass().add("home-recent-status");
+        recentStatus = new Label("SYNCING LOCAL INSTANCES");
+        recentStatus.setStyle("-fx-text-fill: #728176; -fx-font-size: 8px; -fx-font-weight: 900; -fx-letter-spacing: 1.2px;");
 
-        VBox section = new VBox(
-                8,
-                recentTitle,
-                recentSubtitle,
-                recentList,
-                recentStatus
-        );
+        VBox section = new VBox(12, recentTitle, recentSubtitle, recentList, recentStatus);
         section.setFillWidth(true);
+        section.setPadding(new Insets(19));
+        section.setStyle("-fx-background-color: #0d1511; -fx-background-radius: 10px; -fx-border-color: #263a2e; -fx-border-radius: 10px;");
         section.getStyleClass().add("home-recent-section");
         return section;
     }
 
     private VBox createRecentServersCard() {
-        VBox card = new VBox(10);
+        VBox card = new VBox(12);
+        card.setPadding(new Insets(19));
+        card.setStyle("-fx-background-color: #0d1511; -fx-background-radius: 10px; -fx-border-color: #263a2e; -fx-border-radius: 10px;");
         card.getStyleClass().add("home-recent-servers-card");
 
-        Label title = new Label("RECENTLY PLAYED SERVERS");
-        title.getStyleClass().add("home-section-title");
+        HBox heading = new HBox(9);
+        Label marker = new Label("↗");
+        marker.setStyle("-fx-text-fill: #a6c5ad; -fx-font-size: 16px; -fx-font-weight: 900;");
+        Label title = new Label("SERVER HISTORY");
+        title.setStyle("-fx-text-fill: #edf2ed; -fx-font-size: 13px; -fx-font-weight: 900; -fx-letter-spacing: .8px;");
+        heading.setAlignment(Pos.CENTER_LEFT);
+        heading.getChildren().addAll(marker, title);
 
-        Label subtitle = new Label(
-                "Join a server directly with the instance you last used."
-        );
-        subtitle.getStyleClass().add("home-section-subtitle");
+        Label subtitle = new Label("Rejoin a multiplayer world with its original instance.");
+        subtitle.setWrapText(true);
+        subtitle.setStyle("-fx-text-fill: #849389; -fx-font-size: 10px;");
 
         recentServersList = new FlowPane();
-        recentServersList.setHgap(10);
-        recentServersList.setVgap(10);
+        recentServersList.setHgap(8);
+        recentServersList.setVgap(8);
         recentServersList.prefWrapLengthProperty().bind(recentServersList.widthProperty());
         recentServersList.setMaxWidth(Double.MAX_VALUE);
         recentServersList.setMinHeight(0);
         recentServersList.getStyleClass().add("home-server-list");
 
-        recentServersStatus = new Label("No server history yet.");
-        recentServersStatus.getStyleClass().add("home-recent-status");
+        recentServersStatus = new Label("Your recently joined servers will appear here.");
+        recentServersStatus.setWrapText(true);
+        recentServersStatus.setStyle("-fx-text-fill: #728176; -fx-font-size: 9px;");
 
-        card.getChildren().addAll(
-                title,
-                subtitle,
-                recentServersList,
-                recentServersStatus
-        );
-
+        card.getChildren().addAll(heading, subtitle, recentServersList, recentServersStatus);
         return card;
     }
 
