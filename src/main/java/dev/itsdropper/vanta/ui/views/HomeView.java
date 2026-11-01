@@ -3,7 +3,6 @@ package dev.itsdropper.vanta.ui.views;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -66,7 +65,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     private final Consumer<LaunchService.LaunchState> launchStateListener =
             this::onLaunchStateChanged;
     private final Runnable serverHistoryListener =
-            () -> Platform.runLater(this::refreshRecentServers);
+            () -> UiExecutor.shared().dispatchToUi(this::refreshRecentServers);
     private boolean listenersRegistered;
     private final AtomicLong instanceRefreshSequence = new AtomicLong();
     private final AtomicLong serverRefreshSequence = new AtomicLong();
@@ -300,21 +299,21 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
     public void refreshRecentInstances() {
         long request = instanceRefreshSequence.incrementAndGet();
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<Instance> instances =
                         InstanceUsageManager.sortByLastPlayed(
                                 InstanceManager.discoverInstances()
                         );
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (request != instanceRefreshSequence.get()) return;
                     renderRecentInstances(instances);
                 });
 
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (request != instanceRefreshSequence.get()) return;
                     recentList.getChildren().clear();
                     recentStatus.setText("Failed to load recent instances.");
@@ -323,9 +322,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             }
         });
 
-        thread.setDaemon(true);
-        thread.setName("Vanta-Home-Instances");
-        thread.start();
     }
 
     private void renderRecentInstances(List<Instance> instances) {
@@ -704,7 +700,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             return;
         }
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 // Server quick-play is handled by the separate server history section.
                 launchService.launch(instance);
@@ -712,7 +708,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 ex.printStackTrace();
                 LaunchFailure failure = launchService.getLastFailure();
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (failure != null) {
                         onLaunchFailure.accept(failure);
                     } else {
@@ -726,14 +722,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                     }
                 });
             }
-        }, "Vanta-Home-Launch");
-        thread.setDaemon(true);
-        thread.start();
+        });
     }
 
     public void refreshRecentServers() {
         long request = serverRefreshSequence.incrementAndGet();
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<Instance> instances =
                         InstanceManager.discoverInstances();
@@ -741,13 +735,13 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 List<ServerHistoryEntry> history =
                         ServerHistoryManager.getRecent();
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (request != serverRefreshSequence.get()) return;
                     renderRecentServers(instances, history);
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (request != serverRefreshSequence.get()) return;
                     recentServersList.getChildren().clear();
                     recentServersStatus.setText(
@@ -757,9 +751,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             }
         });
 
-        thread.setDaemon(true);
-        thread.setName("Vanta-Home-Servers");
-        thread.start();
     }
 
     private void renderRecentServers(
@@ -912,7 +903,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             return;
         }
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 launchService.launch(
                         instance,
@@ -921,14 +912,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             } catch (Exception ex) {
                 LaunchFailure failure = launchService.getLastFailure();
                 if (failure != null) {
-                    Platform.runLater(() -> onLaunchFailure.accept(failure));
+                    UiExecutor.shared().dispatchToUi(() -> onLaunchFailure.accept(failure));
                 } else {
                     ex.printStackTrace();
                 }
             }
-        }, "Vanta-Server-Launch");
-        thread.setDaemon(true);
-        thread.start();
+        });
     }
 
     public void refreshAccount() {
@@ -945,7 +934,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private void onAccountChanged(Account account) {
-        Platform.runLater(() -> setAccount(account));
+        UiExecutor.shared().dispatchToUi(() -> setAccount(account));
     }
 
     private void updateLaunchStatus(LaunchService.LaunchState state) {
@@ -987,7 +976,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private void onLaunchStateChanged(LaunchService.LaunchState state) {
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
             LaunchService.LaunchState aggregateState = launchService.getState();
             updateLaunchStatus(
                     aggregateState == LaunchService.LaunchState.IDLE
