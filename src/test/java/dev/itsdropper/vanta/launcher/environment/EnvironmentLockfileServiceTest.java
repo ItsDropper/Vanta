@@ -110,6 +110,7 @@ class EnvironmentLockfileServiceTest {
         Files.writeString(minecraft.resolve("version.json"), """
                 {
                   "mainClass": "net.minecraft.client.main.Main",
+                  "javaVersion": { "majorVersion": 21 },
                   "libraries": []
                 }
                 """);
@@ -121,6 +122,8 @@ class EnvironmentLockfileServiceTest {
         EnvironmentLockfile lockfile = new EnvironmentLockfileService().capture(instance);
 
         assertEquals(2, lockfile.environmentFiles().size());
+        assertEquals(21, lockfile.requiredJavaMajorVersion());
+        assertNull(lockfile.javaMajorVersion(), "Selected runtime identity must remain unknown.");
         assertTrue(lockfile.environmentFiles().stream()
                 .anyMatch(file -> file.category().equals("minecraft")
                         && file.relativePath().equals("version.json")));
