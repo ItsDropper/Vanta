@@ -12,7 +12,7 @@ The differentiator should be the quality of the system connecting installation s
 
 The first Environment Engine foundation is now present in the codebase:
 
-- A versioned `EnvironmentLockfile` model with portable, relative artifact identities (schema 3 writes; schemas 1 and 2 remain readable with their original drift scope).
+- A versioned `EnvironmentLockfile` model with portable, relative artifact identities (schema 4 writes; schemas 1–3 remain readable with their original drift scope).
 - A read-only capture service that records every regular file directly inside an instance's `mods/` directory, including files whose mod metadata Vanta cannot identify.
 - SHA-256 and byte-size recording for each artifact.
 - Fabric mod ID/version metadata when the existing scanner can read it.
@@ -29,9 +29,9 @@ The State Center now exposes the first user-facing workflow:
 - Comparison rejects a baseline whose instance identity does not match the selected instance.
 - Lockfile capture and comparison run off the JavaFX Application Thread.
 
-The current report covers Minecraft/loader identity, direct files in `mods/`, and recursive regular files in `resourcepacks/`, `shaderpacks/`, and `config/`, plus the instance's Minecraft version manifest, client JAR, and platform-resolved classpath/native library artifacts. It deliberately excludes worlds, logs, caches, and Java runtime identity. Symbolic links are not followed. Each file is opened without following a final-component symlink and fingerprinted with SHA-256; capture rejects files whose size, modification time, or file identity visibly changes during hashing. The UI does not automatically reconcile or repair environment drift.
+The current report covers Minecraft/loader identity, direct files in `mods/`, and recursive regular files in `resourcepacks/`, `shaderpacks/`, and `config/`, plus the instance's Minecraft version manifest, client JAR, platform-resolved classpath/native library artifacts, and the manifest-declared required Java major version. It deliberately excludes worlds, logs, caches, and the identity of the Java runtime actually selected for launch. Symbolic links are not followed. Each file is opened without following a final-component symlink and fingerprinted with SHA-256; capture rejects files whose size, modification time, or file identity visibly changes during hashing. The UI does not automatically reconcile or repair environment drift.
 
-This is deliberately a foundation, not yet a complete portable environment specification. Java major version is reserved in the schema but remains unknown until Vanta can inspect the selected runtime reliably. The captured dependency closure covers the installed Minecraft manifest's classpath and native artifacts, not the Java runtime's own modules. Drift detection is read-only; it does not change an instance.
+This is deliberately a foundation, not yet a complete portable environment specification. The lockfile records the Minecraft manifest's required Java major separately from the selected runtime's actual Java major. The latter remains unknown until Vanta can inspect the selected runtime reliably without executing an arbitrary user-configured binary. The captured dependency closure covers the installed Minecraft manifest's classpath and native artifacts, not the Java runtime's own modules. Drift detection is read-only; it does not change an instance.
 
 ## Existing foundations
 
