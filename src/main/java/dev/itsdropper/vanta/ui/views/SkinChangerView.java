@@ -1,12 +1,12 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.launcher.service.AccountSkinService;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -75,7 +75,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
     private boolean listenerRegistered;
     private boolean accountStateInitialized;
     private final AccountService.AccountListener accountListener = account ->
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 if (active) {
                     onAccountChanged(account);
                 }
@@ -367,7 +367,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
             } catch (Exception ex) {
                 return new SkinProfile(null, "classic", null, message(ex), List.of(), "", null);
             }
-        }).thenAccept(result -> Platform.runLater(() -> {
+        }).thenAccept(result -> UiExecutor.shared().dispatchToUi(() -> {
             if (!active
                     || generation != profileRequestGeneration
                     || accountService.getCurrentAccount() == null
@@ -471,14 +471,14 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
             try {
                 upload(account, file, variant);
                 AccountSkinService.clear(account);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     selectedFile = null;
                     setBusy(false, "Skin applied to your Minecraft profile. Refreshing the active skin...");
                     fileLabel.setText("Refreshing active account skin...");
                     loadCurrentSkin(account, ++profileRequestGeneration);
                 });
             } catch (Exception ex) {
-                Platform.runLater(() -> setBusy(false, "Upload failed: " + message(ex)));
+                UiExecutor.shared().dispatchToUi(() -> setBusy(false, "Upload failed: " + message(ex)));
             }
         });
     }
@@ -520,12 +520,12 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
                             + (detail.isBlank() ? "." : ": " + detail));
                 }
                 AccountSkinService.clear(account);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     setBusy(false, hide ? "Cape hidden. Refreshing profile..." : "Cape equipped. Refreshing profile...");
                     loadCurrentSkin(account, ++profileRequestGeneration);
                 });
             } catch (Exception ex) {
-                Platform.runLater(() -> setBusy(false, "Cape update failed: " + message(ex)));
+                UiExecutor.shared().dispatchToUi(() -> setBusy(false, "Cape update failed: " + message(ex)));
             }
         });
     }
