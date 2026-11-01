@@ -19,13 +19,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public final class UiExecutor implements AutoCloseable {
 
-    private static final int DEFAULT_WORKERS = Math.max(
-            2,
-            Math.min(8, Runtime.getRuntime().availableProcessors())
-    );
+    private static final int DEFAULT_WORKERS = 32;
     private static final UiExecutor SHARED = new UiExecutor(
             DEFAULT_WORKERS,
-            256,
+            2048,
             "vanta-ui-io"
     );
 
