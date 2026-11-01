@@ -454,6 +454,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         ColorPicker borderColor = customColorPicker("customBorder", ThemeManager.loadTheme().border());
         ColorPicker textColor = customColorPicker("customText", ThemeManager.loadTheme().text());
         ColorPicker mutedColor = customColorPicker("customMuted", ThemeManager.loadTheme().muted());
+        ColorPicker subtleColor = customColorPicker("customSubtle", ThemeManager.loadTheme().subtle());
         ColorPicker dangerColor = customColorPicker("customDanger", ThemeManager.loadTheme().danger());
         ColorPicker successColor = customColorPicker("customSuccess", ThemeManager.loadTheme().success());
 
@@ -465,6 +466,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 colorSettingRow("Borders", "Separators and control outlines", borderColor),
                 colorSettingRow("Primary text", "Headings and high-priority text", textColor),
                 colorSettingRow("Muted text", "Descriptions and secondary labels", mutedColor),
+                colorSettingRow("Subtle text", "Low-emphasis labels and supporting details", subtleColor),
                 colorSettingRow("Error color", "Warnings and destructive-action states", dangerColor),
                 colorSettingRow("Success color", "Successful actions and completion states", successColor)
         );
@@ -482,6 +484,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             borderColor.setValue(Color.web(ThemeManager.loadTheme().border()));
             textColor.setValue(Color.web(ThemeManager.loadTheme().text()));
             mutedColor.setValue(Color.web(ThemeManager.loadTheme().muted()));
+            subtleColor.setValue(Color.web(ThemeManager.loadTheme().subtle()));
             dangerColor.setValue(Color.web(ThemeManager.loadTheme().danger()));
             successColor.setValue(Color.web(ThemeManager.loadTheme().success()));
             NotificationManager manager = NotificationManager.getGlobal();
@@ -2083,12 +2086,120 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private void pageHeader(String title, String subtitle) {
+        if (!"About Vanta".equals(currentSection)) {
+            Button reset = new Button("RESET SECTION");
+            reset.getStyleClass().add("secondary-button");
+            reset.setTooltip(new javafx.scene.control.Tooltip(
+                    "Restore this settings section to its recommended defaults."
+            ));
+            reset.setOnAction(event -> resetCurrentSection());
+            content.getChildren().add(new PageHeader(
+                    title,
+                    subtitle,
+                    "settings-page-title",
+                    "settings-page-subtitle",
+                    reset
+            ));
+            return;
+        }
+
         content.getChildren().add(new PageHeader(
                 title,
                 subtitle,
                 "settings-page-title",
                 "settings-page-subtitle"
         ));
+    }
+
+    private void resetCurrentSection() {
+        Alert confirm = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "Restore the recommended defaults for " + currentSection
+                        + "? Other settings sections will not be changed.",
+                ButtonType.CANCEL,
+                ButtonType.OK
+        );
+        confirm.setTitle("Reset " + currentSection);
+        confirm.setHeaderText("Reset this settings section only");
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+        switch (currentSection) {
+            case "Appearance" -> {
+                ThemeManager.saveThemeName(ThemeManager.DEFAULT_THEME);
+                ThemeManager.saveAccent(ThemeManager.DEFAULT_ACCENT);
+                ThemeManager.clearCustomColors();
+                accentColor = ThemeManager.loadAccent();
+                applyAccent(accentColor);
+                onAccentChanged.accept(accentColor);
+            }
+            case "Discord" -> {
+                LauncherSettings.setDiscordPresenceEnabled(false);
+                LauncherSettings.setDiscordShowPlaytimeEnabled(true);
+                LauncherSettings.setDiscordShowInstanceEnabled(true);
+                LauncherSettings.setDiscordShowVersionEnabled(true);
+                LauncherSettings.setDiscordShowLoaderEnabled(true);
+            }
+            case "General" -> {
+                LauncherSettings.setAnimationsEnabled(true);
+                LauncherSettings.setUpdateChecksEnabled(true);
+                LauncherSettings.setAutoUpdateOnLaunchEnabled(false);
+                LauncherSettings.setConfirmRemovalsEnabled(true);
+                LauncherSettings.setHideLauncherOnLaunchEnabled(false);
+                LauncherSettings.setAutoOpenBrowserEnabled(false);
+                LauncherSettings.setShowPlaytimeEnabled(true);
+                LauncherSettings.setCompactInstancesEnabled(false);
+                LauncherSettings.setShowModrinthDownloadsEnabled(true);
+                LauncherSettings.setAutoRepairOnLaunchEnabled(true);
+                LauncherSettings.setNotificationsEnabled(true);
+                LauncherSettings.setNotificationDurationSeconds(3);
+                LauncherSettings.setRememberLastSettingsPageEnabled(true);
+                LauncherSettings.setStateScanOnOpenEnabled(true);
+            }
+            case "Minecraft" -> {
+                LauncherSettings.setDefaultRamMb(4096);
+                LauncherSettings.setDefaultWidth(1280);
+                LauncherSettings.setDefaultHeight(720);
+                LauncherSettings.setDefaultFullscreen(false);
+                LauncherSettings.setDefaultMinecraftVersion("");
+                LauncherSettings.setDefaultLoader("Fabric");
+                LauncherSettings.setDefaultJavaPath("");
+                LauncherSettings.setDefaultJavaArguments("");
+            }
+            case "Downloads" -> {
+                LauncherSettings.setDownloadThreads(8);
+                LauncherSettings.setDownloadRetries(3);
+                LauncherSettings.setVerifyDownloadsEnabled(true);
+                LauncherSettings.setParallelDownloadsEnabled(true);
+                LauncherSettings.setHttp2Enabled(true);
+                LauncherSettings.setDownloadCacheEnabled(true);
+                LauncherSettings.setAdaptiveDownloadsEnabled(true);
+                LauncherSettings.setResumableDownloadsEnabled(true);
+                LauncherSettings.setSegmentedDownloadsEnabled(false);
+            }
+            case "Storage & Cache" -> LauncherSettings.setDownloadCacheEnabled(true);
+            case "State" -> {
+                LauncherSettings.setStateScanWorkers(
+                        Math.max(2, Math.min(Runtime.getRuntime().availableProcessors(), 8))
+                );
+                LauncherSettings.setStateAutoRepairEnabled(false);
+            }
+            case "Repair & Diagnostics" -> {
+                LauncherSettings.setConfirmRemovalsEnabled(true);
+                LauncherSettings.setConfirmInstanceDeletionEnabled(true);
+                LauncherSettings.setUsageTelemetryEnabled(false);
+                LauncherSettings.setCrashTelemetryEnabled(false);
+            }
+            default -> { return; }
+        }
+
+        selectSection(currentSection);
+        NotificationManager manager = NotificationManager.getGlobal();
+        if (manager != null) {
+            manager.success(
+                    "Settings restored",
+                    currentSection + " was restored to its recommended defaults."
+            );
+        }
     }
 
     private VBox card(String title, String description) {
