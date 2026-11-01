@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.async.UiExecutor;
+
 import dev.itsdropper.vanta.launcher.server.ServerManagerService;
 import dev.itsdropper.vanta.launcher.server.ServerManagerService.Profile;
 import dev.itsdropper.vanta.launcher.server.ServerManagerService.Snapshot;
