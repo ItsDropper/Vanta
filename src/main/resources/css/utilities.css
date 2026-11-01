@@ -1495,3 +1495,71 @@
 .overengineered-ui .notification-accent {
     -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -42%), 6, 0.16, 0, 0);
 }
+
+
+/* Settings: a dedicated preferences workspace, not a stack of generic cards. */
+.settings-shell { -fx-background-color: transparent; }
+.settings-shell .settings-navigation {
+    -fx-background-color: #0e1512;
+    -fx-background-radius: 10px;
+    -fx-border-color: #293a31;
+    -fx-border-radius: 10px;
+    -fx-padding: 12px;
+    -fx-min-width: 190px;
+    -fx-pref-width: 210px;
+}
+.settings-shell .settings-nav-group {
+    -fx-text-fill: #7f9185;
+    -fx-font-size: 9px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.5px;
+    -fx-padding: 15px 9px 5px 9px;
+}
+.settings-shell .settings-nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-text-fill: #aab7ae;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 10px 11px;
+}
+.settings-shell .settings-nav-button:hover {
+    -fx-background-color: #17221b;
+    -fx-text-fill: #edf3ee;
+}
+.settings-shell .settings-nav-button.selected {
+    -fx-background-color: #1c2b21;
+    -fx-border-color: #3b5944;
+    -fx-text-fill: #e7f1e8;
+}
+.settings-shell .settings-search-field {
+    -fx-background-color: #090f0c;
+    -fx-background-radius: 6px;
+    -fx-border-color: #2b3b32;
+    -fx-border-radius: 6px;
+    -fx-text-fill: #e8eee9;
+    -fx-prompt-text-fill: #78877d;
+}
+.settings-shell .settings-card {
+    -fx-background-color: #101814;
+    -fx-background-radius: 10px;
+    -fx-border-color: #2b3c32;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 19px;
+}
+.settings-shell .settings-card-title { -fx-font-size: 15px; -fx-font-weight: 800; }
+.settings-shell .settings-card-description { -fx-text-fill: #9eaca2; -fx-font-size: 11px; }
+.settings-shell .settings-info-label { -fx-text-fill: #dce5de; -fx-font-size: 11px; -fx-font-weight: 700; }
+.settings-shell .settings-info-value { -fx-text-fill: #a5b3a9; -fx-font-size: 10px; }
+.settings-shell .settings-checkbox { -fx-text-fill: #d6e0d8; -fx-font-size: 11px; }
+.settings-shell .settings-page-title { -fx-font-size: 31px; -fx-font-weight: 800; }
+.settings-shell .settings-page-subtitle { -fx-text-fill: #9eaca2; -fx-font-size: 11px; }
+.settings-shell .settings-compact-navigation {
+    -fx-background-color: #0e1512;
+    -fx-background-radius: 8px;
+    -fx-border-color: #293a31;
+    -fx-border-radius: 8px;
+    -fx-padding: 9px 12px;
+}
