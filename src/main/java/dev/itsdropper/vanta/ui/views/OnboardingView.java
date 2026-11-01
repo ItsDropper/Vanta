@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.ScrollPane;
@@ -20,6 +21,7 @@ import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.OnboardingManager;
+import dev.itsdropper.vanta.ui.LauncherSettings;
 
 public class OnboardingView extends BorderPane {
 
@@ -33,6 +35,8 @@ public class OnboardingView extends BorderPane {
     private final Button backButton = new Button("BACK");
     private final Button nextButton = new Button("NEXT");
     private final Button connectButton = new Button("CONNECT MICROSOFT ACCOUNT");
+    private final CheckBox usageTelemetry = new CheckBox("Send anonymous usage statistics");
+    private final CheckBox crashTelemetry = new CheckBox("Send anonymous crash reports");
 
     private int step = 0;
 
@@ -44,6 +48,11 @@ public class OnboardingView extends BorderPane {
         this.accountService = accountService;
         this.onFinished = onFinished;
         this.onCreateInstance = onCreateInstance;
+
+        usageTelemetry.setSelected(LauncherSettings.isUsageTelemetryEnabled());
+        usageTelemetry.getStyleClass().add("settings-checkbox");
+        crashTelemetry.setSelected(LauncherSettings.isCrashTelemetryEnabled());
+        crashTelemetry.getStyleClass().add("settings-checkbox");
 
         getStyleClass().add("onboarding-page");
         setMinWidth(0);
@@ -205,12 +214,29 @@ public class OnboardingView extends BorderPane {
         addFeature(box, "2", "Open Browse Content", "Install compatible mods, resource packs or shaders from Modrinth for that instance.");
         addFeature(box, "3", "Tune it in Settings", "Set RAM, resolution, fullscreen, Java arguments and Minecraft arguments for an individual instance.");
 
+        Label telemetryTitle = new Label("Help improve Vanta (optional)");
+        telemetryTitle.getStyleClass().add("onboarding-feature-title");
+
+        Label telemetryDetails = new Label(
+                "Choose what Vanta may send. Usage events contain only an event name and launcher version. "
+                        + "Crash reports contain only the exception type and launcher version. "
+                        + "No account details, Minecraft credentials, tokens, logs or file paths are sent. "
+                        + "Both options are off by default and can be changed later in Settings."
+        );
+        telemetryDetails.getStyleClass().add("onboarding-feature-description");
+        telemetryDetails.setWrapText(true);
+        telemetryDetails.setMaxWidth(680);
+
+        VBox telemetryOptions = new VBox(9, telemetryTitle, usageTelemetry, crashTelemetry, telemetryDetails);
+        telemetryOptions.getStyleClass().add("onboarding-feature");
+
         HBox actions = new HBox(10);
         actions.setAlignment(Pos.CENTER_LEFT);
 
         Button create = new Button("CREATE FIRST INSTANCE");
         create.getStyleClass().add("primary-button");
         create.setOnAction(event -> {
+            saveTelemetryConsent();
             OnboardingManager.markCompleted();
             onFinished.run();
             onCreateInstance.run();
@@ -219,12 +245,13 @@ public class OnboardingView extends BorderPane {
         Button finish = new Button("EXPLORE VANTA");
         finish.getStyleClass().add("secondary-button");
         finish.setOnAction(event -> {
+            saveTelemetryConsent();
             OnboardingManager.markCompleted();
             onFinished.run();
         });
 
         actions.getChildren().addAll(create, finish);
-        box.getChildren().add(actions);
+        box.getChildren().addAll(telemetryOptions, actions);
 
         return box;
     }
@@ -277,8 +304,14 @@ public class OnboardingView extends BorderPane {
             return;
         }
 
+        saveTelemetryConsent();
         OnboardingManager.markCompleted();
         onFinished.run();
+    }
+
+    private void saveTelemetryConsent() {
+        LauncherSettings.setUsageTelemetryEnabled(usageTelemetry.isSelected());
+        LauncherSettings.setCrashTelemetryEnabled(crashTelemetry.isSelected());
     }
 
     private void connectAccount() {
