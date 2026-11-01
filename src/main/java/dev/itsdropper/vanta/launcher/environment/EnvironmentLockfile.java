@@ -17,9 +17,26 @@ public record EnvironmentLockfile(
         String loaderVersion,
         Integer javaMajorVersion,
         List<ModArtifact> mods,
-        List<EnvironmentArtifact> environmentFiles
+        List<EnvironmentArtifact> environmentFiles,
+        Integer requiredJavaMajorVersion
 ) {
-    public static final int CURRENT_SCHEMA_VERSION = 3;
+    public static final int CURRENT_SCHEMA_VERSION = 4;
+
+    /** Backward-compatible constructor for callers creating schema 1-3 fixtures or records. */
+    public EnvironmentLockfile(
+            int schemaVersion,
+            String generatedAt,
+            String instanceId,
+            String minecraftVersion,
+            String loader,
+            String loaderVersion,
+            Integer javaMajorVersion,
+            List<ModArtifact> mods,
+            List<EnvironmentArtifact> environmentFiles
+    ) {
+        this(schemaVersion, generatedAt, instanceId, minecraftVersion, loader, loaderVersion,
+                javaMajorVersion, mods, environmentFiles, null);
+    }
 
     public EnvironmentLockfile {
         mods = mods == null ? List.of() : List.copyOf(mods);
