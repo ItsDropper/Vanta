@@ -107,7 +107,8 @@ public final class TelemetryService {
         if (value == null || value.isBlank()) {
             return "UnknownError";
         }
-        String sanitized = value.replaceAll("[^A-Za-z0-9_.$]", "");
+        String candidate = value.split(":", 2)[0].trim();
+        String sanitized = candidate.replaceAll("[^A-Za-z0-9_.$].*$", "");
         if (sanitized.isBlank()) {
             return "UnknownError";
         }
