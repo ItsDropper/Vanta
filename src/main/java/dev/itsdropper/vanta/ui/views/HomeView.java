@@ -87,25 +87,30 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         this.onCreateInstance = onCreateInstance;
 
         getStyleClass().addAll("page", "home-page");
+        setStyle("-fx-background-color: #080d0b;");
 
-        Label title = new Label("Home");
+        Label kicker = new Label("VANTA  /  YOUR MINECRAFT LIBRARY");
+        kicker.setStyle("-fx-text-fill: #87a994; -fx-font-size: 9px; -fx-font-weight: 900; -fx-letter-spacing: 2.1px;");
+
+        Label title = new Label("Your worlds, ready.");
         title.getStyleClass().add("home-title");
+        title.setStyle("-fx-text-fill: #f0f4ef; -fx-font-size: 34px; -fx-font-weight: 800;");
 
         accountLabel = new Label("Checking account...");
         accountLabel.getStyleClass().add("home-account-label");
+        accountLabel.setStyle("-fx-text-fill: #9aa99f; -fx-font-size: 11px;");
 
-        VBox headerText = new VBox(4, title, accountLabel);
-        FlowPane header = new FlowPane(16, 10);
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.setRowValignment(javafx.geometry.VPos.CENTER);
-        header.getStyleClass().add("home-header");
+        VBox headerText = new VBox(7, kicker, title, accountLabel);
+        headerText.setAlignment(Pos.CENTER_LEFT);
 
         launchStatusLabel = new Label("READY TO PLAY");
         launchStatusLabel.getStyleClass().addAll("home-launch-indicator", "home-status-ready");
+        launchStatusLabel.setStyle("-fx-background-color: rgba(112,169,132,.13); -fx-border-color: rgba(139,190,153,.28); -fx-border-radius: 20px; -fx-background-radius: 20px; -fx-padding: 8px 12px; -fx-text-fill: #b8d8c0; -fx-font-size: 9px; -fx-font-weight: 900; -fx-letter-spacing: 1px;");
         launchStatusLabel.setAccessibleText("Minecraft launch status: ready to play");
 
-        Button createInstanceButton = new Button("＋  NEW INSTANCE");
+        Button createInstanceButton = new Button("＋   CREATE INSTANCE");
         createInstanceButton.getStyleClass().add("primary-button");
+        createInstanceButton.setStyle("-fx-background-color: #d7e7d9; -fx-text-fill: #102018; -fx-font-size: 10px; -fx-font-weight: 900; -fx-background-radius: 6px; -fx-padding: 0 18px; -fx-min-height: 40px; -fx-cursor: hand;");
         AnimationUtils.installInteractiveAnimations(createInstanceButton);
         createInstanceButton.setMinHeight(40);
         createInstanceButton.setAccessibleText("Create a new Minecraft instance");
@@ -113,19 +118,30 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         createInstanceButton.setOnAction(event -> {
             if (this.onCreateInstance != null) this.onCreateInstance.run();
         });
-        header.getChildren().addAll(headerText, launchStatusLabel, createInstanceButton);
+
+        HBox headerActions = new HBox(12, launchStatusLabel, createInstanceButton);
+        headerActions.setAlignment(Pos.CENTER_RIGHT);
+        Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+        HBox header = new HBox(20, headerText, headerSpacer, headerActions);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(2, 0, 8, 0));
+        header.getStyleClass().add("home-header");
 
         VBox featuredSection = createFeaturedSection();
         VBox recentSection = createRecentInstancesSection();
         VBox serverCard = createRecentServersCard();
+        HBox lowerWorkspace = new HBox(16, recentSection, serverCard);
+        lowerWorkspace.setAlignment(Pos.TOP_LEFT);
+        HBox.setHgrow(recentSection, Priority.ALWAYS);
+        HBox.setHgrow(serverCard, Priority.ALWAYS);
+        recentSection.setMinWidth(0);
+        serverCard.setMinWidth(0);
+        recentSection.prefWidthProperty().bind(lowerWorkspace.widthProperty().multiply(0.56));
+        serverCard.prefWidthProperty().bind(lowerWorkspace.widthProperty().multiply(0.44));
 
-        VBox contentBox = new VBox(
-                22,
-                header,
-                featuredSection,
-                recentSection,
-                serverCard
-        );
+        VBox contentBox = new VBox(24, header, featuredSection, lowerWorkspace);
+        contentBox.setStyle("-fx-background-color: transparent;");
         contentBox.setFillWidth(true);
         contentBox.paddingProperty().bind(
                 Bindings.createObjectBinding(() -> {
