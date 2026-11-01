@@ -569,7 +569,7 @@
 
 /* Dashboard hierarchy: one featured launch, then compact activity streams. */
 .home-page .home-title { -fx-font-size: 34px; -fx-font-weight: 800; }
-.home-page .home-account-label { -fx-text-fill: #9eaca2; -fx-font-size: 11px; }
+.home-page .home-account-label { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
 .home-page .home-featured-section-eyebrow {
     -fx-text-fill: #a9c7b1;
     -fx-font-size: 9px;
@@ -578,37 +578,37 @@
 }
 .home-page .home-featured-section-subtitle,
 .home-page .home-section-subtitle {
-    -fx-text-fill: #9eaca2;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
 }
 .home-page .home-section-title {
-    -fx-text-fill: #e5ece6;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 15px;
     -fx-font-weight: 800;
 }
 .home-page .home-recent-card, .home-page .home-server-card {
     -fx-background-color: #111a15;
     -fx-background-radius: 8px;
-    -fx-border-color: #293a31;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-padding: 12px 14px;
 }
 .home-page .home-recent-card:hover, .home-page .home-server-card:hover {
-    -fx-background-color: #17231c;
-    -fx-border-color: #587562;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaaccent;
 }
 .home-page .home-recent-name, .home-page .home-server-name {
-    -fx-text-fill: #edf2ed;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
     -fx-font-weight: 800;
 }
 .home-page .home-recent-meta, .home-page .home-server-meta {
-    -fx-text-fill: #a2b0a6;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
 }
 .home-page .home-recent-playtime, .home-page .home-recent-status {
-    -fx-text-fill: #829187;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 9px;
 }
 .home-page .home-recent-icon {
@@ -618,7 +618,7 @@
     -fx-border-radius: 7px;
 }
 .home-page .home-recent-card .button, .home-page .home-server-card .button {
-    -fx-background-color: #d5e4d8;
+    -fx-background-color: -vantaaccent;
     -fx-background-radius: 5px;
     -fx-text-fill: #102019;
     -fx-font-size: 9px;
@@ -629,9 +629,9 @@
     -fx-background-color: #ffffff;
 }
 .home-page .home-recent-servers-card {
-    -fx-background-color: #0f1713;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 10px;
-    -fx-border-color: #293a31;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
     -fx-padding: 16px;
 }
