@@ -20,7 +20,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.application.Platform;
 import javafx.util.StringConverter;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
@@ -34,6 +33,7 @@ import dev.itsdropper.vanta.ui.components.NotificationManager;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -997,12 +997,12 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     ) {
         versions.setPromptText("Loading available versions...");
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 UpdateService service = new UpdateService();
                 var available = service.getAvailableVersions(loadVersion());
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     versions.getItems().setAll(available);
                     versions.setPromptText(
                             available.isEmpty()
@@ -1011,7 +1011,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     );
                 });
             } catch (Exception e) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     versions.setPromptText("Could not load Vanta versions");
                     rollbackButton.setDisable(true);
 
@@ -1024,7 +1024,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     }
                 });
             }
-        }, "Vanta-Rollback-Versions");
+        });
 
         thread.setDaemon(true);
         thread.start();
@@ -1118,7 +1118,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
             validateJava.setDisable(true);
             javaValidationStatus.setText("Starting Java version check…");
-            Thread worker = new Thread(() -> {
+            UiExecutor.shared().execute(() -> {
                 String result;
                 boolean success = false;
                 Process process = null;
@@ -1147,7 +1147,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 }
                 final String message = result;
                 final boolean passed = success;
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     validateJava.setDisable(false);
                     javaValidationStatus.setText(message);
                     NotificationManager manager = NotificationManager.getGlobal();
@@ -1156,7 +1156,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                         else manager.error("Java validation failed", message);
                     }
                 });
-            }, "Vanta-Java-Validation");
+            });
             worker.setDaemon(true);
             worker.start();
         });
@@ -1471,7 +1471,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             clear.setDisable(true);
             refresh.setDisable(true);
             cacheStatus.setText("Clearing cached downloads…");
-            Thread worker = new Thread(() -> {
+            UiExecutor.shared().execute(() -> {
                 Exception failure = null;
                 try {
                     if (Files.exists(cacheDirectory)) {
@@ -1485,7 +1485,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     failure = ex;
                 }
                 Exception result = failure;
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     clear.setDisable(false);
                     refresh.setDisable(false);
                     if (result == null) {
@@ -1501,7 +1501,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                         refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh);
                     }
                 });
-            }, "Vanta-Download-Cache-Cleanup");
+            });
             worker.setDaemon(true);
             worker.start();
         });
@@ -1545,7 +1545,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     ) {
         refreshButton.setDisable(true);
         statusLabel.setText("Inspecting local cache files…");
-        Thread worker = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             long total = 0L;
             long files = 0L;
             Exception failure = null;
@@ -1568,7 +1568,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             final long bytes = total;
             final long count = files;
             final Exception error = failure;
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 refreshButton.setDisable(false);
                 if (error != null) {
                     sizeLabel.setText("Size unavailable");
@@ -1581,7 +1581,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                         ? "The download cache is empty."
                         : "Cache contents were measured locally. No file contents were uploaded or modified.");
             });
-        }, "Vanta-Download-Cache-Size");
+        });
         worker.setDaemon(true);
         worker.start();
     }
@@ -1801,7 +1801,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private void runDebugTest(String name, String url) {
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 HttpClient client = HttpClient.newBuilder()
                         .connectTimeout(java.time.Duration.ofSeconds(8))
@@ -1816,7 +1816,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 HttpResponse<Void> response =
                         client.send(request, HttpResponse.BodyHandlers.discarding());
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         if (response.statusCode() >= 200 && response.statusCode() < 300) {
@@ -1827,7 +1827,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     }
                 });
             } catch (Throwable ex) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.error(name + " test failed",
@@ -1842,7 +1842,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private void runStorageTest() {
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             Path testFile = MinecraftLocator.getVantaDirectory().resolve(".vanta-debug-test");
             try {
                 Files.createDirectories(testFile.getParent());
@@ -1855,7 +1855,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     throw new IOException("Read-back data did not match.");
                 }
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.success("Storage test passed", "Write, read and delete completed successfully.");
@@ -1867,7 +1867,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 } catch (IOException ignored) {
                 }
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.error("Storage test failed",
@@ -1882,7 +1882,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private void runJavaRuntimeTest() {
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 Path javaBinary = Path.of(
                         System.getProperty("java.home"),
@@ -1911,7 +1911,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     throw new IOException("java -version exited with code " + process.exitValue());
                 }
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.success("Java runtime test passed",
@@ -1919,7 +1919,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     }
                 });
             } catch (Throwable ex) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.error("Java runtime test failed",
