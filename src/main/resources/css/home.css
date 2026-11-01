@@ -527,3 +527,41 @@
     -fx-border-color: derive(-vantaborder, 30%);
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.25), 10, 0.12, 0, 2);
 }
+ 
+
+/* Featured launch surface: cinematic landscape, restrained and readable. */
+.home-featured-card {
+    -fx-background-color: linear-gradient(to right, #111b1b, #172727 58%, #1c302d);
+    -fx-background-radius: 18px;
+    -fx-border-color: #344b42;
+    -fx-border-radius: 18px;
+    -fx-border-width: 1px;
+}
+.home-featured-card:hover { -fx-border-color: #587766; }
+.home-featured-card .home-featured-icon-frame {
+    -fx-background-color: rgba(10, 22, 20, 0.72);
+    -fx-border-color: rgba(178, 213, 190, 0.24);
+    -fx-background-radius: 15px;
+    -fx-border-radius: 15px;
+}
+.home-featured-card .home-featured-eyebrow {
+    -fx-text-fill: #b6d1bd;
+    -fx-font-size: 9px;
+    -fx-letter-spacing: 1.5px;
+}
+.home-featured-card .home-featured-title { -fx-font-size: 30px; }
+.home-featured-card .home-featured-meta {
+    -fx-text-fill: #d0ddd3;
+    -fx-font-size: 12px;
+}
+.home-featured-card .home-featured-playtime { -fx-text-fill: #a3b5a8; }
+.home-featured-card .home-featured-play-button {
+    -fx-background-color: #d5e4d8;
+    -fx-text-fill: #102019;
+    -fx-background-radius: 6px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 24px;
+}
+.home-featured-card .home-featured-play-button:hover { -fx-background-color: #ffffff; }
+.minecraft-backdrop { -fx-background-color: transparent; }
