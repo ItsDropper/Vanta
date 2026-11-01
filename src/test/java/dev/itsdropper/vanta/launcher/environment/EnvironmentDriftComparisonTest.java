@@ -86,6 +86,34 @@ class EnvironmentDriftComparisonTest {
         assertTrue(failure.getMessage().contains("different instance"));
     }
 
+
+    @Test
+    void schemaTwoBaselineDoesNotReportNewRuntimeCategoriesAsDrift() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("legacy-schema-two"));
+        Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path minecraft = Files.createDirectory(instanceDirectory.resolve("minecraft"));
+        Files.writeString(minecraft.resolve("version.json"), """
+                {
+                  "mainClass": "net.minecraft.client.main.Main",
+                  "libraries": []
+                }
+                """);
+        Files.writeString(minecraft.resolve("client.jar"), "client");
+
+        Instance instance = new Instance(
+                "legacy-v2", "Legacy", "1.21.1", "fabric", "0.16.9", instanceDirectory
+        );
+        EnvironmentLockfile schemaTwoBaseline = new EnvironmentLockfile(
+                2, "2026-10-31T00:00:00Z", instance.getId(), instance.getMinecraftVersion(),
+                instance.getLoader(), instance.getLoaderVersion(), null, java.util.List.of(), java.util.List.of()
+        );
+
+        EnvironmentDriftReport report = new EnvironmentLockfileService()
+                .compare(instance, schemaTwoBaseline);
+
+        assertTrue(report.isClean());
+    }
+
     @Test
     void reportsCleanWhenLiveEnvironmentMatchesBaseline() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("clean-instance"));
