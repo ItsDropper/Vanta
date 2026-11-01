@@ -18,7 +18,7 @@ Vanta is designed to store account/session data and instance data locally on you
 
 Telemetry is disabled by default. During onboarding and in Settings → Repair & Diagnostics, users can independently opt in to:
 
-- **Anonymous usage statistics:** allowlisted launcher events (currently launcher startup and visits to Home, Instances, Mods, and Settings) plus the Vanta version.
+- **Anonymous usage statistics:** allowlisted launcher events (launcher startup; visits to Home, Instances, Mods, and Settings; successful instance creation, mod installation, instance backup, and skin change) plus the Vanta version.
 - **Anonymous crash reports:** the Java exception class name plus the Vanta version. Stack traces, exception messages, logs, screenshots, and local paths are not sent.
 
 Vanta does not include Microsoft, Xbox, or Minecraft account identifiers, usernames, access tokens, refresh tokens, session credentials, server addresses, hardware identifiers, or persistent installation identifiers in telemetry payloads. The telemetry client has no access to authentication storage and sends only fixed-schema JSON payloads.
