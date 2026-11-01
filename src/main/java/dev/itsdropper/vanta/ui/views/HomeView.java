@@ -137,8 +137,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         HBox.setHgrow(serverCard, Priority.ALWAYS);
         recentSection.setMinWidth(0);
         serverCard.setMinWidth(0);
-        recentSection.prefWidthProperty().bind(lowerWorkspace.widthProperty().multiply(0.56));
-        serverCard.prefWidthProperty().bind(lowerWorkspace.widthProperty().multiply(0.44));
+        recentSection.prefWidthProperty().bind(lowerWorkspace.widthProperty().multiply(0.54));
+        serverCard.prefWidthProperty().bind(lowerWorkspace.widthProperty().multiply(0.42));
 
         VBox contentBox = new VBox(24, header, featuredSection, lowerWorkspace);
         contentBox.setStyle("-fx-background-color: transparent;");
@@ -465,6 +465,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                         featuredContainer.widthProperty()
                 )
         );
+        card.setStyle("-fx-background-color: linear-gradient(to bottom right, #14231a, #0d1511); -fx-background-radius: 11px; -fx-border-color: #344d3a; -fx-border-radius: 11px; -fx-border-width: 1px;");
         card.getStyleClass().add("home-empty-card");
         return card;
     }
