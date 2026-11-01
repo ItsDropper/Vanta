@@ -47,6 +47,8 @@ public final class EnvironmentLockfileService {
     private static final int MAX_MOD_FILES = 10_000;
     private static final int MAX_ENVIRONMENT_FILES = 20_000;
     private static final List<String> INSTANCE_ENVIRONMENT_DIRECTORIES = List.of("resourcepacks", "shaderpacks", "config");
+    private static final Set<String> SCHEMA_TWO_ENVIRONMENT_CATEGORIES = Set.of(
+            "resourcepacks", "shaderpacks", "config");
     private static final Set<String> ENVIRONMENT_CATEGORIES = Set.of(
             "resourcepacks", "shaderpacks", "config", "minecraft", "libraries", "natives");
     private static final Set<Integer> SUPPORTED_SCHEMA_VERSIONS = Set.of(1, 2, EnvironmentLockfile.CURRENT_SCHEMA_VERSION);
@@ -213,9 +215,9 @@ public final class EnvironmentLockfileService {
 
 
         java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> expectedFiles =
-                environmentFileMap(baseline.environmentFiles());
+                environmentFileMap(baseline.environmentFiles(), baseline.schemaVersion());
         java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> actualFiles =
-                environmentFileMap(current.environmentFiles());
+                environmentFileMap(current.environmentFiles(), current.schemaVersion());
 
         for (var entry : expectedFiles.entrySet()) {
             EnvironmentLockfile.EnvironmentArtifact recorded = entry.getValue();
@@ -428,10 +430,17 @@ public final class EnvironmentLockfileService {
     }
 
     private static java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> environmentFileMap(
-            List<EnvironmentLockfile.EnvironmentArtifact> artifacts
+            List<EnvironmentLockfile.EnvironmentArtifact> artifacts,
+            int schemaVersion
     ) {
+        Set<String> trackedCategories = schemaVersion >= 3
+                ? ENVIRONMENT_CATEGORIES
+                : schemaVersion == 2 ? SCHEMA_TWO_ENVIRONMENT_CATEGORIES : Set.of();
         java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> result = new java.util.TreeMap<>();
         for (EnvironmentLockfile.EnvironmentArtifact artifact : artifacts) {
+            if (!trackedCategories.contains(artifact.category())) {
+                continue;
+            }
             result.put((artifact.category() + "/" + artifact.relativePath())
                     .toLowerCase(java.util.Locale.ROOT), artifact);
         }
