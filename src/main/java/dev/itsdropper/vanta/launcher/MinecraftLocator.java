@@ -6,22 +6,20 @@ import java.nio.file.Paths;
 
 public class MinecraftLocator {
 
+    /**
+     * Resolves Vanta's data directory without creating it.
+     */
+    public static Path getVantaDirectoryPath() {
+        String appData = System.getenv("APPDATA");
+        if (appData == null || appData.isBlank()) {
+            throw new IllegalStateException("APPDATA is not available.");
+        }
+        return Paths.get(appData, "Vanta").toAbsolutePath().normalize();
+    }
+
     public static Path getVantaDirectory() {
 
-        String appData =
-                System.getenv("APPDATA");
-
-        if (appData == null) {
-            throw new IllegalStateException(
-                    "APPDATA is not available."
-            );
-        }
-
-        Path directory =
-                Paths.get(
-                        appData,
-                        "Vanta"
-                );
+        Path directory = getVantaDirectoryPath();
 
         try {
 
@@ -63,11 +61,16 @@ public class MinecraftLocator {
         return directory;
     }
 
+    /**
+     * Resolves the shared libraries directory without creating it.
+     */
+    public static Path getLibrariesDirectoryPath() {
+        return getVantaDirectoryPath().resolve("libraries");
+    }
+
     public static Path getLibrariesDirectory() {
 
-        Path directory =
-                getVantaDirectory()
-                        .resolve("libraries");
+        Path directory = getLibrariesDirectoryPath();
 
         try {
 
