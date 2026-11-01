@@ -795,9 +795,6 @@ public class InstanceCard extends StackPane {
         });
 
 
-                true
-        );
-
     }
 
     // =============================================================
