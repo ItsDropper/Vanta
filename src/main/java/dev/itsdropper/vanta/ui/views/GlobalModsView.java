@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.components.PageHeader;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -155,12 +155,12 @@ public class GlobalModsView extends VBox {
             refreshForCurrentFilters();
         });
 
-        Thread versionThread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<String> versions =
                         MinecraftVersionResolver.getReleaseVersions();
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     versionBox.getItems().setAll("All versions");
                     versionBox.getItems().addAll(versions);
                     versionBox.getSelectionModel().select("All versions");
@@ -169,7 +169,6 @@ public class GlobalModsView extends VBox {
                 ex.printStackTrace();
             }
         });
-        versionThread.setDaemon(true);
 
         // =========================================================
         // SEARCH
@@ -371,7 +370,6 @@ public class GlobalModsView extends VBox {
         // LOAD POPULAR MODS
         // =========================================================
 
-        versionThread.start();
         loadMostDownloadedMods();
     }
 
@@ -460,19 +458,17 @@ public class GlobalModsView extends VBox {
     }
 
     private void loadProjectForInstall(String projectId, Button sourceButton) {
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 ModrinthProject project = modrinthClient.getProject(projectId);
                 List<dev.itsdropper.vanta.launcher.modrinth.ModrinthVersion> versions =
                         modrinthClient.getVersions(projectId);
-                Platform.runLater(() -> chooseInstances(project, versions, sourceButton));
+                UiExecutor.shared().dispatchToUi(() -> chooseInstances(project, versions, sourceButton));
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> statusLabel.setText("Could not load project compatibility information."));
+                UiExecutor.shared().dispatchToUi(() -> statusLabel.setText("Could not load project compatibility information."));
             }
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     private void chooseInstances(
@@ -558,7 +554,7 @@ public class GlobalModsView extends VBox {
     private void installToInstances(ModrinthProject project, List<Instance> instances, Button sourceButton) {
         sourceButton.setDisable(true);
         sourceButton.setText("INSTALLING...");
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             int success = 0;
             int failed = 0;
             for (Instance instance : instances) {
@@ -579,7 +575,7 @@ public class GlobalModsView extends VBox {
             }
             int installed = success;
             int failures = failed;
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 sourceButton.setDisable(false);
                 sourceButton.setText("INSTALL");
                 statusLabel.setText(project.getTitle() + " installed into " + installed
@@ -587,8 +583,6 @@ public class GlobalModsView extends VBox {
                         + (failures == 0 ? "." : "; " + failures + " failed."));
             });
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     // =============================================================
@@ -597,8 +591,7 @@ public class GlobalModsView extends VBox {
 
     private void loadMostDownloadedMods() {
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -611,7 +604,7 @@ public class GlobalModsView extends VBox {
                                         )
                                         .getHits();
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 showMostDownloadedMods(
                                         projects
                                 )
@@ -621,19 +614,15 @@ public class GlobalModsView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 popularStatusLabel.setText(
                                         "Could not load popular mods."
                                 )
                         );
                     }
-                });
+        });
 
-        thread.setDaemon(
-                true
-        );
 
-        thread.start();
     }
 
     // =============================================================
@@ -873,8 +862,7 @@ public class GlobalModsView extends VBox {
                 "Searching Modrinth..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -888,7 +876,7 @@ public class GlobalModsView extends VBox {
                                         )
                                         .getHits();
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 showResults(
                                         projects
                                 )
@@ -898,7 +886,7 @@ public class GlobalModsView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 statusLabel.setText(
                                         ex.getMessage() != null
                                                 ? ex.getMessage()
@@ -906,13 +894,9 @@ public class GlobalModsView extends VBox {
                                 )
                         );
                     }
-                });
+        });
 
-        thread.setDaemon(
-                true
-        );
 
-        thread.start();
     }
 
     // =============================================================
@@ -1074,11 +1058,11 @@ public class GlobalModsView extends VBox {
 
         popup.getContent().add(root);
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<dev.itsdropper.vanta.launcher.modrinth.ModrinthVersion> versions =
                         modrinthClient.getVersions(projectId);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     list.getChildren().clear();
                     subtitle.setText((versions == null ? 0 : versions.size()) + " versions");
                     if (versions == null || versions.isEmpty()) {
@@ -1090,14 +1074,12 @@ public class GlobalModsView extends VBox {
                     }
                 });
             } catch (Throwable ex) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     list.getChildren().clear();
                     subtitle.setText("Could not load versions");
                 });
             }
         });
-        thread.setDaemon(true);
-        thread.start();
 
         popup.show(anchor, anchor.localToScreen(anchor.getBoundsInLocal()).getMaxX() - 520,
                 anchor.localToScreen(anchor.getBoundsInLocal()).getMaxY() + 6);
@@ -1241,7 +1223,7 @@ public class GlobalModsView extends VBox {
             dev.itsdropper.vanta.launcher.modrinth.ModrinthVersion version,
             List<Instance> instances
     ) {
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             int success = 0;
             int failed = 0;
             for (Instance instance : instances) {
@@ -1256,14 +1238,12 @@ public class GlobalModsView extends VBox {
             }
             int installed = success;
             int failures = failed;
-            Platform.runLater(() -> statusLabel.setText(
+            UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(
                     safe(version.getVersionNumber(), "Version") + " installed into " + installed
                             + " instance" + (installed == 1 ? "" : "s")
                             + (failures == 0 ? "." : "; " + failures + " failed.")
             ));
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     private VBox createProjectCard(
@@ -1517,8 +1497,7 @@ public class GlobalModsView extends VBox {
             return;
         }
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1582,7 +1561,7 @@ public class GlobalModsView extends VBox {
                                         )
                                 );
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             if (!image.isError()) {
 
@@ -1597,13 +1576,9 @@ public class GlobalModsView extends VBox {
 
                         ex.printStackTrace();
                     }
-                });
+        });
 
-        thread.setDaemon(
-                true
-        );
 
-        thread.start();
     }
 
     // =============================================================
