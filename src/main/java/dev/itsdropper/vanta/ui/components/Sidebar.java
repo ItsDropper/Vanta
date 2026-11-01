@@ -93,8 +93,9 @@ public class Sidebar extends VBox {
 
         setSpacing(6);
 
-        setPrefWidth(224);
-        setMinWidth(204);
+        setPrefWidth(260);
+        setMinWidth(260);
+        setMaxWidth(260);
 
         // ---------------------------------------------------------
         // BRAND
@@ -295,7 +296,8 @@ public class Sidebar extends VBox {
             getStyleClass().add("sidebar-compact");
             setPadding(new Insets(16, 8, 14, 8));
             setPrefWidth(76);
-            setMinWidth(72);
+            setMinWidth(76);
+            setMaxWidth(76);
             logo.setText("V");
             subtitle.setVisible(false);
             subtitle.setManaged(false);
@@ -309,8 +311,9 @@ public class Sidebar extends VBox {
         } else {
             getStyleClass().remove("sidebar-compact");
             setPadding(new Insets(22, 14, 18, 14));
-            setPrefWidth(224);
-            setMinWidth(204);
+            setPrefWidth(260);
+            setMinWidth(260);
+            setMaxWidth(260);
             logo.setText("VANTA");
             subtitle.setVisible(true);
             subtitle.setManaged(true);
