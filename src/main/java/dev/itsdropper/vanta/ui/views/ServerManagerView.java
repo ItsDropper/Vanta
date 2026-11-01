@@ -6,7 +6,6 @@ import dev.itsdropper.vanta.launcher.server.ServerManagerService.Snapshot;
 import dev.itsdropper.vanta.launcher.server.ServerManagerService.State;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.PageHeader;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -196,12 +195,12 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         setActionsEnabled(false);
         detail.setDisable(true);
 
-        service.setConsoleListener((id, line) -> Platform.runLater(() -> {
+        service.setConsoleListener((id, line) -> UiExecutor.shared().dispatchToUi(() -> {
             if (!id.equals(selectedId)) return;
             console.appendText(line + System.lineSeparator());
             if (console.getLength() > 140_000) console.deleteText(0, console.getLength() - 100_000);
         }));
-        service.setStateListener((id, snapshot) -> Platform.runLater(() -> {
+        service.setStateListener((id, snapshot) -> UiExecutor.shared().dispatchToUi(() -> {
             if (id.equals(selectedId)) refreshSelected(snapshot);
             refreshProfileList();
         }));
@@ -459,7 +458,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             String id = requireSelectedId();
             startButton.setDisable(true);
             console.appendText("Vanta: checking the server's Java requirement...\\n");
-            Thread starter = new Thread(() -> {
+            UiExecutor.shared().execute(() -> {
                 Exception failure = null;
                 try {
                     service.start(id);
@@ -467,7 +466,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
                     failure = e;
                 }
                 Exception result = failure;
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     startButton.setDisable(false);
                     if (result != null) {
                         error("Could not start server", result.getMessage());
@@ -475,9 +474,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
                         service.profile(id).ifPresent(profile -> javaInput.setText(profile.javaExecutable));
                     }
                 });
-            }, "vanta-server-start");
-            starter.setDaemon(true);
-            starter.start();
+            });
         } catch (Exception e) { error("Could not start server", e.getMessage()); }
     }
 
@@ -505,23 +502,21 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             try {
                 service.stop(selectedId);
                 String id = selectedId;
-                Thread waiter = new Thread(() -> {
+                UiExecutor.shared().execute(() -> {
                     try {
                         for (int i = 0; i < 60; i++) {
                             Thread.sleep(500);
                             Snapshot s = service.snapshot(id);
                             if (s.state() == State.STOPPED || s.state() == State.CRASHED) {
-                                Platform.runLater(() -> {
+                                UiExecutor.shared().dispatchToUi(() -> {
                                     try { service.start(id); } catch (Exception e) { error("Restart failed", e.getMessage()); }
                                 });
                                 return;
                             }
                         }
-                        Platform.runLater(() -> error("Restart timed out", "The server did not exit within 30 seconds. Stop it manually before restarting."));
+                        UiExecutor.shared().dispatchToUi(() -> error("Restart timed out", "The server did not exit within 30 seconds. Stop it manually before restarting."));
                     } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
-                }, "vanta-server-restart");
-                waiter.setDaemon(true);
-                waiter.start();
+                });
             } catch (Exception e) { error("Restart failed", e.getMessage()); }
         } else {
             startServer();
@@ -593,16 +588,14 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         try {
             String id = requireSelectedId();
             console.appendText("Vanta: " + title + "…\n");
-            Thread worker = new Thread(() -> {
+            UiExecutor.shared().execute(() -> {
                 try {
                     T result = action.run();
-                    Platform.runLater(() -> success.accept(result));
+                    UiExecutor.shared().dispatchToUi(() -> success.accept(result));
                 } catch (Exception e) {
-                    Platform.runLater(() -> error(title + " failed", e.getMessage()));
+                    UiExecutor.shared().dispatchToUi(() -> error(title + " failed", e.getMessage()));
                 }
-            }, "vanta-server-task");
-            worker.setDaemon(true);
-            worker.start();
+            });
         } catch (Exception e) { error(title + " failed", e.getMessage()); }
     }
 
