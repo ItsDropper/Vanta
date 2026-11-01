@@ -163,7 +163,7 @@ public final class TelemetryService {
         text = text.replaceAll("(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b", "[REDACTED_EMAIL]");
         text = text.replaceAll("(?i)\\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\b", "[REDACTED_UUID]");
         text = text.replaceAll("\\b(?:\\d{1,3}\\.){3}\\d{1,3}\\b", "[REDACTED_IP]");
-        text = text.replaceAll("(?i)[A-Z]:\\\\Users\\\\[^\\\\\\s\"']+", "[REDACTED_WINDOWS_PATH]");
+        text = text.replaceAll("(?i)[A-Z]:\\\\Users\\\\[^\\\\]+", "[REDACTED_WINDOWS_PATH]");
         text = text.replaceAll("/(?:home|Users)/[^/\\s\"']+", "[REDACTED_HOME]");
         text = text.replaceAll("(?im)^\\s*(?:username|player name|player uuid|user uuid|access token|server address|server ip|connected to)\\s*[:=].*$", "[REDACTED_PRIVATE_FIELD]");
         text = text.replaceAll("(?i)(--username\\s+)\\S+", "$1[REDACTED]");
