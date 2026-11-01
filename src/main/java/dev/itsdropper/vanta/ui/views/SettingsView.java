@@ -2128,6 +2128,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 ThemeManager.saveThemeName(ThemeManager.DEFAULT_THEME);
                 ThemeManager.saveAccent(ThemeManager.DEFAULT_ACCENT);
                 ThemeManager.clearCustomColors();
+                LauncherSettings.setOverengineeredUiEnabled(false);
                 accentColor = ThemeManager.loadAccent();
                 applyAccent(accentColor);
                 onAccentChanged.accept(accentColor);
