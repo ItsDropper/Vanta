@@ -491,6 +491,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         card.setPrefHeight(318);
         card.setMaxWidth(Double.MAX_VALUE);
         card.setStyle("-fx-background-color: #122019; -fx-background-radius: 13px; -fx-border-color: #3a5745; -fx-border-radius: 13px; -fx-border-width: 1px;");
+        javafx.scene.shape.Rectangle heroClip = new javafx.scene.shape.Rectangle();
+        heroClip.widthProperty().bind(card.widthProperty());
+        heroClip.heightProperty().bind(card.heightProperty());
+        heroClip.setArcWidth(26);
+        heroClip.setArcHeight(26);
+        card.setClip(heroClip);
 
         MinecraftBackdrop landscape = new MinecraftBackdrop();
         landscape.setOpacity(1);
