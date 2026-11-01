@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.stream.Stream;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -66,6 +67,8 @@ public class LaunchService {
     private boolean failureHandled;
 
     private long launchStartedAtMillis;
+
+    private Set<String> crashReportsBeforeLaunch = Set.of();
 
     public LaunchService(
             AccountService accountService
@@ -232,6 +235,7 @@ public class LaunchService {
                     LaunchState.STARTING
             );
 
+            crashReportsBeforeLaunch = snapshotCrashReports(instance.getDirectory());
             launchStartedAtMillis = System.currentTimeMillis();
 
             Process process =
@@ -746,6 +750,26 @@ public class LaunchService {
     // PROCESS MONITOR
     // =============================================================
 
+    private Set<String> snapshotCrashReports(Path instanceDirectory) {
+        if (instanceDirectory == null) {
+            return Set.of();
+        }
+
+        Path crashDirectory = instanceDirectory.resolve("crash-reports");
+        if (!Files.isDirectory(crashDirectory)) {
+            return Set.of();
+        }
+
+        try (Stream<Path> files = Files.list(crashDirectory)) {
+            return files
+                    .filter(Files::isRegularFile)
+                    .map(path -> path.getFileName().toString())
+                    .collect(java.util.stream.Collectors.toUnmodifiableSet());
+        } catch (IOException ignored) {
+            return Set.of();
+        }
+    }
+
     private void monitorProcess(
             Process process
     ) {
@@ -762,6 +786,7 @@ public class LaunchService {
                         String processOutput;
                         long startedAt;
                         boolean intentionalClose;
+                        Set<String> previousCrashReports;
 
                         synchronized (this) {
 
@@ -772,6 +797,7 @@ public class LaunchService {
                             exitedInstance = runningInstance;
                             processOutput = getRecentOutput();
                             startedAt = launchStartedAtMillis;
+                            previousCrashReports = crashReportsBeforeLaunch;
                             intentionalClose = state == LaunchState.CLOSING;
 
                             if (failedInstance == null) {
@@ -812,7 +838,8 @@ public class LaunchService {
                             TelemetryService.reportMinecraftCrash(
                                     exitedInstance.getDirectory(),
                                     processOutput,
-                                    startedAt
+                                    startedAt,
+                                    previousCrashReports
                             ).exceptionally(ignored -> null);
                         }
 
