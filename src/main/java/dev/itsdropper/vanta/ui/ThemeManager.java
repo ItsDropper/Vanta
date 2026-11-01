@@ -157,7 +157,7 @@ public final class ThemeManager {
                 "-vantaborder: " + border + ";" +
                 "-vantatext: " + textColor + ";" +
                 "-vantamuted: " + muted + ";" +
-                "-vantasubtle: " + base.subtle() + ";" +
+                "-vantasubtle: " + loadCustomColor(settings, "customSubtle", base.subtle()) + ";" +
                 "-vantadanger: " + danger + ";" +
                 "-vantasuccess: " + success + ";"
         );
