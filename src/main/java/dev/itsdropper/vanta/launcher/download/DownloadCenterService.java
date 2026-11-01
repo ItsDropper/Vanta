@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.download;
 
-import javafx.application.Platform;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.launcher.instance.DownloadUtil;
 
 import java.nio.file.Path;
@@ -151,7 +151,7 @@ public final class DownloadCenterService {
 
     private static void dispatch(Runnable action) {
         try {
-            Platform.runLater(action);
+            UiExecutor.shared().dispatchToUi(action);
         } catch (IllegalStateException toolkitUnavailable) {
             // A closing JavaFX toolkit must not turn a successful transfer into a failure.
         }
