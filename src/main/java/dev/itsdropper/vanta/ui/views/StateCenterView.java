@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.views;
 
-import javafx.application.Platform;
 import javafx.animation.RotateTransition;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
@@ -156,13 +155,16 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         liveInstanceCards.clear();
         liveSharedRows.clear();
 
-        Thread coordinator = new Thread(() -> startParallelScan(generation), "Vanta-State-Coordinator");
-        coordinator.setDaemon(true);
-        coordinator.setUncaughtExceptionHandler((t, ex) -> {
-            ex.printStackTrace();
-            Platform.runLater(() -> failScan(generation, "The State scanner stopped unexpectedly."));
+        UiExecutor.shared().execute(() -> {
+            try {
+                startParallelScan(generation);
+            } catch (Throwable failure) {
+                failure.printStackTrace();
+                UiExecutor.shared().dispatchToUi(
+                        () -> failScan(generation, "The State scanner stopped unexpectedly.")
+                );
+            }
         });
-        coordinator.start();
     }
 
     private void startParallelScan(long generation) {
@@ -172,7 +174,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             instances = InstanceManager.discoverInstances();
         } catch (Throwable ex) {
             ex.printStackTrace();
-            Platform.runLater(() -> failScan(generation, "Vanta could not discover the installed environments."));
+            UiExecutor.shared().dispatchToUi(() -> failScan(generation, "Vanta could not discover the installed environments."));
             return;
         }
 
@@ -185,7 +187,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         final java.util.Set<String> brokenThings =
                 java.util.Collections.synchronizedSet(new java.util.LinkedHashSet<>());
 
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
             if (generation != scanGeneration) return;
 
             for (Instance instance : instances) {
@@ -215,12 +217,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         java.util.concurrent.ExecutorService executor =
                 java.util.concurrent.Executors.newFixedThreadPool(
                         workers,
-                        runnable -> {
-                            Thread thread = new Thread(runnable);
-                            thread.setName("Vanta-State-Worker");
-                            thread.setDaemon(true);
-                            return thread;
-                        }
+                        UiExecutor.namedDaemonThreadFactory("Vanta-State-Worker")
                 );
 
         for (Instance instance : instances) {
@@ -239,7 +236,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 }
 
                 final InstanceState finalState = state;
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (generation != scanGeneration) return;
                     replaceInstanceCard(instance, finalState);
                     updateLiveSummary(instances.size(), healthy.get(), attention.get(), broken.get(),
@@ -249,7 +246,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 if (state.getLevel() == InstanceState.Level.BROKEN
                         && LauncherSettings.isStateAutoRepairEnabled()) {
                     try {
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
                             if (generation == scanGeneration) {
                                 markInstanceRepairing(instance);
                             }
@@ -260,13 +257,13 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                         state = InstanceStateEngine.inspect(instance, workers);
 
                         final InstanceState repairedState = state;
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
                             if (generation != scanGeneration) return;
                             replaceInstanceCard(instance, repairedState);
                         });
                     } catch (Throwable repairFailure) {
                         repairFailure.printStackTrace();
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
                             if (generation == scanGeneration) {
                                 showRepairFailure(instance, repairFailure);
                             }
@@ -325,7 +322,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             int done = completed.incrementAndGet();
 
             final SharedState finalState = state;
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 if (generation != scanGeneration) return;
                 replaceSharedRow(finalState);
             });
@@ -372,7 +369,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             int done = completed.incrementAndGet();
 
             final SharedState finalState = state;
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 if (generation != scanGeneration) return;
                 replaceSharedRow(finalState);
             });
@@ -403,7 +400,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         executor.shutdown();
 
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
             if (generation != scanGeneration) return;
 
             progressLabel.setText("HEALTH");
@@ -463,7 +460,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
     ) {
         double fraction = total == 0 ? 1.0 : (double) done / total;
 
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
             if (generation != scanGeneration) return;
 
             progress.setProgress(fraction);
@@ -660,7 +657,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         button.setDisable(true);
         button.setText("REPAIRING...");
 
-        Thread repairThread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<Instance> instances = InstanceManager.discoverInstances();
                 boolean libraries = "Libraries".equals(name);
@@ -680,7 +677,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                                 false,
                                 LauncherSettings.getStateScanWorkers());
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     replaceSharedRow(repaired);
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
@@ -690,7 +687,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.error("Shared resource repair failed",
@@ -702,9 +699,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                     button.setText("REPAIR");
                 });
             }
-        }, "Vanta-State-Shared-Repair");
-        repairThread.setDaemon(true);
-        repairThread.start();
+        });
     }
 
     private void repairInstanceManually(Instance instance, Button button) {
@@ -713,12 +708,12 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         markInstanceRepairing(instance);
 
-        Thread repairThread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 InstanceRepairService.repair(instance);
                 InstanceState repaired = InstanceStateEngine.inspect(instance);
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     replaceInstanceCard(instance, repaired);
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
@@ -730,7 +725,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     InstanceState failedState = new InstanceState(
                             InstanceState.Level.BROKEN,
                             "REPAIR FAILED",
@@ -749,9 +744,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                     }
                 });
             }
-        }, "Vanta-State-Repair");
-        repairThread.setDaemon(true);
-        repairThread.start();
+        });
     }
 
     private void markInstanceRepairing(Instance instance) {
@@ -892,10 +885,10 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         compareButton.setDisable(true);
         captureButton.setText("SAVING...");
 
-        Thread worker = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 environmentLockfileService.write(instance);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     captureButton.setText("UPDATE BASELINE");
                     compareButton.setDisable(false);
@@ -910,7 +903,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                     }
                 });
             } catch (Throwable failure) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     boolean baselineExists = environmentLockfileService.hasBaseline(instance);
                     captureButton.setText(baselineExists ? "UPDATE BASELINE" : "SAVE BASELINE");
@@ -926,9 +919,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                     }
                 });
             }
-        }, "Vanta-Environment-Lockfile-Capture");
-        worker.setDaemon(true);
-        worker.start();
+        });
     }
 
     private void compareEnvironmentBaseline(
@@ -940,18 +931,18 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         compareButton.setDisable(true);
         compareButton.setText("CHECKING...");
 
-        Thread worker = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 EnvironmentLockfile baseline = environmentLockfileService.readBaseline(instance);
                 EnvironmentDriftReport report = environmentLockfileService.compare(instance, baseline);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     compareButton.setDisable(false);
                     compareButton.setText("CHECK DRIFT");
                     showEnvironmentDrift(instance, report);
                 });
             } catch (Throwable failure) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     compareButton.setDisable(!environmentLockfileService.hasBaseline(instance));
                     compareButton.setText("CHECK DRIFT");
@@ -966,9 +957,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                     }
                 });
             }
-        }, "Vanta-Environment-Drift-Check");
-        worker.setDaemon(true);
-        worker.start();
+        });
     }
 
     private void showEnvironmentDrift(Instance instance, EnvironmentDriftReport report) {
