@@ -210,8 +210,9 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         recentStatus = new Label("Finding recently played instances...");
         recentStatus.setWrapText(true);
-        recentStatus.setMinHeight(Region.USE_PREF_SIZE);
-        recentStatus.setStyle("-fx-text-fill: #a4b5a8; -fx-font-size: 12px; -fx-font-weight: 700; -fx-padding: 10px 2px 2px 2px;");
+        recentStatus.setMinHeight(26);
+        recentStatus.setMaxWidth(Double.MAX_VALUE);
+        recentStatus.setStyle("-fx-text-fill: #b5c5b9; -fx-font-size: 13px; -fx-font-weight: 700; -fx-border-color: #26382c transparent transparent transparent; -fx-border-width: 1px 0 0 0; -fx-padding: 14px 2px 2px 2px;");
 
         VBox section = new VBox(12, recentTitle, recentSubtitle, recentList, recentStatus);
         section.setFillWidth(true);
@@ -248,8 +249,9 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         recentServersStatus = new Label("Your recently joined servers will appear here.");
         recentServersStatus.setWrapText(true);
-        recentServersStatus.setMinHeight(Region.USE_PREF_SIZE);
-        recentServersStatus.setStyle("-fx-text-fill: #a4b5a8; -fx-font-size: 12px; -fx-padding: 10px 2px 2px 2px;");
+        recentServersStatus.setMinHeight(26);
+        recentServersStatus.setMaxWidth(Double.MAX_VALUE);
+        recentServersStatus.setStyle("-fx-text-fill: #b5c5b9; -fx-font-size: 13px; -fx-border-color: #26382c transparent transparent transparent; -fx-border-width: 1px 0 0 0; -fx-padding: 14px 2px 2px 2px;");
 
         card.getChildren().addAll(heading, subtitle, recentServersList, recentServersStatus);
         return card;
@@ -478,8 +480,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         Label state = new Label(launchService.isRunning(instance) ? "●  CURRENTLY RUNNING" : "●  LAST PLAYED");
         state.setStyle("-fx-text-fill: #d0e5d4; -fx-font-size: 11px; -fx-font-weight: 800; -fx-background-color: rgba(14,34,23,.72); -fx-border-color: rgba(160,205,170,.30); -fx-border-radius: 20px; -fx-background-radius: 20px; -fx-padding: 7px 10px;");
 
-        Region topSpacer = new Region();
-        HBox.setHgrow(topSpacer, Priority.ALWAYS);
         VBox topLine = new VBox(10, eyebrow, state);
         topLine.setAlignment(Pos.CENTER_LEFT);
 
