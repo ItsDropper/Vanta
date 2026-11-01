@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.views;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -236,25 +235,23 @@ public class ModpackBrowserView extends VBox {
         statusLabel.setText("Loading popular modpacks...");
         resultsList.getChildren().clear();
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<ModrinthProject> projects = contentService.getMostDownloaded(
                         ModrinthContentType.MODPACK, null, minecraftVersion
                 );
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != catalogRequestId) return;
                     showResults(projects);
                 });
             } catch (Exception e) {
                 e.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != catalogRequestId) return;
                     statusLabel.setText("Failed to load modpacks. Check your connection and try again.");
                 });
             }
-        }, "Vanta-Modpack-Popular");
-        thread.setDaemon(true);
-        thread.start();
+        });
     }
 
     // =============================================================
@@ -273,12 +270,12 @@ public class ModpackBrowserView extends VBox {
         statusLabel.setText("Searching Modrinth...");
         resultsList.getChildren().clear();
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<ModrinthProject> projects = contentService.search(
                         query, ModrinthContentType.MODPACK, null, minecraftVersion
                 );
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId
                             || !query.equals(searchField.getText() == null ? "" : searchField.getText().trim())) {
                         return;
@@ -287,14 +284,12 @@ public class ModpackBrowserView extends VBox {
                 });
             } catch (Exception e) {
                 e.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
                     statusLabel.setText("Search failed. Check your connection and try again.");
                 });
             }
-        }, "Vanta-Modpack-Search");
-        thread.setDaemon(true);
-        thread.start();
+        });
     }
 
     // =============================================================
@@ -557,7 +552,7 @@ public class ModpackBrowserView extends VBox {
                         + "..."
         );
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
             try {
 
@@ -565,7 +560,7 @@ public class ModpackBrowserView extends VBox {
                         project
                 );
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
 
                     button.setText(
                             "IMPORTED"
@@ -585,7 +580,7 @@ public class ModpackBrowserView extends VBox {
 
                 e.printStackTrace();
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
 
                     button.setDisable(false);
                     button.setText("IMPORT");
@@ -599,8 +594,6 @@ public class ModpackBrowserView extends VBox {
             }
         });
 
-        thread.setDaemon(true);
-        thread.start();
     }
 
     // =============================================================
@@ -616,7 +609,7 @@ public class ModpackBrowserView extends VBox {
             return;
         }
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                         .GET()
@@ -653,15 +646,13 @@ public class ModpackBrowserView extends VBox {
                     return;
                 }
 
-                Platform.runLater(() -> imageView.setImage(image));
+                UiExecutor.shared().dispatchToUi(() -> imageView.setImage(image));
             } catch (Exception ex) {
                 System.err.println("Failed to load Modrinth modpack icon: " + url);
                 ex.printStackTrace();
             }
-        }, "Vanta-Modpack-Icon");
+        });
 
-        thread.setDaemon(true);
-        thread.start();
     }
 
     // =============================================================
