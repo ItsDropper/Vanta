@@ -45,8 +45,6 @@ import java.time.Duration;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -55,10 +53,6 @@ import static com.vladsch.flexmark.html.renderer.CoreNodeRenderer.renderHtmlBloc
 public class MarkdownRenderer {
 
     private static final Logger LOGGER = Logger.getLogger(MarkdownRenderer.class.getName());
-    private static final ExecutorService IMAGE_EXECUTOR = Executors.newFixedThreadPool(
-            3,
-            UiExecutor.namedDaemonThreadFactory("Vanta-Markdown-Image")
-    );
     private static final double MAX_IMAGE_WIDTH = 900;
     private static final int MAX_REMOTE_IMAGE_BYTES = 12 * 1024 * 1024;
 
@@ -763,7 +757,7 @@ public class MarkdownRenderer {
             ImageView imageView
     ) {
 
-        IMAGE_EXECUTOR.execute(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
