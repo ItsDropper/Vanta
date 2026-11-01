@@ -175,6 +175,17 @@ public final class EnvironmentLockfileService {
             ));
         }
 
+        if (!java.util.Objects.equals(
+                baseline.requiredJavaMajorVersion(), current.requiredJavaMajorVersion())) {
+            changes.add(new EnvironmentDriftReport.Change(
+                    EnvironmentDriftReport.ChangeType.JAVA_REQUIREMENT_CHANGED,
+                    null, null, null,
+                    "Minecraft's required Java major version changed from "
+                            + baseline.requiredJavaMajorVersion() + " to "
+                            + current.requiredJavaMajorVersion()
+            ));
+        }
+
         java.util.Map<String, EnvironmentLockfile.ModArtifact> expected = new java.util.TreeMap<>();
         for (EnvironmentLockfile.ModArtifact artifact : baseline.mods()) {
             expected.put(artifact.filename().toLowerCase(java.util.Locale.ROOT), artifact);
@@ -601,7 +612,10 @@ public final class EnvironmentLockfileService {
                 || blank(lockfile.instanceId())
                 || blank(lockfile.minecraftVersion())
                 || blank(lockfile.loader())
-                || lockfile.mods() == null) {
+                || lockfile.mods() == null
+                || (lockfile.javaMajorVersion() != null && lockfile.javaMajorVersion() <= 0)
+                || (lockfile.requiredJavaMajorVersion() != null
+                        && lockfile.requiredJavaMajorVersion() <= 0)) {
             throw new IOException("Environment lockfile is incomplete or uses an unsupported schema version.");
         }
 
