@@ -433,12 +433,6 @@ public class InstalledModScanner {
         }
     }
 
-    public InstalledMod scanFile(
-            Path file
-    ) {
-        return readMod(file);
-    }
-
     public DependencyRequirement findDependencyRequirement(
             Instance instance,
             String requestingModId,
