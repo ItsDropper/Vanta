@@ -440,7 +440,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         Button reset = new Button("RESET TO DEFAULT ACCENT");
         reset.getStyleClass().add("secondary-button");
-        reset.setOnAction(event -> setAccent(ThemeManager.DEFAULT_ACCENT));
+        reset.setOnAction(event -> setAccent(ThemeManager.loadTheme().accent()));
 
         VBox customColors = card(
                 "Custom interface palette",
