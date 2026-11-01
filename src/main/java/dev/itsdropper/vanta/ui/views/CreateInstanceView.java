@@ -3,7 +3,6 @@ package dev.itsdropper.vanta.ui.views;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -420,7 +419,7 @@ public class CreateInstanceView extends VBox {
         versionBox.setPromptText("Loading Minecraft releases...");
         statusLabel.setText("Loading Minecraft version manifest...");
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 HttpRequest request = HttpRequest.newBuilder(URI.create(VERSION_MANIFEST_URL))
                         .timeout(Duration.ofSeconds(15))
@@ -454,7 +453,7 @@ public class CreateInstanceView extends VBox {
                     releases.add(idNode.asText());
                 }
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != manifestRequestId.get()) return;
                     versionBox.getItems().setAll(releases);
                     if (releases.isEmpty()) {
@@ -482,7 +481,7 @@ public class CreateInstanceView extends VBox {
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != manifestRequestId.get()) return;
                     versionBox.getItems().clear();
                     versionBox.setDisable(true);
@@ -494,9 +493,7 @@ public class CreateInstanceView extends VBox {
                     retryVersionsButton.setManaged(true);
                 });
             }
-        }, "Vanta-Minecraft-Version-Manifest");
-        thread.setDaemon(true);
-        thread.start();
+        });
     }
 
     // =============================================================
@@ -514,7 +511,7 @@ public class CreateInstanceView extends VBox {
         fabricCheckRunning = true;
         forgeCheckRunning = true;
 
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
                     "Vanilla",
                     "Fabric",
@@ -526,7 +523,7 @@ public class CreateInstanceView extends VBox {
             statusLabel.setText("Checking available mod loaders for Minecraft " + minecraftVersion + "...");
         });
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             boolean fabricAvailable = false;
             boolean forgeAvailable = false;
 
@@ -545,7 +542,7 @@ public class CreateInstanceView extends VBox {
             final boolean fabric = fabricAvailable;
             final boolean forge = forgeAvailable;
 
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()) {
                     return;
                 }
@@ -588,8 +585,6 @@ public class CreateInstanceView extends VBox {
             });
         });
 
-        thread.setDaemon(true);
-        thread.start();
     }
 
     // =============================================================
@@ -699,8 +694,7 @@ public class CreateInstanceView extends VBox {
         // INSTALL
         // ---------------------------------------------------------
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -726,7 +720,7 @@ public class CreateInstanceView extends VBox {
                             );
                         }
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             statusLabel.setText(
                                     "Instance created successfully."
@@ -739,7 +733,7 @@ public class CreateInstanceView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             createButton.setDisable(false);
                             backButton.setDisable(false);
@@ -759,10 +753,8 @@ public class CreateInstanceView extends VBox {
                         });
                     }
 
-                });
+        });
 
-        thread.setDaemon(true);
-        thread.start();
     }
 }
 
