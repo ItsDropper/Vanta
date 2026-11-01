@@ -812,3 +812,54 @@
     -fx-border-radius: 4px;
     -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -35%), 7, 0.18, 0, 0);
 }
+
+
+/* Vanta navigation rail: quieter, sharper, and visually separate from content. */
+.sidebar {
+    -fx-background-color: linear-gradient(to bottom, #101915, #0c120f);
+    -fx-background-radius: 10px;
+    -fx-border-color: #293a31;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+}
+.sidebar-logo {
+    -fx-font-size: 25px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.8px;
+}
+.sidebar-subtitle {
+    -fx-text-fill: #84948a;
+    -fx-font-size: 8px;
+    -fx-letter-spacing: 1.1px;
+}
+.sidebar-section-label {
+    -fx-text-fill: #77877c;
+    -fx-font-size: 8px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.5px;
+}
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #a1afa5;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 10px 11px;
+}
+.sidebar-button:hover {
+    -fx-background-color: #17231c;
+    -fx-text-fill: #f0f4f0;
+}
+.sidebar-button-active, .sidebar-button-active:hover {
+    -fx-background-color: #1b2b21;
+    -fx-border-color: transparent transparent transparent #a4c8ad;
+    -fx-border-width: 0 0 0 2px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: #f1f5f1;
+}
+.sidebar-build {
+    -fx-text-fill: #748379;
+    -fx-font-size: 8px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: .7px;
+}
