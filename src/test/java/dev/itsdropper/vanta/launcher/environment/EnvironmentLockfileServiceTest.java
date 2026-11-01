@@ -128,9 +128,11 @@ class EnvironmentLockfileServiceTest {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("symlink-instance"));
         Files.createDirectory(instanceDirectory.resolve("mods"));
         Path config = Files.createDirectory(instanceDirectory.resolve("config"));
+        Path mods = instanceDirectory.resolve("mods");
         Path outside = Files.writeString(temporaryDirectory.resolve("outside-secret.txt"), "outside");
         try {
             Files.createSymbolicLink(config.resolve("linked.txt"), outside);
+            Files.createSymbolicLink(mods.resolve("linked.jar"), outside);
         } catch (UnsupportedOperationException | java.io.IOException | SecurityException unavailable) {
             org.junit.jupiter.api.Assumptions.assumeTrue(false,
                     "Symbolic links are unavailable in this test environment.");
@@ -142,6 +144,7 @@ class EnvironmentLockfileServiceTest {
         EnvironmentLockfile lockfile = new EnvironmentLockfileService().capture(instance);
 
         assertTrue(lockfile.environmentFiles().isEmpty());
+        assertTrue(lockfile.mods().isEmpty());
     }
 
     @Test
