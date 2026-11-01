@@ -261,6 +261,22 @@ public final class LauncherSettings {
         setBoolean("stateAutoRepair", value);
     }
 
+    public static boolean isUsageTelemetryEnabled() {
+        return getBoolean("usageTelemetryEnabled", false);
+    }
+
+    public static void setUsageTelemetryEnabled(boolean value) {
+        setBoolean("usageTelemetryEnabled", value);
+    }
+
+    public static boolean isCrashTelemetryEnabled() {
+        return getBoolean("crashTelemetryEnabled", false);
+    }
+
+    public static void setCrashTelemetryEnabled(boolean value) {
+        setBoolean("crashTelemetryEnabled", value);
+    }
+
     public static void resetOnboarding() {
         setBoolean("onboardingCompleted", false);
     }
