@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.async.UiExecutor;
+import dev.itsdropper.vanta.telemetry.TelemetryService;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -1165,6 +1166,10 @@ public class ContentBrowserView extends VBox {
                                     "Unsupported content type: "
                                             + installType
                             );
+                        }
+
+                        if (installType == ModrinthContentType.MOD) {
+                            TelemetryService.track("feature_mod_install_used");
                         }
 
                         UiExecutor.shared().dispatchToUi(() -> {
