@@ -1744,6 +1744,13 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 "Sends one synthetic telemetry_test event. It does not include account or device information."
         ));
 
+        Button testCrashTelemetry = new Button("TEST CRASH REPORT DELIVERY");
+        testCrashTelemetry.getStyleClass().add("secondary-button");
+        testCrashTelemetry.setDisable(!crashTelemetry.isSelected());
+        testCrashTelemetry.setTooltip(new javafx.scene.control.Tooltip(
+                "Sends a clearly labelled synthetic crash report through the real crash endpoint. It does not crash Minecraft."
+        ));
+
         usageTelemetry.setOnAction(event -> {
             LauncherSettings.setUsageTelemetryEnabled(usageTelemetry.isSelected());
             testTelemetry.setDisable(!usageTelemetry.isSelected());
@@ -1754,8 +1761,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         crashTelemetry.setOnAction(event -> {
             LauncherSettings.setCrashTelemetryEnabled(crashTelemetry.isSelected());
+            testCrashTelemetry.setDisable(!crashTelemetry.isSelected());
             telemetryStatus.setText(crashTelemetry.isSelected()
-                    ? "Crash reporting enabled. Only the exception type and launcher version are sent."
+                    ? "Crash reporting enabled. Sanitized exception messages and stack traces from new Minecraft crash reports may be sent."
                     : "Crash reporting disabled. No new crash reports will be sent.");
         });
 
@@ -1788,10 +1796,40 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             );
         });
 
+        testCrashTelemetry.setOnAction(event -> {
+            if (!LauncherSettings.isCrashTelemetryEnabled()) {
+                telemetryStatus.setText("Enable crash reporting before testing delivery.");
+                return;
+            }
+
+            testCrashTelemetry.setDisable(true);
+            telemetryStatus.setText("Sending a synthetic crash-report test. Minecraft will not be crashed...");
+            TelemetryService.testCrashDelivery().whenComplete((statusCode, failure) ->
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        testCrashTelemetry.setDisable(!LauncherSettings.isCrashTelemetryEnabled());
+                        if (failure != null) {
+                            telemetryStatus.setText(
+                                    "Crash-report test failed: " + failure.getClass().getSimpleName()
+                            );
+                        } else if (statusCode != null && statusCode == 201) {
+                            telemetryStatus.setText(
+                                    "Crash-report delivery succeeded (HTTP 201). A clearly labelled VantaTelemetryTestException row was stored."
+                            );
+                        } else {
+                            telemetryStatus.setText(
+                                    "Crash-report API rejected the test (HTTP " + statusCode
+                                            + "). Check the Worker schema, D1 migration and deployment."
+                            );
+                        }
+                    })
+            );
+        });
+
         telemetry.getChildren().addAll(
                 usageTelemetry,
                 crashTelemetry,
                 testTelemetry,
+                testCrashTelemetry,
                 telemetryStatus
         );
 
