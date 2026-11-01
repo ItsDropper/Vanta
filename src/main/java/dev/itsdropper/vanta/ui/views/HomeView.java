@@ -354,7 +354,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         }
 
         recentStatus.setText(
-                recent.size() + " recently played " + (recent.size() == 1 ? "instance" : "instances")
+                recent.size() + " recently played " + (recent.size() == 1 ? "instance" : "instances") + " in total"
         );
     }
 
