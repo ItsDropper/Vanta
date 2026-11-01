@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.ThemeManager;
-import javafx.application.Platform;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.geometry.Insets;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
@@ -288,13 +288,14 @@ public class InstancesView extends VBox {
         long requestId = ++refreshRequestId;
         statusLabel.setText("Scanning installed instances...");
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(
+() -> {
             List<Instance> instances;
             try {
                 instances = InstanceManager.discoverInstances();
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != refreshRequestId) return;
                     // A failed rescan must not erase the last successfully loaded list.
                     // Keep existing cards and the real count visible so a transient filesystem
@@ -306,7 +307,7 @@ public class InstancesView extends VBox {
                 return;
             }
 
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 if (requestId != refreshRequestId) return;
 
                 loadedInstances = List.copyOf(instances);
@@ -322,10 +323,9 @@ public class InstancesView extends VBox {
                 // after rename, duplicate, icon change, or manual refresh.
                 filterInstances(searchField.getText());
             });
-        }, "Vanta-Instance-Refresh");
+        }
+        );
 
-        thread.setDaemon(true);
-        thread.start();
     }
 
 
@@ -352,10 +352,11 @@ public class InstancesView extends VBox {
 
         backupButton.setDisable(true);
         statusLabel.setText("Restoring backup… Existing instances will not be overwritten.");
-        Thread worker = new Thread(() -> {
+        UiExecutor.shared().execute(
+() -> {
             try {
                 InstanceBackupService.restoreBackup(archive.toPath(), name);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
                     statusLabel.setText("Backup restored as " + name.trim() + ".");
                     refresh();
@@ -364,16 +365,15 @@ public class InstancesView extends VBox {
                             .show();
                 });
             } catch (Throwable ex) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
                     String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
                     statusLabel.setText("Restore failed: " + message);
                     new Alert(Alert.AlertType.ERROR, "Vanta could not restore this backup.\n\n" + message).show();
                 });
             }
-        }, "Vanta-Instance-Restore");
-        worker.setDaemon(true);
-        worker.start();
+        }
+        );
     }
 
     private void backUpInstance() {
@@ -417,10 +417,11 @@ public class InstancesView extends VBox {
         backupButton.setDisable(true);
         statusLabel.setText("Backing up " + selected.getName() + "… Worlds and settings are included.");
 
-        Thread worker = new Thread(() -> {
+        UiExecutor.shared().execute(
+() -> {
             try {
                 InstanceBackupService.createBackup(selected, output);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
                     statusLabel.setText("Backup created: " + output.getFileName());
                     Alert success = new Alert(Alert.AlertType.INFORMATION,
@@ -430,16 +431,15 @@ public class InstancesView extends VBox {
                     success.show();
                 });
             } catch (Throwable ex) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
                     String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
                     statusLabel.setText("Backup failed: " + message);
                     new Alert(Alert.AlertType.ERROR, "Vanta could not create the backup.\n\n" + message).show();
                 });
             }
-        }, "Vanta-Instance-Backup");
-        worker.setDaemon(true);
-        worker.start();
+        }
+        );
     }
 
     private static String safeFileName(String name) {
@@ -625,17 +625,17 @@ public class InstancesView extends VBox {
             if (name.isBlank()) return;
             popup.hide();
             statusLabel.setText((duplicate ? "Duplicating " : "Renaming ") + instance.getName() + "...");
-            Thread thread = new Thread(() -> {
+            UiExecutor.shared().execute(
+() -> {
                 try {
                     if (duplicate) InstanceManager.duplicateInstance(instance, name);
                     else InstanceManager.renameInstance(instance, name);
-                    Platform.runLater(this::refresh);
+                    UiExecutor.shared().dispatchToUi(this::refresh);
                 } catch (Throwable ex) {
-                    Platform.runLater(() -> statusLabel.setText(ex.getMessage() == null ? "Operation failed." : ex.getMessage()));
+                    UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Operation failed." : ex.getMessage()));
                 }
-            }, duplicate ? "Vanta-Instance-Duplicate" : "Vanta-Instance-Rename");
-            thread.setDaemon(true);
-            thread.start();
+            }
+            );
         });
         actions.getChildren().addAll(cancel, apply);
         root.getChildren().addAll(title, subtitle, field, actions);
@@ -643,7 +643,7 @@ public class InstancesView extends VBox {
 
         popup.getContent().add(root);
         showPopupCentered(popup, 430, duplicate ? 190 : 175);
-        Platform.runLater(() -> { field.requestFocus(); field.selectAll(); });
+        UiExecutor.shared().dispatchToUi(() -> { field.requestFocus(); field.selectAll(); });
     }
 
     private void showIconPopup(Instance instance) {
@@ -665,12 +665,12 @@ public class InstancesView extends VBox {
             button.setTooltip(new javafx.scene.control.Tooltip(icon[0]));
             button.setOnAction(e -> {
                 popup.hide();
-                Thread thread = new Thread(() -> {
-                    try { InstanceManager.setInstanceIcon(instance, icon[0]); Platform.runLater(this::refresh); }
-                    catch (Throwable ex) { Platform.runLater(() -> statusLabel.setText(ex.getMessage() == null ? "Could not change icon." : ex.getMessage())); }
-                }, "Vanta-Instance-Icon");
-                thread.setDaemon(true);
-                thread.start();
+                UiExecutor.shared().execute(
+() -> {
+                    try { InstanceManager.setInstanceIcon(instance, icon[0]); UiExecutor.shared().dispatchToUi(this::refresh); }
+                    catch (Throwable ex) { UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Could not change icon." : ex.getMessage())); }
+                }
+                );
             });
             choices.getChildren().add(button);
         }
@@ -683,17 +683,17 @@ public class InstancesView extends VBox {
             java.io.File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
             if (selected == null) return;
             popup.hide();
-            Thread thread = new Thread(() -> {
+            UiExecutor.shared().execute(
+() -> {
                 try {
                     java.nio.file.Files.copy(selected.toPath(), instance.getDirectory().resolve("icon.png"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     InstanceManager.setInstanceIcon(instance, "CUSTOM");
-                    Platform.runLater(this::refresh);
+                    UiExecutor.shared().dispatchToUi(this::refresh);
                 } catch (Throwable ex) {
-                    Platform.runLater(() -> statusLabel.setText(ex.getMessage() == null ? "Could not upload icon." : ex.getMessage()));
+                    UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Could not upload icon." : ex.getMessage()));
                 }
-            }, "Vanta-Instance-Icon-Upload");
-            thread.setDaemon(true);
-            thread.start();
+            }
+            );
         });
         root.getChildren().addAll(title, subtitle, choices, upload);
         ThemeManager.apply(root, ThemeManager.loadAccent());
@@ -748,8 +748,8 @@ public class InstancesView extends VBox {
                         + "..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(
+() -> {
 
                     try {
 
@@ -757,7 +757,7 @@ public class InstancesView extends VBox {
                                 instance
                         );
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             statusLabel.setText(
                                     "Deleted "
@@ -771,7 +771,7 @@ public class InstancesView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 statusLabel.setText(
                                         ex.getMessage() != null
                                                 ? ex.getMessage()
@@ -779,17 +779,11 @@ public class InstancesView extends VBox {
                                 )
                         );
                     }
-                });
-
-        thread.setDaemon(
-                true
+                }
         );
 
-        thread.setName(
-                "Vanta-Instance-Delete"
-        );
 
-        thread.start();
+
     }
 
     // =============================================================
@@ -800,7 +794,7 @@ public class InstancesView extends VBox {
             LaunchService.LaunchState state
     ) {
 
-        Platform.runLater(
+        UiExecutor.shared().dispatchToUi(
                 this::updateCards
         );
     }
@@ -934,8 +928,8 @@ public class InstancesView extends VBox {
                         + "..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(
+() -> {
 
                     try {
 
@@ -947,7 +941,7 @@ public class InstancesView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 statusLabel.setText(
                                         ex.getMessage() != null
                                                 ? ex.getMessage()
@@ -955,16 +949,10 @@ public class InstancesView extends VBox {
                                 )
                         );
                     }
-                });
-
-        thread.setDaemon(
-                true
+                }
         );
 
-        thread.setName(
-                "Vanta-Instance-Launch"
-        );
 
-        thread.start();
+
     }
 }
