@@ -796,40 +796,47 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             Instance instance,
             ServerHistoryEntry server
     ) {
+        Label serverGlyph = new Label("↗");
+        serverGlyph.setStyle("-fx-text-fill: #a8cbb1; -fx-font-size: 17px; -fx-font-weight: 900;");
+        StackPane icon = new StackPane(serverGlyph);
+        icon.setMinSize(38, 38);
+        icon.setPrefSize(38, 38);
+        icon.setMaxSize(38, 38);
+        icon.setStyle("-fx-background-color: #1b2a20; -fx-background-radius: 7px; -fx-border-color: #344b3b; -fx-border-radius: 7px;");
+
         Label name = new Label(server.getDisplayName());
-        name.getStyleClass().add("home-server-name");
+        name.setWrapText(true);
+        name.setMinWidth(0);
+        name.setStyle("-fx-text-fill: #eaf1eb; -fx-font-size: 10px; -fx-font-weight: 800;");
 
-        Label metadata = new Label(
-                instance != null
-                        ? "Using " + instance.getName()
-                        : "Instance no longer installed"
-        );
-        metadata.getStyleClass().add("home-server-meta");
+        Label endpoint = new Label(server.getHost() + ":" + server.getPort());
+        endpoint.setStyle("-fx-text-fill: #8fa496; -fx-font-size: 8px; -fx-font-family: 'Geist Mono', 'Consolas';");
 
-        VBox info = new VBox(3, name, metadata);
+        Label instanceLabel = new Label(instance != null
+                ? "INSTANCE  /  " + instance.getName()
+                : "INSTANCE NOT INSTALLED");
+        instanceLabel.setWrapText(true);
+        instanceLabel.setStyle("-fx-text-fill: " + (instance != null ? "#718779" : "#b98a70")
+                + "; -fx-font-size: 7px; -fx-font-weight: 900; -fx-letter-spacing: .7px;");
+
+        VBox info = new VBox(4, name, endpoint, instanceLabel);
+        info.setAlignment(Pos.CENTER_LEFT);
+        info.setMinWidth(0);
         HBox.setHgrow(info, Priority.ALWAYS);
 
         boolean instanceAvailable = instance != null;
         ServerTarget runningTarget = launchService.getRunningServerTarget();
-        boolean serverRunning =
-                instanceAvailable
-                        && launchService.isRunning(instance)
-                        && runningTarget != null
-                        && runningTarget.host().equalsIgnoreCase(server.getHost())
-                        && runningTarget.port() == server.getPort();
+        boolean serverRunning = instanceAvailable
+                && launchService.isRunning(instance)
+                && runningTarget != null
+                && runningTarget.host().equalsIgnoreCase(server.getHost())
+                && runningTarget.port() == server.getPort();
 
-        Button play = new Button(
-                serverRunning ? "CLOSE" : "PLAY"
-        );
-        play.getStyleClass().add(
-                serverRunning
-                        ? "home-recent-stop"
-                        : "home-recent-play"
-        );
-        play.setMinWidth(84);
-        play.setPickOnBounds(true);
-        play.setMouseTransparent(false);
-        play.setCursor(Cursor.HAND);
+        Button play = new Button(serverRunning ? "STOP" : "JOIN");
+        play.setStyle("-fx-background-color: " + (serverRunning ? "#392322" : "#d4e5d7")
+                + "; -fx-text-fill: " + (serverRunning ? "#f0b6ad" : "#112019")
+                + "; -fx-font-size: 8px; -fx-font-weight: 900; -fx-background-radius: 5px; -fx-padding: 0 11px; -fx-min-height: 31px; -fx-cursor: hand;");
+        play.setMinWidth(55);
         play.setDisable(!instanceAvailable);
         String serverActionDescription = !instanceAvailable
                 ? "Unavailable: the instance for " + server.getDisplayName() + " is not installed"
@@ -838,13 +845,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                         + (serverRunning ? "" : " using " + instance.getName());
         play.setAccessibleText(serverActionDescription);
         play.setTooltip(new Tooltip(serverActionDescription));
-
         play.setOnAction(event -> launchServer(instance, server));
-
         AnimationUtils.installInteractiveAnimations(play);
-        HBox card = new HBox(14, info, play);
+
+        HBox card = new HBox(10, icon, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(12, 14, 12, 14));
+        card.setPadding(new Insets(10, 11, 10, 11));
         card.setMinWidth(0);
         card.prefWidthProperty().bind(
                 Bindings.createDoubleBinding(
@@ -853,19 +859,18 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 )
         );
         card.setMaxWidth(Double.MAX_VALUE);
+        card.setStyle("-fx-background-color: #131e17; -fx-background-radius: 7px; -fx-border-color: #2b4032; -fx-border-radius: 7px;");
         card.getStyleClass().add("home-server-card");
-
         card.setPickOnBounds(true);
         card.setMouseTransparent(false);
-
         card.setAccessibleRole(AccessibleRole.BUTTON);
         card.setAccessibleText("Join " + server.getDisplayName()
                 + (instanceAvailable ? " using " + instance.getName() : ", unavailable"));
         card.setFocusTraversable(instanceAvailable);
+        card.setOnMouseEntered(event -> card.setStyle("-fx-background-color: #1a2a20; -fx-background-radius: 7px; -fx-border-color: #62816a; -fx-border-radius: 7px;"));
+        card.setOnMouseExited(event -> card.setStyle("-fx-background-color: #131e17; -fx-background-radius: 7px; -fx-border-color: #2b4032; -fx-border-radius: 7px;"));
         card.setOnMouseClicked(event -> {
-            if (event.getTarget() == play || instance == null) {
-                return;
-            }
+            if (event.getTarget() == play || instance == null) return;
             launchServer(instance, server);
         });
         card.setOnKeyPressed(event -> {
@@ -875,7 +880,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 event.consume();
             }
         });
-
         return card;
     }
 
