@@ -217,7 +217,7 @@ public final class EnvironmentLockfileService {
         java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> expectedFiles =
                 environmentFileMap(baseline.environmentFiles(), baseline.schemaVersion());
         java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> actualFiles =
-                environmentFileMap(current.environmentFiles(), current.schemaVersion());
+                environmentFileMap(current.environmentFiles(), baseline.schemaVersion());
 
         for (var entry : expectedFiles.entrySet()) {
             EnvironmentLockfile.EnvironmentArtifact recorded = entry.getValue();
