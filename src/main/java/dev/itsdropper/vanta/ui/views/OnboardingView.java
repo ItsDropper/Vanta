@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.views;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -288,11 +287,11 @@ public class OnboardingView extends BorderPane {
         progress.setPrefSize(18, 18);
         connectButton.setGraphic(progress);
 
-        Thread loginThread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 Account account = accountService.login();
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     accountStatus.setText("Connected as " + account.getUsername());
                     accountStatus.getStyleClass().remove("onboarding-account-status");
                     accountStatus.getStyleClass().add("connected-label");
@@ -301,7 +300,7 @@ public class OnboardingView extends BorderPane {
                     connectButton.setDisable(false);
                 });
             } catch (Throwable ex) {
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     accountStatus.setText(
                             "Could not connect: "
                                     + (ex.getMessage() == null ? ex.toString() : ex.getMessage())
@@ -313,8 +312,6 @@ public class OnboardingView extends BorderPane {
                     connectButton.setDisable(false);
                 });
             }
-        }, "Vanta-Onboarding-Account");
-        loginThread.setDaemon(true);
-        loginThread.start();
+        });
     }
 }
