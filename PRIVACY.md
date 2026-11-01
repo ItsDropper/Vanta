@@ -14,9 +14,20 @@ Depending on the features you use, Vanta may process:
 
 Vanta is designed to store account/session data and instance data locally on your device. Treat your device account and its files as private. Anyone with sufficient access to your device or its backups may be able to access local launcher data.
 
-## 2. Telemetry and data collection
+## 2. Optional telemetry and data collection
 
-Vanta is designed not to include intentional usage analytics or telemetry sent to a Vanta-operated analytics server. This is a statement of the project's intended behavior, not a guarantee that every dependency or future version behaves identically. Check the source and release notes for the exact version you run.
+Telemetry is disabled by default. During onboarding and in Settings → Repair & Diagnostics, users can independently opt in to:
+
+- **Anonymous usage statistics:** allowlisted launcher events (currently launcher startup and visits to Home, Instances, Mods, and Settings) plus the Vanta version.
+- **Anonymous crash reports:** the Java exception class name plus the Vanta version. Stack traces, exception messages, logs, screenshots, and local paths are not sent.
+
+Vanta does not include Microsoft, Xbox, or Minecraft account identifiers, usernames, access tokens, refresh tokens, session credentials, server addresses, hardware identifiers, or persistent installation identifiers in telemetry payloads. The telemetry client has no access to authentication storage and sends only fixed-schema JSON payloads.
+
+Telemetry is sent to the Vanta project's Cloudflare Worker and stored in its D1 database. Cloudflare necessarily receives ordinary network connection metadata, including the request IP address; the Worker uses the connecting IP as a rate-limit key. Vanta does not include that IP in event payloads or application database rows. Cloudflare's own processing is also subject to its service terms and privacy documentation.
+
+Users can withdraw either permission at any time in Settings. Disabling a category stops future events for that category; there is no persistent client-side event queue. Because Vanta does not attach a user or installation identifier, it cannot locate an individual user's previously received rows for selective deletion. The intended server retention periods are 90 days for usage events and 30 days for crash reports, provided the corresponding Cloudflare scheduled cleanup trigger is deployed and enabled.
+
+The Repair & Diagnostics delivery test sends a synthetic telemetry_test usage event only when usage statistics are enabled. It is a diagnostic event and must be excluded from product usage aggregates.
 
 Do not send logs, crash reports, screenshots, or configuration files to anyone without checking them first. They may contain usernames, local file paths, server addresses, or other identifying information.
 
