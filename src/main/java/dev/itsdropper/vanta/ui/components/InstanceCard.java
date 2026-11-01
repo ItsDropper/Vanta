@@ -680,35 +680,10 @@ public class InstanceCard extends StackPane {
         // ---------------------------------------------------------
 
         scene.getStylesheets().add(
-                getClass()
-                        .getResource(
-                                "/css/base.css"
-                        )
-                        .toExternalForm()
+                getClass().getResource("/css/base.css").toExternalForm()
         );
-
         scene.getStylesheets().add(
-                getClass()
-                        .getResource(
-                                "/css/base.css"
-                        )
-                        .toExternalForm()
-        );
-
-        scene.getStylesheets().add(
-                getClass()
-                        .getResource(
-                                "/css/base.css"
-                        )
-                        .toExternalForm()
-        );
-
-        scene.getStylesheets().add(
-                getClass()
-                        .getResource(
-                                "/css/library.css"
-                        )
-                        .toExternalForm()
+                getClass().getResource("/css/library.css").toExternalForm()
         );
 
         dialog.setScene(
