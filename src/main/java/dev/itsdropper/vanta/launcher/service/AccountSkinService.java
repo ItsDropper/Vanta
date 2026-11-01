@@ -1,9 +1,9 @@
 package dev.itsdropper.vanta.launcher.service;
 
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import dev.itsdropper.vanta.launcher.account.Account;
@@ -55,7 +55,7 @@ public class AccountSkinService {
 
         if (cached != null && !cached.isError()) {
 
-            Platform.runLater(() ->
+            UiExecutor.shared().dispatchToUi(() ->
                     callback.accept(
                             createHead(cached)
                     )
@@ -88,7 +88,7 @@ public class AccountSkinService {
                 if (skinUrl == null ||
                         skinUrl.isBlank()) {
 
-                    Platform.runLater(() ->
+                    UiExecutor.shared().dispatchToUi(() ->
                             callback.accept(null)
                     );
 
@@ -119,7 +119,7 @@ public class AccountSkinService {
                 Image head =
                         createHead(skin);
 
-                Platform.runLater(() ->
+                UiExecutor.shared().dispatchToUi(() ->
                         callback.accept(head)
                 );
 
@@ -132,7 +132,7 @@ public class AccountSkinService {
 
                 ex.printStackTrace();
 
-                Platform.runLater(() ->
+                UiExecutor.shared().dispatchToUi(() ->
                         callback.accept(null)
                 );
             }
