@@ -32,14 +32,14 @@ class TelemetryServiceTest {
     void crashTextSanitizationRemovesCommonPrivateValues() {
         String source = "token=secret-value user@example.com "
                 + "123e4567-e89b-12d3-a456-426614174000 "
-                + "192.168.1.20 C:\\\\Users\\\\Example\\\\AppData";
+                + "192.168.1.20 C:\\Users\\Example\\\\AppData";
         String sanitized = TelemetryService.sanitizeText(source, 2000);
 
         assertFalse(sanitized.contains("secret-value"));
         assertFalse(sanitized.contains("user@example.com"));
         assertFalse(sanitized.contains("123e4567-e89b-12d3-a456-426614174000"));
         assertFalse(sanitized.contains("192.168.1.20"));
-        assertFalse(sanitized.contains("C:\\\\Users\\\\Example"));
+        assertFalse(sanitized.contains("C:\\Users\\Example"));
         assertTrue(sanitized.contains("[REDACTED]"));
     }
 
