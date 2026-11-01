@@ -101,6 +101,59 @@ class EnvironmentLockfileServiceTest {
     }
 
 
+
+    @Test
+    void capturesMinecraftRuntimeMetadataAndClientJar() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("runtime-instance"));
+        Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path minecraft = Files.createDirectory(instanceDirectory.resolve("minecraft"));
+        Files.writeString(minecraft.resolve("version.json"), """
+                {
+                  "mainClass": "net.minecraft.client.main.Main",
+                  "libraries": []
+                }
+                """);
+        Files.writeString(minecraft.resolve("client.jar"), "minecraft-client-binary");
+
+        Instance instance = new Instance(
+                "runtime", "Runtime", "1.21.1", "fabric", "0.16.9", instanceDirectory
+        );
+        EnvironmentLockfile lockfile = new EnvironmentLockfileService().capture(instance);
+
+        assertEquals(2, lockfile.environmentFiles().size());
+        assertTrue(lockfile.environmentFiles().stream()
+                .anyMatch(file -> file.category().equals("minecraft")
+                        && file.relativePath().equals("version.json")));
+        assertTrue(lockfile.environmentFiles().stream()
+                .anyMatch(file -> file.category().equals("minecraft")
+                        && file.relativePath().equals("client.jar")));
+    }
+
+    @Test
+    void readsSchemaTwoBaselinesAfterSchemaThreeUpgrade() throws Exception {
+        Path lockfilePath = temporaryDirectory.resolve("legacy-v2.json");
+        Files.writeString(lockfilePath, """
+                {
+                  "schemaVersion": 2,
+                  "generatedAt": "2026-10-31T00:00:00Z",
+                  "instanceId": "legacy-v2",
+                  "minecraftVersion": "1.21.1",
+                  "loader": "fabric",
+                  "loaderVersion": "0.16.9",
+                  "mods": [],
+                  "environmentFiles": [
+                    {"category":"config","relativePath":"options.txt","sizeBytes":1,
+                     "sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+                  ]
+                }
+                """);
+
+        EnvironmentLockfile loaded = new EnvironmentLockfileService().read(lockfilePath);
+
+        assertEquals(2, loaded.schemaVersion());
+        assertEquals("options.txt", loaded.environmentFiles().getFirst().relativePath());
+    }
+
     @Test
     void readsPreviousSchemaOneLockfilesWithoutEnvironmentFileMetadata() throws Exception {
         Path lockfilePath = temporaryDirectory.resolve("legacy-v1.json");
