@@ -1723,9 +1723,17 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         crashTelemetry.setSelected(LauncherSettings.isCrashTelemetryEnabled());
         crashTelemetry.getStyleClass().add("settings-checkbox");
 
-        Label telemetryStatus = new Label(
-                "Telemetry is disabled unless you explicitly enable a category."
-        );
+        String initialTelemetryStatus;
+        if (usageTelemetry.isSelected() && crashTelemetry.isSelected()) {
+            initialTelemetryStatus = "Usage statistics and crash reporting are enabled.";
+        } else if (usageTelemetry.isSelected()) {
+            initialTelemetryStatus = "Usage statistics are enabled. Crash reporting remains disabled.";
+        } else if (crashTelemetry.isSelected()) {
+            initialTelemetryStatus = "Crash reporting is enabled. Usage statistics remain disabled.";
+        } else {
+            initialTelemetryStatus = "Telemetry is disabled unless you explicitly enable a category.";
+        }
+        Label telemetryStatus = new Label(initialTelemetryStatus);
         telemetryStatus.getStyleClass().add("settings-card-description");
         telemetryStatus.setWrapText(true);
 
