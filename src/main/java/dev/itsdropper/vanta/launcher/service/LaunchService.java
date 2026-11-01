@@ -9,6 +9,7 @@ import dev.itsdropper.vanta.launcher.repair.FailureCategory;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosis;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine;
 import dev.itsdropper.vanta.ui.views.RepairView;
+import dev.itsdropper.vanta.telemetry.TelemetryService;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -63,6 +64,8 @@ public class LaunchService {
     private LaunchFailure lastFailure;
 
     private boolean failureHandled;
+
+    private long launchStartedAtMillis;
 
     public LaunchService(
             AccountService accountService
@@ -228,6 +231,8 @@ public class LaunchService {
             setState(
                     LaunchState.STARTING
             );
+
+            launchStartedAtMillis = System.currentTimeMillis();
 
             Process process =
                     MinecraftLauncher.launch(
@@ -753,64 +758,62 @@ public class LaunchService {
                         int exitCode =
                                 process.waitFor();
 
+                        Instance exitedInstance;
+                        String processOutput;
+                        long startedAt;
+                        boolean intentionalClose;
+
                         synchronized (this) {
 
-                            if (minecraftProcess !=
-                                    process) {
-
+                            if (minecraftProcess != process) {
                                 return;
                             }
 
-                            if (failedInstance == null) {
+                            exitedInstance = runningInstance;
+                            processOutput = getRecentOutput();
+                            startedAt = launchStartedAtMillis;
+                            intentionalClose = state == LaunchState.CLOSING;
 
-                                failedInstance =
-                                        runningInstance;
+                            if (failedInstance == null) {
+                                failedInstance = runningInstance;
                             }
 
-                            minecraftProcess =
-                                    null;
-
-                            runningInstance =
-                                    null;
-
+                            minecraftProcess = null;
+                            runningInstance = null;
                             runningServerTarget = null;
 
                             /*
-                             * The output monitor already handled
-                             * a known failure.
+                             * A recognized failure may already have moved
+                             * the UI to ERROR and terminated the child.
+                             * Still inspect its fresh crash report below.
                              */
-                            if (failureHandled) {
-
-                                return;
-                            }
-
-                            if (exitCode != 0) {
-
-                                if (lastFailure == null) {
-
-                                    String output =
-                                            getRecentOutput();
-
-                                    lastFailure =
-                                            new LaunchFailure(
-                                                    "Minecraft exited with code " + exitCode,
-                                                    "Minecraft exited with a non-zero code (" + exitCode
-                                                            + "). This does not by itself confirm a Minecraft crash. "
-                                                            + "No specific failure was identified from the current process output.",
-                                                    output
-                                            );
+                            if (!failureHandled) {
+                                if (exitCode != 0) {
+                                    if (lastFailure == null) {
+                                        lastFailure = new LaunchFailure(
+                                                "Minecraft exited with code " + exitCode,
+                                                "Minecraft exited with a non-zero code (" + exitCode
+                                                        + "). This does not by itself confirm a Minecraft crash. "
+                                                        + "No specific failure was identified from the current process output.",
+                                                processOutput
+                                        );
+                                    }
+                                    setState(LaunchState.ERROR);
+                                } else {
+                                    setState(LaunchState.IDLE);
                                 }
-
-                                setState(
-                                        LaunchState.ERROR
-                                );
-
-                            } else {
-
-                                setState(
-                                        LaunchState.IDLE
-                                );
                             }
+                        }
+
+                        // Only a non-zero, non-user-initiated exit is eligible.
+                        // TelemetryService uploads only a newly-created crash report
+                        // or a throwable-shaped stack excerpt, never raw latest.log.
+                        if (exitCode != 0 && !intentionalClose && exitedInstance != null) {
+                            TelemetryService.reportMinecraftCrash(
+                                    exitedInstance.getDirectory(),
+                                    processOutput,
+                                    startedAt
+                            ).exceptionally(ignored -> null);
                         }
 
                     } catch (InterruptedException e) {
