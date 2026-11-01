@@ -78,9 +78,7 @@ public class GlobalModsView extends VBox {
         httpClient =
                 HttpClient.newHttpClient();
 
-        getStyleClass().add(
-                "page"
-        );
+        getStyleClass().addAll("page", "global-mods-page");
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
