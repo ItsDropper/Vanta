@@ -18,12 +18,32 @@
    INSTANCE CARDS
    ============================================================= */
 
+/* Instance rows share one continuous list surface. Individual rows stay flat;
+   the parent owns the surface and the separators establish scan rhythm. */
+.instance-list {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-padding: 2px 0;
+}
+
 .instance-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+    -fx-border-width: 0 0 1px 0;
     -fx-cursor: hand;
+    -fx-min-height: 82px;
+}
+
+.instance-card:hover {
+    -fx-background-color: -vantasurfacehover;
 }
 
 .instance-card.selected-instance {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -vantaaccentsoft;
 }
 
 
@@ -1058,12 +1078,9 @@
 
 /* Instance library controls */
 .instances-toolbar {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 11px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 11px;
-    -fx-padding: 10px;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
 }
 .instances-toolbar .instance-search-field {
     -fx-background-color: -vantabg;
@@ -1095,9 +1112,9 @@
     -fx-background-color: -vantamuted;
 }
 .overengineered-ui .instances-toolbar {
-    -fx-background-color: linear-gradient(to bottom, derive(-vantasurface, 9%), -vantasurface 65%, derive(-vantabg, 4%));
-    -fx-border-color: derive(-vantaborder, 24%);
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 16, 0.16, 0, 4);
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
 }
 .overengineered-ui .instances-toolbar .instance-sort-field {
     -fx-border-color: derive(-vantaborder, 30%);
