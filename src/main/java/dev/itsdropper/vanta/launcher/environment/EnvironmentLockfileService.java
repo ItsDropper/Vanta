@@ -1,6 +1,8 @@
 package dev.itsdropper.vanta.launcher.environment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.LibraryResolver;
@@ -412,6 +414,8 @@ public final class EnvironmentLockfileService {
                 || Files.isSymbolicLink(clientJar)) {
             throw new IOException("Minecraft client JAR is missing or is not a regular file.");
         }
+        addRuntimeArtifact(artifacts, seen, "minecraft", minecraftDirectory, versionFile,
+                fingerprintVersionManifest(versionFile));
         addRuntimeArtifact(artifacts, seen, "minecraft", minecraftDirectory, clientJar);
 
         if (!manifest.libraries.isEmpty()) {
@@ -446,12 +450,39 @@ public final class EnvironmentLockfileService {
         return List.copyOf(artifacts);
     }
 
+    private static FileFingerprint fingerprintVersionManifest(Path versionFile) throws IOException {
+        JsonNode manifest = MAPPER.readTree(versionFile.toFile());
+        if (manifest == null || !manifest.isObject()) {
+            throw new IOException("Minecraft version metadata must contain a JSON object.");
+        }
+        ((ObjectNode) manifest).remove("javaVersion");
+        byte[] normalized = MAPPER.writeValueAsBytes(manifest);
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return new FileFingerprint(normalized.length,
+                    HexFormat.of().formatHex(digest.digest(normalized)));
+        } catch (NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException("SHA-256 is required by the Java platform.", impossible);
+        }
+    }
+
     private static void addRuntimeArtifact(
             List<EnvironmentLockfile.EnvironmentArtifact> artifacts,
             Set<String> seen,
             String category,
             Path root,
             Path file
+    ) throws IOException {
+        addRuntimeArtifact(artifacts, seen, category, root, file, null);
+    }
+
+    private static void addRuntimeArtifact(
+            List<EnvironmentLockfile.EnvironmentArtifact> artifacts,
+            Set<String> seen,
+            String category,
+            Path root,
+            Path file,
+            FileFingerprint suppliedFingerprint
     ) throws IOException {
         Path normalizedRoot = root.toAbsolutePath().normalize();
         Path normalizedFile = file.toAbsolutePath().normalize();
@@ -471,7 +502,8 @@ public final class EnvironmentLockfileService {
         if (!seen.add(identity)) {
             return;
         }
-        FileFingerprint fingerprint = fingerprint(normalizedFile);
+        FileFingerprint fingerprint = suppliedFingerprint == null
+                ? fingerprint(normalizedFile) : suppliedFingerprint;
         artifacts.add(new EnvironmentLockfile.EnvironmentArtifact(
                 category, relativePath, fingerprint.sizeBytes(), fingerprint.sha256()));
         if (artifacts.size() > MAX_ENVIRONMENT_FILES) {
