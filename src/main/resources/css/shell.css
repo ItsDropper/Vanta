@@ -863,3 +863,76 @@
     -fx-font-weight: 700;
     -fx-letter-spacing: .7px;
 }
+
+/* Navigation rail — fixed-width desktop hierarchy. */
+.sidebar {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+.sidebar-logo {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 23px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 2px;
+}
+
+.sidebar-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 9px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 1.2px;
+}
+
+.sidebar-section-label {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.3px;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 11px 12px;
+    -fx-min-height: 42px;
+    -fx-cursor: hand;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-text-fill: -vantatext;
+}
+
+.sidebar-button:focused {
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+}
+
+.sidebar-button-active,
+.sidebar-button-active:hover {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-text-fill: -vantaaccent;
+}
+
+.sidebar-build {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 9px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0.5px;
+}
+
+.sidebar-compact {
+    -fx-background-radius: 8px;
+}
+
