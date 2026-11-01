@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
@@ -18,6 +17,7 @@ import dev.itsdropper.vanta.launcher.update.*;
 import dev.itsdropper.vanta.ui.components.NotificationManager;
 import dev.itsdropper.vanta.ui.components.CommandPalette;
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.components.Sidebar;
 import dev.itsdropper.vanta.ui.views.*;
@@ -177,7 +177,7 @@ public class LauncherView {
                     );
                 } else if (state == LaunchService.LaunchState.RUNNING) {
                     if (LauncherSettings.isHideLauncherOnLaunchEnabled()) {
-                        Platform.runLater(stage::hide);
+                        UiExecutor.shared().dispatchToUi(stage::hide);
                     }
                     manager.success(
                             "Minecraft started",
@@ -198,7 +198,7 @@ public class LauncherView {
                         || previousLaunchState == LaunchService.LaunchState.RUNNING
                         || previousLaunchState == LaunchService.LaunchState.STARTING)) {
                     if (LauncherSettings.isHideLauncherOnLaunchEnabled()) {
-                        Platform.runLater(stage::show);
+                        UiExecutor.shared().dispatchToUi(stage::show);
                     }
                     manager.success(
                             "Minecraft closed",
@@ -338,7 +338,7 @@ public class LauncherView {
         }
 
         if (OnboardingManager.shouldShow()) {
-            Platform.runLater(this::showOnboarding);
+            UiExecutor.shared().dispatchToUi(this::showOnboarding);
         }
     }
 
@@ -638,8 +638,7 @@ public class LauncherView {
                         + "..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -677,7 +676,7 @@ public class LauncherView {
                                             + nvidium
                             );
 
-                            Platform.runLater(
+                            UiExecutor.shared().dispatchToUi(
                                     this::instanceCreated
                             );
                             return;
@@ -909,7 +908,7 @@ public class LauncherView {
                             );
                         }
 
-                        Platform.runLater(
+                        UiExecutor.shared().dispatchToUi(
                                 this::instanceCreated
                         );
 
@@ -922,24 +921,19 @@ public class LauncherView {
                                 getErrorMessage(ex)
                         );
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 showPresetConfigurationView(
                                         preset
                                 )
                         );
                     }
 
-                });
+        });
 
-        thread.setName(
-                "Vanta-Preset-Installer"
-        );
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
 
@@ -1012,13 +1006,13 @@ public class LauncherView {
             return;
         }
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 launchService.launch(instance);
             } catch (Throwable ex) {
                 ex.printStackTrace();
 
-                Platform.runLater(() ->
+                UiExecutor.shared().dispatchToUi(() ->
                         notifications.error(
                                 "Minecraft failed to launch",
                                 ex.getMessage() != null
@@ -1029,9 +1023,6 @@ public class LauncherView {
             }
         });
 
-        thread.setDaemon(true);
-        thread.setName("Vanta-Home-Launch");
-        thread.start();
     }
 
     private void showInstances() {
@@ -1091,14 +1082,13 @@ public class LauncherView {
 
     private void loadAccount() {
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
                         accountService.loadAccount();
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             homeView.setAccount(
                                     accountService.getCurrentAccount()
@@ -1119,13 +1109,11 @@ public class LauncherView {
                         );
                     }
 
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     private void checkForUpdates() {
@@ -1142,13 +1130,13 @@ public class LauncherView {
                     }
 
                     if (LauncherSettings.isAutoUpdateOnLaunchEnabled()) {
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 performUpdate(updateInfo)
                         );
                         return;
                     }
 
-                    Platform.runLater(() ->
+                    UiExecutor.shared().dispatchToUi(() ->
                             titleBar.showUpdate(
                                     updateInfo
                             )
@@ -1189,8 +1177,7 @@ public class LauncherView {
 
         notifications.setProgress(0.0);
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1272,17 +1259,12 @@ public class LauncherView {
                         );
                     }
 
-                });
+        });
 
-        thread.setName(
-                "Vanta-Update"
-        );
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
 
@@ -1526,7 +1508,7 @@ public class LauncherView {
                     "[Vanta Repair] No deterministic automatic repair found."
             );
 
-            Platform.runLater(() ->
+            UiExecutor.shared().dispatchToUi(() ->
                     showPage(
                             Sidebar.Page.HOME
                     )
@@ -1554,8 +1536,7 @@ public class LauncherView {
                             + "..."
             );
 
-            Thread thread =
-                    new Thread(() -> {
+            UiExecutor.shared().execute(() -> {
 
                         try {
 
@@ -1589,7 +1570,7 @@ public class LauncherView {
                                             + targetVersion
                             );
 
-                            Platform.runLater(() -> {
+                            UiExecutor.shared().dispatchToUi(() -> {
 
                                 try {
 
@@ -1621,24 +1602,19 @@ public class LauncherView {
                                     getErrorMessage(ex)
                             );
 
-                            Platform.runLater(() ->
+                            UiExecutor.shared().dispatchToUi(() ->
                                     showPage(
                                             Sidebar.Page.HOME
                                     )
                             );
                         }
 
-                    });
+            });
 
-            thread.setName(
-                    "Vanta-Minecraft-Version-Repair"
-            );
 
-            thread.setDaemon(
                     true
             );
 
-            thread.start();
 
             return;
         }
@@ -1654,7 +1630,7 @@ public class LauncherView {
                     "[Vanta Repair] Repair issue had no valid Modrinth project."
             );
 
-            Platform.runLater(() ->
+            UiExecutor.shared().dispatchToUi(() ->
                     showPage(
                             Sidebar.Page.HOME
                     )
@@ -1670,8 +1646,7 @@ public class LauncherView {
                         + "..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1720,7 +1695,7 @@ public class LauncherView {
                                 "Vanta repaired the Minecraft dependency."
                         );
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             try {
 
@@ -1752,24 +1727,19 @@ public class LauncherView {
                                 getErrorMessage(ex)
                         );
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 showPage(
                                         Sidebar.Page.HOME
                                 )
                         );
                     }
 
-                });
+        });
 
-        thread.setName(
-                "Vanta-Automatic-Repair"
-        );
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
 
@@ -1801,8 +1771,7 @@ public class LauncherView {
                 "Resolving dependencies..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1866,7 +1835,7 @@ public class LauncherView {
                                     "Vanta-managed Minecraft files were verified and restored. Your mods, configs, worlds and resource packs were preserved."
                             );
 
-                            Platform.runLater(() -> showPage(Sidebar.Page.HOME));
+                            UiExecutor.shared().dispatchToUi(() -> showPage(Sidebar.Page.HOME));
                             return;
                         }
 
@@ -1875,7 +1844,7 @@ public class LauncherView {
                                 "The required dependencies were installed."
                         );
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 showPage(
                                         Sidebar.Page.HOME
                                 )
@@ -1891,17 +1860,12 @@ public class LauncherView {
                         );
                     }
 
-                });
+        });
 
-        thread.setName(
-                "Vanta-Dependency-Repair"
-        );
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 }
 
