@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.ui.markdown;
 
-import javafx.application.Platform;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Hyperlink;
@@ -55,11 +55,10 @@ import static com.vladsch.flexmark.html.renderer.CoreNodeRenderer.renderHtmlBloc
 public class MarkdownRenderer {
 
     private static final Logger LOGGER = Logger.getLogger(MarkdownRenderer.class.getName());
-    private static final ExecutorService IMAGE_EXECUTOR = Executors.newFixedThreadPool(3, task -> {
-        Thread thread = new Thread(task, "Vanta-Markdown-Image");
-        thread.setDaemon(true);
-        return thread;
-    });
+    private static final ExecutorService IMAGE_EXECUTOR = Executors.newFixedThreadPool(
+            3,
+            UiExecutor.namedDaemonThreadFactory("Vanta-Markdown-Image")
+    );
     private static final double MAX_IMAGE_WIDTH = 900;
     private static final int MAX_REMOTE_IMAGE_BYTES = 12 * 1024 * 1024;
 
@@ -811,7 +810,7 @@ public class MarkdownRenderer {
                                 || status >= 300) {
 
                             response.body().close();
-                            Platform.runLater(() ->
+                            UiExecutor.shared().dispatchToUi(() ->
                                     showInlineImageError(
                                             imageView,
                                             "HTTP "
@@ -886,7 +885,7 @@ public class MarkdownRenderer {
 
                             if (bufferedImage == null) {
 
-                                Platform.runLater(() ->
+                                UiExecutor.shared().dispatchToUi(() ->
                                         showInlineImageError(
                                                 imageView,
                                                 "Unsupported image format."
@@ -908,7 +907,7 @@ public class MarkdownRenderer {
 
                             if (!written) {
 
-                                Platform.runLater(() ->
+                                UiExecutor.shared().dispatchToUi(() ->
                                         showInlineImageError(
                                                 imageView,
                                                 "Failed to process image."
@@ -936,7 +935,7 @@ public class MarkdownRenderer {
 
                         if (image.isError()) {
 
-                            Platform.runLater(() ->
+                            UiExecutor.shared().dispatchToUi(() ->
                                     showInlineImageError(
                                             imageView,
                                             "Failed to display image."
@@ -946,7 +945,7 @@ public class MarkdownRenderer {
                             return;
                         }
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             imageView.setImage(image);
 
@@ -996,7 +995,7 @@ public class MarkdownRenderer {
                     } catch (Exception ex) {
                         LOGGER.log(Level.WARNING, "Failed to load remote Markdown image: " + url, ex);
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 showInlineImageError(
                                         imageView,
                                         "Failed: "
