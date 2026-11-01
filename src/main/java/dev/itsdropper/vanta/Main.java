@@ -11,6 +11,7 @@ import javafx.util.Duration;
 import dev.itsdropper.vanta.ui.LauncherView;
 import dev.itsdropper.vanta.ui.LoadingScreen;
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.telemetry.TelemetryService;
 
 public class Main extends Application {
 
@@ -142,10 +143,12 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
+        TelemetryService.installUncaughtExceptionHandler();
         try {
             System.out.println("Vanta started");
             launch(args);
         } catch (Throwable t) {
+            TelemetryService.reportCrash(t);
             t.printStackTrace();
 
             try {
