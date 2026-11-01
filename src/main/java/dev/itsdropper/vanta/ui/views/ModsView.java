@@ -1136,8 +1136,6 @@ public class ModsView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
@@ -1216,8 +1214,6 @@ public class ModsView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
