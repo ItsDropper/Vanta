@@ -20,8 +20,8 @@ import java.util.Properties;
  */
 public final class ThemeManager {
 
-    public static final String DEFAULT_ACCENT = "#3978F6";
-    public static final String DEFAULT_THEME = "Vanta";
+    public static final String DEFAULT_ACCENT = "#63D39A";
+    public static final String DEFAULT_THEME = "Forest";
 
     public record Theme(
             String name,
