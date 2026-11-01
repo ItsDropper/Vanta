@@ -265,8 +265,6 @@ public class ModDetailsView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
@@ -966,8 +964,6 @@ public class ModDetailsView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
@@ -1068,8 +1064,6 @@ public class ModDetailsView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
