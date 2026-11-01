@@ -369,8 +369,6 @@ public class ImportInstanceView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
