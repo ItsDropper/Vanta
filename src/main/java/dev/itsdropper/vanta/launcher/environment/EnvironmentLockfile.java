@@ -26,7 +26,7 @@ public record EnvironmentLockfile(
         environmentFiles = environmentFiles == null ? List.of() : List.copyOf(environmentFiles);
     }
 
-    /** Files from resourcepacks/, shaderpacks/, and config/, stored with portable relative paths. */
+    /** Files from instance folders and resolved Minecraft runtime roots, stored with portable relative paths. */
     public record EnvironmentArtifact(
             String category,
             String relativePath,
