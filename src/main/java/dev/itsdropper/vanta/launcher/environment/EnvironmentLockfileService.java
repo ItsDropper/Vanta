@@ -406,7 +406,6 @@ public final class EnvironmentLockfileService {
 
         List<EnvironmentLockfile.EnvironmentArtifact> artifacts = new ArrayList<>();
         Set<String> seen = new HashSet<>();
-        addRuntimeArtifact(artifacts, seen, "minecraft", minecraftDirectory, versionFile);
 
         Path clientJar = minecraftDirectory.resolve("client.jar");
         if (!Files.isRegularFile(clientJar, LinkOption.NOFOLLOW_LINKS)
