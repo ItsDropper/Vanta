@@ -492,121 +492,102 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     private StackPane createFeaturedInstanceCard(Instance instance) {
         StackPane card = new StackPane();
         card.getStyleClass().add("home-featured-card");
-        card.setMinHeight(220);
+        card.setMinHeight(292);
+        card.setPrefHeight(318);
         card.setMaxWidth(Double.MAX_VALUE);
+        card.setStyle("-fx-background-color: #122019; -fx-background-radius: 13px; -fx-border-color: #3a5745; -fx-border-radius: 13px; -fx-border-width: 1px;");
 
-        HBox layout = new HBox(24);
-        layout.setAlignment(Pos.CENTER_LEFT);
+        MinecraftBackdrop landscape = new MinecraftBackdrop();
+        landscape.setOpacity(1);
 
-        VBox compactLayout = new VBox(16);
-        compactLayout.setFillWidth(true);
+        StackPane scrim = new StackPane();
+        scrim.setMouseTransparent(true);
+        scrim.setStyle("-fx-background-color: linear-gradient(to right, rgba(5,12,10,.97) 0%, rgba(7,15,12,.88) 38%, rgba(7,15,12,.40) 72%, rgba(7,15,12,.22) 100%), linear-gradient(to top, rgba(5,12,10,.78), transparent 62%); -fx-background-radius: 13px;");
 
-        layout.setPadding(new Insets(26, 30, 26, 30));
+        Label eyebrow = new Label("CONTINUE YOUR ADVENTURE");
+        eyebrow.setStyle("-fx-text-fill: #b5d5bd; -fx-font-size: 9px; -fx-font-weight: 900; -fx-letter-spacing: 2px;");
+
+        Label state = new Label(launchService.isRunning(instance) ? "●  CURRENTLY RUNNING" : "●  LAST PLAYED");
+        state.setStyle("-fx-text-fill: #d0e5d4; -fx-font-size: 9px; -fx-font-weight: 800; -fx-background-color: rgba(14,34,23,.72); -fx-border-color: rgba(160,205,170,.30); -fx-border-radius: 20px; -fx-background-radius: 20px; -fx-padding: 7px 10px;");
+
+        Region topSpacer = new Region();
+        HBox.setHgrow(topSpacer, Priority.ALWAYS);
+        HBox topLine = new HBox(12, eyebrow, topSpacer, state);
+        topLine.setAlignment(Pos.CENTER_LEFT);
 
         StackPane iconFrame = new StackPane();
-        iconFrame.getStyleClass().add("home-featured-icon-frame");
-        iconFrame.setMinSize(104, 104);
-        iconFrame.setPrefSize(104, 104);
-        iconFrame.setMaxSize(104, 104);
-
+        iconFrame.setMinSize(76, 76);
+        iconFrame.setPrefSize(76, 76);
+        iconFrame.setMaxSize(76, 76);
+        iconFrame.setStyle("-fx-background-color: rgba(12,27,20,.78); -fx-background-radius: 11px; -fx-border-color: rgba(195,224,201,.28); -fx-border-radius: 11px; -fx-border-width: 1px;");
         if ("CUSTOM".equalsIgnoreCase(instance.getIcon())
                 && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
             ImageView customIcon = new ImageView(new Image(
                     instance.getDirectory().resolve("icon.png").toUri().toString(),
-                    88, 88, true, true
+                    64, 64, true, true
             ));
-            customIcon.fitWidthProperty().bind(iconFrame.widthProperty().subtract(16));
-            customIcon.fitHeightProperty().bind(iconFrame.heightProperty().subtract(16));
+            customIcon.setFitWidth(62);
+            customIcon.setFitHeight(62);
             customIcon.setPreserveRatio(true);
             iconFrame.getChildren().add(customIcon);
         } else {
-            iconFrame.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 76));
+            iconFrame.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 54));
         }
 
-        VBox information = new VBox(10);
-        information.setAlignment(Pos.CENTER_LEFT);
-        information.setMinWidth(0);
-        HBox.setHgrow(information, Priority.ALWAYS);
-
-        Label eyebrow = new Label("FEATURED INSTANCE");
-        eyebrow.getStyleClass().add("home-featured-eyebrow");
-
         Label name = new Label(instance.getName());
-        name.getStyleClass().add("home-featured-title");
-        name.setMinWidth(0);
         name.setWrapText(true);
+        name.setMinWidth(0);
+        name.setStyle("-fx-text-fill: #f3f7f1; -fx-font-size: 32px; -fx-font-weight: 900;");
 
-        Label metadata = new Label(
-                "MINECRAFT " + instance.getMinecraftVersion()
-                        + "   /   " + instance.getDisplayLoader()
-        );
-        metadata.getStyleClass().add("home-featured-meta");
-        metadata.setMinWidth(0);
-        metadata.setWrapText(true);
+        Label version = new Label("MINECRAFT  " + instance.getMinecraftVersion());
+        version.setStyle("-fx-text-fill: #d5e0d7; -fx-font-size: 10px; -fx-font-weight: 800; -fx-letter-spacing: .8px;");
+
+        Label loader = new Label(instance.getDisplayLoader());
+        loader.setStyle("-fx-text-fill: #c2d8c8; -fx-font-size: 10px; -fx-background-color: rgba(133,181,145,.16); -fx-background-radius: 4px; -fx-padding: 5px 8px;");
 
         Label playtime = new Label(
                 InstanceUsageManager.formatPlaytime(
                         InstanceUsageManager.getPlaytimeSeconds(instance)
                                 + launchService.getSessionPlaytimeSeconds(instance)
-                ) + " PLAYED"
+                ) + " IN GAME"
         );
-        playtime.getStyleClass().add("home-featured-playtime");
+        playtime.setStyle("-fx-text-fill: #a6b9aa; -fx-font-size: 9px; -fx-font-weight: 800; -fx-letter-spacing: 1px;");
         playtimeLabels.put(instance.getId(), playtime);
         displayedInstances.put(instance.getId(), instance);
 
-        information.getChildren().addAll(eyebrow, name, metadata, playtime);
+        HBox metadata = new HBox(9, version, loader);
+        metadata.setAlignment(Pos.CENTER_LEFT);
+        VBox identity = new VBox(9, name, metadata, playtime);
+        identity.setAlignment(Pos.CENTER_LEFT);
+        identity.setMinWidth(0);
+        HBox.setHgrow(identity, Priority.ALWAYS);
 
         boolean running = launchService.isRunning(instance);
-        Button play = new Button(running ? "CLOSE GAME" : "PLAY NOW");
+        Button play = new Button(running ? "CLOSE GAME   →" : "PLAY NOW   →");
         play.getStyleClass().add("home-featured-play-button");
-        play.setMinWidth(142);
+        play.setStyle("-fx-background-color: #dcebdd; -fx-text-fill: #102018; -fx-font-size: 10px; -fx-font-weight: 900; -fx-background-radius: 6px; -fx-padding: 0 22px; -fx-min-height: 48px; -fx-cursor: hand;");
+        play.setMinWidth(158);
         play.setMinHeight(48);
         play.setAccessibleText((running ? "Close " : "Launch ") + instance.getName());
         play.setTooltip(new Tooltip((running ? "Close " : "Launch ") + instance.getName()));
         play.setOnAction(event -> launchOrCloseInstance(instance));
         AnimationUtils.installInteractiveAnimations(play);
 
-        VBox action = new VBox(8, play);
-        action.setAlignment(Pos.CENTER_RIGHT);
+        VBox launchPanel = new VBox(8, play);
+        launchPanel.setAlignment(Pos.CENTER_RIGHT);
+        launchPanel.setMinWidth(158);
 
-        layout.getChildren().addAll(iconFrame, information, action);
+        HBox bottomLine = new HBox(20, iconFrame, identity, launchPanel);
+        bottomLine.setAlignment(Pos.CENTER_LEFT);
 
-        // Replace the empty featured panel with a local, asset-free landscape.
-        MinecraftBackdrop backdrop = new MinecraftBackdrop();
-        backdrop.setOpacity(0.92);
-        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
-        clip.widthProperty().bind(card.widthProperty());
-        clip.heightProperty().bind(card.heightProperty());
-        clip.setArcWidth(22);
-        clip.setArcHeight(22);
-        card.setClip(clip);
-        card.getChildren().addAll(backdrop, layout);
+        VBox foreground = new VBox(0, topLine, new Region(), bottomLine);
+        foreground.setPadding(new Insets(25, 28, 25, 28));
+        foreground.setFillWidth(true);
+        VBox.setVgrow(foreground.getChildren().get(1), Priority.ALWAYS);
 
-        // The launch action moves below the instance identity on narrow windows.
-        // This preserves readable metadata instead of squeezing it between the
-        // icon and a permanently wide action button.
-        layout.widthProperty().addListener((observable, previousWidth, nextWidth) -> {
-            boolean compact = nextWidth.doubleValue() < 620;
-            if (compact && card.getChildren().contains(layout)) {
-                layout.getChildren().remove(action);
-                compactLayout.getChildren().setAll(layout, action);
-                compactLayout.setPadding(new Insets(18));
-                action.setAlignment(Pos.CENTER_LEFT);
-                card.getChildren().setAll(compactLayout);
-                iconFrame.setMinSize(76, 76);
-                iconFrame.setPrefSize(76, 76);
-                iconFrame.setMaxSize(76, 76);
-            } else if (!compact && card.getChildren().contains(compactLayout)) {
-                compactLayout.getChildren().clear();
-                layout.getChildren().setAll(iconFrame, information, action);
-                layout.setPadding(new Insets(26, 30, 26, 30));
-                action.setAlignment(Pos.CENTER_RIGHT);
-                card.getChildren().setAll(layout);
-                iconFrame.setMinSize(104, 104);
-                iconFrame.setPrefSize(104, 104);
-                iconFrame.setMaxSize(104, 104);
-            }
-        });
+        card.getChildren().setAll(landscape, scrim, foreground);
+        StackPane.setAlignment(foreground, Pos.CENTER_LEFT);
+
         return card;
     }
 
