@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.async.UiExecutor;
+
 import javafx.animation.RotateTransition;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
