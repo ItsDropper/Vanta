@@ -86,9 +86,7 @@ public class ModsView extends VBox {
         this.selectedType =
                 ContentType.MODS;
 
-        getStyleClass().add(
-                "page"
-        );
+        getStyleClass().addAll("page", "instance-mods-page");
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
