@@ -356,8 +356,8 @@ public final class EnvironmentLockfileService {
         addRuntimeArtifact(artifacts, seen, "minecraft", minecraftDirectory, clientJar);
 
         if (!manifest.libraries.isEmpty()) {
-            Path vantaDirectory = MinecraftLocator.getVantaDirectory();
-            Path librariesDirectory = MinecraftLocator.getLibrariesDirectory()
+            Path vantaDirectory = MinecraftLocator.getVantaDirectoryPath();
+            Path librariesDirectory = MinecraftLocator.getLibrariesDirectoryPath()
                     .toAbsolutePath().normalize();
 
             for (Library library : manifest.libraries) {
