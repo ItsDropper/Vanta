@@ -51,7 +51,7 @@ public final class EnvironmentLockfileService {
             "resourcepacks", "shaderpacks", "config");
     private static final Set<String> ENVIRONMENT_CATEGORIES = Set.of(
             "resourcepacks", "shaderpacks", "config", "minecraft", "libraries", "natives");
-    private static final Set<Integer> SUPPORTED_SCHEMA_VERSIONS = Set.of(1, 2, EnvironmentLockfile.CURRENT_SCHEMA_VERSION);
+    private static final Set<Integer> SUPPORTED_SCHEMA_VERSIONS = Set.of(1, 2, 3, EnvironmentLockfile.CURRENT_SCHEMA_VERSION);
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
@@ -132,7 +132,8 @@ public final class EnvironmentLockfileService {
                 instance.getLoaderVersion(),
                 null,
                 artifacts,
-                environmentFiles
+                environmentFiles,
+                readRequiredJavaMajorVersion(instanceDirectory)
         );
         validateLockfile(lockfile);
         return lockfile;
@@ -314,6 +315,46 @@ public final class EnvironmentLockfileService {
                 .thenComparing(EnvironmentLockfile.EnvironmentArtifact::relativePath,
                         String.CASE_INSENSITIVE_ORDER));
         return List.copyOf(artifacts);
+    }
+
+
+    /**
+     * Reads the Java major version required by the installed Minecraft manifest.
+     * This is a manifest requirement, not evidence of which Java executable the
+     * user has selected or which runtime will actually launch the game.
+     */
+    private static Integer readRequiredJavaMajorVersion(Path instanceDirectory) throws IOException {
+        Path minecraftDirectory = instanceDirectory.resolve("minecraft");
+        if (!Files.exists(minecraftDirectory, LinkOption.NOFOLLOW_LINKS)) {
+            return null;
+        }
+        if (Files.isSymbolicLink(minecraftDirectory)
+                || !Files.isDirectory(minecraftDirectory, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Minecraft directory must be a real, non-symbolic-link directory.");
+        }
+
+        Path versionFile = minecraftDirectory.resolve("version.json");
+        if (!Files.exists(versionFile, LinkOption.NOFOLLOW_LINKS)) {
+            return null;
+        }
+        if (Files.isSymbolicLink(versionFile)
+                || !Files.isRegularFile(versionFile, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Minecraft version metadata must be a regular file.");
+        }
+
+        final VersionManifest manifest;
+        try {
+            manifest = VersionReader.readVersion(instanceDirectory);
+        } catch (RuntimeException failure) {
+            throw new IOException("Unable to read the installed Minecraft Java requirement.", failure);
+        }
+        if (manifest == null || manifest.javaVersion == null) {
+            return null;
+        }
+        if (manifest.javaVersion.majorVersion <= 0) {
+            throw new IOException("Minecraft version metadata contains an invalid required Java major version.");
+        }
+        return manifest.javaVersion.majorVersion;
     }
 
     /**
