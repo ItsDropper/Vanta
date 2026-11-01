@@ -114,6 +114,44 @@ class EnvironmentDriftComparisonTest {
         assertTrue(report.isClean());
     }
 
+
+    @Test
+    void reportsRequiredJavaMajorVersionDrift() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("java-requirement"));
+        Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path minecraft = Files.createDirectory(instanceDirectory.resolve("minecraft"));
+        Path version = minecraft.resolve("version.json");
+        Files.writeString(version, """
+                {
+                  "mainClass": "net.minecraft.client.main.Main",
+                  "javaVersion": { "majorVersion": 21 },
+                  "libraries": []
+                }
+                """);
+        Files.writeString(minecraft.resolve("client.jar"), "client");
+
+        Instance instance = new Instance(
+                "java-requirement", "Java Requirement", "1.21.1", "fabric", "0.16.9", instanceDirectory
+        );
+        EnvironmentLockfileService service = new EnvironmentLockfileService();
+        EnvironmentLockfile baseline = service.capture(instance);
+
+        Files.writeString(version, """
+                {
+                  "mainClass": "net.minecraft.client.main.Main",
+                  "javaVersion": { "majorVersion": 17 },
+                  "libraries": []
+                }
+                """);
+
+        EnvironmentDriftReport report = service.compare(instance, baseline);
+
+        assertEquals(1, report.changes().size());
+        assertEquals(EnvironmentDriftReport.ChangeType.JAVA_REQUIREMENT_CHANGED,
+                report.changes().getFirst().type());
+        assertTrue(report.changes().getFirst().description().contains("21 to 17"));
+    }
+
     @Test
     void reportsCleanWhenLiveEnvironmentMatchesBaseline() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("clean-instance"));
