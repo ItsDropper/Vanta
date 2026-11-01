@@ -19,6 +19,7 @@ import dev.itsdropper.vanta.ui.components.CommandPalette;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.telemetry.TelemetryService;
 import dev.itsdropper.vanta.ui.components.Sidebar;
 import dev.itsdropper.vanta.ui.views.*;
 
@@ -326,6 +327,8 @@ public class LauncherView {
         AnimationUtils.installInteractiveAnimations(sidebar);
         AnimationUtils.installInteractiveAnimations(titleBar);
 
+        TelemetryService.track("launcher_started");
+
         showPage(
                 Sidebar.Page.HOME
         );
@@ -441,6 +444,17 @@ public class LauncherView {
     private void showPage(
             Sidebar.Page page
     ) {
+
+        String telemetryEvent = switch (page) {
+            case HOME -> "view_home_opened";
+            case INSTANCES -> "view_instances_opened";
+            case MODS -> "view_mods_opened";
+            case SETTINGS -> "view_settings_opened";
+            default -> null;
+        };
+        if (telemetryEvent != null) {
+            TelemetryService.track(telemetryEvent);
+        }
 
         sidebar.setSelectedPage(
                 page
