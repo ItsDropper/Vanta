@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.ui.async;
 
+import javafx.application.Platform;
+
 import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Callable;
@@ -67,6 +69,10 @@ public final class UiExecutor implements AutoCloseable {
 
     public Future<?> execute(Runnable task) {
         return executor.submit(Objects.requireNonNull(task, "task"));
+    }
+
+    public void dispatchToUi(Runnable action) {
+        Platform.runLater(Objects.requireNonNull(action, "action"));
     }
 
     public <T> Future<T> submit(Callable<T> task) {
