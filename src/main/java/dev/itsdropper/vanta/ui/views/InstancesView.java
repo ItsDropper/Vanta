@@ -322,7 +322,7 @@ public class InstancesView extends VBox {
                 // after rename, duplicate, icon change, or manual refresh.
                 filterInstances(searchField.getText());
             });
-                });
+        });
 
     }
 
@@ -369,7 +369,7 @@ public class InstancesView extends VBox {
                     new Alert(Alert.AlertType.ERROR, "Vanta could not restore this backup.\n\n" + message).show();
                 });
             }
-                });
+        });
     }
 
     private void backUpInstance() {
@@ -433,7 +433,7 @@ public class InstancesView extends VBox {
                     new Alert(Alert.AlertType.ERROR, "Vanta could not create the backup.\n\n" + message).show();
                 });
             }
-                });
+        });
     }
 
     private static String safeFileName(String name) {
@@ -627,7 +627,7 @@ public class InstancesView extends VBox {
                 } catch (Throwable ex) {
                     UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Operation failed." : ex.getMessage()));
                 }
-                        });
+            });
         });
         actions.getChildren().addAll(cancel, apply);
         root.getChildren().addAll(title, subtitle, field, actions);
@@ -660,7 +660,7 @@ public class InstancesView extends VBox {
                 UiExecutor.shared().execute(() -> {
                     try { InstanceManager.setInstanceIcon(instance, icon[0]); UiExecutor.shared().dispatchToUi(this::refresh); }
                     catch (Throwable ex) { UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Could not change icon." : ex.getMessage())); }
-                                });
+                });
             });
             choices.getChildren().add(button);
         }
@@ -681,7 +681,7 @@ public class InstancesView extends VBox {
                 } catch (Throwable ex) {
                     UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Could not upload icon." : ex.getMessage()));
                 }
-                        });
+            });
         });
         root.getChildren().addAll(title, subtitle, choices, upload);
         ThemeManager.apply(root, ThemeManager.loadAccent());
@@ -766,7 +766,7 @@ public class InstancesView extends VBox {
                                 )
                         );
                     }
-                        });
+        });
 
 
 
@@ -934,7 +934,7 @@ public class InstancesView extends VBox {
                                 )
                         );
                     }
-                        });
+        });
 
 
 
