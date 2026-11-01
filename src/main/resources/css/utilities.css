@@ -1536,7 +1536,7 @@
 .settings-shell .settings-search-field {
     -fx-background-color: -vantasurface;
     -fx-background-radius: 6px;
-    -fx-border-color: #2b3b32;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 6px;
     -fx-text-fill: -vantatext;
     -fx-prompt-text-fill: -vantasubtle;
