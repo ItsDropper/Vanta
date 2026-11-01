@@ -931,9 +931,6 @@ public class LauncherView {
         });
 
 
-                true
-        );
-
     }
 
 
@@ -1111,8 +1108,6 @@ public class LauncherView {
 
         });
 
-                true
-        );
 
     }
 
@@ -1261,9 +1256,6 @@ public class LauncherView {
 
         });
 
-
-                true
-        );
 
     }
 
@@ -1612,9 +1604,6 @@ public class LauncherView {
             });
 
 
-                    true
-            );
-
 
             return;
         }
@@ -1736,9 +1725,6 @@ public class LauncherView {
 
         });
 
-
-                true
-        );
 
     }
 
@@ -1862,9 +1848,6 @@ public class LauncherView {
 
         });
 
-
-                true
-        );
 
     }
 }
