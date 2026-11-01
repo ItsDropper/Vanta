@@ -53,7 +53,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     private final Runnable onCreateInstance;
 
     private final StackPane featuredContainer = new StackPane();
-    private FlowPane recentServersList;
+    private VBox recentServersList;
     private Label recentServersStatus;
     private final Label accountLabel;
     private final Label launchStatusLabel;
@@ -95,9 +95,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         accountLabel.getStyleClass().add("home-account-label");
 
         VBox headerText = new VBox(4, title, accountLabel);
-        FlowPane header = new FlowPane(16, 10);
+        HBox header = new HBox(16);
         header.setAlignment(Pos.CENTER_LEFT);
-        header.setRowValignment(javafx.geometry.VPos.CENTER);
         header.getStyleClass().add("home-header");
 
         launchStatusLabel = new Label("READY TO PLAY");
@@ -113,7 +112,14 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         createInstanceButton.setOnAction(event -> {
             if (this.onCreateInstance != null) this.onCreateInstance.run();
         });
-        header.getChildren().addAll(headerText, launchStatusLabel, createInstanceButton);
+        Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+        header.getChildren().addAll(
+                headerText,
+                headerSpacer,
+                launchStatusLabel,
+                createInstanceButton
+        );
 
         VBox featuredSection = createFeaturedSection();
         VBox recentSection = createRecentInstancesSection();
@@ -242,10 +248,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         );
         subtitle.getStyleClass().add("home-section-subtitle");
 
-        recentServersList = new FlowPane();
-        recentServersList.setHgap(10);
-        recentServersList.setVgap(10);
-        recentServersList.prefWrapLengthProperty().bind(recentServersList.widthProperty());
+        recentServersList = new VBox(8);
+        recentServersList.setFillWidth(true);
         recentServersList.setMaxWidth(Double.MAX_VALUE);
         recentServersList.setMinHeight(0);
         recentServersList.getStyleClass().add("home-server-list");
@@ -874,12 +878,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         card.setAlignment(Pos.CENTER_LEFT);
         card.setPadding(new Insets(12, 14, 12, 14));
         card.setMinWidth(0);
-        card.prefWidthProperty().bind(
-                Bindings.createDoubleBinding(
-                        () -> responsiveCardWidth(recentServersList),
-                        recentServersList.widthProperty()
-                )
-        );
+        card.prefWidthProperty().bind(recentServersList.widthProperty());
         card.setMaxWidth(Double.MAX_VALUE);
         card.getStyleClass().add("home-server-card");
 
