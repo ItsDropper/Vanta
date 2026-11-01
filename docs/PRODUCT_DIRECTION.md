@@ -29,9 +29,9 @@ The State Center now exposes the first user-facing workflow:
 - Comparison rejects a baseline whose instance identity does not match the selected instance.
 - Lockfile capture and comparison run off the JavaFX Application Thread.
 
-The current report covers Minecraft/loader identity, direct files in `mods/`, and recursive regular files in `resourcepacks/`, `shaderpacks/`, and `config/`, plus the instance's Minecraft version manifest, client JAR, and platform-resolved classpath/native library artifacts. It deliberately excludes worlds, logs, caches, and the resolved runtime classpath. Symbolic links are not followed. Each file is opened without following a final-component symlink and fingerprinted with SHA-256; capture rejects files whose size, modification time, or file identity visibly changes during hashing. The UI does not automatically reconcile or repair environment drift.
+The current report covers Minecraft/loader identity, direct files in `mods/`, and recursive regular files in `resourcepacks/`, `shaderpacks/`, and `config/`, plus the instance's Minecraft version manifest, client JAR, and platform-resolved classpath/native library artifacts. It deliberately excludes worlds, logs, caches, and Java runtime identity. Symbolic links are not followed. Each file is opened without following a final-component symlink and fingerprinted with SHA-256; capture rejects files whose size, modification time, or file identity visibly changes during hashing. The UI does not automatically reconcile or repair environment drift.
 
-This is deliberately a foundation, not yet a complete portable environment specification. Java major version is reserved in the schema but remains unknown until Vanta can inspect the selected runtime reliably. Runtime dependency closure is not yet included. Drift detection is read-only; it does not change an instance.
+This is deliberately a foundation, not yet a complete portable environment specification. Java major version is reserved in the schema but remains unknown until Vanta can inspect the selected runtime reliably. The captured dependency closure covers the installed Minecraft manifest's classpath and native artifacts, not the Java runtime's own modules. Drift detection is read-only; it does not change an instance.
 
 ## Existing foundations
 
