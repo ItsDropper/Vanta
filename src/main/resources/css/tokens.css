@@ -1,0 +1,2240 @@
+/* Vanta darkroom design system — global theme bridge.
+ * JavaFX looked-up colors are supplied by ThemeManager on the scene root.
+ * This file contains global compatibility selectors and theme-wide overrides.
+ */
+
+/* ============================================================
+   VANTA DESIGN SYSTEM
+   Modern dark launcher UI inspired by the information density,
+   spacing and restraint of modern Minecraft launchers.
+   Vanta-specific: restrained accent, layered surfaces and intentional gradients.
+   ============================================================ */
+
+.root {
+    -fx-font-family: "Segoe UI", "Inter", sans-serif;
+    -fx-font-smoothing-type: lcd;
+}
+
+.launcher {
+    -vantaaccent: #5688ED;
+    -vantaaccentsoft: #1E2D49;
+    -vantaaccenthover: #6E9BF2;
+    -vantaaccentrgb: 86,136,237;
+    -fx-background-color: #0b0e13;
+    -fx-background-radius: 16px;
+    -fx-border-color: #202733;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+}
+
+.content {
+    -fx-background-color: #0f131a;
+    -fx-background-radius: 0 14px 14px 0;
+}
+
+.page {
+    -fx-background-color: transparent;
+}
+
+/* ---------- typography ---------- */
+
+.page-title,
+.home-title {
+    -fx-text-fill: #f4f7fb;
+    -fx-font-size: 27px;
+    -fx-font-weight: 800;
+}
+
+.page-subtitle,
+.home-account-label {
+    -fx-text-fill: #8b96a8;
+    -fx-font-size: 12px;
+}
+
+.card-title,
+.create-section-title,
+.settings-section-title,
+.instances-count {
+    -fx-text-fill: -vantaaccent;
+}
+
+.footer-label {
+    -fx-text-fill: #687386;
+}
+
+/* ---------- surfaces ---------- */
+
+.info-card,
+.account-card,
+.account-panel,
+.instance-card,
+.instance-empty,
+.create-panel,
+.instance-settings-card,
+.mod-details-card,
+.mod-details-header,
+.create-instance-panel,
+.home-info-card,
+.home-launch-card {
+    -fx-background-color: #151a22;
+    -fx-background-radius: 12px;
+    -fx-border-color: #27303d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.info-card:hover,
+.account-card:hover,
+.instance-card:hover,
+.home-info-card:hover {
+    -fx-background-color: #191f29;
+    -fx-border-color: #364254;
+}
+
+/* ---------- sidebar ---------- */
+
+.sidebar {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 14px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+}
+
+.sidebar-logo {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 23px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.4px;
+}
+
+.sidebar-subtitle {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 8px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.8px;
+}
+
+.sidebar-section-label {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1px;
+    -fx-padding: 0 0 2px 0;
+}
+
+.sidebar-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 10px 12px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-cursor: hand;
+}
+
+.sidebar-button:hover {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
+}
+
+.sidebar-button:pressed {
+    -fx-background-color: -vantaborder;
+}
+
+.sidebar-button-active,
+.sidebar-button-active:hover {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantatext;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+    -fx-border-width: 0 0 0 2px;
+}
+
+/* ---------- title bar ---------- */
+
+.title-bar {
+    -fx-background-color: #0b0f15;
+    -fx-background-radius: 14px 14px 0 0;
+    -fx-border-color: transparent transparent #202733 transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.title-bar-button,
+.title-bar-close {
+    -fx-background-radius: 7px;
+}
+
+.title-bar-button:hover {
+    -fx-background-color: #171e28;
+}
+
+.title-bar-button:hover SVGPath {
+    -fx-stroke: #eaf1ff;
+}
+
+.title-bar-close:hover {
+    -fx-background-color: #c33a46;
+}
+
+.account-switcher {
+    -fx-background-color: #131922;
+    -fx-background-radius: 8px;
+    -fx-border-color: #293341;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+.account-switcher:hover {
+    -fx-background-color: #19212c;
+    -fx-border-color: #3a4657;
+}
+
+.account-switcher-name {
+    -fx-text-fill: #e7ecf4;
+}
+
+.title-bar-update {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantaaccent;
+    -fx-border-color: #2e4770;
+}
+
+.title-bar-update:hover {
+    -fx-background-color: #1d2d48;
+    -fx-text-fill: #c2d7ff;
+    -fx-border-color: #466aa0;
+}
+
+/* ---------- buttons ---------- */
+
+.primary-button,
+.instance-create-button,
+.instance-play-button,
+.home-play-button {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-cursor: hand;
+}
+
+.primary-button:hover,
+.instance-create-button:hover,
+.instance-play-button:hover,
+.home-play-button:hover {
+    -fx-background-color: -vantaaccent;
+}
+
+.primary-button:pressed,
+.instance-create-button:pressed,
+.instance-play-button:pressed,
+.home-play-button:pressed {
+    -fx-background-color: -vantaaccent;
+}
+
+.primary-button:disabled,
+.instance-play-button:disabled,
+.home-play-button:disabled {
+    -fx-opacity: 0.5;
+}
+
+.secondary-button,
+.settings-back-button,
+.instance-settings-button {
+    -fx-background-color: #171d26;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303a49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #c4ccd8;
+}
+
+.secondary-button:hover,
+.settings-back-button:hover,
+.instance-settings-button:hover {
+    -fx-background-color: #1d2530;
+    -fx-border-color: #465467;
+    -fx-text-fill: #f1f5fb;
+}
+
+.danger-button {
+    -fx-background-color: #24181c;
+    -fx-border-color: #523039;
+    -fx-text-fill: #e59aa3;
+}
+
+.danger-button:hover {
+    -fx-background-color: #2e1d23;
+    -fx-border-color: #73404b;
+    -fx-text-fill: #f2b1b8;
+}
+
+/* ---------- home ---------- */
+
+.home-page {
+    -fx-padding: 30px 32px 32px 32px;
+}
+
+.home-header {
+    -fx-spacing: 5px;
+}
+
+.home-launch-card {
+    -fx-background-color: #141b26;
+    -fx-border-color: #2b3a51;
+    -fx-background-radius: 14px;
+    -fx-border-radius: 14px;
+    -fx-padding: 28px;
+}
+
+.home-eyebrow,
+.home-selected-label,
+.home-card-eyebrow {
+    -fx-text-fill: #6e7d92;
+}
+
+.home-minecraft-title {
+    -fx-text-fill: #f4f7fb;
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+}
+
+.home-version {
+    -fx-text-fill: #a9b4c4;
+}
+
+.home-loader,
+.instance-loader {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: #9fc0ff;
+    -fx-background-radius: 6px;
+    -fx-padding: 5px 9px;
+}
+
+.home-launch-status {
+    -fx-text-fill: #788598;
+}
+
+.home-play-button {
+    -fx-min-width: 128px;
+    -fx-pref-width: 128px;
+    -fx-min-height: 44px;
+    -fx-pref-height: 44px;
+    -fx-font-size: 11px;
+}
+
+.home-playing-button,
+.instance-playing-button {
+    -fx-background-color: #241a20;
+    -fx-border-color: #67313c;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #efa8b0;
+}
+
+.home-playing-button:hover,
+.instance-playing-button:hover {
+    -fx-background-color: #302027;
+    -fx-border-color: #884451;
+}
+
+.home-card-title {
+    -fx-text-fill: #edf1f6;
+}
+
+.home-card-description {
+    -fx-text-fill: #7d8898;
+}
+
+.home-card-status,
+.ready-label,
+.account-connected {
+    -fx-text-fill: -vantaaccent;
+}
+
+/* ---------- instance library ---------- */
+
+.instances-page {
+    -fx-background-color: transparent;
+}
+
+.instance-card {
+    -fx-background-color: #151a22;
+    -fx-padding: 14px;
+}
+
+.instance-card:hover {
+    -fx-background-color: #1a202a;
+}
+
+.instance-card.selected-instance {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+}
+
+.instance-icon-box {
+    -fx-background-color: #1b2430;
+    -fx-border-color: #313d4c;
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+}
+
+.instance-icon {
+    -fx-text-fill: #8ca0bb;
+}
+
+.instance-name {
+    -fx-text-fill: #f1f4f8;
+    -fx-font-size: 15px;
+}
+
+.instance-version {
+    -fx-text-fill: #8793a4;
+}
+
+.instance-ready {
+    -fx-text-fill: -vantaaccent;
+}
+
+.instance-settings-button {
+    -fx-min-width: 82px;
+}
+
+.instance-menu-button {
+    -fx-text-fill: #778396;
+}
+
+.instance-menu-button:hover {
+    -fx-background-color: #1d2530;
+    -fx-border-color: #344052;
+    -fx-text-fill: #dce4ef;
+}
+
+.instances-status {
+    -fx-text-fill: #667386;
+}
+
+.instance-empty {
+    -fx-background-color: #131820;
+}
+
+.instance-empty-icon {
+    -fx-text-fill: #4e5b6e;
+}
+
+.instance-empty-title {
+    -fx-text-fill: #e2e7ef;
+}
+
+.instance-empty-description {
+    -fx-text-fill: #727e90;
+}
+
+/* ---------- forms ---------- */
+
+.create-panel,
+.create-instance-panel {
+    -fx-background-color: #141a22;
+    -fx-padding: 24px;
+}
+
+.create-label {
+    -fx-text-fill: #b9c2cf;
+}
+
+.create-field,
+.create-combo,
+.text-area {
+    -fx-background-color: #0d1219;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #edf2f8;
+    -fx-prompt-text-fill: #667285;
+}
+
+.create-field:hover,
+.text-area:hover,
+.create-combo:hover {
+    -fx-border-color: #435266;
+}
+
+.create-field:focused,
+.text-area:focused,
+.create-combo:focused {
+    -fx-background-color: #101721;
+    -fx-border-color: -vantaaccent;
+}
+
+.create-combo .list-cell {
+    -fx-background-color: #151b24;
+    -fx-text-fill: #e8edf4;
+}
+
+.create-combo .list-cell:hover,
+.create-combo .list-cell:filled:selected {
+    -fx-background-color: -vantaaccentsoft;
+}
+
+.slider .track {
+    -fx-background-color: #303a49;
+}
+
+.slider .thumb {
+    -fx-background-color: -vantaaccent;
+}
+
+.slider .thumb:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+/* ---------- theme selector popup ---------- */
+
+.theme-selector-popup,
+.combo-box-popup .list-view {
+    -fx-background-color: #121821;
+    -fx-control-inner-background: #121821;
+    -fx-border-color: #303B49;
+    -fx-border-width: 1px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 5px;
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #E8EDF4;
+    -fx-padding: 9px 12px;
+    -fx-background-radius: 7px;
+}
+
+.combo-box-popup .list-cell:hover,
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: #202936;
+    -fx-text-fill: #FFFFFF;
+}
+
+.theme-selector .list-cell {
+    -fx-text-fill: #E8EDF4;
+}
+
+/* ---------- generic controls ---------- */
+
+.check-box {
+    -fx-text-fill: #c1cad6;
+}
+
+.check-box .box {
+    -fx-background-color: #111720;
+    -fx-border-color: #364253;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.check-box:hover .box {
+    -fx-border-color: #4d607a;
+}
+
+.check-box:selected .box {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
+
+.combo-box-base,
+.choice-box {
+    -fx-background-color: #111720;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.combo-box-base:hover,
+.choice-box:hover {
+    -fx-border-color: #46566c;
+}
+
+.combo-box-base:focused,
+.choice-box:focused {
+    -fx-border-color: -vantaaccent;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: transparent;
+    -fx-padding: 8px 12px;
+}
+
+.tab-pane .tab-label {
+    -fx-text-fill: #7f8b9d;
+    -fx-font-weight: 700;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: #dfe8f8;
+}
+
+.separator .line {
+    -fx-border-color: #27303d;
+}
+
+/* ---------- context menus ---------- */
+
+.context-menu {
+    -fx-background-color: #121821;
+    -fx-background-radius: 9px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 9px;
+    -fx-padding: 5px;
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #c9d1dd;
+    -fx-padding: 8px 12px;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+    -fx-background-color: #1d2735;
+    -fx-text-fill: #f1f5fb;
+}
+
+/* ---------- scrollbars ---------- */
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.scroll-bar .track {
+    -fx-background-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: #303b4a;
+    -fx-background-radius: 6px;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: #46566c;
+}
+
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* ---------- dialogs / overlays ---------- */
+
+.dialog-pane {
+    -fx-background-color: #121821;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: #151c26;
+}
+
+.dialog-pane .content {
+    -fx-background-color: #121821;
+}
+
+.tooltip {
+    -fx-background-color: #0d131b;
+    -fx-text-fill: #dce5f1;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 7px 9px;
+}
+
+/* ---------- selection / focus ---------- */
+
+.text-field:focused,
+.text-area:focused,
+.button:focused,
+.combo-box-base:focused,
+.choice-box:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+/* ---------- content browser / project surfaces ---------- */
+
+.mod-details-card,
+.mod-details-header {
+    -fx-background-color: #151a22;
+}
+
+.modrinth-search-field,
+.content-search-field,
+.search-field {
+    -fx-background-color: #111720;
+    -fx-border-color: #303b49;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.modrinth-search-field:focused,
+.content-search-field:focused,
+.search-field:focused {
+    -fx-border-color: -vantaaccent;
+}
+
+/* ---------- notifications ---------- */
+
+.notification {
+    -fx-background-color: #141b24;
+    -fx-border-color: #303d4e;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 18, 0.15, 0, 5);
+}
+
+.notification-progress > .bar {
+    -fx-background-color: -vantaaccent;
+}
+
+.notification-progress > .track {
+    -fx-background-color: #252e3a;
+}
+
+
+/* ---------- accounts ---------- */
+
+.account-panel {
+    -fx-background-color: #151a22;
+    -fx-border-color: #27303d;
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+}
+
+.account-name {
+    -fx-text-fill: #f1f5fa;
+}
+
+.account-detail {
+    -fx-text-fill: #8793a4;
+}
+
+.connected-label {
+    -fx-text-fill: -vantaaccent;
+}
+
+.account-switcher {
+    -fx-background-color: #131922;
+}
+
+.account-sign-out-button {
+    -fx-background-color: #24181c;
+    -fx-border-color: #523039;
+}
+
+/* ---------- instance settings ---------- */
+
+.settings-page {
+    -fx-background-color: transparent;
+}
+
+.settings-section-title {
+    -fx-text-fill: -vantaaccent;
+}
+
+.instance-setting-label {
+    -fx-text-fill: #7d899a;
+}
+
+.instance-setting-value {
+    -fx-text-fill: #eef2f7;
+}
+
+.instance-directory {
+    -fx-text-fill: #7b8798;
+}
+
+.instance-settings-divider {
+    -fx-background-color: #27303d;
+}
+
+.settings-checkbox {
+    -fx-text-fill: #dce3ec;
+}
+
+.settings-checkbox .box {
+    -fx-background-color: #111720;
+    -fx-border-color: #364253;
+}
+
+.settings-checkbox:selected .box {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
+
+/* ---------- login ---------- */
+
+.login-window {
+    -fx-background-color: #0d1219;
+    -fx-border-color: #27303d;
+}
+
+.login-logo {
+    -fx-text-fill: #eef3fa;
+}
+
+.login-title {
+    -fx-text-fill: #f5f8fc;
+}
+
+.login-subtitle,
+.login-instruction {
+    -fx-text-fill: #7e899a;
+}
+
+.verification-code {
+    -fx-background-color: #111720;
+    -fx-border-color: #303b49;
+}
+
+.verification-code:hover {
+    -fx-background-color: #151c26;
+    -fx-border-color: #435266;
+}
+
+.verification-code:focused {
+    -fx-border-color: -vantaaccent;
+}
+
+.login-status.active {
+    -fx-text-fill: -vantaaccent;
+}
+
+/* ---------- Modrinth/content browsing ---------- */
+
+.mod-icon-box {
+    -fx-background-color: #1a2230;
+    -fx-border-color: #303d50;
+}
+
+.mod-details-header,
+.mod-details-card,
+.mod-details-header-container {
+    -fx-background-color: #151a22;
+    -fx-border-color: #27303d;
+}
+
+.mod-details-title {
+    -fx-text-fill: #f2f6fb;
+}
+
+.mod-details-author,
+.mod-details-description {
+    -fx-text-fill: #8d98a9;
+}
+
+.mod-details-stat-value,
+.mod-details-info-value {
+    -fx-text-fill: #edf2f8;
+}
+
+.mod-details-stat-label,
+.mod-details-card .instance-setting-label {
+    -fx-text-fill: #7c889a;
+}
+
+.mod-details-header .instance-play-button {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: #36588c;
+    -fx-text-fill: -vantaaccent;
+}
+
+.mod-details-header .instance-play-button:hover {
+    -fx-background-color: #223553;
+    -fx-border-color: #4a73b4;
+}
+
+/* ---------- progress ---------- */
+
+.progress-bar {
+    -fx-background-color: transparent;
+}
+
+.progress-bar > .track {
+    -fx-background-color: #252e3a;
+    -fx-background-radius: 5px;
+}
+
+.progress-bar > .bar {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 5px;
+    -fx-background-insets: 0;
+}
+
+/* ---------- tables / lists ---------- */
+
+.list-view,
+.table-view,
+.tree-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.list-cell,
+.table-row-cell,
+.tree-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #c5ceda;
+}
+
+.list-cell:hover,
+.table-row-cell:hover,
+.tree-cell:hover {
+    -fx-background-color: #171e28;
+}
+
+.list-cell:selected,
+.table-row-cell:selected,
+.tree-cell:selected {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: #eef4ff;
+}
+
+/* ---------- disabled controls ---------- */
+
+.button:disabled,
+.text-field:disabled,
+.combo-box-base:disabled,
+.check-box:disabled {
+    -fx-opacity: 0.48;
+}
+
+/* Keep the interface flat and intentional: no gradients anywhere. */
+
+
+/* ============================================================
+   SETTINGS WORKSPACE
+   Two-pane architecture: persistent section navigation + page.
+   ============================================================ */
+
+.settings-shell {
+    -fx-background-color: transparent;
+    -fx-padding: 24px 28px 28px 24px;
+    -fx-spacing: 0;
+}
+
+.settings-navigation {
+    -fx-background-color: #121821;
+    -fx-background-radius: 12px;
+    -fx-border-color: #27303d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 14px 10px;
+    -fx-min-width: 188px;
+    -fx-pref-width: 188px;
+}
+
+.settings-nav-group {
+    -fx-text-fill: #596679;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-padding: 10px 10px 5px 10px;
+}
+
+.settings-nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7px;
+    -fx-border-color: transparent;
+    -fx-text-fill: #8d99aa;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 9px 10px;
+    -fx-cursor: hand;
+}
+
+.settings-nav-button:hover {
+    -fx-background-color: #1a212b;
+    -fx-text-fill: #e5ebf3;
+}
+
+.settings-nav-button:selected,
+.settings-nav-button.selected {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: #f0f5ff;
+}
+
+.settings-page {
+    -fx-background-color: transparent;
+}
+
+.settings-page-title {
+    -fx-text-fill: #f2f5f9;
+    -fx-font-size: 25px;
+    -fx-font-weight: 800;
+}
+
+.settings-page-subtitle {
+    -fx-text-fill: #7e899a;
+    -fx-font-size: 12px;
+}
+
+.settings-card {
+    -fx-background-color: #151a22;
+    -fx-background-radius: 12px;
+    -fx-border-color: #27303d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 20px;
+}
+
+.settings-card-title {
+    -fx-text-fill: #edf2f8;
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+}
+
+.settings-card-description {
+    -fx-text-fill: #7f8b9c;
+    -fx-font-size: 11px;
+}
+
+.accent-picker {
+    -fx-background-color: #111720;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303b49;
+    -fx-border-radius: 8px;
+}
+
+.accent-value {
+    -fx-text-fill: #aab5c5;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+
+.accent-preview {
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 12, 0.08, 0, 4);
+}
+
+.accent-preview-label {
+    -fx-text-fill: rgba(255,255,255,0.92);
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.2px;
+}
+
+.accent-hex-field {
+    -fx-background-color: #111720;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303b49;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #edf2f8;
+    -fx-font-family: "Consolas", monospace;
+    -fx-font-weight: 700;
+}
+
+.accent-hex-field:focused {
+    -fx-border-color: -vantaaccent;
+}
+
+.accent-hex-field:hover {
+    -fx-border-color: #435266;
+}
+
+
+/* ============================================================
+   VANTA 2.0 UI SURFACES
+   Shared primitives used across Home, Instances, Accounts,
+   content browsing and Settings.
+   ============================================================ */
+
+.page,
+.home-page,
+.instances-page {
+    -fx-background-insets: 0;
+}
+
+.home-header,
+.instances-page > .header,
+.accounts-page > .header {
+    -fx-padding: 2px 2px 0 2px;
+}
+
+.home-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 2px;
+}
+
+.home-launch-card {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 20, 0.12, 0, 8);
+}
+
+.home-launch-card:hover {
+    -fx-border-color: -vantaaccent;
+}
+
+.home-play-button:hover,
+.primary-button:hover,
+.instance-create-button:hover,
+.instance-play-button:hover {
+    -fx-effect: dropshadow(gaussian, -vantaaccent, 14, 0.16, 0, 3);
+}
+
+.instance-card.selected-instance {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+}
+
+.instance-card:hover {
+    -fx-border-color: #3c4b60;
+}
+
+.account-panel {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 18, 0.10, 0, 6);
+}
+
+.account-panel:hover {
+    -fx-border-color: #3b485a;
+}
+
+.settings-navigation {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 18, 0.10, 0, 5);
+}
+
+.settings-nav-button.selected,
+.settings-nav-button:hover {
+    -fx-background-color: -vantaaccentsoft;
+}
+
+.settings-nav-button.selected {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 0 0 0 2px;
+}
+
+.settings-scroll,
+.settings-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.settings-info-label {
+    -fx-text-fill: #7d899a;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.settings-info-value {
+    -fx-text-fill: #e4eaf2;
+    -fx-font-family: "Consolas", "Cascadia Code", monospace;
+    -fx-font-size: 10px;
+}
+
+.accent-preset {
+    -fx-background-color: #111720;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #c5ceda;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-padding: 8px 11px;
+    -fx-cursor: hand;
+}
+
+.accent-preset:hover {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+    -fx-text-fill: #f2f6ff;
+}
+
+.accent-preset:pressed {
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: #ffffff;
+}
+
+.settings-card {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.16), 16, 0.08, 0, 5);
+}
+
+.settings-card:hover {
+    -fx-border-color: #344154;
+}
+
+.progress-bar > .bar,
+.notification-progress > .bar {
+    -fx-background-color: -vantaaccent;
+}
+
+.title-bar-update {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+}
+
+.title-bar-update:hover {
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: #ffffff;
+}
+
+.home-loader,
+.instance-loader {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantaaccent;
+}
+
+.mod-details-header .instance-play-button {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+    -fx-text-fill: -vantaaccent;
+}
+
+.mod-details-header .instance-play-button:hover {
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: #ffffff;
+}
+
+.check-box:selected .box,
+.settings-checkbox:selected .box {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
+
+.slider .thumb {
+    -fx-background-color: -vantaaccent;
+}
+
+.slider .thumb:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.list-cell:selected,
+.table-row-cell:selected,
+.tree-cell:selected {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: #eef4ff;
+}
+
+
+.sidebar-build {
+    -fx-text-fill: #566275;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-padding: 14px 8px 0 8px;
+}
+
+.home-card-path {
+    -fx-text-fill: #69778b;
+    -fx-font-family: "Consolas", "Cascadia Code", monospace;
+    -fx-font-size: 9px;
+}
+
+.home-info-card {
+    -fx-min-width: 0;
+}
+
+.home-info-card:hover {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: #3c4c64;
+}
+
+
+.title-bar-brand {
+    -fx-text-fill: #eaf0f8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.4px;
+    -fx-padding: 0 0 0 14px;
+}
+
+
+.instance-search-field {
+    -fx-background-color: #111720;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #edf2f8;
+    -fx-prompt-text-fill: #667285;
+    -fx-padding: 8px 11px;
+}
+
+.instance-search-field:hover {
+    -fx-border-color: #435266;
+}
+
+.instance-search-field:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-background-color: #141b25;
+}
+
+
+/* Instance content controls */
+.instance-tabs {
+    -fx-padding: 2 0 2 0;
+}
+
+.instance-tabs .button {
+    -fx-content-display: LEFT;
+    -fx-graphic-text-gap: 8;
+}
+
+.instances-search {
+    -fx-min-height: 40px;
+    -fx-pref-height: 40px;
+    -fx-padding: 0 14px;
+    -fx-background-color: #151A23;
+    -fx-background-radius: 9px;
+    -fx-border-color: #2B3342;
+    -fx-border-radius: 9px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #E8ECF4;
+    -fx-prompt-text-fill: #7E8798;
+    -fx-font-size: 13px;
+}
+
+.instances-search:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-effect: dropshadow(gaussian, rgba(86,136,237,0.18), 10, 0.2, 0, 0);
+}
+
+.instances-search:hover {
+    -fx-border-color: #3A4558;
+}
+
+.instance-settings-footer {
+    -fx-padding: 12px 0 0 0;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1 0 0 0;
+}
+
+.sidebar-button {
+    -fx-content-display: LEFT;
+    -fx-graphic-text-gap: 10;
+}
+
+.sidebar-button .vanta-icon,
+.button .vanta-icon {
+    -fx-opacity: 0.92;
+}
+
+
+.preset-list-scroll,
+.preset-list-scroll > .viewport,
+.preset-config-scroll,
+.preset-config-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.preset-list-scroll {
+    -fx-min-height: 0;
+}
+
+
+.mod-toggle {
+    -fx-min-width: 52px;
+    -fx-pref-width: 52px;
+    -fx-max-width: 52px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+    -fx-border-width: 1px;
+    -fx-padding: 0;
+    -fx-font-size: 1px;
+}
+
+.mod-toggle-enabled,
+.mod-toggle-disabled {
+    -fx-background-insets: 0;
+    -fx-border-insets: 0;
+    -fx-content-display: GRAPHIC_ONLY;
+    -fx-alignment: CENTER;
+}
+
+.mod-toggle-enabled {
+    -fx-background-color: #2E8B57;
+    -fx-border-color: #45B875;
+}
+
+.mod-toggle-disabled {
+    -fx-background-color: #A33A3A;
+    -fx-border-color: #D05A5A;
+}
+
+
+/* ============================================================
+   FIRST-RUN ONBOARDING
+   ============================================================ */
+
+.onboarding-overlay {
+    -fx-background-color: rgba(7, 10, 15, 0.92);
+}
+
+.onboarding-page {
+    -fx-background-color: #121821;
+    -fx-background-radius: 16px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.55), 34, 0.18, 0, 12);
+}
+
+.onboarding-logo {
+    -fx-text-fill: #f4f7fb;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 2px;
+}
+
+.onboarding-step {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.onboarding-content {
+    -fx-padding: 30px 36px 10px 36px;
+}
+
+.onboarding-title {
+    -fx-text-fill: #f5f8fc;
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+}
+
+.onboarding-subtitle {
+    -fx-text-fill: #8c98a9;
+    -fx-font-size: 14px;
+    -fx-line-spacing: 3px;
+}
+
+.onboarding-body {
+    -fx-text-fill: #aeb8c7;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 4px;
+}
+
+.onboarding-hint {
+    -fx-text-fill: #687486;
+    -fx-font-size: 11px;
+}
+
+.onboarding-feature {
+    -fx-background-color: #171e27;
+    -fx-background-radius: 10px;
+    -fx-border-color: #283341;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-padding: 12px 14px;
+}
+
+.onboarding-feature-number {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-background-radius: 7px;
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 12px;
+    -fx-font-weight: 900;
+    -fx-alignment: CENTER;
+    -fx-min-width: 30px;
+    -fx-pref-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+}
+
+.onboarding-feature-title {
+    -fx-text-fill: #edf2f8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+.onboarding-feature-description {
+    -fx-text-fill: #7e8a9c;
+    -fx-font-size: 11px;
+}
+
+.onboarding-account-status {
+    -fx-text-fill: #c4ccd8;
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+}
+
+
+/* Home / Modrinth-style recent instances */
+.home-section-title { -fx-text-fill: #edf2f8; -fx-font-size: 18px; -fx-font-weight: 900; }
+.home-section-subtitle { -fx-text-fill: #7f8b9c; -fx-font-size: 12px; }
+.home-recent-section {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-max-height: 180px;
+}
+.home-recent-scroll, .home-recent-scroll > .viewport { -fx-background-color: transparent; -fx-border-color: transparent; }
+.home-recent-list { -fx-background-color: transparent; }
+.home-recent-card { -fx-background-color: #141a22; -fx-border-color: #252e3a; -fx-border-radius: 10px; -fx-background-radius: 10px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 14, 0.08, 0, 4); }
+.home-recent-card:hover { -fx-background-color: #1b2430; -fx-border-color: #3a485a; }
+.home-recent-icon { -fx-min-width: 36px; -fx-pref-width: 36px; -fx-min-height: 36px; -fx-pref-height: 36px; -fx-background-color: -vantaaccentsoft; -fx-background-radius: 9px; -fx-alignment: CENTER; }
+.home-recent-name { -fx-text-fill: #edf2f8; -fx-font-size: 14px; -fx-font-weight: 800; }
+.home-recent-meta { -fx-text-fill: #8491a3; -fx-font-size: 11px; }
+.home-recent-playtime { -fx-text-fill: #697789; -fx-font-size: 10px; }
+.home-recent-play, .home-recent-stop {
+    -fx-min-width: 92px;
+    -fx-pref-width: 92px;
+    -fx-min-height: 36px;
+    -fx-pref-height: 36px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 14px;
+    -fx-cursor: hand;
+}
+.home-recent-play {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: #78a2f0;
+    -fx-text-fill: white;
+}
+.home-recent-play:hover {
+    -fx-background-color: -vantaaccenthover;
+    -fx-border-color: #9ab9f6;
+}
+.home-recent-play:pressed {
+    -fx-background-color: #3f6fca;
+    -fx-border-color: #a9c2f5;
+}
+.home-recent-stop {
+    -fx-background-color: #303b49;
+    -fx-border-color: #48586c;
+    -fx-text-fill: #edf2f8;
+}
+.home-recent-stop:hover {
+    -fx-background-color: #3a4859;
+    -fx-border-color: #63758d;
+}
+.home-recent-stop:pressed {
+    -fx-background-color: #252e3a;
+}
+.home-recent-status { -fx-text-fill: #697789; -fx-font-size: 11px; }
+.home-account-card, .home-status-card { -fx-min-height: 112px; }
+
+.home-recent-servers-card {
+    -fx-background-color: #141a22;
+    -fx-background-radius: 12px;
+    -fx-border-color: #27303d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 16px;
+}
+
+.home-server-list {
+    -fx-background-color: transparent;
+}
+
+.home-server-card {
+    -fx-background-color: #171e28;
+    -fx-border-color: #283342;
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+}
+
+.home-server-card:hover {
+    -fx-background-color: #1b2430;
+    -fx-border-color: #3a485a;
+}
+
+.home-server-name {
+    -fx-text-fill: #edf2f8;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+
+.home-server-meta {
+    -fx-text-fill: #8491a3;
+    -fx-font-size: 10px;
+}
+
+.instance-playtime { -fx-text-fill: #697789; -fx-font-size: 10px; -fx-background-color: #111720; -fx-background-radius: 6px; -fx-padding: 4px 7px; }
+
+
+/* ---------- animated Minecraft-inspired home hero ---------- */
+
+.home-hero {
+    -fx-background-color: #0d1721;
+    -fx-background-radius: 16px;
+    -fx-border-color: #2a3a4c;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.30), 24, 0.12, 0, 8);
+    -fx-overflow: hidden;
+}
+
+.home-hero .home-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 900;
+    -fx-text-fill: #f4f7fb;
+}
+
+.home-hero .home-account-label {
+    -fx-text-fill: #c1ccd9;
+    -fx-font-size: 13px;
+}
+
+.debug-button {
+    -fx-background-color: rgba(90, 55, 120, 0.28);
+    -fx-border-color: #8059a8;
+    -fx-border-width: 1px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #d9c7ed;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 9px 13px;
+    -fx-cursor: hand;
+}
+
+.debug-button:hover {
+    -fx-background-color: rgba(112, 72, 148, 0.42);
+    -fx-border-color: #a47dcc;
+    -fx-text-fill: #f1e8fa;
+}
+
+.minecraft-backdrop {
+    -fx-background-color: transparent;
+}
+
+
+/* ---------- full-page Home background layout ---------- */
+
+.home-page {
+    -fx-background-color: #0f131a;
+}
+
+.home-content-scroll,
+.home-content-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.home-content-scroll {
+    -fx-padding: 0;
+}
+
+.home-content-scroll > .viewport {
+    -fx-padding: 0;
+}
+
+.home-content-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.home-content-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.home-content-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: rgba(120, 135, 155, 0.35);
+    -fx-background-radius: 6px;
+}
+
+/* ============================================================
+   CREATE INSTANCE — CURRENT UI
+   ============================================================ */
+
+.create-instance-panel {
+    -fx-background-color: #151a22;
+    -fx-background-radius: 12px;
+    -fx-border-color: #27303d;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 18, 0.08, 0, 5);
+}
+
+.create-panel-title {
+    -fx-text-fill: #edf2f8;
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+}
+
+.create-panel-subtitle {
+    -fx-text-fill: #7f8b9c;
+    -fx-font-size: 11px;
+    -fx-padding: 0 0 6px 0;
+}
+
+.create-instance-panel .create-label {
+    -fx-text-fill: #b8c2d0;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.create-instance-panel .create-field,
+.create-instance-panel .create-combo {
+    -fx-background-color: #111720;
+    -fx-border-color: #303b49;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-min-height: 42px;
+    -fx-pref-height: 42px;
+}
+
+.create-instance-panel .create-field:hover,
+.create-instance-panel .create-combo:hover {
+    -fx-border-color: #435266;
+}
+
+.create-instance-panel .create-field:focused,
+.create-instance-panel .create-combo:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-effect: dropshadow(gaussian, rgba(86,136,237,0.12), 8, 0.15, 0, 0);
+}
+
+.create-instance-panel .create-status {
+    -fx-background-color: #111720;
+    -fx-background-radius: 7px;
+    -fx-border-color: #252e3a;
+    -fx-border-radius: 7px;
+    -fx-padding: 8px 10px;
+    -fx-text-fill: #7f8b9c;
+}
+
+.create-instance-panel .secondary-button,
+.create-instance-panel .primary-button {
+    -fx-min-height: 40px;
+    -fx-pref-height: 40px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+.create-instance-panel .primary-button {
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.create-instance-panel .secondary-button {
+    -fx-font-size: 10px;
+}
+
+
+/* ============================================================
+   MODRINTH CONTENT DIALOGS
+   ============================================================ */
+
+.dialog-pane.vanta-dialog {
+    -fx-background-color: #121821;
+    -fx-background-radius: 12px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 0;
+}
+
+.dialog-pane.vanta-dialog .header-panel {
+    -fx-background-color: #151c26;
+    -fx-background-radius: 12px 12px 0 0;
+    -fx-padding: 18px 20px 12px 20px;
+}
+
+.dialog-pane.vanta-dialog .header-panel .label {
+    -fx-text-fill: #f2f5f9;
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+}
+
+.dialog-pane.vanta-dialog .content {
+    -fx-background-color: #121821;
+    -fx-padding: 4px 20px 12px 20px;
+}
+
+.dialog-pane.vanta-dialog .button-bar {
+    -fx-background-color: #121821;
+    -fx-padding: 8px 16px 16px 16px;
+}
+
+.dialog-pane.vanta-dialog .dialog-scroll,
+.dialog-pane.vanta-dialog .dialog-scroll > .viewport {
+    -fx-background-color: #0f141b;
+}
+
+.dialog-pane.vanta-dialog .dialog-scroll {
+    -fx-border-color: #2a3442;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.dialog-pane.vanta-dialog .dialog-subtitle {
+    -fx-text-fill: #7f8b9c;
+    -fx-font-size: 11px;
+}
+
+.modrinth-versions-button {
+    -fx-background-color: #151c26;
+    -fx-background-radius: 8px;
+    -fx-border-color: #303b49;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-text-fill: #aeb8c7;
+    -fx-font-size: 20px;
+    -fx-font-weight: 900;
+    -fx-padding: 0 11px 3px 11px;
+    -fx-min-width: 40px;
+    -fx-pref-width: 40px;
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-cursor: hand;
+}
+
+.modrinth-versions-button:hover {
+    -fx-background-color: #1b2430;
+    -fx-border-color: #435266;
+    -fx-text-fill: #edf2f8;
+}
+
+.modrinth-version-list {
+    -fx-background-color: transparent;
+}
+
+.modrinth-version-row {
+    -fx-background-color: #151c26;
+    -fx-background-radius: 8px;
+    -fx-border-color: #293443;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.modrinth-version-row:hover {
+    -fx-background-color: #1a222d;
+    -fx-border-color: #3b4a5e;
+}
+
+.modrinth-version-name {
+    -fx-text-fill: #edf2f8;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+}
+
+.modrinth-version-meta {
+    -fx-text-fill: #7f8b9c;
+    -fx-font-size: 10px;
+}
+
+.modrinth-version-type {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-background-radius: 5px;
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 8px;
+    -fx-font-weight: 900;
+    -fx-padding: 4px 6px;
+}
+
+.modrinth-version-downloads {
+    -fx-text-fill: #697789;
+    -fx-font-size: 9px;
+    -fx-min-width: 72px;
+    -fx-alignment: CENTER_RIGHT;
+}
+
+.state-center{-fx-background-color:transparent}.state-hero{-fx-background-color:#151c26;-fx-background-radius:16px;-fx-border-color:#2b3747;-fx-border-radius:16px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.28),24,.12,0,8)}.state-hero-title{-fx-text-fill:#f2f6fb;-fx-font-size:19px;-fx-font-weight:900}.state-hero-subtitle{-fx-text-fill:#7f8b9d;-fx-font-size:12px}.state-progress{-fx-pref-height:6px;-fx-min-height:6px;-fx-max-height:6px}.state-section-title{-fx-text-fill:#687588;-fx-font-size:10px;-fx-font-weight:900;-fx-letter-spacing:1.3px}.state-refresh-button{-fx-background-color:#151c26;-fx-border-color:#303c4d;-fx-border-radius:8px;-fx-background-radius:8px;-fx-text-fill:#cbd4e0;-fx-font-size:10px;-fx-font-weight:800;-fx-padding:8px 11px}.state-refresh-button:hover{-fx-border-color:#5688ED;-fx-background-color:#1E2D49;-fx-text-fill:#f4f7fc}.state-list-card{-fx-background-color:#121821;-fx-background-radius:14px;-fx-border-color:#27303d;-fx-border-radius:14px}.state-card{-fx-background-color:#151b24;-fx-background-radius:11px;-fx-border-color:#293545;-fx-border-radius:11px}.state-card:hover{-fx-background-color:#19212c;-fx-border-color:#3b4c63}.state-instance-name{-fx-text-fill:#edf2f8;-fx-font-size:13px;-fx-font-weight:800}.state-instance-detail{-fx-text-fill:#8a96a8;-fx-font-size:11px}.state-fingerprint{-fx-text-fill:#59677a;-fx-font-family:"Consolas";-fx-font-size:9px;-fx-font-weight:700}.state-stats{-fx-text-fill:#657286;-fx-font-size:9px}.state-status-healthy{-fx-text-fill:#65d69a;-fx-font-size:10px;-fx-font-weight:900}.state-status-attention{-fx-text-fill:#e7bd68;-fx-font-size:10px;-fx-font-weight:900}.state-status-broken{-fx-text-fill:#ed7777;-fx-font-size:10px;-fx-font-weight:900}.state-icon-healthy,.state-icon-attention,.state-icon-broken{-fx-background-radius:10px;-fx-padding:9px}.state-icon-healthy{-fx-background-color:rgba(76,204,137,.12)}.state-icon-attention{-fx-background-color:rgba(231,189,104,.12)}.state-icon-broken{-fx-background-color:rgba(237,119,119,.12)}
+
+
+/* State Center polished UI */
+.state-center{-fx-spacing:18px}
+.state-hero{-fx-min-height:118px;-fx-padding:24px}
+.state-hero-title{-fx-font-size:20px}
+.state-hero-subtitle{-fx-font-size:11px}
+.state-progress-label{-fx-text-fill:#667487;-fx-font-size:9px;-fx-font-weight:900;-fx-letter-spacing:1.2px}
+.state-progress{-fx-accent:-vantaaccent;-fx-pref-height:7px;-fx-min-height:7px;-fx-max-height:7px}
+.state-progress > .track{-fx-background-color:#202a36;-fx-background-radius:5px}
+.state-progress > .bar{-fx-background-color:-vantaaccent;-fx-background-radius:5px}
+.state-refresh-button{-fx-min-height:36px;-fx-pref-height:36px;-fx-padding:0 13px;-fx-cursor:hand}
+.state-list-card{-fx-background-color:#10161e;-fx-background-radius:14px;-fx-border-color:#27303d;-fx-border-width:1px;-fx-border-radius:14px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.20),18,.08,0,5)}
+.state-instance-scroll,.state-instance-scroll>.viewport{-fx-background-color:transparent;-fx-border-color:transparent}
+.state-instance-scroll{-fx-padding:0}
+.state-instance-scroll .scroll-bar:vertical{-fx-background-color:transparent;-fx-padding:2px}
+.state-instance-scroll .scroll-bar:vertical .track{-fx-background-color:transparent}
+.state-instance-scroll .scroll-bar:vertical .thumb{-fx-background-color:rgba(120,135,155,.32);-fx-background-radius:6px}
+.state-card{-fx-background-color:#151b24;-fx-background-radius:11px;-fx-border-color:#293545;-fx-border-width:1px;-fx-border-radius:11px;-fx-min-height:72px;-fx-cursor:hand}
+.state-card:hover{-fx-background-color:#1a222d;-fx-border-color:#4a5c73}
+.state-instance-name{-fx-text-fill:#edf2f8;-fx-font-size:13px;-fx-font-weight:800}
+.state-instance-detail{-fx-text-fill:#8996a8;-fx-font-size:10px}
+.state-instance-summary{-fx-text-fill:#b7c1ce;-fx-font-size:10px}
+.state-fingerprint{-fx-text-fill:#5e6b7d;-fx-font-family:"Consolas";-fx-font-size:8px;-fx-font-weight:700}
+.state-stats{-fx-text-fill:#667487;-fx-font-size:9px}
+.state-status-healthy{-fx-text-fill:#65d69a;-fx-font-size:10px;-fx-font-weight:900}
+.state-status-attention{-fx-text-fill:#e7bd68;-fx-font-size:10px;-fx-font-weight:900}
+.state-status-broken{-fx-text-fill:#ed7777;-fx-font-size:10px;-fx-font-weight:900}
+.state-icon-healthy,.state-icon-attention,.state-icon-broken{-fx-background-radius:10px;-fx-padding:9px}
+.state-icon-healthy{-fx-background-color:rgba(76,204,137,.12)}
+.state-icon-attention{-fx-background-color:rgba(231,189,104,.12)}
+.state-icon-broken{-fx-background-color:rgba(237,119,119,.12)}
+.state-empty-icon{-fx-min-width:58px;-fx-pref-width:58px;-fx-min-height:58px;-fx-pref-height:58px;-fx-background-color:rgba(86,136,237,.10);-fx-background-radius:16px}
+.state-empty-title{-fx-text-fill:#edf2f8;-fx-font-size:15px;-fx-font-weight:800}
+.state-empty-text{-fx-text-fill:#738095;-fx-font-size:11px}
+
+
+/* ============================================================
+   VANTA UNIVERSAL THEME LAYER
+   Loaded last so theme presets reach every launcher surface,
+   including older UI classes that still have legacy colors.
+   ============================================================ */
+
+.launcher,
+.content,
+.page,
+.settings-shell,
+.home-page,
+.instances-page,
+.accounts-page,
+.state-center,
+.modrinth-view,
+.create-instance-panel,
+.login-window {
+    -fx-background-color: -vantabg;
+}
+
+.launcher {
+    -fx-border-color: -vantaborder;
+}
+
+.launcher .label,
+.launcher .text,
+.launcher .list-cell,
+.launcher .table-row-cell,
+.launcher .tree-cell {
+    -fx-text-fill: -vantatext;
+}
+
+.sidebar,
+.settings-navigation,
+.settings-card,
+.info-card,
+.account-card,
+.account-panel,
+.instance-card,
+.instance-empty,
+.create-panel,
+.instance-settings-card,
+.mod-details-card,
+.mod-details-header,
+.home-info-card,
+.home-launch-card,
+.home-recent-servers-card,
+.state-list-card,
+.state-card,
+.accounts-hero,
+.accounts-section,
+.accounts-card,
+.accounts-empty {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.sidebar-button:hover,
+.settings-nav-button:hover,
+.instance-card:hover,
+.info-card:hover,
+.account-card:hover,
+.home-info-card:hover,
+.accounts-card:hover,
+.state-card:hover,
+.home-server-card:hover {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.sidebar-button-active,
+.sidebar-button-active:hover,
+.settings-nav-button.selected,
+.settings-nav-button:selected,
+.instance-card.selected-instance,
+.list-cell:selected,
+.table-row-cell:selected,
+.tree-cell:selected {
+    -fx-background-color: -vantaaccentsoft;
+}
+
+.sidebar-button-active,
+.sidebar-button-active:hover {
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+}
+
+.title-bar {
+    -fx-background-color: -vantabg;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+}
+
+.title-bar-button:hover,
+.account-switcher:hover {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.account-switcher,
+.account-panel,
+.accent-picker,
+.accent-hex-field,
+.create-field,
+.create-combo,
+.text-area,
+.combo-box-base,
+.choice-box,
+.search-field,
+.modrinth-search-field,
+.content-search-field,
+.verification-code {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
+}
+
+.secondary-button,
+.settings-back-button,
+.instance-settings-button {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
+}
+
+.secondary-button:hover,
+.settings-back-button:hover,
+.instance-settings-button:hover {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.primary-button,
+.instance-create-button,
+.instance-play-button,
+.home-play-button {
+    -fx-background-color: -vantaaccent;
+}
+
+.primary-button:hover,
+.instance-create-button:hover,
+.instance-play-button:hover,
+.home-play-button:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.card-title,
+.create-section-title,
+.settings-section-title,
+.instances-count,
+.home-card-status,
+.ready-label,
+.account-connected,
+.instance-ready,
+.connected-label,
+.login-status.active {
+    -fx-text-fill: -vantaaccent;
+}
+
+.page-subtitle,
+.home-account-label,
+.home-card-description,
+.settings-page-subtitle,
+.settings-card-description,
+.instance-version,
+.account-detail,
+.instance-directory,
+.footer-label,
+.state-instance-detail,
+.home-recent-meta,
+.accounts-subtitle {
+    -fx-text-fill: -vantamuted;
+}
+
+.sidebar-logo,
+.page-title,
+.home-title,
+.home-minecraft-title,
+.settings-page-title,
+.accounts-title,
+.accounts-hero-name,
+.accounts-card-name,
+.settings-card-title,
+.instance-name,
+.home-card-title,
+.mod-details-title,
+.state-instance-name,
+.state-hero-title {
+    -fx-text-fill: -vantatext;
+}
+
+.instance-icon-box,
+.accounts-hero-head-frame,
+.accounts-card-head-frame,
+.home-recent-icon {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+}
+
+.instance-loader,
+.home-loader,
+.modrinth-version-type,
+.title-bar-update {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantaaccent;
+}
+
+.slider .track,
+.progress-bar > .track,
+.notification-progress > .track {
+    -fx-background-color: -vantaborder;
+}
+
+.slider .thumb,
+.progress-bar > .bar,
+.notification-progress > .bar {
+    -fx-background-color: -vantaaccent;
+}
+
+.check-box {
+    -fx-text-fill: -vantatext;
+}
+
+.check-box .box {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+}
+
+.check-box:selected .box,
+.settings-checkbox:selected .box {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
+
+.tab-pane .tab-label {
+    -fx-text-fill: -vantamuted;
+}
+
+.tab-pane .tab:selected .tab-label {
+    -fx-text-fill: -vantatext;
+}
+
+.separator .line,
+.instance-settings-divider {
+    -fx-border-color: -vantaborder;
+}
+
+.context-menu,
+.tooltip,
+.dialog-pane,
+.dialog-pane.vanta-dialog {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.context-menu .menu-item {
+    -fx-text-fill: -vantatext;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -vantaborder;
+}
+
+.scroll-bar .thumb:hover {
+    -fx-background-color: -vantaaccentsoft;
+}
+
+.notification {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.mod-details-header,
+.mod-details-card,
+.mod-details-header-container,
+.modrinth-version-row {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.modrinth-version-row:hover {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.state-refresh-button,
+.modrinth-versions-button {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+}
+
+.state-refresh-button:hover,
+.modrinth-versions-button:hover {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+}
+
+.state-status-healthy,
+.accounts-status-connected,
+.accounts-card-active-label {
+    -fx-text-fill: -vantasuccess;
+}
+
+.debug-button {
+    -fx-accent: -vantaaccent;
+}
+
+.theme-preview-label {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantaaccent;
+    -fx-background-radius: 8px;
+    -fx-padding: 9px 12px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+}
+
+.state-shared-row { -fx-background-color: -vantasurfaceraised; -fx-background-radius: 10px; -fx-border-color: -vantaborder; -fx-border-radius: 10px; -fx-padding: 12px; }
+.state-shared-row:hover { -fx-background-color: -vantasurfacehover; }
+.state-shared-icon { -fx-background-color: -vantaaccentsoft; -fx-background-radius: 9px; -fx-padding: 8px; }
+.state-shared-name { -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-weight: 800; }
+.state-shared-summary, .state-shared-count { -fx-text-fill: -vantamuted; -fx-font-size: 10px; }
+.state-shared-healthy { -fx-text-fill: -vantasuccess; -fx-font-size: 10px; -fx-font-weight: 900; }
+.state-shared-attention { -fx-text-fill: #e7bd68; -fx-font-size: 10px; -fx-font-weight: 900; }
+.state-shared-broken { -fx-text-fill: -vantadanger; -fx-font-size: 10px; -fx-font-weight: 900; }
+
+
+/* Environment lockfile actions in State Center. */
+.state-environment-baseline {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+.state-environment-button {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+    -fx-background-radius: 7px;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-padding: 6px 8px;
+}
+.state-environment-button:hover {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+}
+.state-environment-button:disabled {
+    -fx-opacity: 0.55;
+}
