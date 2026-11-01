@@ -5,7 +5,6 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.launcher.server.RemoteRconClient;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -67,7 +66,7 @@ public final class RemoteServerConnectionDialog {
             char[] secret = password.getText().toCharArray();
             password.clear();
             connectButton.setDisable(true);
-            Thread worker = new Thread(() -> {
+            UiExecutor.shared().execute(() -> {
                 RemoteRconClient client = null;
                 Exception failure = null;
                 try {
@@ -76,13 +75,11 @@ public final class RemoteServerConnectionDialog {
                 java.util.Arrays.fill(secret, '\0');
                 RemoteRconClient connected = client;
                 Exception error = failure;
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (error != null) showError("Could not connect: " + (error.getMessage() == null ? error.getClass().getSimpleName() : error.getMessage()));
                     else showConsole(owner, address, remotePort, connected);
                 });
-            }, "vanta-remote-rcon-connect");
-            worker.setDaemon(true);
-            worker.start();
+            });
         });
     }
 
@@ -104,13 +101,13 @@ public final class RemoteServerConnectionDialog {
             if (value.isEmpty()) return;
             command.clear();
             send.setDisable(true);
-            Thread worker = new Thread(() -> {
+            UiExecutor.shared().execute(() -> {
                 String response = null;
                 Exception failure = null;
                 try { response = client.command(value); } catch (Exception e) { failure = e; }
                 String result = response;
                 Exception error = failure;
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     send.setDisable(false);
                     output.appendText("> " + value + "\n");
                     if (error != null) output.appendText("Connection error: " + error.getMessage() + "\n");
@@ -119,9 +116,7 @@ public final class RemoteServerConnectionDialog {
                     output.positionCaret(output.getLength());
                     if (error != null) { client.close(); command.setDisable(true); send.setDisable(true); }
                 });
-            }, "vanta-remote-rcon-command");
-            worker.setDaemon(true);
-            worker.start();
+            });
         };
         send.setOnAction(event -> sendCommand.run());
         command.setOnAction(event -> sendCommand.run());
@@ -146,7 +141,7 @@ public final class RemoteServerConnectionDialog {
     }
 
     private static void showError(String message) {
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
             alert.setHeaderText("Remote server connection");
             alert.showAndWait();
