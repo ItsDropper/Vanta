@@ -1464,7 +1464,7 @@
 }
 .notification-title {
     -fx-font-size: 12px;
-    -fx-font-weight: 750;
+    -fx-font-weight: 700;
 }
 .notification-message {
     -fx-font-size: 11px;
