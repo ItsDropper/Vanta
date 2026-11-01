@@ -289,7 +289,7 @@ public class InstancesView extends VBox {
         statusLabel.setText("Scanning installed instances...");
 
         UiExecutor.shared().execute(
-() -> {
+            () -> {
             List<Instance> instances;
             try {
                 instances = InstanceManager.discoverInstances();
@@ -353,7 +353,7 @@ public class InstancesView extends VBox {
         backupButton.setDisable(true);
         statusLabel.setText("Restoring backup… Existing instances will not be overwritten.");
         UiExecutor.shared().execute(
-() -> {
+            () -> {
             try {
                 InstanceBackupService.restoreBackup(archive.toPath(), name);
                 UiExecutor.shared().dispatchToUi(() -> {
@@ -418,7 +418,7 @@ public class InstancesView extends VBox {
         statusLabel.setText("Backing up " + selected.getName() + "… Worlds and settings are included.");
 
         UiExecutor.shared().execute(
-() -> {
+            () -> {
             try {
                 InstanceBackupService.createBackup(selected, output);
                 UiExecutor.shared().dispatchToUi(() -> {
@@ -626,7 +626,7 @@ public class InstancesView extends VBox {
             popup.hide();
             statusLabel.setText((duplicate ? "Duplicating " : "Renaming ") + instance.getName() + "...");
             UiExecutor.shared().execute(
-() -> {
+                () -> {
                 try {
                     if (duplicate) InstanceManager.duplicateInstance(instance, name);
                     else InstanceManager.renameInstance(instance, name);
@@ -666,7 +666,7 @@ public class InstancesView extends VBox {
             button.setOnAction(e -> {
                 popup.hide();
                 UiExecutor.shared().execute(
-() -> {
+                    () -> {
                     try { InstanceManager.setInstanceIcon(instance, icon[0]); UiExecutor.shared().dispatchToUi(this::refresh); }
                     catch (Throwable ex) { UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Could not change icon." : ex.getMessage())); }
                 }
@@ -684,7 +684,7 @@ public class InstancesView extends VBox {
             if (selected == null) return;
             popup.hide();
             UiExecutor.shared().execute(
-() -> {
+                () -> {
                 try {
                     java.nio.file.Files.copy(selected.toPath(), instance.getDirectory().resolve("icon.png"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     InstanceManager.setInstanceIcon(instance, "CUSTOM");
@@ -749,7 +749,7 @@ public class InstancesView extends VBox {
         );
 
         UiExecutor.shared().execute(
-() -> {
+            () -> {
 
                     try {
 
@@ -929,7 +929,7 @@ public class InstancesView extends VBox {
         );
 
         UiExecutor.shared().execute(
-() -> {
+            () -> {
 
                     try {
 
