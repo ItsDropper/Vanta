@@ -36,7 +36,7 @@ public class Main extends Application {
         );
         scene.setFill(Color.TRANSPARENT);
 
-        var loadingCss = getClass().getResource("/css/loading.css");
+        var loadingCss = getClass().getResource("/css/shell.css");
         if (loadingCss == null) {
             throw new IllegalStateException("Missing CSS resource: /css/loading.css");
         }
@@ -98,30 +98,18 @@ public class Main extends Application {
             tryFinish.run();
         });
 
+        // Replace the splash-only stylesheet with the consolidated launcher set.
+        scene.getStylesheets().clear();
+
         String[] stylesheets = {
-                "/css/global.css",
-                "/css/typography.css",
-                "/css/sidebar.css",
-                "/css/buttons.css",
-                "/css/cards.css",
+                "/css/base.css",
+                "/css/shell.css",
                 "/css/home.css",
-                "/css/accounts.css",
-                "/css/instances.css",
-                "/css/instance-settings.css",
-                "/css/forms.css",
-                "/css/login.css",
-                "/css/scrollbars.css",
-                "/css/modrinth.css",
-                "/css/title-bar.css",
-                "/css/design-system.css",
-                "/css/polish.css",
-                "/css/ux-foundation.css",
-                "/css/download-center.css",
-                "/css/server-manager.css",
-                "/css/home-premium.css",
-                "/css/command-palette.css",
-                "/css/ui-components.css",
-                "/css/vanta-identity.css"
+                "/css/library.css",
+                "/css/content.css",
+                "/css/manage.css",
+                "/css/utilities.css",
+                "/css/tokens.css"
         };
 
         for (String stylesheet : stylesheets) {
