@@ -1,6 +1,6 @@
 # Vanta Privacy Policy
 
-**Last updated:** 15 October 2026
+**Last updated:** 1 November 2026
 
 This policy describes the intended privacy behavior of Vanta, an independently developed Minecraft launcher. Vanta is under active development, so behavior may change between versions. Review the release notes and source code for the version you use.
 
