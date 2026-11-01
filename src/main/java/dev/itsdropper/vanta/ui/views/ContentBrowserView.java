@@ -1102,8 +1102,6 @@ public class ContentBrowserView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
@@ -1204,8 +1202,6 @@ public class ContentBrowserView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
