@@ -34,6 +34,7 @@ import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
+import dev.itsdropper.vanta.telemetry.TelemetryService;
 
 import java.awt.Desktop;
 import java.io.IOException;
@@ -1709,6 +1710,83 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 )
         );
 
+        VBox telemetry = card(
+                "Optional telemetry",
+                "Usage statistics and crash diagnostics are separate opt-ins. Vanta sends only allowlisted event names, the launcher version, and (for crashes) the exception type. No account identifiers, Minecraft credentials, tokens, logs or file paths are included."
+        );
+
+        CheckBox usageTelemetry = new CheckBox("Send anonymous usage statistics");
+        usageTelemetry.setSelected(LauncherSettings.isUsageTelemetryEnabled());
+        usageTelemetry.getStyleClass().add("settings-checkbox");
+
+        CheckBox crashTelemetry = new CheckBox("Send anonymous crash reports");
+        crashTelemetry.setSelected(LauncherSettings.isCrashTelemetryEnabled());
+        crashTelemetry.getStyleClass().add("settings-checkbox");
+
+        Label telemetryStatus = new Label(
+                "Telemetry is disabled unless you explicitly enable a category."
+        );
+        telemetryStatus.getStyleClass().add("settings-card-description");
+        telemetryStatus.setWrapText(true);
+
+        Button testTelemetry = new Button("TEST USAGE TELEMETRY DELIVERY");
+        testTelemetry.getStyleClass().add("secondary-button");
+        testTelemetry.setDisable(!usageTelemetry.isSelected());
+        testTelemetry.setTooltip(new javafx.scene.control.Tooltip(
+                "Sends one synthetic telemetry_test event. It does not include account or device information."
+        ));
+
+        usageTelemetry.setOnAction(event -> {
+            LauncherSettings.setUsageTelemetryEnabled(usageTelemetry.isSelected());
+            testTelemetry.setDisable(!usageTelemetry.isSelected());
+            telemetryStatus.setText(usageTelemetry.isSelected()
+                    ? "Usage statistics enabled. Vanta will send only allowlisted usage events."
+                    : "Usage statistics disabled. No new usage events will be sent.");
+        });
+
+        crashTelemetry.setOnAction(event -> {
+            LauncherSettings.setCrashTelemetryEnabled(crashTelemetry.isSelected());
+            telemetryStatus.setText(crashTelemetry.isSelected()
+                    ? "Crash reporting enabled. Only the exception type and launcher version are sent."
+                    : "Crash reporting disabled. No new crash reports will be sent.");
+        });
+
+        testTelemetry.setOnAction(event -> {
+            if (!LauncherSettings.isUsageTelemetryEnabled()) {
+                telemetryStatus.setText("Enable anonymous usage statistics before testing delivery.");
+                return;
+            }
+
+            testTelemetry.setDisable(true);
+            telemetryStatus.setText("Sending a synthetic test event...");
+            TelemetryService.testUsageDelivery().whenComplete((statusCode, failure) ->
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        testTelemetry.setDisable(!LauncherSettings.isUsageTelemetryEnabled());
+                        if (failure != null) {
+                            telemetryStatus.setText(
+                                    "Telemetry test failed: " + failure.getClass().getSimpleName()
+                            );
+                        } else if (statusCode != null && statusCode == 201) {
+                            telemetryStatus.setText(
+                                    "Telemetry delivery succeeded (HTTP 201). The test event was accepted by Vanta's telemetry API."
+                            );
+                        } else {
+                            telemetryStatus.setText(
+                                    "Telemetry API rejected the test event (HTTP "
+                                            + statusCode + "). Check the Worker event allowlist and deployment."
+                            );
+                        }
+                    })
+            );
+        });
+
+        telemetry.getChildren().addAll(
+                usageTelemetry,
+                crashTelemetry,
+                testTelemetry,
+                telemetryStatus
+        );
+
         VBox safety = card(
                 "What diagnostics change",
                 "The launcher does not silently rewrite files from this page. Instance dependency repair remains available from the instance repair flow."
@@ -1789,7 +1867,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             content.getChildren().add(debug);
         }
 
-        content.getChildren().add(safety);
+        content.getChildren().addAll(health, telemetry, safety);
     }
 
     private void runDebugTest(String name, String url) {
