@@ -100,7 +100,7 @@ public final class AsyncAction<T> implements AutoCloseable {
                 dispatch(ticket, () -> onProgress.accept(boundedFraction, message));
             });
             dispatch(ticket, () -> onSuccess.accept(result));
-        } catch (Throwable failure) {
+        } catch (Exception failure) {
             dispatch(ticket, () -> onFailure.accept(failure));
         } finally {
             if (ticket.isCurrent()) {
