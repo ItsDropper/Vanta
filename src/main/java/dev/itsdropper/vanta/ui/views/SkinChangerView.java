@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.async.UiExecutor;
+import dev.itsdropper.vanta.telemetry.TelemetryService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -470,6 +471,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         CompletableFuture.runAsync(() -> {
             try {
                 upload(account, file, variant);
+                TelemetryService.track("feature_skin_change_used");
                 AccountSkinService.clear(account);
                 UiExecutor.shared().dispatchToUi(() -> {
                     selectedFile = null;
