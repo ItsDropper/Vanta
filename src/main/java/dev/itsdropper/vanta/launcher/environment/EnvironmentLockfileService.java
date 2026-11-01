@@ -8,11 +8,16 @@ import dev.itsdropper.vanta.launcher.modrinth.InstalledModScanner;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.OpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
@@ -86,10 +91,11 @@ public final class EnvironmentLockfileService {
 
             for (Path file : files) {
                 InstalledMod metadata = modScanner.scanFile(file);
+                FileFingerprint fingerprint = fingerprint(file);
                 artifacts.add(new EnvironmentLockfile.ModArtifact(
                         file.getFileName().toString(),
-                        Files.size(file),
-                        sha256(file),
+                        fingerprint.sizeBytes(),
+                        fingerprint.sha256(),
                         metadata == null ? null : metadata.getModId(),
                         metadata == null ? null : metadata.getVersion()
                 ));
@@ -274,11 +280,12 @@ public final class EnvironmentLockfileService {
                                 + MAX_ENVIRONMENT_FILES + " tracked files; refusing an incomplete baseline.");
                     }
                     String relativePath = root.relativize(file).toString().replace(java.io.File.separatorChar, '/');
+                    FileFingerprint fingerprint = fingerprint(file);
                     artifacts.add(new EnvironmentLockfile.EnvironmentArtifact(
                             category,
                             relativePath,
-                            Files.size(file),
-                            sha256(file)
+                            fingerprint.sizeBytes(),
+                            fingerprint.sha256()
                     ));
                 }
             }
@@ -459,7 +466,17 @@ public final class EnvironmentLockfileService {
         return value == null || value.isBlank();
     }
 
-    private static String sha256(Path file) throws IOException {
+    /**
+     * Hashes one regular file without following a final-component symlink and
+     * rejects files that visibly change while being read.
+     */
+    private static FileFingerprint fingerprint(Path file) throws IOException {
+        BasicFileAttributes before = Files.readAttributes(
+                file, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        if (!before.isRegularFile()) {
+            throw new IOException("Tracked environment artifact is no longer a regular file: " + file.getFileName());
+        }
+
         final MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("SHA-256");
@@ -468,12 +485,27 @@ public final class EnvironmentLockfileService {
         }
 
         byte[] buffer = new byte[BUFFER_SIZE];
-        try (InputStream input = Files.newInputStream(file)) {
+        Set<OpenOption> options = Set.of(StandardOpenOption.READ, LinkOption.NOFOLLOW_LINKS);
+        try (SeekableByteChannel channel = Files.newByteChannel(file, options);
+             InputStream input = Channels.newInputStream(channel)) {
             int read;
             while ((read = input.read(buffer)) != -1) {
                 digest.update(buffer, 0, read);
             }
         }
-        return HexFormat.of().formatHex(digest.digest());
+
+        BasicFileAttributes after = Files.readAttributes(
+                file, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+        if (!after.isRegularFile()
+                || before.size() != after.size()
+                || !before.lastModifiedTime().equals(after.lastModifiedTime())
+                || (before.fileKey() != null && !before.fileKey().equals(after.fileKey()))) {
+            throw new IOException("Tracked environment artifact changed while being hashed: " + file.getFileName());
+        }
+
+        return new FileFingerprint(before.size(), HexFormat.of().formatHex(digest.digest()));
+    }
+
+    private record FileFingerprint(long sizeBytes, String sha256) {
     }
 }
