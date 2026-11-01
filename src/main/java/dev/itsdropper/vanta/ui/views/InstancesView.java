@@ -288,8 +288,7 @@ public class InstancesView extends VBox {
         long requestId = ++refreshRequestId;
         statusLabel.setText("Scanning installed instances...");
 
-        UiExecutor.shared().execute(
-            () -> {
+        UiExecutor.shared().execute(() -> {
             List<Instance> instances;
             try {
                 instances = InstanceManager.discoverInstances();
@@ -323,8 +322,7 @@ public class InstancesView extends VBox {
                 // after rename, duplicate, icon change, or manual refresh.
                 filterInstances(searchField.getText());
             });
-        }
-        );
+                });
 
     }
 
@@ -352,8 +350,7 @@ public class InstancesView extends VBox {
 
         backupButton.setDisable(true);
         statusLabel.setText("Restoring backup… Existing instances will not be overwritten.");
-        UiExecutor.shared().execute(
-            () -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 InstanceBackupService.restoreBackup(archive.toPath(), name);
                 UiExecutor.shared().dispatchToUi(() -> {
@@ -372,8 +369,7 @@ public class InstancesView extends VBox {
                     new Alert(Alert.AlertType.ERROR, "Vanta could not restore this backup.\n\n" + message).show();
                 });
             }
-        }
-        );
+                });
     }
 
     private void backUpInstance() {
@@ -417,8 +413,7 @@ public class InstancesView extends VBox {
         backupButton.setDisable(true);
         statusLabel.setText("Backing up " + selected.getName() + "… Worlds and settings are included.");
 
-        UiExecutor.shared().execute(
-            () -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 InstanceBackupService.createBackup(selected, output);
                 UiExecutor.shared().dispatchToUi(() -> {
@@ -438,8 +433,7 @@ public class InstancesView extends VBox {
                     new Alert(Alert.AlertType.ERROR, "Vanta could not create the backup.\n\n" + message).show();
                 });
             }
-        }
-        );
+                });
     }
 
     private static String safeFileName(String name) {
@@ -625,8 +619,7 @@ public class InstancesView extends VBox {
             if (name.isBlank()) return;
             popup.hide();
             statusLabel.setText((duplicate ? "Duplicating " : "Renaming ") + instance.getName() + "...");
-            UiExecutor.shared().execute(
-                () -> {
+            UiExecutor.shared().execute(() -> {
                 try {
                     if (duplicate) InstanceManager.duplicateInstance(instance, name);
                     else InstanceManager.renameInstance(instance, name);
@@ -634,8 +627,7 @@ public class InstancesView extends VBox {
                 } catch (Throwable ex) {
                     UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Operation failed." : ex.getMessage()));
                 }
-            }
-            );
+                        });
         });
         actions.getChildren().addAll(cancel, apply);
         root.getChildren().addAll(title, subtitle, field, actions);
@@ -665,12 +657,10 @@ public class InstancesView extends VBox {
             button.setTooltip(new javafx.scene.control.Tooltip(icon[0]));
             button.setOnAction(e -> {
                 popup.hide();
-                UiExecutor.shared().execute(
-                    () -> {
+                UiExecutor.shared().execute(() -> {
                     try { InstanceManager.setInstanceIcon(instance, icon[0]); UiExecutor.shared().dispatchToUi(this::refresh); }
                     catch (Throwable ex) { UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Could not change icon." : ex.getMessage())); }
-                }
-                );
+                                });
             });
             choices.getChildren().add(button);
         }
@@ -683,8 +673,7 @@ public class InstancesView extends VBox {
             java.io.File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
             if (selected == null) return;
             popup.hide();
-            UiExecutor.shared().execute(
-                () -> {
+            UiExecutor.shared().execute(() -> {
                 try {
                     java.nio.file.Files.copy(selected.toPath(), instance.getDirectory().resolve("icon.png"), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
                     InstanceManager.setInstanceIcon(instance, "CUSTOM");
@@ -692,8 +681,7 @@ public class InstancesView extends VBox {
                 } catch (Throwable ex) {
                     UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(ex.getMessage() == null ? "Could not upload icon." : ex.getMessage()));
                 }
-            }
-            );
+                        });
         });
         root.getChildren().addAll(title, subtitle, choices, upload);
         ThemeManager.apply(root, ThemeManager.loadAccent());
@@ -748,8 +736,7 @@ public class InstancesView extends VBox {
                         + "..."
         );
 
-        UiExecutor.shared().execute(
-            () -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -779,8 +766,7 @@ public class InstancesView extends VBox {
                                 )
                         );
                     }
-                }
-        );
+                        });
 
 
 
@@ -928,8 +914,7 @@ public class InstancesView extends VBox {
                         + "..."
         );
 
-        UiExecutor.shared().execute(
-            () -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -949,8 +934,7 @@ public class InstancesView extends VBox {
                                 )
                         );
                     }
-                }
-        );
+                        });
 
 
 
