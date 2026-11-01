@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.views;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -319,8 +318,7 @@ public class ImportInstanceView extends VBox {
                         + "..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -329,7 +327,7 @@ public class ImportInstanceView extends VBox {
                                         file.toPath()
                                 );
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             statusLabel.setText(
                                     "Imported "
@@ -344,7 +342,7 @@ public class ImportInstanceView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             importButton.setDisable(
                                     false
@@ -369,13 +367,11 @@ public class ImportInstanceView extends VBox {
                             );
                         });
                     }
-                }, "Vanta-Modpack-Import");
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
 
