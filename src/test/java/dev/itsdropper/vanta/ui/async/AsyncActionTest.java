@@ -1,12 +1,12 @@
 package dev.itsdropper.vanta.ui.async;
 
-import javafx.application.Platform;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -20,25 +20,17 @@ class AsyncActionTest {
     private static final long TIMEOUT_SECONDS = 5;
 
     private UiExecutor executor;
+    private ExecutorService fxExecutor;
     private AsyncAction<?> action;
 
-    @BeforeAll
-    static void startJavaFxToolkit() throws Exception {
-        CountDownLatch started = new CountDownLatch(1);
-        try {
-            Platform.startup(() -> {
-                Platform.setImplicitExit(false);
-                started.countDown();
-            });
-        } catch (IllegalStateException alreadyStarted) {
-            Platform.runLater(started::countDown);
-        }
-        assertTrue(started.await(TIMEOUT_SECONDS, TimeUnit.SECONDS));
-    }
-
     @BeforeEach
-    void createExecutor() {
-        executor = new UiExecutor(2, 16, "async-action-test");
+    void createExecutors() {
+        executor = new UiExecutor(2, 16, "async-action-worker");
+        fxExecutor = Executors.newSingleThreadExecutor(task -> {
+            Thread thread = new Thread(task, "async-action-fx");
+            thread.setDaemon(true);
+            return thread;
+        });
     }
 
     @AfterEach
@@ -47,29 +39,31 @@ class AsyncActionTest {
             action.close();
         }
         executor.close();
+        fxExecutor.shutdownNow();
     }
 
     @Test
-    void deliversProgressAndResultOnJavaFxThread() throws Exception {
+    void deliversProgressAndResultThroughTheFxDispatcher() throws Exception {
         CountDownLatch progressDelivered = new CountDownLatch(1);
         CountDownLatch resultDelivered = new CountDownLatch(1);
-        AtomicReference<Boolean> callbacksOnFxThread = new AtomicReference<>(true);
+        AtomicReference<String> callbackThread = new AtomicReference<>();
         AtomicReference<Double> progressValue = new AtomicReference<>();
         AtomicReference<String> result = new AtomicReference<>();
 
         action = new AsyncAction<>(
                 executor,
                 value -> {
-                    callbacksOnFxThread.set(callbacksOnFxThread.get() && Platform.isFxApplicationThread());
+                    callbackThread.set(Thread.currentThread().getName());
                     result.set(value);
                     resultDelivered.countDown();
                 },
                 failure -> resultDelivered.countDown(),
                 (fraction, message) -> {
-                    callbacksOnFxThread.set(callbacksOnFxThread.get() && Platform.isFxApplicationThread());
+                    callbackThread.set(Thread.currentThread().getName());
                     progressValue.set(fraction);
                     progressDelivered.countDown();
-                }
+                },
+                task -> fxExecutor.execute(task)
         );
 
         action.start(progress -> {
@@ -81,7 +75,7 @@ class AsyncActionTest {
         assertTrue(resultDelivered.await(TIMEOUT_SECONDS, TimeUnit.SECONDS));
         assertEquals(0.4, progressValue.get());
         assertEquals("complete", result.get());
-        assertTrue(callbacksOnFxThread.get());
+        assertEquals("async-action-fx", callbackThread.get());
     }
 
     @Test
@@ -101,7 +95,8 @@ class AsyncActionTest {
                 failure -> {
                 },
                 (fraction, message) -> {
-                }
+                },
+                task -> fxExecutor.execute(task)
         );
 
         RequestToken.Ticket oldTicket = action.start(() -> {
@@ -144,7 +139,8 @@ class AsyncActionTest {
                 value -> delivered.countDown(),
                 failure -> delivered.countDown(),
                 (fraction, message) -> {
-                }
+                },
+                task -> fxExecutor.execute(task)
         );
 
         ticket.set(action.start(() -> {
@@ -165,10 +161,10 @@ class AsyncActionTest {
     }
 
     @Test
-    void deliversFailuresOnJavaFxThread() throws Exception {
+    void deliversFailuresThroughTheFxDispatcher() throws Exception {
         CountDownLatch failed = new CountDownLatch(1);
         AtomicReference<Throwable> deliveredFailure = new AtomicReference<>();
-        AtomicReference<Boolean> onFxThread = new AtomicReference<>(false);
+        AtomicReference<String> callbackThread = new AtomicReference<>();
 
         action = new AsyncAction<>(
                 executor,
@@ -176,11 +172,12 @@ class AsyncActionTest {
                 },
                 failure -> {
                     deliveredFailure.set(failure);
-                    onFxThread.set(Platform.isFxApplicationThread());
+                    callbackThread.set(Thread.currentThread().getName());
                     failed.countDown();
                 },
                 (fraction, message) -> {
-                }
+                },
+                task -> fxExecutor.execute(task)
         );
 
         action.start(() -> {
@@ -190,6 +187,6 @@ class AsyncActionTest {
         assertTrue(failed.await(TIMEOUT_SECONDS, TimeUnit.SECONDS));
         assertNotNull(deliveredFailure.get());
         assertEquals("expected failure", deliveredFailure.get().getMessage());
-        assertTrue(onFxThread.get());
+        assertEquals("async-action-fx", callbackThread.get());
     }
 }
