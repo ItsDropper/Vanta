@@ -1712,14 +1712,14 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         VBox telemetry = card(
                 "Optional telemetry",
-                "Usage statistics and crash diagnostics are separate opt-ins. Vanta sends only allowlisted event names, the launcher version, and (for crashes) the exception type. No account identifiers, Minecraft credentials, tokens, logs or file paths are included."
+                "Usage statistics and crash diagnostics are separate opt-ins. Crash diagnostics can include a redacted exception message, stack trace and short error excerpt from a new Minecraft crash report. Common credentials, identifiers, IP addresses and local paths are filtered, but automated redaction is not perfect."
         );
 
         CheckBox usageTelemetry = new CheckBox("Send anonymous usage statistics");
         usageTelemetry.setSelected(LauncherSettings.isUsageTelemetryEnabled());
         usageTelemetry.getStyleClass().add("settings-checkbox");
 
-        CheckBox crashTelemetry = new CheckBox("Send anonymous crash reports");
+        CheckBox crashTelemetry = new CheckBox("Send crash diagnostics");
         crashTelemetry.setSelected(LauncherSettings.isCrashTelemetryEnabled());
         crashTelemetry.getStyleClass().add("settings-checkbox");
 
