@@ -1,0 +1,1194 @@
+/* Vanta darkroom design system — instance library.
+ * Consolidated from: instances.css, instance-settings.css.
+ * Original selector definitions retained in source order for compatibility.
+ */
+
+.instances-page {
+    -fx-background-color: transparent;
+}
+
+.instances-count {
+    -fx-text-fill: -vantasuccess;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+
+/* =============================================================
+   INSTANCE CARDS
+   ============================================================= */
+
+.instance-card {
+    -fx-cursor: hand;
+}
+
+.instance-card.selected-instance {
+    -fx-background-color: -vantasurface;
+}
+
+
+.instance-icon-box {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-min-width: 46px;
+    -fx-pref-width: 46px;
+    -fx-max-width: 46px;
+
+    -fx-min-height: 46px;
+    -fx-pref-height: 46px;
+    -fx-max-height: 46px;
+}
+
+.instance-icon {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 22px;
+}
+
+
+.instance-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.instance-version {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+
+.instance-loader {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-background-radius: 7px;
+
+    -fx-text-fill: -vantaaccent;
+
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 4px 8px;
+}
+
+.instance-ready {
+    -fx-text-fill: -vantasuccess;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+
+/* =============================================================
+   INSTANCE ACTIONS
+   ============================================================= */
+
+.instance-play-button {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 7px;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: -vantabg;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+
+    -fx-padding: 0 14px;
+
+    -fx-cursor: hand;
+}
+
+.instance-play-button:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.instance-play-button:pressed {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.instance-play-button:disabled {
+    -fx-background-color: derive(-vantaaccent, -75%);
+    -fx-text-fill: -vantasubtle;
+    -fx-opacity: 1;
+    -fx-cursor: default;
+}
+
+
+/* =============================================================
+   PLAYING / CLOSE BUTTON
+   ============================================================= */
+
+.instance-playing-button {
+    -fx-background-color: -vantasurfaceraised;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: -vantatext;
+}
+
+.instance-playing-button:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: derive(-vantaborder, 20%);
+}
+
+.instance-playing-button:pressed {
+    -fx-background-color: -vantasurfacehover;
+}
+
+
+/* =============================================================
+   OPTIONS BUTTON
+   ============================================================= */
+
+.instance-settings-button {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 7px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+
+    -fx-padding: 0 12px;
+
+    -fx-cursor: hand;
+}
+
+.instance-settings-button:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
+}
+
+.instance-settings-button:pressed {
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantaborder;
+}
+
+
+/* =============================================================
+   THREE-DOT MENU
+   ============================================================= */
+
+.instance-menu-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 0;
+
+    -fx-alignment: center;
+
+    -fx-cursor: hand;
+}
+
+.instance-menu-button:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
+}
+
+.instance-menu-button:pressed {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
+}
+
+.instance-menu-button:disabled {
+    -fx-opacity: 0.45;
+    -fx-cursor: default;
+}
+
+
+/* =============================================================
+   INSTANCE MENU
+   ============================================================= */
+
+.context-menu {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-padding: 5px;
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+
+    -fx-padding: 8px 12px;
+
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 11px;
+}
+
+.context-menu .menu-item:hover {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.context-menu .menu-item:focused {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.context-menu .menu-item:pressed {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.context-menu .instance-delete-menu-item {
+    -fx-text-fill: -vantadanger;
+}
+
+.context-menu .instance-delete-menu-item:hover,
+.context-menu .instance-delete-menu-item:focused {
+    -fx-background-color: derive(-vantadanger, -82%);
+    -fx-text-fill: -vantadanger;
+}
+
+
+/* =============================================================
+   INSTANCE STATUS
+   ============================================================= */
+
+.instance-actions {
+    -fx-spacing: 8px;
+}
+
+.instances-status {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+}
+
+
+/* =============================================================
+   EMPTY STATE
+   ============================================================= */
+
+.instance-empty {
+    -fx-background-color: -vantasurface;
+}
+
+.instance-empty-icon {
+    -fx-text-fill: -vantaborder;
+    -fx-font-size: 34px;
+}
+
+.instance-empty-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.instance-empty-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+
+/* =============================================================
+   CREATE INSTANCE PANEL
+   ============================================================= */
+
+.create-instance-panel {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.create-instance-panel .card-title {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+
+/* =============================================================
+   CREATE INSTANCE FORM
+   ============================================================= */
+
+.create-label {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.create-field,
+.create-combo {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: -vantatext;
+
+    -fx-font-size: 12px;
+}
+
+.create-field {
+    -fx-padding: 0 12px;
+}
+
+.create-field:focused,
+.create-combo:focused {
+    -fx-border-color: -vantasuccess;
+}
+
+.create-field:hover,
+.create-combo:hover {
+    -fx-border-color: -vantaborder;
+}
+
+.create-combo .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+}
+
+.create-combo .arrow {
+    -fx-background-color: -vantamuted;
+}
+
+.create-combo .arrow-button {
+    -fx-background-color: transparent;
+}
+
+
+/* =============================================================
+   CREATE STATUS
+   ============================================================= */
+
+.create-status {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+
+.create-option {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-padding: 14px 16px;
+
+    -fx-cursor: hand;
+    -fx-alignment: center-left;
+}
+
+.create-option:hover {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.create-option:pressed {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.create-option:disabled {
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantasurfaceraised;
+    -fx-opacity: 0.45;
+    -fx-cursor: default;
+}
+
+.create-option-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.create-option-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+
+.create-option-arrow {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.create-option:hover .create-option-arrow {
+    -fx-text-fill: -vantatext;
+}
+
+/* =============================================================
+   DELETE INSTANCE DIALOG
+   ============================================================= */
+
+.delete-dialog {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+
+    -fx-padding: 22px;
+}
+
+.delete-dialog-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.delete-dialog-message {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-wrap-text: true;
+}
+
+.delete-dialog-cancel {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 7px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 9px 16px;
+
+    -fx-cursor: hand;
+}
+
+.delete-dialog-cancel:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: -vantaborder;
+    -fx-text-fill: -vantatext;
+}
+
+.delete-dialog-delete {
+    -fx-background-color: derive(-vantadanger, -82%);
+    -fx-background-radius: 7px;
+
+    -fx-border-color: derive(-vantadanger, -45%);
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-text-fill: -vantadanger;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 9px 16px;
+
+    -fx-cursor: hand;
+}
+
+.delete-dialog-delete:hover {
+    -fx-background-color: derive(-vantadanger, -70%);
+    -fx-border-color: -vantadanger;
+    -fx-text-fill: -vantadanger;
+}
+
+.delete-dialog-delete:pressed {
+    -fx-background-color: derive(-vantadanger, -82%);
+}
+
+
+       /* =============================================================
+          PRESET CONFIGURATION
+          ============================================================= */
+
+   .preset-config-scroll {
+       -fx-background-color: transparent;
+       -fx-background: transparent;
+       -fx-border-color: transparent;
+       -fx-padding: 0;
+   }
+
+.preset-config-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.preset-config-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.preset-config-scroll > .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+    -fx-background-radius: 4px;
+}
+
+.preset-config-scroll > .scroll-bar:vertical .thumb {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 4px;
+}
+
+.preset-config-scroll > .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -vantaborder;
+}
+
+.preset-config-scroll > .scroll-bar:vertical .increment-button,
+.preset-config-scroll > .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+
+/* =============================================================
+   PRESET ENVIRONMENT
+   ============================================================= */
+
+.preset-environment {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 9px;
+
+    -fx-border-color: -vantasurface;
+    -fx-border-width: 1px;
+    -fx-border-radius: 9px;
+
+    -fx-padding: 14px 16px;
+}
+
+.preset-environment-value {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.preset-environment-secondary {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+}
+
+
+/* =============================================================
+   PRESET VERSION LIST
+   ============================================================= */
+
+.preset-version-list {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-line-spacing: 2px;
+}
+
+
+/* =============================================================
+   PRESET MOD LIST
+   ============================================================= */
+
+.preset-mods-scroll {
+    -fx-background-color: -vantabg;
+    -fx-background: -vantabg;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-background-radius: 8px;
+}
+
+.preset-mods-scroll > .viewport {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 7px;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical .thumb {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 4px;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -vantaborder;
+}
+
+.preset-mods-scroll > .scroll-bar:vertical .increment-button,
+.preset-mods-scroll > .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+
+/* =============================================================
+   PRESET ACTIONS
+   ============================================================= */
+
+.preset-actions {
+    -fx-padding: 16px 0 0 0;
+
+    -fx-border-color: -vantasurface transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* =============================================================
+   REPAIR VIEW
+   ============================================================= */
+
+.repair-issue-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: -vantasurfaceraised;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-padding: 20px;
+}
+
+.repair-issue-type {
+    -fx-text-fill: -vantadanger;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+
+.repair-issue-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.repair-issue-details {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+
+.repair-empty {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-padding: 20px;
+}
+
+.repair-status {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+}
+
+/* =============================================================
+   SCREENSHOTS
+   ============================================================= */
+
+.screenshots-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.screenshots-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.screenshots-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.screenshots-scroll > .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.screenshots-scroll > .scroll-bar:vertical .thumb {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 4px;
+}
+
+.screenshots-scroll > .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -vantaborder;
+}
+
+.screenshots-scroll > .scroll-bar:vertical .increment-button,
+.screenshots-scroll > .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+
+/* Screenshot card */
+
+.screenshot-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+
+    -fx-cursor: hand;
+}
+
+.screenshot-card:hover {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.screenshot-preview {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 7px;
+
+    -fx-border-color: -vantasurfaceraised;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+
+    -fx-cursor: hand;
+}
+
+.screenshot-card:hover .screenshot-preview {
+    -fx-border-color: -vantaborder;
+}
+
+.screenshot-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+
+/* Screenshot preview window */
+
+.screenshot-dialog {
+    -fx-background-color: -vantabg;
+}
+
+.screenshot-dialog-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.screenshot-preview-container {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: -vantasurface;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+/* =============================================================
+   SCREENSHOT VIEWER
+   ============================================================= */
+
+.screenshot-grid {
+    -fx-padding: 4px;
+}
+
+.screenshots-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.screenshots-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.screenshots-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-pref-width: 8px;
+}
+
+.screenshots-scroll > .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.screenshots-scroll > .scroll-bar:vertical .thumb {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 4px;
+}
+
+.screenshot-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.screenshot-card:hover {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.screenshot-preview {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 7px;
+    -fx-border-color: -vantasurfaceraised;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+    -fx-cursor: hand;
+}
+
+.screenshot-card:hover .screenshot-preview {
+    -fx-border-color: -vantaborder;
+}
+
+.screenshot-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.screenshot-dialog {
+    -fx-background-color: -vantabg;
+}
+
+.screenshot-dialog-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.screenshot-preview-container {
+    -fx-background-color: -vantabg;
+}
+
+.screenshot-image-scroll {
+    -fx-background-color: -vantabg;
+    -fx-background: -vantabg;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.screenshot-image-scroll > .viewport {
+    -fx-background-color: -vantabg;
+}
+
+.screenshot-image-scroll > .scroll-bar:vertical,
+.screenshot-image-scroll > .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.screenshot-image-scroll > .scroll-bar .thumb {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 5px;
+}
+
+/* =============================================================
+   SCREENSHOT DELETE DIALOG
+   ============================================================= */
+
+.screenshot-delete-dialog {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.screenshot-delete-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.screenshot-delete-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.screenshot-delete-file {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+
+/* =============================================================
+   VANTA CONTENT / CONFIRMATION DIALOGS
+   ============================================================= */
+
+.vanta-dialog {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-padding: 4px;
+}
+
+.vanta-dialog .header-panel,
+.delete-dialog .header-panel {
+    -fx-background-color: -vantasurface;
+    -fx-padding: 18px 20px 10px 20px;
+}
+
+.vanta-dialog .header-panel .label,
+.delete-dialog .header-panel .label {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.vanta-dialog .content,
+.delete-dialog .content {
+    -fx-background-color: -vantasurface;
+    -fx-padding: 4px 20px 12px 20px;
+}
+
+.dialog-subtitle,
+.delete-dialog .content .label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+
+.dialog-choice-list {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.dialog-instance-checkbox {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantasurface;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-padding: 11px 12px;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+}
+
+.dialog-instance-checkbox:hover {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+}
+
+.dialog-instance-checkbox:selected {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantasuccess;
+}
+
+.dialog-instance-checkbox .box {
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+
+.dialog-instance-checkbox:selected .box {
+    -fx-background-color: -vantasuccess;
+    -fx-border-color: -vantasuccess;
+}
+
+.dialog-instance-checkbox:selected .mark {
+    -fx-background-color: -vantabg;
+}
+
+.vanta-dialog .dialog-scroll,
+.vanta-dialog .dialog-scroll > .viewport {
+    -fx-background-color: -vantabg;
+}
+
+.vanta-dialog .dialog-scroll {
+    -fx-border-color: -vantasurface;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.vanta-dialog .dialog-pane {
+    -fx-background-color: -vantasurface;
+}
+
+.vanta-dialog .button-bar,
+.delete-dialog .button-bar {
+    -fx-background-color: -vantasurface;
+    -fx-padding: 8px 16px 16px 16px;
+}
+
+.delete-dialog-header {
+    -fx-background-color: -vantasurface;
+}
+
+.delete-dialog-content {
+    -fx-background-color: -vantasurface;
+}
+
+
+
+/* Instance management popups */
+.instance-action-popup{-fx-background-color:-vantabg;-fx-background-radius:14px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:14px;-fx-padding:20px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.38),24,.15,0,8)}
+.instance-action-title{-fx-text-fill:-vantatext;-fx-font-size:14px;-fx-font-weight:900}
+.instance-action-subtitle{-fx-text-fill:-vantamuted;-fx-font-size:10px}
+.instance-action-field{-fx-background-color:-vantabg;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-radius:8px;-fx-text-fill:-vantatext;-fx-prompt-text-fill:-vantamuted;-fx-padding:10px 12px;-fx-min-height:40px}
+.instance-action-field:focused{-fx-border-color:-vantaaccent}
+.instance-icon-choice{-fx-background-color:-vantasurface;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-radius:10px;-fx-text-fill:-vantatext;-fx-font-size:20px;-fx-font-weight:800;-fx-min-width:38px;-fx-pref-width:38px;-fx-min-height:38px;-fx-pref-height:38px;-fx-cursor:hand}
+.instance-icon-choice:hover{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaaccent}
+.instance-card-compact{-fx-min-height:62px}
+.instance-card-compact .instance-playtime{-fx-font-size:9px}
+
+
+/* Instance library controls */
+.instances-toolbar {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 11px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 11px;
+    -fx-padding: 10px;
+}
+.instances-toolbar .instance-search-field {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantasubtle;
+    -fx-padding: 9px 12px;
+    -fx-min-height: 38px;
+}
+.instances-toolbar .instance-search-field:focused {
+    -fx-border-color: -vantaaccent;
+}
+.instances-toolbar .instance-sort-field {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 8px;
+    -fx-min-height: 38px;
+}
+.instances-toolbar .instance-sort-field .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 11px;
+}
+.instances-toolbar .instance-sort-field .arrow {
+    -fx-background-color: -vantamuted;
+}
+.overengineered-ui .instances-toolbar {
+    -fx-background-color: linear-gradient(to bottom, derive(-vantasurface, 9%), -vantasurface 65%, derive(-vantabg, 4%));
+    -fx-border-color: derive(-vantaborder, 24%);
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.28), 16, 0.16, 0, 4);
+}
+.overengineered-ui .instances-toolbar .instance-sort-field {
+    -fx-border-color: derive(-vantaborder, 30%);
+}
+
+
+.settings-page {
+    -fx-background-color: transparent;
+}
+
+.settings-header {
+    -fx-padding: 0 0 4px 0;
+}
+
+.settings-section-title {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+
+.instance-setting-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.instance-setting-value {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.instance-directory {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-wrap-text: true;
+}
+
+.instance-settings-divider {
+    -fx-background-color: -vantaborder;
+
+    -fx-min-height: 1px;
+    -fx-pref-height: 1px;
+    -fx-max-height: 1px;
+}
+
+
+.instance-settings-danger-card {
+    -fx-background-color: derive(-vantadanger, -82%);
+    -fx-background-radius: 13px;
+
+    -fx-border-color: derive(-vantadanger, -45%);
+    -fx-border-width: 1px;
+    -fx-border-radius: 13px;
+}
+
+.instance-settings-danger-title {
+    -fx-text-fill: -vantadanger;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.instance-settings-danger-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-wrap-text: true;
+}
+
+
+/* Settings checkbox */
+
+.settings-checkbox {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+}
+
+.settings-checkbox .box {
+    -fx-background-color: -vantasurfaceraised;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.settings-checkbox:hover .box {
+    -fx-border-color: derive(-vantaborder, 20%);
+}
+
+.settings-checkbox:selected .box {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
