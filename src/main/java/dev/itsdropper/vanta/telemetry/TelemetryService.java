@@ -153,7 +153,7 @@ public final class TelemetryService {
     static String sanitizeText(String value, int maxLength) {
         if (value == null || value.isBlank() || maxLength <= 0) return "";
         String text = value.replace("\r\n", "\n").replace('\r', '\n').replace("\0", "");
-        text = text.replaceAll("(?i)(access[_ -]?token|refresh[_ -]?token|client[_ -]?secret|authorization|bearer)(\\s*[:=]\\s*)[^\\s,;]+", "$1$2[REDACTED]");
+        text = text.replaceAll("(?i)(access[_ -]?token|refresh[_ -]?token|client[_ -]?secret|token|authorization|bearer)(\\s*[:=]\\s*)[^\\s,;]+", "$1$2[REDACTED]");
         text = text.replaceAll("(?i)Bearer\\s+[A-Za-z0-9._~+/-]+=*", "Bearer [REDACTED]");
         text = text.replaceAll("(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b", "[REDACTED_EMAIL]");
         text = text.replaceAll("(?i)\\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\\b", "[REDACTED_UUID]");
