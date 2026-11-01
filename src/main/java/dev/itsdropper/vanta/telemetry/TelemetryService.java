@@ -29,7 +29,11 @@ public final class TelemetryService {
             "view_home_opened",
             "view_instances_opened",
             "view_mods_opened",
-            "view_settings_opened"
+            "view_settings_opened",
+            "feature_instance_created",
+            "feature_mod_install_used",
+            "feature_backup_used",
+            "feature_skin_change_used"
     );
 
     private static final String APP_VERSION = loadVersion();
