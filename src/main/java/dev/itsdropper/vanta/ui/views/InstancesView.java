@@ -212,7 +212,7 @@ public class InstancesView extends VBox {
 
         instanceList =
                 new VBox(
-                        12
+                        0
                 );
 
         instanceList.getStyleClass().add(
