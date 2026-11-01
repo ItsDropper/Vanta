@@ -38,7 +38,7 @@ public class Main extends Application {
 
         var loadingCss = getClass().getResource("/css/shell.css");
         if (loadingCss == null) {
-            throw new IllegalStateException("Missing CSS resource: /css/loading.css");
+            throw new IllegalStateException("Missing CSS resource: /css/shell.css");
         }
         scene.getStylesheets().add(loadingCss.toExternalForm());
 
