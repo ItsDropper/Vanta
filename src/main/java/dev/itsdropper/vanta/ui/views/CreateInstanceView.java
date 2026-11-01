@@ -20,6 +20,7 @@ import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.ForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.telemetry.TelemetryService;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -721,6 +722,8 @@ public class CreateInstanceView extends VBox {
                                     version
                             );
                         }
+
+                        TelemetryService.track("feature_instance_created");
 
                         UiExecutor.shared().dispatchToUi(() -> {
 
