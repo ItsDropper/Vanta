@@ -1140,8 +1140,6 @@ public class BrowseModsView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
@@ -1212,8 +1210,6 @@ public class BrowseModsView extends VBox {
                     }
         });
 
-                true
-        );
 
     }
 
