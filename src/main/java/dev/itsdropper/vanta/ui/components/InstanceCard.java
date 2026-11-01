@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.components;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -758,9 +757,7 @@ public class InstanceCard extends StackPane {
                 true
         );
 
-        Thread exportThread =
-                new Thread(
-                        () -> {
+        UiExecutor.shared().execute(() -> {
 
                             try {
 
@@ -769,7 +766,7 @@ public class InstanceCard extends StackPane {
                                         finalSelected.toPath()
                                 );
 
-                                Platform.runLater(() -> {
+                                UiExecutor.shared().dispatchToUi(() -> {
 
                                     menuButton.setDisable(
                                             false
@@ -784,7 +781,7 @@ public class InstanceCard extends StackPane {
 
                                 e.printStackTrace();
 
-                                Platform.runLater(() -> {
+                                UiExecutor.shared().dispatchToUi(() -> {
 
                                     menuButton.setDisable(
                                             false
@@ -795,18 +792,12 @@ public class InstanceCard extends StackPane {
                                     );
                                 });
                             }
-                        }
-                );
+        });
 
-        exportThread.setName(
-                "Vanta-Mrpack-Export"
-        );
 
-        exportThread.setDaemon(
                 true
         );
 
-        exportThread.start();
     }
 
     // =============================================================
@@ -1031,7 +1022,7 @@ public class InstanceCard extends StackPane {
             boolean isThisInstance
     ) {
 
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
 
             switch (state) {
 
