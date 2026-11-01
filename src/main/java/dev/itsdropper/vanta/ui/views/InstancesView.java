@@ -30,6 +30,7 @@ import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.telemetry.TelemetryService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -416,6 +417,7 @@ public class InstancesView extends VBox {
         UiExecutor.shared().execute(() -> {
             try {
                 InstanceBackupService.createBackup(selected, output);
+                TelemetryService.track("feature_backup_used");
                 UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
                     statusLabel.setText("Backup created: " + output.getFileName());
