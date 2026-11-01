@@ -682,7 +682,7 @@ public class InstanceCard extends StackPane {
         scene.getStylesheets().add(
                 getClass()
                         .getResource(
-                                "/css/global.css"
+                                "/css/base.css"
                         )
                         .toExternalForm()
         );
@@ -690,7 +690,7 @@ public class InstanceCard extends StackPane {
         scene.getStylesheets().add(
                 getClass()
                         .getResource(
-                                "/css/typography.css"
+                                "/css/base.css"
                         )
                         .toExternalForm()
         );
@@ -698,7 +698,7 @@ public class InstanceCard extends StackPane {
         scene.getStylesheets().add(
                 getClass()
                         .getResource(
-                                "/css/buttons.css"
+                                "/css/base.css"
                         )
                         .toExternalForm()
         );
