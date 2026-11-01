@@ -1,0 +1,463 @@
+/* Vanta darkroom design system — base layer.
+ * Consolidated from: global.css, typography.css, buttons.css, cards.css, forms.css, scrollbars.css.
+ * Original selector definitions retained in source order for compatibility.
+ */
+
+.root,
+.launcher {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 12px;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+
+.content {
+    -fx-background-color: transparent;
+}
+
+.page {
+    -fx-background-color: transparent;
+}
+
+
+.page-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+}
+
+.page-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+}
+
+.card-title,
+.create-section-title,
+.settings-section-title,
+.instances-count {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.footer-label {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+}
+
+.primary-button,
+.instance-create-button,
+.instance-play-button {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 8px;
+
+    -fx-text-fill: -vantabg;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+
+    -fx-padding: 11px 17px;
+
+    -fx-cursor: hand;
+
+    -fx-alignment: center;
+
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-max-height: 38px;
+}
+
+.primary-button:hover,
+.instance-create-button:hover,
+.instance-play-button:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.primary-button:pressed,
+.instance-create-button:pressed,
+.instance-play-button:pressed {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.primary-button:disabled,
+.instance-play-button:disabled {
+    -fx-opacity: 0.55;
+}
+
+
+/* =============================================================
+   INSTANCE CLOSE BUTTON
+   ============================================================= */
+
+.instance-play-button.instance-playing-button {
+    -fx-background-color: derive(-vantadanger, -82%);
+
+    -fx-background-radius: 8px;
+
+    -fx-border-color: derive(-vantadanger, -45%);
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: -vantadanger;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+
+    -fx-padding: 11px 17px;
+
+    -fx-alignment: center;
+
+    -fx-min-width: 110px;
+    -fx-pref-width: 110px;
+    -fx-max-width: 110px;
+
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-max-height: 38px;
+
+    -fx-cursor: hand;
+}
+
+.instance-play-button.instance-playing-button:hover {
+    -fx-background-color: derive(-vantadanger, -70%);
+
+    -fx-border-color: -vantadanger;
+
+    -fx-text-fill: -vantadanger;
+}
+
+.instance-play-button.instance-playing-button:pressed {
+    -fx-background-color: derive(-vantadanger, -70%);
+
+    -fx-border-color: -vantadanger;
+
+    -fx-text-fill: -vantadanger;
+}
+
+.instance-play-button.instance-playing-button:disabled {
+    -fx-opacity: 0.55;
+}
+
+
+/* =============================================================
+   SECONDARY / OPTIONS BUTTONS
+   ============================================================= */
+
+.secondary-button,
+.settings-back-button,
+.instance-settings-button {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: -vantatext;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 11px 17px;
+
+    -fx-cursor: hand;
+
+    -fx-alignment: center;
+}
+
+.secondary-button:hover,
+.settings-back-button:hover,
+.instance-settings-button:hover {
+    -fx-background-color: -vantasurfacehover;
+
+    -fx-border-color: derive(-vantaborder, 20%);
+
+    -fx-text-fill: -vantatext;
+}
+
+.secondary-button:pressed,
+.settings-back-button:pressed,
+.instance-settings-button:pressed {
+    -fx-background-color: -vantaborder;
+}
+
+.instance-settings-button {
+    -fx-font-size: 10px;
+
+    -fx-padding: 9px 13px;
+
+    -fx-min-width: 92px;
+    -fx-pref-width: 92px;
+    -fx-max-width: 92px;
+
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-max-height: 38px;
+}
+
+/* =============================================================
+   DANGER / SIGN OUT BUTTON
+   ============================================================= */
+
+.danger-button {
+    -fx-background-color: derive(-vantadanger, -82%);
+    -fx-background-radius: 8px;
+
+    -fx-border-color: derive(-vantadanger, -45%);
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: -vantadanger;
+
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+
+    -fx-padding: 11px 17px;
+
+    -fx-cursor: hand;
+
+    -fx-alignment: center;
+}
+
+.danger-button:hover {
+    -fx-background-color: derive(-vantadanger, -70%);
+
+    -fx-border-color: -vantadanger;
+
+    -fx-text-fill: -vantadanger;
+}
+
+.danger-button:pressed {
+    -fx-background-color: derive(-vantadanger, -70%);
+
+    -fx-border-color: -vantadanger;
+
+    -fx-text-fill: -vantadanger;
+}
+
+.danger-button:disabled {
+    -fx-opacity: 0.55;
+}
+
+/* =============================================================
+   NOTIFICATION PROGRESS BAR
+   ============================================================= */
+
+.notification-progress {
+    -fx-pref-height: 5px;
+    -fx-min-height: 5px;
+    -fx-max-height: 5px;
+
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 3px;
+
+    -fx-control-inner-background: -vantasurfaceraised;
+}
+
+.notification-progress > .bar {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.notification-progress > .track {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 3px;
+    -fx-background-insets: 0;
+}
+
+.info-card,
+.account-card,
+.account-panel,
+.instance-card,
+.instance-empty,
+.create-panel,
+.instance-settings-card,
+.mod-details-card,
+.mod-details-header {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.info-card:hover,
+.account-card:hover,
+.instance-card:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: -vantaborder;
+}
+
+.card-title {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.card-main {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.card-secondary {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.create-panel {
+    -fx-padding: 26px;
+}
+
+.create-section-title {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+
+.create-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+
+.create-field,
+.text-area,
+.create-combo {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantamuted;
+}
+
+.create-field {
+    -fx-font-size: 13px;
+    -fx-padding: 10px 13px;
+}
+
+.create-field:hover,
+.text-area:hover,
+.create-combo:hover {
+    -fx-border-color: -vantaborder;
+}
+
+.create-field:focused,
+.text-area:focused,
+.create-combo:focused {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaaccent;
+}
+
+
+.create-combo .list-cell {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+}
+
+.create-combo .list-cell:hover,
+.create-combo .list-cell:filled:selected {
+    -fx-background-color: -vantaaccentsoft;
+}
+
+.create-combo .arrow {
+    -fx-background-color: -vantamuted;
+}
+
+
+.create-status {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+
+
+/* Text area */
+
+.text-area {
+    -fx-text-fill: -vantatext;
+}
+
+.text-area .content {
+    -fx-background-color: -vantabg;
+}
+
+.text-area:focused .content {
+    -fx-background-color: -vantasurface;
+}
+
+
+/* Slider */
+
+.slider .track {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 4px;
+    -fx-pref-height: 6px;
+}
+
+.slider .thumb {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 50%;
+
+    -fx-pref-width: 16px;
+    -fx-pref-height: 16px;
+}
+
+.slider .thumb:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.instances-scroll,
+.settings-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-border-color: transparent;
+}
+
+.instances-scroll > .viewport,
+.settings-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.settings-scroll > .corner {
+    -fx-background-color: transparent;
+}
+
+
+.instances-scroll .scroll-bar:vertical,
+.settings-scroll .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 0 0 0 6px;
+}
+
+.instances-scroll .scroll-bar:vertical .track,
+.settings-scroll .scroll-bar:vertical .track {
+    -fx-background-color: transparent;
+}
+
+.instances-scroll .scroll-bar:vertical .thumb,
+.settings-scroll .scroll-bar:vertical .thumb {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 6px;
+}
+
+.instances-scroll .scroll-bar:vertical .thumb:hover,
+.settings-scroll .scroll-bar:vertical .thumb:hover {
+    -fx-background-color: -vantamuted;
+}
+
+.instances-scroll .scroll-bar:vertical .increment-button,
+.instances-scroll .scroll-bar:vertical .decrement-button,
+.settings-scroll .scroll-bar:vertical .increment-button,
+.settings-scroll .scroll-bar:vertical .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
