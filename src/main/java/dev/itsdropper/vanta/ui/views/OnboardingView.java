@@ -36,7 +36,7 @@ public class OnboardingView extends BorderPane {
     private final Button nextButton = new Button("NEXT");
     private final Button connectButton = new Button("CONNECT MICROSOFT ACCOUNT");
     private final CheckBox usageTelemetry = new CheckBox("Send anonymous usage statistics");
-    private final CheckBox crashTelemetry = new CheckBox("Send anonymous crash reports");
+    private final CheckBox crashTelemetry = new CheckBox("Send crash diagnostics");
 
     private int step = 0;
 
@@ -219,9 +219,9 @@ public class OnboardingView extends BorderPane {
 
         Label telemetryDetails = new Label(
                 "Choose what Vanta may send. Usage events contain only an event name and launcher version. "
-                        + "Crash reports contain only the exception type and launcher version. "
-                        + "No account details, Minecraft credentials, tokens, logs or file paths are sent. "
-                        + "Both options are off by default and can be changed later in Settings."
+                        + "Crash diagnostics may include a sanitized exception message, stack trace and a short error excerpt. "
+                        + "Vanta filters common credentials, account identifiers, IP addresses and local paths, but automated redaction is not perfect. "
+                        + "Crash diagnostics and usage statistics are separate opt-ins, off by default, and can be changed later in Settings."
         );
         telemetryDetails.getStyleClass().add("onboarding-feature-description");
         telemetryDetails.setWrapText(true);
