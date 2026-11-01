@@ -44,6 +44,7 @@ public final class TelemetryService {
 
     private static final AtomicBoolean HANDLER_INSTALLED = new AtomicBoolean();
     private static final AtomicBoolean CRASH_REPORTED = new AtomicBoolean();
+    private static volatile Thread.UncaughtExceptionHandler telemetryDefaultHandler;
 
     private TelemetryService() {
     }
@@ -87,20 +88,34 @@ public final class TelemetryService {
      * so telemetry never suppresses normal JVM crash handling.
      */
     public static void installUncaughtExceptionHandler() {
-        if (!HANDLER_INSTALLED.compareAndSet(false, true)) {
-            return;
+        if (HANDLER_INSTALLED.compareAndSet(false, true)) {
+            Thread.UncaughtExceptionHandler previousDefault =
+                    Thread.getDefaultUncaughtExceptionHandler();
+            telemetryDefaultHandler = (thread, error) -> {
+                reportCrash(error);
+                if (previousDefault != null) {
+                    previousDefault.uncaughtException(thread, error);
+                } else {
+                    error.printStackTrace();
+                }
+            };
+            Thread.setDefaultUncaughtExceptionHandler(telemetryDefaultHandler);
         }
 
-        Thread.UncaughtExceptionHandler previous =
-                Thread.getDefaultUncaughtExceptionHandler();
-        Thread.setDefaultUncaughtExceptionHandler((thread, error) -> {
-            reportCrash(error);
-            if (previous != null) {
-                previous.uncaughtException(thread, error);
-            } else {
-                error.printStackTrace();
-            }
-        });
+        // JavaFX may install a thread-specific handler for its application
+        // thread. Wrap it as well, preserving its existing error handling.
+        Thread current = Thread.currentThread();
+        Thread.UncaughtExceptionHandler currentHandler = current.getUncaughtExceptionHandler();
+        if (currentHandler != telemetryDefaultHandler) {
+            current.setUncaughtExceptionHandler((thread, error) -> {
+                reportCrash(error);
+                if (currentHandler != null) {
+                    currentHandler.uncaughtException(thread, error);
+                } else {
+                    error.printStackTrace();
+                }
+            });
+        }
     }
 
     static boolean isSupportedUsageEvent(String eventName) {
