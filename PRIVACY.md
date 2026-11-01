@@ -19,15 +19,15 @@ Vanta is designed to store account/session data and instance data locally on you
 Telemetry is disabled by default. During onboarding and in Settings → Repair & Diagnostics, users can independently opt in to:
 
 - **Anonymous usage statistics:** allowlisted launcher events (launcher startup; visits to Home, Instances, Mods, and Settings; successful instance creation, mod installation, instance backup, and skin change) plus the Vanta version.
-- **Anonymous crash reports:** the Java exception class name plus the Vanta version. Stack traces, exception messages, logs, screenshots, and local paths are not sent.
+- **Crash diagnostics:** the Vanta version, exception class, sanitized exception message, selected stack frames, and a short excerpt containing error/stack lines from a newly generated Minecraft crash report. Raw latest.log files, screenshots, worlds, mod files, and full system-detail sections are not uploaded.
 
-Vanta does not include Microsoft, Xbox, or Minecraft account identifiers, usernames, access tokens, refresh tokens, session credentials, server addresses, hardware identifiers, or persistent installation identifiers in telemetry payloads. The telemetry client has no access to authentication storage and sends only fixed-schema JSON payloads.
+The telemetry client has no access to authentication storage and sends only fixed-schema JSON payloads. Before transmission, the crash client applies bounded redaction to common access-token fields, email addresses, UUIDs, IP addresses, local user paths, player-name fields, server-address fields, and command-line usernames. The Worker applies a second redaction pass. This is risk reduction, not a guarantee of anonymity: arbitrary mod-generated exception messages can contain unexpected personal information. Users should enable crash diagnostics only if they accept that limited risk. Vanta does not intentionally include Microsoft/Xbox/Minecraft credentials or account identifiers.
 
 Telemetry is sent to the Vanta project's Cloudflare Worker and stored in its D1 database. Cloudflare necessarily receives ordinary network connection metadata, including the request IP address; the Worker uses the connecting IP as a rate-limit key. Vanta does not include that IP in event payloads or application database rows. Cloudflare's own processing is also subject to its service terms and privacy documentation.
 
 Users can withdraw either permission at any time in Settings. Disabling a category stops future events for that category; there is no persistent client-side event queue. Because Vanta does not attach a user or installation identifier, it cannot locate an individual user's previously received rows for selective deletion. The intended server retention periods are 90 days for usage events and 30 days for crash reports, provided the corresponding Cloudflare scheduled cleanup trigger is deployed and enabled.
 
-The Repair & Diagnostics delivery test sends a synthetic telemetry_test usage event only when usage statistics are enabled. It is a diagnostic event and must be excluded from product usage aggregates.
+The Repair & Diagnostics page has separate delivery tests. The usage test sends a synthetic telemetry_test event only when usage statistics are enabled and it must be excluded from usage aggregates. The crash test sends a clearly labelled VantaTelemetryTestException sample through the crash endpoint only when crash diagnostics are enabled; it does not crash Minecraft.
 
 Do not send logs, crash reports, screenshots, or configuration files to anyone without checking them first. They may contain usernames, local file paths, server addresses, or other identifying information.
 
