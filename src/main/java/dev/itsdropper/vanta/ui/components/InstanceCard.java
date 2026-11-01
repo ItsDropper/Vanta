@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.ui.components;
 
+import dev.itsdropper.vanta.ui.async.UiExecutor;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
