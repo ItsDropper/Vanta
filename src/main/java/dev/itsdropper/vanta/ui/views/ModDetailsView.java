@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.views;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -221,8 +220,7 @@ public class ModDetailsView extends VBox {
 
     private void loadProject() {
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -241,7 +239,7 @@ public class ModDetailsView extends VBox {
                                         teamMembers
                                 );
 
-                        Platform.runLater(
+                        UiExecutor.shared().dispatchToUi(
                                 () ->
                                         showProject(
                                                 project,
@@ -253,7 +251,7 @@ public class ModDetailsView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 statusLabel.setText(
                                         ex.getMessage() != null
                                                 ? ex.getMessage()
@@ -265,13 +263,11 @@ public class ModDetailsView extends VBox {
                                 )
                         );
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     // =============================================================
@@ -897,8 +893,7 @@ public class ModDetailsView extends VBox {
                         + "..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -934,7 +929,7 @@ public class ModDetailsView extends VBox {
                             );
                         }
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setText(
                                     "INSTALLED"
@@ -950,7 +945,7 @@ public class ModDetailsView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setDisable(
                                     false
@@ -969,13 +964,11 @@ public class ModDetailsView extends VBox {
                             );
                         });
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     // =============================================================
@@ -996,8 +989,7 @@ public class ModDetailsView extends VBox {
             return;
         }
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1064,7 +1056,7 @@ public class ModDetailsView extends VBox {
                             return;
                         }
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 imageView.setImage(
                                         image
                                 )
@@ -1074,13 +1066,11 @@ public class ModDetailsView extends VBox {
 
                         ex.printStackTrace();
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     // =============================================================
