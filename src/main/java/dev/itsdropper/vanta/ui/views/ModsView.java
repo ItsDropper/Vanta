@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.components.PageHeader;
-import javafx.application.Platform;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
@@ -1070,8 +1070,7 @@ public class ModsView extends VBox {
             ImageView imageView
     ) {
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1120,7 +1119,7 @@ public class ModsView extends VBox {
                                             bufferedImage
                                     );
 
-                            Platform.runLater(() -> {
+                            UiExecutor.shared().dispatchToUi(() -> {
 
                                 if (!image.isError()) {
 
@@ -1135,13 +1134,11 @@ public class ModsView extends VBox {
 
                         ex.printStackTrace();
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     // =============================================================
@@ -1153,8 +1150,7 @@ public class ModsView extends VBox {
             ImageView imageView
     ) {
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1203,7 +1199,7 @@ public class ModsView extends VBox {
                                             bufferedImage
                                     );
 
-                            Platform.runLater(() -> {
+                            UiExecutor.shared().dispatchToUi(() -> {
 
                                 if (!image.isError()) {
 
@@ -1218,13 +1214,11 @@ public class ModsView extends VBox {
 
                         ex.printStackTrace();
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     private Image bufferedImageToImage(
