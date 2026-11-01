@@ -323,15 +323,21 @@ public final class EnvironmentLockfileService {
             Path instanceDirectory
     ) throws IOException {
         Path minecraftDirectory = instanceDirectory.resolve("minecraft");
+        if (!Files.exists(minecraftDirectory, LinkOption.NOFOLLOW_LINKS)) {
+            return List.of();
+        }
+        if (Files.isSymbolicLink(minecraftDirectory)
+                || !Files.isDirectory(minecraftDirectory, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Minecraft directory must be a real, non-symbolic-link directory.");
+        }
+
         Path versionFile = minecraftDirectory.resolve("version.json");
         if (!Files.exists(versionFile, LinkOption.NOFOLLOW_LINKS)) {
             return List.of();
         }
-        if (Files.isSymbolicLink(minecraftDirectory)
-                || !Files.isDirectory(minecraftDirectory, LinkOption.NOFOLLOW_LINKS)
-                || Files.isSymbolicLink(versionFile)
+        if (Files.isSymbolicLink(versionFile)
                 || !Files.isRegularFile(versionFile, LinkOption.NOFOLLOW_LINKS)) {
-            throw new IOException("Minecraft version metadata must be a regular file inside a real minecraft directory.");
+            throw new IOException("Minecraft version metadata must be a regular file.");
         }
 
         VersionManifest manifest;
@@ -399,8 +405,15 @@ public final class EnvironmentLockfileService {
         if (!normalizedFile.startsWith(normalizedRoot)) {
             throw new IOException("Resolved runtime artifact escapes its managed directory.");
         }
-        String relativePath = normalizedRoot.relativize(normalizedFile)
-                .toString().replace(java.io.File.separatorChar, '/');
+        Path relative = normalizedRoot.relativize(normalizedFile);
+        Path current = normalizedRoot;
+        for (Path component : relative) {
+            current = current.resolve(component);
+            if (Files.isSymbolicLink(current)) {
+                throw new IOException("Resolved runtime artifact traverses a symbolic link.");
+            }
+        }
+        String relativePath = relative.toString().replace(java.io.File.separatorChar, '/');
         String identity = (category + "/" + relativePath).toLowerCase(java.util.Locale.ROOT);
         if (!seen.add(identity)) {
             return;
