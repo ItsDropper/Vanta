@@ -438,7 +438,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         addPreset(presets, "Silver", "#E5E7EB");
         presetsCard.getChildren().add(presets);
 
-        Button reset = new Button("RESET TO VANTA BLUE");
+        Button reset = new Button("RESET TO DEFAULT ACCENT");
         reset.getStyleClass().add("secondary-button");
         reset.setOnAction(event -> setAccent(ThemeManager.DEFAULT_ACCENT));
 
@@ -2115,12 +2115,12 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         Alert confirm = new Alert(
                 Alert.AlertType.CONFIRMATION,
                 "Restore the recommended defaults for " + currentSection
-                        + "? Other settings sections will not be changed.",
+                        + "? Settings shared with other sections may also change.",
                 ButtonType.CANCEL,
                 ButtonType.OK
         );
         confirm.setTitle("Reset " + currentSection);
-        confirm.setHeaderText("Reset this settings section only");
+        confirm.setHeaderText("Reset this settings section");
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
 
         switch (currentSection) {
