@@ -197,6 +197,7 @@ public final class ThemeManager {
         properties.remove("customBorder");
         properties.remove("customText");
         properties.remove("customMuted");
+        properties.remove("customSubtle");
         properties.remove("customDanger");
         properties.remove("customSuccess");
         save(properties);
