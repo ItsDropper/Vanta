@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.ui;
 
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.animation.PauseTransition;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -39,7 +39,7 @@ public class LoginPopup {
             String code
     ) {
 
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
 
             if (stage != null) {
                 stage.close();
@@ -425,7 +425,7 @@ public class LoginPopup {
 
     public static void close() {
 
-        Platform.runLater(() -> {
+        UiExecutor.shared().dispatchToUi(() -> {
 
             if (stage != null) {
 
