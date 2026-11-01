@@ -95,6 +95,10 @@ public final class UiExecutor implements AutoCloseable {
         return executor.submit(Objects.requireNonNull(task, "task"));
     }
 
+    public int parallelism() {
+        return executor.getMaximumPoolSize();
+    }
+
     public boolean isShutdown() {
         return executor.isShutdown();
     }
