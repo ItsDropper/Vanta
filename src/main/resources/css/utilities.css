@@ -1529,8 +1529,8 @@
     -fx-text-fill: #edf3ee;
 }
 .settings-shell .settings-nav-button.selected {
-    -fx-background-color: #1c2b21;
-    -fx-border-color: #3b5944;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
     -fx-text-fill: -vantatext;
 }
 .settings-shell .settings-search-field {
