@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.ui.components;
 
-import javafx.application.Platform;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -152,7 +152,7 @@ public final class CommandPalette extends StackPane {
         setOpacity(1.0);
         searchField.clear();
         refreshResults();
-        Platform.runLater(searchField::requestFocus);
+        UiExecutor.shared().dispatchToUi(searchField::requestFocus);
     }
 
     public void hide() {
@@ -165,7 +165,7 @@ public final class CommandPalette extends StackPane {
         Node focusTarget = previousFocusOwner;
         previousFocusOwner = null;
         if (restoreFocus && focusTarget != null) {
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 if (focusTarget.getScene() != null && focusTarget.isVisible() && !focusTarget.isDisabled()) {
                     focusTarget.requestFocus();
                 }
