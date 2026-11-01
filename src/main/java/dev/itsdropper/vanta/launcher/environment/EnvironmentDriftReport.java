@@ -21,6 +21,7 @@ public record EnvironmentDriftReport(
     public enum ChangeType {
         MINECRAFT_VERSION_CHANGED,
         LOADER_CHANGED,
+        JAVA_REQUIREMENT_CHANGED,
         MOD_ADDED,
         MOD_REMOVED,
         MOD_MODIFIED,
