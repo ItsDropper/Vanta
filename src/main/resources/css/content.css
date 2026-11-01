@@ -336,24 +336,24 @@
     -fx-text-fill: #9ca9a2;
 }
 .global-mods-page .create-field, .instance-mods-page .instances-search {
-    -fx-background-color: #111a18;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 7px;
-    -fx-border-color: #2a3933;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 7px;
     -fx-border-width: 1px;
-    -fx-text-fill: #edf2ed;
-    -fx-prompt-text-fill: #77847d;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantasubtle;
     -fx-padding: 0 14px;
     -fx-min-height: 42px;
 }
 .global-mods-page .create-field:focused, .instance-mods-page .instances-search:focused {
-    -fx-border-color: #7da98f;
+    -fx-border-color: -vantaaccent;
     -fx-effect: dropshadow(gaussian, rgba(125,169,143,.12), 12, .1, 0, 0);
 }
 .global-mods-page .create-combo {
-    -fx-background-color: #111a18;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 7px;
-    -fx-border-color: #2a3933;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 7px;
 }
 .global-mods-page .settings-section-title {
@@ -366,16 +366,16 @@
     -fx-padding: 2px 2px 12px 2px;
 }
 .global-mods-page .instance-card, .instance-mods-page .instance-card {
-    -fx-background-color: #101916;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 10px;
-    -fx-border-color: #293a32;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
     -fx-border-width: 1px;
     -fx-padding: 14px 16px;
 }
 .global-mods-page .instance-card:hover, .instance-mods-page .instance-card:hover {
-    -fx-background-color: #16231e;
-    -fx-border-color: #557663;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaaccent;
 }
 .global-mods-page .instance-name, .instance-mods-page .instance-name {
     -fx-font-size: 14px;
@@ -383,16 +383,16 @@
 }
 .global-mods-page .global-mod-description {
     -fx-font-size: 11px;
-    -fx-text-fill: #aebbb2;
+    -fx-text-fill: -vantamuted;
 }
 .global-mods-page .instance-loader, .instance-mods-page .instance-loader {
     -fx-font-size: 10px;
-    -fx-text-fill: #a7b8ab;
+    -fx-text-fill: -vantamuted;
 }
 .instance-mods-page .instance-tabs {
-    -fx-background-color: #0e1512;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 8px;
-    -fx-border-color: #293a32;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
     -fx-padding: 5px;
 }
@@ -412,7 +412,7 @@
 .modrinth-popup {
     -fx-background-color: #101714;
     -fx-background-radius: 12px;
-    -fx-border-color: #34483d;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 12px;
     -fx-padding: 18px;
 }
