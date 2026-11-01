@@ -82,7 +82,7 @@ class EnvironmentLockfileServiceTest {
         Path config = Files.createDirectories(instanceDirectory.resolve("config/example"));
         Files.writeString(resourcepacks.resolve("pack.zip"), "resource-pack");
         Files.writeString(shaderpacks.resolve("shader.zip"), "shader-pack");
-        Files.writeString(config.resolve("settings.json"), "{\\"enabled\\":true}");
+        Files.writeString(config.resolve("settings.json"), "{\"enabled\":true}");
 
         Instance instance = new Instance(
                 "tracked", "Tracked", "1.21.1", "fabric", "0.16.9", instanceDirectory
