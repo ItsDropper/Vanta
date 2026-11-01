@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.views;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -42,7 +41,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
     private final Label errorLabel = new Label();
     private boolean listenersRegistered;
     private final AccountService.AccountListener accountListener = account ->
-            Platform.runLater(() -> {
+            UiExecutor.shared().dispatchToUi(() -> {
                 if (listenersRegistered) {
                     renderAccounts();
                 }
@@ -448,13 +447,13 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         setBusy(true, "Connecting to Microsoft...");
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 accountService.login();
-                Platform.runLater(() -> setBusy(false, null));
+                UiExecutor.shared().dispatchToUi(() -> setBusy(false, null));
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> showError(
+                UiExecutor.shared().dispatchToUi(() -> showError(
                         ex.getMessage() != null
                                 ? ex.getMessage()
                                 : ex.toString()
@@ -462,22 +461,19 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
             }
         });
 
-        thread.setDaemon(true);
-        thread.setName("Vanta-Accounts-Login");
-        thread.start();
     }
 
     public void refresh() {
 
         setBusy(true, "Refreshing account...");
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 accountService.loadAccount();
-                Platform.runLater(() -> setBusy(false, null));
+                UiExecutor.shared().dispatchToUi(() -> setBusy(false, null));
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> showError(
+                UiExecutor.shared().dispatchToUi(() -> showError(
                         ex.getMessage() != null
                                 ? ex.getMessage()
                                 : ex.toString()
@@ -485,22 +481,19 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
             }
         });
 
-        thread.setDaemon(true);
-        thread.setName("Vanta-Accounts-Refresh");
-        thread.start();
     }
 
     private void switchAccount(Account account) {
 
         setBusy(true, "Switching to " + account.getUsername() + "...");
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 accountService.switchAccount(account.getUuid());
-                Platform.runLater(() -> setBusy(false, null));
+                UiExecutor.shared().dispatchToUi(() -> setBusy(false, null));
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> showError(
+                UiExecutor.shared().dispatchToUi(() -> showError(
                         ex.getMessage() != null
                                 ? ex.getMessage()
                                 : ex.toString()
@@ -508,22 +501,19 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
             }
         });
 
-        thread.setDaemon(true);
-        thread.setName("Vanta-Accounts-Switch");
-        thread.start();
     }
 
     private void logout() {
 
         setBusy(true, "Signing out...");
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 accountService.logout();
-                Platform.runLater(() -> setBusy(false, null));
+                UiExecutor.shared().dispatchToUi(() -> setBusy(false, null));
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> showError(
+                UiExecutor.shared().dispatchToUi(() -> showError(
                         ex.getMessage() != null
                                 ? ex.getMessage()
                                 : ex.toString()
@@ -531,9 +521,6 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
             }
         });
 
-        thread.setDaemon(true);
-        thread.setName("Vanta-Accounts-Logout");
-        thread.start();
     }
 
     private void setBusy(boolean busy, String message) {
