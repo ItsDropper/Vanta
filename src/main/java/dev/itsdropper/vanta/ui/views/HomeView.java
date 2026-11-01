@@ -38,6 +38,7 @@ import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
+import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -553,7 +554,17 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         action.setAlignment(Pos.CENTER_RIGHT);
 
         layout.getChildren().addAll(iconFrame, information, action);
-        card.getChildren().add(layout);
+
+        // Replace the empty featured panel with a local, asset-free landscape.
+        MinecraftBackdrop backdrop = new MinecraftBackdrop();
+        backdrop.setOpacity(0.92);
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+        clip.widthProperty().bind(card.widthProperty());
+        clip.heightProperty().bind(card.heightProperty());
+        clip.setArcWidth(22);
+        clip.setArcHeight(22);
+        card.setClip(clip);
+        card.getChildren().addAll(backdrop, layout);
 
         // The launch action moves below the instance identity on narrow windows.
         // This preserves readable metadata instead of squeezing it between the
