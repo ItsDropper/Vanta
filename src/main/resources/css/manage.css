@@ -1,0 +1,367 @@
+/* Vanta darkroom design system — account and management views.
+ * Consolidated from: accounts.css, download-center.css, server-manager.css.
+ * Original selector definitions retained in source order for compatibility.
+ */
+
+.accounts-page{-fx-background-color:-vantabg}.accounts-scroll,.accounts-scroll>.viewport{-fx-background-color:transparent;-fx-border-color:transparent}.accounts-scroll{-fx-padding:0}.accounts-header{-fx-padding:2px 0 0 0}.accounts-title{-fx-text-fill:-vantatext;-fx-font-size:30px;-fx-font-weight:900}.accounts-subtitle{-fx-text-fill:-vantamuted;-fx-font-size:13px}.accounts-hero{-fx-background-color:linear-gradient(to bottom right,-vantasurfaceraised,-vantasurface);-fx-background-radius:18px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.32),26,.12,0,8);-fx-min-height:152px}.accounts-hero-head-frame{-fx-background-color:-vantasurfaceraised;-fx-background-radius:16px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:16px;-fx-alignment:CENTER}.accounts-hero-head{-fx-effect:dropshadow(gaussian,rgba(0,0,0,.35),10,.15,0,4)}.accounts-head-fallback,.accounts-card-head-fallback{-fx-text-fill:-vantamuted;-fx-font-size:22px;-fx-font-weight:900}.accounts-eyebrow{-fx-text-fill:-vantamuted;-fx-font-size:9px;-fx-font-weight:900;-fx-letter-spacing:1.4px}.accounts-hero-name{-fx-text-fill:-vantatext;-fx-font-size:26px;-fx-font-weight:900}.accounts-status-pill{-fx-background-radius:999px;-fx-padding:5px 9px;-fx-font-size:8px;-fx-font-weight:900}.accounts-status-connected{-fx-background-color:derive(-vantasuccess, -84%);-fx-text-fill:-vantasuccess}.accounts-status-disconnected{-fx-background-color:derive(-vantadanger, -82%);-fx-text-fill:-vantadanger}.accounts-hero-uuid{-fx-text-fill:-vantasubtle;-fx-font-size:9px;-fx-font-family:"Consolas"}.accounts-primary-button,.accounts-secondary-button,.accounts-danger-button,.accounts-card-use{-fx-min-height:36px;-fx-pref-height:36px;-fx-background-radius:8px;-fx-border-radius:8px;-fx-border-width:1px;-fx-padding:0 13px;-fx-font-size:9px;-fx-font-weight:900;-fx-cursor:hand}.accounts-primary-button{-fx-background-color:-vantaaccent;-fx-border-color:-vantaaccenthover;-fx-text-fill:white}.accounts-primary-button:hover{-fx-background-color:-vantaaccenthover;-fx-border-color:derive(-vantaaccent, 22%)}.accounts-secondary-button{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaborder;-fx-text-fill:-vantatext}.accounts-secondary-button:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:derive(-vantaborder, 20%)}.accounts-danger-button{-fx-background-color:derive(-vantadanger, -82%);-fx-border-color:derive(-vantadanger, -45%);-fx-text-fill:-vantadanger}.accounts-danger-button:hover{-fx-background-color:derive(-vantadanger, -70%);-fx-border-color:-vantadanger}.accounts-section{-fx-background-color:-vantasurface;-fx-background-radius:16px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:16px;-fx-padding:20px}.accounts-section-title{-fx-text-fill:-vantatext;-fx-font-size:17px;-fx-font-weight:900}.accounts-section-count{-fx-text-fill:-vantamuted;-fx-font-size:10px}.accounts-privacy{-fx-text-fill:-vantamuted;-fx-font-size:9px}.accounts-grid{-fx-background-color:transparent}.accounts-card{-fx-background-color:-vantasurface;-fx-background-radius:13px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:13px;-fx-padding:15px;-fx-pref-width:360px;-fx-max-width:520px}.accounts-card:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:derive(-vantaborder, 20%)}.accounts-card-active{-fx-background-color:-vantaaccentsoft;-fx-border-color:-vantaaccent;-fx-effect:dropshadow(gaussian,-vantaaccentsoft,16,.1,0,4)}.accounts-card-head-frame{-fx-background-color:-vantasurfaceraised;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:10px;-fx-alignment:CENTER}.accounts-card-name{-fx-text-fill:-vantatext;-fx-font-size:13px;-fx-font-weight:800}.accounts-card-uuid{-fx-text-fill:-vantamuted;-fx-font-size:8px;-fx-font-family:"Consolas"}.accounts-card-active-label,.accounts-card-saved-label{-fx-background-radius:999px;-fx-padding:5px 8px;-fx-font-size:8px;-fx-font-weight:900}.accounts-card-active-label{-fx-background-color:-vantaaccentsoft;-fx-text-fill:-vantaaccent}.accounts-card-saved-label{-fx-background-color:-vantasurfaceraised;-fx-text-fill:-vantamuted}.accounts-card-use{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaborder;-fx-text-fill:-vantatext}.accounts-card-use:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:-vantaaccent}.accounts-card-hint{-fx-text-fill:-vantamuted;-fx-font-size:9px}.accounts-empty{-fx-background-color:-vantasurface;-fx-background-radius:13px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:13px;-fx-padding:28px;-fx-min-height:180px}.accounts-empty-icon{-fx-background-color:-vantaaccentsoft;-fx-background-radius:12px;-fx-text-fill:-vantaaccent;-fx-font-size:22px;-fx-font-weight:900;-fx-padding:8px 15px}.accounts-empty-title{-fx-text-fill:-vantatext;-fx-font-size:15px;-fx-font-weight:800}.accounts-empty-text{-fx-text-fill:-vantamuted;-fx-font-size:10px}.accounts-error,.accounts-busy{-fx-background-radius:8px;-fx-padding:9px 12px;-fx-font-size:10px}.accounts-error{-fx-background-color:derive(-vantadanger, -84%);-fx-border-color:derive(-vantadanger, -45%);-fx-border-width:1px;-fx-border-radius:8px;-fx-text-fill:-vantadanger}.accounts-busy{-fx-background-color:-vantaaccentsoft;-fx-border-color:-vantaaccent;-fx-border-width:1px;-fx-border-radius:8px;-fx-text-fill:-vantaaccent}
+/* Skin editor: independently toggleable Minecraft outer layers. */
+.skin-layer-toggle {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+.skin-layer-toggle .box {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+}
+.skin-layer-toggle:selected .box {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
+.skin-layer-toggle:selected .mark {
+    -fx-background-color: white;
+}
+
+
+/* Download Center — calm, information-dense transfer monitoring. */
+.download-center-page {
+    -fx-spacing: 18px;
+}
+.download-eyebrow {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 1.4px;
+}
+.download-stats {
+    -fx-spacing: 10px;
+}
+.download-stat-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-min-height: 82px;
+}
+.download-stat-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 0.8px;
+}
+.download-stat-value {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 24px;
+    -fx-font-weight: 800;
+}
+.download-stat-active .download-stat-value { -fx-text-fill: -vantaaccent; }
+.download-stat-complete .download-stat-value { -fx-text-fill: -vantasuccess; }
+.download-stat-failed .download-stat-value { -fx-text-fill: -vantadanger; }
+.download-summary {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+.download-section-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 14px;
+    -fx-font-weight: 800;
+}
+.download-scroll, .download-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+.download-scroll > .viewport > .download-task-list {
+    -fx-background-color: transparent;
+}
+.download-task-list {
+    -fx-spacing: 10px;
+    -fx-padding: 1px 5px 8px 1px;
+}
+.download-task-card, .download-empty-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+.download-task-card:hover {
+    -fx-background-color: -vantasurfaceraised;
+}
+.download-task-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+.download-task-source {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+}
+.download-status {
+    -fx-padding: 5px 8px;
+    -fx-background-radius: 6px;
+    -fx-font-size: 8px;
+    -fx-font-weight: 900;
+    -fx-letter-spacing: 0.4px;
+}
+.download-status-downloading {
+    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -vantaaccentsoft;
+}
+.download-status-verifying {
+    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -vantaaccentsoft;
+}
+.download-status-completed {
+    -fx-text-fill: -vantasuccess;
+    -fx-background-color: derive(-vantasuccess, -84%);
+}
+.download-status-failed {
+    -fx-text-fill: -vantadanger;
+    -fx-background-color: derive(-vantadanger, -84%);
+}
+.download-progress {
+    -fx-accent: -vantaaccent;
+    -fx-pref-height: 6px;
+    -fx-min-height: 6px;
+    -fx-max-height: 6px;
+}
+.download-progress > .track {
+    -fx-background-color: -vantasurfacehover;
+    -fx-background-radius: 99px;
+}
+.download-progress > .bar {
+    -fx-background-radius: 99px;
+    -fx-background-insets: 0;
+}
+.download-task-detail {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+}
+.download-task-error {
+    -fx-text-fill: -vantadanger;
+    -fx-font-size: 10px;
+}
+.download-empty-card {
+    -fx-alignment: center;
+    -fx-padding: 28px;
+}
+.download-empty-icon {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 38px;
+    -fx-font-weight: 800;
+}
+.download-empty-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+}
+.download-empty-body {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-text-alignment: center;
+}
+
+
+.server-manager {
+    -fx-spacing: 0;
+}
+.server-eyebrow {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.5px;
+}
+.server-heading {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 29px;
+    -fx-font-weight: 800;
+}
+.server-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+.server-workspace {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.server-workspace > .split-pane-divider {
+    -fx-background-color: transparent;
+    -fx-padding: 0 5px;
+}
+.server-sidebar, .server-detail {
+    -fx-background-color: transparent;
+}
+.server-list-header {
+    -fx-alignment: center-left;
+    -fx-padding: 0 4px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+.server-list-header .label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+.server-profile-list {
+    -fx-background-color: transparent;
+}
+.server-profile-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 10px;
+    -fx-cursor: hand;
+}
+.server-profile-card:hover {
+    -fx-background-color: -vantaborder;
+    -fx-border-color: derive(-vantaborder, 20%);
+}
+.server-profile-selected {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
+}
+.server-profile-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+.server-profile-meta {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+}
+.server-empty {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-padding: 12px;
+}
+.server-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 22px;
+    -fx-font-weight: 800;
+}
+.server-status-row {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantasurfaceraised;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-padding: 11px 12px;
+}
+.server-status-label {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+.server-status-dot {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 12px;
+}
+.server-state-running {
+    -fx-text-fill: -vantasuccess;
+}
+.server-state-starting {
+    -fx-text-fill: -vantaaccent;
+}
+.server-state-stopping {
+    -fx-text-fill: -vantaaccent;
+}
+.server-state-crashed {
+    -fx-text-fill: -vantadanger;
+}
+.server-state-stopped {
+    -fx-text-fill: -vantasubtle;
+}
+.server-action {
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 11px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-cursor: hand;
+}
+.server-primary {
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: white;
+}
+.server-primary:hover {
+    -fx-opacity: 0.88;
+}
+.server-secondary {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 8px;
+    -fx-text-fill: -vantatext;
+}
+.server-secondary:hover {
+    -fx-background-color: -vantasurfacehover;
+}
+.server-danger {
+    -fx-background-color: derive(-vantadanger, -78%);
+    -fx-border-color: derive(-vantadanger, -45%);
+    -fx-border-radius: 8px;
+    -fx-text-fill: -vantadanger;
+}
+.server-action:disabled {
+    -fx-opacity: 0.35;
+    -fx-cursor: default;
+}
+.server-panel {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 15px;
+}
+.server-section-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+.server-section-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+}
+.server-field-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+}
+.server-input, .server-spinner {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 7px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 7px;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantamuted;
+    -fx-padding: 8px 10px;
+    -fx-font-size: 11px;
+}
+.server-spinner .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantatext;
+}
+.server-eula {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+}
+.server-console {
+    -fx-control-inner-background: -vantabg;
+    -fx-background-color: -vantabg;
+    -fx-text-fill: -vantatext;
+    -fx-highlight-fill: -vantaaccentsoft;
+    -fx-highlight-text-fill: white;
+    -fx-font-family: "Cascadia Mono", "Consolas", monospace;
+    -fx-font-size: 10px;
+}
+.server-scroll, .server-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+.server-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
