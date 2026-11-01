@@ -1026,8 +1026,6 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             }
         });
 
-        thread.setDaemon(true);
-        thread.start();
     }
 
     private void buildMinecraftPage() {
@@ -1157,8 +1155,6 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     }
                 });
             });
-            worker.setDaemon(true);
-            worker.start();
         });
 
         HBox javaPathRow = new HBox(8, javaPath, browseJava);
@@ -1502,8 +1498,6 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     }
                 });
             });
-            worker.setDaemon(true);
-            worker.start();
         });
 
         HBox actions = new HBox(8, refresh, open, clear);
@@ -1582,8 +1576,6 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                         : "Cache contents were measured locally. No file contents were uploaded or modified.");
             });
         });
-        worker.setDaemon(true);
-        worker.start();
     }
 
     private static String formatStorageSize(long bytes) {
@@ -1837,8 +1829,6 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 });
             }
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     private void runStorageTest() {
@@ -1877,8 +1867,6 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 });
             }
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     private void runJavaRuntimeTest() {
@@ -1929,8 +1917,6 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 });
             }
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     public void refreshDebugAccess() {
