@@ -588,79 +588,62 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     private HBox createRecentCard(Instance instance) {
         StackPane icon = new StackPane();
         icon.getStyleClass().add("home-recent-icon");
+        icon.setMinSize(48, 48);
+        icon.setPrefSize(48, 48);
+        icon.setMaxSize(48, 48);
+        icon.setStyle("-fx-background-color: #1a2a20; -fx-background-radius: 8px; -fx-border-color: #344b3b; -fx-border-radius: 8px;");
         ImageView customIcon = new ImageView();
-        customIcon.setFitWidth(30);
-        customIcon.setFitHeight(30);
+        customIcon.setFitWidth(34);
+        customIcon.setFitHeight(34);
         customIcon.setPreserveRatio(true);
         if ("CUSTOM".equalsIgnoreCase(instance.getIcon())
                 && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
-            customIcon.setImage(new Image(instance.getDirectory().resolve("icon.png").toUri().toString(), 30, 30, true, true));
+            customIcon.setImage(new Image(instance.getDirectory().resolve("icon.png").toUri().toString(), 34, 34, true, true));
             icon.getChildren().add(customIcon);
         } else {
-            icon.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 30));
+            icon.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 34));
         }
 
         Label name = new Label(instance.getName());
-        name.getStyleClass().add("home-recent-name");
+        name.setWrapText(true);
+        name.setMinWidth(0);
+        name.setStyle("-fx-text-fill: #edf3ed; -fx-font-size: 12px; -fx-font-weight: 800;");
 
-        Label metadata = new Label(
-                instance.getMinecraftVersion()
-                        + " • "
-                        + instance.getDisplayLoader()
-        );
-        metadata.getStyleClass().add("home-recent-meta");
+        Label metadata = new Label(instance.getMinecraftVersion() + "   /   " + instance.getDisplayLoader());
+        metadata.setWrapText(true);
+        metadata.setStyle("-fx-text-fill: #9cab9f; -fx-font-size: 9px;");
 
         Label playtime = new Label(
                 InstanceUsageManager.formatPlaytime(
                         InstanceUsageManager.getPlaytimeSeconds(instance)
                                 + launchService.getSessionPlaytimeSeconds(instance)
-                )
-                        + " played"
+                ) + " PLAYED"
         );
+        playtime.setStyle("-fx-text-fill: #74877a; -fx-font-size: 8px; -fx-font-weight: 900; -fx-letter-spacing: 1px;");
         playtimeLabels.put(instance.getId(), playtime);
         displayedInstances.put(instance.getId(), instance);
-        playtime.getStyleClass().add("home-recent-playtime");
 
-        VBox info = new VBox(4, name, metadata, playtime);
+        VBox info = new VBox(5, name, metadata, playtime);
+        info.setAlignment(Pos.CENTER_LEFT);
+        info.setMinWidth(0);
         HBox.setHgrow(info, Priority.ALWAYS);
 
-        Button play = new Button(
-                instance != null && launchService.isRunning(instance)
-                        ? "CLOSE"
-                        : "PLAY"
-        );
-        play.getStyleClass().add(
-                launchService.isRunning(instance)
-                        ? "home-recent-stop"
-                        : "home-recent-play"
-        );
-        play.setMinWidth(92);
-        play.setPrefWidth(92);
-        play.setMinHeight(36);
-        play.setPrefHeight(36);
-        play.setMaxHeight(36);
-        play.setCursor(Cursor.HAND);
-        play.setPickOnBounds(true);
-        play.setFocusTraversable(true);
-        play.setAccessibleText(
-                (launchService.isRunning(instance) ? "Close " : "Launch ")
-                        + instance.getName()
-        );
-        play.setTooltip(new Tooltip(
-                (launchService.isRunning(instance) ? "Close " : "Launch ")
-                        + instance.getName()
-        ));
-        play.setDisable(false);
-        play.setMouseTransparent(false);
-
-        play.setDisable(instance == null);
-
+        boolean running = launchService.isRunning(instance);
+        Button play = new Button(running ? "STOP" : "PLAY  →");
+        play.setStyle("-fx-background-color: " + (running ? "#392322" : "#d4e5d7")
+                + "; -fx-text-fill: " + (running ? "#f0b6ad" : "#112019")
+                + "; -fx-font-size: 8px; -fx-font-weight: 900; -fx-background-radius: 5px; -fx-padding: 0 12px; -fx-min-height: 34px; -fx-cursor: hand;");
+        play.setMinWidth(70);
+        play.setPrefWidth(70);
+        play.setMinHeight(34);
+        play.setAccessibleText((running ? "Close " : "Launch ") + instance.getName());
+        play.setTooltip(new Tooltip((running ? "Close " : "Launch ") + instance.getName()));
         play.setOnAction(event -> launchOrCloseInstance(instance));
-
         AnimationUtils.installInteractiveAnimations(play);
-        HBox card = new HBox(14, icon, info, play);
+
+        HBox card = new HBox(12, icon, info, play);
         card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(14, 16, 14, 16));
+        card.setPadding(new Insets(12, 13, 12, 13));
         card.setMinWidth(0);
         card.prefWidthProperty().bind(
                 Bindings.createDoubleBinding(
@@ -669,18 +652,17 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 )
         );
         card.setMaxWidth(Double.MAX_VALUE);
+        card.setStyle("-fx-background-color: #131e17; -fx-background-radius: 8px; -fx-border-color: #2b4032; -fx-border-radius: 8px; -fx-border-width: 1px;");
+        card.getStyleClass().add("home-recent-card");
         card.setPickOnBounds(true);
         card.setMouseTransparent(false);
-        card.getStyleClass().add("home-recent-card");
-
-        // The card is a secondary hit target; the explicit button remains primary.
         card.setAccessibleRole(AccessibleRole.BUTTON);
         card.setAccessibleText("Launch or close " + instance.getName());
         card.setFocusTraversable(true);
+        card.setOnMouseEntered(event -> card.setStyle("-fx-background-color: #1a2a20; -fx-background-radius: 8px; -fx-border-color: #62816a; -fx-border-radius: 8px; -fx-border-width: 1px;"));
+        card.setOnMouseExited(event -> card.setStyle("-fx-background-color: #131e17; -fx-background-radius: 8px; -fx-border-color: #2b4032; -fx-border-radius: 8px; -fx-border-width: 1px;"));
         card.setOnMouseClicked(event -> {
-            if (event.getTarget() == play || play.isHover()) {
-                return;
-            }
+            if (event.getTarget() == play || play.isHover()) return;
             launchOrCloseInstance(instance);
         });
         card.setOnKeyPressed(event -> {
@@ -690,7 +672,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 event.consume();
             }
         });
-
         return card;
     }
 
