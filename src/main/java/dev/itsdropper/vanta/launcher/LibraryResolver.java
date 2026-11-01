@@ -776,7 +776,7 @@ public final class LibraryResolver {
 
     private static Path librariesDirectory() {
         return MinecraftLocator
-                .getLibrariesDirectory()
+                .getLibrariesDirectoryPath()
                 .toAbsolutePath()
                 .normalize();
     }
