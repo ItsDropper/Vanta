@@ -42,15 +42,7 @@ public final class UiExecutor implements AutoCloseable {
             throw new IllegalArgumentException("threadPrefix must not be blank");
         }
 
-        AtomicInteger threadNumber = new AtomicInteger();
-        ThreadFactory threadFactory = task -> {
-            Thread thread = new Thread(
-                    task,
-                    threadPrefix + "-" + threadNumber.incrementAndGet()
-            );
-            thread.setDaemon(true);
-            return thread;
-        };
+        ThreadFactory threadFactory = namedDaemonThreadFactory(threadPrefix);
 
         executor = new ThreadPoolExecutor(
                 workerCount,
@@ -65,6 +57,21 @@ public final class UiExecutor implements AutoCloseable {
 
     public static UiExecutor shared() {
         return SHARED;
+    }
+
+    public static ThreadFactory namedDaemonThreadFactory(String threadPrefix) {
+        if (threadPrefix == null || threadPrefix.isBlank()) {
+            throw new IllegalArgumentException("threadPrefix must not be blank");
+        }
+        AtomicInteger threadNumber = new AtomicInteger();
+        return task -> {
+            Thread thread = new Thread(
+                    task,
+                    threadPrefix + "-" + threadNumber.incrementAndGet()
+            );
+            thread.setDaemon(true);
+            return thread;
+        };
     }
 
     public Future<?> execute(Runnable task) {
