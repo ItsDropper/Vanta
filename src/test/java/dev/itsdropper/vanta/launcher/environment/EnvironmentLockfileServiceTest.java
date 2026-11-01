@@ -129,6 +129,27 @@ class EnvironmentLockfileServiceTest {
                         && file.relativePath().equals("client.jar")));
     }
 
+
+    @Test
+    void rejectsSymbolicMinecraftDirectoryEvenWhenVersionMetadataIsAbsent() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("minecraft-link-instance"));
+        Files.createDirectory(instanceDirectory.resolve("mods"));
+        Path outside = Files.createDirectory(temporaryDirectory.resolve("external-minecraft"));
+        try {
+            Files.createSymbolicLink(instanceDirectory.resolve("minecraft"), outside);
+        } catch (UnsupportedOperationException | java.io.IOException | SecurityException unavailable) {
+            org.junit.jupiter.api.Assumptions.assumeTrue(false,
+                    "Symbolic links are unavailable in this test environment.");
+        }
+
+        Instance instance = new Instance(
+                "minecraft-link", "Minecraft Link", "1.21.1", "fabric", "0.16.9", instanceDirectory
+        );
+
+        assertThrows(java.io.IOException.class,
+                () -> new EnvironmentLockfileService().capture(instance));
+    }
+
     @Test
     void readsSchemaTwoBaselinesAfterSchemaThreeUpgrade() throws Exception {
         Path lockfilePath = temporaryDirectory.resolve("legacy-v2.json");
