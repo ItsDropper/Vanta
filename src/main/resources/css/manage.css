@@ -365,3 +365,174 @@
 .server-scroll > .scroll-bar:vertical {
     -fx-background-color: transparent;
 }
+
+
+/* State Center: a diagnostic workspace with clear health hierarchy. */
+.state-center { -fx-spacing: 18px; }
+.state-center .state-hero {
+    -fx-background-color: linear-gradient(to right, #15221d, #182820 70%, #1b3028);
+    -fx-background-radius: 12px;
+    -fx-border-color: #3a5546;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 22px;
+}
+.state-center .state-hero-title {
+    -fx-text-fill: #e8f0e9;
+    -fx-font-size: 25px;
+    -fx-font-weight: 800;
+}
+.state-center .state-hero-subtitle { -fx-text-fill: #a9b9ad; -fx-font-size: 11px; }
+.state-center .state-section-title {
+    -fx-text-fill: #dce6de;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.2px;
+}
+.state-center .state-list-card {
+    -fx-background-color: #0f1713;
+    -fx-background-radius: 10px;
+    -fx-border-color: #293a31;
+    -fx-border-radius: 10px;
+    -fx-padding: 12px;
+}
+.state-center .state-card {
+    -fx-background-color: #141e19;
+    -fx-background-radius: 8px;
+    -fx-border-color: #293a31;
+    -fx-border-radius: 8px;
+    -fx-padding: 13px 15px;
+}
+.state-center .state-card:hover { -fx-background-color: #19271f; -fx-border-color: #526c5a; }
+.state-center .state-instance-name { -fx-font-size: 13px; -fx-font-weight: 700; }
+.state-center .state-instance-detail, .state-center .state-instance-summary {
+    -fx-text-fill: #9eada2;
+    -fx-font-size: 10px;
+}
+.state-center .state-shared-row {
+    -fx-background-color: #141e19;
+    -fx-background-radius: 7px;
+    -fx-padding: 11px 13px;
+}
+.state-center .state-refresh-button, .state-center .state-repair-button {
+    -fx-background-radius: 6px;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+
+/* Server Manager: split-pane control room with a distinct console surface. */
+.server-manager { -fx-background-color: transparent; }
+.server-manager .server-heading { -fx-font-size: 34px; -fx-font-weight: 800; }
+.server-manager .server-subtitle { -fx-text-fill: #9aa89f; }
+.server-manager .server-sidebar {
+    -fx-background-color: #0e1512;
+    -fx-background-radius: 10px;
+    -fx-border-color: #293a31;
+    -fx-border-radius: 10px;
+    -fx-padding: 10px;
+}
+.server-manager .server-profile-card {
+    -fx-background-color: #131d18;
+    -fx-background-radius: 7px;
+    -fx-border-color: transparent transparent #2a3931 transparent;
+    -fx-border-radius: 0;
+    -fx-padding: 12px;
+}
+.server-manager .server-profile-selected {
+    -fx-background-color: #1b2a21;
+    -fx-border-color: #789b81;
+}
+.server-manager .server-title { -fx-font-size: 25px; }
+.server-manager .server-status-row {
+    -fx-background-color: #121c17;
+    -fx-border-color: #2d4035;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-padding: 12px 14px;
+}
+.server-manager .server-panel {
+    -fx-background-color: #101814;
+    -fx-background-radius: 9px;
+    -fx-border-color: #293a31;
+    -fx-border-radius: 9px;
+    -fx-padding: 15px;
+}
+.server-manager .server-console {
+    -fx-control-inner-background: #080d0b;
+    -fx-background-color: #080d0b;
+    -fx-text-fill: #b9c9bd;
+    -fx-font-family: "Geist Mono", "Consolas";
+    -fx-font-size: 11px;
+    -fx-highlight-fill: #294436;
+}
+.server-manager .server-input, .server-manager .server-spinner {
+    -fx-background-color: #0c1310;
+    -fx-border-color: #2b3c32;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #e5ece6;
+}
+.server-manager .server-action { -fx-background-radius: 6px; -fx-padding: 0 13px; }
+
+/* Download Center: transfer queue with quiet metrics and clear progress. */
+.download-center-page { -fx-spacing: 20px; }
+.download-center-page .download-eyebrow { -fx-text-fill: #a7c7b0; -fx-letter-spacing: 1.8px; }
+.download-center-page .download-stat-card {
+    -fx-background-color: #101814;
+    -fx-background-radius: 9px;
+    -fx-border-color: #2b3d33;
+    -fx-border-radius: 9px;
+    -fx-min-width: 170px;
+    -fx-padding: 17px 19px;
+}
+.download-center-page .download-stat-value { -fx-font-size: 29px; }
+.download-center-page .download-section-title { -fx-font-size: 17px; }
+.download-center-page .download-task-card {
+    -fx-background-color: #111a15;
+    -fx-background-radius: 8px;
+    -fx-border-color: #2a3a31;
+    -fx-border-radius: 8px;
+    -fx-padding: 15px 17px;
+}
+.download-center-page .download-task-card:hover { -fx-background-color: #17231c; }
+.download-center-page .download-task-name { -fx-font-size: 13px; }
+.download-center-page .download-progress { -fx-pref-height: 5px; -fx-min-height: 5px; -fx-max-height: 5px; }
+
+/* Accounts and skin editor share identity controls, not identical page layouts. */
+.accounts-page .accounts-hero, .skin-changer-page .accounts-hero {
+    -fx-background-color: linear-gradient(to bottom right, #17231d, #101814);
+    -fx-background-radius: 12px;
+    -fx-border-color: #34483a;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-effect: none;
+}
+.accounts-page .accounts-section {
+    -fx-background-color: #0f1713;
+    -fx-background-radius: 10px;
+    -fx-border-color: #293a31;
+    -fx-border-radius: 10px;
+    -fx-padding: 18px;
+}
+.accounts-page .accounts-card {
+    -fx-background-color: #141e19;
+    -fx-background-radius: 9px;
+    -fx-border-color: #2c3d33;
+    -fx-border-radius: 9px;
+    -fx-padding: 14px;
+}
+.accounts-page .accounts-card-active {
+    -fx-background-color: #1a2b21;
+    -fx-border-color: #779b80;
+    -fx-effect: none;
+}
+.accounts-page .accounts-hero-name { -fx-font-size: 30px; }
+.skin-changer-page .accounts-hero { -fx-padding: 20px; }
+.skin-changer-page .accounts-card-name { -fx-font-size: 14px; -fx-font-weight: 800; }
+.skin-changer-page .accounts-subtitle { -fx-text-fill: #a7b4aa; -fx-font-size: 11px; }
+.skin-changer-page .skin-layer-toggle { -fx-font-size: 11px; }
+.skin-changer-page .accounts-primary-button, .skin-changer-page .accounts-card-use {
+    -fx-min-height: 36px;
+    -fx-background-radius: 6px;
+    -fx-padding: 0 14px;
+}
