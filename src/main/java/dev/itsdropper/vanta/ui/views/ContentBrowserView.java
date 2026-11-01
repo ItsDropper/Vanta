@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.views;
 
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -538,20 +537,20 @@ public class ContentBrowserView extends VBox {
                 "Loading popular " + requestedType.getDisplayName().toLowerCase() + "s..."
         );
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<ModrinthProject> projects = contentService.getMostDownloaded(
                         requestedType,
                         instance.getLoader(),
                         instance.getMinecraftVersion()
                 );
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != popularRequestId || requestedType != contentType) return;
                     showMostDownloaded(projects);
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != popularRequestId || requestedType != contentType) return;
                     popularStatusLabel.setText(
                             "Could not load popular " + requestedType.getDisplayName().toLowerCase()
@@ -559,9 +558,7 @@ public class ContentBrowserView extends VBox {
                     );
                 });
             }
-        }, "Vanta-Modrinth-Popular");
-        thread.setDaemon(true);
-        thread.start();
+        });
     }
 
     // =============================================================
@@ -637,7 +634,7 @@ public class ContentBrowserView extends VBox {
         statusLabel.setText("Searching Modrinth...");
         results.getChildren().clear();
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<ModrinthProject> projects = contentService.search(
                         query,
@@ -645,7 +642,7 @@ public class ContentBrowserView extends VBox {
                         instance.getLoader(),
                         instance.getMinecraftVersion()
                 );
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId || requestedType != contentType
                             || !query.equals(searchField.getText() == null ? "" : searchField.getText().trim())) {
                         return;
@@ -654,7 +651,7 @@ public class ContentBrowserView extends VBox {
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId || requestedType != contentType) return;
                     statusLabel.setText(
                             ex.getMessage() != null && !ex.getMessage().isBlank()
@@ -663,9 +660,7 @@ public class ContentBrowserView extends VBox {
                     );
                 });
             }
-        }, "Vanta-Modrinth-Search");
-        thread.setDaemon(true);
-        thread.start();
+        });
     }
 
     // =============================================================
@@ -1023,8 +1018,7 @@ public class ContentBrowserView extends VBox {
             return;
         }
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1091,7 +1085,7 @@ public class ContentBrowserView extends VBox {
                             return;
                         }
 
-                        Platform.runLater(() ->
+                        UiExecutor.shared().dispatchToUi(() ->
                                 imageView.setImage(
                                         image
                                 )
@@ -1106,13 +1100,11 @@ public class ContentBrowserView extends VBox {
 
                         ex.printStackTrace();
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     // =============================================================
@@ -1139,8 +1131,7 @@ public class ContentBrowserView extends VBox {
                         + "..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1176,7 +1167,7 @@ public class ContentBrowserView extends VBox {
                             );
                         }
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setText(
                                     "INSTALLED"
@@ -1192,7 +1183,7 @@ public class ContentBrowserView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setDisable(
                                     false
@@ -1211,13 +1202,11 @@ public class ContentBrowserView extends VBox {
                             );
                         });
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     // =============================================================
