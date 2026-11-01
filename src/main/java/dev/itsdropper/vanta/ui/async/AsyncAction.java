@@ -21,6 +21,7 @@ public final class AsyncAction<T> implements AutoCloseable {
     private final Consumer<T> onSuccess;
     private final Consumer<Throwable> onFailure;
     private final BiConsumer<Double, String> onProgress;
+    private final Consumer<Runnable> fxDispatcher;
     private final RequestToken requestToken = new RequestToken();
     private final AtomicBoolean running = new AtomicBoolean();
 
@@ -32,10 +33,21 @@ public final class AsyncAction<T> implements AutoCloseable {
             Consumer<Throwable> onFailure,
             BiConsumer<Double, String> onProgress
     ) {
+        this(executor, onSuccess, onFailure, onProgress, Platform::runLater);
+    }
+
+    public AsyncAction(
+            UiExecutor executor,
+            Consumer<T> onSuccess,
+            Consumer<Throwable> onFailure,
+            BiConsumer<Double, String> onProgress,
+            Consumer<Runnable> fxDispatcher
+    ) {
         this.executor = Objects.requireNonNull(executor, "executor");
         this.onSuccess = Objects.requireNonNull(onSuccess, "onSuccess");
         this.onFailure = Objects.requireNonNull(onFailure, "onFailure");
         this.onProgress = Objects.requireNonNull(onProgress, "onProgress");
+        this.fxDispatcher = Objects.requireNonNull(fxDispatcher, "fxDispatcher");
     }
 
     public RequestToken.Ticket start(Callable<T> work) {
@@ -100,7 +112,7 @@ public final class AsyncAction<T> implements AutoCloseable {
 
     private void dispatch(RequestToken.Ticket ticket, Runnable callback) {
         try {
-            Platform.runLater(() -> {
+            fxDispatcher.accept(() -> {
                 if (ticket.isCurrent()) {
                     callback.run();
                 }
