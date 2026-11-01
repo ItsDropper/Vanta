@@ -21,7 +21,7 @@ class AsyncActionTest {
 
     private UiExecutor executor;
     private ExecutorService fxExecutor;
-    private AsyncAction<?> action;
+    private AsyncAction<String> action;
 
     @BeforeEach
     void createExecutors() {
