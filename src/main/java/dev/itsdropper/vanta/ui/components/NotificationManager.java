@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.ui.components;
 
-import javafx.application.Platform;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
@@ -157,10 +157,6 @@ public class NotificationManager {
     }
 
     private void runOnFxThread(Runnable runnable) {
-        if (Platform.isFxApplicationThread()) {
-            runnable.run();
-        } else {
-            Platform.runLater(runnable);
-        }
+        UiExecutor.shared().runOnUiThread(runnable);
     }
 }
