@@ -4,6 +4,8 @@
  */
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.async.UiExecutor;
+
 import dev.itsdropper.vanta.launcher.server.RemoteRconClient;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
