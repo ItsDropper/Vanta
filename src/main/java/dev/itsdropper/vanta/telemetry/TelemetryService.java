@@ -86,7 +86,8 @@ public final class TelemetryService {
      * latest.log files and unrelated system-detail sections are never uploaded.
      */
     public static CompletableFuture<Integer> reportMinecraftCrash(
-            Path instanceDirectory, String processOutput, long launchStartedAtMillis) {
+            Path instanceDirectory, String processOutput, long launchStartedAtMillis,
+            Set<String> previousCrashReportNames) {
         if (!LauncherSettings.isCrashTelemetryEnabled()) {
             return CompletableFuture.failedFuture(new IllegalStateException("Crash reporting is disabled."));
         }
@@ -94,7 +95,11 @@ public final class TelemetryService {
             return CompletableFuture.failedFuture(new IllegalArgumentException("Missing crash context."));
         }
 
-        Path report = newestCrashReport(instanceDirectory.resolve("crash-reports"), launchStartedAtMillis);
+        Path report = newestCrashReport(
+                instanceDirectory.resolve("crash-reports"),
+                launchStartedAtMillis,
+                previousCrashReportNames == null ? Set.of() : previousCrashReportNames
+        );
         String reportText = report == null ? "" : readBounded(report, MAX_FILE);
         CrashDetails details = extractCrashDetails(reportText);
         if (details.stackTrace().isBlank() && reportText.isBlank()) {
@@ -226,11 +231,12 @@ public final class TelemetryService {
         );
     }
 
-    private static Path newestCrashReport(Path directory, long startedAt) {
+    private static Path newestCrashReport(Path directory, long startedAt, Set<String> previousNames) {
         if (!Files.isDirectory(directory)) return null;
         try (Stream<Path> files = Files.list(directory)) {
             return files.filter(Files::isRegularFile)
                     .filter(path -> path.getFileName().toString().endsWith(".txt"))
+                    .filter(path -> !previousNames.contains(path.getFileName().toString()))
                     .filter(path -> lastModified(path) >= startedAt - 2_000L)
                     .max(Comparator.comparingLong(TelemetryService::lastModified))
                     .orElse(null);
