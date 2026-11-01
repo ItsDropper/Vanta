@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.ui.components;
 
 import dev.itsdropper.vanta.ui.ThemeManager;
-import javafx.application.Platform;
+import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.AccessibleRole;
@@ -124,7 +124,7 @@ public class AccountSwitcher extends HBox {
 
         popup.setAutoHide(true);
         popup.setHideOnEscape(true);
-        popup.setOnHidden(event -> Platform.runLater(this::requestFocus));
+        popup.setOnHidden(event -> UiExecutor.shared().dispatchToUi(this::requestFocus));
 
         accountList =
                 new VBox();
@@ -155,7 +155,7 @@ public class AccountSwitcher extends HBox {
             if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
                 togglePopup();
                 if (popup.isShowing()) {
-                    Platform.runLater(() -> {
+                    UiExecutor.shared().dispatchToUi(() -> {
                         for (javafx.scene.Node child : accountList.getChildren()) {
                             if (child instanceof Button button) {
                                 button.requestFocus();
@@ -172,7 +172,7 @@ public class AccountSwitcher extends HBox {
         // ACCOUNT LISTENER
         // -----------------------------------------------------
 
-        LoginPopup.setOnClosed(() -> Platform.runLater(() -> {
+        LoginPopup.setOnClosed(() -> UiExecutor.shared().dispatchToUi(() -> {
             loginInProgress = false;
             getStyleClass().remove("account-switcher-busy");
             setDisable(false);
@@ -180,7 +180,7 @@ public class AccountSwitcher extends HBox {
 
         accountService.addListener(
                 account ->
-                        Platform.runLater(
+                        UiExecutor.shared().dispatchToUi(
                                 () -> updateAccountDisplay(
                                         account
                                 )
@@ -493,8 +493,7 @@ public class AccountSwitcher extends HBox {
 
         setDisable(true);
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -508,14 +507,12 @@ public class AccountSwitcher extends HBox {
 
                     } finally {
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
                             setDisable(false);
                         });
                     }
-                });
+        });
 
-        thread.setDaemon(true);
-        thread.start();
     }
 
     private void loginNewAccount() {
@@ -527,8 +524,7 @@ public class AccountSwitcher extends HBox {
         loginInProgress = true;
         getStyleClass().add("account-switcher-busy");
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -540,15 +536,13 @@ public class AccountSwitcher extends HBox {
 
                     } finally {
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
                             loginInProgress = false;
                             getStyleClass().remove("account-switcher-busy");
                             setDisable(false);
                         });
                     }
-                });
+        });
 
-        thread.setDaemon(true);
-        thread.start();
     }
 }
