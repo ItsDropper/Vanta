@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.ui.views;
 
-import javafx.application.Platform;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -330,24 +329,24 @@ public class BrowseModsView extends VBox {
         long requestId = ++popularRequestId;
         popularStatusLabel.setText("Loading popular mods...");
 
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<ModrinthProject> broad =
                         modrinthService.getMostDownloadedModsFastBroad(instance);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != popularRequestId) return;
                     showMostDownloadedMods(broad, true);
                 });
 
                 List<ModrinthProject> compatible =
                         modrinthService.getMostDownloadedModsFast(instance);
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != popularRequestId) return;
                     showMostDownloadedMods(compatible, false);
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != popularRequestId) return;
                     if (popularResults.getChildren().isEmpty()) {
                         popularStatusLabel.setText("Could not load popular mods.");
@@ -355,8 +354,6 @@ public class BrowseModsView extends VBox {
                 });
             }
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     // =============================================================
@@ -637,12 +634,12 @@ public class BrowseModsView extends VBox {
         // First paint uses the same broad loader-only query as GlobalModsView.
         // The exact-version query follows in the background and replaces these
         // provisional results once Modrinth returns compatible projects.
-        Thread thread = new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
             try {
                 List<ModrinthProject> broad =
                         modrinthService.searchModsFastBroad(instance, query);
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
                     showResults(broad, true);
                 });
@@ -650,13 +647,13 @@ public class BrowseModsView extends VBox {
                 List<ModrinthProject> compatible =
                         modrinthService.searchModsFast(instance, query);
 
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
                     showResults(compatible, false);
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                Platform.runLater(() -> {
+                UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
                     if (results.getChildren().isEmpty()) {
                         statusLabel.setText(ex.getMessage() != null
@@ -665,8 +662,6 @@ public class BrowseModsView extends VBox {
                 });
             }
         });
-        thread.setDaemon(true);
-        thread.start();
     }
 
     // =============================================================
@@ -1065,8 +1060,7 @@ public class BrowseModsView extends VBox {
             return;
         }
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1130,7 +1124,7 @@ public class BrowseModsView extends VBox {
                                         )
                                 );
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             if (!image.isError()) {
 
@@ -1144,13 +1138,11 @@ public class BrowseModsView extends VBox {
 
                         ex.printStackTrace();
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     // =============================================================
@@ -1176,8 +1168,7 @@ public class BrowseModsView extends VBox {
                         + "..."
         );
 
-        Thread thread =
-                new Thread(() -> {
+        UiExecutor.shared().execute(() -> {
 
                     try {
 
@@ -1186,7 +1177,7 @@ public class BrowseModsView extends VBox {
                                 project
                         );
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setText(
                                     "INSTALLED"
@@ -1202,7 +1193,7 @@ public class BrowseModsView extends VBox {
 
                         ex.printStackTrace();
 
-                        Platform.runLater(() -> {
+                        UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setDisable(
                                     false
@@ -1219,13 +1210,11 @@ public class BrowseModsView extends VBox {
                             );
                         });
                     }
-                });
+        });
 
-        thread.setDaemon(
                 true
         );
 
-        thread.start();
     }
 
     // =============================================================
