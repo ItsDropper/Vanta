@@ -179,7 +179,13 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         }
 
         final int totalTasks = instances.size() + 2;
-        final int workers = Math.max(1, Math.min(LauncherSettings.getStateScanWorkers(), Math.max(1, totalTasks)));
+        final int workers = Math.max(
+                1,
+                Math.min(
+                        LauncherSettings.getStateScanWorkers(),
+                        Math.min(Math.max(1, totalTasks), UiExecutor.shared().parallelism())
+                )
+        );
         final java.util.concurrent.atomic.AtomicInteger completed = new java.util.concurrent.atomic.AtomicInteger();
         final java.util.concurrent.atomic.AtomicInteger healthy = new java.util.concurrent.atomic.AtomicInteger();
         final java.util.concurrent.atomic.AtomicInteger attention = new java.util.concurrent.atomic.AtomicInteger();
@@ -214,14 +220,8 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             }
         });
 
-        java.util.concurrent.ExecutorService executor =
-                java.util.concurrent.Executors.newFixedThreadPool(
-                        workers,
-                        UiExecutor.namedDaemonThreadFactory("Vanta-State-Worker")
-                );
-
         for (Instance instance : instances) {
-            executor.submit(() -> {
+            UiExecutor.shared().execute(() -> {
                 InstanceState state;
                 try {
                     state = InstanceStateEngine.inspect(instance, workers);
@@ -282,13 +282,13 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 updateScanProgress(generation, done, totalTasks, workers,
                         healthy.get(), attention.get(), broken.get(), instance.getName(), brokenThings);
                 maybeFinishParallelScan(
-                        executor, generation, done, totalTasks, instances,
+                        generation, done, totalTasks, instances,
                         healthy, attention, broken, brokenThings
                 );
             });
         }
 
-        executor.submit(() -> {
+        UiExecutor.shared().execute(() -> {
             SharedState state = InstanceStateEngine.inspectShared(
                     "Libraries",
                     dev.itsdropper.vanta.launcher.MinecraftLocator.getLibrariesDirectory(),
@@ -330,12 +330,12 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             updateScanProgress(generation, done, totalTasks, workers,
                     healthy.get(), attention.get(), broken.get(), "Libraries", brokenThings);
             maybeFinishParallelScan(
-                        executor, generation, done, totalTasks, instances,
+                        generation, done, totalTasks, instances,
                         healthy, attention, broken, brokenThings
                 );
         });
 
-        executor.submit(() -> {
+        UiExecutor.shared().execute(() -> {
             SharedState state = InstanceStateEngine.inspectShared(
                     "Assets",
                     dev.itsdropper.vanta.launcher.MinecraftLocator.getVantaDirectory().resolve("assets"),
@@ -377,14 +377,13 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             updateScanProgress(generation, done, totalTasks, workers,
                     healthy.get(), attention.get(), broken.get(), "Assets", brokenThings);
             maybeFinishParallelScan(
-                        executor, generation, done, totalTasks, instances,
+                        generation, done, totalTasks, instances,
                         healthy, attention, broken, brokenThings
                 );
         });
     }
 
     private void maybeFinishParallelScan(
-            java.util.concurrent.ExecutorService executor,
             long generation,
             int done,
             int total,
@@ -397,8 +396,6 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         if (done != total) {
             return;
         }
-
-        executor.shutdown();
 
         UiExecutor.shared().dispatchToUi(() -> {
             if (generation != scanGeneration) return;
