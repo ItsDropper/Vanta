@@ -76,7 +76,7 @@ Downloaded metadata and archives are untrusted input. Installation, extraction, 
 
 ## Privacy and network behavior
 
-Vanta's optional usage statistics and minimal crash reporting are disabled by default and require separate, explicit opt-in. Users can change either choice in Settings. Telemetry payloads are restricted to allowlisted event names, the launcher version, and (for crash reports) the exception type; authentication credentials and account data are never included. See PRIVACY.md for details.
+Vanta's optional usage statistics and crash diagnostics are disabled by default and require separate, explicit opt-in. Users can change either choice in Settings. Crash diagnostics can include redacted exception messages, stack frames, and a short error excerpt from a newly generated Minecraft crash report. Common credentials, identifiers, IP addresses, and local paths are filtered, but automated redaction cannot guarantee that arbitrary mod-generated text contains no personal information. See PRIVACY.md for details.
 
 Depending on the features used, Vanta may contact Microsoft/Xbox/Minecraft services, Modrinth, loader metadata services, configured GitHub release endpoints, and Eclipse Adoptium's API/GitHub releases when a compatible server Java runtime must be provisioned. Those third parties have their own privacy policies and terms.
 
