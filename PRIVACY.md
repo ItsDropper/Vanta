@@ -53,7 +53,7 @@ Launcher files generally remain on your device until you remove them. Logging ou
 
 ## 6. Children's privacy
 
-Vanta is not intended to collect personal information from users through a Vanta-operated account or analytics service. Account authentication is provided by third-party services and remains subject to their age requirements and terms. Do not bypass those requirements.
+Vanta does not provide a Vanta-operated user account. Optional telemetry is off by default and its application payloads omit direct identifiers, but Cloudflare still processes ordinary network connection metadata as described above. Users should follow the age requirements and terms of Microsoft, Minecraft, and other services they connect. If local law requires parental or guardian involvement for optional data processing, obtain that involvement before enabling telemetry.
 
 ## 7. Security
 
