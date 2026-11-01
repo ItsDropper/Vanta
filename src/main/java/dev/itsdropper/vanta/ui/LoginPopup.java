@@ -358,13 +358,13 @@ public class LoginPopup {
 
             URL loginCss =
                     LoginPopup.class.getResource(
-                            "/css/login.css"
+                            "/css/shell.css"
                     );
 
             if (loginCss == null) {
 
                 throw new IllegalStateException(
-                        "Could not find /css/login.css"
+                        "Could not find /css/shell.css"
                 );
             }
 
@@ -374,7 +374,7 @@ public class LoginPopup {
 
             URL buttonsCss =
                     LoginPopup.class.getResource(
-                            "/css/buttons.css"
+                            "/css/base.css"
                     );
 
             if (buttonsCss != null) {
