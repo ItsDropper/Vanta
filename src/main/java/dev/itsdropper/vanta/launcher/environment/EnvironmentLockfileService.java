@@ -2,7 +2,12 @@ package dev.itsdropper.vanta.launcher.environment;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.LibraryResolver;
+import dev.itsdropper.vanta.launcher.VersionReader;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.model.Library;
+import dev.itsdropper.vanta.launcher.model.VersionManifest;
 import dev.itsdropper.vanta.launcher.modrinth.InstalledMod;
 import dev.itsdropper.vanta.launcher.modrinth.InstalledModScanner;
 
@@ -41,8 +46,10 @@ public final class EnvironmentLockfileService {
     private static final int BUFFER_SIZE = 64 * 1024;
     private static final int MAX_MOD_FILES = 10_000;
     private static final int MAX_ENVIRONMENT_FILES = 20_000;
-    private static final List<String> ENVIRONMENT_DIRECTORIES = List.of("resourcepacks", "shaderpacks", "config");
-    private static final Set<Integer> SUPPORTED_SCHEMA_VERSIONS = Set.of(1, EnvironmentLockfile.CURRENT_SCHEMA_VERSION);
+    private static final List<String> INSTANCE_ENVIRONMENT_DIRECTORIES = List.of("resourcepacks", "shaderpacks", "config");
+    private static final Set<String> ENVIRONMENT_CATEGORIES = Set.of(
+            "resourcepacks", "shaderpacks", "config", "minecraft", "libraries", "natives");
+    private static final Set<Integer> SUPPORTED_SCHEMA_VERSIONS = Set.of(1, 2, EnvironmentLockfile.CURRENT_SCHEMA_VERSION);
 
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .enable(SerializationFeature.INDENT_OUTPUT);
@@ -102,7 +109,17 @@ public final class EnvironmentLockfileService {
             }
         }
 
-        List<EnvironmentLockfile.EnvironmentArtifact> environmentFiles = captureEnvironmentFiles(instanceDirectory);
+        List<EnvironmentLockfile.EnvironmentArtifact> environmentFiles = new ArrayList<>(
+                captureEnvironmentFiles(instanceDirectory));
+        environmentFiles.addAll(captureRuntimeArtifacts(instanceDirectory));
+        if (environmentFiles.size() > MAX_ENVIRONMENT_FILES) {
+            throw new IOException("Environment contains more than " + MAX_ENVIRONMENT_FILES
+                    + " tracked files; refusing an incomplete baseline.");
+        }
+        environmentFiles.sort(Comparator
+                .comparing(EnvironmentLockfile.EnvironmentArtifact::category)
+                .thenComparing(EnvironmentLockfile.EnvironmentArtifact::relativePath,
+                        String.CASE_INSENSITIVE_ORDER));
 
         EnvironmentLockfile lockfile = new EnvironmentLockfile(
                 EnvironmentLockfile.CURRENT_SCHEMA_VERSION,
@@ -247,7 +264,7 @@ public final class EnvironmentLockfileService {
             Path instanceDirectory
     ) throws IOException {
         List<EnvironmentLockfile.EnvironmentArtifact> artifacts = new ArrayList<>();
-        for (String category : ENVIRONMENT_DIRECTORIES) {
+        for (String category : INSTANCE_ENVIRONMENT_DIRECTORIES) {
             Path root = instanceDirectory.resolve(category);
             if (!Files.exists(root, LinkOption.NOFOLLOW_LINKS)) {
                 continue;
@@ -295,6 +312,106 @@ public final class EnvironmentLockfileService {
                 .thenComparing(EnvironmentLockfile.EnvironmentArtifact::relativePath,
                         String.CASE_INSENSITIVE_ORDER));
         return List.copyOf(artifacts);
+    }
+
+    /**
+     * Captures the instance's Minecraft client and the exact platform-resolved
+     * classpath/native artifacts referenced by its installed version manifest.
+     * This is read-only: the resolver validates existing files and never downloads them.
+     */
+    private static List<EnvironmentLockfile.EnvironmentArtifact> captureRuntimeArtifacts(
+            Path instanceDirectory
+    ) throws IOException {
+        Path minecraftDirectory = instanceDirectory.resolve("minecraft");
+        Path versionFile = minecraftDirectory.resolve("version.json");
+        if (!Files.exists(versionFile, LinkOption.NOFOLLOW_LINKS)) {
+            return List.of();
+        }
+        if (Files.isSymbolicLink(minecraftDirectory)
+                || !Files.isDirectory(minecraftDirectory, LinkOption.NOFOLLOW_LINKS)
+                || Files.isSymbolicLink(versionFile)
+                || !Files.isRegularFile(versionFile, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Minecraft version metadata must be a regular file inside a real minecraft directory.");
+        }
+
+        VersionManifest manifest;
+        try {
+            manifest = VersionReader.readVersion(instanceDirectory);
+        } catch (RuntimeException failure) {
+            throw new IOException("Unable to read the installed Minecraft runtime manifest.", failure);
+        }
+        if (manifest == null || manifest.libraries == null) {
+            throw new IOException("Installed Minecraft runtime manifest has no library list.");
+        }
+
+        List<EnvironmentLockfile.EnvironmentArtifact> artifacts = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        addRuntimeArtifact(artifacts, seen, "minecraft", minecraftDirectory, versionFile);
+
+        Path clientJar = minecraftDirectory.resolve("client.jar");
+        if (!Files.isRegularFile(clientJar, LinkOption.NOFOLLOW_LINKS)
+                || Files.isSymbolicLink(clientJar)) {
+            throw new IOException("Minecraft client JAR is missing or is not a regular file.");
+        }
+        addRuntimeArtifact(artifacts, seen, "minecraft", minecraftDirectory, clientJar);
+
+        if (!manifest.libraries.isEmpty()) {
+            Path vantaDirectory = MinecraftLocator.getVantaDirectory();
+            Path librariesDirectory = MinecraftLocator.getLibrariesDirectory()
+                    .toAbsolutePath().normalize();
+
+            for (Library library : manifest.libraries) {
+                if (library == null) {
+                    continue;
+                }
+                try {
+                    Path classpathArtifact = LibraryResolver.resolve(vantaDirectory, library);
+                    if (classpathArtifact != null) {
+                        addRuntimeArtifact(artifacts, seen, "libraries", librariesDirectory,
+                                classpathArtifact);
+                    }
+
+                    Path nativeArtifact = LibraryResolver.resolveNative(vantaDirectory, library);
+                    if (nativeArtifact != null) {
+                        addRuntimeArtifact(artifacts, seen, "natives", librariesDirectory,
+                                nativeArtifact);
+                    }
+                } catch (IllegalStateException failure) {
+                    String name = library.name == null || library.name.isBlank()
+                            ? "<unnamed library>" : library.name;
+                    throw new IOException("Unable to resolve installed runtime dependency " + name + ".", failure);
+                }
+            }
+        }
+
+        return List.copyOf(artifacts);
+    }
+
+    private static void addRuntimeArtifact(
+            List<EnvironmentLockfile.EnvironmentArtifact> artifacts,
+            Set<String> seen,
+            String category,
+            Path root,
+            Path file
+    ) throws IOException {
+        Path normalizedRoot = root.toAbsolutePath().normalize();
+        Path normalizedFile = file.toAbsolutePath().normalize();
+        if (!normalizedFile.startsWith(normalizedRoot)) {
+            throw new IOException("Resolved runtime artifact escapes its managed directory.");
+        }
+        String relativePath = normalizedRoot.relativize(normalizedFile)
+                .toString().replace(java.io.File.separatorChar, '/');
+        String identity = (category + "/" + relativePath).toLowerCase(java.util.Locale.ROOT);
+        if (!seen.add(identity)) {
+            return;
+        }
+        FileFingerprint fingerprint = fingerprint(normalizedFile);
+        artifacts.add(new EnvironmentLockfile.EnvironmentArtifact(
+                category, relativePath, fingerprint.sizeBytes(), fingerprint.sha256()));
+        if (artifacts.size() > MAX_ENVIRONMENT_FILES) {
+            throw new IOException("Environment contains more than " + MAX_ENVIRONMENT_FILES
+                    + " tracked files; refusing an incomplete baseline.");
+        }
     }
 
     private static java.util.Map<String, EnvironmentLockfile.EnvironmentArtifact> environmentFileMap(
@@ -445,7 +562,7 @@ public final class EnvironmentLockfileService {
         Set<String> environmentPaths = new HashSet<>();
         for (EnvironmentLockfile.EnvironmentArtifact artifact : lockfile.environmentFiles()) {
             if (artifact == null
-                    || !ENVIRONMENT_DIRECTORIES.contains(artifact.category())
+                    || !ENVIRONMENT_CATEGORIES.contains(artifact.category())
                     || blank(artifact.relativePath())
                     || artifact.relativePath().startsWith("/")
                     || artifact.relativePath().contains("\\")
