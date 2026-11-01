@@ -82,6 +82,15 @@ public final class UiExecutor implements AutoCloseable {
         Platform.runLater(Objects.requireNonNull(action, "action"));
     }
 
+    public void runOnUiThread(Runnable action) {
+        Runnable checkedAction = Objects.requireNonNull(action, "action");
+        if (Platform.isFxApplicationThread()) {
+            checkedAction.run();
+        } else {
+            Platform.runLater(checkedAction);
+        }
+    }
+
     public <T> Future<T> submit(Callable<T> task) {
         return executor.submit(Objects.requireNonNull(task, "task"));
     }
