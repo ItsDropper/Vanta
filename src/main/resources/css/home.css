@@ -635,3 +635,278 @@
     -fx-border-radius: 10px;
     -fx-padding: 16px;
 }
+
+/* ============================================================
+   HOME — cohesive forest-accent composition
+   Final screen-level rules intentionally override legacy layers
+   above while continuing to respect the selected theme tokens.
+   ============================================================ */
+
+.home-page {
+    -fx-background-color: -vantabg;
+}
+
+.home-header {
+    -fx-alignment: center-left;
+    -fx-spacing: 16px;
+    -fx-padding: 0 0 8px 0;
+}
+
+.home-page .home-title {
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -vantatext;
+}
+
+.home-page .home-account-label {
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+.home-launch-indicator {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-padding: 8px 11px;
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+}
+
+.home-page .primary-button {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 0 16px;
+}
+
+.home-featured-section {
+    -fx-spacing: 7px;
+}
+
+.home-featured-section-eyebrow {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.4px;
+}
+
+.home-featured-section-subtitle,
+.home-section-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.home-featured-card {
+    -fx-background-color: linear-gradient(to right, -vantasurface, -vantasurfacehover);
+    -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.home-featured-card:hover {
+    -fx-border-color: derive(-vantaaccent, -28%);
+}
+
+.home-featured-card .home-featured-icon-frame {
+    -fx-background-color: rgba(8, 16, 12, 0.76);
+    -fx-border-color: rgba(180, 210, 190, 0.30);
+    -fx-border-width: 1px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+}
+
+.home-featured-card .home-featured-eyebrow {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1.3px;
+}
+
+.home-featured-card .home-featured-title {
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 29px;
+    -fx-font-weight: 800;
+}
+
+.home-featured-card .home-featured-meta {
+    -fx-text-fill: #E0E9E2;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.home-featured-card .home-featured-playtime {
+    -fx-text-fill: #B9C9BE;
+    -fx-font-size: 11px;
+}
+
+.home-featured-card .home-featured-play-button {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantabg;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+    -fx-padding: 0 22px;
+}
+
+.home-featured-card .home-featured-play-button:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.home-recent-section {
+    -fx-spacing: 8px;
+}
+
+.home-section-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: 800;
+}
+
+.home-recent-card,
+.home-server-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+.home-recent-card:hover,
+.home-server-card:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: derive(-vantaaccent, -24%);
+}
+
+.home-recent-icon {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 7px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 7px;
+}
+
+.home-recent-name,
+.home-server-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 700;
+}
+
+.home-recent-meta,
+.home-server-meta {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+
+.home-recent-playtime,
+.home-recent-status {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 10px;
+}
+
+.home-recent-play,
+.home-recent-stop {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-width: 1px;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-padding: 0 14px;
+}
+
+.home-recent-play {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: derive(-vantaaccent, -40%);
+    -fx-text-fill: -vantaaccent;
+}
+
+.home-recent-play:hover {
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: -vantabg;
+}
+
+.home-recent-stop {
+    -fx-background-color: derive(-vantadanger, -84%);
+    -fx-border-color: derive(-vantadanger, -48%);
+    -fx-text-fill: -vantadanger;
+}
+
+.home-recent-servers-card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-spacing: 8px;
+}
+
+.home-server-card {
+    -fx-padding: 12px 14px;
+}
+
+.home-server-card .home-server-name {
+    -fx-font-size: 12px;
+}
+
+.home-server-card .home-recent-play,
+.home-server-card .home-recent-stop {
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+}
+
+.home-empty-card,
+.home-load-error-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.home-empty-eyebrow {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+    -fx-letter-spacing: 1px;
+}
+
+.home-empty-title,
+.home-load-error-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 22px;
+    -fx-font-weight: 800;
+}
+
+.home-empty-description,
+.home-load-error-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.home-content-scroll,
+.home-content-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.home-content-scroll > .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.home-content-scroll > .scroll-bar:vertical > .thumb {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 5px;
+}
+
+.overengineered-ui .home-featured-card,
+.overengineered-ui .home-recent-card,
+.overengineered-ui .home-server-card,
+.overengineered-ui .home-empty-card {
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.22), 14, 0.10, 0, 4);
+}
+
