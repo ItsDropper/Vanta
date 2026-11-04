@@ -48,7 +48,7 @@ class LoaderProfileStackMergerTest {
         assertEquals("org.example:base:1.1", merged.path("libraries").get(0).path("name").asText());
         String arguments = merged.path("minecraftArguments").asText();
         assertTrue(arguments.indexOf("FMLTweaker") < arguments.indexOf("LiteLoaderTweaker"));
-        assertTrue(arguments.endsWith("--tweakClass \\"example.extra.FinalTweaker\\""));
+        assertTrue(arguments.endsWith("--tweakClass \"example.extra.FinalTweaker\""));
         assertEquals("net.minecraft.launchwrapper.Launch", merged.path("mainClass").asText());
         assertFalse(merged.has("inheritsFrom"));
     }
