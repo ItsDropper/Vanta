@@ -107,6 +107,18 @@ public class MinecraftLauncher {
         command.add("-Djava.net.useSystemProxies=true");
 
         // =============================================================
+        // NILLOADER JAVA AGENT
+        // =============================================================
+
+        if (data.javaAgent != null) {
+            Path agent = data.javaAgent.toAbsolutePath().normalize();
+            if (!Files.isRegularFile(agent)) {
+                throw new IllegalStateException("NilLoader Java agent not found: " + agent);
+            }
+            command.add("-javaagent:" + agent);
+        }
+
+        // =============================================================
         // MEMORY
         // =============================================================
 
