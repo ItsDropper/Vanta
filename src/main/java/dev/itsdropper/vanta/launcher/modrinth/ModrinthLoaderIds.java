@@ -45,6 +45,19 @@ public final class ModrinthLoaderIds {
         };
     }
 
+    public static boolean supportsGameVersion(java.util.List<String> supportedVersions, String requestedVersion) {
+        if (supportedVersions == null || requestedVersion == null || requestedVersion.isBlank()) {
+            return false;
+        }
+        if (supportedVersions.contains(requestedVersion)) {
+            return true;
+        }
+        String familyPrefix = requestedVersion + ".";
+        return supportedVersions.stream()
+                .filter(version -> version != null && !version.isBlank())
+                .anyMatch(version -> version.startsWith(familyPrefix));
+    }
+
     /**
      * Whether the loader has a first-class Modrinth loader/category tag.
      * Unknown/custom loaders must be filtered against version metadata
