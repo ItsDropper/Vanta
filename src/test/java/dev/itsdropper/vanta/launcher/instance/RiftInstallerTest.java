@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RiftInstallerTest {
     @Test
     void supportsOnlyOfficialMinecraft113Release() {
-        assertEquals("1.0.4-66", RiftInstaller.findLatestLoaderVersion("1.13"));
+        assertEquals("1.0.4-87", RiftInstaller.findLatestLoaderVersion("1.13"));
         assertThrows(IllegalArgumentException.class,
                 () -> RiftInstaller.findLatestLoaderVersion("1.13.1"));
         assertThrows(IllegalArgumentException.class,
@@ -24,7 +24,7 @@ class RiftInstallerTest {
         JsonNode profile = RiftInstaller.buildOverlay("1.13");
         assertEquals("net.minecraft.launchwrapper.Launch",
                 profile.path("mainClass").asText());
-        assertEquals("org.dimdev:rift:1.0.4-66",
+        assertEquals("org.dimdev:rift:1.0.4-87",
                 profile.path("libraries").get(0).path("name").asText());
         assertEquals("org.dimdev:mixin:0.7.11-SNAPSHOT",
                 profile.path("libraries").get(1).path("name").asText());
