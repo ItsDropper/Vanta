@@ -27,7 +27,7 @@ class LegacyArgumentResolverTest {
     @Test
     void preservesQuotedArgumentsAsSingleTokens() {
         List<String> actual = LegacyArgumentResolver.resolve(
-                '--userProperties "{}" --gameDir "${game_directory}"',
+                "--userProperties \"{}\"" --gameDir \"${game_directory}\"",
                 Map.of("game_directory", "C:\\Users\\Test User\\.vanta")
         );
 
