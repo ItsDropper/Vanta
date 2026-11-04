@@ -255,6 +255,12 @@ public final class MrpackExporter {
                                 loaderVersion
                         );
 
+                case "ornithe" ->
+                        dependencies.put(
+                                "ornithe",
+                                loaderVersion
+                        );
+
                 case "neoforge" ->
                         dependencies.put(
                                 "neoforge",
