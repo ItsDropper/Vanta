@@ -673,6 +673,10 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("Ornithe");
                 }
 
+                if (!legacyFabric) {
+                    loaderBox.getItems().remove("Legacy Fabric");
+                }
+
                 // A saved default can be unavailable for this Minecraft version.
                 if (loaderBox.getValue() == null
                         || !loaderBox.getItems().contains(loaderBox.getValue())) {
