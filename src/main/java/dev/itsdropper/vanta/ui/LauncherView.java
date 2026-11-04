@@ -270,7 +270,8 @@ public class LauncherView {
 
         skinChangerView =
                 new SkinChangerView(
-                        accountService
+                        accountService,
+                        screenshotMode
                 );
 
         instancesView =
@@ -333,6 +334,7 @@ public class LauncherView {
             }
         } else {
             homeView.prepareScreenshotPreview();
+            stateCenterView.prepareScreenshotPreview();
             showPageForCapture(Sidebar.Page.HOME);
         }
     }

@@ -30,6 +30,7 @@ import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.components.EmptyState;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
@@ -289,7 +290,13 @@ public class InstancesView extends VBox {
 
         if (screenshotPreview) {
             countLabel.setText("INSTANCE LIBRARY");
-            statusLabel.setText("Installed instances appear here when Vanta loads your library.");
+            statusLabel.setText("Preview mode · your local Minecraft folders were not scanned.");
+            instanceList.getChildren().setAll(new EmptyState(
+                    "▦",
+                    "YOUR LIBRARY",
+                    "No instances shown in preview",
+                    "Create a new instance or import an existing Minecraft installation. Your installed profiles will appear here."
+            ));
         } else {
             refresh();
         }

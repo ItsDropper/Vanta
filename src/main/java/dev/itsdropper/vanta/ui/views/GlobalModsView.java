@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.ui.views;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.components.EmptyState;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -374,7 +375,21 @@ public class GlobalModsView extends VBox {
         // =========================================================
 
         if (screenshotPreview) {
-            popularStatusLabel.setText("Popular projects load when Modrinth browsing is active.");
+            popularStatusLabel.setText("");
+            popularStatusLabel.setManaged(false);
+            popularResults.getChildren().setAll(new EmptyState(
+                    "✦",
+                    "MODRINTH DISCOVERY",
+                    "Find your next favourite project",
+                    "Popular mods, resource packs and shaders appear here when Modrinth browsing is active."
+            ));
+            results.getChildren().setAll(new EmptyState(
+                    "⌕",
+                    "SEARCH MODRINTH",
+                    "Search across Minecraft content",
+                    "Filter by content type, loader and Minecraft version to find compatible projects."
+            ));
+            statusLabel.setText("Screenshot preview · network requests are disabled.");
         } else {
             loadMostDownloadedMods();
         }

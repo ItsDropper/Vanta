@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.CheckBox;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.components.EmptyState;
 import dev.itsdropper.vanta.ui.VantaUI;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -84,6 +85,10 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
             });
 
     public SkinChangerView(AccountService accountService) {
+        this(accountService, false);
+    }
+
+    public SkinChangerView(AccountService accountService, boolean screenshotPreview) {
         this.accountService = accountService;
         getStyleClass().addAll("page", "skin-changer-page");
         setFillWidth(true);
@@ -227,8 +232,48 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         VBox.setVgrow(scroll, Priority.ALWAYS);
         getChildren().add(scroll);
 
-        fileLabel.setText("Skin preview loads when this screen is opened.");
-        statusLabel.setText("Open this screen to load the skin currently active on your Minecraft account.");
+        if (screenshotPreview) {
+            prepareScreenshotPreview();
+        } else {
+            fileLabel.setText("Skin preview loads when this screen is opened.");
+            statusLabel.setText("Open this screen to load the skin currently active on your Minecraft account.");
+        }
+    }
+
+    /** Provides truthful, deterministic UI state without connecting an account. */
+    public void prepareScreenshotPreview() {
+        accountLabel.setText("Connect a Minecraft Java account from Accounts to load your profile.");
+        fileLabel.setText("Your player skin will appear here after your profile loads.");
+        statusLabel.setText("Preview only · account requests and skin uploads are disabled.");
+        capeChoice.setPromptText("Sign in to load owned capes");
+        modelChoice.setDisable(true);
+        capeChoice.setDisable(true);
+        hatLayer.setDisable(true);
+        jacketLayer.setDisable(true);
+        sleevesLayer.setDisable(true);
+        trousersLayer.setDisable(true);
+        applyCapeButton.setDisable(true);
+        hideCapeButton.setDisable(true);
+        chooseButton.setDisable(true);
+        uploadButton.setDisable(true);
+        Label previewMessage = new Label("Connect an account to preview your 3D skin");
+        previewMessage.setWrapText(true);
+        previewMessage.getStyleClass().add("accounts-subtitle");
+        VantaUI.styleText(previewMessage, VantaUI.TextRole.MUTED);
+        previewCardPlaceholder(previewMessage);
+    }
+
+    private void previewCardPlaceholder(Label message) {
+        modelPreview.setVisible(false);
+        modelPreview.setManaged(false);
+        message.setMaxWidth(220);
+        previewHeadingPlaceholder(message);
+    }
+
+    private void previewHeadingPlaceholder(Label message) {
+        if (!previewCard.getChildren().contains(message)) {
+            previewCard.getChildren().add(message);
+        }
     }
 
     @Override

@@ -33,6 +33,7 @@ import dev.itsdropper.vanta.launcher.instance.SharedResourceRepairService;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.components.EmptyState;
 import dev.itsdropper.vanta.ui.components.NotificationManager;
 import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.LauncherSettings;
@@ -136,6 +137,30 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             AnimationUtils.slideFadeVertical(section, 12);
             AnimationUtils.slideFadeVertical(listCard, 18);
         }
+    }
+
+    /** Render a stable preview without scanning any user data or touching disk. */
+    public void prepareScreenshotPreview() {
+        overallTitle.setText("READY");
+        overallSubtitle.setText("Scan your environments to see installation health, drift and repair options.");
+        progress.setProgress(0);
+        refreshButton.setDisable(false);
+        refreshButton.setText("SCAN NOW");
+
+        instanceList.setAlignment(Pos.CENTER);
+        instanceList.getChildren().setAll(new EmptyState(
+                "⌁",
+                "ENVIRONMENT HEALTH",
+                "No scan results yet",
+                "Run a scan to inspect installed instances, missing files, configuration drift and repairable issues."
+        ));
+        sharedList.setAlignment(Pos.CENTER);
+        sharedList.getChildren().setAll(new EmptyState(
+                "◇",
+                "SHARED RESOURCES",
+                "Shared resources are ready to inspect",
+                "Libraries, assets and other shared files appear here after the first environment scan."
+        ));
     }
 
     @Override
