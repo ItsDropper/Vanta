@@ -124,6 +124,9 @@ public class LaunchDataBuilder {
         data.version =
                 instance.getMinecraftVersion();
 
+        data.versionType = manifest.type;
+        data.minecraftArguments = manifest.minecraftArguments;
+
         data.loader =
                 instance.getLoader();
 
