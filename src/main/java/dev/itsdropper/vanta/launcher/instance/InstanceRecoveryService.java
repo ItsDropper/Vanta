@@ -242,6 +242,7 @@ public final class InstanceRecoveryService {
                 move(replacement, current);
                 published.add(directoryName);
             }
+            writeRestoreCommitMarker(transaction);
             committed = true;
         } catch (Exception failure) {
             IOException rollbackFailure = null;
@@ -320,6 +321,16 @@ public final class InstanceRecoveryService {
                 if (Files.isSymbolicLink(journal) || !Files.isRegularFile(journal, LinkOption.NOFOLLOW_LINKS)) {
                     throw new IOException("Recovery transaction journal is not a regular file: " + transaction);
                 }
+                Path committedMarker = transaction.resolve("restore-committed");
+                if (Files.exists(committedMarker, LinkOption.NOFOLLOW_LINKS)) {
+                    if (Files.isSymbolicLink(committedMarker)
+                            || !Files.isRegularFile(committedMarker, LinkOption.NOFOLLOW_LINKS)) {
+                        throw new IOException("Recovery commit marker is unsafe: " + transaction);
+                    }
+                    // Publication completed; only transaction-directory cleanup was interrupted.
+                    deleteTree(transaction);
+                    continue;
+                }
                 List<String> lines = Files.readAllLines(journal, java.nio.charset.StandardCharsets.UTF_8);
                 if (lines.size() != 2 || !"VANTA-RECOVERY-TRANSACTION-V1".equals(lines.get(0))
                         || !lines.get(1).startsWith("present=")) {
@@ -377,6 +388,17 @@ public final class InstanceRecoveryService {
             channel.force(true);
         }
         move(temporary, journal);
+    }
+
+    private static void writeRestoreCommitMarker(Path transaction) throws IOException {
+        Path temporary = transaction.resolve("restore-committed.in-progress");
+        Path marker = transaction.resolve("restore-committed");
+        Files.writeString(temporary, "committed\\n", java.nio.charset.StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+        try (FileChannel channel = FileChannel.open(temporary, StandardOpenOption.WRITE)) {
+            channel.force(true);
+        }
+        move(temporary, marker);
     }
 
     private static void extractManagedDirectories(Path archive, Path stagedRoot) throws IOException {
