@@ -10,15 +10,13 @@ import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.util.Duration;
 import javafx.stage.Window;
+import javafx.scene.robot.Robot;
 
 import javax.imageio.ImageIO;
-import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -156,14 +154,15 @@ public final class SidebarScreenshotCapture {
             int height = (int) Math.ceil(window.getHeight());
             if (width > 0 && height > 0) {
                 try {
-                    BufferedImage screen = new Robot().createScreenCapture(
-                            new Rectangle(x, y, width, height)
+                    WritableImage screen = new Robot().getScreenCapture(
+                            null, x, y, width, height, true
                     );
-                    if (hasVisualVariation(screen)) {
-                        return screen;
+                    BufferedImage captured = toBufferedImage(screen);
+                    if (hasVisualVariation(captured)) {
+                        return captured;
                     }
                     System.err.println("Native window capture was blank; trying JavaFX node snapshot.");
-                } catch (AWTException | IllegalArgumentException failure) {
+                } catch (RuntimeException failure) {
                     System.err.println("Native window capture unavailable; trying JavaFX node snapshot: "
                             + failure.getMessage());
                 }
