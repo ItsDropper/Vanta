@@ -28,6 +28,7 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
+import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
@@ -88,11 +89,11 @@ public class InstancesView extends VBox {
                 Bindings.createObjectBinding(() -> {
                     double width = getWidth();
                     double horizontal = width < 850 ? 20 : width < 1100 ? 28 : 36;
-                    return new Insets(28, horizontal, 24, horizontal);
+                    return new Insets(VantaUI.spacing(7), horizontal, VantaUI.spacing(6), horizontal);
                 }, widthProperty())
         );
 
-        setSpacing(20);
+        setSpacing(VantaUI.spacing(5));
 
         // ---------------------------------------------------------
         // HEADER
@@ -106,6 +107,7 @@ public class InstancesView extends VBox {
         countLabel.getStyleClass().add(
                 "instances-count"
         );
+        VantaUI.styleText(countLabel, VantaUI.TextRole.EYEBROW);
 
         Button createButton =
                 new Button(
@@ -204,14 +206,14 @@ public class InstancesView extends VBox {
         sortField.setPrefWidth(170);
         sortField.setOnAction(event -> filterInstances(searchField.getText()));
 
-        FlowPane searchRow = new FlowPane(10, 10);
+        FlowPane searchRow = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2));
         searchRow.getStyleClass().add("instances-toolbar");
         searchRow.setAlignment(Pos.CENTER_LEFT);
         searchRow.setRowValignment(javafx.geometry.VPos.CENTER);
         searchRow.prefWrapLengthProperty().bind(searchRow.widthProperty());
         searchRow.getChildren().addAll(searchField, clearSearchButton, sortField, refreshButton);
 
-        VBox header = new VBox(14, headerTop, searchRow);
+        VBox header = new VBox(VantaUI.spacing(3), headerTop, searchRow);
         header.getStyleClass().add("instances-header");
 
         // ---------------------------------------------------------
@@ -265,6 +267,7 @@ public class InstancesView extends VBox {
         statusLabel.getStyleClass().add(
                 "instances-status"
         );
+        VantaUI.styleText(statusLabel, VantaUI.TextRole.MUTED);
 
         // ---------------------------------------------------------
         // BUILD
@@ -549,21 +552,24 @@ public class InstancesView extends VBox {
 
         Label title = new Label("No matching instances");
         title.getStyleClass().add("instance-empty-title");
+        VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
 
         Label description = new Label("No instance matches \"" + (query == null ? "" : query.trim())
                 + "\". Try a name, Minecraft version, or loader.");
         description.setWrapText(true);
         description.getStyleClass().add("instance-empty-description");
+        VantaUI.styleText(description, VantaUI.TextRole.MUTED);
 
         Button clearButton = new Button("CLEAR SEARCH");
         clearButton.getStyleClass().add("secondary-button");
         clearButton.setOnAction(event -> searchField.clear());
 
-        VBox empty = new VBox(10, icon, title, description, clearButton);
+        VBox empty = new VBox(VantaUI.spacing(2), icon, title, description, clearButton);
         empty.setAlignment(Pos.CENTER);
-        empty.setPadding(new Insets(48));
+        empty.setPadding(new Insets(VantaUI.spacing(12)));
         empty.getStyleClass().add("instance-empty");
         empty.setMaxWidth(Double.MAX_VALUE);
+        VantaUI.applySurface(empty, VantaUI.SurfaceRole.CARD);
         return empty;
     }
 
@@ -612,8 +618,10 @@ public class InstancesView extends VBox {
     private void showNamePopup(Instance instance, boolean duplicate) {
         Popup popup = new Popup();
         popup.setAutoHide(true);
-        VBox root = new VBox(12);
+        VBox root = new VBox(VantaUI.spacing(3));
         root.getStyleClass().add("instance-action-popup");
+        root.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(root, VantaUI.SurfaceRole.PANEL);
         Label title = new Label(duplicate ? "DUPLICATE INSTANCE" : "RENAME INSTANCE");
         title.getStyleClass().add("instance-action-title");
         Label subtitle = new Label(duplicate ? "Create a complete copy with its own instance ID." : "Change the display name without moving the instance.");
@@ -655,8 +663,10 @@ public class InstancesView extends VBox {
     private void showIconPopup(Instance instance) {
         Popup popup = new Popup();
         popup.setAutoHide(true);
-        VBox root = new VBox(12);
+        VBox root = new VBox(VantaUI.spacing(3));
         root.getStyleClass().add("instance-action-popup");
+        root.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(root, VantaUI.SurfaceRole.PANEL);
         Label title = new Label("INSTANCE ICON");
         title.getStyleClass().add("instance-action-title");
         Label subtitle = new Label("Choose the identity shown on the Instances page.");
