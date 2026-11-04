@@ -221,7 +221,12 @@ public final class InstanceRecoveryService {
             throw new IOException("Recovery restore failed; Vanta attempted to roll back the changed directories.", failure);
         } finally {
             if (committed || rollbackComplete) {
-                deleteTree(transaction);
+                try {
+                    deleteTree(transaction);
+                } catch (IOException cleanupFailure) {
+                    System.err.println("Recovery transaction cleanup failed; leaving its directory for inspection: "
+                            + transaction + " (" + cleanupFailure.getMessage() + ")");
+                }
             }
         }
     }
