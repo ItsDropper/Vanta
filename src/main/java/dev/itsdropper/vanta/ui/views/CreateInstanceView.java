@@ -27,6 +27,7 @@ import dev.itsdropper.vanta.launcher.instance.OrnitheInstaller;
 import dev.itsdropper.vanta.launcher.instance.LegacyFabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.QuiltInstaller;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
+import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
