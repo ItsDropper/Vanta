@@ -29,6 +29,8 @@ public class LaunchData {
 
     public Path javaAgent;
 
+    public Path minecraftMappings;
+
     public String assetIndex;
 
     public List<Path> classpath;
