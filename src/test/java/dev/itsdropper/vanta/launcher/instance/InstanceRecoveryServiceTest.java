@@ -70,7 +70,9 @@ class InstanceRecoveryServiceTest {
         assertFalse(Files.exists(instanceDirectory.resolve("config/new.json")));
         assertEquals("updated-world-data",
                 Files.readString(instanceDirectory.resolve("saves/world/level.dat")));
-        assertFalse(Files.exists(instanceDirectory.resolve(".vanta-recovery-")));
+        try (var children = Files.list(instanceDirectory)) {
+            assertTrue(children.noneMatch(path -> path.getFileName().toString().startsWith(".vanta-recovery-")));
+        }
     }
 
     @Test
