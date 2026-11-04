@@ -2298,3 +2298,124 @@
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
 }
+
+
+/* ============================================================
+   UNIVERSAL THEME ADOPTION
+   These shared selectors bridge legacy page classes onto semantic tokens.
+   ============================================================ */
+
+.vanta-ui-root .button {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-cursor: hand;
+}
+
+.vanta-ui-root .button:focused,
+.vanta-ui-root .text-field:focused,
+.vanta-ui-root .text-area:focused,
+.vanta-ui-root .combo-box:focused,
+.vanta-ui-root .choice-box:focused,
+.vanta-ui-root .check-box:focused,
+.vanta-ui-root .radio-button:focused,
+.vanta-ui-root .slider:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+}
+
+.vanta-ui-root .launcher {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 22px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 22px;
+}
+
+.vanta-ui-root .content {
+    -fx-background-color: transparent;
+}
+
+.vanta-ui-root .title-bar {
+    -fx-background-color: -vantabg;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+}
+
+.vanta-ui-root .info-card,
+.vanta-ui-root .account-card,
+.vanta-ui-root .account-panel,
+.vanta-ui-root .instance-card,
+.vanta-ui-root .instance-empty,
+.vanta-ui-root .create-panel,
+.vanta-ui-root .instance-settings-card,
+.vanta-ui-root .mod-details-card,
+.vanta-ui-root .mod-details-header,
+.vanta-ui-root .create-instance-panel,
+.vanta-ui-root .home-info-card,
+.vanta-ui-root .home-launch-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 14px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 14px;
+}
+
+.vanta-ui-root .info-card:hover,
+.vanta-ui-root .account-card:hover,
+.vanta-ui-root .instance-card:hover,
+.vanta-ui-root .home-info-card:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: derive(-vantaborder, 18%);
+}
+
+.vanta-ui-root .title-bar-button,
+.vanta-ui-root .title-bar-close {
+    -fx-background-radius: 8px;
+}
+
+.vanta-ui-root .account-switcher {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.vanta-ui-root .account-switcher:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: derive(-vantaborder, 18%);
+}
+
+.vanta-ui-root .primary-button,
+.vanta-ui-root .instance-create-button,
+.vanta-ui-root .home-play-button,
+.vanta-ui-root .vanta-button-primary {
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: -vantaaccentforeground;
+    -fx-border-color: transparent;
+}
+
+.vanta-ui-root .primary-button:hover,
+.vanta-ui-root .instance-create-button:hover,
+.vanta-ui-root .home-play-button:hover,
+.vanta-ui-root .vanta-button-primary:hover {
+    -fx-background-color: -vantaaccenthover;
+    -fx-text-fill: -vantaaccentforeground;
+}
+
+.vanta-ui-root .secondary-button,
+.vanta-ui-root .settings-back-button,
+.vanta-ui-root .instance-settings-button,
+.vanta-ui-root .vanta-button-secondary {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .secondary-button:hover,
+.vanta-ui-root .settings-back-button:hover,
+.vanta-ui-root .instance-settings-button:hover,
+.vanta-ui-root .vanta-button-secondary:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: derive(-vantaborder, 18%);
+    -fx-text-fill: -vantatext;
+}

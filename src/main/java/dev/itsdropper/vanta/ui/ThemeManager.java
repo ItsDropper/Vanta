@@ -138,6 +138,7 @@ public final class ThemeManager {
         String danger = loadCustomColor(settings, "customDanger", base.danger());
         String success = loadCustomColor(settings, "customSuccess", base.success());
         Color color = Color.web(effectiveAccent);
+        String accentForeground = toHex(VantaUI.accessibleTextColor(color));
 
         String soft = toHex(color.darker().darker());
         String accentHover = toHex(color.brighter());
@@ -147,6 +148,7 @@ public final class ThemeManager {
 
         node.setStyle(
                 "-vantaaccent: " + effectiveAccent + ";" +
+                "-vantaaccentforeground: " + accentForeground + ";" +
                 "-vantaaccentsoft: " + soft + ";" +
                 "-vantaaccenthover: " + accentHover + ";" +
                 "-vantaaccentrgb: " + rgb + ";" +
