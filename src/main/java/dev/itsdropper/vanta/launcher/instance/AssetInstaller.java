@@ -35,9 +35,17 @@ public class AssetInstaller {
                 metadata.get("assetIndex");
 
         if (assetIndex == null) {
-            throw new IllegalStateException(
-                    "No asset index found."
-            );
+            String type = metadata.path("type").asText();
+            if ("old_alpha".equalsIgnoreCase(type)
+                    || "old_beta".equalsIgnoreCase(type)) {
+                Path legacyAssets = MinecraftLocator.getVantaDirectory()
+                        .resolve("assets")
+                        .resolve("virtual")
+                        .resolve("legacy");
+                Files.createDirectories(legacyAssets);
+                return;
+            }
+            throw new IllegalStateException("No asset index found.");
         }
 
         JsonNode urlNode =
