@@ -70,6 +70,16 @@ class InstanceRecoveryServiceTest {
         assertFalse(Files.exists(instanceDirectory.resolve("config/new.json")));
         assertEquals("updated-world-data",
                 Files.readString(instanceDirectory.resolve("saves/world/level.dat")));
+
+        List<InstanceRecoveryService.RecoveryPoint> points =
+                InstanceRecoveryService.listRecoveryPoints(instance, temporaryDirectory);
+        assertEquals(2, points.size(), "Restore should preserve the pre-restore state as a new point");
+        assertEquals("Automatic snapshot before recovery restore", points.get(0).reason());
+
+        InstanceRecoveryService.restoreRecoveryPoint(instance, points.get(0).id(), temporaryDirectory);
+        assertTrue(Files.exists(instanceDirectory.resolve("mods/new.jar")),
+                "The automatic pre-restore point should make the restore reversible");
+
         try (var children = Files.list(instanceDirectory)) {
             assertTrue(children.noneMatch(path -> path.getFileName().toString().startsWith(".vanta-recovery-")));
         }
