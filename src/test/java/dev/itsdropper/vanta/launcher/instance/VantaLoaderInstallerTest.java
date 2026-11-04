@@ -38,6 +38,9 @@ class VantaLoaderInstallerTest {
         assertEquals(temporaryDirectory.resolve(
                         "libraries/dev/itsdropper/vantaloader/nightly/VantaLoader-agent.jar"),
                 VantaLoaderInstaller.agentPath(instance));
+        assertEquals(temporaryDirectory.resolve(
+                        "libraries/dev/itsdropper/vantaloader/nightly-012345abcdef/VantaLoader-agent.jar"),
+                VantaLoaderInstaller.agentPath(instance, "nightly-012345abcdef"));
 
         Instance invalid = new Instance("test", "Test", "1.21.11",
                 "VantaLoader", "../outside", temporaryDirectory);
