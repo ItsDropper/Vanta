@@ -38,6 +38,7 @@ public final class InstanceRepairService {
                         || text.contains("minecraft client jar not found")
                         || text.contains("native library not found")
                         || text.contains("nilloader agent is missing or invalid")
+                        || text.contains("vantaloader agent is missing or invalid")
                         || text.contains("rift library is missing")
                         || text.contains("rift artifact")
                         || text.contains("native classifier not found")
@@ -140,6 +141,9 @@ public final class InstanceRepairService {
         } else if (loader.equalsIgnoreCase("nilloader")) {
             NilLoaderInstaller.install(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+        } else if (loader.equalsIgnoreCase("vantaloader")) {
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            VantaLoaderInstaller.install(instance);
         } else if (loader.equalsIgnoreCase("modloader")) {
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             ModLoaderInstaller.install(instance);
