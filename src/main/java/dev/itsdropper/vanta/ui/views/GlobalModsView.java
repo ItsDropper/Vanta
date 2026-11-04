@@ -120,7 +120,7 @@ public class GlobalModsView extends VBox {
         contentTypeBox.getStyleClass().add("create-combo");
 
         loaderBox = new ComboBox<>();
-        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric");
+        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric");
         loaderBox.setValue("Fabric");
         loaderBox.setAccessibleText("Minecraft mod loader filter");
         loaderBox.setPrefWidth(140);
@@ -428,6 +428,7 @@ public class GlobalModsView extends VBox {
         return switch (selected) {
             case "Legacy Fabric" -> "legacyfabric";
             case "Ornithe" -> "ornithe";
+            case "Babric" -> "babric";
             default -> selected.toLowerCase(java.util.Locale.ROOT);
         };
     }
@@ -457,7 +458,8 @@ public class GlobalModsView extends VBox {
                     && !loaderId.equals("neoforge")
                     && !loaderId.equals("ornithe")
                     && !loaderId.equals("legacy fabric")
-                    && !loaderId.equals("legacyfabric")) {
+                    && !loaderId.equals("legacyfabric")
+                    && !loaderId.equals("babric")) {
                 continue;
             }
 
