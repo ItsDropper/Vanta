@@ -545,8 +545,9 @@ public class InstanceInstaller {
     ) throws Exception {
         JsonNode vanillaMetadata =
                 MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        String loaderVersion = NilLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
         Instance instance = InstanceManager.createInstance(
-                name, minecraftVersion, "NilLoader", NilLoaderInstaller.VERSION);
+                name, minecraftVersion, "NilLoader", loaderVersion);
 
         try {
             MinecraftFileInstaller.installClient(instance, vanillaMetadata);
