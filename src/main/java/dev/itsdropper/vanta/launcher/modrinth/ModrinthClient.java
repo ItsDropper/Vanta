@@ -123,10 +123,11 @@ public class ModrinthClient {
 
         checkResponse(response);
 
-        return mapper.readValue(
+        ModrinthSearchResult result = mapper.readValue(
                 response.body(),
                 ModrinthSearchResult.class
         );
+        return filterUnindexedLoaderResults(result, contentType, loader, minecraftVersion);
     }
 
     // =============================================================
@@ -191,10 +192,53 @@ public class ModrinthClient {
 
         checkResponse(response);
 
-        return mapper.readValue(
+        ModrinthSearchResult result = mapper.readValue(
                 response.body(),
                 ModrinthSearchResult.class
         );
+        return filterUnindexedLoaderResults(result, contentType, loader, minecraftVersion);
+    }
+
+    private ModrinthSearchResult filterUnindexedLoaderResults(
+            ModrinthSearchResult result,
+            ModrinthContentType contentType,
+            String loader,
+            String minecraftVersion
+    ) throws IOException, InterruptedException {
+        if (result == null
+                || contentType != ModrinthContentType.MOD
+                || loader == null
+                || loader.isBlank()
+                || loader.equalsIgnoreCase("vanilla")
+                || ModrinthLoaderIds.supportsSearchFacet(loader)
+                || result.getHits() == null) {
+            return result;
+        }
+
+        String loaderId = ModrinthLoaderIds.normalize(loader);
+        List<ModrinthSearchHit> compatible = new java.util.ArrayList<>();
+        for (ModrinthSearchHit hit : result.getHits()) {
+            if (hit == null || hit.getProjectId() == null || hit.getProjectId().isBlank()) {
+                continue;
+            }
+
+            boolean supported = getVersions(hit.getProjectId()).stream().anyMatch(version ->
+                    version.getLoaders() != null
+                            && version.getLoaders().stream()
+                            .map(ModrinthLoaderIds::normalize)
+                            .anyMatch(loaderId::equals)
+                            && (minecraftVersion == null || minecraftVersion.isBlank()
+                                || (version.getGameVersions() != null
+                                    && version.getGameVersions().contains(minecraftVersion)))
+            );
+            if (supported) {
+                compatible.add(hit);
+            }
+        }
+
+        result.setHits(compatible);
+        result.setTotalHits(compatible.size());
+        return result;
     }
 
     // =============================================================
@@ -217,14 +261,15 @@ public class ModrinthClient {
         if (loader != null
                 && !loader.isBlank()
                 && contentType == ModrinthContentType.MOD
-                && !loader.equalsIgnoreCase("vanilla")) {
+                && !loader.equalsIgnoreCase("vanilla")
+                && ModrinthLoaderIds.supportsSearchFacet(loader)) {
 
             facets.append(
                     ",[\"categories:"
             );
 
             facets.append(
-                    escapeFacetValue(loader.trim().toLowerCase(java.util.Locale.ROOT))
+                    escapeFacetValue(ModrinthLoaderIds.normalize(loader))
             );
 
             facets.append(
