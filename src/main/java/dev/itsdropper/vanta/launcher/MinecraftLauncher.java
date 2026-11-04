@@ -542,25 +542,7 @@ public class MinecraftLauncher {
                 java.util.Map.entry("user_properties", "{}")
         );
 
-        // Tokenize before substitution. A game-directory path may contain
-        // spaces, and replacing placeholders before splitting would corrupt
-        // that single argument into multiple command-line tokens.
-        List<String> resolvedArguments = new ArrayList<>();
-        for (String token : splitArguments(template)) {
-            String resolved = token;
-            for (java.util.Map.Entry<String, String> value : values.entrySet()) {
-                resolved = resolved.replace("${" + value.getKey() + "}", value.getValue());
-            }
-
-            if (resolved.contains("${")) {
-                throw new IllegalStateException(
-                        "Legacy Minecraft arguments contain an unsupported placeholder: " + resolved
-                );
-            }
-            resolvedArguments.add(resolved);
-        }
-
-        return resolvedArguments;
+        return LegacyArgumentResolver.resolve(template, values);
     }
 
     private static boolean supportsQuickPlay(
@@ -588,78 +570,6 @@ public class MinecraftLauncher {
     // ARGUMENT PARSER
     // =============================================================
 
-    private static List<String> splitArguments(
-            String arguments
-    ) {
-
-        if (arguments == null
-                || arguments.isBlank()) {
-
-            return List.of();
-        }
-
-        List<String> result =
-                new ArrayList<>();
-
-        StringBuilder current =
-                new StringBuilder();
-
-        boolean insideQuotes = false;
-        char quote = 0;
-
-        for (int i = 0;
-             i < arguments.length();
-             i++) {
-
-            char c =
-                    arguments.charAt(i);
-
-            if ((c == '"' || c == '\'')
-                    && (i == 0
-                    || arguments.charAt(i - 1) != '\\')) {
-
-                if (insideQuotes) {
-
-                    if (c == quote) {
-                        insideQuotes = false;
-                    } else {
-                        current.append(c);
-                    }
-
-                } else {
-
-                    insideQuotes = true;
-                    quote = c;
-                }
-
-                continue;
-            }
-
-            if (Character.isWhitespace(c)
-                    && !insideQuotes) {
-
-                if (!current.isEmpty()) {
-
-                    result.add(
-                            current.toString()
-                    );
-
-                    current.setLength(0);
-                }
-
-                continue;
-            }
-
-            current.append(c);
-        }
-
-        if (!current.isEmpty()) {
-
-            result.add(
-                    current.toString()
-            );
-        }
-
-        return result;
-    }
-}
+    private static List<String> splitArguments(String arguments) {
+        return LegacyArgumentResolver.tokenize(arguments);
+    }}
