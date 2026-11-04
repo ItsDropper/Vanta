@@ -95,6 +95,24 @@ class VantaUITest {
     }
 
     @Test
+    void ensureContrastRaisesForegroundToTheRequestedThreshold() {
+        Color darkSurface = Color.rgb(37, 42, 48);
+        Color dimText = Color.rgb(105, 113, 125);
+        assertFalse(VantaUI.meetsWcagAA(dimText, darkSurface, false));
+
+        Color adjusted = VantaUI.ensureContrast(dimText, darkSurface, 4.5);
+        assertTrue(VantaUI.meetsWcagAA(adjusted, darkSurface, false));
+        assertTrue(adjusted.getRed() >= dimText.getRed());
+    }
+
+    @Test
+    void ensureContrastLeavesReadableColorsUnchangedAndRejectsBadThresholds() {
+        assertEquals(Color.WHITE, VantaUI.ensureContrast(Color.WHITE, Color.BLACK, 4.5));
+        assertThrows(IllegalArgumentException.class,
+                () -> VantaUI.ensureContrast(Color.WHITE, Color.BLACK, 22.0));
+    }
+
+    @Test
     void choosesTheHigherContrastTextColor() {
         assertEquals(Color.WHITE, VantaUI.accessibleTextColor(Color.BLACK));
         assertEquals(Color.BLACK, VantaUI.accessibleTextColor(Color.WHITE));

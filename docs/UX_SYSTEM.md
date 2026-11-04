@@ -17,7 +17,7 @@ This document defines the interaction contract for Vanta's JavaFX interface. It 
 - Shell and major-panel corners use a fourth-order superellipse (squircle), with normalized boundary |x/a|^4 + |y/b|^4 = 1. The curve is a clipped JavaFX path, independent of CSS circular corner radii.
 - Use shared radius constants for windows, panels and cards. Shape hierarchy should follow component scale; do not apply the largest radius to tiny controls.
 - Use a restrained type scale: 11 px metadata, 12–13 px control/body text, 15–16 px section labels, and 22–28 px page titles. Preserve platform text rendering and allow content to wrap.
-- Keep colors semantic and theme-derived. Target WCAG AA contrast: 4.5:1 for normal text and 3:1 for large text and meaningful UI boundaries. Validate actual theme pairings.
+- Keep colors semantic and theme-derived. Target WCAG AA contrast: 4.5:1 for normal text and 3:1 for large text and meaningful UI boundaries. `ThemeManager` automatically adjusts primary, muted and subtle foreground tokens to at least 4.5:1 against the active raised/hover surface while preserving hue as much as possible.
 - Motion is feedback, not decoration: prefer short opacity/translation transitions, avoid layout animation, and respect the user's animation preference.
 - A squircle is a mathematical primitive, not proof that one curve is universally more beautiful. Validate actual screens at target window sizes, including keyboard/focus states.
 

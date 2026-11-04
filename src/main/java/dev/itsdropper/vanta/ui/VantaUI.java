@@ -237,6 +237,40 @@ public final class VantaUI {
         return contrastRatio(foreground, background) >= (largeText ? 3.0 : 4.5);
     }
 
+    /**
+     * Moves a foreground color the minimum distance toward black or white until
+     * it reaches the requested WCAG contrast ratio on the supplied background.
+     * The original hue is preserved as much as possible.
+     */
+    public static Color ensureContrast(Color foreground, Color background, double minimumRatio) {
+        Objects.requireNonNull(foreground, "foreground");
+        Objects.requireNonNull(background, "background");
+        if (!Double.isFinite(minimumRatio) || minimumRatio < 1.0 || minimumRatio > 21.0) {
+            throw new IllegalArgumentException("minimumRatio must be between 1 and 21");
+        }
+        if (contrastRatio(foreground, background) >= minimumRatio) {
+            return foreground;
+        }
+
+        Color target = accessibleTextColor(background);
+        if (contrastRatio(target, background) < minimumRatio) {
+            return target;
+        }
+
+        double lower = 0.0;
+        double upper = 1.0;
+        for (int i = 0; i < 28; i++) {
+            double midpoint = (lower + upper) / 2.0;
+            Color candidate = foreground.interpolate(target, midpoint);
+            if (contrastRatio(candidate, background) >= minimumRatio) {
+                upper = midpoint;
+            } else {
+                lower = midpoint;
+            }
+        }
+        return foreground.interpolate(target, upper);
+    }
+
     /** Picks whichever of black or white has the stronger contrast on a background. */
     public static Color accessibleTextColor(Color background) {
         Objects.requireNonNull(background, "background");

@@ -135,6 +135,11 @@ public final class ThemeManager {
         String border = loadCustomColor(settings, "customBorder", base.border());
         String textColor = loadCustomColor(settings, "customText", base.text());
         String muted = loadCustomColor(settings, "customMuted", base.muted());
+        String subtle = loadCustomColor(settings, "customSubtle", base.subtle());
+        Color contrastSurface = Color.web(hoverSurface);
+        textColor = toHex(VantaUI.ensureContrast(Color.web(textColor), contrastSurface, 4.5));
+        muted = toHex(VantaUI.ensureContrast(Color.web(muted), contrastSurface, 4.5));
+        subtle = toHex(VantaUI.ensureContrast(Color.web(subtle), contrastSurface, 4.5));
         String danger = loadCustomColor(settings, "customDanger", base.danger());
         String success = loadCustomColor(settings, "customSuccess", base.success());
         Color color = Color.web(effectiveAccent);
@@ -159,7 +164,7 @@ public final class ThemeManager {
                 "-vantaborder: " + border + ";" +
                 "-vantatext: " + textColor + ";" +
                 "-vantamuted: " + muted + ";" +
-                "-vantasubtle: " + loadCustomColor(settings, "customSubtle", base.subtle()) + ";" +
+                "-vantasubtle: " + subtle + ";" +
                 "-vantadanger: " + danger + ";" +
                 "-vantasuccess: " + success + ";"
         );
