@@ -20,6 +20,7 @@ import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.BabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
 import dev.itsdropper.vanta.launcher.instance.LiteLoaderInstaller;
+import dev.itsdropper.vanta.launcher.instance.ModLoaderInstaller;
 import dev.itsdropper.vanta.launcher.instance.ForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.NeoForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.OrnitheInstaller;
@@ -90,6 +91,8 @@ public class CreateInstanceView extends VBox {
     private volatile boolean babricCheckRunning;
     private final AtomicInteger liteLoaderCheckId = new AtomicInteger();
     private volatile boolean liteLoaderCheckRunning;
+    private final AtomicInteger modLoaderCheckId = new AtomicInteger();
+    private volatile boolean modLoaderCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -546,6 +549,7 @@ public class CreateInstanceView extends VBox {
         int legacyFabricId = legacyFabricCheckId.incrementAndGet();
         int babricId = babricCheckId.incrementAndGet();
         int liteLoaderId = liteLoaderCheckId.incrementAndGet();
+        int modLoaderId = modLoaderCheckId.incrementAndGet();
         fabricCheckRunning = true;
         forgeCheckRunning = true;
         quiltCheckRunning = true;
@@ -554,6 +558,7 @@ public class CreateInstanceView extends VBox {
         legacyFabricCheckRunning = true;
         babricCheckRunning = true;
         liteLoaderCheckRunning = true;
+        modLoaderCheckRunning = true;
 
         UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
@@ -566,7 +571,8 @@ public class CreateInstanceView extends VBox {
                     "Legacy Fabric",
                     "Babric",
                     "NilLoader",
-                    "LiteLoader"
+                    "LiteLoader",
+                    "ModLoader"
             );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
@@ -584,6 +590,7 @@ public class CreateInstanceView extends VBox {
             boolean babricAvailable = false;
             boolean nilLoaderAvailable = false;
             boolean liteLoaderAvailable = false;
+            boolean modLoaderAvailable = false;
 
             try {
                 FabricInstaller.findLatestLoaderVersion(minecraftVersion);
@@ -639,6 +646,12 @@ public class CreateInstanceView extends VBox {
             } catch (Throwable ignored) {
             }
 
+            try {
+                ModLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
+                modLoaderAvailable = true;
+            } catch (Throwable ignored) {
+            }
+
             final boolean fabric = fabricAvailable;
             final boolean forge = forgeAvailable;
             final boolean quilt = quiltAvailable;
@@ -648,6 +661,7 @@ public class CreateInstanceView extends VBox {
             final boolean babric = babricAvailable;
             final boolean nilLoader = nilLoaderAvailable;
             final boolean liteLoader = liteLoaderAvailable;
+            final boolean modLoader = modLoaderAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
@@ -655,7 +669,8 @@ public class CreateInstanceView extends VBox {
                         || ornitheId != ornitheCheckId.get()
                         || legacyFabricId != legacyFabricCheckId.get()
                         || babricId != babricCheckId.get()
-                        || liteLoaderId != liteLoaderCheckId.get()) {
+                        || liteLoaderId != liteLoaderCheckId.get()
+                        || modLoaderId != modLoaderCheckId.get()) {
                     return;
                 }
 
@@ -667,6 +682,7 @@ public class CreateInstanceView extends VBox {
                 legacyFabricCheckRunning = false;
                 babricCheckRunning = false;
                 liteLoaderCheckRunning = false;
+                modLoaderCheckRunning = false;
                 loaderBox.getItems().setAll(
                         "Vanilla",
                         "Fabric",
@@ -690,7 +706,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader) {
+                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
@@ -734,6 +750,10 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("LiteLoader");
                 }
 
+                if (!modLoader) {
+                    loaderBox.getItems().remove("ModLoader");
+                }
+
                 // A saved default can be unavailable for this Minecraft version.
                 if (loaderBox.getValue() == null
                         || !loaderBox.getItems().contains(loaderBox.getValue())) {
@@ -754,7 +774,7 @@ public class CreateInstanceView extends VBox {
 
         if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning
                 || neoForgeCheckRunning || ornitheCheckRunning || legacyFabricCheckRunning
-                || babricCheckRunning || liteLoaderCheckRunning) {
+                || babricCheckRunning || liteLoaderCheckRunning || modLoaderCheckRunning) {
 
             statusLabel.setText(
                     "Still checking mod loader support..."
@@ -822,6 +842,12 @@ public class CreateInstanceView extends VBox {
         if ("LiteLoader".equals(loader) && !loaderBox.getItems().contains("LiteLoader")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("LiteLoader is not available for Minecraft " + version + ".");
+            return;
+        }
+
+        if ("ModLoader".equals(loader) && !loaderBox.getItems().contains("ModLoader")) {
+            loaderBox.getSelectionModel().select("Vanilla");
+            statusLabel.setText("No verified Risugami ModLoader archive is available for Minecraft " + version + ".");
             return;
         }
 
@@ -931,6 +957,10 @@ public class CreateInstanceView extends VBox {
                         } else if ("LiteLoader".equals(loader)) {
 
                             InstanceInstaller.installLiteLoader(name, version);
+
+                        } else if ("ModLoader".equals(loader)) {
+
+                            InstanceInstaller.installModLoader(name, version);
 
                         } else if ("NeoForge".equals(loader)) {
 
