@@ -85,6 +85,10 @@ public final class InstanceRecoveryService {
                     if (Files.isSymbolicLink(directory)) {
                         throw new IOException("Cannot snapshot a symbolic-link directory: " + directoryName);
                     }
+                    if (Files.exists(directory, LinkOption.NOFOLLOW_LINKS)
+                            && !Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
+                        throw new IOException("Expected an instance directory but found a file: " + directoryName);
+                    }
                     zip.putNextEntry(new ZipEntry(directoryName + "/"));
                     zip.closeEntry();
                     if (!Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) continue;
