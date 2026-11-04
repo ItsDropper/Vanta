@@ -199,12 +199,6 @@ public class MinecraftLauncher {
 
         if (data.minecraftArguments != null && !data.minecraftArguments.isBlank()
                 && !"Forge".equalsIgnoreCase(data.loader)) {
-            if (data.minecraftArguments == null || data.minecraftArguments.isBlank()) {
-                throw new IllegalStateException(
-                        "Legacy Minecraft metadata is missing minecraftArguments."
-                );
-            }
-
             command.addAll(buildLegacyGameArguments(
                     data.minecraftArguments,
                     account,
@@ -289,11 +283,10 @@ public class MinecraftLauncher {
             // ASSET INDEX
             // =============================================================
     
-            command.add("--assetIndex");
-    
-            command.add(
-                    data.assetIndex
-            );
+            if (data.assetIndex != null && !data.assetIndex.isBlank()) {
+                command.add("--assetIndex");
+                command.add(data.assetIndex);
+            }
     
             // =============================================================
             // ACCOUNT
