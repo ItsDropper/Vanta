@@ -131,7 +131,7 @@ class InstanceRecoveryServiceTest {
         Files.createDirectories(transaction.resolve("staged"));
         Files.createDirectories(transaction.resolve("rollback"));
         Files.writeString(transaction.resolve("restore-journal.txt"),
-                "VANTA-RECOVERY-TRANSACTION-V1\\npresent=mods\\n");
+                "VANTA-RECOVERY-TRANSACTION-V1\npresent=mods\n");
         Files.writeString(transaction.resolve("restore-committed"), "committed");
 
         int recovered = InstanceRecoveryService.recoverInterruptedRestores(instance);
