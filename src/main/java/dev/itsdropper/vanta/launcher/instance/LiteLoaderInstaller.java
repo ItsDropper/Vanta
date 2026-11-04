@@ -73,11 +73,11 @@ public final class LiteLoaderInstaller {
         return overlay;
     }
 
-    public static void install(Instance instance) throws Exception {
+    public static String install(Instance instance) throws Exception {
         if (instance == null) {
             throw new IllegalArgumentException("A valid LiteLoader instance is required.");
         }
-        install(instance, instance.getMinecraftVersion());
+        return install(instance, instance.getMinecraftVersion());
     }
 
     public static String install(Instance instance, String minecraftVersion) throws Exception {
