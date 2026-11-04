@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.zip.ZipInputStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Comparator;
@@ -50,7 +51,7 @@ public final class InstanceBackupService {
                  ZipOutputStream zip = new ZipOutputStream(stream)) {
                 List<Path> files;
                 try (var walk = Files.walk(source)) {
-                    files = walk.filter(Files::isRegularFile)
+                    files = walk.filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
                             .filter(path -> !path.getFileName().toString().equals(".installing"))
                             .filter(path -> !path.startsWith(source.resolve("logs")))
                             .filter(path -> !path.startsWith(source.resolve("natives")))
