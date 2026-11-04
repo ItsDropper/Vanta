@@ -6,12 +6,12 @@ This document separates implemented integrations from candidates. A loader is no
 
 | Loader / technology | Current status | Integration notes |
 | --- | --- | --- |
-| Vanilla | Supported | Standard Mojang version metadata and libraries. |
+| Vanilla | Supported for Mojang manifest entries | Standard Mojang version metadata and libraries. The create-version selector now includes all manifest entries typed `old_alpha` and `old_beta`, with historical argument and virtual-asset handling. Pre-Classic builds absent from Mojang's manifest are not included yet. |
 | Fabric | Supported | Fabric Meta profile installation, repair, and Modrinth integration. |
 | Forge | Supported | Installer-based client installation and version metadata merge. |
 | Quilt | Implemented; runtime validation pending | Uses the official Quilt Meta v3 API and Quilt-specific instance identity. The installer profile is structurally compatible with Vanta's existing launcher-profile merge path. Validate real launches, repair, Modrinth filtering, and mrpack imports before calling this fully production-verified. |
 | NeoForge | Implemented; runtime validation pending | Uses NeoForged Maven metadata and the official client installer. Version mapping, installer execution, metadata merge, repair, Modrinth filtering, and mrpack import/export are integrated. Validate clean installs and real launches before calling this production-supported. |
-| Ornithe | Planned research | Legacy-focused ecosystem. Support must be tied to its actual Minecraft version matrix and installer/profile format. |
+| Ornithe | Implemented; runtime validation pending | Uses the official Ornithe Meta v2 game-version loader endpoint and launcher-profile JSON. Installation, repair, Modrinth filtering, and mrpack import/export are wired. The current Vanta base-game resolver still requires a Mojang-manifest version; non-manifest Pre-Classic builds are not yet installable. |
 | Legacy Fabric | Planned research | Separate legacy version coverage and metadata from modern Fabric; do not route it through Fabric Meta without verifying the target version. |
 | Babric | Planned research | Legacy Fabric-derived toolchain for older Minecraft versions. Treat as a separate integration and version family. |
 | NilLoader | Planned research | Legacy loading environment with its own compatibility and launch requirements. |
@@ -21,8 +21,8 @@ This document separates implemented integrations from candidates. A loader is no
 ## Implementation rules
 
 1. Keep each loader's identity stable in instance metadata. Never silently relabel Quilt, NeoForge, or a legacy loader as Fabric or Forge.
-2. Gate discovery by the selected Minecraft version. A loader is selectable only when Vanta can install it for that exact version.
-3. Treat installation, launch, repair, modpack import/export, Modrinth filtering, and diagnostics as one support contract.
+2. Gate discovery by the selected Minecraft version. A loader is selectable only when Vanta can install it for that exact version. Ornithe is discovered per Minecraft version through Ornithe Meta.
+3. Treat installation, launch, repair, modpack import/export, Modrinth filtering, and diagnostics as one support contract. Historical vanilla launches must use the metadata's legacy argument template and materialize virtual assets when the asset index requires it.
 4. Preserve the vanilla instance directory and shared-library boundaries. Installer output must be validated before marking an instance complete.
 5. Use official metadata and installer endpoints where available. Validate downloaded JSON, Maven coordinates, archive paths, and generated version metadata.
 6. Keep legacy loaders version-scoped. Do not build a single generic legacy-loader installer until the actual bootstraps and profile formats prove compatible.
@@ -32,7 +32,7 @@ This document separates implemented integrations from candidates. A loader is no
 
 1. Finish NeoForge runtime and regression validation.
 2. Finish Quilt runtime and regression validation.
-3. Implement Ornithe as the next loader, with its own version-scoped metadata and installer flow.
+3. Validate Ornithe runtime launches and extend its catalog integration to non-Mojang Pre-Classic versions without weakening instance isolation.
 4. Implement Legacy Fabric as a separate, version-scoped integration.
 5. Implement Babric as a separate legacy loader integration.
 6. Evaluate NilLoader, LiteLoader, and Risugami's ModLoader individually, one at a time, against their actual install and launch requirements.
