@@ -92,6 +92,12 @@ public final class InstanceRepairService {
                         + instance.getName()
         );
 
+        // Preserve user-managed mods/configuration before repair. This is separate
+        // from the metadata rollback snapshot below and deliberately excludes worlds.
+        InstanceRecoveryService.RecoveryPoint recoveryPoint =
+                InstanceRecoveryService.createRecoveryPoint(instance, "Automatic snapshot before instance repair");
+        System.out.println("[Vanta Repair] User-content recovery point: " + recoveryPoint.id());
+
         // Save a rollback snapshot before touching instance metadata.
         Path backup = dev.itsdropper.vanta.launcher.repair.RepairBackupService
                 .createSnapshot(instance.getDirectory());
