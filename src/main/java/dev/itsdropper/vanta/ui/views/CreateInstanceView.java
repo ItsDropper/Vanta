@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.ForgeInstaller;
+import dev.itsdropper.vanta.launcher.instance.QuiltInstaller;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
@@ -71,6 +72,8 @@ public class CreateInstanceView extends VBox {
     private volatile boolean fabricCheckRunning;
     private final AtomicInteger forgeCheckId = new AtomicInteger();
     private volatile boolean forgeCheckRunning;
+    private final AtomicInteger quiltCheckId = new AtomicInteger();
+    private volatile boolean quiltCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -234,6 +237,7 @@ public class CreateInstanceView extends VBox {
         loaderBox.getItems().addAll(
                 "Vanilla",
                 "Fabric",
+                "Quilt",
                 "Forge"
         );
 
@@ -511,13 +515,16 @@ public class CreateInstanceView extends VBox {
 
         int fabricId = fabricCheckId.incrementAndGet();
         int forgeId = forgeCheckId.incrementAndGet();
+        int quiltId = quiltCheckId.incrementAndGet();
         fabricCheckRunning = true;
         forgeCheckRunning = true;
+        quiltCheckRunning = true;
 
         UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
                     "Vanilla",
                     "Fabric",
+                    "Quilt",
                     "Forge"
             );
             loaderBox.getSelectionModel().select("Vanilla");
@@ -529,6 +536,7 @@ public class CreateInstanceView extends VBox {
         UiExecutor.shared().execute(() -> {
             boolean fabricAvailable = false;
             boolean forgeAvailable = false;
+            boolean quiltAvailable = false;
 
             try {
                 FabricInstaller.findLatestLoaderVersion(minecraftVersion);
@@ -542,19 +550,29 @@ public class CreateInstanceView extends VBox {
             } catch (Throwable ignored) {
             }
 
+            try {
+                QuiltInstaller.findLatestLoaderVersion(minecraftVersion);
+                quiltAvailable = true;
+            } catch (Throwable ignored) {
+            }
+
             final boolean fabric = fabricAvailable;
             final boolean forge = forgeAvailable;
+            final boolean quilt = quiltAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
-                if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()) {
+                if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
+                        || quiltId != quiltCheckId.get()) {
                     return;
                 }
 
                 fabricCheckRunning = false;
                 forgeCheckRunning = false;
+                quiltCheckRunning = false;
                 loaderBox.getItems().setAll(
                         "Vanilla",
                         "Fabric",
+                        "Quilt",
                         "Forge"
                 );
 
@@ -568,7 +586,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge) {
+                if (fabric || forge || quilt) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
@@ -584,6 +602,10 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("Forge");
                 }
 
+                if (!quilt) {
+                    loaderBox.getItems().remove("Quilt");
+                }
+
                 createButton.setDisable(false);
             });
         });
@@ -596,7 +618,7 @@ public class CreateInstanceView extends VBox {
 
     private void createInstance() {
 
-        if (fabricCheckRunning || forgeCheckRunning) {
+        if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning) {
 
             statusLabel.setText(
                     "Still checking mod loader support..."
@@ -655,6 +677,12 @@ public class CreateInstanceView extends VBox {
          * Extra safety check: only install a loader that the
          * current version check actually exposed in the UI.
          */
+        if ("Quilt".equals(loader) && !loaderBox.getItems().contains("Quilt")) {
+            loaderBox.getSelectionModel().select("Vanilla");
+            statusLabel.setText("Quilt is not available for Minecraft " + version + ".");
+            return;
+        }
+
         if ("Fabric".equals(loader)) {
 
             /* The loader was exposed only after the version check. */
@@ -707,6 +735,10 @@ public class CreateInstanceView extends VBox {
                                     name,
                                     version
                             );
+
+                        } else if ("Quilt".equals(loader)) {
+
+                            InstanceInstaller.installQuilt(name, version);
 
                         } else if ("Forge".equals(loader)) {
 
