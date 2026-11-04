@@ -222,9 +222,10 @@ public final class InstanceRepairService {
 
         JsonNode fabricProfile = BabricInstaller.downloadFabricProfile(
                 instance.getMinecraftVersion(), loaderVersion);
-        JsonNode babricOverlay = BabricInstaller.buildOverlay(fabricProfile);
+        JsonNode babricOverlay = BabricInstaller.downloadOverlay(fabricProfile);
         BabricInstaller.installLibraries(fabricProfile, babricOverlay);
         JsonNode merged = BabricInstaller.mergeProfile(vanillaMetadata, fabricProfile, babricOverlay);
+        MinecraftFileInstaller.installLibraries(merged);
         MinecraftVersionResolver.saveMetadata(instance, merged);
         NativeInstaller.extract(instance, merged);
 
