@@ -24,7 +24,7 @@ import java.util.jar.JarFile;
  */
 public final class RiftInstaller {
     public static final String MINECRAFT_VERSION = "1.13";
-    public static final String LOADER_VERSION = "1.0.4-66";
+    public static final String LOADER_VERSION = "1.0.4-87";
     public static final String RIFT_REPOSITORY = "https://www.dimdev.org/maven/";
     public static final String TWEAKER = "org.dimdev.riftloader.launch.RiftLoaderClientTweaker";
     public static final String LAUNCHWRAPPER_MAIN = "net.minecraft.launchwrapper.Launch";
@@ -72,6 +72,10 @@ public final class RiftInstaller {
         String version = findLatestLoaderVersion(minecraftVersion);
         JsonNode overlay = buildOverlay(minecraftVersion);
 
+        Path artifact = artifactPath(version);
+        if (Files.exists(artifact) && !hasExpectedTweakerClass(artifact)) {
+            Files.delete(artifact);
+        }
         FabricInstaller.installLibraries(overlay);
         verifyRiftArtifact(version);
 
@@ -99,19 +103,33 @@ public final class RiftInstaller {
         library.put("url", repository);
     }
 
-    private static void verifyRiftArtifact(String version) throws Exception {
+    private static Path artifactPath(String version) throws IOException {
         Path libraries = MinecraftLocator.getLibrariesDirectoryPath()
                 .toAbsolutePath().normalize();
         Path artifact = libraries.resolve("org").resolve("dimdev").resolve("rift")
                 .resolve(version).resolve("rift-" + version + ".jar").normalize();
-        if (!artifact.startsWith(libraries) || !Files.isRegularFile(artifact)
-                || Files.size(artifact) == 0) {
-            throw new IOException("Rift library is missing after installation.");
+        if (!artifact.startsWith(libraries)) {
+            throw new IOException("Rift artifact path escapes the shared libraries directory.");
+        }
+        return artifact;
+    }
+
+    private static boolean hasExpectedTweakerClass(Path artifact) {
+        if (!Files.isRegularFile(artifact)) {
+            return false;
         }
         try (JarFile jar = new JarFile(artifact.toFile())) {
-            if (jar.getEntry("org/dimdev/riftloader/launch/RiftLoaderClientTweaker.class") == null) {
-                throw new IOException("Downloaded Rift artifact does not contain its official client tweaker.");
-            }
+            return jar.getEntry("org/dimdev/riftloader/launch/RiftLoaderClientTweaker.class") != null;
+        } catch (IOException ignored) {
+            return false;
+        }
+    }
+
+    private static void verifyRiftArtifact(String version) throws Exception {
+        Path artifact = artifactPath(version);
+        if (!Files.isRegularFile(artifact) || Files.size(artifact) == 0
+                || !hasExpectedTweakerClass(artifact)) {
+            throw new IOException("Rift library is missing or invalid after installation.");
         }
     }
 }
