@@ -2,7 +2,7 @@
 
 **A Windows-focused Minecraft launcher built around isolated instances, repairability, and control.**
 
-Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, Fabric, Forge, Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, and NilLoader installations, Modrinth content, installation health, and verified launcher updates.
+Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, Fabric, Forge, Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, and LiteLoader installations, Modrinth content, installation health, and verified launcher updates.
 
 > Vanta is under active development. Features and compatibility can change between releases; do not treat roadmap items as shipped functionality.
 
@@ -10,7 +10,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 
 - **Instance isolation** — keep mods, settings, worlds, logs, screenshots, resource packs, and shader packs separated by instance.
 - **Minecraft installation** — resolve version metadata, client files, libraries, assets, natives, and launch arguments.
-- **Fabric and Forge** — established loader installation and repair. **Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, and NilLoader** — initial loader installation and Modrinth integration implemented; real-game validation remains pending. Babric is currently version-gated to Beta 1.7.3. NilLoader is installed as an instance-local Java agent and attached with `-javaagent`, not merged into Minecraft's classpath. Instance Settings now includes an ordered loader-stack editor for importing profile JSON overlays and specifying LaunchWrapper tweakers; profile libraries are installed and merged into instance launch metadata, with repair/rebuild reapplication. The vanilla version picker includes Mojang's official old Alpha/Beta catalog entries and uses their legacy launch arguments and virtual assets. Pre-Classic versions absent from Mojang's manifest are not yet included.
+- **Fabric and Forge** — established loader installation and repair. **Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, and LiteLoader** — initial loader installation and integration implemented; real-game validation remains pending. Babric is currently version-gated to Beta 1.7.3. NilLoader is installed as an instance-local Java agent and attached with `-javaagent`, not merged into Minecraft's classpath. LiteLoader uses its official stable-version manifest and an ordered LaunchWrapper profile overlay; snapshot-only builds are excluded. Instance Settings now includes an ordered loader-stack editor for importing profile JSON overlays and specifying LaunchWrapper tweakers; profile libraries are installed and merged into instance launch metadata, with repair/rebuild reapplication. The vanilla version picker includes Mojang's official old Alpha/Beta catalog entries and uses their legacy launch arguments and virtual assets. Pre-Classic versions absent from Mojang's manifest are not yet included.
 - **Modrinth integration** — search projects, install content, resolve dependencies, scan installed mods, and repair dependencies.
 - **State Center** — inspect instance and shared-resource health and identify missing or invalid files.
 - **Recovery-oriented updates** — download release packages, verify SHA-256 checksums, and use an external updater with staging and rollback.
