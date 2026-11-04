@@ -137,18 +137,11 @@ public class LaunchDataBuilder {
         // ASSETS
         // ---------------------------------------------------------
 
-        if (manifest.assetIndex == null
-                || manifest.assetIndex.id == null
-                || manifest.assetIndex.id.isBlank()) {
-
-            throw new IllegalStateException(
-                    "Asset index missing for Minecraft "
-                            + instance.getMinecraftVersion()
-            );
+        if (manifest.assetIndex != null
+                && manifest.assetIndex.id != null
+                && !manifest.assetIndex.id.isBlank()) {
+            data.assetIndex = manifest.assetIndex.id;
         }
-
-        data.assetIndex =
-                manifest.assetIndex.id;
 
         // ---------------------------------------------------------
         // CLASSPATH
