@@ -15,6 +15,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.CheckBox;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.VantaUI;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
@@ -97,36 +98,41 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         header.paddingProperty().bind(Bindings.createObjectBinding(() -> {
             double horizontal = header.getWidth() < 600 ? 16
                     : header.getWidth() < 900 ? 24 : 38;
-            return new Insets(30, horizontal, 0, horizontal);
+            return new Insets(VantaUI.spacing(7), horizontal, 0, horizontal);
         }, header.widthProperty()));
 
-        VBox previewCard = new VBox(10);
+        VBox previewCard = new VBox(VantaUI.spacing(2));
         previewCard.setAlignment(Pos.CENTER);
-        previewCard.setPadding(new Insets(18, 12, 20, 12));
+        previewCard.setPadding(new Insets(VantaUI.spacing(4), VantaUI.spacing(3), VantaUI.spacing(5), VantaUI.spacing(3)));
         previewCard.getStyleClass().add("accounts-hero");
+        VantaUI.applySurface(previewCard, VantaUI.SurfaceRole.PANEL);
         modelPreview.setAccessibleText("Interactive 3D preview of the selected Minecraft skin");
         previewCard.setMinWidth(264);
         previewCard.setPrefWidth(300);
         previewCard.setMaxWidth(320);
         Label previewHeading = new Label("Player preview");
         previewHeading.getStyleClass().add("accounts-card-name");
+        VantaUI.styleText(previewHeading, VantaUI.TextRole.SECTION_TITLE);
         Label rotateHint = new Label("Drag to rotate · Scroll to zoom");
         rotateHint.getStyleClass().add("accounts-subtitle");
         previewCard.getChildren().addAll(previewHeading, modelPreview, rotateHint, fileLabel);
 
-        VBox controls = new VBox(14);
-        controls.setPadding(new Insets(24));
+        VBox controls = new VBox(VantaUI.spacing(3));
+        controls.setPadding(new Insets(VantaUI.spacing(6)));
         controls.getStyleClass().add("accounts-hero");
+        VantaUI.applySurface(controls, VantaUI.SurfaceRole.PANEL);
         controls.setMinWidth(0);
         controls.setPrefWidth(420);
         controls.setMaxWidth(Double.MAX_VALUE);
 
         Label accountHeading = new Label("Minecraft account");
         accountHeading.getStyleClass().add("accounts-card-name");
+        VantaUI.styleText(accountHeading, VantaUI.TextRole.SECTION_TITLE);
         accountLabel.setWrapText(true);
 
         Label modelHeading = new Label("Skin model");
         modelHeading.getStyleClass().add("accounts-card-name");
+        VantaUI.styleText(modelHeading, VantaUI.TextRole.SECTION_TITLE);
         modelChoice.getItems().setAll("Classic (Steve)", "Slim (Alex)");
         modelChoice.setValue("Classic (Steve)");
         modelChoice.setMaxWidth(Double.MAX_VALUE);
@@ -138,6 +144,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
 
         Label layersHeading = new Label("3D skin layers");
         layersHeading.getStyleClass().add("accounts-card-name");
+        VantaUI.styleText(layersHeading, VantaUI.TextRole.SECTION_TITLE);
         for (CheckBox layerControl : List.of(hatLayer, jacketLayer, sleevesLayer, trousersLayer)) {
             layerControl.setSelected(true);
             layerControl.getStyleClass().add("skin-layer-toggle");
@@ -150,13 +157,14 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
                 modelPreview.setLayerVisible(SkinModel3D.Layer.SLEEVES, visible));
         trousersLayer.selectedProperty().addListener((obs, oldValue, visible) ->
                 modelPreview.setLayerVisible(SkinModel3D.Layer.TROUSERS, visible));
-        FlowPane layerControls = new FlowPane(12, 8,
+        FlowPane layerControls = new FlowPane(VantaUI.spacing(3), VantaUI.spacing(2),
                 hatLayer, jacketLayer, sleevesLayer, trousersLayer);
         layerControls.setAlignment(Pos.CENTER_LEFT);
         updateLayerControls(null);
 
         Label capeHeading = new Label("Owned capes");
         capeHeading.getStyleClass().add("accounts-card-name");
+        VantaUI.styleText(capeHeading, VantaUI.TextRole.SECTION_TITLE);
         capeChoice.setMaxWidth(Double.MAX_VALUE);
         capeChoice.setAccessibleText("Select an owned Minecraft cape");
         capeChoice.setPromptText("Loading account capes...");
@@ -170,7 +178,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         hideCapeButton.setAccessibleText("Hide the currently applied cape");
         applyCapeButton.setOnAction(event -> applySelectedCape());
         hideCapeButton.setOnAction(event -> hideCape());
-        FlowPane capeActions = new FlowPane(10, 8, applyCapeButton, hideCapeButton);
+        FlowPane capeActions = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2), applyCapeButton, hideCapeButton);
         capeActions.setAlignment(Pos.CENTER_LEFT);
         capeActions.setMaxWidth(Double.MAX_VALUE);
 
@@ -179,6 +187,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         );
         formatHint.setWrapText(true);
         formatHint.getStyleClass().add("accounts-subtitle");
+        VantaUI.styleText(formatHint, VantaUI.TextRole.MUTED);
 
         chooseButton.getStyleClass().add("accounts-card-use");
         uploadButton.getStyleClass().add("accounts-primary-button");
@@ -187,7 +196,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         chooseButton.setOnAction(event -> chooseSkin());
         uploadButton.setOnAction(event -> uploadSkin());
 
-        FlowPane actions = new FlowPane(10, 8, chooseButton, uploadButton);
+        FlowPane actions = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2), chooseButton, uploadButton);
         actions.setAlignment(Pos.CENTER_LEFT);
         actions.setMaxWidth(Double.MAX_VALUE);
 
@@ -201,13 +210,13 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
                 capeHeading, capeChoice, capeActions,
                 formatHint, actions, statusLabel
         );
-        FlowPane body = new FlowPane(20, 20, previewCard, controls);
+        FlowPane body = new FlowPane(VantaUI.spacing(5), VantaUI.spacing(5), previewCard, controls);
         body.setAlignment(Pos.TOP_CENTER);
         body.setMaxWidth(Double.MAX_VALUE);
         body.paddingProperty().bind(Bindings.createObjectBinding(() -> {
             double horizontal = body.getWidth() < 600 ? 16
                     : body.getWidth() < 900 ? 24 : 38;
-            return new Insets(24, horizontal, 36, horizontal);
+            return new Insets(VantaUI.spacing(6), horizontal, VantaUI.spacing(9), horizontal);
         }, body.widthProperty()));
 
         ScrollPane scroll = new ScrollPane(new VBox(header, body));

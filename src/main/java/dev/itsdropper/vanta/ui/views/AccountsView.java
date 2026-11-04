@@ -20,6 +20,7 @@ import javafx.scene.layout.VBox;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.launcher.service.AccountSkinService;
 
 import java.util.List;
@@ -68,7 +69,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         VBox accountsSection = createAccountsSection();
 
         VBox content = new VBox(
-                22,
+                VantaUI.spacing(5),
                 header,
                 hero,
                 accountsSection
@@ -78,7 +79,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
                 Bindings.createObjectBinding(() -> {
                     double width = getWidth();
                     double horizontal = width < 620 ? 16 : width < 900 ? 24 : 38;
-                    return new Insets(24, horizontal, 28, horizontal);
+                    return new Insets(VantaUI.spacing(6), horizontal, VantaUI.spacing(7), horizontal);
                 }, widthProperty())
         );
 
@@ -117,8 +118,9 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         StackPane hero = new StackPane();
         hero.getStyleClass().add("accounts-hero");
         hero.setMaxWidth(Double.MAX_VALUE);
+        VantaUI.applySurface(hero, VantaUI.SurfaceRole.PANEL);
 
-        HBox content = new HBox(22);
+        HBox content = new HBox(VantaUI.spacing(5));
         content.setAlignment(Pos.CENTER_LEFT);
 
         StackPane headFrame = new StackPane();
@@ -139,20 +141,21 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         headFrame.getChildren().addAll(heroHead, heroFallback);
 
-        VBox identity = new VBox(7);
+        VBox identity = new VBox(VantaUI.spacing(2));
         identity.setMinWidth(0);
-        HBox identityRow = new HBox(22, headFrame, identity);
+        HBox identityRow = new HBox(VantaUI.spacing(5), headFrame, identity);
         identityRow.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(identity, Priority.ALWAYS);
 
         Label eyebrow = new Label("ACTIVE MINECRAFT ACCOUNT");
         eyebrow.getStyleClass().add("accounts-eyebrow");
+        VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
 
         heroUsername.getStyleClass().add("accounts-hero-name");
         heroUsername.setMinWidth(0);
         heroUsername.setWrapText(true);
 
-        HBox statusRow = new HBox(8);
+        HBox statusRow = new HBox(VantaUI.spacing(2));
         statusRow.setMinWidth(0);
         statusRow.setAlignment(Pos.CENTER_LEFT);
 
@@ -168,7 +171,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        VBox actions = new VBox(8);
+        VBox actions = new VBox(VantaUI.spacing(2));
         actions.setAlignment(Pos.CENTER_RIGHT);
 
         addAccountButton.getStyleClass().add("accounts-primary-button");
@@ -179,29 +182,29 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         refreshButton.setOnAction(event -> refresh());
         signOutButton.setOnAction(event -> logout());
 
-        HBox topActions = new HBox(8, addAccountButton, refreshButton);
+        HBox topActions = new HBox(VantaUI.spacing(2), addAccountButton, refreshButton);
         topActions.setAlignment(Pos.CENTER_RIGHT);
         actions.getChildren().addAll(topActions, signOutButton);
 
         content.getChildren().addAll(identityRow, spacer, actions);
 
         hero.getChildren().add(content);
-        StackPane.setMargin(content, new Insets(24));
+        StackPane.setMargin(content, new Insets(VantaUI.spacing(6)));
 
         hero.widthProperty().addListener((observable, previousWidth, nextWidth) -> {
             boolean compact = nextWidth.doubleValue() < 700;
             if (compact && content.getChildren().contains(spacer)) {
                 content.getChildren().setAll(identityRow, actions);
-                content.setSpacing(16);
+                content.setSpacing(VantaUI.spacing(4));
                 actions.setAlignment(Pos.CENTER_LEFT);
                 topActions.setAlignment(Pos.CENTER_LEFT);
-                StackPane.setMargin(content, new Insets(16));
+                StackPane.setMargin(content, new Insets(VantaUI.spacing(4)));
             } else if (!compact && !content.getChildren().contains(spacer)) {
                 content.getChildren().setAll(identityRow, spacer, actions);
                 content.setSpacing(0);
                 actions.setAlignment(Pos.CENTER_RIGHT);
                 topActions.setAlignment(Pos.CENTER_RIGHT);
-                StackPane.setMargin(content, new Insets(24));
+                StackPane.setMargin(content, new Insets(VantaUI.spacing(6)));
             }
         });
 
@@ -213,10 +216,11 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         HBox sectionHeader = new HBox();
         sectionHeader.setAlignment(Pos.CENTER_LEFT);
 
-        VBox titles = new VBox(3);
+        VBox titles = new VBox(VantaUI.spacing(1));
 
         Label title = new Label("Your accounts");
         title.getStyleClass().add("accounts-section-title");
+        VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
 
         accountCount.getStyleClass().add("accounts-section-count");
         titles.getChildren().addAll(title, accountCount);
@@ -226,6 +230,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         Label privacy = new Label("Stored locally • No account telemetry");
         privacy.getStyleClass().add("accounts-privacy");
+        VantaUI.styleText(privacy, VantaUI.TextRole.METADATA);
 
         sectionHeader.getChildren().addAll(titles, spacer, privacy);
 
@@ -233,20 +238,21 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
 
-        accountList.setHgap(12);
-        accountList.setVgap(12);
+        accountList.setHgap(VantaUI.spacing(3));
+        accountList.setVgap(VantaUI.spacing(3));
         accountList.prefWrapLengthProperty().bind(accountList.widthProperty());
         accountList.setMaxWidth(Double.MAX_VALUE);
         accountList.getStyleClass().add("accounts-grid");
 
         VBox section = new VBox(
-                12,
+                VantaUI.spacing(3),
                 sectionHeader,
                 errorLabel,
                 accountList
         );
         section.getStyleClass().add("accounts-section");
         section.setFillWidth(true);
+        section.setMaxWidth(Double.MAX_VALUE);
 
         return section;
     }
@@ -330,9 +336,11 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
     private VBox createAccountCard(Account account, boolean active) {
 
-        VBox card = new VBox(14);
+        VBox card = new VBox(VantaUI.spacing(3));
         card.setMinWidth(0);
         card.setMaxWidth(Double.MAX_VALUE);
+        card.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(card, VantaUI.SurfaceRole.CARD);
         card.prefWidthProperty().bind(
                 Bindings.createDoubleBinding(() -> {
                     double width = accountList.getWidth();
@@ -347,7 +355,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
             card.getStyleClass().add("accounts-card-active");
         }
 
-        HBox top = new HBox(13);
+        HBox top = new HBox(VantaUI.spacing(3));
         top.setAlignment(Pos.CENTER_LEFT);
 
         StackPane headFrame = new StackPane();
@@ -367,7 +375,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         headFrame.getChildren().addAll(head, placeholder);
 
-        VBox identity = new VBox(3);
+        VBox identity = new VBox(VantaUI.spacing(1));
         identity.setMinWidth(0);
         HBox.setHgrow(identity, Priority.ALWAYS);
 
@@ -395,7 +403,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         top.getChildren().addAll(headFrame, identity, spacer, state);
 
-        HBox actions = new HBox(8);
+        HBox actions = new HBox(VantaUI.spacing(2));
         actions.setAlignment(Pos.CENTER_RIGHT);
 
         if (!active) {
