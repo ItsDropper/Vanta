@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.ui;
 
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.Parent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -34,6 +35,19 @@ public final class VantaUI {
         }
     }
 
+    public enum TextRole {
+        PAGE_TITLE("vanta-type-page-title"),
+        SECTION_TITLE("vanta-type-section-title"),
+        BODY("vanta-type-body"),
+        MUTED("vanta-type-muted"),
+        EYEBROW("vanta-type-eyebrow"),
+        METADATA("vanta-type-metadata"),
+        MONOSPACE("vanta-type-monospace");
+
+        private final String styleClass;
+        TextRole(String styleClass) { this.styleClass = styleClass; }
+    }
+
     public enum ButtonVariant {
         PRIMARY("vanta-button-primary"),
         SECONDARY("vanta-button-secondary"),
@@ -58,6 +72,13 @@ public final class VantaUI {
         Objects.requireNonNull(root, "root");
         addStyleClass(root, "vanta-ui-root");
         ThemeManager.apply(root, ThemeManager.loadAccent());
+    }
+
+    public static Label styleText(Label label, TextRole role) {
+        Objects.requireNonNull(label, "label");
+        Objects.requireNonNull(role, "role");
+        addStyleClass(label, role.styleClass);
+        return label;
     }
 
     public static Button styleButton(Button button, ButtonVariant variant) {

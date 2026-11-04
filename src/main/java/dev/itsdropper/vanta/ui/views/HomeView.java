@@ -36,6 +36,7 @@ import dev.itsdropper.vanta.launcher.service.ServerHistoryManager;
 import dev.itsdropper.vanta.launcher.service.ServerTarget;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.ui.AnimationUtils;
+import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
@@ -90,9 +91,11 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         Label title = new Label("Home");
         title.getStyleClass().add("home-title");
+        VantaUI.styleText(title, VantaUI.TextRole.PAGE_TITLE);
 
         accountLabel = new Label("Checking account...");
         accountLabel.getStyleClass().add("home-account-label");
+        VantaUI.styleText(accountLabel, VantaUI.TextRole.MUTED);
 
         VBox headerText = new VBox(4, title, accountLabel);
         HBox header = new HBox(16);
@@ -272,6 +275,39 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
      * creation, imports and repairs can change the library without a launch
      * state transition, so relying only on launch listeners leaves stale UI.
      */
+    /** Fills the dashboard with stable explanatory content for CI screenshots. */
+    public void prepareScreenshotPreview() {
+        accountLabel.setText("Account information appears here when Vanta loads your profile.");
+        launchStatusLabel.setText("UI PREVIEW");
+        recentList.getChildren().clear();
+        recentStatus.setText("Recently played instances appear here after using your library.");
+        recentServersList.getChildren().clear();
+        recentServersStatus.setText("Recently joined servers appear here.");
+
+        Label eyebrow = new Label("YOUR MINECRAFT WORKSPACE");
+        eyebrow.getStyleClass().add("home-empty-eyebrow");
+        VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
+
+        Label title = new Label("Your instances, ready when you are.");
+        title.getStyleClass().add("home-empty-title");
+        VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
+        title.setWrapText(true);
+
+        Label description = new Label(
+                "Your installed instances, recent worlds and launch status are shown here."
+        );
+        description.setWrapText(true);
+        description.getStyleClass().add("home-empty-description");
+        VantaUI.styleText(description, VantaUI.TextRole.MUTED);
+
+        VBox preview = new VBox(VantaUI.spacing(2), eyebrow, title, description);
+        preview.setPadding(new Insets(VantaUI.spacing(6)));
+        preview.setMinHeight(180);
+        preview.setMaxWidth(Double.MAX_VALUE);
+        VantaUI.applySurface(preview, VantaUI.SurfaceRole.PANEL);
+        featuredContainer.getChildren().setAll(preview);
+    }
+
     public void onShown() {
         if (!listenersRegistered) {
             accountService.addListener(accountListener);

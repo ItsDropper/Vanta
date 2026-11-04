@@ -5,6 +5,7 @@ import dev.itsdropper.vanta.launcher.download.DownloadCenterService.Task;
 import dev.itsdropper.vanta.launcher.download.DownloadCenterService.Status;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.VantaUI;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -33,6 +34,10 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
     private boolean listening;
 
     public DownloadCenterView() {
+        this(false);
+    }
+
+    public DownloadCenterView(boolean screenshotPreview) {
         getStyleClass().addAll("page", "download-center-page");
         setSpacing(18);
         setPadding(new Insets(8, 8, 8, 8));
@@ -76,6 +81,10 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
 
         summary.getStyleClass().add("download-summary");
         getChildren().addAll(heading, stats, summary, listHeading, scroll);
+
+        if (screenshotPreview) {
+            renderTasks(List.of());
+        }
     }
 
     @Override
@@ -98,9 +107,10 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         Label label = new Label(caption);
         label.getStyleClass().add("download-stat-label");
         value.getStyleClass().add("download-stat-value");
-        VBox card = new VBox(7, label, value);
+        VBox card = new VBox(VantaUI.spacing(2), label, value);
         card.getStyleClass().addAll("download-stat-card", style);
-        card.setPadding(new Insets(15, 16, 15, 16));
+        card.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(card, VantaUI.SurfaceRole.CARD);
         return card;
     }
 
@@ -183,9 +193,10 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         detail.getStyleClass().add(task.status() == Status.FAILED ? "download-task-error" : "download-task-detail");
         detail.setWrapText(true);
 
-        VBox card = new VBox(10, top, progress, detail);
+        VBox card = new VBox(VantaUI.spacing(2), top, progress, detail);
         card.getStyleClass().addAll("download-task-card", "download-task-" + task.status().name().toLowerCase(Locale.ROOT));
-        card.setPadding(new Insets(15, 16, 15, 16));
+        card.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(card, VantaUI.SurfaceRole.CARD);
         if (task.status() == Status.FAILED) {
             boolean retryRequested = service.isRetryRequested(task.id());
             Button retry = new Button(retryRequested ? "Retry queued" : "Retry",

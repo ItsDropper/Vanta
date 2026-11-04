@@ -31,10 +31,12 @@ public final class PageHeader extends HBox {
 
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().addAll("page-header-title", titleStyleClass);
+        VantaUI.styleText(titleLabel, VantaUI.TextRole.PAGE_TITLE);
         titleLabel.setWrapText(true);
 
         Label subtitleLabel = new Label(subtitle);
         subtitleLabel.getStyleClass().addAll("page-header-subtitle", subtitleStyleClass);
+        VantaUI.styleText(subtitleLabel, VantaUI.TextRole.MUTED);
         subtitleLabel.setWrapText(true);
 
         VBox copy = new VBox(VantaUI.spacing(1), titleLabel, subtitleLabel);

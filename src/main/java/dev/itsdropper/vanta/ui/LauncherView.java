@@ -276,7 +276,8 @@ public class LauncherView {
                 new InstancesView(
                         launchService,
                         this::showCreateInstanceView,
-                        this::showInstanceMods
+                        this::showInstanceMods,
+                        screenshotMode
                 );
 
         createInstanceTypeView =
@@ -290,11 +291,12 @@ public class LauncherView {
 
         globalModsView =
                 new GlobalModsView(
-                        this::showGlobalContentDetails
+                        this::showGlobalContentDetails,
+                        screenshotMode
                 );
 
         stateCenterView = new StateCenterView();
-        downloadCenterView = new DownloadCenterView();
+        downloadCenterView = new DownloadCenterView(screenshotMode);
         serverManagerView = new ServerManagerView();
 
         settingsView =
@@ -329,6 +331,7 @@ public class LauncherView {
                 UiExecutor.shared().dispatchToUi(this::showOnboarding);
             }
         } else {
+            homeView.prepareScreenshotPreview();
             showPageForCapture(Sidebar.Page.HOME);
         }
     }

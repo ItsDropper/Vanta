@@ -17,6 +17,15 @@ class VantaUITest {
     }
 
     @Test
+    void textRolesAreStableAndIdempotent() {
+        javafx.scene.control.Label label = new javafx.scene.control.Label("Vanta");
+        VantaUI.styleText(label, VantaUI.TextRole.PAGE_TITLE);
+        VantaUI.styleText(label, VantaUI.TextRole.PAGE_TITLE);
+        assertEquals(1, label.getStyleClass().stream()
+                .filter("vanta-type-page-title"::equals).count());
+    }
+
+    @Test
     void squirclePathIsClosedAndFitsRequestedBounds() {
         Path path = VantaUI.createSquirclePath(240.0, 120.0, 18.0, 4.0);
         Bounds bounds = path.getBoundsInLocal();

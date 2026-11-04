@@ -59,13 +59,20 @@ public class InstancesView extends VBox {
     // Only the newest scan may replace the visible instance list.
     private long refreshRequestId;
 
-
     public InstancesView(
             MultiLaunchService launchService,
             Runnable onCreateInstance,
             Consumer<Instance> onInstanceSettings
     ) {
+        this(launchService, onCreateInstance, onInstanceSettings, false);
+    }
 
+    public InstancesView(
+            MultiLaunchService launchService,
+            Runnable onCreateInstance,
+            Consumer<Instance> onInstanceSettings,
+            boolean screenshotPreview
+    ) {
         this.launchService =
                 launchService;
 
@@ -277,7 +284,12 @@ public class InstancesView extends VBox {
                 this::onLaunchStateChanged
         );
 
-        refresh();
+        if (screenshotPreview) {
+            countLabel.setText("INSTANCE LIBRARY");
+            statusLabel.setText("Installed instances appear here when Vanta loads your library.");
+        } else {
+            refresh();
+        }
     }
 
     // =============================================================

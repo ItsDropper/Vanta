@@ -64,13 +64,18 @@ public class GlobalModsView extends VBox {
     private final ScrollPane resultsScrollPane;
 
     private final BiConsumer<String, ModrinthContentType> onModSelected;
+    private final boolean screenshotPreview;
+
+    public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
+        this(onModSelected, false);
+    }
 
     public GlobalModsView(
-            BiConsumer<String, ModrinthContentType> onModSelected
+            BiConsumer<String, ModrinthContentType> onModSelected,
+            boolean screenshotPreview
     ) {
-
-        this.onModSelected =
-                onModSelected;
+        this.onModSelected = onModSelected;
+        this.screenshotPreview = screenshotPreview;
 
         modrinthClient =
                 new ModrinthClient();
@@ -153,20 +158,20 @@ public class GlobalModsView extends VBox {
             refreshForCurrentFilters();
         });
 
-        UiExecutor.shared().execute(() -> {
-            try {
-                List<String> versions =
-                        MinecraftVersionResolver.getReleaseVersions();
-
-                UiExecutor.shared().dispatchToUi(() -> {
-                    versionBox.getItems().setAll("All versions");
-                    versionBox.getItems().addAll(versions);
-                    versionBox.getSelectionModel().select("All versions");
-                });
-            } catch (Throwable ex) {
-                ex.printStackTrace();
-            }
-        });
+        if (!screenshotPreview) {
+            UiExecutor.shared().execute(() -> {
+                try {
+                    List<String> versions = MinecraftVersionResolver.getReleaseVersions();
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        versionBox.getItems().setAll("All versions");
+                        versionBox.getItems().addAll(versions);
+                        versionBox.getSelectionModel().select("All versions");
+                    });
+                } catch (Throwable ex) {
+                    ex.printStackTrace();
+                }
+            });
+        }
 
         // =========================================================
         // SEARCH
@@ -368,10 +373,18 @@ public class GlobalModsView extends VBox {
         // LOAD POPULAR MODS
         // =========================================================
 
-        loadMostDownloadedMods();
+        if (screenshotPreview) {
+            popularStatusLabel.setText("Popular projects load when Modrinth browsing is active.");
+        } else {
+            loadMostDownloadedMods();
+        }
     }
 
     private void refreshForCurrentFilters() {
+        if (screenshotPreview) {
+            statusLabel.setText("Search results are omitted from the screenshot preview.");
+            return;
+        }
         String query = searchField.getText();
 
         if (query != null && !query.trim().isBlank()) {
