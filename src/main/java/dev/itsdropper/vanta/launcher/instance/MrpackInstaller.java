@@ -151,7 +151,7 @@ public class MrpackInstaller {
 
         } else if ("NilLoader".equals(loader)) {
 
-            instance = InstanceInstaller.installNilLoader(name, minecraftVersion);
+            instance = InstanceInstaller.installNilLoader(name, minecraftVersion, loaderVersion);
 
         } else {
 
