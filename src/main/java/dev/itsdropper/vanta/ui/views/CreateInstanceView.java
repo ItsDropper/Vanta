@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.ForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.NeoForgeInstaller;
+import dev.itsdropper.vanta.launcher.instance.OrnitheInstaller;
 import dev.itsdropper.vanta.launcher.instance.QuiltInstaller;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
 import dev.itsdropper.vanta.ui.LauncherSettings;
@@ -77,6 +78,8 @@ public class CreateInstanceView extends VBox {
     private volatile boolean quiltCheckRunning;
     private final AtomicInteger neoForgeCheckId = new AtomicInteger();
     private volatile boolean neoForgeCheckRunning;
+    private final AtomicInteger ornitheCheckId = new AtomicInteger();
+    private volatile boolean ornitheCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -242,7 +245,8 @@ public class CreateInstanceView extends VBox {
                 "Fabric",
                 "Quilt",
                 "Forge",
-                "NeoForge"
+                "NeoForge",
+                "Ornithe"
         );
 
         loaderBox.getSelectionModel()
@@ -527,10 +531,12 @@ public class CreateInstanceView extends VBox {
         int forgeId = forgeCheckId.incrementAndGet();
         int quiltId = quiltCheckId.incrementAndGet();
         int neoForgeId = neoForgeCheckId.incrementAndGet();
+        int ornitheId = ornitheCheckId.incrementAndGet();
         fabricCheckRunning = true;
         forgeCheckRunning = true;
         quiltCheckRunning = true;
         neoForgeCheckRunning = true;
+        ornitheCheckRunning = true;
 
         UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
@@ -538,7 +544,8 @@ public class CreateInstanceView extends VBox {
                     "Fabric",
                     "Quilt",
                     "Forge",
-                    "NeoForge"
+                    "NeoForge",
+                    "Ornithe"
             );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
@@ -551,6 +558,7 @@ public class CreateInstanceView extends VBox {
             boolean forgeAvailable = false;
             boolean quiltAvailable = false;
             boolean neoForgeAvailable = false;
+            boolean ornitheAvailable = false;
 
             try {
                 FabricInstaller.findLatestLoaderVersion(minecraftVersion);
@@ -576,14 +584,22 @@ public class CreateInstanceView extends VBox {
             } catch (Throwable ignored) {
             }
 
+            try {
+                OrnitheInstaller.findLatestLoaderVersion(minecraftVersion);
+                ornitheAvailable = true;
+            } catch (Throwable ignored) {
+            }
+
             final boolean fabric = fabricAvailable;
             final boolean forge = forgeAvailable;
             final boolean quilt = quiltAvailable;
             final boolean neoForge = neoForgeAvailable;
+            final boolean ornithe = ornitheAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
-                        || quiltId != quiltCheckId.get() || neoForgeId != neoForgeCheckId.get()) {
+                        || quiltId != quiltCheckId.get() || neoForgeId != neoForgeCheckId.get()
+                        || ornitheId != ornitheCheckId.get()) {
                     return;
                 }
 
@@ -591,12 +607,14 @@ public class CreateInstanceView extends VBox {
                 forgeCheckRunning = false;
                 quiltCheckRunning = false;
                 neoForgeCheckRunning = false;
+                ornitheCheckRunning = false;
                 loaderBox.getItems().setAll(
                         "Vanilla",
                         "Fabric",
                         "Quilt",
                         "Forge",
-                        "NeoForge"
+                        "NeoForge",
+                        "Ornithe"
                 );
 
                 // Keep unsupported loaders visible but prevent selecting them.
@@ -609,7 +627,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge) {
+                if (fabric || forge || quilt || neoForge || ornithe) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
@@ -633,6 +651,10 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("NeoForge");
                 }
 
+                if (!ornithe) {
+                    loaderBox.getItems().remove("Ornithe");
+                }
+
                 // A saved default can be unavailable for this Minecraft version.
                 if (loaderBox.getValue() == null) {
                     loaderBox.getSelectionModel().select("Vanilla");
@@ -650,7 +672,8 @@ public class CreateInstanceView extends VBox {
 
     private void createInstance() {
 
-        if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning || neoForgeCheckRunning) {
+        if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning
+                || neoForgeCheckRunning || ornitheCheckRunning) {
 
             statusLabel.setText(
                     "Still checking mod loader support..."
@@ -709,6 +732,12 @@ public class CreateInstanceView extends VBox {
          * Extra safety check: only install a loader that the
          * current version check actually exposed in the UI.
          */
+        if ("Ornithe".equals(loader) && !loaderBox.getItems().contains("Ornithe")) {
+            loaderBox.getSelectionModel().select("Vanilla");
+            statusLabel.setText("Ornithe is not available for Minecraft " + version + ".");
+            return;
+        }
+
         if ("NeoForge".equals(loader) && !loaderBox.getItems().contains("NeoForge")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("NeoForge is not available for Minecraft " + version + ".");
@@ -777,6 +806,10 @@ public class CreateInstanceView extends VBox {
                         } else if ("Quilt".equals(loader)) {
 
                             InstanceInstaller.installQuilt(name, version);
+
+                        } else if ("Ornithe".equals(loader)) {
+
+                            InstanceInstaller.installOrnithe(name, version);
 
                         } else if ("NeoForge".equals(loader)) {
 
