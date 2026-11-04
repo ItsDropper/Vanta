@@ -26,6 +26,10 @@ public class InstalledModManager {
             Instance instance
     ) throws IOException {
 
+        if (instance == null || instance.getDirectory() == null) {
+            throw new IllegalArgumentException("A valid instance is required.");
+        }
+
         Path file =
                 instance.getDirectory()
                         .resolve(FILE_NAME);
@@ -44,6 +48,13 @@ public class InstalledModManager {
             Instance instance,
             List<InstalledModRecord> mods
     ) throws IOException {
+
+        if (instance == null || instance.getDirectory() == null) {
+            throw new IllegalArgumentException("A valid instance is required.");
+        }
+        if (mods == null) {
+            throw new IllegalArgumentException("Installed mod records cannot be null.");
+        }
 
         Path file =
                 instance.getDirectory()
