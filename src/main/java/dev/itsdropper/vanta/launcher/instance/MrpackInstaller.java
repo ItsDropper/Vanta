@@ -87,10 +87,15 @@ public class MrpackInstaller {
                 throw new IllegalStateException("Modpack Fabric Loader version is missing.");
             }
 
+        } else if (dependencies.has("quilt-loader")) {
+            loader = "Quilt";
+            loaderVersion = dependencies.path("quilt-loader").asText();
+            if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
+                throw new IllegalStateException("Modpack Quilt Loader version is missing.");
+            }
         } else if (
                 dependencies.has("forge")
                         || dependencies.has("neoforge")
-                        || dependencies.has("quilt-loader")
         ) {
 
             throw new IllegalStateException(
@@ -116,12 +121,11 @@ public class MrpackInstaller {
         if ("Fabric".equals(loader)) {
 
             // Respect the loader version pinned by the modpack index.
-            instance =
-                    InstanceInstaller.installFabric(
-                            name,
-                            minecraftVersion,
-                            loaderVersion
-                    );
+            instance = InstanceInstaller.installFabric(name, minecraftVersion, loaderVersion);
+
+        } else if ("Quilt".equals(loader)) {
+
+            instance = InstanceInstaller.installQuilt(name, minecraftVersion, loaderVersion);
 
         } else {
 
