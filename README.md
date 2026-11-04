@@ -10,7 +10,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 
 - **Instance isolation** — keep mods, settings, worlds, logs, screenshots, resource packs, and shader packs separated by instance.
 - **Minecraft installation** — resolve version metadata, client files, libraries, assets, natives, and launch arguments.
-- **Fabric and Forge** — install and repair supported loader profiles.
+- **Fabric, Quilt, and Forge** — install and repair supported loader profiles. NeoForge and legacy loader families remain planned, version-scoped integrations.
 - **Modrinth integration** — search projects, install content, resolve dependencies, scan installed mods, and repair dependencies.
 - **State Center** — inspect instance and shared-resource health and identify missing or invalid files.
 - **Recovery-oriented updates** — download release packages, verify SHA-256 checksums, and use an external updater with staging and rollback.
