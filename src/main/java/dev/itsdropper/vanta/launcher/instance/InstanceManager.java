@@ -295,36 +295,35 @@ public class InstanceManager {
             Instance instance,
             String minecraftVersion
     ) throws IOException {
-
-        if (instance == null) {
-            throw new IllegalArgumentException(
-                    "Instance cannot be null."
-            );
-        }
-
-        if (minecraftVersion == null
-                || minecraftVersion.isBlank()) {
-
-            throw new IllegalArgumentException(
-                    "Minecraft version cannot be empty."
-            );
-        }
-
-        Instance updatedInstance =
-                new Instance(
-                        instance.getId(),
-                        instance.getName(),
-                        minecraftVersion,
-                        instance.getLoader(),
-                        instance.getLoaderVersion(),
-                        instance.getDirectory(),
-                        instance.getIcon()
-                );
-
-        saveInstance(
-                updatedInstance
+        return updateMinecraftVersion(
+                instance,
+                minecraftVersion,
+                instance == null ? null : instance.getLoaderVersion()
         );
+    }
 
+    public static Instance updateMinecraftVersion(
+            Instance instance,
+            String minecraftVersion,
+            String loaderVersion
+    ) throws IOException {
+        if (instance == null) {
+            throw new IllegalArgumentException("Instance cannot be null.");
+        }
+        if (minecraftVersion == null || minecraftVersion.isBlank()) {
+            throw new IllegalArgumentException("Minecraft version cannot be empty.");
+        }
+
+        Instance updatedInstance = new Instance(
+                instance.getId(),
+                instance.getName(),
+                minecraftVersion,
+                instance.getLoader(),
+                loaderVersion,
+                instance.getDirectory(),
+                instance.getIcon()
+        );
+        saveInstance(updatedInstance);
         return updatedInstance;
     }
 
