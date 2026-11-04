@@ -35,6 +35,15 @@ class VantaUITest {
         assertEquals(120.0, bounds.getMaxY(), 0.001);
         assertInstanceOf(ClosePath.class, path.getElements().get(path.getElements().size() - 1));
         assertTrue(path.getElements().size() >= 80);
+        path.getElements().forEach(element -> {
+            if (element instanceof javafx.scene.shape.MoveTo move) {
+                assertTrue(Double.isFinite(move.getX()));
+                assertTrue(Double.isFinite(move.getY()));
+            } else if (element instanceof javafx.scene.shape.LineTo line) {
+                assertTrue(Double.isFinite(line.getX()));
+                assertTrue(Double.isFinite(line.getY()));
+            }
+        });
     }
 
     @Test

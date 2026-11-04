@@ -139,32 +139,32 @@ public final class VantaUI {
         for (int i = 1; i <= CURVE_SEGMENTS; i++) {
             double angle = Math.PI * 0.5 * i / CURVE_SEGMENTS;
             path.getElements().add(new LineTo(
-                    width - r + r * Math.pow(Math.sin(angle), power),
-                    r - r * Math.pow(Math.cos(angle), power)));
+                    width - r + r * Math.pow(Math.max(0.0, Math.sin(angle)), power),
+                    r - r * Math.pow(Math.max(0.0, Math.cos(angle)), power)));
         }
 
         path.getElements().add(new LineTo(width, height - r));
         for (int i = 1; i <= CURVE_SEGMENTS; i++) {
             double angle = Math.PI * 0.5 * i / CURVE_SEGMENTS;
             path.getElements().add(new LineTo(
-                    width - r + r * Math.pow(Math.cos(angle), power),
-                    height - r + r * Math.pow(Math.sin(angle), power)));
+                    width - r + r * Math.pow(Math.max(0.0, Math.cos(angle)), power),
+                    height - r + r * Math.pow(Math.max(0.0, Math.sin(angle)), power)));
         }
 
         path.getElements().add(new LineTo(r, height));
         for (int i = 1; i <= CURVE_SEGMENTS; i++) {
             double angle = Math.PI * 0.5 * i / CURVE_SEGMENTS;
             path.getElements().add(new LineTo(
-                    r - r * Math.pow(Math.sin(angle), power),
-                    height - r + r * Math.pow(Math.cos(angle), power)));
+                    r - r * Math.pow(Math.max(0.0, Math.sin(angle)), power),
+                    height - r + r * Math.pow(Math.max(0.0, Math.cos(angle)), power)));
         }
 
         path.getElements().add(new LineTo(0, r));
         for (int i = 1; i <= CURVE_SEGMENTS; i++) {
             double angle = Math.PI * 0.5 * i / CURVE_SEGMENTS;
             path.getElements().add(new LineTo(
-                    r - r * Math.pow(Math.cos(angle), power),
-                    r - r * Math.pow(Math.sin(angle), power)));
+                    r - r * Math.pow(Math.max(0.0, Math.cos(angle)), power),
+                    r - r * Math.pow(Math.max(0.0, Math.sin(angle)), power)));
         }
         path.getElements().add(new ClosePath());
         return path;
