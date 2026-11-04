@@ -154,7 +154,7 @@ public final class LauncherSettings {
                 && !"Quilt".equals(loader) && !"Forge".equals(loader)
                 && !"NeoForge".equals(loader) && !"Ornithe".equals(loader)
                 && !"Legacy Fabric".equals(loader) && !"Babric".equals(loader)
-                && !"NilLoader".equals(loader)) {
+                && !"NilLoader".equals(loader) && !"LiteLoader".equals(loader)) {
             loader = "Fabric";
         }
         setString("defaultLoader", loader);
