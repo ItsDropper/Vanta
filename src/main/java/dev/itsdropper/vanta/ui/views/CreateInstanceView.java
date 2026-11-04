@@ -627,6 +627,11 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("NeoForge");
                 }
 
+                // A saved default can be unavailable for this Minecraft version.
+                if (loaderBox.getValue() == null) {
+                    loaderBox.getSelectionModel().select("Vanilla");
+                }
+
                 createButton.setDisable(false);
             });
         });
