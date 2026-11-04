@@ -142,8 +142,17 @@ public final class InstanceRepairService {
             NilLoaderInstaller.install(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
         } else if (loader.equalsIgnoreCase("vantaloader")) {
-            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
-            VantaLoaderInstaller.install(instance);
+            // Repair is also the explicit update path: resolve the current main
+            // commit to an immutable release tag and persist that exact version.
+            String latestLoaderVersion = VantaLoaderInstaller.findLatestLoaderVersion();
+            Instance updated = new Instance(
+                    instance.getId(), instance.getName(), instance.getMinecraftVersion(),
+                    instance.getLoader(), latestLoaderVersion, instance.getDirectory());
+            MinecraftVersionResolver.saveMetadata(updated, vanillaMetadata);
+            VantaLoaderInstaller.install(updated);
+            if (!latestLoaderVersion.equals(instance.getLoaderVersion())) {
+                InstanceManager.saveInstance(updated);
+            }
         } else if (loader.equalsIgnoreCase("modloader")) {
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             ModLoaderInstaller.install(instance);
