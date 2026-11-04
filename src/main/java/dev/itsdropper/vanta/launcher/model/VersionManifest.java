@@ -9,7 +9,13 @@ public class VersionManifest {
 
     public String id;
 
+    /** Mojang manifest category: release, snapshot, old_beta, or old_alpha. */
+    public String type;
+
     public String inheritsFrom;
+
+    /** Legacy flat game-argument format used by historical clients. */
+    public String minecraftArguments;
 
     public String mainClass;
 
