@@ -480,7 +480,12 @@ public class InstancesView extends VBox {
                     }
                     InstanceRecoveryService.RecoveryPoint point = points.get(pointIndex);
                     Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,
-                            "This will replace the instance's current mods, config, resourcepacks, and shaderpacks "
+                            "Recovery point: " + point.id() + "\n"
+                                    + "Reason: " + point.reason() + "\n"
+                                    + "Files: " + point.fileCount() + "\n"
+                                    + "Expanded size: " + String.format(Locale.ROOT, "%.2f MiB",
+                                    point.expandedBytes() / (1024.0 * 1024.0)) + "\n\n"
+                                    + "This will replace the instance's current mods, config, resourcepacks, and shaderpacks "
                                     + "with the selected recovery point.\n\n"
                                     + "Worlds, screenshots, options, and instance metadata are not changed.\n\n"
                                     + "Vanta stages the replacement and attempts rollback if publication fails.");
