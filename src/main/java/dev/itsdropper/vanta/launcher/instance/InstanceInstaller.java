@@ -539,6 +539,32 @@ public class InstanceInstaller {
         }
     }
 
+    public static Instance installLiteLoader(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        String loaderVersion = LiteLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "LiteLoader", loaderVersion);
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            LiteLoaderInstaller.install(instance, minecraftVersion);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception failure) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw failure;
+        }
+    }
+
     public static Instance installNilLoader(
             String name,
             String minecraftVersion
@@ -791,6 +817,14 @@ public class InstanceInstaller {
 
         if ("NilLoader".equalsIgnoreCase(loader)) {
             NilLoaderInstaller.install(instance);
+        }
+
+        if ("LiteLoader".equalsIgnoreCase(loader)) {
+            dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            LiteLoaderInstaller.install(instance, minecraftVersion);
+            finalMetadata = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readTree(instance.getDirectory().resolve("minecraft").resolve("version.json").toFile());
         }
 
         dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
