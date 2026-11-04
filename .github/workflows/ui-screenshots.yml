@@ -26,6 +26,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install --yes xvfb libgtk-3-0 libxtst6 libxi6 libxrender1 libxrandr2 libxinerama1 libxxf86vm1 libgl1
+      - name: Make Gradle wrapper executable
+        run: chmod +x ./gradlew
       - name: Run regression tests
         run: ./gradlew test
       - name: Capture all sidebar destinations

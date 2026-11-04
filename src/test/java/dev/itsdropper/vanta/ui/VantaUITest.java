@@ -36,6 +36,20 @@ class VantaUITest {
     }
 
     @Test
+    void calculatesWcagContrastAndThresholds() {
+        assertEquals(21.0, VantaUI.contrastRatio(Color.WHITE, Color.BLACK), 0.001);
+        Color mediumGray = Color.rgb(119, 119, 119);
+        assertFalse(VantaUI.meetsWcagAA(mediumGray, Color.WHITE, false));
+        assertTrue(VantaUI.meetsWcagAA(mediumGray, Color.WHITE, true));
+    }
+
+    @Test
+    void choosesTheHigherContrastTextColor() {
+        assertEquals(Color.WHITE, VantaUI.accessibleTextColor(Color.BLACK));
+        assertEquals(Color.BLACK, VantaUI.accessibleTextColor(Color.WHITE));
+    }
+
+    @Test
     void rejectsInvalidSquircleDimensionsAndExponents() {
         assertThrows(IllegalArgumentException.class,
                 () -> VantaUI.createSquirclePath(0.0, 100.0, 12.0, 4.0));

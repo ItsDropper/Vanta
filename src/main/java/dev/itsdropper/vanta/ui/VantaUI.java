@@ -4,6 +4,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Parent;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.ClosePath;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
@@ -143,6 +144,56 @@ public final class VantaUI {
         }
         path.getElements().add(new ClosePath());
         return path;
+    }
+
+    /**
+     * Returns the WCAG 2.x contrast ratio for two opaque or translucent colors.
+     * Alpha is composited over the supplied background before luminance is measured.
+     */
+    public static double contrastRatio(Color foreground, Color background) {
+        Objects.requireNonNull(foreground, "foreground");
+        Objects.requireNonNull(background, "background");
+        Color opaqueBackground = composite(background, Color.WHITE);
+        Color opaqueForeground = composite(foreground, opaqueBackground);
+        double first = relativeLuminance(opaqueForeground);
+        double second = relativeLuminance(opaqueBackground);
+        return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+    }
+
+    /** Checks the WCAG AA contrast threshold (4.5:1, or 3:1 for large text). */
+    public static boolean meetsWcagAA(Color foreground, Color background, boolean largeText) {
+        return contrastRatio(foreground, background) >= (largeText ? 3.0 : 4.5);
+    }
+
+    /** Picks whichever of black or white has the stronger contrast on a background. */
+    public static Color accessibleTextColor(Color background) {
+        Objects.requireNonNull(background, "background");
+        Color black = Color.BLACK;
+        Color white = Color.WHITE;
+        return contrastRatio(black, background) >= contrastRatio(white, background)
+                ? black : white;
+    }
+
+    private static Color composite(Color foreground, Color background) {
+        double alpha = foreground.getOpacity();
+        return new Color(
+                foreground.getRed() * alpha + background.getRed() * (1.0 - alpha),
+                foreground.getGreen() * alpha + background.getGreen() * (1.0 - alpha),
+                foreground.getBlue() * alpha + background.getBlue() * (1.0 - alpha),
+                1.0
+        );
+    }
+
+    private static double relativeLuminance(Color color) {
+        return 0.2126 * linearize(color.getRed())
+                + 0.7152 * linearize(color.getGreen())
+                + 0.0722 * linearize(color.getBlue());
+    }
+
+    private static double linearize(double channel) {
+        return channel <= 0.04045
+                ? channel / 12.92
+                : Math.pow((channel + 0.055) / 1.055, 2.4);
     }
 
     private static void addStyleClass(Node node, String styleClass) {
