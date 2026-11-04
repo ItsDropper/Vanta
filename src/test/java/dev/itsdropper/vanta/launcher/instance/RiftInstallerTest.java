@@ -29,5 +29,6 @@ class RiftInstallerTest {
         assertEquals("org.dimdev:mixin:0.7.11-SNAPSHOT",
                 profile.path("libraries").get(1).path("name").asText());
         assertTrue(profile.path("libraries").toString().contains("net.minecraft:launchwrapper:1.12"));
+        assertTrue(profile.path("libraries").toString().contains("org.ow2.asm:asm-tree:6.2"));
     }
 }
