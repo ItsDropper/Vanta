@@ -284,6 +284,20 @@ public class CreateInstanceView extends VBox {
                 "create-combo"
         );
 
+        Label loaderHint = new Label(
+                "Experimental preview: native VantaLoader entrypoints initialize before Minecraft starts. "
+                        + "Minecraft event hooks, gameplay transformations, and Mixin support are not available yet."
+        );
+        loaderHint.getStyleClass().add("create-panel-subtitle");
+        loaderHint.setWrapText(true);
+        loaderHint.setVisible(false);
+        loaderHint.setManaged(false);
+        loaderBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            boolean preview = "VantaLoader".equals(newValue);
+            loaderHint.setVisible(preview);
+            loaderHint.setManaged(preview);
+        });
+
         // =========================================================
         // FORM
         // =========================================================
@@ -301,7 +315,8 @@ public class CreateInstanceView extends VBox {
                 versionBox,
 
                 loaderLabel,
-                loaderBox
+                loaderBox,
+                loaderHint
         );
 
         // =========================================================
