@@ -393,7 +393,7 @@ public final class InstanceRecoveryService {
     private static void writeRestoreCommitMarker(Path transaction) throws IOException {
         Path temporary = transaction.resolve("restore-committed.in-progress");
         Path marker = transaction.resolve("restore-committed");
-        Files.writeString(temporary, "committed\\n", java.nio.charset.StandardCharsets.UTF_8,
+        Files.writeString(temporary, "committed", java.nio.charset.StandardCharsets.UTF_8,
                 StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
         try (FileChannel channel = FileChannel.open(temporary, StandardOpenOption.WRITE)) {
             channel.force(true);
