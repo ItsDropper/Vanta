@@ -173,7 +173,8 @@ public final class InstanceRecoveryService {
                 }
             }
         }
-        points.sort(Comparator.comparingLong(RecoveryPoint::createdAtEpochMillis).reversed());
+        points.sort(Comparator.comparingLong(RecoveryPoint::createdAtEpochMillis).reversed()
+                .thenComparing(RecoveryPoint::id, Comparator.reverseOrder()));
         return List.copyOf(points);
     }
 
@@ -276,7 +277,7 @@ public final class InstanceRecoveryService {
                 }
             }
             try {
-                pruneRecoveryPoints(instanceId, DEFAULT_RETENTION, vantaDirectory);
+                pruneRecoveryPoints(instanceId, LauncherSettings.getRecoveryPointRetention(), vantaDirectory);
             } catch (IOException cleanupFailure) {
                 System.err.println("Recovery retention cleanup failed: " + cleanupFailure.getMessage());
             }
@@ -540,7 +541,7 @@ public final class InstanceRecoveryService {
         Path directory = recoveryDirectory(instanceId, vantaDirectory);
         try (var files = Files.list(directory)) {
             List<Path> archives = files.filter(path -> path.getFileName().toString().matches("[0-9]{13}-[a-f0-9]{8}\\.zip"))
-                    .sorted(Comparator.comparingLong((Path path) -> parseTimestamp(path.getFileName().toString())).reversed())
+                    .sorted(Comparator.comparing((Path path) -> path.getFileName().toString()).reversed())
                     .toList();
             for (int i = retention; i < archives.size(); i++) Files.deleteIfExists(archives.get(i));
         }
