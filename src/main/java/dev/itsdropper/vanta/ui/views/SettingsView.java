@@ -1214,7 +1214,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         defaultVersion.setPromptText("Leave blank to use the newest release");
 
         ComboBox<String> defaultLoader = new ComboBox<>();
-        defaultLoader.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric", "NilLoader", "LiteLoader", "Vanilla");
+        defaultLoader.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric", "NilLoader", "LiteLoader", "Rift", "Vanilla");
         defaultLoader.getSelectionModel().select(LauncherSettings.getDefaultLoader());
         defaultLoader.setMaxWidth(Double.MAX_VALUE);
         defaultLoader.getStyleClass().add("create-combo");
