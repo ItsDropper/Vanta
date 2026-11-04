@@ -66,7 +66,7 @@ public final class VantaLoaderInstaller {
 
     public static Path agentPath(Instance instance, String version) {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        if (version == null || !version.matches("nightly|nightly-[0-9a-f]{12}")) {
+        if (version == null || !version.matches("nightly|nightly-[0-9a-f]{40}")) {
             throw new IllegalStateException("VantaLoader instance has an invalid release identifier.");
         }
         return instance.getDirectory().resolve("libraries")
@@ -171,11 +171,11 @@ public final class VantaLoaderInstaller {
         if (!sha.matches("[0-9a-f]{40}")) {
             throw new IOException("VantaLoader main-branch lookup returned an invalid commit SHA.");
         }
-        return "nightly-" + sha.substring(0, 12);
+        return "nightly-" + sha;
     }
 
     private static Release readRelease(String tag) throws Exception {
-        if (tag == null || !tag.matches("nightly-[0-9a-f]{12}")) {
+        if (tag == null || !tag.matches("nightly-[0-9a-f]{40}")) {
             throw new IOException("Invalid pinned VantaLoader release identifier.");
         }
         HttpRequest request = HttpRequest.newBuilder(URI.create(RELEASE_API + tag))
