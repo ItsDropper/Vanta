@@ -73,13 +73,21 @@ public final class InstanceRecoveryService {
                 byte[] buffer = new byte[64 * 1024];
                 for (String directoryName : RECOVERED_DIRECTORIES) {
                     Path directory = instanceDirectory.resolve(directoryName);
+                    if (Files.isSymbolicLink(directory)) {
+                        throw new IOException("Cannot snapshot a symbolic-link directory: " + directoryName);
+                    }
                     zip.putNextEntry(new ZipEntry(directoryName + "/"));
                     zip.closeEntry();
                     if (!Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) continue;
 
                     List<Path> files;
                     try (var walk = Files.walk(directory)) {
-                        files = walk.filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                        List<Path> visited = walk.toList();
+                        if (visited.stream().anyMatch(Files::isSymbolicLink)) {
+                            throw new IOException("Cannot snapshot symbolic links inside " + directoryName + ".");
+                        }
+                        files = visited.stream()
+                                .filter(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
                                 .sorted(Comparator.comparing(path -> directory.relativize(path).toString()))
                                 .toList();
                     }
@@ -388,7 +396,9 @@ public final class InstanceRecoveryService {
             throw new IllegalArgumentException("A valid instance is required.");
         }
         Path directory = instance.getDirectory().toAbsolutePath().normalize();
-        if (!Files.isDirectory(directory)) throw new IOException("Instance directory does not exist.");
+        if (!Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Instance directory does not exist or is a symbolic link.");
+        }
         return directory;
     }
 
