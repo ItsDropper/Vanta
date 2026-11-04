@@ -221,9 +221,13 @@ private Path installResolvedVersion(
             ));
 
             // Registry now points to the new file; only now is the previous file disposable.
-            if (rollbackFile != null) Files.deleteIfExists(rollbackFile);
+            if (rollbackFile != null) {
+                try { Files.deleteIfExists(rollbackFile); }
+                catch (IOException cleanupFailure) { System.err.println("Could not clean up mod rollback file: " + cleanupFailure.getMessage()); }
+            }
             if (previousFile != null && !previousFile.equals(installedFile)) {
-                Files.deleteIfExists(previousFile);
+                try { Files.deleteIfExists(previousFile); }
+                catch (IOException cleanupFailure) { System.err.println("Could not clean up previous mod file: " + cleanupFailure.getMessage()); }
             }
             return installedFile;
         } catch (Exception failure) {
