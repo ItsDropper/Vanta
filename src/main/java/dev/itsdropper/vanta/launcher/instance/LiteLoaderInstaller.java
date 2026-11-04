@@ -73,11 +73,16 @@ public final class LiteLoaderInstaller {
     }
 
     public static void install(Instance instance) throws Exception {
+        if (instance == null) {
+            throw new IllegalArgumentException("A valid LiteLoader instance is required.");
+        }
+        install(instance, instance.getMinecraftVersion());
+    }
+
+    public static void install(Instance instance, String minecraftVersion) throws Exception {
         if (instance == null || instance.getDirectory() == null) {
             throw new IllegalArgumentException("A valid LiteLoader instance is required.");
         }
-
-        String minecraftVersion = instance.getMinecraftVersion();
         JsonNode metadata = versionMetadata(minecraftVersion);
         JsonNode overlay = buildOverlay(minecraftVersion, metadata);
 
