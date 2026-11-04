@@ -18,7 +18,7 @@ class LoaderProfileStackMergerTest {
     void mergesLibrariesAndPreservesExplicitTweakerOrder() throws Exception {
         JsonNode base = MAPPER.readTree("""
                 {
-                  "mainClass": "net.minecraft.launchwrapper.Launch",
+                  "mainClass": "net.minecraft.client.main.Main",
                   "inheritsFrom": "1.12.2",
                   "minecraftArguments": "--username Steve",
                   "libraries": [{"name":"org.example:base:1.0"}]
