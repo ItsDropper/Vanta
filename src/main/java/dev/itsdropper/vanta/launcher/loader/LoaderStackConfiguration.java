@@ -148,7 +148,7 @@ public final class LoaderStackConfiguration {
             if (profileFile != null && !profileFile.isBlank()) {
                 java.nio.file.Path path = java.nio.file.Path.of(profileFile).normalize();
                 if (path.isAbsolute() || path.startsWith("..")
-                        || !path.toString().replace('\\\\', '/').startsWith("loader-profiles/")) {
+                        || !path.toString().replace(java.io.File.separatorChar, '/').startsWith("loader-profiles/")) {
                     throw new IllegalStateException("Loader profile path must stay inside loader-profiles/.");
                 }
             } else {
