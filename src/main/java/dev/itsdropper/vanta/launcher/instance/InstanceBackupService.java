@@ -7,6 +7,7 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -70,6 +71,7 @@ public final class InstanceBackupService {
                 }
                 if (added == 0) throw new IOException("The instance contains no files to back up.");
             }
+            verifyBackup(temporary);
             try {
                 Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
             } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
@@ -80,6 +82,99 @@ public final class InstanceBackupService {
             if (ex instanceof IOException io) throw io;
             throw new IOException("Could not create instance backup.", ex);
         }
+    }
+
+    /** Summary returned after every archive entry has been fully read and CRC-checked. */
+    public record BackupVerification(
+            int entryCount,
+            long expandedBytes,
+            String instanceName,
+            String minecraftVersion,
+            String loader
+    ) { }
+
+    /**
+     * Verifies a Vanta backup without extracting it. Reading each entry to EOF
+     * causes ZipInputStream to validate its CRC. Paths, duplicate entries,
+     * expansion size, and instance metadata are validated before a restore is
+     * allowed to write anything.
+     */
+    public static BackupVerification verifyBackup(Path archive) throws IOException {
+        if (archive == null || !Files.isRegularFile(archive)) {
+            throw new IOException("Select an existing Vanta ZIP backup.");
+        }
+
+        Set<String> names = new HashSet<>();
+        long expandedBytes = 0;
+        int entries = 0;
+        byte[] buffer = new byte[64 * 1024];
+        byte[] metadataBytes = null;
+
+        try (InputStream input = Files.newInputStream(archive);
+             ZipInputStream zip = new ZipInputStream(input)) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                if (++entries > 100_000) {
+                    throw new IOException("Backup contains too many entries.");
+                }
+                String rawName = entry.getName();
+                if (rawName == null || rawName.isBlank() || rawName.indexOf('\\0') >= 0) {
+                    throw new IOException("Backup contains an invalid path.");
+                }
+                String normalizedName = rawName.replace('\\\\', '/');
+                Path relative = Path.of(normalizedName).normalize();
+                if (relative.isAbsolute() || relative.startsWith("..")
+                        || normalizedName.startsWith("/")
+                        || normalizedName.matches("^[A-Za-z]:.*")) {
+                    throw new IOException("Backup contains an unsafe path: " + rawName);
+                }
+                String key = relative.toString().replace('\\\\', '/')
+                        .toLowerCase(java.util.Locale.ROOT);
+                if (!names.add(key)) {
+                    throw new IOException("Backup contains duplicate paths: " + rawName);
+                }
+
+                boolean metadataEntry = key.equals("instance.json");
+                ByteArrayOutputStream metadata = metadataEntry ? new ByteArrayOutputStream() : null;
+                int read;
+                while ((read = zip.read(buffer)) != -1) {
+                    expandedBytes += read;
+                    if (expandedBytes > 100L * 1024 * 1024 * 1024) {
+                        throw new IOException("Backup expands beyond the 100 GiB safety limit.");
+                    }
+                    if (metadata != null) {
+                        if (metadata.size() + read > 1024 * 1024) {
+                            throw new IOException("Backup instance metadata exceeds the 1 MiB safety limit.");
+                        }
+                        metadata.write(buffer, 0, read);
+                    }
+                }
+                if (metadata != null) metadataBytes = metadata.toByteArray();
+                zip.closeEntry();
+            }
+        } catch (java.util.zip.ZipException failure) {
+            throw new IOException("Backup archive is corrupt or failed its CRC integrity check.", failure);
+        } catch (java.nio.file.InvalidPathException failure) {
+            throw new IOException("Backup contains an invalid archive path.", failure);
+        }
+
+        if (entries == 0 || metadataBytes == null) {
+            throw new IOException("This ZIP is not a Vanta instance backup (instance.json is missing).");
+        }
+
+        final Instance original;
+        try {
+            original = new ObjectMapper().readValue(metadataBytes, Instance.class);
+        } catch (Exception failure) {
+            throw new IOException("The backup's instance metadata is invalid.", failure);
+        }
+        if (original.getMinecraftVersion() == null || original.getMinecraftVersion().isBlank()
+                || original.getLoader() == null || original.getLoader().isBlank()) {
+            throw new IOException("The backup is missing Minecraft version or loader metadata.");
+        }
+
+        return new BackupVerification(entries, expandedBytes, original.getName(),
+                original.getMinecraftVersion(), original.getLoader());
     }
 
     /**
