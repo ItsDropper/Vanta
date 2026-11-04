@@ -427,8 +427,8 @@ public class CreateInstanceView extends VBox {
         int requestId = manifestRequestId.incrementAndGet();
         createButton.setDisable(true);
         versionBox.setDisable(true);
-        versionBox.setPromptText("Loading Minecraft releases...");
-        statusLabel.setText("Loading Minecraft version manifest...");
+        versionBox.setPromptText("Loading Minecraft versions...");
+        statusLabel.setText("Loading Minecraft version manifest, including historical versions...");
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -453,26 +453,32 @@ public class CreateInstanceView extends VBox {
                     throw new IllegalStateException("Invalid Minecraft version manifest.");
                 }
 
-                java.util.List<String> releases = new java.util.ArrayList<>();
+                java.util.List<String> availableVersions = new java.util.ArrayList<>();
                 for (JsonNode version : versions) {
                     JsonNode idNode = version.get("id");
                     JsonNode typeNode = version.get("type");
-                    if (idNode == null || typeNode == null || !typeNode.isTextual()
-                            || !"release".equals(typeNode.asText()) || !idNode.isTextual()) {
+                    if (idNode == null || !idNode.isTextual()
+                            || typeNode == null || !typeNode.isTextual()) {
                         continue;
                     }
-                    releases.add(idNode.asText());
+
+                    String type = typeNode.asText();
+                    if ("release".equals(type)
+                            || "old_beta".equals(type)
+                            || "old_alpha".equals(type)) {
+                        availableVersions.add(idNode.asText());
+                    }
                 }
 
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != manifestRequestId.get()) return;
-                    versionBox.getItems().setAll(releases);
-                    if (releases.isEmpty()) {
+                    versionBox.getItems().setAll(availableVersions);
+                    if (availableVersions.isEmpty()) {
                         versionBox.setDisable(true);
                         loaderBox.setDisable(true);
                         createButton.setDisable(true);
-                        versionBox.setPromptText("No releases available");
-                        statusLabel.setText("No Minecraft releases were returned. Check your connection and retry.");
+                        versionBox.setPromptText("No Minecraft versions available");
+                        statusLabel.setText("No Minecraft versions were returned. Check your connection and retry.");
                         retryVersionsButton.setVisible(true);
                         retryVersionsButton.setManaged(true);
                         return;
@@ -483,12 +489,12 @@ public class CreateInstanceView extends VBox {
                     retryVersionsButton.setVisible(false);
                     retryVersionsButton.setManaged(false);
                     String preferredVersion = LauncherSettings.getDefaultMinecraftVersion();
-                    if (!preferredVersion.isBlank() && releases.contains(preferredVersion)) {
+                    if (!preferredVersion.isBlank() && availableVersions.contains(preferredVersion)) {
                         versionBox.getSelectionModel().select(preferredVersion);
                     } else {
                         versionBox.getSelectionModel().selectFirst();
                     }
-                    statusLabel.setText("Minecraft releases loaded. Checking loader compatibility...");
+                    statusLabel.setText("Minecraft versions loaded, including official Alpha and Beta history. Checking loader compatibility...");
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -499,7 +505,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.setDisable(true);
                     createButton.setDisable(true);
                     versionBox.setPromptText("Could not load versions");
-                    statusLabel.setText("Could not load Minecraft releases. Check your connection and retry.");
+                    statusLabel.setText("Could not load Minecraft versions. Check your connection and retry.");
                     retryVersionsButton.setVisible(true);
                     retryVersionsButton.setManaged(true);
                 });
