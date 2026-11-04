@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.nio.channels.FileChannel;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -44,6 +46,7 @@ public final class InstanceRecoveryService {
     private InstanceRecoveryService() { }
 
     public static RecoveryPoint createRecoveryPoint(Instance instance, String reason) throws IOException {
+        recoverInterruptedRestores(instance);
         return createRecoveryPoint(instance, reason, MinecraftLocator.getVantaDirectoryPath());
     }
 
@@ -151,6 +154,7 @@ public final class InstanceRecoveryService {
     }
 
     public static List<RecoveryPoint> listRecoveryPoints(Instance instance) throws IOException {
+        recoverInterruptedRestores(instance);
         return listRecoveryPoints(instance, MinecraftLocator.getVantaDirectoryPath());
     }
 
@@ -179,6 +183,7 @@ public final class InstanceRecoveryService {
      * all replacements have succeeded.
      */
     public static void restoreRecoveryPoint(Instance instance, String recoveryPointId) throws IOException {
+        recoverInterruptedRestores(instance);
         restoreRecoveryPoint(instance, recoveryPointId, MinecraftLocator.getVantaDirectoryPath());
     }
 
@@ -211,10 +216,24 @@ public final class InstanceRecoveryService {
 
         try {
             extractManagedDirectories(archive, staged);
+            Set<String> originallyPresent = new HashSet<>();
+            for (String directoryName : RECOVERED_DIRECTORIES) {
+                Path current = instanceDirectory.resolve(directoryName);
+                if (Files.isSymbolicLink(current)) {
+                    throw new IOException("Cannot restore over a symbolic-link directory: " + directoryName);
+                }
+                if (Files.exists(current, LinkOption.NOFOLLOW_LINKS)) {
+                    if (!Files.isDirectory(current, LinkOption.NOFOLLOW_LINKS)) {
+                        throw new IOException("Expected an instance directory but found a file: " + directoryName);
+                    }
+                    originallyPresent.add(directoryName);
+                }
+            }
+            writeRestoreJournal(transaction, originallyPresent);
             for (String directoryName : RECOVERED_DIRECTORIES) {
                 Path current = instanceDirectory.resolve(directoryName);
                 Path old = rollback.resolve(directoryName);
-                if (Files.exists(current, LinkOption.NOFOLLOW_LINKS)) {
+                if (originallyPresent.contains(directoryName)) {
                     move(current, old);
                     movedOld.add(directoryName);
                 }
@@ -261,6 +280,97 @@ public final class InstanceRecoveryService {
                 System.err.println("Recovery retention cleanup failed: " + cleanupFailure.getMessage());
             }
         }
+    }
+
+    /**
+     * Reverses any restore transaction interrupted before Vanta could report success.
+     * A journal is published atomically before the first live directory is moved.
+     */
+    public static int recoverInterruptedRestores(Instance instance) throws IOException {
+        Path instanceDirectory = requireInstanceDirectory(instance);
+        int recovered = 0;
+        try (var entries = Files.list(instanceDirectory)) {
+            for (Path transaction : entries
+                    .filter(path -> path.getFileName().toString().startsWith(".vanta-recovery-"))
+                    .toList()) {
+                if (Files.isSymbolicLink(transaction)
+                        || !Files.isDirectory(transaction, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new IOException("An unsafe recovery transaction entry requires manual inspection: "
+                            + transaction.getFileName());
+                }
+                Path journal = transaction.resolve("restore-journal.txt");
+                if (!Files.exists(journal, LinkOption.NOFOLLOW_LINKS)) {
+                    // Publication cannot start until the complete journal exists.
+                    deleteTree(transaction);
+                    recovered++;
+                    continue;
+                }
+                if (Files.isSymbolicLink(journal) || !Files.isRegularFile(journal, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new IOException("Recovery transaction journal is not a regular file: " + transaction);
+                }
+                List<String> lines = Files.readAllLines(journal, java.nio.charset.StandardCharsets.UTF_8);
+                if (lines.size() != 2 || !"VANTA-RECOVERY-TRANSACTION-V1".equals(lines.get(0))
+                        || !lines.get(1).startsWith("present=")) {
+                    throw new IOException("Unrecognized recovery transaction journal: " + transaction);
+                }
+                Set<String> originallyPresent = new HashSet<>();
+                String value = lines.get(1).substring("present=".length());
+                if (!value.isBlank()) {
+                    for (String name : value.split(",", -1)) {
+                        if (!RECOVERED_DIRECTORIES.contains(name) || !originallyPresent.add(name)) {
+                            throw new IOException("Invalid recovery transaction journal: " + transaction);
+                        }
+                    }
+                }
+
+                Path rollback = transaction.resolve("rollback");
+                if (Files.isSymbolicLink(rollback)
+                        || !Files.isDirectory(rollback, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new IOException("Recovery rollback data is missing or unsafe: " + transaction);
+                }
+
+                for (int i = RECOVERED_DIRECTORIES.size() - 1; i >= 0; i--) {
+                    String name = RECOVERED_DIRECTORIES.get(i);
+                    Path current = instanceDirectory.resolve(name);
+                    Path previous = rollback.resolve(name);
+                    boolean previousExists = Files.exists(previous, LinkOption.NOFOLLOW_LINKS);
+                    if (originallyPresent.contains(name)) {
+                        if (previousExists) {
+                            if (Files.isSymbolicLink(previous)
+                                    || !Files.isDirectory(previous, LinkOption.NOFOLLOW_LINKS)) {
+                                throw new IOException("Unsafe rollback directory in transaction: " + name);
+                            }
+                            deleteTree(current);
+                            move(previous, current);
+                        } else if (Files.isSymbolicLink(current)
+                                || !Files.isDirectory(current, LinkOption.NOFOLLOW_LINKS)) {
+                            throw new IOException("Original instance directory cannot be recovered: " + name);
+                        }
+                    } else {
+                        deleteTree(current);
+                    }
+                }
+                deleteTree(transaction);
+                recovered++;
+            }
+        }
+        return recovered;
+    }
+
+    private static void writeRestoreJournal(Path transaction, Set<String> originallyPresent) throws IOException {
+        List<String> ordered = RECOVERED_DIRECTORIES.stream()
+                .filter(originallyPresent::contains)
+                .toList();
+        String contents = "VANTA-RECOVERY-TRANSACTION-V1\\npresent="
+                + String.join(",", ordered) + "\\n";
+        Path temporary = transaction.resolve("restore-journal.txt.in-progress");
+        Path journal = transaction.resolve("restore-journal.txt");
+        Files.writeString(temporary, contents, java.nio.charset.StandardCharsets.UTF_8,
+                StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+        try (FileChannel channel = FileChannel.open(temporary, StandardOpenOption.WRITE)) {
+            channel.force(true);
+        }
+        move(temporary, journal);
     }
 
     private static void extractManagedDirectories(Path archive, Path stagedRoot) throws IOException {
