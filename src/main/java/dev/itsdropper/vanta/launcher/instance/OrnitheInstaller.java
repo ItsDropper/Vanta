@@ -38,7 +38,10 @@ public final class OrnitheInstaller {
                 fallback = version.asText();
             }
 
-            JsonNode stable = entry.get("stable");
+            JsonNode stable = loader.get("stable");
+            if (stable == null) {
+                stable = entry.get("stable");
+            }
             if (stable != null && stable.isBoolean() && stable.asBoolean()) {
                 return version.asText();
             }
