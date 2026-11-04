@@ -693,7 +693,8 @@ public class CreateInstanceView extends VBox {
                         "Legacy Fabric",
                         "Babric",
                         "NilLoader",
-                        "LiteLoader"
+                        "LiteLoader",
+                        "ModLoader"
                 );
 
                 // Keep unsupported loaders visible but prevent selecting them.
