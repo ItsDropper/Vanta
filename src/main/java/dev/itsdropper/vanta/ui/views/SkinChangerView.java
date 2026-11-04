@@ -58,8 +58,8 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
     private final Label fileLabel = new Label("Loading current account skin...");
     private final Label statusLabel = new Label("Loading the skin currently active on your account...");
     private final SkinModel3D modelPreview = new SkinModel3D();
-    private final VBox previewCard = new VBox(VantaUI.spacing(2));
-    private final Label previewHeading = new Label("Player preview");
+    private final VBox previewCard;
+    private final Label previewHeading;
     private final ComboBox<String> modelChoice = new ComboBox<>();
     private final ComboBox<CapeOption> capeChoice = new ComboBox<>();
     private final CheckBox hatLayer = new CheckBox("Hat");
