@@ -18,6 +18,16 @@ class ModrinthLoaderIdsTest {
     }
 
     @Test
+    void matchesExactAndMinorFamilyMinecraftVersions() {
+        assertTrue(ModrinthLoaderIds.supportsGameVersion(
+                java.util.List.of("1.20.1", "1.20.2"), "1.20"));
+        assertTrue(ModrinthLoaderIds.supportsGameVersion(
+                java.util.List.of("1.20.1"), "1.20.1"));
+        assertFalse(ModrinthLoaderIds.supportsGameVersion(
+                java.util.List.of("1.19.4"), "1.20"));
+    }
+
+    @Test
     void onlyUsesKnownModrinthLoaderFacets() {
         assertTrue(ModrinthLoaderIds.supportsSearchFacet("Rift"));
         assertTrue(ModrinthLoaderIds.supportsSearchFacet("LiteLoader"));
