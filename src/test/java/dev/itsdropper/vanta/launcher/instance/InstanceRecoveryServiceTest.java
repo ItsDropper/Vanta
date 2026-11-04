@@ -27,7 +27,7 @@ class InstanceRecoveryServiceTest {
         Files.createDirectories(instanceDirectory.resolve("saves/world"));
         Files.writeString(instanceDirectory.resolve("mods/example.jar"), "mod-v1");
         Files.writeString(instanceDirectory.resolve("config/example.json"), "{}");
-        Files.writeString(instanceDirectory.resolve("loader-profiles/custom.json"), "{\\"libraries\\":[]}");
+        Files.writeString(instanceDirectory.resolve("loader-profiles/custom.json"), "{\"libraries\":[]}");
 
         Files.writeString(instanceDirectory.resolve("saves/world/level.dat"), "world-data");
 
@@ -57,7 +57,7 @@ class InstanceRecoveryServiceTest {
         }
         Files.writeString(instanceDirectory.resolve("mods/old.jar"), "old-mod");
         Files.writeString(instanceDirectory.resolve("config/old.json"), "old-config");
-        Files.writeString(instanceDirectory.resolve("loader-profiles/old.json"), "{\\"libraries\\":[]}");
+        Files.writeString(instanceDirectory.resolve("loader-profiles/old.json"), "{\"libraries\":[]}");
 
         Files.writeString(instanceDirectory.resolve("saves/world/level.dat"), "world-data");
 
@@ -66,7 +66,7 @@ class InstanceRecoveryServiceTest {
 
         Files.writeString(instanceDirectory.resolve("mods/new.jar"), "new-mod");
         Files.writeString(instanceDirectory.resolve("config/new.json"), "new-config");
-        Files.writeString(instanceDirectory.resolve("loader-profiles/new.json"), "{\\"libraries\\":[]}");
+        Files.writeString(instanceDirectory.resolve("loader-profiles/new.json"), "{\"libraries\":[]}");
 
         Files.writeString(instanceDirectory.resolve("saves/world/level.dat"), "updated-world-data");
 
