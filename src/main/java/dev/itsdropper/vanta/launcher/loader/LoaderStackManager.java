@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.launcher.loader;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.NativeInstaller;
@@ -85,6 +86,11 @@ public final class LoaderStackManager {
             JsonNode profile = MAPPER.readTree(profilePath.toFile());
             if (profile == null || !profile.isObject()) {
                 throw new IllegalStateException("Invalid profile JSON: " + layer.profileFile());
+            }
+            if (!profile.hasNonNull("mainClass")
+                    || !profile.path("mainClass").isTextual()
+                    || profile.path("mainClass").asText().isBlank()) {
+                ((ObjectNode) profile).put("mainClass", base.path("mainClass").asText());
             }
             FabricInstaller.installLibraries(profile);
             overlays.add(profile);
