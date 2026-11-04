@@ -543,9 +543,20 @@ public class InstanceInstaller {
             String name,
             String minecraftVersion
     ) throws Exception {
+        return installNilLoader(name, minecraftVersion,
+                NilLoaderInstaller.findLatestLoaderVersion(minecraftVersion));
+    }
+
+    public static Instance installNilLoader(
+            String name,
+            String minecraftVersion,
+            String loaderVersion
+    ) throws Exception {
+        if (loaderVersion == null || loaderVersion.isBlank()) {
+            throw new IllegalArgumentException("NilLoader version cannot be empty.");
+        }
         JsonNode vanillaMetadata =
                 MinecraftVersionResolver.downloadMetadata(minecraftVersion);
-        String loaderVersion = NilLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
         Instance instance = InstanceManager.createInstance(
                 name, minecraftVersion, "NilLoader", loaderVersion);
 
@@ -555,7 +566,7 @@ public class InstanceInstaller {
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
 
-            NilLoaderInstaller.install(instance);
+            NilLoaderInstaller.install(instance, loaderVersion);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             InstanceManager.markInstallationComplete(instance);
             return instance;
