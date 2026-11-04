@@ -361,8 +361,8 @@ public final class InstanceRecoveryService {
         List<String> ordered = RECOVERED_DIRECTORIES.stream()
                 .filter(originallyPresent::contains)
                 .toList();
-        String contents = "VANTA-RECOVERY-TRANSACTION-V1\\npresent="
-                + String.join(",", ordered) + "\\n";
+        String contents = "VANTA-RECOVERY-TRANSACTION-V1\npresent="
+                + String.join(",", ordered) + "\n";
         Path temporary = transaction.resolve("restore-journal.txt.in-progress");
         Path journal = transaction.resolve("restore-journal.txt");
         Files.writeString(temporary, contents, java.nio.charset.StandardCharsets.UTF_8,
