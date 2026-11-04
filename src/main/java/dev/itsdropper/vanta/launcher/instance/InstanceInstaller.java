@@ -735,6 +735,13 @@ public class InstanceInstaller {
                         minecraftVersion
                 );
 
+        // A version update can replace the client runtime and loader profile.
+        // Preserve user-managed content before the first instance mutation.
+        InstanceRecoveryService.createRecoveryPoint(
+                instance,
+                "Automatic snapshot before Minecraft version update"
+        );
+
         /*
          * ---------------------------------------------------------
          * 2. INSTALL TARGET MINECRAFT RUNTIME
