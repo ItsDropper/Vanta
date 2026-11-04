@@ -108,7 +108,12 @@ public final class InstanceRecoveryService {
             }
 
             RecoveryPoint point = new RecoveryPoint(id, parseTimestamp(id), safeReason, expandedBytes, fileCount);
-            pruneRecoveryPoints(instanceId, DEFAULT_RETENTION);
+            try {
+                pruneRecoveryPoints(instanceId, DEFAULT_RETENTION);
+            } catch (IOException cleanupFailure) {
+                System.err.println("Recovery point was saved, but retention cleanup failed: "
+                        + cleanupFailure.getMessage());
+            }
             return point;
         } catch (Exception failure) {
             Files.deleteIfExists(temporary);
@@ -263,7 +268,7 @@ public final class InstanceRecoveryService {
     private static RecoveryPoint readPoint(Path archive) throws IOException {
         inspectArchive(archive);
         long timestamp = parseTimestamp(archive.getFileName().toString().replaceFirst("\\.zip$", ""));
-        long bytes = 0;
+        long expandedBytes = 0;
         int files = 0;
         String reason = "Recovery point";
         byte[] buffer = new byte[4096];
@@ -284,13 +289,14 @@ public final class InstanceRecoveryService {
                     }
                 } else if (!entry.isDirectory()) {
                     files++;
-                    while (zip.read(buffer) != -1) { /* CRC-check */ }
+                    int read;
+                    while ((read = zip.read(buffer)) != -1) expandedBytes += read;
                 }
                 zip.closeEntry();
             }
         }
         return new RecoveryPoint(archive.getFileName().toString().replaceFirst("\\.zip$", ""),
-                timestamp, reason, Files.size(archive), files);
+                timestamp, reason, expandedBytes, files);
     }
 
     private static void inspectArchive(Path archive) throws IOException {
