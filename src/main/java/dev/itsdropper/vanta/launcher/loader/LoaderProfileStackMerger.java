@@ -31,7 +31,7 @@ public final class LoaderProfileStackMerger {
         collectLibraries(libraries, vanilla);
 
         String baseMainClass = text(vanilla.get("mainClass"));
-        String effectiveMainClass = baseMainClass;
+        String effectiveMainClass = null;
         List<String> tweakers = new ArrayList<>();
 
         if (orderedOverlays != null) {
@@ -61,6 +61,8 @@ public final class LoaderProfileStackMerger {
 
         if (effectiveMainClass != null) {
             merged.put("mainClass", effectiveMainClass);
+        } else if (baseMainClass != null) {
+            merged.put("mainClass", baseMainClass);
         }
 
         ArrayNode mergedLibraries = JsonNodeFactory.instance.arrayNode();
