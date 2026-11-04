@@ -33,7 +33,7 @@ Capture all nine top-level sidebar destinations from the actual JavaFX views:
 .\gradlew.bat run --args="--capture-sidebar-screenshots build/ui-screenshots"
 ```
 
-The UI screenshots GitHub Actions workflow performs the same capture under Xvfb and uploads build/ui-screenshots as an artifact. Screenshot mode does not require a signed-in account or a pre-existing Minecraft instance. On Linux, set APPDATA to a writable temporary directory for the Windows-oriented launcher data-path resolver.
+The UI screenshots GitHub Actions workflow performs the same capture under Xvfb, generates individual PNGs plus a 3×3 overview contact sheet, and uploads build/ui-screenshots as an artifact. Screenshot mode does not require a signed-in account or a pre-existing Minecraft instance. On Linux, set APPDATA to a writable temporary directory for the Windows-oriented launcher data-path resolver.
 
 ## Packaging
 

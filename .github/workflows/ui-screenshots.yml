@@ -37,8 +37,9 @@ jobs:
         run: |
           mkdir -p "$APPDATA"
           xvfb-run -a -s "-screen 0 1600x1000x24" ./gradlew run --args="--capture-sidebar-screenshots build/ui-screenshots"
-          test "$(find build/ui-screenshots -maxdepth 1 -type f -name '*.png' | wc -l)" -eq 9
+          test "$(find build/ui-screenshots -maxdepth 1 -type f -name '*.png' ! -name 'overview.png' | wc -l)" -eq 9
           test -s build/ui-screenshots/index.md
+          test -s build/ui-screenshots/overview.png
       - name: Publish screenshots
         uses: actions/upload-artifact@v4
         with:
