@@ -8,6 +8,8 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,10 +49,18 @@ public class InstalledModManager {
                 instance.getDirectory()
                         .resolve(FILE_NAME);
 
-        MAPPER.writeValue(
-                file.toFile(),
-                mods
-        );
+        Path temporary = file.resolveSibling(FILE_NAME + ".tmp-" + UUID.randomUUID());
+        try {
+            MAPPER.writeValue(temporary.toFile(), mods);
+            try {
+                Files.move(temporary, file, StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, file, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
     }
 
     public static void add(
