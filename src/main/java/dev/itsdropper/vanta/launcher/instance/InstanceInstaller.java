@@ -744,6 +744,8 @@ public class InstanceInstaller {
                 finalMetadata
         );
 
+        dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
+
         /*
          * ---------------------------------------------------------
          * 5. UPDATE INSTANCE METADATA
