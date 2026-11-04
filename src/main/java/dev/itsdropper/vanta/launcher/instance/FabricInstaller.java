@@ -213,6 +213,16 @@ public class FabricInstaller {
             String name =
                     nameNode.asText().trim();
 
+            JsonNode downloads = library.get("downloads");
+            if (downloads != null
+                    && downloads.get("artifact") == null
+                    && downloads.has("classifiers")
+                    && library.has("natives")) {
+                // Native-only Maven entries are installed from their
+                // platform classifier by MinecraftFileInstaller.
+                continue;
+            }
+
             MavenCoordinate coordinate =
                     parseCoordinate(name);
 
