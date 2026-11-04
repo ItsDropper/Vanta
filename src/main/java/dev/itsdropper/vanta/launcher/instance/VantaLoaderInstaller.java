@@ -196,9 +196,9 @@ public final class VantaLoaderInstaller {
         if (root.path("draft").asBoolean(true)) {
             throw new IOException("The VantaLoader nightly release is not published.");
         }
-        String tag = root.path("tag_name").asText("");
-        if (!tag.equals(root.path("tag_name").asText(""))) {
-            throw new IOException("Unexpected VantaLoader release tag: " + root.path("tag_name").asText(""));
+        String publishedTag = root.path("tag_name").asText("");
+        if (!tag.equals(publishedTag)) {
+            throw new IOException("Unexpected VantaLoader release tag: " + publishedTag);
         }
 
         URI agent = null;
@@ -213,23 +213,24 @@ public final class VantaLoaderInstaller {
                 if (size <= 0 || size > MAX_AGENT_BYTES) {
                     throw new IOException("VantaLoader agent asset has an invalid size.");
                 }
-                agent = validateAssetUri(url);
+                agent = validateAssetUri(url, tag);
             } else if (CHECKSUM_ASSET.equals(name)) {
-                checksum = validateAssetUri(url);
+                checksum = validateAssetUri(url, tag);
             }
         }
         if (agent == null || checksum == null) {
             throw new IOException("VantaLoader nightly release is missing its agent or checksum asset.");
         }
-        return new Release(tag, agent, checksum);
+        return new Release(publishedTag, agent, checksum);
     }
 
-    private static URI validateAssetUri(String value) throws IOException {
+    private static URI validateAssetUri(String value, String releaseTag) throws IOException {
         try {
             URI uri = URI.create(value);
             if (!"https".equalsIgnoreCase(uri.getScheme())
                     || !"github.com".equalsIgnoreCase(uri.getHost())
-                    || !uri.getPath().startsWith("/ItsDropper/VantaLoader/releases/download/")) {
+                    || !uri.getPath().startsWith("/ItsDropper/VantaLoader/releases/download/"
+                            + releaseTag + "/")) {
                 throw new IOException("VantaLoader release contains an unexpected asset URL.");
             }
             return uri;
