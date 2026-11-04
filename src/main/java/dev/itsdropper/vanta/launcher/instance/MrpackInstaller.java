@@ -93,6 +93,12 @@ public class MrpackInstaller {
             if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
                 throw new IllegalStateException("Modpack Quilt Loader version is missing.");
             }
+        } else if (dependencies.has("ornithe")) {
+            loader = "Ornithe";
+            loaderVersion = dependencies.path("ornithe").asText();
+            if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
+                throw new IllegalStateException("Modpack Ornithe Loader version is missing.");
+            }
         } else if (dependencies.has("neoforge")) {
             loader = "NeoForge";
             loaderVersion = dependencies.path("neoforge").asText();
@@ -129,6 +135,9 @@ public class MrpackInstaller {
         } else if ("Quilt".equals(loader)) {
 
             instance = InstanceInstaller.installQuilt(name, minecraftVersion, loaderVersion);
+
+        } else if ("Ornithe".equals(loader)) {
+            instance = InstanceInstaller.installOrnithe(name, minecraftVersion, loaderVersion);
 
         } else if ("NeoForge".equals(loader)) {
 
