@@ -66,7 +66,7 @@ public final class VantaLoaderInstaller {
 
     public static Path agentPath(Instance instance, String version) {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        if (version == null || !version.matches("nightly-[0-9a-f]{12}|[A-Za-z0-9._-]{1,80}")) {
+        if (version == null || !version.matches("nightly|nightly-[0-9a-f]{12}")) {
             throw new IllegalStateException("VantaLoader instance has an invalid release identifier.");
         }
         return instance.getDirectory().resolve("libraries")
