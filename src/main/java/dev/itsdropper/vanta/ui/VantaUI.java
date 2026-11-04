@@ -10,6 +10,8 @@ import javafx.scene.shape.ClosePath;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.Objects;
 
 /** Shared visual primitives for Vanta's JavaFX interface. */
@@ -21,6 +23,12 @@ public final class VantaUI {
     public static final double RADIUS_WINDOW = 22.0;
     public static final double SQUIRCLE_EXPONENT = 4.0;
     private static final int CURVE_SEGMENTS = 20;
+
+    // Regions are weakly referenced: applying the UI system must not keep
+    // detached views alive after their owning screen is discarded.
+    private static final Map<Region, Double> SQUIRCLE_RADII = new WeakHashMap<>();
+    private static final java.util.Set<Region> SQUIRCLE_LISTENERS =
+            java.util.Collections.newSetFromMap(new WeakHashMap<>());
 
     public enum SurfaceRole {
         SIDEBAR("vanta-surface-sidebar", RADIUS_PANEL),
@@ -103,16 +111,38 @@ public final class VantaUI {
         if (!Double.isFinite(radius) || radius < 0) {
             throw new IllegalArgumentException("radius must be finite and non-negative");
         }
-        Runnable updateClip = () -> {
-            double width = region.getWidth();
-            double height = region.getHeight();
-            if (width <= 0 || height <= 0) return;
-            region.setClip(createSquirclePath(width, height,
-                    Math.min(radius, Math.min(width, height) / 2.0), SQUIRCLE_EXPONENT));
-        };
-        region.widthProperty().addListener((observable, previous, current) -> updateClip.run());
-        region.heightProperty().addListener((observable, previous, current) -> updateClip.run());
-        updateClip.run();
+
+        boolean installListeners;
+        synchronized (SQUIRCLE_RADII) {
+            SQUIRCLE_RADII.put(region, radius);
+            installListeners = SQUIRCLE_LISTENERS.add(region);
+        }
+
+        if (installListeners) {
+            region.widthProperty().addListener((observable, previous, current) -> updateSquircle(region));
+            region.heightProperty().addListener((observable, previous, current) -> updateSquircle(region));
+        }
+        updateSquircle(region);
+    }
+
+    private static void updateSquircle(Region region) {
+        double radius;
+        synchronized (SQUIRCLE_RADII) {
+            Double configured = SQUIRCLE_RADII.get(region);
+            if (configured == null) return;
+            radius = configured;
+        }
+
+        double width = region.getWidth();
+        double height = region.getHeight();
+        if (width <= 0 || height <= 0) return;
+
+        region.setClip(createSquirclePath(
+                width,
+                height,
+                Math.min(radius, Math.min(width, height) / 2.0),
+                SQUIRCLE_EXPONENT
+        ));
     }
 
     public static Path createSquirclePath(double width, double height, double radius, double exponent) {
