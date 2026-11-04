@@ -27,6 +27,8 @@ public class LaunchData {
 
     public String loaderVersion;
 
+    public Path javaAgent;
+
     public String assetIndex;
 
     public List<Path> classpath;
