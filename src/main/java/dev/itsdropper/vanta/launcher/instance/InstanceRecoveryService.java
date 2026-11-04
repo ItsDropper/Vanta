@@ -31,7 +31,7 @@ import java.util.zip.ZipOutputStream;
  */
 public final class InstanceRecoveryService {
     private static final List<String> RECOVERED_DIRECTORIES =
-            List.of("mods", "config", "resourcepacks", "shaderpacks");
+            List.of("mods", "config", "resourcepacks", "shaderpacks", "loader-profiles");
     private static final int MAX_ENTRIES = 100_000;
     private static final long MAX_EXPANDED_BYTES = 20L * 1024 * 1024 * 1024;
 
@@ -179,7 +179,7 @@ public final class InstanceRecoveryService {
     }
 
     /**
-     * Restores only the four managed directories. The new tree is fully staged
+     * Restores only the managed user-content directories. The new tree is fully staged
      * before publication; current directories are retained for rollback until
      * all replacements have succeeded.
      */
