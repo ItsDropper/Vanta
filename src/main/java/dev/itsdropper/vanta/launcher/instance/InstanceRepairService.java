@@ -146,6 +146,8 @@ public final class InstanceRepairService {
             );
         }
 
+        dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
+
         InstanceManager.markInstallationComplete(
                 instance
         );
