@@ -201,15 +201,6 @@ public class FabricInstaller {
             JsonNode nameNode =
                     library.get("name");
 
-            if (urlNode == null
-                    || !urlNode.isTextual()
-                    || urlNode.asText().isBlank()) {
-
-                throw new IllegalStateException(
-                        "Fabric library is missing a repository URL."
-                );
-            }
-
             if (nameNode == null
                     || !nameNode.isTextual()
                     || nameNode.asText().isBlank()) {
@@ -271,15 +262,16 @@ public class FabricInstaller {
                     target.getParent()
             );
 
-            String baseUrl =
-                    urlNode
-                            .asText()
-                            .trim();
-
-            if (baseUrl.isBlank()) {
-
+            String baseUrl;
+            if (urlNode == null || urlNode.isNull()) {
+                // The launcher metadata format defines Mojang's library
+                // repository as the default when a library omits its URL.
+                baseUrl = "https://libraries.minecraft.net/";
+            } else if (urlNode.isTextual() && !urlNode.asText().isBlank()) {
+                baseUrl = urlNode.asText().trim();
+            } else {
                 throw new IllegalStateException(
-                        "Fabric library repository URL is empty."
+                        "Invalid Fabric library repository URL for " + name
                 );
             }
 
