@@ -394,9 +394,14 @@ public class InstancesView extends VBox {
         int selectedIndex = instanceLabels.indexOf(selectedLabel);
         if (selectedIndex < 0 || selectedIndex >= loadedInstances.size()) return;
         Instance selected = loadedInstances.get(selectedIndex);
-        if (launchService.isRunning(selected)) {
+        LaunchService.LaunchState launchState = launchService.getState(selected);
+        if (launchState == LaunchService.LaunchState.PREPARING
+                || launchState == LaunchService.LaunchState.STARTING
+                || launchState == LaunchService.LaunchState.RUNNING
+                || launchState == LaunchService.LaunchState.CLOSING) {
             new Alert(Alert.AlertType.WARNING,
-                    "Close this instance before creating or restoring a recovery point.").showAndWait();
+                    "Wait until this instance has completely stopped before creating or restoring a recovery point.")
+                    .showAndWait();
             return;
         }
 
