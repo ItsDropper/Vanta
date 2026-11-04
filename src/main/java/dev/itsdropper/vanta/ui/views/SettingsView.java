@@ -1534,7 +1534,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         Path recoveryDirectory = vantaDirectory.resolve("recovery-points");
         VBox recoveryPolicy = card(
                 "Instance recovery retention",
-                "Recovery points protect mods, configs, resource packs, and shader packs before repair or restore operations. Worlds and screenshots are not included."
+                "Recovery points protect mods, configs, resource packs, shader packs, and imported loader profiles before repair, version updates, or restore operations. Worlds and screenshots are not included."
         );
         addInfoRow(recoveryPolicy, "Recovery-point location", recoveryDirectory.toString());
 
