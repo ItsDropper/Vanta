@@ -197,7 +197,8 @@ public class MinecraftLauncher {
                 data.mainClass
         );
 
-        if (isLegacyVersionType(data.versionType)) {
+        if (data.minecraftArguments != null && !data.minecraftArguments.isBlank()
+                && !"Forge".equalsIgnoreCase(data.loader)) {
             if (data.minecraftArguments == null || data.minecraftArguments.isBlank()) {
                 throw new IllegalStateException(
                         "Legacy Minecraft metadata is missing minecraftArguments."
@@ -211,6 +212,14 @@ public class MinecraftLauncher {
                     minecraft,
                     assets
             ));
+
+            if (data.serverHost != null && !data.serverHost.isBlank()) {
+                int port = data.serverPort > 0 ? data.serverPort : 25565;
+                command.add("--server");
+                command.add(data.serverHost);
+                command.add("--port");
+                command.add(String.valueOf(port));
+            }
 
             if (data.gameArguments != null && !data.gameArguments.isBlank()) {
                 command.addAll(splitArguments(data.gameArguments));
@@ -502,11 +511,6 @@ public class MinecraftLauncher {
         return process;
     }
 
-    private static boolean isLegacyVersionType(String type) {
-        return "old_alpha".equalsIgnoreCase(type)
-                || "old_beta".equalsIgnoreCase(type);
-    }
-
     /**
      * Historical Alpha/Beta metadata carries its own complete flat game
      * argument template. Those clients use the legacy auth_session token
@@ -538,7 +542,9 @@ public class MinecraftLauncher {
                         data.assetIndex == null || data.assetIndex.isBlank()
                                 ? "legacy" : data.assetIndex),
                 java.util.Map.entry("version_name", data.version),
-                java.util.Map.entry("version_type", "release"),
+                java.util.Map.entry("version_type",
+                        data.versionType == null || data.versionType.isBlank()
+                                ? "release" : data.versionType),
                 java.util.Map.entry("user_type", "msa"),
                 java.util.Map.entry("user_properties", "{}")
         );
