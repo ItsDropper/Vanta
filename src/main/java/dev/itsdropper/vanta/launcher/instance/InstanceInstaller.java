@@ -167,6 +167,48 @@ public class InstanceInstaller {
     }
 
     // =============================================================
+    // NEOFORGE
+    // =============================================================
+
+    public static Instance installNeoForge(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        return installNeoForge(name, minecraftVersion,
+                NeoForgeInstaller.findLatestLoaderVersion(minecraftVersion));
+    }
+
+    public static Instance installNeoForge(
+            String name,
+            String minecraftVersion,
+            String loaderVersion
+    ) throws Exception {
+        if (loaderVersion == null || loaderVersion.isBlank()) {
+            throw new IllegalArgumentException("NeoForge version cannot be empty.");
+        }
+
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "NeoForge", loaderVersion);
+
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+            NeoForgeInstaller.installNeoForge(instance, loaderVersion);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception e) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw e;
+        }
+    }
+
+    // =============================================================
     // FABRIC
     // =============================================================
 
@@ -502,6 +544,22 @@ public class InstanceInstaller {
             JsonNode quiltProfile = QuiltInstaller.downloadProfile(minecraftVersion, loaderVersion);
             QuiltInstaller.installLibraries(quiltProfile);
             finalMetadata = QuiltInstaller.mergeProfile(vanillaMetadata, quiltProfile);
+        }
+
+        if ("NeoForge".equalsIgnoreCase(loader)) {
+            if (loaderVersion == null || loaderVersion.isBlank()) {
+                throw new IllegalStateException("NeoForge version is missing.");
+            }
+            NeoForgeInstaller.installNeoForge(instance, loaderVersion);
+            Path neoForgeMetadata = instance.getDirectory()
+                    .resolve("minecraft")
+                    .resolve("version.json");
+            if (!Files.isRegularFile(neoForgeMetadata)) {
+                throw new IllegalStateException(
+                        "NeoForge installation did not produce version metadata.");
+            }
+            finalMetadata = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readTree(neoForgeMetadata.toFile());
         }
 
         if ("Forge".equalsIgnoreCase(loader)) {
