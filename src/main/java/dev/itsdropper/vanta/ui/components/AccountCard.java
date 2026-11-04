@@ -5,6 +5,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.account.Account;
+import dev.itsdropper.vanta.ui.VantaUI;
 
 public class AccountCard extends VBox {
 
@@ -14,10 +15,12 @@ public class AccountCard extends VBox {
 
     public AccountCard() {
 
-        setSpacing(10);
-        setPadding(new Insets(22));
+        setSpacing(VantaUI.spacing(2));
+        setPadding(new Insets(VantaUI.spacing(6)));
+        setMaxWidth(Double.MAX_VALUE);
 
         getStyleClass().add("info-card");
+        VantaUI.applySurface(this, VantaUI.SurfaceRole.CARD);
 
         Label title = new Label("PROFILE");
         title.getStyleClass().add("card-title");

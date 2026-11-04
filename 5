@@ -1,0 +1,240 @@
+undefined
+
+/* ============================================================
+   VANTA UI — UNIVERSAL CONTROL SKIN
+   Loaded last so legacy page selectors inherit the active theme.
+   ============================================================ */
+
+.vanta-ui-root {
+    -fx-focus-color: -vantaaccent;
+    -fx-faint-focus-color: derive(-vantaaccent, 72%);
+    -fx-selection-bar: -vantaaccentsoft;
+    -fx-selection-bar-non-focused: -vantasurfaceraised;
+}
+
+.vanta-ui-root .button {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 9px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 9px;
+    -fx-text-fill: -vantatext;
+    -fx-padding: 9px 14px;
+    -fx-cursor: hand;
+}
+
+.vanta-ui-root .button:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: derive(-vantaborder, 18%);
+}
+
+.vanta-ui-root .button:pressed {
+    -fx-background-color: -vantaborder;
+}
+
+.vanta-ui-root .button:disabled {
+    -fx-opacity: 0.48;
+}
+
+.vanta-ui-root .button:focused,
+.vanta-ui-root .text-field:focused,
+.vanta-ui-root .text-area:focused,
+.vanta-ui-root .combo-box-base:focused,
+.vanta-ui-root .choice-box:focused,
+.vanta-ui-root .spinner:focused,
+.vanta-ui-root .check-box:focused,
+.vanta-ui-root .radio-button:focused,
+.vanta-ui-root .toggle-button:focused,
+.vanta-ui-root .slider:focused,
+.vanta-ui-root .list-view:focused,
+.vanta-ui-root .table-view:focused,
+.vanta-ui-root .tree-view:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+}
+
+.vanta-ui-root .text-field,
+.vanta-ui-root .text-area,
+.vanta-ui-root .combo-box-base,
+.vanta-ui-root .choice-box,
+.vanta-ui-root .spinner,
+.vanta-ui-root .date-picker,
+.vanta-ui-root .color-picker {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 9px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 9px;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantasubtle;
+}
+
+.vanta-ui-root .text-field,
+.vanta-ui-root .text-area,
+.vanta-ui-root .combo-box-base,
+.vanta-ui-root .choice-box,
+.vanta-ui-root .date-picker,
+.vanta-ui-root .color-picker {
+    -fx-padding: 8px 11px;
+}
+
+.vanta-ui-root .text-area .content,
+.vanta-ui-root .list-view,
+.vanta-ui-root .table-view,
+.vanta-ui-root .tree-view {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+}
+
+.vanta-ui-root .list-cell,
+.vanta-ui-root .tree-cell,
+.vanta-ui-root .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .list-cell:filled:hover,
+.vanta-ui-root .tree-cell:hover,
+.vanta-ui-root .table-row-cell:hover {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.vanta-ui-root .list-cell:filled:selected,
+.vanta-ui-root .tree-cell:selected,
+.vanta-ui-root .table-row-cell:selected {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .table-view .column-header-background,
+.vanta-ui-root .table-view .column-header,
+.vanta-ui-root .table-view .filler {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+}
+
+.vanta-ui-root .scroll-pane,
+.vanta-ui-root .scroll-pane > .viewport {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.vanta-ui-root .scroll-bar:horizontal,
+.vanta-ui-root .scroll-bar:vertical {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.vanta-ui-root .scroll-bar .track {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+}
+
+.vanta-ui-root .scroll-bar .thumb {
+    -fx-background-color: derive(-vantamuted, -12%);
+    -fx-background-radius: 6px;
+}
+
+.vanta-ui-root .scroll-bar .thumb:hover {
+    -fx-background-color: -vantaaccent;
+}
+
+.vanta-ui-root .progress-bar {
+    -fx-accent: -vantaaccent;
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 6px;
+}
+
+.vanta-ui-root .progress-bar > .bar {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 6px;
+}
+
+.vanta-ui-root .check-box > .box {
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+}
+
+.vanta-ui-root .check-box:selected > .box,
+.vanta-ui-root .radio-button:selected > .radio {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
+
+.vanta-ui-root .check-box:selected > .box > .mark {
+    -fx-background-color: -vantaaccentforeground;
+}
+
+.vanta-ui-root .radio-button > .radio {
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantaborder;
+}
+
+.vanta-ui-root .radio-button:selected > .radio > .dot {
+    -fx-background-color: -vantaaccentforeground;
+}
+
+.vanta-ui-root .tooltip,
+.vanta-ui-root .context-menu,
+.vanta-ui-root .choice-box-popup,
+.vanta-ui-root .combo-box-popup {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+.vanta-ui-root .menu-item:focused,
+.vanta-ui-root .menu-item:hover {
+    -fx-background-color: -vantasurfacehover;
+}
+
+.vanta-ui-root .separator:horizontal .line,
+.vanta-ui-root .separator:vertical .line {
+    -fx-border-color: -vantaborder;
+}
+
+.vanta-ui-root .primary-button,
+.vanta-ui-root .instance-create-button,
+.vanta-ui-root .instance-play-button,
+.vanta-ui-root .home-play-button,
+.vanta-ui-root .vanta-button-primary {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -vantaaccentforeground;
+}
+
+.vanta-ui-root .primary-button:hover,
+.vanta-ui-root .instance-create-button:hover,
+.vanta-ui-root .instance-play-button:hover,
+.vanta-ui-root .home-play-button:hover,
+.vanta-ui-root .vanta-button-primary:hover {
+    -fx-background-color: -vantaaccenthover;
+    -fx-text-fill: -vantaaccentforeground;
+}
+
+.vanta-ui-root .secondary-button,
+.vanta-ui-root .settings-back-button,
+.vanta-ui-root .instance-settings-button,
+.vanta-ui-root .vanta-button-secondary {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .secondary-button:hover,
+.vanta-ui-root .settings-back-button:hover,
+.vanta-ui-root .instance-settings-button:hover,
+.vanta-ui-root .vanta-button-secondary:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: derive(-vantaborder, 18%);
+    -fx-text-fill: -vantatext;
+}

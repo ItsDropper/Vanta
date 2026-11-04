@@ -7,6 +7,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import dev.itsdropper.vanta.ui.VantaUI;
 
 /**
  * Shared title/subtitle/action layout for top-level launcher pages.
@@ -24,7 +25,7 @@ public final class PageHeader extends HBox {
     ) {
         getStyleClass().add("page-header");
         setAlignment(Pos.CENTER_LEFT);
-        setSpacing(16);
+        setSpacing(VantaUI.spacing(4));
         setMinWidth(0);
         setMaxWidth(Double.MAX_VALUE);
 
@@ -36,7 +37,7 @@ public final class PageHeader extends HBox {
         subtitleLabel.getStyleClass().addAll("page-header-subtitle", subtitleStyleClass);
         subtitleLabel.setWrapText(true);
 
-        VBox copy = new VBox(5, titleLabel, subtitleLabel);
+        VBox copy = new VBox(VantaUI.spacing(1), titleLabel, subtitleLabel);
         copy.getStyleClass().add("page-header-copy");
         copy.setMinWidth(0);
         HBox.setHgrow(copy, Priority.ALWAYS);
@@ -44,13 +45,13 @@ public final class PageHeader extends HBox {
         getChildren().add(copy);
 
         if (actions != null && actions.length > 0) {
-            FlowPane actionGroup = new FlowPane(8, 8, actions);
+            FlowPane actionGroup = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2), actions);
             actionGroup.setAlignment(Pos.CENTER_RIGHT);
             actionGroup.setMinWidth(0);
             actionGroup.setMaxWidth(Double.MAX_VALUE);
             actionGroup.getStyleClass().add("page-header-actions");
 
-            VBox compactLayout = new VBox(10);
+            VBox compactLayout = new VBox(VantaUI.spacing(2));
             compactLayout.setFillWidth(true);
             compactLayout.setMinWidth(0);
             compactLayout.setMaxWidth(Double.MAX_VALUE);

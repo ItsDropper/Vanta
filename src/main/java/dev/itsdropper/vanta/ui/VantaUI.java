@@ -48,7 +48,10 @@ public final class VantaUI {
     private VantaUI() { }
 
     public static double spacing(int units) {
-        return Math.max(0, units) * GRID_UNIT;
+        if (units < 0) {
+            throw new IllegalArgumentException("spacing units must be non-negative");
+        }
+        return units * GRID_UNIT;
     }
 
     public static void install(Parent root) {

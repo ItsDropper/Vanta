@@ -12,6 +12,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import dev.itsdropper.vanta.ui.VantaUI;
 
 public class NotificationView extends VBox {
 
@@ -41,11 +42,13 @@ public class NotificationView extends VBox {
         setPrefWidth(360);
         setMinWidth(0);
         setMaxWidth(Double.MAX_VALUE);
-        setPadding(new Insets(9, 12, 9, 12));
-        setSpacing(6);
+        setPadding(new Insets(VantaUI.spacing(2), VantaUI.spacing(3),
+                VantaUI.spacing(2), VantaUI.spacing(3)));
+        setSpacing(VantaUI.spacing(1));
         setFillWidth(true);
         setMouseTransparent(false);
         getStyleClass().add("notification");
+        VantaUI.applySurface(this, VantaUI.SurfaceRole.CARD);
 
         accent = new Rectangle(3, 30);
         accent.setArcWidth(3);

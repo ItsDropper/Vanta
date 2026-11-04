@@ -12,7 +12,7 @@ class VantaUITest {
         assertEquals(4.0, VantaUI.spacing(1));
         assertEquals(16.0, VantaUI.spacing(4));
         assertEquals(32.0, VantaUI.spacing(8));
-        assertEquals(0.0, VantaUI.spacing(-2));
+        assertThrows(IllegalArgumentException.class, () -> VantaUI.spacing(-2));
     }
 
     @Test

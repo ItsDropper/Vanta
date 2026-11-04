@@ -34,6 +34,7 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.launcher.service.InstanceUsageManager;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.ui.VantaUI;
 
 import java.io.File;
 
@@ -72,6 +73,7 @@ public class InstanceCard extends StackPane {
         getStyleClass().add(
                 "instance-card"
         );
+        VantaUI.applySurface(this, VantaUI.SurfaceRole.CARD);
 
         // ---------------------------------------------------------
         // MAIN CONTENT
@@ -80,18 +82,14 @@ public class InstanceCard extends StackPane {
         HBox content =
                 new HBox();
 
-        content.setSpacing(
-                18
-        );
+        content.setSpacing(VantaUI.spacing(4));
 
-        content.setPadding(
-                new Insets(
-                        18,
-                        20,
-                        18,
-                        20
-                )
-        );
+        content.setPadding(new Insets(
+                VantaUI.spacing(4),
+                VantaUI.spacing(5),
+                VantaUI.spacing(4),
+                VantaUI.spacing(5)
+        ));
 
         content.setAlignment(
                 Pos.CENTER_LEFT
@@ -339,9 +337,13 @@ public class InstanceCard extends StackPane {
             double width = newWidth.doubleValue();
 
             if (width < 520) {
-                content.setSpacing(width < 420 ? 9 : 12);
-                content.setPadding(new Insets(width < 420 ? 12 : 14, width < 420 ? 14 : 16,
-                        width < 420 ? 12 : 14, width < 420 ? 14 : 16));
+                content.setSpacing(width < 420 ? VantaUI.spacing(2) : VantaUI.spacing(3));
+                content.setPadding(new Insets(
+                        width < 420 ? VantaUI.spacing(3) : VantaUI.spacing(4),
+                        width < 420 ? VantaUI.spacing(3) : VantaUI.spacing(4),
+                        width < 420 ? VantaUI.spacing(3) : VantaUI.spacing(4),
+                        width < 420 ? VantaUI.spacing(3) : VantaUI.spacing(4)
+                ));
                 statusLabel.setVisible(false);
                 statusLabel.setManaged(false);
                 settingsButton.setText("⚙");
@@ -351,8 +353,11 @@ public class InstanceCard extends StackPane {
                 right.setSpacing(7);
                 right.setPadding(new Insets(0, 34, 0, 0));
             } else {
-                content.setSpacing(18);
-                content.setPadding(new Insets(18, 20, 18, 20));
+                content.setSpacing(VantaUI.spacing(4));
+                content.setPadding(new Insets(
+                        VantaUI.spacing(4), VantaUI.spacing(5),
+                        VantaUI.spacing(4), VantaUI.spacing(5)
+                ));
                 statusLabel.setVisible(true);
                 statusLabel.setManaged(true);
                 settingsButton.setText("OPTIONS");
