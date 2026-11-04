@@ -528,7 +528,11 @@ public class MinecraftLauncher {
                 java.util.Map.entry("auth_uuid", uuid),
                 java.util.Map.entry("auth_access_token", account.getAccessToken()),
                 java.util.Map.entry("game_directory", gameDirectory.toString()),
-                java.util.Map.entry("game_assets", assetsDirectory.toString()),
+                java.util.Map.entry("game_assets",
+                        assetsDirectory.resolve("virtual").resolve(
+                                data.assetIndex == null || data.assetIndex.isBlank()
+                                        ? "legacy" : data.assetIndex
+                        ).toString()),
                 java.util.Map.entry("assets_root", assetsDirectory.toString()),
                 java.util.Map.entry("assets_index_name",
                         data.assetIndex == null || data.assetIndex.isBlank()
