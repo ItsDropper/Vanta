@@ -120,6 +120,7 @@ public class InstanceInstaller {
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            MinecraftMappingsInstaller.install(instance, vanillaMetadata);
             VantaLoaderInstaller.install(instance);
             InstanceManager.markInstallationComplete(instance);
             return instance;
