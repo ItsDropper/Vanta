@@ -32,7 +32,6 @@ public final class InstanceRecoveryService {
     private static final int MAX_ENTRIES = 100_000;
     private static final long MAX_EXPANDED_BYTES = 20L * 1024 * 1024 * 1024;
     private static final int DEFAULT_RETENTION = 5;
-    private static final byte[] BUFFER = new byte[64 * 1024];
 
     public record RecoveryPoint(
             String id,
@@ -45,9 +44,14 @@ public final class InstanceRecoveryService {
     private InstanceRecoveryService() { }
 
     public static RecoveryPoint createRecoveryPoint(Instance instance, String reason) throws IOException {
+        return createRecoveryPoint(instance, reason, MinecraftLocator.getVantaDirectoryPath());
+    }
+
+    static RecoveryPoint createRecoveryPoint(Instance instance, String reason, Path vantaDirectory)
+            throws IOException {
         Path instanceDirectory = requireInstanceDirectory(instance);
         String instanceId = safeInstanceId(instance.getId());
-        Path recoveryDirectory = recoveryDirectory(instanceId);
+        Path recoveryDirectory = recoveryDirectory(instanceId, vantaDirectory);
         Files.createDirectories(recoveryDirectory);
 
         String id = Instant.now().toEpochMilli() + "-" + UUID.randomUUID().toString().substring(0, 8);
@@ -124,7 +128,11 @@ public final class InstanceRecoveryService {
     }
 
     public static List<RecoveryPoint> listRecoveryPoints(Instance instance) throws IOException {
-        Path directory = recoveryDirectory(safeInstanceId(instance == null ? null : instance.getId()));
+        return listRecoveryPoints(instance, MinecraftLocator.getVantaDirectoryPath());
+    }
+
+    static List<RecoveryPoint> listRecoveryPoints(Instance instance, Path vantaDirectory) throws IOException {
+        Path directory = recoveryDirectory(safeInstanceId(instance == null ? null : instance.getId()), vantaDirectory);
         if (!Files.isDirectory(directory)) return List.of();
 
         List<RecoveryPoint> points = new ArrayList<>();
@@ -147,13 +155,19 @@ public final class InstanceRecoveryService {
      * all replacements have succeeded.
      */
     public static void restoreRecoveryPoint(Instance instance, String recoveryPointId) throws IOException {
+        restoreRecoveryPoint(instance, recoveryPointId, MinecraftLocator.getVantaDirectoryPath());
+    }
+
+    static void restoreRecoveryPoint(Instance instance, String recoveryPointId, Path vantaDirectory)
+            throws IOException {
         Path instanceDirectory = requireInstanceDirectory(instance);
         String instanceId = safeInstanceId(instance.getId());
         if (recoveryPointId == null || !recoveryPointId.matches("[0-9]{13}-[a-f0-9]{8}")) {
             throw new IllegalArgumentException("Invalid recovery point identifier.");
         }
-        Path archive = recoveryDirectory(instanceId).resolve(recoveryPointId + ".zip").normalize();
-        if (!archive.startsWith(recoveryDirectory(instanceId)) || !Files.isRegularFile(archive)) {
+        Path recoveryDirectory = recoveryDirectory(instanceId, vantaDirectory);
+        Path archive = recoveryDirectory.resolve(recoveryPointId + ".zip").normalize();
+        if (!archive.startsWith(recoveryDirectory) || !Files.isRegularFile(archive)) {
             throw new IOException("Recovery point no longer exists.");
         }
         inspectArchive(archive);
@@ -355,7 +369,13 @@ public final class InstanceRecoveryService {
     }
 
     private static Path recoveryDirectory(String instanceId) {
-        return MinecraftLocator.getVantaDirectoryPath().resolve("recovery-points").resolve(instanceId).normalize();
+        return recoveryDirectory(instanceId, MinecraftLocator.getVantaDirectoryPath());
+    }
+
+    private static Path recoveryDirectory(String instanceId, Path vantaDirectory) {
+        if (vantaDirectory == null) throw new IllegalArgumentException("Vanta data directory is required.");
+        return vantaDirectory.toAbsolutePath().normalize()
+                .resolve("recovery-points").resolve(instanceId).normalize();
     }
 
     private static Path requireInstanceDirectory(Instance instance) throws IOException {
