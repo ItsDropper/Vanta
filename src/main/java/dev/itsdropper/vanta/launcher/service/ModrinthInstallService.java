@@ -155,107 +155,111 @@ private Path installResolvedVersion(
             ModrinthVersion version
     ) throws IOException, InterruptedException {
 
-        ModrinthFile file =
-                catalog.findPrimaryFile(version);
-
-        if (file == null) {
-            throw new IOException(
-                    "Modrinth version has no downloadable file: "
-                            + projectId
-            );
+        ModrinthFile file = catalog.findPrimaryFile(version);
+        if (file == null || file.getUrl() == null || file.getUrl().isBlank()) {
+            throw new IOException("Modrinth version has no downloadable file: " + projectId);
         }
 
-        Path modsDirectory =
-                instance.getDirectory()
-                        .resolve("mods");
-
+        Path modsDirectory = instance.getDirectory().resolve("mods").toAbsolutePath().normalize();
         Files.createDirectories(modsDirectory);
 
-        /*
-         * If this project is already tracked and the exact same
-         * version is installed, don't redownload it.
-         */
-        InstalledModRecord existing =
-                InstalledModManager.findByProjectId(
-                        instance,
-                        projectId
-                );
-
-        if (existing != null
-                && version.getId().equals(
-                existing.getVersionId()
-        )
+        InstalledModRecord existing = InstalledModManager.findByProjectId(instance, projectId);
+        if (existing != null && version.getId().equals(existing.getVersionId())
                 && existing.getFilename() != null) {
+            Path existingFile = resolveTrackedModPath(modsDirectory, existing.getFilename());
+            if (Files.isRegularFile(existingFile)) return existingFile;
+        }
 
-            Path existingFile =
-                    modsDirectory.resolve(
-                            existing.getFilename()
-                    );
+        String filename = catalog.sanitizeFilename(file.getFilename());
+        if (filename == null || filename.isBlank()) {
+            throw new IOException("Modrinth returned an invalid mod filename.");
+        }
+        Path installedFile = modsDirectory.resolve(filename).normalize();
+        if (!installedFile.startsWith(modsDirectory)) {
+            throw new IOException("Mod filename escapes the instance mods directory.");
+        }
 
-            if (Files.isRegularFile(existingFile)) {
-                return existingFile;
+        Path previousFile = existing == null || existing.getFilename() == null
+                ? null : resolveTrackedModPath(modsDirectory, existing.getFilename());
+        if (Files.exists(installedFile) && (previousFile == null || !installedFile.equals(previousFile))) {
+            throw new IOException("A different file already exists at " + installedFile.getFileName()
+                    + "; refusing to overwrite an untracked mod.");
+        }
+
+        Path stagedFile = modsDirectory.resolve(".vanta-stage-" + UUID.randomUUID() + ".jar");
+        Path rollbackFile = previousFile != null && Files.isRegularFile(previousFile)
+                ? modsDirectory.resolve(".vanta-rollback-" + UUID.randomUUID() + ".jar") : null;
+        boolean previousMoved = false;
+        boolean newFilePublished = false;
+
+        try {
+            // Download to a unique staging file; never touch the installed version during transfer.
+            DownloadUtil.downloadFile(file.getUrl(), stagedFile);
+            if (!Files.isRegularFile(stagedFile) || Files.size(stagedFile) == 0) {
+                throw new IOException("Downloaded mod file is empty or missing.");
+            }
+            if (file.getSize() > 0 && Files.size(stagedFile) != file.getSize()) {
+                throw new IOException("Downloaded mod size does not match Modrinth metadata.");
+            }
+
+            InstalledMod scanned = installedModScanner.scanFile(stagedFile);
+
+            if (rollbackFile != null) {
+                moveFile(previousFile, rollbackFile);
+                previousMoved = true;
+            }
+
+            moveFile(stagedFile, installedFile);
+            newFilePublished = true;
+
+            InstalledModManager.add(instance, new InstalledModRecord(
+                    projectId,
+                    version.getId(),
+                    scanned != null ? scanned.getModId() : null,
+                    scanned != null ? scanned.getVersion() : version.getVersionNumber(),
+                    installedFile.getFileName().toString()
+            ));
+
+            // Registry now points to the new file; only now is the previous file disposable.
+            if (rollbackFile != null) Files.deleteIfExists(rollbackFile);
+            if (previousFile != null && !previousFile.equals(installedFile)) {
+                Files.deleteIfExists(previousFile);
+            }
+            return installedFile;
+        } catch (Exception failure) {
+            if (newFilePublished) {
+                try { Files.deleteIfExists(installedFile); }
+                catch (IOException rollbackFailure) { failure.addSuppressed(rollbackFailure); }
+            }
+            if (previousMoved && rollbackFile != null && Files.exists(rollbackFile)) {
+                try { moveFile(rollbackFile, previousFile); }
+                catch (IOException rollbackFailure) { failure.addSuppressed(rollbackFailure); }
+            }
+            if (failure instanceof InterruptedException interrupted) throw interrupted;
+            if (failure instanceof IOException io) throw io;
+            throw new IOException("Could not install mod transactionally: " + projectId, failure);
+        } finally {
+            Files.deleteIfExists(stagedFile);
+            if (rollbackFile != null && Files.exists(rollbackFile) && !previousMoved) {
+                Files.deleteIfExists(rollbackFile);
             }
         }
+    }
 
-        /*
-         * Remove an older tracked version before installing the
-         * replacement.
-         */
-        if (existing != null) {
-            removeInstalledMod(
-                    instance,
-                    projectId
-            );
+    private static Path resolveTrackedModPath(Path modsDirectory, String filename) throws IOException {
+        Path resolved = modsDirectory.resolve(filename).normalize();
+        if (!resolved.startsWith(modsDirectory)) {
+            throw new IOException("Installed-mod registry contains an unsafe filename: " + filename);
         }
+        return resolved;
+    }
 
-        Path installedFile =
-                modsDirectory.resolve(
-                        catalog.sanitizeFilename(
-                                file.getFilename()
-                        )
-                );
-
-        if (!Files.exists(installedFile)) {
-
-            try {
-
-                DownloadUtil.downloadFile(
-                        file.getUrl(),
-                        installedFile
-                );
-
-            } catch (Exception e) {
-
-                throw new IOException(
-                        "Failed to download mod: "
-                                + file.getFilename(),
-                        e
-                );
-            }
+    private static void moveFile(Path source, Path destination) throws IOException {
+        try {
+            Files.move(source, destination, StandardCopyOption.ATOMIC_MOVE);
+        } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+            Files.move(source, destination);
         }
-
-        InstalledMod installedMod =
-                installedModScanner.scanFile(
-                        installedFile
-                );
-
-        InstalledModManager.add(
-                instance,
-                new InstalledModRecord(
-                        projectId,
-                        version.getId(),
-                        installedMod != null
-                                ? installedMod.getModId()
-                                : null,
-                        installedMod != null
-                                ? installedMod.getVersion()
-                                : version.getVersionNumber(),
-                        installedFile.getFileName()
-                                .toString()
-                )
-        );
-
-        return installedFile;
     }
 
 private Path installModVersion(
