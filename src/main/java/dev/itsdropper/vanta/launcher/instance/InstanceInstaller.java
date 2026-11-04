@@ -539,6 +539,34 @@ public class InstanceInstaller {
         }
     }
 
+    public static Instance installNilLoader(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        JsonNode vanillaMetadata =
+                MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "NilLoader", NilLoaderInstaller.VERSION);
+
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+
+            NilLoaderInstaller.install(instance);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception failure) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw failure;
+        }
+    }
+
     public static Instance updateMinecraftVersion(
             Instance instance,
             String minecraftVersion
@@ -748,6 +776,10 @@ public class InstanceInstaller {
                 instance,
                 finalMetadata
         );
+
+        if ("NilLoader".equalsIgnoreCase(loader)) {
+            NilLoaderInstaller.install(instance);
+        }
 
         dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
 
