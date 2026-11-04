@@ -81,7 +81,7 @@ public final class InstanceRecoveryService {
                     }
                     for (Path file : files) {
                         Path relative = directory.relativize(file);
-                        String entryName = directoryName + "/" + relative.toString().replace('\\\\', '/');
+                        String entryName = directoryName + "/" + relative.toString().replace('\\', '/');
                         zip.putNextEntry(new ZipEntry(entryName));
                         try (InputStream input = Files.newInputStream(file)) {
                             int read;
@@ -223,16 +223,16 @@ public final class InstanceRecoveryService {
             while ((entry = zip.getNextEntry()) != null) {
                 if (++entries > MAX_ENTRIES + 16) throw new IOException("Recovery archive contains too many entries.");
                 String raw = entry.getName();
-                if (raw == null || raw.isBlank() || raw.indexOf('\\0') >= 0) {
+                if (raw == null || raw.isBlank() || raw.indexOf((char) 0) >= 0) {
                     throw new IOException("Recovery archive contains an invalid path.");
                 }
-                String normalized = raw.replace('\\\\', '/');
+                String normalized = raw.replace('\\', '/');
                 Path relative = Path.of(normalized).normalize();
                 if (relative.isAbsolute() || relative.startsWith("..") || normalized.startsWith("/")
                         || normalized.matches("^[A-Za-z]:.*")) {
                     throw new IOException("Recovery archive contains an unsafe path.");
                 }
-                String key = relative.toString().replace('\\\\', '/').toLowerCase(Locale.ROOT);
+                String key = relative.toString().replace('\\', '/').toLowerCase(Locale.ROOT);
                 if (!seen.add(key)) throw new IOException("Recovery archive contains duplicate paths.");
                 if (key.equals("recovery-point.txt")) {
                     while (zip.read(buffer) != -1) { /* consume and CRC-check */ }
@@ -312,12 +312,12 @@ public final class InstanceRecoveryService {
             while ((entry = zip.getNextEntry()) != null) {
                 if (++entries > MAX_ENTRIES + 16) throw new IOException("Recovery archive contains too many entries.");
                 String name = entry.getName();
-                if (name == null || name.isBlank() || name.indexOf('\\0') >= 0) throw new IOException("Invalid recovery archive path.");
-                String normalized = name.replace('\\\\', '/');
+                if (name == null || name.isBlank() || name.indexOf((char) 0) >= 0) throw new IOException("Invalid recovery archive path.");
+                String normalized = name.replace('\\', '/');
                 Path relative = Path.of(normalized).normalize();
                 if (relative.isAbsolute() || relative.startsWith("..") || normalized.startsWith("/")
                         || normalized.matches("^[A-Za-z]:.*")) throw new IOException("Unsafe recovery archive path.");
-                String key = relative.toString().replace('\\\\', '/').toLowerCase(Locale.ROOT);
+                String key = relative.toString().replace('\\', '/').toLowerCase(Locale.ROOT);
                 if (!names.add(key)) throw new IOException("Duplicate recovery archive path.");
                 if (!key.equals("recovery-point.txt")) {
                     String top = relative.getNameCount() == 0 ? "" : relative.getName(0).toString();
