@@ -103,7 +103,11 @@ public final class SidebarScreenshotCapture {
                             root.getLayoutBounds().getHeight());
                     dumpNodeTree(root, 0, 4);
                 }
-                BufferedImage image = captureVisibleWindow(root);
+                BufferedImage image = captureVisibleWindow(
+                        root,
+                        outputDirectory.resolve("debug-native.png"),
+                        outputDirectory.resolve("debug-node.png")
+                );
                 writePng(image, outputDirectory.resolve(fileName(page)));
             } catch (Throwable failure) {
                 completion.accept(failure);
@@ -145,7 +149,11 @@ public final class SidebarScreenshotCapture {
      * pipelines return a mostly empty node snapshot despite a correctly laid-out
      * scene, so on-screen pixels are the authoritative screenshot source.
      */
-    private static BufferedImage captureVisibleWindow(Parent root) throws IOException {
+    private static BufferedImage captureVisibleWindow(
+            Parent root,
+            Path nativeDiagnostic,
+            Path nodeDiagnostic
+    ) throws IOException {
         Window window = root.getScene() == null ? null : root.getScene().getWindow();
         if (window != null && window.isShowing()) {
             int x = (int) Math.floor(window.getX());
@@ -161,7 +169,8 @@ public final class SidebarScreenshotCapture {
                     if (hasVisualVariation(captured)) {
                         return captured;
                     }
-                    System.err.println("Native window capture was blank; trying JavaFX node snapshot.");
+                    writePngUnchecked(captured, nativeDiagnostic);
+                    System.err.println("Native window capture was blank; preserved debug-native.png.");
                 } catch (RuntimeException failure) {
                     System.err.println("Native window capture unavailable; trying JavaFX node snapshot: "
                             + failure.getMessage());
@@ -175,6 +184,8 @@ public final class SidebarScreenshotCapture {
         parameters.setFill(javafx.scene.paint.Color.web("#0B0D12"));
         BufferedImage fallback = toBufferedImage(root.snapshot(parameters, null));
         if (!hasVisualVariation(fallback)) {
+            writePngUnchecked(fallback, nodeDiagnostic);
+            System.err.println("JavaFX node capture was blank; preserved debug-node.png.");
             throw new IOException("Both native window and JavaFX node captures are blank or unrendered");
         }
         return fallback;
@@ -218,9 +229,13 @@ public final class SidebarScreenshotCapture {
     }
 
     private static void writePng(BufferedImage image, Path destination) throws IOException {
+        writePngUnchecked(image, destination);
         if (!hasVisualVariation(image)) {
             throw new IOException("Screenshot appears blank or unrendered");
         }
+    }
+
+    private static void writePngUnchecked(BufferedImage image, Path destination) throws IOException {
         if (!ImageIO.write(image, "png", destination.toFile())) {
             throw new IOException("No PNG image writer is available");
         }
