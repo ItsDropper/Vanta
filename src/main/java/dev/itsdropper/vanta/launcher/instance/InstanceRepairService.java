@@ -141,7 +141,12 @@ public final class InstanceRepairService {
         } else if (loader.equalsIgnoreCase("liteloader")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
-            LiteLoaderInstaller.install(instance);
+            String repairedLoaderVersion = LiteLoaderInstaller.install(instance);
+            if (!repairedLoaderVersion.equals(instance.getLoaderVersion())) {
+                InstanceManager.saveInstance(new Instance(
+                        instance.getId(), instance.getName(), instance.getMinecraftVersion(),
+                        instance.getLoader(), repairedLoaderVersion, instance.getDirectory()));
+            }
         } else if (loader.equalsIgnoreCase("vanilla")) {
             MinecraftVersionResolver.saveMetadata(
                     instance,
