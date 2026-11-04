@@ -15,8 +15,6 @@ import dev.itsdropper.vanta.launcher.loader.LoaderProfileStackMerger;
  */
 public final class BabricInstaller {
     public static final String SUPPORTED_GAME_VERSION = "b1.7.3";
-    private static final String INTERMEDIARY_REPOSITORY =
-            "https://maven.glass-launcher.net/babric/";
     private static final String BABRIC_ARGUMENTS =
             "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}";
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -81,16 +79,16 @@ public final class BabricInstaller {
                     {"name":"babric:intermediary-upstream:b1.7.3","url":"https://maven.glass-launcher.net/babric/"},
                     {"name":"babric:log4j-config:1.0.0","url":"https://maven.glass-launcher.net/babric/"},
                     {"name":"net.minecrell:terminalconsoleappender:1.2.0","url":"https://repo1.maven.org/maven2/"},
-                    {"name":"org.slf4j:slf4j-api:1.8.0-beta4"},
-                    {"name":"org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0"},
-                    {"name":"org.apache.logging.log4j:log4j-api:2.16.0"},
-                    {"name":"org.apache.logging.log4j:log4j-core:2.16.0"},
-                    {"name":"com.google.code.gson:gson:2.8.9"},
-                    {"name":"com.google.guava:guava:31.0.1-jre"},
-                    {"name":"com.google.guava:failureaccess:1.0.1"},
-                    {"name":"org.apache.commons:commons-lang3:3.12.0"},
-                    {"name":"commons-io:commons-io:2.11.0"},
-                    {"name":"commons-codec:commons-codec:1.15"}
+                    {"name":"org.slf4j:slf4j-api:1.8.0-beta4","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"org.apache.logging.log4j:log4j-slf4j18-impl:2.16.0","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"org.apache.logging.log4j:log4j-api:2.16.0","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"org.apache.logging.log4j:log4j-core:2.16.0","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"com.google.code.gson:gson:2.8.9","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"com.google.guava:guava:31.0.1-jre","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"com.google.guava:failureaccess:1.0.1","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"org.apache.commons:commons-lang3:3.12.0","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"commons-io:commons-io:2.11.0","url":"https://repo1.maven.org/maven2/"},
+                    {"name":"commons-codec:commons-codec:1.15","url":"https://repo1.maven.org/maven2/"}
                   ]
                 }
                 """);
