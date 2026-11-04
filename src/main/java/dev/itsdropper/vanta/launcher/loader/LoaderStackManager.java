@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.NativeInstaller;
+import dev.itsdropper.vanta.launcher.instance.MinecraftFileInstaller;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.io.IOException;
@@ -107,6 +108,7 @@ public final class LoaderStackManager {
         }
 
         try {
+            MinecraftFileInstaller.installLibraries(merged);
             NativeInstaller.extract(instance, merged);
             configuration.save(configurationPath(instance));
         } catch (Exception failure) {
