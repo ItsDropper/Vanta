@@ -23,6 +23,7 @@ public final class VantaUI {
     public static final double RADIUS_WINDOW = 22.0;
     public static final double SQUIRCLE_EXPONENT = 4.0;
     private static final int CURVE_SEGMENTS = 20;
+    private static volatile boolean squircleClippingEnabled = true;
 
     // Regions are weakly referenced: applying the UI system must not keep
     // detached views alive after their owning screen is discarded.
@@ -70,6 +71,14 @@ public final class VantaUI {
 
     private VantaUI() { }
 
+    /**
+     * Enables or disables path-based clipping. Screenshot mode can disable
+     * this independently of semantic surface styling to isolate render issues.
+     */
+    public static void setSquircleClippingEnabled(boolean enabled) {
+        squircleClippingEnabled = enabled;
+    }
+
     public static double spacing(int units) {
         if (units < 0) {
             throw new IllegalArgumentException("spacing units must be non-negative");
@@ -103,11 +112,19 @@ public final class VantaUI {
         Objects.requireNonNull(role, "role");
         addStyleClass(region, "vanta-surface");
         addStyleClass(region, role.styleClass);
-        applySquircle(region, role.radius);
+        if (squircleClippingEnabled) {
+            applySquircle(region, role.radius);
+        } else {
+            region.setClip(null);
+        }
     }
 
     public static void applySquircle(Region region, double radius) {
         Objects.requireNonNull(region, "region");
+        if (!squircleClippingEnabled) {
+            region.setClip(null);
+            return;
+        }
         if (!Double.isFinite(radius) || radius < 0) {
             throw new IllegalArgumentException("radius must be finite and non-negative");
         }

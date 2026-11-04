@@ -82,6 +82,7 @@ public class LauncherView {
         this.stage = stage;
         this.onReady = onReady;
         this.screenshotMode = screenshotMode;
+        VantaUI.setSquircleClippingEnabled(!screenshotMode);
 
         root =
                 new StackPane();
