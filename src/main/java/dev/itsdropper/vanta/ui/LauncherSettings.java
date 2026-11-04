@@ -153,7 +153,8 @@ public final class LauncherSettings {
         if (!"Vanilla".equals(loader) && !"Fabric".equals(loader)
                 && !"Quilt".equals(loader) && !"Forge".equals(loader)
                 && !"NeoForge".equals(loader) && !"Ornithe".equals(loader)
-                && !"Legacy Fabric".equals(loader) && !"Babric".equals(loader)) {
+                && !"Legacy Fabric".equals(loader) && !"Babric".equals(loader)
+                && !"NilLoader".equals(loader)) {
             loader = "Fabric";
         }
         setString("defaultLoader", loader);
