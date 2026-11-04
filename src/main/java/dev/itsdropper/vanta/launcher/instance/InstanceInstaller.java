@@ -422,6 +422,48 @@ public class InstanceInstaller {
         }
     }
 
+    public static Instance installOrnithe(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        return installOrnithe(name, minecraftVersion,
+                OrnitheInstaller.findLatestLoaderVersion(minecraftVersion));
+    }
+
+    public static Instance installOrnithe(
+            String name,
+            String minecraftVersion,
+            String loaderVersion
+    ) throws Exception {
+        if (loaderVersion == null || loaderVersion.isBlank()) {
+            throw new IllegalArgumentException("Ornithe Loader version cannot be empty.");
+        }
+
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "Ornithe", loaderVersion);
+
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+
+            JsonNode ornitheProfile = OrnitheInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            OrnitheInstaller.installLibraries(ornitheProfile);
+            JsonNode merged = OrnitheInstaller.mergeProfile(vanillaMetadata, ornitheProfile);
+            MinecraftVersionResolver.saveMetadata(instance, merged);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception e) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw e;
+        }
+    }
+
     public static Instance updateMinecraftVersion(
             Instance instance,
             String minecraftVersion
@@ -544,6 +586,15 @@ public class InstanceInstaller {
             JsonNode quiltProfile = QuiltInstaller.downloadProfile(minecraftVersion, loaderVersion);
             QuiltInstaller.installLibraries(quiltProfile);
             finalMetadata = QuiltInstaller.mergeProfile(vanillaMetadata, quiltProfile);
+        }
+
+        if ("Ornithe".equalsIgnoreCase(loader)) {
+            if (loaderVersion == null || loaderVersion.isBlank()) {
+                throw new IllegalStateException("Ornithe Loader version is missing.");
+            }
+            JsonNode ornitheProfile = OrnitheInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            OrnitheInstaller.installLibraries(ornitheProfile);
+            finalMetadata = OrnitheInstaller.mergeProfile(vanillaMetadata, ornitheProfile);
         }
 
         if ("NeoForge".equalsIgnoreCase(loader)) {
