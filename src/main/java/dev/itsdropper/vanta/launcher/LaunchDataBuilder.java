@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.launcher;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
+import dev.itsdropper.vanta.launcher.loader.LoaderStackManager;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
 import dev.itsdropper.vanta.launcher.model.VersionManifest;
@@ -34,6 +35,11 @@ public class LaunchDataBuilder {
 
         Path instanceDirectory =
                 instance.getDirectory();
+
+        // A saved stack is validated before reading the already-merged
+        // version metadata. ClasspathBuilder and MinecraftLauncher then
+        // consume that merged metadata through the normal launch path.
+        LoaderStackManager.validateForLaunch(instance);
 
         // =========================================================
         // VERSION MANIFEST
