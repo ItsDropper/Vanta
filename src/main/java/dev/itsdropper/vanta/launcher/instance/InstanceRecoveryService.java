@@ -298,6 +298,18 @@ public final class InstanceRecoveryService {
                     throw new IOException("An unsafe recovery transaction entry requires manual inspection: "
                             + transaction.getFileName());
                 }
+                String transactionName = transaction.getFileName().toString();
+                if (!transactionName.matches("\\.vanta-recovery-[A-Za-z0-9-]+")) {
+                    throw new IOException("An unrecognized recovery transaction directory requires manual inspection: "
+                            + transactionName);
+                }
+                Path staged = transaction.resolve("staged");
+                Path rollback = transaction.resolve("rollback");
+                if (Files.isSymbolicLink(staged) || !Files.isDirectory(staged, LinkOption.NOFOLLOW_LINKS)
+                        || Files.isSymbolicLink(rollback) || !Files.isDirectory(rollback, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new IOException("Recovery transaction staging or rollback data is missing or unsafe: "
+                            + transaction);
+                }
                 Path journal = transaction.resolve("restore-journal.txt");
                 if (!Files.exists(journal, LinkOption.NOFOLLOW_LINKS)) {
                     // Publication cannot start until the complete journal exists.
@@ -321,12 +333,6 @@ public final class InstanceRecoveryService {
                             throw new IOException("Invalid recovery transaction journal: " + transaction);
                         }
                     }
-                }
-
-                Path rollback = transaction.resolve("rollback");
-                if (Files.isSymbolicLink(rollback)
-                        || !Files.isDirectory(rollback, LinkOption.NOFOLLOW_LINKS)) {
-                    throw new IOException("Recovery rollback data is missing or unsafe: " + transaction);
                 }
 
                 for (int i = RECOVERED_DIRECTORIES.size() - 1; i >= 0; i--) {
