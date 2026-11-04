@@ -227,8 +227,8 @@ public class ModrinthClient {
                             .map(ModrinthLoaderIds::normalize)
                             .anyMatch(loaderId::equals)
                             && (minecraftVersion == null || minecraftVersion.isBlank()
-                                || (version.getGameVersions() != null
-                                    && version.getGameVersions().contains(minecraftVersion)))
+                                || ModrinthLoaderIds.supportsGameVersion(
+                                        version.getGameVersions(), minecraftVersion))
             );
             if (supported) {
                 compatible.add(hit);
