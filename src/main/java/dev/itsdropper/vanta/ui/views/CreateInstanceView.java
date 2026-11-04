@@ -18,6 +18,7 @@ import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.BabricInstaller;
+import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
 import dev.itsdropper.vanta.launcher.instance.ForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.NeoForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.OrnitheInstaller;
@@ -575,6 +576,7 @@ public class CreateInstanceView extends VBox {
             boolean ornitheAvailable = false;
             boolean legacyFabricAvailable = false;
             boolean babricAvailable = false;
+            boolean nilLoaderAvailable = false;
 
             try {
                 FabricInstaller.findLatestLoaderVersion(minecraftVersion);
@@ -618,6 +620,12 @@ public class CreateInstanceView extends VBox {
             } catch (Throwable ignored) {
             }
 
+            try {
+                NilLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
+                nilLoaderAvailable = true;
+            } catch (Throwable ignored) {
+            }
+
             final boolean fabric = fabricAvailable;
             final boolean forge = forgeAvailable;
             final boolean quilt = quiltAvailable;
@@ -625,7 +633,7 @@ public class CreateInstanceView extends VBox {
             final boolean ornithe = ornitheAvailable;
             final boolean legacyFabric = legacyFabricAvailable;
             final boolean babric = babricAvailable;
-            final boolean nilLoader = true;
+            final boolean nilLoader = nilLoaderAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
