@@ -57,7 +57,9 @@ public final class InstanceRecoveryService {
         String id = Instant.now().toEpochMilli() + "-" + UUID.randomUUID().toString().substring(0, 8);
         Path destination = recoveryDirectory.resolve(id + ".zip");
         Path temporary = recoveryDirectory.resolve(id + ".zip.in-progress");
-        String safeReason = reason == null || reason.isBlank() ? "Manual recovery point" : reason.trim();
+        String safeReason = reason == null || reason.isBlank() ? "Manual recovery point"
+                : reason.replaceAll("[\\p{Cntrl}]", " ").trim();
+        if (safeReason.length() > 200) safeReason = safeReason.substring(0, 200);
 
         long expandedBytes = 0;
         int fileCount = 0;
@@ -346,6 +348,9 @@ public final class InstanceRecoveryService {
                         || normalized.matches("^[A-Za-z]:.*")) throw new IOException("Unsafe recovery archive path.");
                 String key = relative.toString().replace('\\', '/').toLowerCase(Locale.ROOT);
                 if (!names.add(key)) throw new IOException("Duplicate recovery archive path.");
+                if (key.equals("recovery-point.txt") && entry.isDirectory()) {
+                    throw new IOException("Recovery point metadata must be a file.");
+                }
                 if (!key.equals("recovery-point.txt")) {
                     String top = relative.getNameCount() == 0 ? "" : relative.getName(0).toString();
                     if (!RECOVERED_DIRECTORIES.contains(top)
