@@ -97,8 +97,8 @@ public final class SidebarScreenshotCapture {
                             root.getScene() != null,
                             root.getScene() == null ? 0.0 : root.getScene().getWidth(),
                             root.getScene() == null ? 0.0 : root.getScene().getHeight(),
-                            root.getWidth(),
-                            root.getHeight());
+                            root.getLayoutBounds().getWidth(),
+                            root.getLayoutBounds().getHeight());
                     dumpNodeTree(root, 0, 4);
                 }
                 SnapshotParameters parameters = new SnapshotParameters();
