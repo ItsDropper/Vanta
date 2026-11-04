@@ -115,6 +115,26 @@ public final class LoaderStackManager {
         }
     }
 
+    /**
+     * Rebase an installed stack after the primary loader or Minecraft
+     * metadata has been repaired/reinstalled.
+     */
+    public static void refreshBaseAndApply(Instance instance) throws Exception {
+        requireInstance(instance);
+        LoaderStackConfiguration configuration = load(instance);
+        if (configuration == null) {
+            return;
+        }
+        Path minecraftDirectory = instance.getDirectory().resolve("minecraft");
+        Path versionFile = minecraftDirectory.resolve("version.json");
+        Path baseFile = minecraftDirectory.resolve(BASE_METADATA_FILE);
+        if (!Files.isRegularFile(versionFile)) {
+            throw new IllegalStateException("Repaired version metadata is missing.");
+        }
+        Files.copy(versionFile, baseFile, StandardCopyOption.REPLACE_EXISTING);
+        apply(instance, configuration);
+    }
+
     public static void clear(Instance instance) throws IOException {
         requireInstance(instance);
         Path minecraftDirectory = instance.getDirectory().resolve("minecraft");
