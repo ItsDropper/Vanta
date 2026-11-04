@@ -109,6 +109,10 @@ public class MinecraftLauncher {
         if ("VantaLoader".equalsIgnoreCase(data.loader)) {
             command.add("-Dvanta.minecraft.version=" + data.version);
             command.add("-Dvanta.environment=client");
+            if (data.minecraftMappings == null || !Files.isRegularFile(data.minecraftMappings)) {
+                throw new IllegalStateException("Official Minecraft client mappings are missing for this VantaLoader instance.");
+            }
+            command.add("-Dvanta.minecraft.mappings=" + data.minecraftMappings.toAbsolutePath().normalize());
         }
 
         // =============================================================
