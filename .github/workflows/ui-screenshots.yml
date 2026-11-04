@@ -32,8 +32,10 @@ jobs:
         run: ./gradlew test
       - name: Capture all sidebar destinations
         env:
+          APPDATA: ${{ runner.temp }}/vanta-appdata
           JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
         run: |
+          mkdir -p "$APPDATA"
           xvfb-run -a -s "-screen 0 1600x1000x24" ./gradlew run --args="--capture-sidebar-screenshots build/ui-screenshots"
           test "$(find build/ui-screenshots -maxdepth 1 -type f -name '*.png' | wc -l)" -eq 9
           test -s build/ui-screenshots/index.md

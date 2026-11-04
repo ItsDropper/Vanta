@@ -24,7 +24,11 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
-        TelemetryService.installUncaughtExceptionHandler();
+        List<String> arguments = getParameters().getRaw();
+        boolean screenshotMode = isScreenshotCapture(arguments);
+        if (!screenshotMode) {
+            TelemetryService.installUncaughtExceptionHandler();
+        }
 
         // Keep the JavaFX application alive when the launcher window is
         // hidden while Minecraft is running.
@@ -32,8 +36,7 @@ public class Main extends Application {
 
         stage.initStyle(StageStyle.TRANSPARENT);
 
-        List<String> arguments = getParameters().getRaw();
-        if (arguments.contains("--capture-sidebar-screenshots")) {
+        if (screenshotMode) {
             startScreenshotCapture(stage, arguments);
             return;
         }
@@ -180,13 +183,31 @@ public class Main extends Application {
         minimumDisplay.play();
     }
 
+    private static boolean isScreenshotCapture(List<String> arguments) {
+        return arguments.contains("--capture-sidebar-screenshots");
+    }
+
+    private static boolean isScreenshotCapture(String[] arguments) {
+        for (String argument : arguments) {
+            if ("--capture-sidebar-screenshots".equals(argument)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static void main(String[] args) {
-        TelemetryService.installUncaughtExceptionHandler();
+        boolean screenshotMode = isScreenshotCapture(args);
+        if (!screenshotMode) {
+            TelemetryService.installUncaughtExceptionHandler();
+        }
         try {
             System.out.println("Vanta started");
             launch(args);
         } catch (Throwable t) {
-            TelemetryService.reportCrash(t);
+            if (!screenshotMode) {
+                TelemetryService.reportCrash(t);
+            }
             t.printStackTrace();
 
             try {
