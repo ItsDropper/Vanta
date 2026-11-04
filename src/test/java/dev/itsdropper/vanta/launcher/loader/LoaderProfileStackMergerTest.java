@@ -58,11 +58,15 @@ class LoaderProfileStackMergerTest {
         JsonNode base = MAPPER.readTree("""
                 {"mainClass":"example.VanillaMain","libraries":[]}
                 """);
-        JsonNode overlay = MAPPER.readTree("""
+        JsonNode firstOverlay = MAPPER.readTree("""
+                {"mainClass":"example.LaunchWrapperMain","libraries":[]}
+                """);
+        JsonNode conflictingOverlay = MAPPER.readTree("""
                 {"mainClass":"example.OtherMain","libraries":[]}
                 """);
 
         assertThrows(IllegalStateException.class,
-                () -> LoaderProfileStackMerger.merge(base, List.of(overlay), List.of()));
+                () -> LoaderProfileStackMerger.merge(
+                        base, List.of(firstOverlay, conflictingOverlay), List.of()));
     }
 }
