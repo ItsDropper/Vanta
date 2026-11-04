@@ -506,6 +506,38 @@ public class InstanceInstaller {
         }
     }
 
+    public static Instance installBabric(String name, String minecraftVersion) throws Exception {
+        String loaderVersion = BabricInstaller.findLatestLoaderVersion(minecraftVersion);
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "Babric", loaderVersion);
+
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+
+            JsonNode fabricProfile =
+                    BabricInstaller.downloadFabricProfile(minecraftVersion, loaderVersion);
+            JsonNode babricOverlay =
+                    BabricInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            BabricInstaller.installLibraries(fabricProfile, babricOverlay);
+            JsonNode merged =
+                    BabricInstaller.mergeProfile(vanillaMetadata, fabricProfile, babricOverlay);
+            MinecraftVersionResolver.saveMetadata(instance, merged);
+            NativeInstaller.extract(instance, merged);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception e) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw e;
+        }
+    }
+
     public static Instance updateMinecraftVersion(
             Instance instance,
             String minecraftVersion
@@ -648,6 +680,18 @@ public class InstanceInstaller {
             LegacyFabricInstaller.installLibraries(legacyFabricProfile);
             finalMetadata =
                     LegacyFabricInstaller.mergeProfile(vanillaMetadata, legacyFabricProfile);
+        }
+
+        if ("Babric".equalsIgnoreCase(loader)) {
+            String babricLoaderVersion = BabricInstaller.findLatestLoaderVersion(minecraftVersion);
+            JsonNode babricFabricProfile =
+                    BabricInstaller.downloadFabricProfile(minecraftVersion, babricLoaderVersion);
+            JsonNode babricOverlay =
+                    BabricInstaller.downloadProfile(minecraftVersion, babricLoaderVersion);
+            BabricInstaller.installLibraries(babricFabricProfile, babricOverlay);
+            finalMetadata = BabricInstaller.mergeProfile(
+                    vanillaMetadata, babricFabricProfile, babricOverlay);
+            NativeInstaller.extract(instance, finalMetadata);
         }
 
         if ("NeoForge".equalsIgnoreCase(loader)) {
