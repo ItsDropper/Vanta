@@ -39,6 +39,8 @@ public final class InstanceRepairService {
                         || text.contains("native library not found")
                         || text.contains("nilloader agent is missing or invalid")
                         || text.contains("vantaloader agent is missing or invalid")
+                        || text.contains("official minecraft client mappings are missing")
+                        || text.contains("minecraft mappings") && text.contains("missing")
                         || text.contains("rift library is missing")
                         || text.contains("rift artifact")
                         || text.contains("native classifier not found")
@@ -155,6 +157,7 @@ public final class InstanceRepairService {
                     instance.getId(), instance.getName(), instance.getMinecraftVersion(),
                     instance.getLoader(), latestLoaderVersion, instance.getDirectory());
             MinecraftVersionResolver.saveMetadata(updated, vanillaMetadata);
+            MinecraftMappingsInstaller.install(updated, vanillaMetadata);
             VantaLoaderInstaller.install(updated);
             if (!latestLoaderVersion.equals(instance.getLoaderVersion())) {
                 InstanceManager.saveInstance(updated);
