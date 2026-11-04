@@ -7,6 +7,7 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 public class AssetInstaller {
 
@@ -123,6 +124,51 @@ public class AssetInstaller {
                 assetObjects,
                 objects
         );
+
+        /*
+         * Pre-1.7 clients read assets from a directory tree rather than
+         * the content-addressed object store. Materialize the legacy view
+         * while keeping the shared object store as the download source.
+         */
+        if ("legacy".equalsIgnoreCase(id)
+                || "pre-1.6".equalsIgnoreCase(id)
+                || index.path("virtual").asBoolean(false)) {
+            String virtualName = "pre-1.6".equalsIgnoreCase(id) ? "pre-1.6" : "legacy";
+            Path virtualDirectory = assets.resolve("virtual").resolve(virtualName).normalize();
+            if (!virtualDirectory.startsWith(assets.normalize())) {
+                throw new IllegalStateException("Unsafe legacy asset directory.");
+            }
+            Files.createDirectories(virtualDirectory);
+
+            java.util.Iterator<java.util.Map.Entry<String, JsonNode>> entries =
+                    assetObjects.fields();
+            while (entries.hasNext()) {
+                java.util.Map.Entry<String, JsonNode> entry = entries.next();
+                String assetPath = entry.getKey();
+                JsonNode hashNode = entry.getValue().get("hash");
+                if (hashNode == null || !hashNode.isTextual()
+                        || !hashNode.asText().matches("[a-fA-F0-9]{40}")) {
+                    throw new IllegalStateException("Invalid legacy asset hash for " + assetPath);
+                }
+
+                Path relative = Path.of(assetPath).normalize();
+                if (relative.isAbsolute() || relative.startsWith("..")) {
+                    throw new IllegalStateException("Unsafe legacy asset path: " + assetPath);
+                }
+
+                String hash = hashNode.asText().toLowerCase(java.util.Locale.ROOT);
+                Path source = objects.resolve(hash.substring(0, 2)).resolve(hash);
+                Path target = virtualDirectory.resolve(relative).normalize();
+                if (!target.startsWith(virtualDirectory)) {
+                    throw new IllegalStateException("Legacy asset path escapes its directory: " + assetPath);
+                }
+                if (!Files.isRegularFile(source)) {
+                    throw new IllegalStateException("Legacy asset object is missing: " + source);
+                }
+                Files.createDirectories(target.getParent());
+                Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        }
 
         System.out.println(
                 "Assets installed: "
