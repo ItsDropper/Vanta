@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui;
 
 import javafx.geometry.Bounds;
+import javafx.scene.paint.Color;
 import javafx.scene.shape.ClosePath;
 import javafx.scene.shape.Path;
 import org.junit.jupiter.api.Test;
