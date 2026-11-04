@@ -51,9 +51,16 @@ public final class LoaderProfileStackMerger {
                 String overlayMainClass = text(overlay.get("mainClass"));
                 if (overlayMainClass != null) {
                     if (effectiveMainClass != null && !effectiveMainClass.equals(overlayMainClass)) {
-                        throw new IllegalStateException(
-                                "Cannot chain profiles with different main classes: "
-                                        + effectiveMainClass + " and " + overlayMainClass);
+                        boolean explicitLiteLoaderBootstrap =
+                                "net.minecraft.launchwrapper.Launch".equals(overlayMainClass)
+                                        && explicitlyOrderedTweakers != null
+                                        && explicitlyOrderedTweakers.contains(
+                                                "com.mumfrey.liteloader.launch.LiteLoaderTweaker");
+                        if (!explicitLiteLoaderBootstrap) {
+                            throw new IllegalStateException(
+                                    "Cannot chain profiles with different main classes: "
+                                            + effectiveMainClass + " and " + overlayMainClass);
+                        }
                     }
                     effectiveMainClass = overlayMainClass;
                 }
