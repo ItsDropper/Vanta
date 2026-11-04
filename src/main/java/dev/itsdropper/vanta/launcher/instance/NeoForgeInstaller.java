@@ -66,7 +66,7 @@ public final class NeoForgeInstaller {
 
             // Prefer stable builds; use beta builds only if no stable build exists.
             List<String> stable = candidates.stream()
-                    .filter(version -> !version.toLowerCase(java.util.Locale.ROOT).contains("-beta"))
+                    .filter(version -> !version.contains("-"))
                     .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
             List<String> selectable = stable.isEmpty() ? candidates : stable;
             selectable.sort(NeoForgeInstaller::compareVersions);
@@ -225,7 +225,7 @@ public final class NeoForgeInstaller {
             }
 
             Path metadata =
-                    findNeoForgeVersionMetadata(target);
+                    findNeoForgeVersionMetadata(target, neoforgeVersion);
 
             if (metadata == null) {
                 throw new IOException(
@@ -405,7 +405,8 @@ public final class NeoForgeInstaller {
     }
 
     private static Path findNeoForgeVersionMetadata(
-            Path instanceDirectory
+            Path instanceDirectory,
+            String loaderVersion
     ) throws IOException {
 
         Path versions =
@@ -423,14 +424,14 @@ public final class NeoForgeInstaller {
                         String fileName = path.getFileName().toString().toLowerCase(java.util.Locale.ROOT);
                         String parentName = path.getParent() == null || path.getParent().getFileName() == null
                                 ? "" : path.getParent().getFileName().toString().toLowerCase(java.util.Locale.ROOT);
-                        if (fileName.contains("neoforge") || parentName.contains("neoforge")) {
-                            return true;
-                        }
                         try {
                             JsonNode metadata = new com.fasterxml.jackson.databind.ObjectMapper()
                                     .readTree(path.toFile());
                             String id = textValue(metadata, "id");
-                            return id != null && id.toLowerCase(java.util.Locale.ROOT).contains("neoforge");
+                            String profileIdentity = (fileName + " " + parentName + " "
+                                    + (id == null ? "" : id)).toLowerCase(java.util.Locale.ROOT);
+                            return profileIdentity.contains("neoforge")
+                                    && profileIdentity.contains(loaderVersion.toLowerCase(java.util.Locale.ROOT));
                         } catch (IOException ignored) {
                             return false;
                         }
