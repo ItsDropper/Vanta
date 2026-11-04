@@ -141,6 +141,10 @@ public final class InstanceRepairService {
         } else if (loader.equalsIgnoreCase("modloader")) {
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             ModLoaderInstaller.install(instance);
+        } else if (loader.equalsIgnoreCase("rift")) {
+            dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            RiftInstaller.install(instance);
         } else if (loader.equalsIgnoreCase("liteloader")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
@@ -162,7 +166,7 @@ public final class InstanceRepairService {
             );
         }
 
-        if (!loader.equalsIgnoreCase("liteloader")) {
+        if (!loader.equalsIgnoreCase("liteloader") && !loader.equalsIgnoreCase("rift")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
         }
 
