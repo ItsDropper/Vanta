@@ -1531,11 +1531,48 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         });
         downloadPolicy.getChildren().add(cacheEnabled);
 
+        Path recoveryDirectory = vantaDirectory.resolve("recovery-points");
+        VBox recoveryPolicy = card(
+                "Instance recovery retention",
+                "Recovery points protect mods, configs, resource packs, and shader packs before repair or restore operations. Worlds and screenshots are not included."
+        );
+        addInfoRow(recoveryPolicy, "Recovery-point location", recoveryDirectory.toString());
+
+        ComboBox<Integer> recoveryRetention = new ComboBox<>();
+        recoveryRetention.getItems().setAll(1, 3, 5, 10, 20, 50);
+        recoveryRetention.setValue(LauncherSettings.getRecoveryPointRetention());
+        recoveryRetention.setAccessibleText("Recovery points to retain per instance");
+        recoveryRetention.setTooltip(new javafx.scene.control.Tooltip(
+                "Choose how many recent recovery points Vanta keeps for each instance."
+        ));
+        recoveryRetention.setMinWidth(120);
+        recoveryRetention.setOnAction(event -> {
+            Integer selected = recoveryRetention.getValue();
+            if (selected == null) return;
+            LauncherSettings.setRecoveryPointRetention(selected);
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.success("Recovery retention updated",
+                        "Vanta will keep up to " + selected + " recovery points per instance.");
+            }
+        });
+        Label retentionLabel = new Label("Recovery points per instance");
+        retentionLabel.getStyleClass().add("settings-card-title");
+        Label retentionDescription = new Label(
+                "Older points are pruned the next time Vanta creates or restores a recovery point. "
+                        + "At least one recovery point is always retained."
+        );
+        retentionDescription.getStyleClass().add("settings-card-description");
+        retentionDescription.setWrapText(true);
+        HBox retentionRow = new HBox(12, retentionLabel, recoveryRetention);
+        retentionRow.setAlignment(Pos.CENTER_LEFT);
+        recoveryPolicy.getChildren().addAll(retentionRow, retentionDescription);
+
         VBox safety = card(
                 "Storage safety",
                 "Cache cleanup is restricted to the dedicated Vanta download-cache directory. It does not scan or delete files from your Windows profile, game saves, screenshots, mods, or instance folders."
         );
-        content.getChildren().addAll(overview, downloadPolicy, safety);
+        content.getChildren().addAll(overview, downloadPolicy, recoveryPolicy, safety);
         refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh);
     }
 
