@@ -93,6 +93,8 @@ public class CreateInstanceView extends VBox {
     private volatile boolean liteLoaderCheckRunning;
     private final AtomicInteger modLoaderCheckId = new AtomicInteger();
     private volatile boolean modLoaderCheckRunning;
+    private final AtomicInteger riftCheckId = new AtomicInteger();
+    private volatile boolean riftCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -550,6 +552,7 @@ public class CreateInstanceView extends VBox {
         int babricId = babricCheckId.incrementAndGet();
         int liteLoaderId = liteLoaderCheckId.incrementAndGet();
         int modLoaderId = modLoaderCheckId.incrementAndGet();
+        int riftId = riftCheckId.incrementAndGet();
         fabricCheckRunning = true;
         forgeCheckRunning = true;
         quiltCheckRunning = true;
@@ -559,6 +562,7 @@ public class CreateInstanceView extends VBox {
         babricCheckRunning = true;
         liteLoaderCheckRunning = true;
         modLoaderCheckRunning = true;
+        riftCheckRunning = true;
 
         UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
@@ -572,7 +576,8 @@ public class CreateInstanceView extends VBox {
                     "Babric",
                     "NilLoader",
                     "LiteLoader",
-                    "ModLoader"
+                    "ModLoader",
+                    "Rift"
             );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
@@ -591,6 +596,7 @@ public class CreateInstanceView extends VBox {
             boolean nilLoaderAvailable = false;
             boolean liteLoaderAvailable = false;
             boolean modLoaderAvailable = false;
+            boolean riftAvailable = false;
 
             try {
                 FabricInstaller.findLatestLoaderVersion(minecraftVersion);
@@ -652,6 +658,12 @@ public class CreateInstanceView extends VBox {
             } catch (Throwable ignored) {
             }
 
+            try {
+                RiftInstaller.findLatestLoaderVersion(minecraftVersion);
+                riftAvailable = true;
+            } catch (Throwable ignored) {
+            }
+
             final boolean fabric = fabricAvailable;
             final boolean forge = forgeAvailable;
             final boolean quilt = quiltAvailable;
@@ -662,6 +674,7 @@ public class CreateInstanceView extends VBox {
             final boolean nilLoader = nilLoaderAvailable;
             final boolean liteLoader = liteLoaderAvailable;
             final boolean modLoader = modLoaderAvailable;
+            final boolean rift = riftAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
@@ -670,7 +683,8 @@ public class CreateInstanceView extends VBox {
                         || legacyFabricId != legacyFabricCheckId.get()
                         || babricId != babricCheckId.get()
                         || liteLoaderId != liteLoaderCheckId.get()
-                        || modLoaderId != modLoaderCheckId.get()) {
+                        || modLoaderId != modLoaderCheckId.get()
+                        || riftId != riftCheckId.get()) {
                     return;
                 }
 
@@ -683,6 +697,7 @@ public class CreateInstanceView extends VBox {
                 babricCheckRunning = false;
                 liteLoaderCheckRunning = false;
                 modLoaderCheckRunning = false;
+                riftCheckRunning = false;
                 loaderBox.getItems().setAll(
                         "Vanilla",
                         "Fabric",
@@ -694,7 +709,8 @@ public class CreateInstanceView extends VBox {
                         "Babric",
                         "NilLoader",
                         "LiteLoader",
-                        "ModLoader"
+                        "ModLoader",
+                        "Rift"
                 );
 
                 // Keep unsupported loaders visible but prevent selecting them.
@@ -707,7 +723,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader) {
+                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader || rift) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
@@ -755,6 +771,10 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("ModLoader");
                 }
 
+                if (!rift) {
+                    loaderBox.getItems().remove("Rift");
+                }
+
                 // A saved default can be unavailable for this Minecraft version.
                 if (loaderBox.getValue() == null
                         || !loaderBox.getItems().contains(loaderBox.getValue())) {
@@ -775,7 +795,8 @@ public class CreateInstanceView extends VBox {
 
         if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning
                 || neoForgeCheckRunning || ornitheCheckRunning || legacyFabricCheckRunning
-                || babricCheckRunning || liteLoaderCheckRunning || modLoaderCheckRunning) {
+                || babricCheckRunning || liteLoaderCheckRunning || modLoaderCheckRunning
+                || riftCheckRunning) {
 
             statusLabel.setText(
                     "Still checking mod loader support..."
@@ -962,6 +983,10 @@ public class CreateInstanceView extends VBox {
                         } else if ("ModLoader".equals(loader)) {
 
                             InstanceInstaller.installModLoader(name, version);
+
+                        } else if ("Rift".equals(loader)) {
+
+                            InstanceInstaller.installRift(name, version);
 
                         } else if ("NeoForge".equals(loader)) {
 
