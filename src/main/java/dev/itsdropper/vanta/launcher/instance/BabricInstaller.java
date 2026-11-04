@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher.instance;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import dev.itsdropper.vanta.launcher.loader.LoaderProfileStackMerger;
 
 /**
@@ -45,6 +46,25 @@ public final class BabricInstaller {
         JsonNode profile = FabricInstaller.downloadProfile(SUPPORTED_GAME_VERSION, loaderVersion);
         validateFabricBootstrap(profile);
         return profile;
+    }
+
+    public static JsonNode downloadOverlay(JsonNode fabricProfile) throws Exception {
+        ObjectNode overlay = (ObjectNode) buildOverlay(fabricProfile);
+        JsonNode lwjglPatch = DownloadUtil.downloadJson(
+                "https://raw.githubusercontent.com/babric/prism-instance/b1.7.3/patches/org.lwjgl.json");
+        JsonNode patchLibraries = lwjglPatch == null ? null : lwjglPatch.get("libraries");
+        if (patchLibraries == null || !patchLibraries.isArray()) {
+            throw new IllegalStateException("Official Babric LWJGL patch has no library list.");
+        }
+        ArrayNode libraries = (ArrayNode) overlay.get("libraries");
+        for (JsonNode library : patchLibraries) {
+            if (library == null || !library.isObject()
+                    || !library.path("name").isTextual()) {
+                throw new IllegalStateException("Official Babric LWJGL patch contains an invalid library.");
+            }
+            libraries.add(library.deepCopy());
+        }
+        return overlay;
     }
 
     public static void installLibraries(JsonNode fabricProfile, JsonNode babricOverlay) throws Exception {
