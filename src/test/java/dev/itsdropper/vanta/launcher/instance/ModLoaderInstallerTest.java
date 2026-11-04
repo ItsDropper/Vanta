@@ -61,7 +61,7 @@ class ModLoaderInstallerTest {
         assertTrue(ModLoaderInstaller.findLatestLoaderVersion("b1.8.1").equals("b1.8.1"));
     }
 
-    private static Path createZip(String... nameAndBytes) throws Exception {
+    private static Path createZip(Object... nameAndBytes) throws Exception {
         Path file = Files.createTempFile("vanta-modloader-fixture", ".zip");
         try (ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(file))) {
             for (int i = 0; i < nameAndBytes.length; i += 2) {
