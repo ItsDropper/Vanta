@@ -197,207 +197,229 @@ public class MinecraftLauncher {
                 data.mainClass
         );
 
-        // =============================================================
-        // GAME DIRECTORY
-        // =============================================================
-
-        command.add("--gameDir");
-
-        command.add(
-                minecraft.toString()
-        );
-
-        // =============================================================
-        // ASSETS DIRECTORY
-        // =============================================================
-
-        command.add("--assetsDir");
-
-        command.add(
-                assets.toString()
-        );
-
-        // =============================================================
-        // VERSION
-        // =============================================================
-
-        command.add("--version");
-
-        command.add(
-                data.version
-        );
-
-        // =============================================================
-        // LOADER-SPECIFIC ARGUMENTS
-        // =============================================================
-
-        /*
-         * Forge uses ModLauncher and requires its launch target plus
-         * Forge identity arguments. Vanta keeps instances isolated,
-         * so add the equivalent arguments directly to the command.
-         */
-        if ("Forge".equalsIgnoreCase(data.loader)) {
-            if (data.loaderVersion == null
-                    || data.loaderVersion.isBlank()) {
+        if (isLegacyVersionType(data.versionType)) {
+            if (data.minecraftArguments == null || data.minecraftArguments.isBlank()) {
                 throw new IllegalStateException(
-                        "Forge instance has no Forge version."
+                        "Legacy Minecraft metadata is missing minecraftArguments."
                 );
             }
 
-            command.add("--launchTarget");
-            command.add("forge_client");
+            command.addAll(buildLegacyGameArguments(
+                    data.minecraftArguments,
+                    account,
+                    data,
+                    minecraft,
+                    assets
+            ));
 
-            command.add("--fml.forgeVersion");
-            command.add(data.loaderVersion);
-
-            command.add("--fml.mcVersion");
-            command.add(data.version);
-
-            command.add("--fml.forgeGroup");
-            command.add("net.minecraftforge");
-        }
-
-        // =============================================================
-        // ASSET INDEX
-        // =============================================================
-
-        command.add("--assetIndex");
-
-        command.add(
-                data.assetIndex
-        );
-
-        // =============================================================
-        // ACCOUNT
-        // =============================================================
-
-        command.add("--username");
-
-        command.add(
-                account.getUsername()
-        );
-
-        command.add("--uuid");
-
-        command.add(
-                account
-                        .getUuid()
-                        .replace("-", "")
-        );
-
-        command.add("--accessToken");
-
-        command.add(
-                account.getAccessToken()
-        );
-
-        command.add("--userType");
-
-        command.add("msa");
-
-        // =============================================================
-        // USER PROPERTIES
-        // =============================================================
-
-        /*
-         * Minecraft 1.8 requires the userProperties option.
-         *
-         * Modern Minecraft versions that accept this argument
-         * tolerate an empty JSON object.
-         */
-        command.add("--userProperties");
-
-        command.add("{}");
-
-        // =============================================================
-        // RESOLUTION
-        // =============================================================
-
-        /*
-         * Old Minecraft versions using LWJGL 2 can behave badly when
-         * Vanta injects modern-style resolution arguments.
-         *
-         * Only pass Vanta's resolution settings to newer Minecraft
-         * versions for now.
-         */
-        if (data.width > 0 && data.height > 0) {
-
-            command.add("--width");
-
-            command.add(
-                    String.valueOf(
-                            data.width
-                    )
-            );
-
-            command.add("--height");
-
-            command.add(
-                    String.valueOf(
-                            data.height
-                    )
-            );
-        }
-
-        // =============================================================
-        // FULLSCREEN
-        // =============================================================
-
-        /*
-         * Same diagnostic restriction as resolution.
-         */
-        if (data.javaVersion >= 17
-                && data.fullscreen) {
-
-            command.add(
-                    "--fullscreen"
-            );
-        }
-
-        // =============================================================
-        // SERVER
-        // =============================================================
-
-        if (data.serverHost != null
-                && !data.serverHost.isBlank()) {
-
-            int port =
-                    data.serverPort > 0
-                            ? data.serverPort
-                            : 25565;
-
-            /*
-             * Minecraft 1.20+ uses Quick Play for direct server
-             * launches. The old --server/--port arguments are no
-             * longer supported.
-             *
-             * Quick Play performs the connection after Minecraft
-             * finishes its normal startup/resource loading.
-             */
-            if (supportsQuickPlay(data.version)) {
-                command.add("--quickPlayMultiplayer");
-                command.add(data.serverHost + ":" + port);
-            } else {
-                command.add("--server");
-                command.add(data.serverHost);
-
-                command.add("--port");
-                command.add(String.valueOf(port));
+            if (data.gameArguments != null && !data.gameArguments.isBlank()) {
+                command.addAll(splitArguments(data.gameArguments));
             }
-        }
-
-        // =============================================================
-        // GAME ARGUMENTS
-        // =============================================================
-
-        if (data.gameArguments != null
-                && !data.gameArguments.isBlank()) {
-
-            command.addAll(
-                    splitArguments(
-                            data.gameArguments
-                    )
+        } else {
+            // =============================================================
+            // GAME DIRECTORY
+            // =============================================================
+    
+            command.add("--gameDir");
+    
+            command.add(
+                    minecraft.toString()
             );
+    
+            // =============================================================
+            // ASSETS DIRECTORY
+            // =============================================================
+    
+            command.add("--assetsDir");
+    
+            command.add(
+                    assets.toString()
+            );
+    
+            // =============================================================
+            // VERSION
+            // =============================================================
+    
+            command.add("--version");
+    
+            command.add(
+                    data.version
+            );
+    
+            // =============================================================
+            // LOADER-SPECIFIC ARGUMENTS
+            // =============================================================
+    
+            /*
+             * Forge uses ModLauncher and requires its launch target plus
+             * Forge identity arguments. Vanta keeps instances isolated,
+             * so add the equivalent arguments directly to the command.
+             */
+            if ("Forge".equalsIgnoreCase(data.loader)) {
+                if (data.loaderVersion == null
+                        || data.loaderVersion.isBlank()) {
+                    throw new IllegalStateException(
+                            "Forge instance has no Forge version."
+                    );
+                }
+    
+                command.add("--launchTarget");
+                command.add("forge_client");
+    
+                command.add("--fml.forgeVersion");
+                command.add(data.loaderVersion);
+    
+                command.add("--fml.mcVersion");
+                command.add(data.version);
+    
+                command.add("--fml.forgeGroup");
+                command.add("net.minecraftforge");
+            }
+    
+            // =============================================================
+            // ASSET INDEX
+            // =============================================================
+    
+            command.add("--assetIndex");
+    
+            command.add(
+                    data.assetIndex
+            );
+    
+            // =============================================================
+            // ACCOUNT
+            // =============================================================
+    
+            command.add("--username");
+    
+            command.add(
+                    account.getUsername()
+            );
+    
+            command.add("--uuid");
+    
+            command.add(
+                    account
+                            .getUuid()
+                            .replace("-", "")
+            );
+    
+            command.add("--accessToken");
+    
+            command.add(
+                    account.getAccessToken()
+            );
+    
+            command.add("--userType");
+    
+            command.add("msa");
+    
+            // =============================================================
+            // USER PROPERTIES
+            // =============================================================
+    
+            /*
+             * Minecraft 1.8 requires the userProperties option.
+             *
+             * Modern Minecraft versions that accept this argument
+             * tolerate an empty JSON object.
+             */
+            command.add("--userProperties");
+    
+            command.add("{}");
+    
+            // =============================================================
+            // RESOLUTION
+            // =============================================================
+    
+            /*
+             * Old Minecraft versions using LWJGL 2 can behave badly when
+             * Vanta injects modern-style resolution arguments.
+             *
+             * Only pass Vanta's resolution settings to newer Minecraft
+             * versions for now.
+             */
+            if (data.width > 0 && data.height > 0) {
+    
+                command.add("--width");
+    
+                command.add(
+                        String.valueOf(
+                                data.width
+                        )
+                );
+    
+                command.add("--height");
+    
+                command.add(
+                        String.valueOf(
+                                data.height
+                        )
+                );
+            }
+    
+            // =============================================================
+            // FULLSCREEN
+            // =============================================================
+    
+            /*
+             * Same diagnostic restriction as resolution.
+             */
+            if (data.javaVersion >= 17
+                    && data.fullscreen) {
+    
+                command.add(
+                        "--fullscreen"
+                );
+            }
+    
+            // =============================================================
+            // SERVER
+            // =============================================================
+    
+            if (data.serverHost != null
+                    && !data.serverHost.isBlank()) {
+    
+                int port =
+                        data.serverPort > 0
+                                ? data.serverPort
+                                : 25565;
+    
+                /*
+                 * Minecraft 1.20+ uses Quick Play for direct server
+                 * launches. The old --server/--port arguments are no
+                 * longer supported.
+                 *
+                 * Quick Play performs the connection after Minecraft
+                 * finishes its normal startup/resource loading.
+                 */
+                if (supportsQuickPlay(data.version)) {
+                    command.add("--quickPlayMultiplayer");
+                    command.add(data.serverHost + ":" + port);
+                } else {
+                    command.add("--server");
+                    command.add(data.serverHost);
+    
+                    command.add("--port");
+                    command.add(String.valueOf(port));
+                }
+            }
+    
+            // =============================================================
+            // GAME ARGUMENTS
+            // =============================================================
+    
+            if (data.gameArguments != null
+                    && !data.gameArguments.isBlank()) {
+    
+                command.addAll(
+                        splitArguments(
+                                data.gameArguments
+                        )
+                );
+            }
+    
+    
         }
 
         // =============================================================
@@ -478,6 +500,57 @@ public class MinecraftLauncher {
         );
 
         return process;
+    }
+
+    private static boolean isLegacyVersionType(String type) {
+        return "old_alpha".equalsIgnoreCase(type)
+                || "old_beta".equalsIgnoreCase(type);
+    }
+
+    /**
+     * Historical Alpha/Beta metadata carries its own complete flat game
+     * argument template. Those clients use the legacy auth_session token
+     * format and must not receive the modern launcher's hard-coded flags.
+     */
+    private static List<String> buildLegacyGameArguments(
+            String template,
+            Account account,
+            LaunchData data,
+            Path gameDirectory,
+            Path assetsDirectory
+    ) {
+        String uuid = account.getUuid().replace("-", "");
+        String session = "token:" + account.getAccessToken() + ":" + uuid;
+
+        java.util.Map<String, String> values = java.util.Map.ofEntries(
+                java.util.Map.entry("auth_player_name", account.getUsername()),
+                java.util.Map.entry("auth_session", session),
+                java.util.Map.entry("auth_uuid", uuid),
+                java.util.Map.entry("auth_access_token", account.getAccessToken()),
+                java.util.Map.entry("game_directory", gameDirectory.toString()),
+                java.util.Map.entry("game_assets", assetsDirectory.toString()),
+                java.util.Map.entry("assets_root", assetsDirectory.toString()),
+                java.util.Map.entry("assets_index_name",
+                        data.assetIndex == null || data.assetIndex.isBlank()
+                                ? "legacy" : data.assetIndex),
+                java.util.Map.entry("version_name", data.version),
+                java.util.Map.entry("version_type", "release"),
+                java.util.Map.entry("user_type", "msa"),
+                java.util.Map.entry("user_properties", "{}")
+        );
+
+        String resolved = template;
+        for (java.util.Map.Entry<String, String> value : values.entrySet()) {
+            resolved = resolved.replace("${" + value.getKey() + "}", value.getValue());
+        }
+
+        if (resolved.contains("${")) {
+            throw new IllegalStateException(
+                    "Legacy Minecraft arguments contain an unsupported placeholder: " + resolved
+            );
+        }
+
+        return splitArguments(resolved);
     }
 
     private static boolean supportsQuickPlay(
