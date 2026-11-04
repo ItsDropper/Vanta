@@ -21,7 +21,7 @@ import java.util.jar.JarFile;
 
 /**
  * Installs the self-contained VantaLoader Java agent published by the
- * VantaLoader repository's rolling nightly release.
+ * VantaLoader repository's immutable commit-pinned nightly release.
  */
 public final class VantaLoaderInstaller {
     private static final String RELEASE_API =
