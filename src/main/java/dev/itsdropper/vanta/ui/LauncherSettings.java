@@ -152,7 +152,7 @@ public final class LauncherSettings {
         String loader = value == null ? "Fabric" : value.trim();
         if (!"Vanilla".equals(loader) && !"Fabric".equals(loader)
                 && !"Quilt".equals(loader) && !"Forge".equals(loader)
-                && !"NeoForge".equals(loader)) {
+                && !"NeoForge".equals(loader) && !"Ornithe".equals(loader)) {
             loader = "Fabric";
         }
         setString("defaultLoader", loader);
