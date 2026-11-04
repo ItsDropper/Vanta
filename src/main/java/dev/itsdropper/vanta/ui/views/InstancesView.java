@@ -448,9 +448,19 @@ public class InstancesView extends VBox {
         statusLabel.setText("Loading recovery-point history…");
         UiExecutor.shared().execute(() -> {
             try {
+                int recoveredTransactions =
+                        InstanceRecoveryService.recoverInterruptedRestores(selected);
                 List<InstanceRecoveryService.RecoveryPoint> points =
                         InstanceRecoveryService.listRecoveryPoints(selected);
                 UiExecutor.shared().dispatchToUi(() -> {
+                    if (recoveredTransactions > 0) {
+                        new Alert(Alert.AlertType.INFORMATION,
+                                "Vanta detected and rolled back " + recoveredTransactions
+                                        + " interrupted recovery transaction"
+                                        + (recoveredTransactions == 1 ? "" : "s")
+                                        + ". The instance has been returned to its pre-restore state.")
+                                .show();
+                    }
                     if (points.isEmpty()) {
                         actionButton.setDisable(false);
                         statusLabel.setText("No valid recovery points exist for " + selected.getName() + ".");
