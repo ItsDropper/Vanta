@@ -17,6 +17,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
+import dev.itsdropper.vanta.launcher.instance.BabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.ForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.NeoForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.OrnitheInstaller;
@@ -83,6 +84,8 @@ public class CreateInstanceView extends VBox {
     private volatile boolean ornitheCheckRunning;
     private final AtomicInteger legacyFabricCheckId = new AtomicInteger();
     private volatile boolean legacyFabricCheckRunning;
+    private final AtomicInteger babricCheckId = new AtomicInteger();
+    private volatile boolean babricCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -537,12 +540,14 @@ public class CreateInstanceView extends VBox {
         int neoForgeId = neoForgeCheckId.incrementAndGet();
         int ornitheId = ornitheCheckId.incrementAndGet();
         int legacyFabricId = legacyFabricCheckId.incrementAndGet();
+        int babricId = babricCheckId.incrementAndGet();
         fabricCheckRunning = true;
         forgeCheckRunning = true;
         quiltCheckRunning = true;
         neoForgeCheckRunning = true;
         ornitheCheckRunning = true;
         legacyFabricCheckRunning = true;
+        babricCheckRunning = true;
 
         UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
@@ -552,7 +557,8 @@ public class CreateInstanceView extends VBox {
                     "Forge",
                     "NeoForge",
                     "Ornithe",
-                    "Legacy Fabric"
+                    "Legacy Fabric",
+                    "Babric"
             );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
@@ -567,6 +573,7 @@ public class CreateInstanceView extends VBox {
             boolean neoForgeAvailable = false;
             boolean ornitheAvailable = false;
             boolean legacyFabricAvailable = false;
+            boolean babricAvailable = false;
 
             try {
                 FabricInstaller.findLatestLoaderVersion(minecraftVersion);
@@ -604,18 +611,26 @@ public class CreateInstanceView extends VBox {
             } catch (Throwable ignored) {
             }
 
+            try {
+                BabricInstaller.findLatestLoaderVersion(minecraftVersion);
+                babricAvailable = true;
+            } catch (Throwable ignored) {
+            }
+
             final boolean fabric = fabricAvailable;
             final boolean forge = forgeAvailable;
             final boolean quilt = quiltAvailable;
             final boolean neoForge = neoForgeAvailable;
             final boolean ornithe = ornitheAvailable;
             final boolean legacyFabric = legacyFabricAvailable;
+            final boolean babric = babricAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
                         || quiltId != quiltCheckId.get() || neoForgeId != neoForgeCheckId.get()
                         || ornitheId != ornitheCheckId.get()
-                        || legacyFabricId != legacyFabricCheckId.get()) {
+                        || legacyFabricId != legacyFabricCheckId.get()
+                        || babricId != babricCheckId.get()) {
                     return;
                 }
 
@@ -625,6 +640,7 @@ public class CreateInstanceView extends VBox {
                 neoForgeCheckRunning = false;
                 ornitheCheckRunning = false;
                 legacyFabricCheckRunning = false;
+                babricCheckRunning = false;
                 loaderBox.getItems().setAll(
                         "Vanilla",
                         "Fabric",
@@ -632,7 +648,8 @@ public class CreateInstanceView extends VBox {
                         "Forge",
                         "NeoForge",
                         "Ornithe",
-                        "Legacy Fabric"
+                        "Legacy Fabric",
+                        "Babric"
                 );
 
                 // Keep unsupported loaders visible but prevent selecting them.
@@ -645,7 +662,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric) {
+                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
@@ -677,6 +694,10 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("Legacy Fabric");
                 }
 
+                if (!babric) {
+                    loaderBox.getItems().remove("Babric");
+                }
+
                 // A saved default can be unavailable for this Minecraft version.
                 if (loaderBox.getValue() == null
                         || !loaderBox.getItems().contains(loaderBox.getValue())) {
@@ -696,7 +717,8 @@ public class CreateInstanceView extends VBox {
     private void createInstance() {
 
         if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning
-                || neoForgeCheckRunning || ornitheCheckRunning || legacyFabricCheckRunning) {
+                || neoForgeCheckRunning || ornitheCheckRunning || legacyFabricCheckRunning
+                || babricCheckRunning) {
 
             statusLabel.setText(
                     "Still checking mod loader support..."
@@ -755,6 +777,12 @@ public class CreateInstanceView extends VBox {
          * Extra safety check: only install a loader that the
          * current version check actually exposed in the UI.
          */
+        if ("Babric".equals(loader) && !loaderBox.getItems().contains("Babric")) {
+            loaderBox.getSelectionModel().select("Vanilla");
+            statusLabel.setText("Babric is currently available only for Minecraft b1.7.3.");
+            return;
+        }
+
         if ("Legacy Fabric".equals(loader) && !loaderBox.getItems().contains("Legacy Fabric")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("Legacy Fabric is not available for Minecraft " + version + ".");
@@ -843,6 +871,10 @@ public class CreateInstanceView extends VBox {
                         } else if ("Legacy Fabric".equals(loader)) {
 
                             InstanceInstaller.installLegacyFabric(name, version);
+
+                        } else if ("Babric".equals(loader)) {
+
+                            InstanceInstaller.installBabric(name, version);
 
                         } else if ("NeoForge".equals(loader)) {
 
