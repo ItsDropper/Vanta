@@ -30,28 +30,50 @@ public final class NilLoaderInstaller {
     }
 
     public static Path agentPath(Instance instance) {
+        String version = instance == null ? null : instance.getLoaderVersion();
+        return agentPath(instance, version == null || version.isBlank() ? VERSION : version);
+    }
+
+    public static Path agentPath(Instance instance, String version) {
         if (instance == null || instance.getDirectory() == null) {
             throw new IllegalArgumentException("A valid NilLoader instance is required.");
         }
+        String safeVersion = requireVersion(version);
         return instance.getDirectory().resolve("libraries")
                 .resolve("com").resolve("unascribed").resolve("nilloader")
-                .resolve(VERSION).resolve("nilloader-" + VERSION + ".jar")
+                .resolve(safeVersion).resolve("nilloader-" + safeVersion + ".jar")
                 .toAbsolutePath().normalize();
     }
 
     public static void install(Instance instance) throws Exception {
-        Path target = agentPath(instance);
+        String version = instance == null ? null : instance.getLoaderVersion();
+        install(instance, version == null || version.isBlank() ? VERSION : version);
+    }
+
+    public static void install(Instance instance, String version) throws Exception {
+        String safeVersion = requireVersion(version);
+        Path target = agentPath(instance, safeVersion);
         if (Files.isRegularFile(target) && hasAgentEntrypoint(target)) {
             return;
         }
 
         Files.deleteIfExists(target);
-        DownloadUtil.downloadFile(MAVEN_BASE + ARTIFACT_PATH, target);
+        String artifactPath = "com/unascribed/nilloader/" + safeVersion
+                + "/nilloader-" + safeVersion + ".jar";
+        DownloadUtil.downloadFile(MAVEN_BASE + artifactPath, target);
         if (!hasAgentEntrypoint(target)) {
             Files.deleteIfExists(target);
             throw new IOException(
                     "Downloaded NilLoader artifact does not declare a Java agent entrypoint.");
         }
+    }
+
+    private static String requireVersion(String version) {
+        if (version == null || !version.matches("[A-Za-z0-9][A-Za-z0-9._+-]{0,63}")
+                || version.contains("..")) {
+            throw new IllegalArgumentException("NilLoader version is invalid.");
+        }
+        return version;
     }
 
     public static boolean hasAgentEntrypoint(Path jarPath) {
