@@ -2666,3 +2666,47 @@
     -fx-border-color: -vantadanger;
     -fx-text-fill: -vantadanger;
 }
+
+/* Shared typography roles — applied by VantaUI.styleText. */
+.vanta-ui-root .vanta-type-page-title {
+    -fx-font-size: 27px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .vanta-type-section-title {
+    -fx-font-size: 15px;
+    -fx-font-weight: 700;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .vanta-type-body {
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .vanta-type-muted {
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+    -fx-text-fill: -vantamuted;
+}
+
+.vanta-ui-root .vanta-type-eyebrow {
+    -fx-font-size: 9px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -vantasubtle;
+    -fx-letter-spacing: 1px;
+}
+
+.vanta-ui-root .vanta-type-metadata {
+    -fx-font-size: 10px;
+    -fx-font-weight: 600;
+    -fx-text-fill: -vantasubtle;
+}
+
+.vanta-ui-root .vanta-type-monospace {
+    -fx-font-family: "Cascadia Code", "Consolas", monospace;
+    -fx-font-size: 11px;
+    -fx-text-fill: -vantamuted;
+}
