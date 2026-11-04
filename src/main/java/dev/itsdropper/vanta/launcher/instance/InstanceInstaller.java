@@ -846,6 +846,7 @@ public class InstanceInstaller {
         }
 
         if ("ModLoader".equalsIgnoreCase(loader)) {
+            loaderVersion = ModLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             ModLoaderInstaller.install(instance);
         }
