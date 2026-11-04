@@ -27,7 +27,7 @@ class LoaderProfileStackMergerTest {
         JsonNode forge = MAPPER.readTree("""
                 {
                   "mainClass": "net.minecraft.launchwrapper.Launch",
-                  "minecraftArguments": "--tweakClass \\"net.minecraftforge.fml.common.launcher.FMLTweaker\\"",
+                  "minecraftArguments": "--tweakClass net.minecraftforge.fml.common.launcher.FMLTweaker",
                   "libraries": [{"name":"org.example:forge:2.0"}]
                 }
                 """);
@@ -46,11 +46,10 @@ class LoaderProfileStackMergerTest {
 
         assertEquals(2, merged.path("libraries").size());
         assertEquals("org.example:base:1.1", merged.path("libraries").get(0).path("name").asText());
-        assertTrue(merged.path("minecraftArguments").asText()
-                .indexOf("FMLTweaker") < merged.path("minecraftArguments").asText()
-                .indexOf("LiteLoaderTweaker"));
-        assertTrue(merged.path("minecraftArguments").asText().endsWith(
-                "--tweakClass \\"example.extra.FinalTweaker\\""));
+        String arguments = merged.path("minecraftArguments").asText();
+        assertTrue(arguments.indexOf("FMLTweaker") < arguments.indexOf("LiteLoaderTweaker"));
+        assertTrue(arguments.endsWith("--tweakClass \\"example.extra.FinalTweaker\\""));
+        assertEquals("net.minecraft.launchwrapper.Launch", merged.path("mainClass").asText());
         assertFalse(merged.has("inheritsFrom"));
     }
 
