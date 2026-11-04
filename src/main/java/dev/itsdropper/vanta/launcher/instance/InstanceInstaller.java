@@ -684,7 +684,10 @@ public class InstanceInstaller {
         }
 
         if ("Babric".equalsIgnoreCase(loader)) {
-            String babricLoaderVersion = BabricInstaller.findLatestLoaderVersion(minecraftVersion);
+            String babricLoaderVersion = loaderVersion;
+            if (babricLoaderVersion == null || babricLoaderVersion.isBlank()) {
+                babricLoaderVersion = BabricInstaller.findLatestLoaderVersion(minecraftVersion);
+            }
             JsonNode babricFabricProfile =
                     BabricInstaller.downloadFabricProfile(minecraftVersion, babricLoaderVersion);
             JsonNode babricOverlay =
