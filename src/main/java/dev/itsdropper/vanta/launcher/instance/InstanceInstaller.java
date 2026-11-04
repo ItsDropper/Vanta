@@ -521,10 +521,11 @@ public class InstanceInstaller {
             JsonNode fabricProfile =
                     BabricInstaller.downloadFabricProfile(minecraftVersion, loaderVersion);
             JsonNode babricOverlay =
-                    BabricInstaller.buildOverlay(fabricProfile);
+                    BabricInstaller.downloadOverlay(fabricProfile);
             BabricInstaller.installLibraries(fabricProfile, babricOverlay);
             JsonNode merged =
                     BabricInstaller.mergeProfile(vanillaMetadata, fabricProfile, babricOverlay);
+            MinecraftFileInstaller.installLibraries(merged);
             MinecraftVersionResolver.saveMetadata(instance, merged);
             NativeInstaller.extract(instance, merged);
             InstanceManager.markInstallationComplete(instance);
@@ -687,10 +688,11 @@ public class InstanceInstaller {
             JsonNode babricFabricProfile =
                     BabricInstaller.downloadFabricProfile(minecraftVersion, babricLoaderVersion);
             JsonNode babricOverlay =
-                    BabricInstaller.buildOverlay(babricFabricProfile);
+                    BabricInstaller.downloadOverlay(babricFabricProfile);
             BabricInstaller.installLibraries(babricFabricProfile, babricOverlay);
             finalMetadata = BabricInstaller.mergeProfile(
                     vanillaMetadata, babricFabricProfile, babricOverlay);
+            MinecraftFileInstaller.installLibraries(finalMetadata);
             NativeInstaller.extract(instance, finalMetadata);
         }
 
