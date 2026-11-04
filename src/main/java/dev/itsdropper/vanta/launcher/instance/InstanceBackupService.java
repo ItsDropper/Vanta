@@ -215,10 +215,10 @@ public final class InstanceBackupService {
                 while ((entry = zip.getNextEntry()) != null) {
                     if (++entries > 100_000) throw new IOException("Backup contains too many entries.");
                     String rawName = entry.getName();
-                if (rawName == null || rawName.isBlank() || rawName.indexOf('\0') >= 0) {
+                    if (rawName == null || rawName.isBlank() || rawName.indexOf('\0') >= 0) {
                         throw new IOException("Backup contains an invalid path.");
                     }
-                String normalizedName = rawName.replace('\\', '/');
+                    String normalizedName = rawName.replace('\\', '/');
                     Path relative = Path.of(normalizedName).normalize();
                     if (relative.isAbsolute() || relative.startsWith("..")
                             || normalizedName.startsWith("/") || normalizedName.matches("^[A-Za-z]:.*")) {
@@ -228,8 +228,8 @@ public final class InstanceBackupService {
                         zip.closeEntry();
                         continue;
                     }
-                String key = relative.toString().replace('\\', '/')
-                    key = key.toLowerCase(java.util.Locale.ROOT);
+                    String key = relative.toString().replace('\\', '/')
+                            .toLowerCase(java.util.Locale.ROOT);
                     if (!names.add(key)) throw new IOException("Backup contains duplicate paths: " + rawName);
                     Path output = target.resolve(relative).normalize();
                     if (!output.startsWith(target)) throw new IOException("Backup path escapes the restore directory.");
