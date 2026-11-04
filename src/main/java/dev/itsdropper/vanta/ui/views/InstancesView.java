@@ -164,6 +164,14 @@ public class InstancesView extends VBox {
         ));
         restoreButton.setOnAction(event -> restoreInstanceBackup());
 
+        Button verifyBackupButton = new Button("VERIFY BACKUP");
+        verifyBackupButton.getStyleClass().add("secondary-button");
+        verifyBackupButton.setAccessibleText("Verify the integrity of a Vanta instance backup");
+        verifyBackupButton.setTooltip(new javafx.scene.control.Tooltip(
+                "Check archive integrity, entry paths, CRC data, and required instance metadata without extracting files."
+        ));
+        verifyBackupButton.setOnAction(event -> verifyInstanceBackup());
+
         PageHeader headerTop = new PageHeader(
                 "Instances",
                 "Manage your Minecraft installations.",
@@ -172,6 +180,7 @@ public class InstancesView extends VBox {
                 countLabel,
                 backupButton,
                 restoreButton,
+                verifyBackupButton,
                 createButton
         );
 
@@ -355,6 +364,52 @@ public class InstancesView extends VBox {
 
     }
 
+
+    private void verifyInstanceBackup() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Verify Vanta Instance Backup");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("ZIP backups (*.zip)", "*.zip"));
+        java.io.File archive = chooser.showOpenDialog(
+                getScene() == null ? null : getScene().getWindow());
+        if (archive == null) return;
+
+        backupButton.setDisable(true);
+        statusLabel.setText("Verifying backup integrity… No files will be extracted or modified.");
+        UiExecutor.shared().execute(() -> {
+            try {
+                InstanceBackupService.BackupVerification report =
+                        InstanceBackupService.verifyBackup(archive.toPath());
+                UiExecutor.shared().dispatchToUi(() -> {
+                    backupButton.setDisable(false);
+                    String size = String.format(Locale.ROOT, "%.2f GiB",
+                            report.expandedBytes() / (1024.0 * 1024.0 * 1024.0));
+                    statusLabel.setText("Backup verified: " + archive.getName()
+                            + " · " + report.entryCount() + " entries");
+                    Alert success = new Alert(Alert.AlertType.INFORMATION,
+                            "Archive integrity checks passed.\n\n"
+                                    + "Instance: " + report.instanceName() + "\n"
+                                    + "Minecraft: " + report.minecraftVersion() + "\n"
+                                    + "Loader: " + report.loader() + "\n"
+                                    + "Entries: " + report.entryCount() + "\n"
+                                    + "Expanded size: " + size + "\n\n"
+                                    + "This verifies archive structure and CRC integrity; it does not prove that every game dependency is present or that Minecraft will launch.");
+                    success.setTitle("Backup Verified");
+                    success.setHeaderText(archive.getName());
+                    success.show();
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    backupButton.setDisable(false);
+                    String message = failure.getMessage() == null
+                            ? failure.getClass().getSimpleName() : failure.getMessage();
+                    statusLabel.setText("Backup verification failed: " + message);
+                    new Alert(Alert.AlertType.ERROR,
+                            "Vanta could not verify this backup.\n\n" + message).show();
+                });
+            }
+        });
+    }
 
     private void restoreInstanceBackup() {
         FileChooser chooser = new FileChooser();
