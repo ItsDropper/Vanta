@@ -113,7 +113,7 @@ public final class InstanceRecoveryService {
 
             RecoveryPoint point = new RecoveryPoint(id, parseTimestamp(id), safeReason, expandedBytes, fileCount);
             try {
-                pruneRecoveryPoints(instanceId, DEFAULT_RETENTION);
+                pruneRecoveryPoints(instanceId, DEFAULT_RETENTION, vantaDirectory);
             } catch (IOException cleanupFailure) {
                 System.err.println("Recovery point was saved, but retention cleanup failed: "
                         + cleanupFailure.getMessage());
@@ -363,8 +363,8 @@ public final class InstanceRecoveryService {
         }
     }
 
-    private static void pruneRecoveryPoints(String instanceId, int retention) throws IOException {
-        Path directory = recoveryDirectory(instanceId);
+    private static void pruneRecoveryPoints(String instanceId, int retention, Path vantaDirectory) throws IOException {
+        Path directory = recoveryDirectory(instanceId, vantaDirectory);
         try (var files = Files.list(directory)) {
             List<Path> archives = files.filter(path -> path.getFileName().toString().matches("[0-9]{13}-[a-f0-9]{8}\\.zip"))
                     .sorted(Comparator.comparingLong((Path path) -> parseTimestamp(path.getFileName().toString())).reversed())
