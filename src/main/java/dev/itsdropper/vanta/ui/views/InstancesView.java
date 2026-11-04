@@ -295,6 +295,8 @@ public class InstancesView extends VBox {
             instanceList.setAlignment(Pos.CENTER);
             countLabel.setText("INSTANCE LIBRARY");
             statusLabel.setText("Preview mode · your local Minecraft folders were not scanned.");
+            statusLabel.setVisible(false);
+            statusLabel.setManaged(false);
             instanceList.getChildren().setAll(new EmptyState(
                     "▦",
                     "YOUR LIBRARY",

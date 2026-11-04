@@ -270,13 +270,11 @@ public class GlobalModsView extends VBox {
                 ScrollPane.ScrollBarPolicy.AS_NEEDED
         );
 
-        popularScrollPane.setPrefHeight(
-                320
-        );
-
-        popularScrollPane.setMaxHeight(
-                320
-        );
+        popularScrollPane.setPrefHeight(320);
+        popularScrollPane.setMaxHeight(320);
+        popularScrollPane.setMaxWidth(Double.MAX_VALUE);
+        popularResults.setMaxWidth(Double.MAX_VALUE);
+        popularResults.setFillWidth(true);
 
         popularScrollPane.getStyleClass().add(
                 "instances-scroll"
@@ -392,6 +390,8 @@ public class GlobalModsView extends VBox {
                     "Filter by content type, loader and Minecraft version to find compatible projects."
             ));
             statusLabel.setText("Screenshot preview · network requests are disabled.");
+            statusLabel.setVisible(false);
+            statusLabel.setManaged(false);
         } else {
             loadMostDownloadedMods();
         }

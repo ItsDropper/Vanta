@@ -245,7 +245,9 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
     /** Provides truthful, deterministic UI state without connecting an account. */
     public void prepareScreenshotPreview() {
         accountLabel.setText("Connect a Minecraft Java account from Accounts to load your profile.");
-        fileLabel.setText("Your player skin will appear here after your profile loads.");
+        fileLabel.setText("No skin loaded");
+        fileLabel.setWrapText(true);
+        fileLabel.setMaxWidth(240);
         statusLabel.setText("Preview only · account requests and skin uploads are disabled.");
         capeChoice.setPromptText("Sign in to load owned capes");
         modelChoice.setDisable(true);
