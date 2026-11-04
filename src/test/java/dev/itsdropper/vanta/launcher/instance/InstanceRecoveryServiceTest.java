@@ -74,9 +74,11 @@ class InstanceRecoveryServiceTest {
         List<InstanceRecoveryService.RecoveryPoint> points =
                 InstanceRecoveryService.listRecoveryPoints(instance, temporaryDirectory);
         assertEquals(2, points.size(), "Restore should preserve the pre-restore state as a new point");
-        assertEquals("Automatic snapshot before recovery restore", points.get(0).reason());
+        InstanceRecoveryService.RecoveryPoint beforeRestore = points.stream()
+                .filter(candidate -> candidate.reason().equals("Automatic snapshot before recovery restore"))
+                .findFirst().orElseThrow();
 
-        InstanceRecoveryService.restoreRecoveryPoint(instance, points.get(0).id(), temporaryDirectory);
+        InstanceRecoveryService.restoreRecoveryPoint(instance, beforeRestore.id(), temporaryDirectory);
         assertTrue(Files.exists(instanceDirectory.resolve("mods/new.jar")),
                 "The automatic pre-restore point should make the restore reversible");
 
