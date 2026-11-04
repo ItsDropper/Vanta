@@ -33,6 +33,7 @@ import dev.itsdropper.vanta.ui.components.NotificationManager;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
@@ -57,10 +58,10 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     private final Consumer<String> onAccentChanged;
     private final Runnable onDebugOnboarding;
     private final Consumer<UpdateInfo> onVantaUpdate;
-    private final VBox navigation = new VBox(4);
-    private final VBox content = new VBox(22);
+    private final VBox navigation = new VBox(VantaUI.spacing(1));
+    private final VBox content = new VBox(VantaUI.spacing(5));
     private final ComboBox<String> compactNavigation = new ComboBox<>();
-    private final HBox compactNavigationBar = new HBox(12);
+    private final HBox compactNavigationBar = new HBox(VantaUI.spacing(3));
     private final AccountService.AccountListener accountListener = account -> refreshDebugAccess();
     private boolean accountListenerRegistered;
     private boolean updatingNavigation;
@@ -89,6 +90,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         getStyleClass().add("settings-shell");
 
         buildNavigation();
+        navigation.setPadding(new Insets(VantaUI.spacing(3)));
+        VantaUI.applySurface(navigation, VantaUI.SurfaceRole.SIDEBAR);
 
         content.setFillWidth(true);
         content.setPadding(new Insets(0, 4, 24, 4));
@@ -2204,8 +2207,10 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private VBox card(String title, String description) {
-        VBox card = new VBox(14);
+        VBox card = new VBox(VantaUI.spacing(3));
         card.getStyleClass().add("settings-card");
+        card.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(card, VantaUI.SurfaceRole.CARD);
 
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("settings-card-title");
@@ -2219,7 +2224,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private void addInfoRow(VBox parent, String label, String value) {
-        HBox row = new HBox(14);
+        HBox row = new HBox(VantaUI.spacing(3));
         row.setAlignment(Pos.CENTER_LEFT);
 
         Label key = new Label(label);

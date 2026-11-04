@@ -8,6 +8,7 @@ import dev.itsdropper.vanta.launcher.server.ServerManagerService.Snapshot;
 import dev.itsdropper.vanta.launcher.server.ServerManagerService.State;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.VantaUI;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
@@ -29,8 +30,8 @@ import java.util.Properties;
 /** Local-first manager for vanilla/Paper/Fabric/Forge-compatible Java server jars. */
 public final class ServerManagerView extends BorderPane implements AutoCloseable {
     private final ServerManagerService service = new ServerManagerService();
-    private final VBox profileList = new VBox(8);
-    private final VBox detail = new VBox(14);
+    private final VBox profileList = new VBox(VantaUI.spacing(2));
+    private final VBox detail = new VBox(VantaUI.spacing(3));
     private final Label status = new Label("Select a server");
     private final Label statusDot = new Label("●");
     private final Label serverTitle = new Label("No server selected");
@@ -73,19 +74,21 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         VBox headingRow = new VBox(8, eyebrow, pageHeader);
 
         profileList.getStyleClass().add("server-profile-list");
-        profileList.setPadding(new Insets(10));
+        profileList.setPadding(new Insets(VantaUI.spacing(3)));
         ScrollPane profileScroll = new ScrollPane(profileList);
         profileScroll.setFitToWidth(true);
         profileScroll.getStyleClass().add("server-scroll");
         profileScroll.setPrefWidth(245);
         profileScroll.setMinWidth(220);
 
-        VBox left = new VBox(12);
+        VBox left = new VBox(VantaUI.spacing(3));
         HBox listHeader = new HBox(8, new Label("YOUR SERVERS"), spacer(), new Label("LOCAL"));
         listHeader.getStyleClass().add("server-list-header");
         left.getChildren().addAll(listHeader, profileScroll);
         VBox.setVgrow(profileScroll, Priority.ALWAYS);
         left.getStyleClass().add("server-sidebar");
+        left.setPadding(new Insets(VantaUI.spacing(3)));
+        VantaUI.applySurface(left, VantaUI.SurfaceRole.PANEL);
 
         serverTitle.getStyleClass().add("server-title");
         serverMeta.getStyleClass().add("server-subtitle");
@@ -107,8 +110,8 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         saveSettings.setOnAction(event -> saveRuntimeSettings(true));
 
         GridPane runtimeGrid = new GridPane();
-        runtimeGrid.setHgap(12);
-        runtimeGrid.setVgap(10);
+        runtimeGrid.setHgap(VantaUI.spacing(3));
+        runtimeGrid.setVgap(VantaUI.spacing(2));
         runtimeGrid.add(field("Java executable", javaInput), 0, 0);
         runtimeGrid.add(field("Minimum RAM (MB)", minRam), 1, 0);
         runtimeGrid.add(field("Maximum RAM (MB)", maxRam), 2, 0);
@@ -118,7 +121,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         col2.setHgrow(Priority.ALWAYS); col2.setPercentWidth(27);
         runtimeGrid.getColumnConstraints().addAll(col, col2, col2);
 
-        FlowPane tools = new FlowPane(8, 8);
+        FlowPane tools = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2));
         Button properties = actionButton("Server properties", IconView.Type.SETTINGS, "server-secondary");
         Button backup = actionButton("Create backup", IconView.Type.PACKAGE, "server-secondary");
         Button restore = actionButton("Restore backup", IconView.Type.REFRESH, "server-secondary");
@@ -139,10 +142,13 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         console.setPromptText("Server output will appear here when the process starts.");
         console.getStyleClass().add("server-console");
         console.setPrefRowCount(16);
-        VBox consolePanel = new VBox(8, sectionHeader("LIVE CONSOLE", "Process output and server commands"), console);
+        VBox consolePanel = new VBox(VantaUI.spacing(2),
+                sectionHeader("LIVE CONSOLE", "Process output and server commands"), console);
         consolePanel.getStyleClass().add("server-panel");
+        consolePanel.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(consolePanel, VantaUI.SurfaceRole.CARD);
         VBox.setVgrow(console, Priority.ALWAYS);
-        HBox commandRow = new HBox(8);
+        HBox commandRow = new HBox(VantaUI.spacing(2));
         commandInput.setPromptText("Enter a command, e.g. say Server restarting in 5 minutes");
         commandInput.getStyleClass().add("server-input");
         Button send = actionButton("Send", IconView.Type.ARROW_RIGHT, "server-primary");
@@ -152,8 +158,11 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         HBox.setHgrow(commandInput, Priority.ALWAYS);
         consolePanel.getChildren().add(commandRow);
 
-        VBox runtimePanel = new VBox(10, sectionHeader("RUNTIME", "Java process configuration"), runtimeGrid, eula, saveSettings);
+        VBox runtimePanel = new VBox(VantaUI.spacing(2),
+                sectionHeader("RUNTIME", "Java process configuration"), runtimeGrid, eula, saveSettings);
         runtimePanel.getStyleClass().add("server-panel");
+        runtimePanel.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(runtimePanel, VantaUI.SurfaceRole.CARD);
         detail.getChildren().setAll(
                 new VBox(5, serverTitle, serverMeta),
                 statusRow,
@@ -184,7 +193,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             profileScroll.setPrefHeight(compact ? 150 : Region.USE_COMPUTED_SIZE);
             left.setPrefHeight(compact ? 200 : Region.USE_COMPUTED_SIZE);
         });
-        VBox main = new VBox(18, headingRow, workspace);
+        VBox main = new VBox(VantaUI.spacing(4), headingRow, workspace);
         VBox.setVgrow(workspace, Priority.ALWAYS);
         setCenter(main);
 

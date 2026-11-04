@@ -36,6 +36,7 @@ import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.components.NotificationManager;
 import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.ui.VantaUI;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,9 +44,9 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 
 public final class StateCenterView extends VBox implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
-    private final VBox instanceList = new VBox(10);
+    private final VBox instanceList = new VBox(VantaUI.spacing(2));
     private final EnvironmentLockfileService environmentLockfileService = new EnvironmentLockfileService();
-    private final VBox sharedList = new VBox(10);
+    private final VBox sharedList = new VBox(VantaUI.spacing(2));
     private final ScrollPane instanceScroll = new ScrollPane(instanceList);
     private final Label overallTitle = new Label("READY");
     private final Label overallSubtitle = new Label("Vanta will inspect your environments when you open this page.");
@@ -60,7 +61,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
     public StateCenterView() {
         getStyleClass().add("state-center");
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
-        setSpacing(20);
+        setSpacing(VantaUI.spacing(5));
 
         PageHeader heading = new PageHeader(
                 "State Center",
@@ -69,7 +70,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 "page-subtitle"
         );
 
-        VBox heroText = new VBox(5, overallTitle, overallSubtitle);
+        VBox heroText = new VBox(VantaUI.spacing(1), overallTitle, overallSubtitle);
         heroText.setMinWidth(0);
         overallTitle.getStyleClass().add("state-hero-title");
         overallSubtitle.getStyleClass().add("state-hero-subtitle");
@@ -80,15 +81,16 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         progress.getStyleClass().add("state-progress");
 
         progressLabel.getStyleClass().add("state-progress-label");
-        VBox progressBox = new VBox(6, progressLabel, progress);
+        VBox progressBox = new VBox(VantaUI.spacing(1), progressLabel, progress);
 
-        FlowPane heroRow = new FlowPane(20, 12, heroText, progressBox);
+        FlowPane heroRow = new FlowPane(VantaUI.spacing(5), VantaUI.spacing(3), heroText, progressBox);
         heroRow.setAlignment(Pos.CENTER_LEFT);
         heroRow.setMaxWidth(Double.MAX_VALUE);
 
         StackPane hero = new StackPane(heroRow);
         hero.getStyleClass().add("state-hero");
-        hero.setPadding(new Insets(22));
+        hero.setPadding(new Insets(VantaUI.spacing(5)));
+        VantaUI.applySurface(hero, VantaUI.SurfaceRole.PANEL);
 
         refreshButton.getStyleClass().add("state-refresh-button");
         refreshButton.setAccessibleText("Scan installed environments now");
@@ -96,7 +98,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         Label sectionTitle = new Label("ENVIRONMENTS");
         sectionTitle.getStyleClass().add("state-section-title");
-        HBox section = new HBox(10, sectionTitle, refreshButton);
+        HBox section = new HBox(VantaUI.spacing(2), sectionTitle, refreshButton);
         section.setAlignment(Pos.CENTER_LEFT);
 
         instanceList.setFillWidth(true);
@@ -113,14 +115,16 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         VBox listCard = new VBox(instanceScroll);
         listCard.getStyleClass().add("state-list-card");
-        listCard.setPadding(new Insets(12));
+        listCard.setPadding(new Insets(VantaUI.spacing(3)));
+        VantaUI.applySurface(listCard, VantaUI.SurfaceRole.PANEL);
         VBox.setVgrow(listCard, Priority.ALWAYS);
 
         Label sharedTitle = new Label("SHARED RESOURCES");
         sharedTitle.getStyleClass().add("state-section-title");
-        VBox sharedCard = new VBox(12, sharedTitle, sharedList);
+        VBox sharedCard = new VBox(VantaUI.spacing(3), sharedTitle, sharedList);
         sharedCard.getStyleClass().add("state-list-card");
-        sharedCard.setPadding(new Insets(16));
+        sharedCard.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(sharedCard, VantaUI.SurfaceRole.PANEL);
 
         getChildren().addAll(heading, hero, section, listCard, sharedCard);
 
@@ -528,10 +532,11 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
     }
 
     private HBox createScanningCard(Instance instance) {
-        HBox card = new HBox(16);
+        HBox card = new HBox(VantaUI.spacing(4));
         card.getStyleClass().add("state-card");
         card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(16));
+        card.setPadding(new Insets(VantaUI.spacing(4)));
+        VantaUI.applySurface(card, VantaUI.SurfaceRole.CARD);
 
         StackPane icon = new StackPane(IconView.create(IconView.Type.REFRESH, 22));
         icon.getStyleClass().add("state-instance-icon");
@@ -603,9 +608,10 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
     }
 
     private HBox createSharedRow(String name, SharedState state) {
-        HBox row = new HBox(14);
+        HBox row = new HBox(VantaUI.spacing(3));
         row.setAlignment(Pos.CENTER_LEFT);
         row.getStyleClass().add("state-shared-row");
+        VantaUI.applySurface(row, VantaUI.SurfaceRole.CARD);
 
         StackPane icon = new StackPane(IconView.create(
                 "Libraries".equals(name) ? IconView.Type.PACKAGE : IconView.Type.FOLDER, 20));
