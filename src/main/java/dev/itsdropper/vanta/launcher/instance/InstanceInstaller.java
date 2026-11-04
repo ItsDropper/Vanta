@@ -565,6 +565,32 @@ public class InstanceInstaller {
         }
     }
 
+    public static Instance installModLoader(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        String loaderVersion = ModLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "ModLoader", loaderVersion);
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            ModLoaderInstaller.install(instance);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception failure) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw failure;
+        }
+    }
+
     public static Instance installNilLoader(
             String name,
             String minecraftVersion
@@ -817,6 +843,11 @@ public class InstanceInstaller {
 
         if ("NilLoader".equalsIgnoreCase(loader)) {
             NilLoaderInstaller.install(instance);
+        }
+
+        if ("ModLoader".equalsIgnoreCase(loader)) {
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            ModLoaderInstaller.install(instance);
         }
 
         if ("LiteLoader".equalsIgnoreCase(loader)) {
