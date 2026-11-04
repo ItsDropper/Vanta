@@ -625,6 +625,7 @@ public class CreateInstanceView extends VBox {
             final boolean ornithe = ornitheAvailable;
             final boolean legacyFabric = legacyFabricAvailable;
             final boolean babric = babricAvailable;
+            final boolean nilLoader = true;
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
@@ -650,7 +651,8 @@ public class CreateInstanceView extends VBox {
                         "NeoForge",
                         "Ornithe",
                         "Legacy Fabric",
-                        "Babric"
+                        "Babric",
+                        "NilLoader"
                 );
 
                 // Keep unsupported loaders visible but prevent selecting them.
@@ -663,7 +665,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || true) {
+                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
