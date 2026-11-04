@@ -285,8 +285,8 @@ public class CreateInstanceView extends VBox {
         );
 
         Label loaderHint = new Label(
-                "Experimental preview: native VantaLoader entrypoints initialize before Minecraft starts. "
-                        + "Minecraft event hooks, gameplay transformations, and Mixin support are not available yet."
+                "Experimental preview: VantaLoader supports native Java mods and exact-target ASM transformations. "
+                        + "Minecraft mappings, lifecycle events, Mixin, and Fabric/Forge mod compatibility are not available yet."
         );
         loaderHint.getStyleClass().add("create-panel-subtitle");
         loaderHint.setWrapText(true);
