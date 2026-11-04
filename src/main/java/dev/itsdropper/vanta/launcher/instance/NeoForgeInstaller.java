@@ -33,13 +33,7 @@ public final class NeoForgeInstaller {
 
         // NeoForge Maven versions omit the leading "1." for the 1.x era:
         // Minecraft 1.21.1 maps to NeoForge 21.1.x.
-        String normalizedVersion = minecraftVersion.startsWith("1.")
-                ? minecraftVersion.substring(2)
-                : minecraftVersion;
-        if (!normalizedVersion.contains(".")) {
-            normalizedVersion += ".0";
-        }
-        String prefix = normalizedVersion + ".";
+        String prefix = mavenMinecraftPrefix(minecraftVersion);
 
         Path metadataFile = Files.createTempFile(
                 "vanta-neoforge-metadata-", ".xml");
@@ -80,6 +74,21 @@ public final class NeoForgeInstaller {
         } finally {
             Files.deleteIfExists(metadataFile);
         }
+    }
+
+    private static String mavenMinecraftPrefix(String minecraftVersion) {
+        if (minecraftVersion == null
+                || !minecraftVersion.matches("[0-9]+(?:\\.[0-9]+){1,3}")) {
+            throw new IllegalArgumentException("Minecraft version is invalid.");
+        }
+
+        String normalized = minecraftVersion.startsWith("1.")
+                ? minecraftVersion.substring(2)
+                : minecraftVersion;
+        if (!normalized.contains(".")) {
+            normalized += ".0";
+        }
+        return normalized + ".";
     }
 
     private static int compareVersions(
@@ -124,8 +133,16 @@ public final class NeoForgeInstaller {
             throw new IllegalArgumentException("Instance cannot be null.");
         }
 
-        if (neoforgeVersion == null || neoforgeVersion.isBlank()) {
-            throw new IllegalArgumentException("NeoForge version cannot be empty.");
+        if (neoforgeVersion == null
+                || !neoforgeVersion.matches("[A-Za-z0-9][A-Za-z0-9._+-]*")) {
+            throw new IllegalArgumentException("NeoForge version is invalid.");
+        }
+
+        String expectedPrefix = mavenMinecraftPrefix(instance.getMinecraftVersion());
+        if (!neoforgeVersion.startsWith(expectedPrefix)) {
+            throw new IllegalArgumentException(
+                    "NeoForge " + neoforgeVersion + " does not match Minecraft "
+                            + instance.getMinecraftVersion() + ".");
         }
 
         String coordinate = neoforgeVersion;
@@ -219,6 +236,16 @@ public final class NeoForgeInstaller {
             JsonNode neoforgeMetadata =
                     new com.fasterxml.jackson.databind.ObjectMapper()
                             .readTree(metadata.toFile());
+
+            JsonNode mainClass = neoforgeMetadata.path("mainClass");
+            JsonNode profileLibraries = neoforgeMetadata.path("libraries");
+            if (!neoforgeMetadata.isObject()
+                    || !mainClass.isTextual()
+                    || mainClass.asText().isBlank()
+                    || !profileLibraries.isArray()) {
+                throw new IOException(
+                        "NeoForge installer produced invalid version metadata.");
+            }
 
             /*
              * NeoForge's installer uses the target directory as a
@@ -396,7 +423,17 @@ public final class NeoForgeInstaller {
                         String fileName = path.getFileName().toString().toLowerCase(java.util.Locale.ROOT);
                         String parentName = path.getParent() == null || path.getParent().getFileName() == null
                                 ? "" : path.getParent().getFileName().toString().toLowerCase(java.util.Locale.ROOT);
-                        return fileName.contains("neoforge") || parentName.contains("neoforge");
+                        if (fileName.contains("neoforge") || parentName.contains("neoforge")) {
+                            return true;
+                        }
+                        try {
+                            JsonNode metadata = new com.fasterxml.jackson.databind.ObjectMapper()
+                                    .readTree(path.toFile());
+                            String id = textValue(metadata, "id");
+                            return id != null && id.toLowerCase(java.util.Locale.ROOT).contains("neoforge");
+                        } catch (IOException ignored) {
+                            return false;
+                        }
                     })
                     .max(Comparator.comparingLong(path -> {
                         try {
