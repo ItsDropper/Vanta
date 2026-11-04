@@ -383,13 +383,7 @@ String normalizeLoader(
             String loader
     ) {
 
-        if (loader == null) {
-            return "";
-        }
-
-        return loader
-                .trim()
-                .toLowerCase();
+        return dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(loader);
     }
 
 String sanitizeFilename(
