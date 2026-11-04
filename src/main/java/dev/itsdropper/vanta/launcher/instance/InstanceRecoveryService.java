@@ -59,6 +59,7 @@ public final class InstanceRecoveryService {
         Path temporary = recoveryDirectory.resolve(id + ".zip.in-progress");
         String safeReason = reason == null || reason.isBlank() ? "Manual recovery point"
                 : reason.replaceAll("[\\p{Cntrl}]", " ").trim();
+        if (safeReason.isBlank()) safeReason = "Manual recovery point";
         if (safeReason.length() > 200) safeReason = safeReason.substring(0, 200);
 
         long expandedBytes = 0;
@@ -147,7 +148,8 @@ public final class InstanceRecoveryService {
 
         List<RecoveryPoint> points = new ArrayList<>();
         try (var files = Files.list(directory)) {
-            for (Path archive : files.filter(path -> path.getFileName().toString().endsWith(".zip")).toList()) {
+            for (Path archive : files.filter(path ->
+                    path.getFileName().toString().matches("[0-9]{13}-[a-f0-9]{8}\\\\.zip")).toList()) {
                 try {
                     points.add(readPoint(archive));
                 } catch (IOException invalid) {
