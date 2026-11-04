@@ -59,6 +59,8 @@ public final class RiftInstaller {
                 "https://repo1.maven.org/maven2/");
         addLibrary(libraries, "org.ow2.asm:asm-commons:6.2",
                 "https://repo1.maven.org/maven2/");
+        addLibrary(libraries, "org.ow2.asm:asm-tree:6.2",
+                "https://repo1.maven.org/maven2/");
         return overlay;
     }
 
