@@ -22,6 +22,13 @@ public final class NilLoaderInstaller {
     private NilLoaderInstaller() {
     }
 
+    public static String findLatestLoaderVersion(String minecraftVersion) {
+        if (minecraftVersion == null || minecraftVersion.isBlank()) {
+            throw new IllegalArgumentException("Minecraft version is required.");
+        }
+        return VERSION;
+    }
+
     public static Path agentPath(Instance instance) {
         if (instance == null || instance.getDirectory() == null) {
             throw new IllegalArgumentException("A valid NilLoader instance is required.");
