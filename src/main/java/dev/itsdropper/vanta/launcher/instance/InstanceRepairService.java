@@ -134,6 +134,9 @@ public final class InstanceRepairService {
             );
         } else if (loader.equalsIgnoreCase("babric")) {
             repairBabric(instance, vanillaMetadata);
+        } else if (loader.equalsIgnoreCase("nilloader")) {
+            NilLoaderInstaller.install(instance);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
         } else if (loader.equalsIgnoreCase("vanilla")) {
             MinecraftVersionResolver.saveMetadata(
                     instance,
