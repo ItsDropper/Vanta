@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher.instance;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +34,6 @@ public final class InstanceRecoveryService {
             List.of("mods", "config", "resourcepacks", "shaderpacks");
     private static final int MAX_ENTRIES = 100_000;
     private static final long MAX_EXPANDED_BYTES = 20L * 1024 * 1024 * 1024;
-    private static final int DEFAULT_RETENTION = 5;
 
     public record RecoveryPoint(
             String id,
@@ -138,7 +138,7 @@ public final class InstanceRecoveryService {
             RecoveryPoint point = new RecoveryPoint(id, parseTimestamp(id), safeReason, expandedBytes, fileCount);
             if (applyRetention) {
                 try {
-                    pruneRecoveryPoints(instanceId, DEFAULT_RETENTION, vantaDirectory);
+                    pruneRecoveryPoints(instanceId, LauncherSettings.getRecoveryPointRetention(), vantaDirectory);
                 } catch (IOException cleanupFailure) {
                     System.err.println("Recovery point was saved, but retention cleanup failed: "
                             + cleanupFailure.getMessage());
