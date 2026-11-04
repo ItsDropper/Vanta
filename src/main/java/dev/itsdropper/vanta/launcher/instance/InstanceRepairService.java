@@ -132,6 +132,8 @@ public final class InstanceRepairService {
             repairForge(
                     instance
             );
+        } else if (loader.equalsIgnoreCase("babric")) {
+            repairBabric(instance, vanillaMetadata);
         } else if (loader.equalsIgnoreCase("vanilla")) {
             MinecraftVersionResolver.saveMetadata(
                     instance,
@@ -204,6 +206,31 @@ public final class InstanceRepairService {
             InstanceManager.saveInstance(
                     repaired
             );
+        }
+    }
+
+    private static void repairBabric(
+            Instance instance,
+            JsonNode vanillaMetadata
+    ) throws Exception {
+        String loaderVersion = instance.getLoaderVersion();
+        if (loaderVersion == null || loaderVersion.isBlank()) {
+            loaderVersion = BabricInstaller.findLatestLoaderVersion(instance.getMinecraftVersion());
+        }
+
+        JsonNode fabricProfile = BabricInstaller.downloadFabricProfile(
+                instance.getMinecraftVersion(), loaderVersion);
+        JsonNode babricOverlay = BabricInstaller.buildOverlay(fabricProfile);
+        BabricInstaller.installLibraries(fabricProfile, babricOverlay);
+        JsonNode merged = BabricInstaller.mergeProfile(vanillaMetadata, fabricProfile, babricOverlay);
+        MinecraftVersionResolver.saveMetadata(instance, merged);
+        NativeInstaller.extract(instance, merged);
+
+        if (!loaderVersion.equals(instance.getLoaderVersion())) {
+            Instance repaired = new Instance(
+                    instance.getId(), instance.getName(), instance.getMinecraftVersion(),
+                    instance.getLoader(), loaderVersion, instance.getDirectory());
+            InstanceManager.saveInstance(repaired);
         }
     }
 
