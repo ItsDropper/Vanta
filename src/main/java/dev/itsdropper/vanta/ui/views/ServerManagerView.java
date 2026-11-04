@@ -56,6 +56,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
         Label eyebrow = new Label("LOCAL HOSTING");
         eyebrow.getStyleClass().add("server-eyebrow");
+        VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
         Button add = actionButton("Import existing", IconView.Type.FOLDER, "server-secondary");
         add.setOnAction(event -> addProfile());
         Button create = actionButton("Create from JAR", IconView.Type.PLUS, "server-primary");

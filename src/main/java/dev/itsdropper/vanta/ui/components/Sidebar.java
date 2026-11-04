@@ -177,6 +177,7 @@ public class Sidebar extends VBox {
         build.getStyleClass().add(
                 "sidebar-build"
         );
+        VantaUI.styleText(build, VantaUI.TextRole.METADATA);
 
         build.setWrapText(true);
         build.setAccessibleText("Vanta version " + loadVersion()
@@ -228,6 +229,7 @@ public class Sidebar extends VBox {
         Label label = new Label(title);
         sectionLabels.add(label);
         label.getStyleClass().add("sidebar-section-label");
+        VantaUI.styleText(label, VantaUI.TextRole.EYEBROW);
         label.setMaxWidth(Double.MAX_VALUE);
         VBox.setMargin(label, new Insets(12, 8, 2, 8));
         getChildren().add(label);

@@ -246,6 +246,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     private Label group(String text) {
         Label label = new Label(text);
         label.getStyleClass().add("settings-nav-group");
+        VantaUI.styleText(label, VantaUI.TextRole.EYEBROW);
         return label;
     }
 

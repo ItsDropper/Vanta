@@ -98,6 +98,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         Label sectionTitle = new Label("ENVIRONMENTS");
         sectionTitle.getStyleClass().add("state-section-title");
+        VantaUI.styleText(sectionTitle, VantaUI.TextRole.SECTION_TITLE);
         HBox section = new HBox(VantaUI.spacing(2), sectionTitle, refreshButton);
         section.setAlignment(Pos.CENTER_LEFT);
 
@@ -121,6 +122,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         Label sharedTitle = new Label("SHARED RESOURCES");
         sharedTitle.getStyleClass().add("state-section-title");
+        VantaUI.styleText(sharedTitle, VantaUI.TextRole.SECTION_TITLE);
         VBox sharedCard = new VBox(VantaUI.spacing(3), sharedTitle, sharedList);
         sharedCard.getStyleClass().add("state-list-card");
         sharedCard.setPadding(new Insets(VantaUI.spacing(4)));

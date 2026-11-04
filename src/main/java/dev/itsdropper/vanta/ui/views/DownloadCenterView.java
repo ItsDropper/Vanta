@@ -45,6 +45,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
 
         Label eyebrow = new Label("TRANSFER ACTIVITY");
         eyebrow.getStyleClass().add("download-eyebrow");
+        VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
         PageHeader pageHeader = new PageHeader(
                 "Download Center",
                 "One place to track installs, libraries, mods, assets and updates.",
@@ -64,6 +65,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         listHeading.setAlignment(Pos.CENTER_LEFT);
         Label queueTitle = new Label("Recent transfers");
         queueTitle.getStyleClass().add("download-section-title");
+        VantaUI.styleText(queueTitle, VantaUI.TextRole.SECTION_TITLE);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         Button clear = new Button("Clear history", IconView.create(IconView.Type.TRASH, 14));
