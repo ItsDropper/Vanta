@@ -67,7 +67,21 @@ public final class OrnitheInstaller {
 
     public static JsonNode mergeProfile(JsonNode vanilla, JsonNode ornitheProfile) {
         validateProfile(ornitheProfile);
-        return FabricInstaller.mergeProfile(vanilla, ornitheProfile);
+        com.fasterxml.jackson.databind.node.ObjectNode merged =
+                (com.fasterxml.jackson.databind.node.ObjectNode)
+                        FabricInstaller.mergeProfile(vanilla, ornitheProfile);
+
+        // Ornithe's historical profiles may carry a loader-specific
+        // legacy argument template. Preserve it when supplied.
+        JsonNode minecraftArguments = ornitheProfile.get("minecraftArguments");
+        if (minecraftArguments != null && minecraftArguments.isTextual()) {
+            merged.set("minecraftArguments", minecraftArguments.deepCopy());
+        }
+        JsonNode arguments = ornitheProfile.get("arguments");
+        if (arguments != null && arguments.isObject()) {
+            merged.set("arguments", arguments.deepCopy());
+        }
+        return merged;
     }
 
     private static void validateProfile(JsonNode profile) {
@@ -88,7 +102,7 @@ public final class OrnitheInstaller {
 
     private static String encodeSegment(String value, String label) {
         if (value == null || value.isBlank()
-                || value.contains("/") || value.contains("\\\\") || value.contains("..")) {
+                || value.contains("/") || value.contains("\\") || value.contains("..")) {
             throw new IllegalArgumentException(label + " is invalid.");
         }
         return URLEncoder.encode(value.trim(), StandardCharsets.UTF_8)
