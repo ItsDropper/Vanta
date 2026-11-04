@@ -190,6 +190,9 @@ public final class InstanceBackupService {
             throw new IllegalArgumentException("Restored instance name cannot be empty.");
         }
 
+        // Complete a read-only integrity and safety pass before creating any restore files.
+        verifyBackup(archive);
+
         Path instancesRoot = MinecraftLocator.getInstancesDirectory().toAbsolutePath().normalize();
         String id = "restored-" + UUID.randomUUID().toString().substring(0, 12);
         Path target = instancesRoot.resolve(id).normalize();
