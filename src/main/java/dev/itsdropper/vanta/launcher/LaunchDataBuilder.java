@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
+import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
 import dev.itsdropper.vanta.launcher.loader.LoaderStackManager;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
@@ -145,6 +146,15 @@ public class LaunchDataBuilder {
             if (!NilLoaderInstaller.hasAgentEntrypoint(agent)) {
                 throw new IllegalStateException(
                         "NilLoader agent is missing or invalid. Repair this instance before launching.");
+            }
+            data.javaAgent = agent;
+        }
+
+        if ("VantaLoader".equalsIgnoreCase(instance.getLoader())) {
+            Path agent = VantaLoaderInstaller.agentPath(instance);
+            if (!VantaLoaderInstaller.isValidAgentJar(agent)) {
+                throw new IllegalStateException(
+                        "VantaLoader agent is missing or invalid. Repair this instance before launching.");
             }
             data.javaAgent = agent;
         }
