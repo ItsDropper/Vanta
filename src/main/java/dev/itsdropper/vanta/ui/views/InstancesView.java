@@ -24,6 +24,7 @@ import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.instance.InstanceBackupService;
+import dev.itsdropper.vanta.launcher.instance.InstanceRecoveryService;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
@@ -216,12 +217,20 @@ public class InstancesView extends VBox {
         sortField.setPrefWidth(170);
         sortField.setOnAction(event -> filterInstances(searchField.getText()));
 
+        Button recoveryButton = new Button("RECOVERY");
+        recoveryButton.getStyleClass().add("secondary-button");
+        recoveryButton.setAccessibleText("Create or restore an instance recovery point");
+        recoveryButton.setTooltip(new javafx.scene.control.Tooltip(
+                "Snapshot or restore mods, configs, resource packs, and shader packs. Worlds are excluded."
+        ));
+        recoveryButton.setOnAction(event -> manageRecoveryPoints(recoveryButton));
+
         FlowPane searchRow = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2));
         searchRow.getStyleClass().add("instances-toolbar");
         searchRow.setAlignment(Pos.CENTER_LEFT);
         searchRow.setRowValignment(javafx.geometry.VPos.CENTER);
         searchRow.prefWrapLengthProperty().bind(searchRow.widthProperty());
-        searchRow.getChildren().addAll(searchField, clearSearchButton, sortField, refreshButton);
+        searchRow.getChildren().addAll(searchField, clearSearchButton, sortField, refreshButton, recoveryButton);
 
         VBox header = new VBox(VantaUI.spacing(3), headerTop, searchRow);
         header.getStyleClass().add("instances-header");
@@ -364,6 +373,155 @@ public class InstancesView extends VBox {
 
     }
 
+
+    private void manageRecoveryPoints(Button actionButton) {
+        if (loadedInstances.isEmpty()) {
+            statusLabel.setText("There are no instances to recover.");
+            return;
+        }
+
+        List<String> instanceLabels = loadedInstances.stream()
+                .map(instance -> instance.getName() + " · Minecraft " + instance.getMinecraftVersion()
+                        + " · " + instance.getDisplayLoader() + " [" + instance.getId() + "]")
+                .toList();
+        ChoiceDialog<String> instanceChooser = new ChoiceDialog<>(instanceLabels.get(0), instanceLabels);
+        instanceChooser.setTitle("Instance Recovery Center");
+        instanceChooser.setHeaderText("Choose an instance");
+        instanceChooser.setContentText("Instance:");
+        String selectedLabel = instanceChooser.showAndWait().orElse(null);
+        if (selectedLabel == null) return;
+
+        int selectedIndex = instanceLabels.indexOf(selectedLabel);
+        if (selectedIndex < 0 || selectedIndex >= loadedInstances.size()) return;
+        Instance selected = loadedInstances.get(selectedIndex);
+        if (launchService.isRunning(selected)) {
+            new Alert(Alert.AlertType.WARNING,
+                    "Close this instance before creating or restoring a recovery point.").showAndWait();
+            return;
+        }
+
+        ChoiceDialog<String> actionChooser = new ChoiceDialog<>(
+                "Create recovery point", List.of("Create recovery point", "Restore a recovery point"));
+        actionChooser.setTitle("Instance Recovery Center");
+        actionChooser.setHeaderText(selected.getName());
+        actionChooser.setContentText("Choose an operation:");
+        String action = actionChooser.showAndWait().orElse(null);
+        if (action == null) return;
+
+        actionButton.setDisable(true);
+        if (action.equals("Create recovery point")) {
+            statusLabel.setText("Creating a targeted recovery point for " + selected.getName() + "…");
+            UiExecutor.shared().execute(() -> {
+                try {
+                    InstanceRecoveryService.RecoveryPoint point =
+                            InstanceRecoveryService.createRecoveryPoint(selected, "Manual recovery point");
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        actionButton.setDisable(false);
+                        statusLabel.setText("Recovery point created: " + point.id());
+                        new Alert(Alert.AlertType.INFORMATION,
+                                "Recovery point created.\n\n"
+                                        + "Files: " + point.fileCount() + "\n"
+                                        + "Expanded size: " + String.format(Locale.ROOT, "%.2f MiB",
+                                        point.expandedBytes() / (1024.0 * 1024.0)) + "\n"
+                                        + "Retention: latest five recovery points per instance.\n\n"
+                                        + "Worlds, screenshots, logs, and instance settings were not included.")
+                                .show();
+                    });
+                } catch (Throwable failure) {
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        actionButton.setDisable(false);
+                        String message = failure.getMessage() == null
+                                ? failure.getClass().getSimpleName() : failure.getMessage();
+                        statusLabel.setText("Recovery point creation failed: " + message);
+                        new Alert(Alert.AlertType.ERROR, "Could not create recovery point.\n\n" + message).show();
+                    });
+                }
+            });
+            return;
+        }
+
+        statusLabel.setText("Loading recovery-point history…");
+        UiExecutor.shared().execute(() -> {
+            try {
+                List<InstanceRecoveryService.RecoveryPoint> points =
+                        InstanceRecoveryService.listRecoveryPoints(selected);
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (points.isEmpty()) {
+                        actionButton.setDisable(false);
+                        statusLabel.setText("No valid recovery points exist for " + selected.getName() + ".");
+                        new Alert(Alert.AlertType.INFORMATION,
+                                "This instance has no valid recovery points yet.").show();
+                        return;
+                    }
+
+                    List<String> labels = points.stream()
+                            .map(point -> java.time.Instant.ofEpochMilli(point.createdAtEpochMillis())
+                                    + " · " + point.reason() + " · " + point.fileCount() + " files")
+                            .toList();
+                    ChoiceDialog<String> pointChooser = new ChoiceDialog<>(labels.get(0), labels);
+                    pointChooser.setTitle("Restore Recovery Point");
+                    pointChooser.setHeaderText("Choose a recovery point for " + selected.getName());
+                    pointChooser.setContentText("Recovery point:");
+                    String chosen = pointChooser.showAndWait().orElse(null);
+                    if (chosen == null) {
+                        actionButton.setDisable(false);
+                        return;
+                    }
+
+                    int pointIndex = labels.indexOf(chosen);
+                    if (pointIndex < 0 || pointIndex >= points.size()) {
+                        actionButton.setDisable(false);
+                        return;
+                    }
+                    InstanceRecoveryService.RecoveryPoint point = points.get(pointIndex);
+                    Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,
+                            "This will replace the instance's current mods, config, resourcepacks, and shaderpacks "
+                                    + "with the selected recovery point.\n\n"
+                                    + "Worlds, screenshots, options, and instance metadata are not changed.\n\n"
+                                    + "Vanta stages the replacement and attempts rollback if publication fails.");
+                    confirmation.setTitle("Confirm Recovery");
+                    confirmation.setHeaderText("Restore " + point.id() + "?");
+                    if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+                        actionButton.setDisable(false);
+                        return;
+                    }
+
+                    statusLabel.setText("Restoring recovery point…");
+                    UiExecutor.shared().execute(() -> {
+                        try {
+                            InstanceRecoveryService.restoreRecoveryPoint(selected, point.id());
+                            UiExecutor.shared().dispatchToUi(() -> {
+                                actionButton.setDisable(false);
+                                statusLabel.setText("Recovery point restored for " + selected.getName() + ".");
+                                new Alert(Alert.AlertType.INFORMATION,
+                                        "Recovery completed.\n\n"
+                                                + "Mods, configs, resource packs, and shader packs were restored. "
+                                                + "Worlds and other user data were left untouched.").show();
+                            });
+                        } catch (Throwable failure) {
+                            UiExecutor.shared().dispatchToUi(() -> {
+                                actionButton.setDisable(false);
+                                String message = failure.getMessage() == null
+                                        ? failure.getClass().getSimpleName() : failure.getMessage();
+                                statusLabel.setText("Recovery failed: " + message);
+                                new Alert(Alert.AlertType.ERROR,
+                                        "Recovery failed. Vanta attempted to roll back any published directories.\n\n"
+                                                + message).show();
+                            });
+                        }
+                    });
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    actionButton.setDisable(false);
+                    String message = failure.getMessage() == null
+                            ? failure.getClass().getSimpleName() : failure.getMessage();
+                    statusLabel.setText("Could not load recovery history: " + message);
+                    new Alert(Alert.AlertType.ERROR, "Could not load recovery history.\n\n" + message).show();
+                });
+            }
+        });
+    }
 
     private void verifyInstanceBackup() {
         FileChooser chooser = new FileChooser();
