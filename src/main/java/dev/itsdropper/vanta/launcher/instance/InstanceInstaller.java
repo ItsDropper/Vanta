@@ -827,7 +827,9 @@ public class InstanceInstaller {
                     .readTree(instance.getDirectory().resolve("minecraft").resolve("version.json").toFile());
         }
 
-        dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
+        if (!"LiteLoader".equalsIgnoreCase(loader)) {
+            dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
+        }
 
         /*
          * ---------------------------------------------------------
