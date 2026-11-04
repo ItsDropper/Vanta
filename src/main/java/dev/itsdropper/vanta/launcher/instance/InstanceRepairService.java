@@ -159,6 +159,7 @@ public final class InstanceRepairService {
             if (!latestLoaderVersion.equals(instance.getLoaderVersion())) {
                 InstanceManager.saveInstance(updated);
             }
+            instance = updated;
         } else if (loader.equalsIgnoreCase("modloader")) {
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             ModLoaderInstaller.install(instance);
