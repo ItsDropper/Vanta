@@ -464,6 +464,48 @@ public class InstanceInstaller {
         }
     }
 
+    public static Instance installLegacyFabric(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        return installLegacyFabric(name, minecraftVersion,
+                LegacyFabricInstaller.findLatestLoaderVersion(minecraftVersion));
+    }
+
+    public static Instance installLegacyFabric(
+            String name,
+            String minecraftVersion,
+            String loaderVersion
+    ) throws Exception {
+        if (loaderVersion == null || loaderVersion.isBlank()) {
+            throw new IllegalArgumentException("Legacy Fabric Loader version cannot be empty.");
+        }
+
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "Legacy Fabric", loaderVersion);
+
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+
+            JsonNode profile = LegacyFabricInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            LegacyFabricInstaller.installLibraries(profile);
+            JsonNode merged = LegacyFabricInstaller.mergeProfile(vanillaMetadata, profile);
+            MinecraftVersionResolver.saveMetadata(instance, merged);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception e) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw e;
+        }
+    }
+
     public static Instance updateMinecraftVersion(
             Instance instance,
             String minecraftVersion
