@@ -656,7 +656,8 @@ public class CreateInstanceView extends VBox {
                 }
 
                 // A saved default can be unavailable for this Minecraft version.
-                if (loaderBox.getValue() == null) {
+                if (loaderBox.getValue() == null
+                        || !loaderBox.getItems().contains(loaderBox.getValue())) {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
