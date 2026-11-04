@@ -505,7 +505,7 @@ public class InstancesView extends VBox {
                                     + "Files: " + point.fileCount() + "\n"
                                     + "Expanded size: " + String.format(Locale.ROOT, "%.2f MiB",
                                     point.expandedBytes() / (1024.0 * 1024.0)) + "\n\n"
-                                    + "This will replace the instance's current mods, config, resourcepacks, and shaderpacks "
+                                    + "This will replace the instance's current mods, config, resourcepacks, shaderpacks, and imported loader profiles "
                                     + "with the selected recovery point.\n\n"
                                     + "Worlds, screenshots, options, and instance metadata are not changed.\n\n"
                                     + "Vanta stages the replacement and attempts rollback if publication fails.");
