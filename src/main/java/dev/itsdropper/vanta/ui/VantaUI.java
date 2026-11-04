@@ -2,7 +2,7 @@ package dev.itsdropper.vanta.ui;
 
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.layout.Parent;
+import javafx.scene.Parent;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ClosePath;
