@@ -38,8 +38,7 @@ public final class BabricInstaller {
         }
         JsonNode fabricProfile = FabricInstaller.downloadProfile(
                 SUPPORTED_GAME_VERSION, loaderVersion.trim());
-        validateFabricBootstrap(fabricProfile);
-        return buildBabricOverlay(fabricProfile);
+        return buildOverlay(fabricProfile);
     }
 
     public static JsonNode downloadFabricProfile(String minecraftVersion, String loaderVersion)
@@ -73,7 +72,8 @@ public final class BabricInstaller {
         return merged;
     }
 
-    private static ObjectNode buildBabricOverlay(JsonNode fabricProfile) throws Exception {
+    public static JsonNode buildOverlay(JsonNode fabricProfile) throws Exception {
+        validateFabricBootstrap(fabricProfile);
         ObjectNode overlay = (ObjectNode) MAPPER.readTree("""
                 {
                   "minecraftArguments": "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}",
