@@ -7,7 +7,9 @@ import org.junit.jupiter.api.io.TempDir;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -95,6 +97,38 @@ class InstanceRecoveryServiceTest {
         try (var children = Files.list(instanceDirectory)) {
             assertTrue(children.noneMatch(path -> path.getFileName().toString().startsWith(".vanta-recovery-")));
         }
+    }
+
+    @Test
+    void restoringLegacyPointPreservesImportedLoaderProfiles() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
+        Instance instance = instance(instanceDirectory);
+        Path currentProfiles = Files.createDirectories(instanceDirectory.resolve("loader-profiles"));
+        Files.writeString(currentProfiles.resolve("custom.json"), "{\\"libraries\\":[]}");
+        Path recoveryDirectory = Files.createDirectories(
+                temporaryDirectory.resolve("recovery-points").resolve(instance.getId()));
+        String pointId = "1700000000000-deadbeef";
+        Path archive = recoveryDirectory.resolve(pointId + ".zip");
+
+        try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(archive))) {
+            zip.putNextEntry(new ZipEntry("recovery-point.txt"));
+            zip.write("Vanta recovery point\\nReason: Legacy point\\n".getBytes(
+                    java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+            for (String directory : List.of("mods", "config", "resourcepacks", "shaderpacks")) {
+                zip.putNextEntry(new ZipEntry(directory + "/"));
+                zip.closeEntry();
+            }
+            zip.putNextEntry(new ZipEntry("mods/legacy.jar"));
+            zip.write("legacy-mod".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        InstanceRecoveryService.restoreRecoveryPoint(instance, pointId, temporaryDirectory);
+
+        assertEquals("{\\"libraries\\":[]}",
+                Files.readString(instanceDirectory.resolve("loader-profiles/custom.json")));
+        assertEquals("legacy-mod", Files.readString(instanceDirectory.resolve("mods/legacy.jar")));
     }
 
     @Test
