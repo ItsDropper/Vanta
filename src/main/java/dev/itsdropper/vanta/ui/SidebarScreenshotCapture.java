@@ -91,6 +91,16 @@ public final class SidebarScreenshotCapture {
             try {
                 root.applyCss();
                 root.layout();
+                if (index == 0) {
+                    System.out.printf(Locale.ROOT,
+                            "UI capture scene: attached=%s scene=%.0fx%.0f root=%.0fx%.0f%n",
+                            root.getScene() != null,
+                            root.getScene() == null ? 0.0 : root.getScene().getWidth(),
+                            root.getScene() == null ? 0.0 : root.getScene().getHeight(),
+                            root.getWidth(),
+                            root.getHeight());
+                    dumpNodeTree(root, 0, 4);
+                }
                 SnapshotParameters parameters = new SnapshotParameters();
                 parameters.setFill(javafx.scene.paint.Color.web("#0B0D12"));
                 WritableImage image = root.snapshot(parameters, null);
@@ -102,6 +112,32 @@ public final class SidebarScreenshotCapture {
             capturePage(root, navigate, outputDirectory, completion, pages, index + 1);
         });
         settle.play();
+    }
+
+    private static void dumpNodeTree(Node node, int depth, int maxDepth) {
+        String indent = "  ".repeat(depth);
+        var bounds = node.getBoundsInLocal();
+        System.out.printf(Locale.ROOT,
+                "%s%s visible=%s managed=%s opacity=%.2f bounds=%.1fx%.1f%n",
+                indent,
+                node.getClass().getSimpleName(),
+                node.isVisible(),
+                node.isManaged(),
+                node.getOpacity(),
+                bounds.getWidth(),
+                bounds.getHeight());
+
+        if (depth >= maxDepth || !(node instanceof Parent parent)) {
+            return;
+        }
+        int childCount = parent.getChildrenUnmodifiable().size();
+        int shown = Math.min(childCount, 24);
+        for (int i = 0; i < shown; i++) {
+            dumpNodeTree(parent.getChildrenUnmodifiable().get(i), depth + 1, maxDepth);
+        }
+        if (childCount > shown) {
+            System.out.println(indent + "  … " + (childCount - shown) + " more children");
+        }
     }
 
     private static void writePng(WritableImage image, Path destination) throws IOException {
