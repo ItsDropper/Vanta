@@ -455,10 +455,10 @@ public class InstancesView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (recoveredTransactions > 0) {
                         new Alert(Alert.AlertType.INFORMATION,
-                                "Vanta detected and rolled back " + recoveredTransactions
+                                "Vanta reconciled " + recoveredTransactions
                                         + " interrupted recovery transaction"
                                         + (recoveredTransactions == 1 ? "" : "s")
-                                        + ". The instance has been returned to its pre-restore state.")
+                                        + ". Any incomplete restore was rolled back before its temporary files were removed.")
                                 .show();
                     }
                     if (points.isEmpty()) {
