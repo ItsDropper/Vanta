@@ -27,7 +27,7 @@ public class ModrinthService {
      */
     public List<ModrinthProject> searchModsFast(Instance instance, String query) throws IOException, InterruptedException {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
+        String loader = ModrinthLoaderIds.normalize(instance.getLoader());
         List<ModrinthSearchHit> hits = client.search(query, ModrinthContentType.MOD, loader, instance.getMinecraftVersion()).getHits();
         return mapSearchHits(hits);
     }
@@ -38,20 +38,20 @@ public class ModrinthService {
      */
     public List<ModrinthProject> searchModsFastBroad(Instance instance, String query) throws IOException, InterruptedException {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
+        String loader = ModrinthLoaderIds.normalize(instance.getLoader());
         return mapSearchHits(client.search(query, ModrinthContentType.MOD, loader, null).getHits());
     }
 
     public List<ModrinthProject> getMostDownloadedModsFast(Instance instance) throws IOException, InterruptedException {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
+        String loader = ModrinthLoaderIds.normalize(instance.getLoader());
         List<ModrinthSearchHit> hits = client.getMostDownloaded(ModrinthContentType.MOD, loader, instance.getMinecraftVersion()).getHits();
         return mapSearchHits(hits);
     }
 
     public List<ModrinthProject> getMostDownloadedModsFastBroad(Instance instance) throws IOException, InterruptedException {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        String loader = instance.getLoader() == null ? "" : instance.getLoader().trim().toLowerCase(Locale.ROOT);
+        String loader = ModrinthLoaderIds.normalize(instance.getLoader());
         return mapSearchHits(client.getMostDownloaded(ModrinthContentType.MOD, loader, null).getHits());
     }
 
