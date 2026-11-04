@@ -93,10 +93,13 @@ public class MrpackInstaller {
             if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
                 throw new IllegalStateException("Modpack Quilt Loader version is missing.");
             }
-        } else if (
-                dependencies.has("forge")
-                        || dependencies.has("neoforge")
-        ) {
+        } else if (dependencies.has("neoforge")) {
+            loader = "NeoForge";
+            loaderVersion = dependencies.path("neoforge").asText();
+            if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
+                throw new IllegalStateException("Modpack NeoForge version is missing.");
+            }
+        } else if (dependencies.has("forge")) {
 
             throw new IllegalStateException(
                     "This modpack uses a mod loader that Vanta does not support yet."
@@ -126,6 +129,10 @@ public class MrpackInstaller {
         } else if ("Quilt".equals(loader)) {
 
             instance = InstanceInstaller.installQuilt(name, minecraftVersion, loaderVersion);
+
+        } else if ("NeoForge".equals(loader)) {
+
+            instance = InstanceInstaller.installNeoForge(name, minecraftVersion, loaderVersion);
 
         } else {
 
