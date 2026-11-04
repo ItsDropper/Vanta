@@ -58,6 +58,8 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
     private final Label fileLabel = new Label("Loading current account skin...");
     private final Label statusLabel = new Label("Loading the skin currently active on your account...");
     private final SkinModel3D modelPreview = new SkinModel3D();
+    private final VBox previewCard = new VBox(VantaUI.spacing(2));
+    private final Label previewHeading = new Label("Player preview");
     private final ComboBox<String> modelChoice = new ComboBox<>();
     private final ComboBox<CapeOption> capeChoice = new ComboBox<>();
     private final CheckBox hatLayer = new CheckBox("Hat");
@@ -106,7 +108,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
             return new Insets(VantaUI.spacing(7), horizontal, 0, horizontal);
         }, header.widthProperty()));
 
-        VBox previewCard = new VBox(VantaUI.spacing(2));
+        previewCard = new VBox(VantaUI.spacing(2));
         previewCard.setAlignment(Pos.CENTER);
         previewCard.setPadding(new Insets(VantaUI.spacing(4), VantaUI.spacing(3), VantaUI.spacing(5), VantaUI.spacing(3)));
         previewCard.getStyleClass().add("accounts-hero");
@@ -115,7 +117,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         previewCard.setMinWidth(264);
         previewCard.setPrefWidth(300);
         previewCard.setMaxWidth(320);
-        Label previewHeading = new Label("Player preview");
+        previewHeading = new Label("Player preview");
         previewHeading.getStyleClass().add("accounts-card-name");
         VantaUI.styleText(previewHeading, VantaUI.TextRole.SECTION_TITLE);
         Label rotateHint = new Label("Drag to rotate · Scroll to zoom");
@@ -260,20 +262,9 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         previewMessage.setWrapText(true);
         previewMessage.getStyleClass().add("accounts-subtitle");
         VantaUI.styleText(previewMessage, VantaUI.TextRole.MUTED);
-        previewCardPlaceholder(previewMessage);
-    }
-
-    private void previewCardPlaceholder(Label message) {
         modelPreview.setVisible(false);
         modelPreview.setManaged(false);
-        message.setMaxWidth(220);
-        previewHeadingPlaceholder(message);
-    }
-
-    private void previewHeadingPlaceholder(Label message) {
-        if (!previewCard.getChildren().contains(message)) {
-            previewCard.getChildren().add(message);
-        }
+        previewCard.getChildren().add(previewMessage);
     }
 
     @Override
