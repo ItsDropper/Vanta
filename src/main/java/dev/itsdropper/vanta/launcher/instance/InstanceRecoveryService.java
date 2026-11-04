@@ -166,6 +166,7 @@ public final class InstanceRecoveryService {
         List<String> movedOld = new ArrayList<>();
         List<String> published = new ArrayList<>();
         boolean committed = false;
+        boolean rollbackComplete = false;
 
         try {
             extractManagedDirectories(archive, staged);
@@ -200,11 +201,12 @@ public final class InstanceRecoveryService {
                     rollbackFailure = ex;
                 }
             }
+            rollbackComplete = rollbackFailure == null;
             if (rollbackFailure != null) failure.addSuppressed(rollbackFailure);
             if (failure instanceof IOException io) throw io;
             throw new IOException("Recovery restore failed; Vanta attempted to roll back the changed directories.", failure);
         } finally {
-            if (committed || !Files.exists(transaction.resolve("rollback"))) {
+            if (committed || rollbackComplete) {
                 deleteTree(transaction);
             }
         }
@@ -317,8 +319,12 @@ public final class InstanceRecoveryService {
                         || normalized.matches("^[A-Za-z]:.*")) throw new IOException("Unsafe recovery archive path.");
                 String key = relative.toString().replace('\\\\', '/').toLowerCase(Locale.ROOT);
                 if (!names.add(key)) throw new IOException("Duplicate recovery archive path.");
-                if (!key.equals("recovery-point.txt") && !RECOVERED_DIRECTORIES.contains(relative.getName(0).toString())) {
-                    throw new IOException("Unexpected recovery archive entry.");
+                if (!key.equals("recovery-point.txt")) {
+                    String top = relative.getNameCount() == 0 ? "" : relative.getName(0).toString();
+                    if (!RECOVERED_DIRECTORIES.contains(top)
+                            || (relative.getNameCount() == 1 && !entry.isDirectory())) {
+                        throw new IOException("Unexpected recovery archive entry.");
+                    }
                 }
                 int read;
                 while ((read = zip.read(buffer)) != -1) {
