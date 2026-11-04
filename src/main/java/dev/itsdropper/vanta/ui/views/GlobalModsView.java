@@ -120,7 +120,7 @@ public class GlobalModsView extends VBox {
         contentTypeBox.getStyleClass().add("create-combo");
 
         loaderBox = new ComboBox<>();
-        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge");
+        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge");
         loaderBox.setValue("Fabric");
         loaderBox.setAccessibleText("Minecraft mod loader filter");
         loaderBox.setPrefWidth(140);
@@ -443,7 +443,8 @@ public class GlobalModsView extends VBox {
             if (contentTypeBox.getValue() == ModrinthContentType.MOD
                     && !loader.equals("fabric")
                     && !loader.equals("quilt")
-                    && !loader.equals("forge")) {
+                    && !loader.equals("forge")
+                    && !loader.equals("neoforge")) {
                 continue;
             }
 
