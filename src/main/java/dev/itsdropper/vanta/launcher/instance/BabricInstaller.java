@@ -16,6 +16,7 @@ import dev.itsdropper.vanta.launcher.loader.LoaderProfileStackMerger;
  */
 public final class BabricInstaller {
     public static final String SUPPORTED_GAME_VERSION = "b1.7.3";
+    private static final String BABRIC_PRISM_REVISION = "ebff13db466cb4ccb3ff8bb5e2658ff30bfc913d";
     private static final String BABRIC_ARGUMENTS =
             "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}";
     private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -35,9 +36,8 @@ public final class BabricInstaller {
         if (loaderVersion == null || loaderVersion.isBlank()) {
             throw new IllegalArgumentException("Babric's Fabric Loader version cannot be empty.");
         }
-        JsonNode fabricProfile = FabricInstaller.downloadProfile(
-                SUPPORTED_GAME_VERSION, loaderVersion.trim());
-        return buildOverlay(fabricProfile);
+        JsonNode fabricProfile = downloadFabricProfile(minecraftVersion, loaderVersion);
+        return downloadOverlay(fabricProfile);
     }
 
     public static JsonNode downloadFabricProfile(String minecraftVersion, String loaderVersion)
@@ -63,7 +63,7 @@ public final class BabricInstaller {
     public static JsonNode downloadOverlay(JsonNode fabricProfile) throws Exception {
         ObjectNode overlay = (ObjectNode) buildOverlay(fabricProfile);
         JsonNode lwjglPatch = DownloadUtil.downloadJson(
-                "https://raw.githubusercontent.com/babric/prism-instance/b1.7.3/patches/org.lwjgl.json");
+                "https://raw.githubusercontent.com/babric/prism-instance/ebff13db466cb4ccb3ff8bb5e2658ff30bfc913d/patches/org.lwjgl.json");
         JsonNode patchLibraries = lwjglPatch == null ? null : lwjglPatch.get("libraries");
         if (patchLibraries == null || !patchLibraries.isArray()) {
             throw new IllegalStateException("Official Babric LWJGL patch has no library list.");
