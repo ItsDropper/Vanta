@@ -459,8 +459,8 @@ public class GlobalModsView extends VBox {
 
             if (versions != null) {
                 for (dev.itsdropper.vanta.launcher.modrinth.ModrinthVersion version : versions) {
-                    if (version.getGameVersions() == null
-                            || !version.getGameVersions().contains(minecraftVersion)) {
+                    if (!dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds
+                            .supportsGameVersion(version.getGameVersions(), minecraftVersion)) {
                         continue;
                     }
 
