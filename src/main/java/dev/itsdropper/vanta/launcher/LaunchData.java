@@ -19,6 +19,10 @@ public class LaunchData {
 
     public String version;
 
+    public String versionType;
+
+    public String minecraftArguments;
+
     public String loader;
 
     public String loaderVersion;
