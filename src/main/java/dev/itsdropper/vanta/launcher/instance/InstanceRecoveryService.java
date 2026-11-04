@@ -217,6 +217,7 @@ public final class InstanceRecoveryService {
 
         try {
             extractManagedDirectories(archive, staged);
+            preserveLoaderProfilesFromLegacyRecoveryPoints(instanceDirectory, staged);
             Set<String> originallyPresent = new HashSet<>();
             for (String directoryName : RECOVERED_DIRECTORIES) {
                 Path current = instanceDirectory.resolve(directoryName);
@@ -401,6 +402,53 @@ public final class InstanceRecoveryService {
             channel.force(true);
         }
         move(temporary, marker);
+    }
+
+    /**
+     * Recovery points created before loader-profiles became a managed snapshot
+     * directory do not contain that entry. Preserve the current profiles when
+     * restoring those older archives instead of silently deleting user imports.
+     */
+    private static void preserveLoaderProfilesFromLegacyRecoveryPoints(
+            Path instanceDirectory, Path stagedRoot
+    ) throws IOException {
+        Path stagedProfiles = stagedRoot.resolve("loader-profiles");
+        if (Files.exists(stagedProfiles, LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+
+        Path currentProfiles = instanceDirectory.resolve("loader-profiles");
+        if (Files.isSymbolicLink(currentProfiles)) {
+            throw new IOException("Cannot preserve a symbolic-link loader profile directory.");
+        }
+        if (!Files.exists(currentProfiles, LinkOption.NOFOLLOW_LINKS)) {
+            Files.createDirectories(stagedProfiles);
+            return;
+        }
+        if (!Files.isDirectory(currentProfiles, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Expected loader-profiles to be a directory.");
+        }
+
+        try (var walk = Files.walk(currentProfiles)) {
+            for (Path source : walk.toList()) {
+                if (Files.isSymbolicLink(source)) {
+                    throw new IOException("Cannot preserve symbolic links in loader-profiles.");
+                }
+                Path relative = currentProfiles.relativize(source);
+                Path destination = stagedProfiles.resolve(relative).normalize();
+                if (!destination.startsWith(stagedProfiles)) {
+                    throw new IOException("Loader profile path escapes recovery staging.");
+                }
+                if (Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
+                    Files.createDirectories(destination);
+                } else if (Files.isRegularFile(source, LinkOption.NOFOLLOW_LINKS)) {
+                    Files.createDirectories(destination.getParent());
+                    Files.copy(source, destination, StandardCopyOption.COPY_ATTRIBUTES);
+                } else {
+                    throw new IOException("Unsupported entry in loader-profiles: " + source);
+                }
+            }
+        }
     }
 
     private static void extractManagedDirectories(Path archive, Path stagedRoot) throws IOException {
