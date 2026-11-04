@@ -9,12 +9,16 @@ import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
 import javafx.util.Duration;
+import javafx.stage.Window;
 
 import javax.imageio.ImageIO;
+import java.awt.AWTException;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -101,9 +105,7 @@ public final class SidebarScreenshotCapture {
                             root.getLayoutBounds().getHeight());
                     dumpNodeTree(root, 0, 4);
                 }
-                SnapshotParameters parameters = new SnapshotParameters();
-                parameters.setFill(javafx.scene.paint.Color.web("#0B0D12"));
-                WritableImage image = root.snapshot(parameters, null);
+                BufferedImage image = captureVisibleWindow(root);
                 writePng(image, outputDirectory.resolve(fileName(page)));
             } catch (Throwable failure) {
                 completion.accept(failure);
@@ -140,37 +142,87 @@ public final class SidebarScreenshotCapture {
         }
     }
 
-    private static void writePng(WritableImage image, Path destination) throws IOException {
+    /**
+     * Captures the visible native window first. Some headless JavaFX software
+     * pipelines return a mostly empty node snapshot despite a correctly laid-out
+     * scene, so on-screen pixels are the authoritative screenshot source.
+     */
+    private static BufferedImage captureVisibleWindow(Parent root) throws IOException {
+        Window window = root.getScene() == null ? null : root.getScene().getWindow();
+        if (window != null && window.isShowing()) {
+            int x = (int) Math.floor(window.getX());
+            int y = (int) Math.floor(window.getY());
+            int width = (int) Math.ceil(window.getWidth());
+            int height = (int) Math.ceil(window.getHeight());
+            if (width > 0 && height > 0) {
+                try {
+                    BufferedImage screen = new Robot().createScreenCapture(
+                            new Rectangle(x, y, width, height)
+                    );
+                    if (hasVisualVariation(screen)) {
+                        return screen;
+                    }
+                    System.err.println("Native window capture was blank; trying JavaFX node snapshot.");
+                } catch (AWTException | IllegalArgumentException failure) {
+                    System.err.println("Native window capture unavailable; trying JavaFX node snapshot: "
+                            + failure.getMessage());
+                }
+            }
+        }
+
+        root.applyCss();
+        root.layout();
+        SnapshotParameters parameters = new SnapshotParameters();
+        parameters.setFill(javafx.scene.paint.Color.web("#0B0D12"));
+        BufferedImage fallback = toBufferedImage(root.snapshot(parameters, null));
+        if (!hasVisualVariation(fallback)) {
+            throw new IOException("Both native window and JavaFX node captures are blank or unrendered");
+        }
+        return fallback;
+    }
+
+    private static BufferedImage toBufferedImage(WritableImage image) throws IOException {
         int width = (int) Math.ceil(image.getWidth());
         int height = (int) Math.ceil(image.getHeight());
         if (width <= 0 || height <= 0) {
             throw new IOException("JavaFX produced an empty screenshot");
         }
-
         PixelReader reader = image.getPixelReader();
         if (reader == null) {
-            throw new IOException("Screenshot has no pixel reader");
+            throw new IOException("JavaFX screenshot has no pixel reader");
         }
 
         int[] pixels = new int[width * height];
         reader.getPixels(0, 0, width, height, PixelFormat.getIntArgbInstance(), pixels, 0, width);
-
-        Set<Integer> sampledColors = new HashSet<>();
-        int sampleStep = Math.max(1, pixels.length / 12_000);
-        for (int i = 0; i < pixels.length; i += sampleStep) {
-            sampledColors.add(pixels[i]);
-            if (sampledColors.size() >= 64) {
-                break;
-            }
-        }
-        if (sampledColors.size() < 32) {
-            throw new IOException("Screenshot appears blank or unrendered ("
-                    + sampledColors.size() + " sampled colors)");
-        }
-
         BufferedImage buffered = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         buffered.setRGB(0, 0, width, height, pixels, 0, width);
-        if (!ImageIO.write(buffered, "png", destination.toFile())) {
+        return buffered;
+    }
+
+    private static boolean hasVisualVariation(BufferedImage image) {
+        if (image == null || image.getWidth() <= 0 || image.getHeight() <= 0) {
+            return false;
+        }
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+        int[] samples = image.getRGB(0, 0, width, height, null, 0, width);
+        Set<Integer> sampledColors = new HashSet<>();
+        int sampleStep = Math.max(1, samples.length / 12_000);
+        for (int i = 0; i < samples.length; i += sampleStep) {
+            sampledColors.add(samples[i]);
+            if (sampledColors.size() >= 64) {
+                return true;
+            }
+        }
+        return sampledColors.size() >= 32;
+    }
+
+    private static void writePng(BufferedImage image, Path destination) throws IOException {
+        if (!hasVisualVariation(image)) {
+            throw new IOException("Screenshot appears blank or unrendered");
+        }
+        if (!ImageIO.write(image, "png", destination.toFile())) {
             throw new IOException("No PNG image writer is available");
         }
     }
