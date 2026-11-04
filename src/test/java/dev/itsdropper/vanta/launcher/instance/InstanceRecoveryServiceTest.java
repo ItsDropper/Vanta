@@ -88,6 +88,39 @@ class InstanceRecoveryServiceTest {
     }
 
     @Test
+    void interruptedRestoreIsRolledBackFromJournal() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
+        Instance instance = instance(instanceDirectory);
+        Path mods = Files.createDirectories(instanceDirectory.resolve("mods"));
+        Path config = Files.createDirectories(instanceDirectory.resolve("config"));
+        Path resourcepacks = Files.createDirectories(instanceDirectory.resolve("resourcepacks"));
+        Files.writeString(mods.resolve("new.jar"), "partially-published");
+        Files.writeString(config.resolve("old.json"), "old-config");
+        Files.writeString(resourcepacks.resolve("old.zip"), "old-resource-pack");
+
+        Path transaction = Files.createDirectory(instanceDirectory.resolve(".vanta-recovery-crash-test"));
+        Path rollback = Files.createDirectory(transaction.resolve("rollback"));
+        Files.createDirectories(transaction.resolve("staged"));
+        Files.createDirectories(rollback.resolve("mods"));
+        Files.createDirectories(rollback.resolve("config"));
+        Files.writeString(rollback.resolve("mods/old.jar"), "old-mod");
+        Files.writeString(rollback.resolve("config/old.json"), "old-config");
+        Files.writeString(transaction.resolve("restore-journal.txt"),
+                "VANTA-RECOVERY-TRANSACTION-V1\\npresent=mods,config,resourcepacks\\n");
+
+        int recovered = InstanceRecoveryService.recoverInterruptedRestores(instance);
+
+        assertEquals(1, recovered);
+        assertEquals("old-mod", Files.readString(instanceDirectory.resolve("mods/old.jar")));
+        assertEquals("old-config", Files.readString(instanceDirectory.resolve("config/old.json")));
+        assertEquals("old-resource-pack",
+                Files.readString(instanceDirectory.resolve("resourcepacks/old.zip")));
+        assertFalse(Files.exists(instanceDirectory.resolve("shaderpacks")),
+                "Directories absent before restore must not be left behind after rollback");
+        assertFalse(Files.exists(transaction));
+    }
+
+    @Test
     void keepsOnlyFiveMostRecentRecoveryPoints() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
         Instance instance = instance(instanceDirectory);
