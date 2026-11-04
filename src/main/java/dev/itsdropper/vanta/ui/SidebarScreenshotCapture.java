@@ -5,7 +5,6 @@ import javafx.animation.PauseTransition;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.paint.Color;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
@@ -93,7 +92,7 @@ public final class SidebarScreenshotCapture {
                 root.applyCss();
                 root.layout();
                 SnapshotParameters parameters = new SnapshotParameters();
-                parameters.setFill(Color.web("#0B0D12"));
+                parameters.setFill(javafx.scene.paint.Color.web("#0B0D12"));
                 WritableImage image = root.snapshot(parameters, null);
                 writePng(image, outputDirectory.resolve(fileName(page)));
             } catch (Throwable failure) {
