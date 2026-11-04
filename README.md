@@ -87,6 +87,7 @@ Depending on the features used, Vanta may contact Microsoft/Xbox/Minecraft servi
 ## Documentation
 
 - [Architecture Overview](docs/ARCHITECTURE.md) — subsystem responsibilities and design principles
+- [Loader Compatibility](docs/LOADER_COMPATIBILITY.md) — implemented loaders, legacy candidates, and integration requirements
 - [Product Direction](docs/PRODUCT_DIRECTION.md) — differentiated environment-management subsystems and delivery order
 - [Development Guide](docs/DEVELOPMENT.md) — setup, build, packaging, and debugging
 - [Contributing](CONTRIBUTING.md) — change expectations, checks, and pull request guidance
