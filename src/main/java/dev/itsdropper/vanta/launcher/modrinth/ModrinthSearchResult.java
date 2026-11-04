@@ -23,6 +23,14 @@ public class ModrinthSearchResult {
         return hits;
     }
 
+    public void setHits(List<ModrinthSearchHit> hits) {
+        this.hits = hits;
+    }
+
+    public void setTotalHits(int totalHits) {
+        this.totalHits = totalHits;
+    }
+
     public int getOffset() {
         return offset;
     }
