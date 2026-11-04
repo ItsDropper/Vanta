@@ -250,7 +250,7 @@ public class GlobalModsView extends VBox {
                 );
 
         popularResults.setAlignment(
-                Pos.TOP_LEFT
+                Pos.CENTER
         );
 
         popularScrollPane =
@@ -303,6 +303,8 @@ public class GlobalModsView extends VBox {
         results.getStyleClass().add(
                 "instance-list"
         );
+        results.setAlignment(Pos.CENTER);
+        results.setFillWidth(true);
 
         resultsScrollPane =
                 new ScrollPane(

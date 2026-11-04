@@ -148,6 +148,8 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         refreshButton.setText("SCAN NOW");
 
         instanceList.setAlignment(Pos.CENTER);
+        instanceList.setFillWidth(true);
+        instanceScroll.setFitToHeight(true);
         instanceList.getChildren().setAll(new EmptyState(
                 "⌁",
                 "ENVIRONMENT HEALTH",

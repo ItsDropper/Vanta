@@ -229,6 +229,8 @@ public class InstancesView extends VBox {
         instanceList.getStyleClass().add(
                 "instance-list"
         );
+        instanceList.setAlignment(Pos.TOP_CENTER);
+        instanceList.setFillWidth(true);
 
         ScrollPane scrollPane =
                 new ScrollPane(
@@ -238,6 +240,7 @@ public class InstancesView extends VBox {
         scrollPane.setFitToWidth(
                 true
         );
+        scrollPane.setFitToHeight(screenshotPreview);
 
         scrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
@@ -289,6 +292,7 @@ public class InstancesView extends VBox {
         );
 
         if (screenshotPreview) {
+            instanceList.setAlignment(Pos.CENTER);
             countLabel.setText("INSTANCE LIBRARY");
             statusLabel.setText("Preview mode · your local Minecraft folders were not scanned.");
             instanceList.getChildren().setAll(new EmptyState(

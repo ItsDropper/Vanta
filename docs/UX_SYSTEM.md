@@ -58,6 +58,10 @@ For any significant UI change:
 6. Ensure a first-run user can create or import an instance without having to discover a hidden workflow.
 7. Preserve existing user data and settings; UI polish must not alter launcher behavior.
 
+## Empty states
+
+Use the shared `EmptyState` component whenever a page has no content to display. Empty states should identify what belongs in the region, explain why it is empty, and provide the most direct next action when one exists. Avoid leaving a large blank panel or using a perpetual loading message when no operation is actually running.
+
 ## Screenshot review
 
 Run the production sidebar capture locally:
