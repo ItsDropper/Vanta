@@ -135,8 +135,13 @@ public final class VantaLoaderInstaller {
                 throw new IOException("VantaLoader agent JAR has no valid Premain-Class manifest entry.");
             }
             if (jar.getEntry("dev/itsdropper/vantaloader/bootstrap/VantaLoaderAgent.class") == null
-                    || jar.getEntry("com/google/gson/JsonParser.class") == null) {
-                throw new IOException("VantaLoader agent JAR is missing required runtime classes.");
+                    || jar.getEntry("com/google/gson/JsonParser.class") == null
+                    || jar.getEntry("org/objectweb/asm/ClassReader.class") == null
+                    || jar.getEntry("org/objectweb/asm/tree/ClassNode.class") == null
+                    || jar.getEntry("org/objectweb/asm/commons/AdviceAdapter.class") == null
+                    || jar.getEntry("org/objectweb/asm/util/CheckClassAdapter.class") == null
+                    || jar.getEntry("org/objectweb/asm/tree/analysis/Analyzer.class") == null) {
+                throw new IOException("VantaLoader agent JAR is missing required runtime or ASM classes.");
             }
         }
     }
