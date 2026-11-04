@@ -639,6 +639,17 @@ public class InstanceInstaller {
             finalMetadata = OrnitheInstaller.mergeProfile(vanillaMetadata, ornitheProfile);
         }
 
+        if ("Legacy Fabric".equalsIgnoreCase(loader)) {
+            if (loaderVersion == null || loaderVersion.isBlank()) {
+                throw new IllegalStateException("Legacy Fabric Loader version is missing.");
+            }
+            JsonNode legacyFabricProfile =
+                    LegacyFabricInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            LegacyFabricInstaller.installLibraries(legacyFabricProfile);
+            finalMetadata =
+                    LegacyFabricInstaller.mergeProfile(vanillaMetadata, legacyFabricProfile);
+        }
+
         if ("NeoForge".equalsIgnoreCase(loader)) {
             if (loaderVersion == null || loaderVersion.isBlank()) {
                 throw new IllegalStateException("NeoForge version is missing.");
