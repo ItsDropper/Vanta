@@ -103,8 +103,19 @@ public final class LoaderProfileStackMerger {
             }
             // LinkedHashMap preserves first-seen classpath position while the
             // latest profile definition replaces the metadata for that coordinate.
-            target.put(name, library.deepCopy());
+            target.put(libraryKey(name), library.deepCopy());
         }
+    }
+
+    private static String libraryKey(String coordinate) {
+        String[] parts = coordinate.split(":", -1);
+        if (parts.length < 3 || parts.length > 4) {
+            return coordinate;
+        }
+        // A loader overlay replaces an earlier version of the same
+        // Maven artifact, while classifier variants remain distinct.
+        return parts[0] + ":" + parts[1]
+                + (parts.length == 4 ? ":" + parts[3] : "");
     }
 
     private static void collectTweakers(List<String> target, JsonNode argumentTemplate) {
