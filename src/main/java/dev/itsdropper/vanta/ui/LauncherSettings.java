@@ -239,6 +239,14 @@ public final class LauncherSettings {
     public static void setLastSettingsPage(String value) {
         if (value != null && !value.isBlank()) setString("lastSettingsPage", value.trim());
     }
+    public static int getRecoveryPointRetention() {
+        return getInt("recoveryPointRetention", 5, 1, 50);
+    }
+
+    public static void setRecoveryPointRetention(int value) {
+        setInt("recoveryPointRetention", clamp(value, 1, 50));
+    }
+
     public static int getDownloadRetries() { return getInt("downloadRetries", 3, 1, 8); }
     public static void setDownloadRetries(int value) { setInt("downloadRetries", clamp(value, 1, 8)); }
     public static boolean isVerifyDownloadsEnabled() { return getBoolean("verifyDownloads", true); }
