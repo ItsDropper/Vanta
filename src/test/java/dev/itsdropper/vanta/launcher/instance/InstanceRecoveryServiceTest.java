@@ -121,6 +121,27 @@ class InstanceRecoveryServiceTest {
     }
 
     @Test
+    void committedRestoreIsNotRolledBackDuringCleanupRecovery() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
+        Instance instance = instance(instanceDirectory);
+        Path mods = Files.createDirectories(instanceDirectory.resolve("mods"));
+        Files.writeString(mods.resolve("new.jar"), "committed-state");
+
+        Path transaction = Files.createDirectory(instanceDirectory.resolve(".vanta-recovery-committed-test"));
+        Files.createDirectories(transaction.resolve("staged"));
+        Files.createDirectories(transaction.resolve("rollback"));
+        Files.writeString(transaction.resolve("restore-journal.txt"),
+                "VANTA-RECOVERY-TRANSACTION-V1\\npresent=mods\\n");
+        Files.writeString(transaction.resolve("restore-committed"), "committed");
+
+        int recovered = InstanceRecoveryService.recoverInterruptedRestores(instance);
+
+        assertEquals(0, recovered);
+        assertEquals("committed-state", Files.readString(instanceDirectory.resolve("mods/new.jar")));
+        assertFalse(Files.exists(transaction));
+    }
+
+    @Test
     void keepsOnlyFiveMostRecentRecoveryPoints() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
         Instance instance = instance(instanceDirectory);
