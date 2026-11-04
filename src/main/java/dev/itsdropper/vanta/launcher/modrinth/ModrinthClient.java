@@ -127,7 +127,7 @@ public class ModrinthClient {
                 response.body(),
                 ModrinthSearchResult.class
         );
-        return filterUnindexedLoaderResults(result, contentType, loader, minecraftVersion);
+        return filterLoaderVersionCompatibility(result, contentType, loader, minecraftVersion);
     }
 
     // =============================================================
@@ -196,10 +196,10 @@ public class ModrinthClient {
                 response.body(),
                 ModrinthSearchResult.class
         );
-        return filterUnindexedLoaderResults(result, contentType, loader, minecraftVersion);
+        return filterLoaderVersionCompatibility(result, contentType, loader, minecraftVersion);
     }
 
-    private ModrinthSearchResult filterUnindexedLoaderResults(
+    private ModrinthSearchResult filterLoaderVersionCompatibility(
             ModrinthSearchResult result,
             ModrinthContentType contentType,
             String loader,
@@ -210,7 +210,6 @@ public class ModrinthClient {
                 || loader == null
                 || loader.isBlank()
                 || loader.equalsIgnoreCase("vanilla")
-                || ModrinthLoaderIds.supportsSearchFacet(loader)
                 || result.getHits() == null) {
             return result;
         }
