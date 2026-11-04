@@ -243,9 +243,15 @@ private Path installResolvedVersion(
             if (failure instanceof IOException io) throw io;
             throw new IOException("Could not install mod transactionally: " + projectId, failure);
         } finally {
-            Files.deleteIfExists(stagedFile);
+            try { Files.deleteIfExists(stagedFile); }
+            catch (IOException cleanupFailure) {
+                System.err.println("Could not remove staged mod file: " + cleanupFailure.getMessage());
+            }
             if (rollbackFile != null && Files.exists(rollbackFile) && !previousMoved) {
-                Files.deleteIfExists(rollbackFile);
+                try { Files.deleteIfExists(rollbackFile); }
+                catch (IOException cleanupFailure) {
+                    System.err.println("Could not remove unused mod rollback file: " + cleanupFailure.getMessage());
+                }
             }
         }
     }
