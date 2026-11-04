@@ -305,19 +305,20 @@ public final class InstanceRecoveryService {
                     throw new IOException("An unrecognized recovery transaction directory requires manual inspection: "
                             + transactionName);
                 }
+                Path journal = transaction.resolve("restore-journal.txt");
+                if (!Files.exists(journal, LinkOption.NOFOLLOW_LINKS)) {
+                    // Publication cannot start until the complete journal exists. This also
+                    // safely handles a crash immediately after the temporary directory was made.
+                    deleteTree(transaction);
+                    recovered++;
+                    continue;
+                }
                 Path staged = transaction.resolve("staged");
                 Path rollback = transaction.resolve("rollback");
                 if (Files.isSymbolicLink(staged) || !Files.isDirectory(staged, LinkOption.NOFOLLOW_LINKS)
                         || Files.isSymbolicLink(rollback) || !Files.isDirectory(rollback, LinkOption.NOFOLLOW_LINKS)) {
                     throw new IOException("Recovery transaction staging or rollback data is missing or unsafe: "
                             + transaction);
-                }
-                Path journal = transaction.resolve("restore-journal.txt");
-                if (!Files.exists(journal, LinkOption.NOFOLLOW_LINKS)) {
-                    // Publication cannot start until the complete journal exists.
-                    deleteTree(transaction);
-                    recovered++;
-                    continue;
                 }
                 if (Files.isSymbolicLink(journal) || !Files.isRegularFile(journal, LinkOption.NOFOLLOW_LINKS)) {
                     throw new IOException("Recovery transaction journal is not a regular file: " + transaction);
