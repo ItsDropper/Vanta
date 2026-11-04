@@ -151,6 +151,10 @@ public class LaunchDataBuilder {
         }
 
         if ("VantaLoader".equalsIgnoreCase(instance.getLoader())) {
+            data.minecraftMappings = instanceDirectory.resolve("minecraft").resolve("client_mappings.txt");
+            if (!java.nio.file.Files.isRegularFile(data.minecraftMappings)) {
+                throw new IllegalStateException("Official Minecraft client mappings are missing. Repair this VantaLoader instance before launching.");
+            }
             Path agent = VantaLoaderInstaller.agentPath(instance);
             if (!VantaLoaderInstaller.isValidAgentJar(agent)) {
                 throw new IllegalStateException(
