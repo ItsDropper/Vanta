@@ -37,9 +37,30 @@ jobs:
         run: |
           mkdir -p "$APPDATA"
           xvfb-run -a -s "-screen 0 1600x1000x24" ./gradlew run --args="--capture-sidebar-screenshots build/ui-screenshots"
-          test "$(find build/ui-screenshots -maxdepth 1 -type f -name '*.png' ! -name 'overview.png' | wc -l)" -eq 9
+          screenshots=(build/ui-screenshots/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
           test -s build/ui-screenshots/index.md
           test -s build/ui-screenshots/overview.png
+          for screenshot in "${screenshots[@]}"; do
+            test -s "$screenshot"
+            test "$(stat -c%s "$screenshot")" -gt 12000
+          done
+          test "$(sha256sum "${screenshots[@]}" | awk '{print $1}' | sort -u | wc -l)" -eq 9
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+
+          files = sorted(Path("build/ui-screenshots").glob("[0-9][0-9]-*.png"))
+          if len(files) != 9:
+              raise SystemExit(f"Expected 9 page screenshots, found {len(files)}")
+          for path in files:
+              header = path.read_bytes()[:24]
+              if header[:8] != b"\x89PNG\r\n\x1a\n":
+                  raise SystemExit(f"{path.name} is not a PNG")
+              width, height = struct.unpack(">II", header[16:24])
+              if (width, height) != (1440, 900):
+                  raise SystemExit(f"{path.name}: expected 1440x900, got {width}x{height}")
+          PY
       - name: Publish screenshots and capture diagnostics
         if: always()
         uses: actions/upload-artifact@v4
