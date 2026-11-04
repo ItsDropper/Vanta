@@ -25,7 +25,9 @@ import java.util.jar.JarFile;
  */
 public final class VantaLoaderInstaller {
     private static final String RELEASE_API =
-            "https://api.github.com/repos/ItsDropper/VantaLoader/releases/tags/nightly";
+            "https://api.github.com/repos/ItsDropper/VantaLoader/releases/tags/";
+    private static final String MAIN_COMMIT_API =
+            "https://api.github.com/repos/ItsDropper/VantaLoader/commits/main";
     private static final String AGENT_ASSET = "VantaLoader-agent.jar";
     private static final String CHECKSUM_ASSET = AGENT_ASSET + ".sha256";
     private static final long MAX_AGENT_BYTES = 64L * 1024 * 1024;
@@ -38,7 +40,8 @@ public final class VantaLoaderInstaller {
     private VantaLoaderInstaller() { }
 
     public static String findLatestLoaderVersion() throws Exception {
-        return readRelease().tag();
+        String tag = latestReleaseTag();
+        return readRelease(tag).tag();
     }
 
     public static boolean supportsMinecraftVersion(String minecraftVersion) {
@@ -58,8 +61,12 @@ public final class VantaLoaderInstaller {
 
     public static Path agentPath(Instance instance) {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        String version = instance.getLoaderVersion();
-        if (version == null || !version.matches("[A-Za-z0-9._-]{1,80}")) {
+        return agentPath(instance, instance.getLoaderVersion());
+    }
+
+    public static Path agentPath(Instance instance, String version) {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        if (version == null || !version.matches("nightly-[0-9a-f]{12}|[A-Za-z0-9._-]{1,80}")) {
             throw new IllegalStateException("VantaLoader instance has an invalid release identifier.");
         }
         return instance.getDirectory().resolve("libraries")
@@ -73,12 +80,15 @@ public final class VantaLoaderInstaller {
             throw new IllegalArgumentException("Instance is not configured for VantaLoader.");
         }
 
-        Release release = readRelease();
-        if (instance.getLoaderVersion() != null
-                && !instance.getLoaderVersion().equals(release.tag())) {
-            throw new IOException("The selected VantaLoader release changed. Recreate the instance to use "
-                    + release.tag() + ".");
+        String selectedVersion = instance.getLoaderVersion();
+        if (selectedVersion == null || selectedVersion.isBlank()) {
+            throw new IOException("VantaLoader instance is missing its pinned release version.");
         }
+        // "nightly" is retained only as a migration path for instances created
+        // by older launcher builds. New instances always pin an immutable tag.
+        String resolvedVersion = "nightly".equals(selectedVersion)
+                ? latestReleaseTag() : selectedVersion;
+        Release release = readRelease(resolvedVersion);
 
         byte[] jarBytes = download(release.agentUri(), MAX_AGENT_BYTES);
         byte[] checksumBytes = download(release.checksumUri(), 4096);
@@ -95,7 +105,7 @@ public final class VantaLoaderInstaller {
             throw new IOException("VantaLoader agent SHA-256 verification failed.");
         }
 
-        Path destination = agentPath(instance).toAbsolutePath().normalize();
+        Path destination = agentPath(instance, release.tag()).toAbsolutePath().normalize();
         Path instanceRoot = instance.getDirectory().toAbsolutePath().normalize();
         if (!destination.startsWith(instanceRoot)) {
             throw new IOException("Resolved VantaLoader agent path escapes the instance directory.");
@@ -146,8 +156,29 @@ public final class VantaLoaderInstaller {
         }
     }
 
-    private static Release readRelease() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(RELEASE_API))
+    private static String latestReleaseTag() throws Exception {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(MAIN_COMMIT_API))
+                .timeout(Duration.ofSeconds(20))
+                .header("Accept", "application/vnd.github+json")
+                .header("X-GitHub-Api-Version", "2022-11-28")
+                .header("User-Agent", "VantaLauncher")
+                .GET().build();
+        HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() < 200 || response.statusCode() >= 300) {
+            throw new IOException("VantaLoader main-branch lookup returned HTTP " + response.statusCode() + ".");
+        }
+        String sha = MAPPER.readTree(response.body()).path("sha").asText("");
+        if (!sha.matches("[0-9a-f]{40}")) {
+            throw new IOException("VantaLoader main-branch lookup returned an invalid commit SHA.");
+        }
+        return "nightly-" + sha.substring(0, 12);
+    }
+
+    private static Release readRelease(String tag) throws Exception {
+        if (tag == null || !tag.matches("nightly-[0-9a-f]{12}")) {
+            throw new IOException("Invalid pinned VantaLoader release identifier.");
+        }
+        HttpRequest request = HttpRequest.newBuilder(URI.create(RELEASE_API + tag))
                 .timeout(Duration.ofSeconds(20))
                 .header("Accept", "application/vnd.github+json")
                 .header("X-GitHub-Api-Version", "2022-11-28")
@@ -166,8 +197,8 @@ public final class VantaLoaderInstaller {
             throw new IOException("The VantaLoader nightly release is not published.");
         }
         String tag = root.path("tag_name").asText("");
-        if (!"nightly".equals(tag)) {
-            throw new IOException("Unexpected VantaLoader release tag: " + tag);
+        if (!tag.equals(root.path("tag_name").asText(""))) {
+            throw new IOException("Unexpected VantaLoader release tag: " + root.path("tag_name").asText(""));
         }
 
         URI agent = null;
