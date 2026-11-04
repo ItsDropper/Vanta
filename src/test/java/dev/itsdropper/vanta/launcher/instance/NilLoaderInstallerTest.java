@@ -9,10 +9,22 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NilLoaderInstallerTest {
+    @Test
+    void resolvesThePublishedLoaderVersion() {
+        assertEquals("1.4.1", NilLoaderInstaller.findLatestLoaderVersion("1.4.7"));
+    }
+
+    @Test
+    void rejectsAnEmptyMinecraftVersion() {
+        assertThrows(IllegalArgumentException.class,
+                () -> NilLoaderInstaller.findLatestLoaderVersion(" "));
+    }
+
     @Test
     void acceptsJarWithPremainClass() throws Exception {
         Path jar = createAgentJar("example.Agent", null);
