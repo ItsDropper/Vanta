@@ -23,9 +23,12 @@ class InstanceRecoveryServiceTest {
         Files.createDirectories(instanceDirectory.resolve("config"));
         Files.createDirectories(instanceDirectory.resolve("resourcepacks"));
         Files.createDirectories(instanceDirectory.resolve("shaderpacks"));
+        Files.createDirectories(instanceDirectory.resolve("loader-profiles"));
         Files.createDirectories(instanceDirectory.resolve("saves/world"));
         Files.writeString(instanceDirectory.resolve("mods/example.jar"), "mod-v1");
         Files.writeString(instanceDirectory.resolve("config/example.json"), "{}");
+        Files.writeString(instanceDirectory.resolve("loader-profiles/custom.json"), "{\\"libraries\\":[]}");
+
         Files.writeString(instanceDirectory.resolve("saves/world/level.dat"), "world-data");
 
         InstanceRecoveryService.RecoveryPoint point =
@@ -39,6 +42,7 @@ class InstanceRecoveryServiceTest {
             assertNotNull(zip.getEntry("config/example.json"));
             assertNotNull(zip.getEntry("resourcepacks/"));
             assertNotNull(zip.getEntry("shaderpacks/"));
+            assertNotNull(zip.getEntry("loader-profiles/custom.json"));
             assertNull(zip.getEntry("saves/world/level.dat"));
         }
         assertEquals(1, InstanceRecoveryService.listRecoveryPoints(instance, temporaryDirectory).size());
@@ -48,11 +52,13 @@ class InstanceRecoveryServiceTest {
     void restoreReplacesOnlyManagedDirectoriesAndPreservesWorlds() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
         Instance instance = instance(instanceDirectory);
-        for (String name : List.of("mods", "config", "resourcepacks", "shaderpacks", "saves/world")) {
+        for (String name : List.of("mods", "config", "resourcepacks", "shaderpacks", "loader-profiles", "saves/world")) {
             Files.createDirectories(instanceDirectory.resolve(name));
         }
         Files.writeString(instanceDirectory.resolve("mods/old.jar"), "old-mod");
         Files.writeString(instanceDirectory.resolve("config/old.json"), "old-config");
+        Files.writeString(instanceDirectory.resolve("loader-profiles/old.json"), "{\\"libraries\\":[]}");
+
         Files.writeString(instanceDirectory.resolve("saves/world/level.dat"), "world-data");
 
         InstanceRecoveryService.RecoveryPoint point =
@@ -60,6 +66,8 @@ class InstanceRecoveryServiceTest {
 
         Files.writeString(instanceDirectory.resolve("mods/new.jar"), "new-mod");
         Files.writeString(instanceDirectory.resolve("config/new.json"), "new-config");
+        Files.writeString(instanceDirectory.resolve("loader-profiles/new.json"), "{\\"libraries\\":[]}");
+
         Files.writeString(instanceDirectory.resolve("saves/world/level.dat"), "updated-world-data");
 
         InstanceRecoveryService.restoreRecoveryPoint(instance, point.id(), temporaryDirectory);
@@ -68,6 +76,8 @@ class InstanceRecoveryServiceTest {
         assertFalse(Files.exists(instanceDirectory.resolve("mods/new.jar")));
         assertTrue(Files.exists(instanceDirectory.resolve("config/old.json")));
         assertFalse(Files.exists(instanceDirectory.resolve("config/new.json")));
+        assertTrue(Files.exists(instanceDirectory.resolve("loader-profiles/old.json")));
+        assertFalse(Files.exists(instanceDirectory.resolve("loader-profiles/new.json")));
         assertEquals("updated-world-data",
                 Files.readString(instanceDirectory.resolve("saves/world/level.dat")));
 
