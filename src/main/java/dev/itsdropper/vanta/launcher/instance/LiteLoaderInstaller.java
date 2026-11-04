@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.loader.LoaderStackConfiguration;
 import dev.itsdropper.vanta.launcher.loader.LoaderStackManager;
 import dev.itsdropper.vanta.launcher.model.Instance;
