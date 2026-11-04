@@ -71,6 +71,16 @@ class VantaLoaderInstallerTest {
                 output.putNextEntry(new JarEntry("com/google/gson/JsonParser.class"));
                 output.write(new byte[]{0});
                 output.closeEntry();
+                for (String entry : java.util.List.of(
+                        "org/objectweb/asm/ClassReader.class",
+                        "org/objectweb/asm/tree/ClassNode.class",
+                        "org/objectweb/asm/commons/AdviceAdapter.class",
+                        "org/objectweb/asm/util/CheckClassAdapter.class",
+                        "org/objectweb/asm/tree/analysis/Analyzer.class")) {
+                    output.putNextEntry(new JarEntry(entry));
+                    output.write(new byte[]{0});
+                    output.closeEntry();
+                }
             }
         }
         return jar;
