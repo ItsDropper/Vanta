@@ -448,16 +448,16 @@ public class GlobalModsView extends VBox {
 
             String minecraftVersion = instance.getMinecraftVersion();
             String loader = instance.getLoader().trim().toLowerCase(java.util.Locale.ROOT);
-            if (loader.equals("legacy fabric")) loader = "legacyfabric";
+            final String loaderId = loader.equals("legacy fabric") ? "legacyfabric" : loader;
 
             if (contentTypeBox.getValue() == ModrinthContentType.MOD
-                    && !loader.equals("fabric")
-                    && !loader.equals("quilt")
-                    && !loader.equals("forge")
-                    && !loader.equals("neoforge")
-                    && !loader.equals("ornithe")
-                    && !loader.equals("legacy fabric")
-                    && !loader.equals("legacyfabric")) {
+                    && !loaderId.equals("fabric")
+                    && !loaderId.equals("quilt")
+                    && !loaderId.equals("forge")
+                    && !loaderId.equals("neoforge")
+                    && !loaderId.equals("ornithe")
+                    && !loaderId.equals("legacy fabric")
+                    && !loaderId.equals("legacyfabric")) {
                 continue;
             }
 
@@ -465,7 +465,7 @@ public class GlobalModsView extends VBox {
                 String selected = selectedLoader();
                 if (selected != null && !selected.isBlank()
                         && !selected.equalsIgnoreCase("all")
-                        && !loader.equalsIgnoreCase(selected)) {
+                        && !loaderId.equalsIgnoreCase(selected)) {
                     continue;
                 }
             }
@@ -482,7 +482,7 @@ public class GlobalModsView extends VBox {
                     if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
                         if (version.getLoaders() == null
                                 || version.getLoaders().stream()
-                                .noneMatch(value -> loader.equalsIgnoreCase(value))) {
+                                .noneMatch(value -> loaderId.equalsIgnoreCase(value))) {
                             continue;
                         }
                     }
