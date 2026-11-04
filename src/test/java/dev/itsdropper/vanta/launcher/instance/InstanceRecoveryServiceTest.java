@@ -106,7 +106,7 @@ class InstanceRecoveryServiceTest {
         Files.writeString(rollback.resolve("mods/old.jar"), "old-mod");
         Files.writeString(rollback.resolve("config/old.json"), "old-config");
         Files.writeString(transaction.resolve("restore-journal.txt"),
-                "VANTA-RECOVERY-TRANSACTION-V1\\npresent=mods,config,resourcepacks\\n");
+                "VANTA-RECOVERY-TRANSACTION-V1\npresent=mods,config,resourcepacks\n");
 
         int recovered = InstanceRecoveryService.recoverInterruptedRestores(instance);
 
