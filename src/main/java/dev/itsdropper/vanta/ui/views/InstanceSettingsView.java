@@ -15,6 +15,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.launcher.loader.LoaderStackConfiguration;
+import dev.itsdropper.vanta.launcher.loader.LoaderStackManager;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
@@ -42,6 +55,11 @@ public class InstanceSettingsView extends VBox {
     private final CheckBox fullscreenCheck;
 
     private final Label statusLabel;
+    private final TextArea loaderStackProfilesArea;
+    private final TextArea loaderStackTweakersArea;
+    private final List<LoaderStackConfiguration.Layer> loaderStackLayers = new ArrayList<>();
+    private boolean loaderStackConfigured;
+    private static final ObjectMapper LOADER_PROFILE_MAPPER = new ObjectMapper();
 
     public InstanceSettingsView(
             Instance instance,
@@ -389,6 +407,46 @@ public class InstanceSettingsView extends VBox {
                 );
 
         // ---------------------------------------------------------
+        // LOADER STACK
+        // ---------------------------------------------------------
+
+        Label loaderStackTitle = createSectionTitle("LOADER STACK");
+
+        loaderStackProfilesArea = new TextArea();
+        loaderStackProfilesArea.setEditable(false);
+        loaderStackProfilesArea.setWrapText(true);
+        loaderStackProfilesArea.setPrefRowCount(3);
+        loaderStackProfilesArea.setPromptText("No profile overlays added.");
+        loaderStackProfilesArea.getStyleClass().add("create-field");
+
+        loaderStackTweakersArea = new TextArea();
+        loaderStackTweakersArea.setWrapText(true);
+        loaderStackTweakersArea.setPrefRowCount(3);
+        loaderStackTweakersArea.setPromptText(
+                "Optional LaunchWrapper tweaker class names, one per line.");
+        loaderStackTweakersArea.getStyleClass().add("create-field");
+
+        Button addLoaderProfilesButton = new Button("ADD PROFILE JSON");
+        addLoaderProfilesButton.getStyleClass().add("secondary-button");
+        addLoaderProfilesButton.setOnAction(event -> addLoaderProfiles());
+
+        Button removeLastLoaderProfileButton = new Button("REMOVE LAST");
+        removeLastLoaderProfileButton.getStyleClass().add("secondary-button");
+        removeLastLoaderProfileButton.setOnAction(event -> {
+            if (!loaderStackLayers.isEmpty()) {
+                loaderStackLayers.remove(loaderStackLayers.size() - 1);
+                refreshLoaderProfileList();
+            }
+        });
+
+        VBox loaderStackCard = createCard(
+                new Label("Profile overlays are applied in the order shown. Add only profiles designed to share the same Minecraft bootstrap."),
+                loaderStackProfilesArea,
+                new HBox(8, addLoaderProfilesButton, removeLastLoaderProfileButton),
+                createInput("LaunchWrapper tweakers (one class per line)", loaderStackTweakersArea)
+        );
+
+        // ---------------------------------------------------------
         // DIRECTORY
         // ---------------------------------------------------------
 
@@ -491,6 +549,9 @@ public class InstanceSettingsView extends VBox {
 
                         gameTitle,
                         gameCard,
+
+                        loaderStackTitle,
+                        loaderStackCard,
 
                         directoryTitle,
                         directoryCard
@@ -628,6 +689,23 @@ public class InstanceSettingsView extends VBox {
                     settings.isFullscreen()
             );
 
+            loaderStackLayers.clear();
+            loaderStackTweakersArea.clear();
+            LoaderStackConfiguration stack = LoaderStackManager.load(instance);
+            loaderStackConfigured = stack != null;
+            if (stack != null) {
+                for (LoaderStackConfiguration.Layer layer : stack.getOrderedLayers()) {
+                    if (layer.type() == LoaderStackConfiguration.LayerType.PROFILE_OVERLAY) {
+                        loaderStackLayers.add(layer);
+                    } else if (layer.type() == LoaderStackConfiguration.LayerType.TWEAKER) {
+                        loaderStackTweakersArea.appendText(
+                                String.join(System.lineSeparator(), layer.launchTweakers())
+                                        + System.lineSeparator());
+                    }
+                }
+            }
+            refreshLoaderProfileList();
+
             statusLabel.setText(
                     "Settings loaded."
             );
@@ -703,6 +781,26 @@ public class InstanceSettingsView extends VBox {
                     settings
             );
 
+            List<LoaderStackConfiguration.Layer> configuredLayers = new ArrayList<>(loaderStackLayers);
+            List<String> tweakers = loaderStackTweakersArea.getText().lines()
+                    .map(String::trim)
+                    .filter(line -> !line.isEmpty())
+                    .toList();
+            if (!tweakers.isEmpty()) {
+                configuredLayers.add(new LoaderStackConfiguration.Layer(
+                        "manual-tweakers", "custom", LoaderStackConfiguration.LayerType.TWEAKER,
+                        configuredLayers.size() * 10 + 10, tweakers));
+            }
+            if (configuredLayers.isEmpty()) {
+                if (loaderStackConfigured) {
+                    LoaderStackManager.clear(instance);
+                    loaderStackConfigured = false;
+                }
+            } else {
+                LoaderStackManager.apply(instance, new LoaderStackConfiguration(configuredLayers));
+                loaderStackConfigured = true;
+            }
+
             statusLabel.setText(
                     "Settings saved."
             );
@@ -727,6 +825,54 @@ public class InstanceSettingsView extends VBox {
 
             return false;
         }
+    }
+
+    private void addLoaderProfiles() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Select launcher profile JSON files");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Launcher profile JSON", "*.json"));
+        List<File> selected = chooser.showOpenMultipleDialog(
+                getScene() == null ? null : getScene().getWindow());
+        if (selected == null || selected.isEmpty()) {
+            return;
+        }
+
+        try {
+            Path profileDirectory = instance.getDirectory().resolve("loader-profiles");
+            Files.createDirectories(profileDirectory);
+            for (File source : selected) {
+                JsonNode profile = LOADER_PROFILE_MAPPER.readTree(source);
+                if (profile == null || !profile.isObject()
+                        || profile.path("libraries").isMissingNode()
+                        || !profile.path("libraries").isArray()) {
+                    throw new IOException("Invalid launcher profile: " + source.getName());
+                }
+
+                String id = "profile-" + UUID.randomUUID().toString().substring(0, 8);
+                String relativePath = "loader-profiles/" + id + ".json";
+                Path destination = profileDirectory.resolve(id + ".json");
+                Files.copy(source.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
+
+                loaderStackLayers.add(new LoaderStackConfiguration.Layer(
+                        id, "imported", LoaderStackConfiguration.LayerType.PROFILE_OVERLAY,
+                        loaderStackLayers.size() * 10, List.of(), relativePath));
+            }
+            refreshLoaderProfileList();
+            statusLabel.setText("Added " + selected.size() + " profile overlay(s). Save to apply.");
+        } catch (Exception e) {
+            statusLabel.setText("Could not add loader profile: " + e.getMessage());
+        }
+    }
+
+    private void refreshLoaderProfileList() {
+        if (loaderStackProfilesArea == null) {
+            return;
+        }
+        loaderStackProfilesArea.setText(loaderStackLayers.stream()
+                .map(layer -> layer.id() + "  ·  " + layer.profileFile())
+                .reduce((left, right) -> left + System.lineSeparator() + right)
+                .orElse(""));
     }
 
     // =============================================================
