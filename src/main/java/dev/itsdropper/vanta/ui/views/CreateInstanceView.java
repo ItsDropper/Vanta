@@ -19,6 +19,7 @@ import javafx.scene.layout.VBox;
 import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.BabricInstaller;
 import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
+import dev.itsdropper.vanta.launcher.instance.LiteLoaderInstaller;
 import dev.itsdropper.vanta.launcher.instance.ForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.NeoForgeInstaller;
 import dev.itsdropper.vanta.launcher.instance.OrnitheInstaller;
@@ -87,6 +88,8 @@ public class CreateInstanceView extends VBox {
     private volatile boolean legacyFabricCheckRunning;
     private final AtomicInteger babricCheckId = new AtomicInteger();
     private volatile boolean babricCheckRunning;
+    private final AtomicInteger liteLoaderCheckId = new AtomicInteger();
+    private volatile boolean liteLoaderCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -542,6 +545,7 @@ public class CreateInstanceView extends VBox {
         int ornitheId = ornitheCheckId.incrementAndGet();
         int legacyFabricId = legacyFabricCheckId.incrementAndGet();
         int babricId = babricCheckId.incrementAndGet();
+        int liteLoaderId = liteLoaderCheckId.incrementAndGet();
         fabricCheckRunning = true;
         forgeCheckRunning = true;
         quiltCheckRunning = true;
@@ -549,6 +553,7 @@ public class CreateInstanceView extends VBox {
         ornitheCheckRunning = true;
         legacyFabricCheckRunning = true;
         babricCheckRunning = true;
+        liteLoaderCheckRunning = true;
 
         UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
@@ -560,7 +565,8 @@ public class CreateInstanceView extends VBox {
                     "Ornithe",
                     "Legacy Fabric",
                     "Babric",
-                    "NilLoader"
+                    "NilLoader",
+                    "LiteLoader"
             );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
@@ -577,6 +583,7 @@ public class CreateInstanceView extends VBox {
             boolean legacyFabricAvailable = false;
             boolean babricAvailable = false;
             boolean nilLoaderAvailable = false;
+            boolean liteLoaderAvailable = false;
 
             try {
                 FabricInstaller.findLatestLoaderVersion(minecraftVersion);
@@ -626,6 +633,12 @@ public class CreateInstanceView extends VBox {
             } catch (Throwable ignored) {
             }
 
+            try {
+                LiteLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
+                liteLoaderAvailable = true;
+            } catch (Throwable ignored) {
+            }
+
             final boolean fabric = fabricAvailable;
             final boolean forge = forgeAvailable;
             final boolean quilt = quiltAvailable;
@@ -634,13 +647,15 @@ public class CreateInstanceView extends VBox {
             final boolean legacyFabric = legacyFabricAvailable;
             final boolean babric = babricAvailable;
             final boolean nilLoader = nilLoaderAvailable;
+            final boolean liteLoader = liteLoaderAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
                         || quiltId != quiltCheckId.get() || neoForgeId != neoForgeCheckId.get()
                         || ornitheId != ornitheCheckId.get()
                         || legacyFabricId != legacyFabricCheckId.get()
-                        || babricId != babricCheckId.get()) {
+                        || babricId != babricCheckId.get()
+                        || liteLoaderId != liteLoaderCheckId.get()) {
                     return;
                 }
 
@@ -651,6 +666,7 @@ public class CreateInstanceView extends VBox {
                 ornitheCheckRunning = false;
                 legacyFabricCheckRunning = false;
                 babricCheckRunning = false;
+                liteLoaderCheckRunning = false;
                 loaderBox.getItems().setAll(
                         "Vanilla",
                         "Fabric",
@@ -660,7 +676,8 @@ public class CreateInstanceView extends VBox {
                         "Ornithe",
                         "Legacy Fabric",
                         "Babric",
-                        "NilLoader"
+                        "NilLoader",
+                        "LiteLoader"
                 );
 
                 // Keep unsupported loaders visible but prevent selecting them.
@@ -673,7 +690,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader) {
+                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
@@ -709,6 +726,14 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("Babric");
                 }
 
+                if (!nilLoader) {
+                    loaderBox.getItems().remove("NilLoader");
+                }
+
+                if (!liteLoader) {
+                    loaderBox.getItems().remove("LiteLoader");
+                }
+
                 // A saved default can be unavailable for this Minecraft version.
                 if (loaderBox.getValue() == null
                         || !loaderBox.getItems().contains(loaderBox.getValue())) {
@@ -729,7 +754,7 @@ public class CreateInstanceView extends VBox {
 
         if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning
                 || neoForgeCheckRunning || ornitheCheckRunning || legacyFabricCheckRunning
-                || babricCheckRunning) {
+                || babricCheckRunning || liteLoaderCheckRunning) {
 
             statusLabel.setText(
                     "Still checking mod loader support..."
@@ -791,6 +816,12 @@ public class CreateInstanceView extends VBox {
         if ("Babric".equals(loader) && !loaderBox.getItems().contains("Babric")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("Babric is currently available only for Minecraft b1.7.3.");
+            return;
+        }
+
+        if ("LiteLoader".equals(loader) && !loaderBox.getItems().contains("LiteLoader")) {
+            loaderBox.getSelectionModel().select("Vanilla");
+            statusLabel.setText("LiteLoader is not available for Minecraft " + version + ".");
             return;
         }
 
@@ -896,6 +927,10 @@ public class CreateInstanceView extends VBox {
                         } else if ("NilLoader".equals(loader)) {
 
                             InstanceInstaller.installNilLoader(name, version);
+
+                        } else if ("LiteLoader".equals(loader)) {
+
+                            InstanceInstaller.installLiteLoader(name, version);
 
                         } else if ("NeoForge".equals(loader)) {
 
