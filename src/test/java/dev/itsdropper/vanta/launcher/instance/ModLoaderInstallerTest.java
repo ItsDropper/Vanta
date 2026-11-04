@@ -65,7 +65,7 @@ class ModLoaderInstallerTest {
         Path file = Files.createTempFile("vanta-modloader-fixture", ".zip");
         try (ZipOutputStream output = new ZipOutputStream(Files.newOutputStream(file))) {
             for (int i = 0; i < nameAndBytes.length; i += 2) {
-                output.putNextEntry(new ZipEntry(nameAndBytes[i]));
+                output.putNextEntry(new ZipEntry((String) nameAndBytes[i]));
                 output.write((byte[]) nameAndBytes[i + 1]);
                 output.closeEntry();
             }
