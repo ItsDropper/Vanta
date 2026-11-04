@@ -120,7 +120,7 @@ public class GlobalModsView extends VBox {
         contentTypeBox.getStyleClass().add("create-combo");
 
         loaderBox = new ComboBox<>();
-        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric", "NilLoader");
+        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric", "NilLoader", "LiteLoader", "Rift", "ModLoader");
         loaderBox.setValue("Fabric");
         loaderBox.setAccessibleText("Minecraft mod loader filter");
         loaderBox.setPrefWidth(140);
@@ -425,13 +425,7 @@ public class GlobalModsView extends VBox {
         if (selected == null) {
             return null;
         }
-        return switch (selected) {
-            case "Legacy Fabric" -> "legacyfabric";
-            case "Ornithe" -> "ornithe";
-            case "Babric" -> "babric";
-            case "NilLoader" -> "nilloader";
-            default -> selected.toLowerCase(java.util.Locale.ROOT);
-        };
+        return dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(selected);
     }
 
     private List<Instance> compatibleInstances(
@@ -449,21 +443,8 @@ public class GlobalModsView extends VBox {
             }
 
             String minecraftVersion = instance.getMinecraftVersion();
-            String loader = instance.getLoader().trim().toLowerCase(java.util.Locale.ROOT);
-            final String loaderId = loader.equals("legacy fabric") ? "legacyfabric" : loader;
-
-            if (contentTypeBox.getValue() == ModrinthContentType.MOD
-                    && !loaderId.equals("fabric")
-                    && !loaderId.equals("quilt")
-                    && !loaderId.equals("forge")
-                    && !loaderId.equals("neoforge")
-                    && !loaderId.equals("ornithe")
-                    && !loaderId.equals("legacy fabric")
-                    && !loaderId.equals("legacyfabric")
-                    && !loaderId.equals("babric")
-                    && !loaderId.equals("nilloader")) {
-                continue;
-            }
+            String loaderId = dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds
+                    .normalize(instance.getLoader());
 
             if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
                 String selected = selectedLoader();
@@ -486,7 +467,8 @@ public class GlobalModsView extends VBox {
                     if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
                         if (version.getLoaders() == null
                                 || version.getLoaders().stream()
-                                .noneMatch(value -> loaderId.equalsIgnoreCase(value))) {
+                                .noneMatch(value -> loaderId.equalsIgnoreCase(
+                                        dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(value)))) {
                             continue;
                         }
                     }
