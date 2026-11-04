@@ -273,6 +273,12 @@ public final class MrpackExporter {
                                 loaderVersion
                         );
 
+                case "nilloader" ->
+                        dependencies.put(
+                                "nilloader",
+                                loaderVersion
+                        );
+
                 default -> {
                     // Unknown loaders are deliberately not
                     // written into the Modrinth manifest.
