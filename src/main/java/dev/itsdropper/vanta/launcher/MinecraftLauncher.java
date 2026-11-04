@@ -572,4 +572,5 @@ public class MinecraftLauncher {
 
     private static List<String> splitArguments(String arguments) {
         return LegacyArgumentResolver.tokenize(arguments);
-    }}
+    }
+}
