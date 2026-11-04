@@ -106,6 +106,11 @@ public class MinecraftLauncher {
          */
         command.add("-Djava.net.useSystemProxies=true");
 
+        if ("VantaLoader".equalsIgnoreCase(data.loader)) {
+            command.add("-Dvanta.minecraft.version=" + data.version);
+            command.add("-Dvanta.environment=client");
+        }
+
         // =============================================================
         // NILLOADER JAVA AGENT
         // =============================================================
