@@ -565,6 +565,32 @@ public class InstanceInstaller {
         }
     }
 
+    public static Instance installRift(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        String loaderVersion = RiftInstaller.findLatestLoaderVersion(minecraftVersion);
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "Rift", loaderVersion);
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            RiftInstaller.install(instance);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception failure) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception ignored) {
+            }
+            throw failure;
+        }
+    }
+
     public static Instance installModLoader(
             String name,
             String minecraftVersion
@@ -859,7 +885,16 @@ public class InstanceInstaller {
                     .readTree(instance.getDirectory().resolve("minecraft").resolve("version.json").toFile());
         }
 
-        if (!"LiteLoader".equalsIgnoreCase(loader)) {
+        if ("Rift".equalsIgnoreCase(loader)) {
+            dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            loaderVersion = RiftInstaller.findLatestLoaderVersion(minecraftVersion);
+            RiftInstaller.install(instance);
+            finalMetadata = new com.fasterxml.jackson.databind.ObjectMapper()
+                    .readTree(instance.getDirectory().resolve("minecraft").resolve("version.json").toFile());
+        }
+
+        if (!"LiteLoader".equalsIgnoreCase(loader) && !"Rift".equalsIgnoreCase(loader)) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
         }
 
