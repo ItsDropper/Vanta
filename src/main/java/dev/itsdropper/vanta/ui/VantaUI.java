@@ -46,6 +46,7 @@ public final class VantaUI {
 
         private final String styleClass;
         TextRole(String styleClass) { this.styleClass = styleClass; }
+        public String styleClass() { return styleClass; }
     }
 
     public enum ButtonVariant {

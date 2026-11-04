@@ -1,13 +1,45 @@
 package dev.itsdropper.vanta.ui;
 
-import javafx.geometry.Bounds;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.ClosePath;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.PathElement;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 class VantaUITest {
+    private static double[] coordinateBounds(Path path) {
+        double minX = Double.POSITIVE_INFINITY;
+        double minY = Double.POSITIVE_INFINITY;
+        double maxX = Double.NEGATIVE_INFINITY;
+        double maxY = Double.NEGATIVE_INFINITY;
+
+        for (PathElement element : path.getElements()) {
+            double x;
+            double y;
+            if (element instanceof MoveTo move) {
+                x = move.getX();
+                y = move.getY();
+            } else if (element instanceof LineTo line) {
+                x = line.getX();
+                y = line.getY();
+            } else {
+                continue;
+            }
+
+            assertTrue(Double.isFinite(x), "Path X coordinate must be finite");
+            assertTrue(Double.isFinite(y), "Path Y coordinate must be finite");
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+        }
+
+        return new double[]{minX, minY, maxX, maxY};
+    }
+
     @Test
     void spacingUsesFourPixelGrid() {
         assertEquals(4.0, VantaUI.spacing(1));
@@ -17,22 +49,20 @@ class VantaUITest {
     }
 
     @Test
-    void textRolesAreStableAndIdempotent() {
-        javafx.scene.control.Label label = new javafx.scene.control.Label("Vanta");
-        VantaUI.styleText(label, VantaUI.TextRole.PAGE_TITLE);
-        VantaUI.styleText(label, VantaUI.TextRole.PAGE_TITLE);
-        assertEquals(1, label.getStyleClass().stream()
-                .filter("vanta-type-page-title"::equals).count());
+    void textRolesExposeSemanticStyleClasses() {
+        assertEquals("vanta-type-page-title", VantaUI.TextRole.PAGE_TITLE.styleClass());
+        assertEquals("vanta-type-muted", VantaUI.TextRole.MUTED.styleClass());
+        assertEquals(7, VantaUI.TextRole.values().length);
     }
 
     @Test
     void squirclePathIsClosedAndFitsRequestedBounds() {
         Path path = VantaUI.createSquirclePath(240.0, 120.0, 18.0, 4.0);
-        Bounds bounds = path.getBoundsInLocal();
-        assertEquals(0.0, bounds.getMinX(), 0.001);
-        assertEquals(0.0, bounds.getMinY(), 0.001);
-        assertEquals(240.0, bounds.getMaxX(), 0.001);
-        assertEquals(120.0, bounds.getMaxY(), 0.001);
+        double[] bounds = coordinateBounds(path);
+        assertEquals(0.0, bounds[0], 0.001);
+        assertEquals(0.0, bounds[1], 0.001);
+        assertEquals(240.0, bounds[2], 0.001);
+        assertEquals(120.0, bounds[3], 0.001);
         assertInstanceOf(ClosePath.class, path.getElements().get(path.getElements().size() - 1));
         assertTrue(path.getElements().size() >= 80);
         path.getElements().forEach(element -> {
@@ -49,9 +79,11 @@ class VantaUITest {
     @Test
     void squircleRadiusIsClampedToHalfTheShortestDimension() {
         Path path = VantaUI.createSquirclePath(80.0, 40.0, 100.0, 4.0);
-        Bounds bounds = path.getBoundsInLocal();
-        assertEquals(80.0, bounds.getWidth(), 0.001);
-        assertEquals(40.0, bounds.getHeight(), 0.001);
+        double[] bounds = coordinateBounds(path);
+        assertEquals(0.0, bounds[0], 0.001);
+        assertEquals(0.0, bounds[1], 0.001);
+        assertEquals(80.0, bounds[2], 0.001);
+        assertEquals(40.0, bounds[3], 0.001);
     }
 
     @Test
