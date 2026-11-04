@@ -26,7 +26,7 @@ Version metadata drives the resolution of client files, libraries, assets, nativ
 
 ### Loader integrations
 
-Fabric, Quilt, and Forge each have loader-specific metadata and installation behavior. Quilt uses its own official metadata service while sharing the compatible launcher-profile structure used by Fabric. Loader installation, Modrinth filtering, modpack import/export, and repair should integrate with the normal instance lifecycle rather than create a separate, inconsistent launch path. NeoForge and historical loaders require separate installer and version-compatibility work; they must not be advertised as supported until their full install, launch, repair, and modpack paths are implemented.
+Fabric, Quilt, Forge, and NeoForge each have loader-specific metadata and installation behavior. Quilt uses its own official metadata service while sharing the compatible launcher-profile structure used by Fabric. NeoForge uses its own Maven coordinates and client installer; its installer-generated profile must be merged without retaining inheritance references. Loader installation, Modrinth filtering, modpack import/export, and repair should integrate with the normal instance lifecycle rather than create a separate, inconsistent launch path. Historical loaders still require separate, version-scoped installer and launch work.
 
 ### Modrinth
 
