@@ -8,6 +8,9 @@ import javafx.scene.paint.Color;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
+import java.nio.file.Path;
+import java.util.List;
+
 import dev.itsdropper.vanta.ui.LauncherView;
 import dev.itsdropper.vanta.ui.LoadingScreen;
 import dev.itsdropper.vanta.ui.ThemeManager;
@@ -28,6 +31,12 @@ public class Main extends Application {
         javafx.application.Platform.setImplicitExit(false);
 
         stage.initStyle(StageStyle.TRANSPARENT);
+
+        List<String> arguments = getParameters().getRaw();
+        if (arguments.contains("--capture-sidebar-screenshots")) {
+            startScreenshotCapture(stage, arguments);
+            return;
+        }
 
         LoadingScreen loadingScreen = new LoadingScreen();
         ThemeManager.apply(loadingScreen.getRoot(), ThemeManager.loadAccent());
@@ -68,6 +77,55 @@ public class Main extends Application {
         firstFrame.play();
     }
 
+    private void startScreenshotCapture(Stage stage, List<String> arguments) {
+        Path outputDirectory = Path.of("build", "ui-screenshots");
+        int captureArgument = arguments.indexOf("--capture-sidebar-screenshots");
+        if (captureArgument >= 0 && captureArgument + 1 < arguments.size()
+                && !arguments.get(captureArgument + 1).startsWith("--")) {
+            outputDirectory = Path.of(arguments.get(captureArgument + 1));
+        }
+
+        LauncherView launcher = new LauncherView(stage, () -> {}, true);
+        Scene scene = new Scene(launcher.getRoot(), WINDOW_WIDTH, WINDOW_HEIGHT);
+        scene.setFill(Color.TRANSPARENT);
+        applyLauncherStylesheets(scene);
+
+        stage.setTitle("Vanta — UI screenshot capture");
+        stage.setMinWidth(1180);
+        stage.setMinHeight(760);
+        stage.setResizable(false);
+        stage.setScene(scene);
+        stage.show();
+
+        Path destination = outputDirectory;
+        PauseTransition warmup = new PauseTransition(Duration.millis(400));
+        warmup.setOnFinished(event -> launcher.captureSidebarScreenshots(destination, failure -> {
+            if (failure != null) {
+                System.err.println("Sidebar screenshot capture failed.");
+                failure.printStackTrace();
+                System.exit(1);
+                return;
+            }
+            System.out.println("Captured all sidebar pages to " + destination.toAbsolutePath());
+            javafx.application.Platform.exit();
+        }));
+        warmup.play();
+    }
+
+    private void applyLauncherStylesheets(Scene scene) {
+        String[] stylesheets = {
+                "/css/base.css", "/css/shell.css", "/css/home.css", "/css/library.css",
+                "/css/content.css", "/css/manage.css", "/css/utilities.css", "/css/tokens.css"
+        };
+        for (String stylesheet : stylesheets) {
+            var resource = getClass().getResource(stylesheet);
+            if (resource == null) {
+                throw new IllegalStateException("Missing CSS resource: " + stylesheet);
+            }
+            scene.getStylesheets().add(resource.toExternalForm());
+        }
+    }
+
     private void initializeLauncher(
             Stage stage,
             Scene scene,
@@ -103,29 +161,7 @@ public class Main extends Application {
 
         // Replace the splash-only stylesheet with the consolidated launcher set.
         scene.getStylesheets().clear();
-
-        String[] stylesheets = {
-                "/css/base.css",
-                "/css/shell.css",
-                "/css/home.css",
-                "/css/library.css",
-                "/css/content.css",
-                "/css/manage.css",
-                "/css/utilities.css",
-                "/css/tokens.css"
-        };
-
-        for (String stylesheet : stylesheets) {
-            var resource = getClass().getResource(stylesheet);
-
-            if (resource == null) {
-                throw new IllegalStateException(
-                        "Missing CSS resource: " + stylesheet
-                );
-            }
-
-            scene.getStylesheets().add(resource.toExternalForm());
-        }
+        applyLauncherStylesheets(scene);
 
         long elapsedMs =
                 (System.nanoTime() - startedAt) / 1_000_000L;

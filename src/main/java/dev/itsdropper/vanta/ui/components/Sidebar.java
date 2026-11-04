@@ -8,6 +8,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 
 import dev.itsdropper.vanta.ui.components.IconView;
+import dev.itsdropper.vanta.ui.VantaUI;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -257,6 +258,7 @@ public class Sidebar extends VBox {
         button.getStyleClass().add(
                 "sidebar-button"
         );
+        VantaUI.styleButton(button, VantaUI.ButtonVariant.NAVIGATION);
 
         navigationButtons.put(
                 page,

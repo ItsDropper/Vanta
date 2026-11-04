@@ -2234,3 +2234,67 @@
 .state-environment-button:disabled {
     -fx-opacity: 0.55;
 }
+
+
+/* Shared semantic components; colors inherit the active ThemeManager palette. */
+.vanta-ui-root {
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+.vanta-ui-root .vanta-button {
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+    -fx-padding: 10px 16px;
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-cursor: hand;
+}
+.vanta-ui-root .vanta-button-primary {
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: -vantabg;
+    -fx-border-color: transparent;
+}
+.vanta-ui-root .vanta-button-secondary {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
+    -fx-border-color: -vantaborder;
+}
+.vanta-ui-root .vanta-button-quiet,
+.vanta-ui-root .vanta-button-navigation {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantamuted;
+    -fx-border-color: transparent;
+}
+.vanta-ui-root .vanta-button-secondary:hover,
+.vanta-ui-root .vanta-button-quiet:hover,
+.vanta-ui-root .vanta-button-navigation:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-text-fill: -vantatext;
+}
+.vanta-ui-root .vanta-button:focused,
+.vanta-ui-root .text-field:focused,
+.vanta-ui-root .text-area:focused,
+.vanta-ui-root .combo-box:focused,
+.vanta-ui-root .choice-box:focused,
+.vanta-ui-root .check-box:focused,
+.vanta-ui-root .radio-button:focused,
+.vanta-ui-root .slider:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+}
+.vanta-ui-root .vanta-surface-sidebar,
+.vanta-ui-root .vanta-surface-panel {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+}
+.vanta-ui-root .vanta-surface-card {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+}
+.vanta-ui-root .vanta-surface-inset {
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+}

@@ -4,7 +4,6 @@ import javafx.geometry.Insets;
 import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
@@ -17,6 +16,8 @@ import dev.itsdropper.vanta.launcher.update.*;
 import dev.itsdropper.vanta.ui.components.NotificationManager;
 import dev.itsdropper.vanta.ui.components.CommandPalette;
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.VantaUI;
+import dev.itsdropper.vanta.ui.SidebarScreenshotCapture;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
@@ -36,6 +37,7 @@ public class LauncherView {
 
     private final StackPane root;
     private final Stage stage;
+    private final boolean screenshotMode;
     private final BorderPane window;
 
     private final AccountService accountService;
@@ -68,15 +70,22 @@ public class LauncherView {
 
 
     public LauncherView(Stage stage) {
-        this(stage, () -> {});
+        this(stage, () -> {}, false);
     }
 
     public LauncherView(Stage stage, Runnable onReady) {
+        this(stage, onReady, false);
+    }
+
+    /** Creates the normal launcher or an isolated UI screenshot session. */
+    public LauncherView(Stage stage, Runnable onReady, boolean screenshotMode) {
         this.stage = stage;
         this.onReady = onReady;
+        this.screenshotMode = screenshotMode;
 
         root =
                 new StackPane();
+        VantaUI.install(root);
 
         root.sceneProperty().addListener((observable, previousScene, nextScene) -> {
             if (previousScene != null) {
@@ -125,28 +134,7 @@ public class LauncherView {
                 root.heightProperty()
         );
 
-        Rectangle clip =
-                new Rectangle();
-
-        clip.setArcWidth(
-                24
-        );
-
-        clip.setArcHeight(
-                24
-        );
-
-        clip.widthProperty().bind(
-                root.widthProperty()
-        );
-
-        clip.heightProperty().bind(
-                root.heightProperty()
-        );
-
-        window.setClip(
-                clip
-        );
+        VantaUI.applySquircle(window, VantaUI.RADIUS_WINDOW);
 
         accountService =
                 new AccountService();
@@ -223,6 +211,7 @@ public class LauncherView {
 
         sidebar =
                 new Sidebar();
+        VantaUI.applySurface(sidebar, VantaUI.SurfaceRole.SIDEBAR);
 
         root.widthProperty().addListener((observable, oldWidth, newWidth) -> {
             boolean compact = newWidth.doubleValue() < 1120;
@@ -327,21 +316,20 @@ public class LauncherView {
         AnimationUtils.installInteractiveAnimations(sidebar);
         AnimationUtils.installInteractiveAnimations(titleBar);
 
-        TelemetryService.track("launcher_started");
-
-        showPage(
-                Sidebar.Page.HOME
-        );
-
-        loadAccount();
-        settingsView.refreshDebugAccess();
-        if (LauncherSettings.isUpdateChecksEnabled()
-                || LauncherSettings.isAutoUpdateOnLaunchEnabled()) {
-            checkForUpdates();
-        }
-
-        if (OnboardingManager.shouldShow()) {
-            UiExecutor.shared().dispatchToUi(this::showOnboarding);
+        if (!screenshotMode) {
+            TelemetryService.track("launcher_started");
+            showPage(Sidebar.Page.HOME);
+            loadAccount();
+            settingsView.refreshDebugAccess();
+            if (LauncherSettings.isUpdateChecksEnabled()
+                    || LauncherSettings.isAutoUpdateOnLaunchEnabled()) {
+                checkForUpdates();
+            }
+            if (OnboardingManager.shouldShow()) {
+                UiExecutor.shared().dispatchToUi(this::showOnboarding);
+            }
+        } else {
+            showPageForCapture(Sidebar.Page.HOME);
         }
     }
 
@@ -452,7 +440,7 @@ public class LauncherView {
             case SETTINGS -> "view_settings_opened";
             default -> null;
         };
-        if (telemetryEvent != null) {
+        if (!screenshotMode && telemetryEvent != null) {
             TelemetryService.track(telemetryEvent);
         }
 
@@ -472,6 +460,25 @@ public class LauncherView {
             case DOWNLOADS -> showAnimatedContent(downloadCenterView);
             case SERVERS -> showAnimatedContent(serverManagerView);
         }
+    }
+
+    private void showPageForCapture(Sidebar.Page page) {
+        sidebar.setSelectedPage(page);
+        switch (page) {
+            case HOME -> viewHost.showForCapture(homeView);
+            case ACCOUNTS -> viewHost.showForCapture(accountsView);
+            case SKIN -> viewHost.showForCapture(skinChangerView);
+            case INSTANCES -> viewHost.showForCapture(instancesView);
+            case MODS -> viewHost.showForCapture(globalModsView);
+            case STATE -> viewHost.showForCapture(stateCenterView);
+            case SETTINGS -> viewHost.showForCapture(settingsView);
+            case DOWNLOADS -> viewHost.showForCapture(downloadCenterView);
+            case SERVERS -> viewHost.showForCapture(serverManagerView);
+        }
+    }
+
+    public void captureSidebarScreenshots(Path outputDirectory, Consumer<Throwable> completion) {
+        SidebarScreenshotCapture.capture(root, this::showPageForCapture, outputDirectory, completion);
     }
 
     private void showStatePage() {

@@ -11,6 +11,16 @@ This document defines the interaction contract for Vanta's JavaFX interface. It 
 - Avoid hard-coded green or blue for normal states; theme tokens must drive accent and status colors.
 - Avoid decorative effects that reduce contrast or obscure content.
 
+## Geometry, rhythm and typography
+
+- Use a 4 px base spacing unit and multiples of 8 px for common gaps. Prefer VantaUI spacing helpers over unrelated scales.
+- Shell and major-panel corners use a fourth-order superellipse (squircle), with normalized boundary |x/a|^4 + |y/b|^4 = 1. The curve is a clipped JavaFX path, independent of CSS circular corner radii.
+- Use shared radius constants for windows, panels and cards. Shape hierarchy should follow component scale; do not apply the largest radius to tiny controls.
+- Use a restrained type scale: 11 px metadata, 12–13 px control/body text, 15–16 px section labels, and 22–28 px page titles. Preserve platform text rendering and allow content to wrap.
+- Keep colors semantic and theme-derived. Target WCAG AA contrast: 4.5:1 for normal text and 3:1 for large text and meaningful UI boundaries. Validate actual theme pairings.
+- Motion is feedback, not decoration: prefer short opacity/translation transitions, avoid layout animation, and respect the user's animation preference.
+- A squircle is a mathematical primitive, not proof that one curve is universally more beautiful. Validate actual screens at target window sizes, including keyboard/focus states.
+
 ## Interaction contract
 
 - Every non-empty page must have an obvious next action. Empty states should explain what belongs there and provide a useful action when one exists.
@@ -47,6 +57,16 @@ For any significant UI change:
 5. Confirm window dragging does not steal clicks from interactive title-bar controls.
 6. Ensure a first-run user can create or import an instance without having to discover a hidden workflow.
 7. Preserve existing user data and settings; UI polish must not alter launcher behavior.
+
+## Screenshot review
+
+Run the production sidebar capture locally:
+
+```bash
+./gradlew run --args="--capture-sidebar-screenshots build/ui-screenshots"
+```
+
+This generates one PNG per Sidebar.Page plus an index. CI captures the production views under Xvfb and uploads them as the vanta-sidebar-screenshots artifact. Capture mode skips account loading, update checks, onboarding, telemetry events and active-view lifecycle refreshes.
 
 ## Motion and responsiveness
 

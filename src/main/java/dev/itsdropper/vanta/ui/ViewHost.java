@@ -51,6 +51,21 @@ public final class ViewHost {
         }
     }
 
+    /** Shows a page without starting live view lifecycle hooks (screenshot mode). */
+    public void showForCapture(Node view) {
+        Objects.requireNonNull(view, "view");
+        Node previousView = getActiveView();
+        if (previousView != null && previousView != view) {
+            AnimationUtils.cancelAnimations(previousView);
+        }
+        container.getChildren().setAll(view);
+        view.setVisible(true);
+        view.setManaged(true);
+        view.setOpacity(1.0);
+        view.setTranslateX(0.0);
+        view.setTranslateY(0.0);
+    }
+
     /**
      * Replaces the active view and applies the launcher's standard entrance
      * and interactive animations when motion is enabled in settings.

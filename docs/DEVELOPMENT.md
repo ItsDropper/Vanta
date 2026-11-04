@@ -25,6 +25,16 @@ From PowerShell, run the baseline checks:
 
 The first build may download Gradle dependencies. A successful compile is not a substitute for testing the affected runtime behavior.
 
+## UI screenshots
+
+Capture all nine top-level sidebar destinations from the actual JavaFX views:
+
+```powershell
+.\gradlew.bat run --args="--capture-sidebar-screenshots build/ui-screenshots"
+```
+
+The UI screenshots GitHub Actions workflow performs the same capture under Xvfb and uploads build/ui-screenshots as an artifact. Screenshot mode does not require a signed-in account or a pre-existing Minecraft instance.
+
 ## Packaging
 
 The build uses the Shadow plugin for the application JAR and defines a separate updater JAR task. Windows packaging also uses tools from the Java runtime packaging ecosystem, including `jlink` and `jpackage`, and NSIS in the distribution pipeline. Packaging may require a Windows environment and the relevant external tools.

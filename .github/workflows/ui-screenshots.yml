@@ -1,0 +1,44 @@
+name: UI screenshots
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  capture-sidebar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Install JavaFX display dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes xvfb libgtk-3-0 libxtst6 libxi6 libxrender1 libxrandr2 libxinerama1 libxxf86vm1 libgl1
+      - name: Run regression tests
+        run: ./gradlew test
+      - name: Capture all sidebar destinations
+        env:
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          xvfb-run -a -s "-screen 0 1600x1000x24" ./gradlew run --args="--capture-sidebar-screenshots build/ui-screenshots"
+          test "$(find build/ui-screenshots -maxdepth 1 -type f -name '*.png' | wc -l)" -eq 9
+          test -s build/ui-screenshots/index.md
+      - name: Publish screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-sidebar-screenshots
+          path: build/ui-screenshots/
+          if-no-files-found: error
+          retention-days: 14
