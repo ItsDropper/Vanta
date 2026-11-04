@@ -97,6 +97,43 @@ public class InstanceInstaller {
     }
 
     // =============================================================
+    // VANTALOADER
+    // =============================================================
+
+    public static Instance installVantaLoader(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        if (!VantaLoaderInstaller.supportsMinecraftVersion(minecraftVersion)) {
+            throw new IllegalArgumentException(
+                    "VantaLoader currently targets Minecraft 1.20.5 and newer Java 21 releases.");
+        }
+
+        String loaderVersion = VantaLoaderInstaller.findLatestLoaderVersion();
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "VantaLoader", loaderVersion);
+
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            VantaLoaderInstaller.install(instance);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception failure) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
+            throw failure;
+        }
+    }
+
+    // =============================================================
     // FORGE
     // =============================================================
 
