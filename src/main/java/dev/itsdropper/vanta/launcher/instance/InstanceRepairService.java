@@ -138,6 +138,10 @@ public final class InstanceRepairService {
         } else if (loader.equalsIgnoreCase("nilloader")) {
             NilLoaderInstaller.install(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+        } else if (loader.equalsIgnoreCase("liteloader")) {
+            dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            LiteLoaderInstaller.install(instance);
         } else if (loader.equalsIgnoreCase("vanilla")) {
             MinecraftVersionResolver.saveMetadata(
                     instance,
@@ -150,7 +154,9 @@ public final class InstanceRepairService {
             );
         }
 
-        dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
+        if (!loader.equalsIgnoreCase("liteloader")) {
+            dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
+        }
 
         InstanceManager.markInstallationComplete(
                 instance
