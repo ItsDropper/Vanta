@@ -38,6 +38,8 @@ public final class InstanceRepairService {
                         || text.contains("minecraft client jar not found")
                         || text.contains("native library not found")
                         || text.contains("nilloader agent is missing or invalid")
+                        || text.contains("rift library is missing")
+                        || text.contains("rift artifact")
                         || text.contains("native classifier not found")
                         || text.contains("asset index missing")
                         || text.contains("asset index not found")
