@@ -418,9 +418,18 @@ public class GlobalModsView extends VBox {
     }
 
     private String selectedLoader() {
-        return contentTypeBox.getValue() == ModrinthContentType.MOD
-                ? loaderBox.getValue()
-                : null;
+        if (contentTypeBox.getValue() != ModrinthContentType.MOD) {
+            return null;
+        }
+        String selected = loaderBox.getValue();
+        if (selected == null) {
+            return null;
+        }
+        return switch (selected) {
+            case "Legacy Fabric" -> "legacyfabric";
+            case "Ornithe" -> "ornithe";
+            default -> selected.toLowerCase(java.util.Locale.ROOT);
+        };
     }
 
     private List<Instance> compatibleInstances(
@@ -439,18 +448,22 @@ public class GlobalModsView extends VBox {
 
             String minecraftVersion = instance.getMinecraftVersion();
             String loader = instance.getLoader().trim().toLowerCase(java.util.Locale.ROOT);
+            if (loader.equals("legacy fabric")) loader = "legacyfabric";
 
             if (contentTypeBox.getValue() == ModrinthContentType.MOD
                     && !loader.equals("fabric")
                     && !loader.equals("quilt")
                     && !loader.equals("forge")
-                    && !loader.equals("neoforge")) {
+                    && !loader.equals("neoforge")
+                    && !loader.equals("ornithe")
+                    && !loader.equals("legacy fabric")
+                    && !loader.equals("legacyfabric")) {
                 continue;
             }
 
             if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
                 String selected = selectedLoader();
-                if (!selected.isBlank()
+                if (selected != null && !selected.isBlank()
                         && !selected.equalsIgnoreCase("all")
                         && !loader.equalsIgnoreCase(selected)) {
                     continue;
