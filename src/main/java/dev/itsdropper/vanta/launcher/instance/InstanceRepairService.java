@@ -138,6 +138,9 @@ public final class InstanceRepairService {
         } else if (loader.equalsIgnoreCase("nilloader")) {
             NilLoaderInstaller.install(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+        } else if (loader.equalsIgnoreCase("modloader")) {
+            MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            ModLoaderInstaller.install(instance);
         } else if (loader.equalsIgnoreCase("liteloader")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
