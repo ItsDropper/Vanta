@@ -43,8 +43,20 @@ public final class BabricInstaller {
     public static JsonNode downloadFabricProfile(String minecraftVersion, String loaderVersion)
             throws Exception {
         requireSupportedVersion(minecraftVersion);
-        JsonNode profile = FabricInstaller.downloadProfile(SUPPORTED_GAME_VERSION, loaderVersion);
-        validateFabricBootstrap(profile);
+        JsonNode downloaded = FabricInstaller.downloadProfile(SUPPORTED_GAME_VERSION, loaderVersion);
+        validateFabricBootstrap(downloaded);
+
+        // Fabric Meta's generic profile may include Fabric's own intermediary
+        // mapping artifact. Babric ships its own b1.7.3 intermediary and the
+        // Prism instance patch replaces that dependency with this mapping.
+        ObjectNode profile = (ObjectNode) downloaded.deepCopy();
+        ArrayNode libraries = (ArrayNode) profile.get("libraries");
+        for (int i = libraries.size() - 1; i >= 0; i--) {
+            String name = libraries.get(i).path("name").asText("");
+            if (name.startsWith("net.fabricmc:intermediary:")) {
+                libraries.remove(i);
+            }
+        }
         return profile;
     }
 
