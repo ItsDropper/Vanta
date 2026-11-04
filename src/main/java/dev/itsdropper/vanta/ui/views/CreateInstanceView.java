@@ -95,6 +95,8 @@ public class CreateInstanceView extends VBox {
     private volatile boolean modLoaderCheckRunning;
     private final AtomicInteger riftCheckId = new AtomicInteger();
     private volatile boolean riftCheckRunning;
+    private final AtomicInteger vantaLoaderCheckId = new AtomicInteger();
+    private volatile boolean vantaLoaderCheckRunning;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -553,6 +555,7 @@ public class CreateInstanceView extends VBox {
         int liteLoaderId = liteLoaderCheckId.incrementAndGet();
         int modLoaderId = modLoaderCheckId.incrementAndGet();
         int riftId = riftCheckId.incrementAndGet();
+        int vantaLoaderId = vantaLoaderCheckId.incrementAndGet();
         fabricCheckRunning = true;
         forgeCheckRunning = true;
         quiltCheckRunning = true;
@@ -563,6 +566,7 @@ public class CreateInstanceView extends VBox {
         liteLoaderCheckRunning = true;
         modLoaderCheckRunning = true;
         riftCheckRunning = true;
+        vantaLoaderCheckRunning = true;
 
         UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
@@ -597,6 +601,7 @@ public class CreateInstanceView extends VBox {
             boolean liteLoaderAvailable = false;
             boolean modLoaderAvailable = false;
             boolean riftAvailable = false;
+            boolean vantaLoaderAvailable = false;
 
             try {
                 FabricInstaller.findLatestLoaderVersion(minecraftVersion);
@@ -675,6 +680,14 @@ public class CreateInstanceView extends VBox {
             final boolean liteLoader = liteLoaderAvailable;
             final boolean modLoader = modLoaderAvailable;
             final boolean rift = riftAvailable;
+            try {
+                if (VantaLoaderInstaller.supportsMinecraftVersion(minecraftVersion)) {
+                    VantaLoaderInstaller.findLatestLoaderVersion();
+                    vantaLoaderAvailable = true;
+                }
+            } catch (Throwable ignored) {
+            }
+            final boolean vantaLoader = vantaLoaderAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
@@ -684,7 +697,8 @@ public class CreateInstanceView extends VBox {
                         || babricId != babricCheckId.get()
                         || liteLoaderId != liteLoaderCheckId.get()
                         || modLoaderId != modLoaderCheckId.get()
-                        || riftId != riftCheckId.get()) {
+                        || riftId != riftCheckId.get()
+                        || vantaLoaderId != vantaLoaderCheckId.get()) {
                     return;
                 }
 
@@ -698,6 +712,7 @@ public class CreateInstanceView extends VBox {
                 liteLoaderCheckRunning = false;
                 modLoaderCheckRunning = false;
                 riftCheckRunning = false;
+                vantaLoaderCheckRunning = false;
                 loaderBox.getItems().setAll(
                         "Vanilla",
                         "Fabric",
@@ -710,7 +725,8 @@ public class CreateInstanceView extends VBox {
                         "NilLoader",
                         "LiteLoader",
                         "ModLoader",
-                        "Rift"
+                        "Rift",
+                        "VantaLoader"
                 );
 
                 // Keep unsupported loaders visible but prevent selecting them.
@@ -723,7 +739,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader || rift) {
+                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader || rift || vantaLoader) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
@@ -775,6 +791,10 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getItems().remove("Rift");
                 }
 
+                if (!vantaLoader) {
+                    loaderBox.getItems().remove("VantaLoader");
+                }
+
                 // A saved default can be unavailable for this Minecraft version.
                 if (loaderBox.getValue() == null
                         || !loaderBox.getItems().contains(loaderBox.getValue())) {
@@ -796,7 +816,7 @@ public class CreateInstanceView extends VBox {
         if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning
                 || neoForgeCheckRunning || ornitheCheckRunning || legacyFabricCheckRunning
                 || babricCheckRunning || liteLoaderCheckRunning || modLoaderCheckRunning
-                || riftCheckRunning) {
+                || riftCheckRunning || vantaLoaderCheckRunning) {
 
             statusLabel.setText(
                     "Still checking mod loader support..."
@@ -903,6 +923,14 @@ public class CreateInstanceView extends VBox {
             return;
         }
 
+        if ("VantaLoader".equals(loader)
+                && (!loaderBox.getItems().contains("VantaLoader")
+                || !VantaLoaderInstaller.supportsMinecraftVersion(version))) {
+            loaderBox.getSelectionModel().select("Vanilla");
+            statusLabel.setText("VantaLoader is not available for Minecraft " + version + ".");
+            return;
+        }
+
         if ("Fabric".equals(loader)) {
 
             /* The loader was exposed only after the version check. */
@@ -949,7 +977,11 @@ public class CreateInstanceView extends VBox {
 
                     try {
 
-                        if ("Fabric".equals(loader)) {
+                        if ("VantaLoader".equals(loader)) {
+
+                            InstanceInstaller.installVantaLoader(name, version);
+
+                        } else if ("Fabric".equals(loader)) {
 
                             InstanceInstaller.installFabric(
                                     name,
