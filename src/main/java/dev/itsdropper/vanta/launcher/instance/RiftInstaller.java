@@ -1,0 +1,115 @@
+package dev.itsdropper.vanta.launcher.instance;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.loader.LoaderStackConfiguration;
+import dev.itsdropper.vanta.launcher.loader.LoaderStackManager;
+import dev.itsdropper.vanta.launcher.model.Instance;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.jar.JarFile;
+
+/**
+ * Installs the original Dimensional Development Rift loader for Minecraft 1.13.
+ *
+ * This deliberately does not use RiftLoader forks or community 1.13.2 ports.
+ * The profile mirrors the original project's LaunchWrapper tweaker and
+ * dependency coordinates.
+ */
+public final class RiftInstaller {
+    public static final String MINECRAFT_VERSION = "1.13";
+    public static final String LOADER_VERSION = "1.0.4-66";
+    public static final String RIFT_REPOSITORY = "https://www.dimdev.org/maven/";
+    public static final String TWEAKER = "org.dimdev.riftloader.launch.RiftLoaderClientTweaker";
+    public static final String LAUNCHWRAPPER_MAIN = "net.minecraft.launchwrapper.Launch";
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private RiftInstaller() {
+    }
+
+    public static String findLatestLoaderVersion(String minecraftVersion) {
+        if (!MINECRAFT_VERSION.equals(minecraftVersion)) {
+            throw new IllegalArgumentException(
+                    "The original Rift release is only supported for Minecraft 1.13.");
+        }
+        return LOADER_VERSION;
+    }
+
+    public static JsonNode buildOverlay(String minecraftVersion) {
+        findLatestLoaderVersion(minecraftVersion);
+
+        ObjectNode overlay = MAPPER.createObjectNode();
+        overlay.put("id", "rift-" + minecraftVersion + "-" + LOADER_VERSION);
+        overlay.put("mainClass", LAUNCHWRAPPER_MAIN);
+        overlay.put("type", "release");
+
+        ArrayNode libraries = overlay.putArray("libraries");
+        addLibrary(libraries, "org.dimdev:rift:" + LOADER_VERSION, RIFT_REPOSITORY);
+        addLibrary(libraries, "org.dimdev:mixin:0.7.11-SNAPSHOT", RIFT_REPOSITORY);
+        addLibrary(libraries, "net.minecraft:launchwrapper:1.12",
+                "https://libraries.minecraft.net/");
+        addLibrary(libraries, "org.ow2.asm:asm:6.2",
+                "https://repo1.maven.org/maven2/");
+        addLibrary(libraries, "org.ow2.asm:asm-commons:6.2",
+                "https://repo1.maven.org/maven2/");
+        return overlay;
+    }
+
+    public static void install(Instance instance) throws Exception {
+        if (instance == null || instance.getDirectory() == null) {
+            throw new IllegalArgumentException("A valid Rift instance is required.");
+        }
+        String minecraftVersion = instance.getMinecraftVersion();
+        String version = findLatestLoaderVersion(minecraftVersion);
+        JsonNode overlay = buildOverlay(minecraftVersion);
+
+        FabricInstaller.installLibraries(overlay);
+        verifyRiftArtifact(version);
+
+        Path profileDirectory = instance.getDirectory().resolve("loader-profiles");
+        Files.createDirectories(profileDirectory);
+        Path profileFile = profileDirectory.resolve("rift.json");
+        MAPPER.writerWithDefaultPrettyPrinter().writeValue(profileFile.toFile(), overlay);
+
+        LoaderStackConfiguration configuration = new LoaderStackConfiguration(List.of(
+                new LoaderStackConfiguration.Layer(
+                        "rift",
+                        version,
+                        LoaderStackConfiguration.LayerType.PROFILE_OVERLAY,
+                        100,
+                        List.of(TWEAKER),
+                        "loader-profiles/rift.json"
+                )
+        ));
+        LoaderStackManager.apply(instance, configuration);
+    }
+
+    private static void addLibrary(ArrayNode libraries, String coordinate, String repository) {
+        ObjectNode library = libraries.addObject();
+        library.put("name", coordinate);
+        library.put("url", repository);
+    }
+
+    private static void verifyRiftArtifact(String version) throws Exception {
+        Path libraries = MinecraftLocator.getLibrariesDirectoryPath()
+                .toAbsolutePath().normalize();
+        Path artifact = libraries.resolve("org").resolve("dimdev").resolve("rift")
+                .resolve(version).resolve("rift-" + version + ".jar").normalize();
+        if (!artifact.startsWith(libraries) || !Files.isRegularFile(artifact)
+                || Files.size(artifact) == 0) {
+            throw new IOException("Rift library is missing after installation.");
+        }
+        try (JarFile jar = new JarFile(artifact.toFile())) {
+            if (jar.getEntry("org/dimdev/riftloader/launch/RiftLoaderClientTweaker.class") == null) {
+                throw new IOException("Downloaded Rift artifact does not contain its official client tweaker.");
+            }
+        }
+    }
+}
