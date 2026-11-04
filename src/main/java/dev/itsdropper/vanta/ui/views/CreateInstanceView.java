@@ -558,7 +558,8 @@ public class CreateInstanceView extends VBox {
                     "NeoForge",
                     "Ornithe",
                     "Legacy Fabric",
-                    "Babric"
+                    "Babric",
+                    "NilLoader"
             );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
@@ -662,7 +663,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric) {
+                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || true) {
                     statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
                 } else {
                     statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
@@ -783,6 +784,12 @@ public class CreateInstanceView extends VBox {
             return;
         }
 
+        if ("NilLoader".equals(loader) && !loaderBox.getItems().contains("NilLoader")) {
+            loaderBox.getSelectionModel().select("Vanilla");
+            statusLabel.setText("NilLoader is not available for this Minecraft version.");
+            return;
+        }
+
         if ("Legacy Fabric".equals(loader) && !loaderBox.getItems().contains("Legacy Fabric")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("Legacy Fabric is not available for Minecraft " + version + ".");
@@ -875,6 +882,10 @@ public class CreateInstanceView extends VBox {
                         } else if ("Babric".equals(loader)) {
 
                             InstanceInstaller.installBabric(name, version);
+
+                        } else if ("NilLoader".equals(loader)) {
+
+                            InstanceInstaller.installNilLoader(name, version);
 
                         } else if ("NeoForge".equals(loader)) {
 
