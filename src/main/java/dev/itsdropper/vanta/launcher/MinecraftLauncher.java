@@ -542,18 +542,25 @@ public class MinecraftLauncher {
                 java.util.Map.entry("user_properties", "{}")
         );
 
-        String resolved = template;
-        for (java.util.Map.Entry<String, String> value : values.entrySet()) {
-            resolved = resolved.replace("${" + value.getKey() + "}", value.getValue());
+        // Tokenize before substitution. A game-directory path may contain
+        // spaces, and replacing placeholders before splitting would corrupt
+        // that single argument into multiple command-line tokens.
+        List<String> resolvedArguments = new ArrayList<>();
+        for (String token : splitArguments(template)) {
+            String resolved = token;
+            for (java.util.Map.Entry<String, String> value : values.entrySet()) {
+                resolved = resolved.replace("${" + value.getKey() + "}", value.getValue());
+            }
+
+            if (resolved.contains("${")) {
+                throw new IllegalStateException(
+                        "Legacy Minecraft arguments contain an unsupported placeholder: " + resolved
+                );
+            }
+            resolvedArguments.add(resolved);
         }
 
-        if (resolved.contains("${")) {
-            throw new IllegalStateException(
-                    "Legacy Minecraft arguments contain an unsupported placeholder: " + resolved
-            );
-        }
-
-        return splitArguments(resolved);
+        return resolvedArguments;
     }
 
     private static boolean supportsQuickPlay(
