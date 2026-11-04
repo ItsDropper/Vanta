@@ -418,10 +418,20 @@ public class InstancesView extends VBox {
             statusLabel.setText("Creating a targeted recovery point for " + selected.getName() + "…");
             UiExecutor.shared().execute(() -> {
                 try {
+                    int recoveredTransactions =
+                            InstanceRecoveryService.recoverInterruptedRestores(selected);
                     InstanceRecoveryService.RecoveryPoint point =
                             InstanceRecoveryService.createRecoveryPoint(selected, "Manual recovery point");
                     UiExecutor.shared().dispatchToUi(() -> {
                         actionButton.setDisable(false);
+                        if (recoveredTransactions > 0) {
+                            new Alert(Alert.AlertType.INFORMATION,
+                                    "Vanta reconciled " + recoveredTransactions
+                                            + " interrupted recovery transaction"
+                                            + (recoveredTransactions == 1 ? "" : "s")
+                                            + " before creating this point. Any incomplete restore was rolled back.")
+                                    .show();
+                        }
                         statusLabel.setText("Recovery point created: " + point.id());
                         new Alert(Alert.AlertType.INFORMATION,
                                 "Recovery point created.\n\n"
