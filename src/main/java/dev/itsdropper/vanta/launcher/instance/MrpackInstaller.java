@@ -105,6 +105,12 @@ public class MrpackInstaller {
             if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
                 throw new IllegalStateException("Modpack NeoForge version is missing.");
             }
+        } else if (dependencies.has("nilloader")) {
+            loader = "NilLoader";
+            loaderVersion = dependencies.path("nilloader").asText();
+            if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
+                throw new IllegalStateException("Modpack NilLoader version is missing.");
+            }
         } else if (dependencies.has("forge")) {
 
             throw new IllegalStateException(
@@ -142,6 +148,10 @@ public class MrpackInstaller {
         } else if ("NeoForge".equals(loader)) {
 
             instance = InstanceInstaller.installNeoForge(name, minecraftVersion, loaderVersion);
+
+        } else if ("NilLoader".equals(loader)) {
+
+            instance = InstanceInstaller.installNilLoader(name, minecraftVersion);
 
         } else {
 
