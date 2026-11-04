@@ -149,7 +149,7 @@ public final class InstanceRecoveryService {
         List<RecoveryPoint> points = new ArrayList<>();
         try (var files = Files.list(directory)) {
             for (Path archive : files.filter(path ->
-                    path.getFileName().toString().matches("[0-9]{13}-[a-f0-9]{8}\\\\.zip")).toList()) {
+                    path.getFileName().toString().matches("[0-9]{13}-[a-f0-9]{8}\\.zip")).toList()) {
                 try {
                     points.add(readPoint(archive));
                 } catch (IOException invalid) {
