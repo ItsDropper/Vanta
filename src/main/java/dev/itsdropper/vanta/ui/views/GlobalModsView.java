@@ -120,7 +120,7 @@ public class GlobalModsView extends VBox {
         contentTypeBox.getStyleClass().add("create-combo");
 
         loaderBox = new ComboBox<>();
-        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge");
+        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge", "Ornithe");
         loaderBox.setValue("Fabric");
         loaderBox.setAccessibleText("Minecraft mod loader filter");
         loaderBox.setPrefWidth(140);
