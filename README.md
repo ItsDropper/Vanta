@@ -2,7 +2,7 @@
 
 **A Windows-focused Minecraft launcher built around isolated instances, repairability, and control.**
 
-Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, Fabric and Forge installations, Modrinth content, installation health, and verified launcher updates.
+Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, Fabric, Forge, Quilt, and NeoForge installations, Modrinth content, installation health, and verified launcher updates.
 
 > Vanta is under active development. Features and compatibility can change between releases; do not treat roadmap items as shipped functionality.
 
