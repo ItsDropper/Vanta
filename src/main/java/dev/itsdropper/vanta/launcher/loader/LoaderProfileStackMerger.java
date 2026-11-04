@@ -21,6 +21,17 @@ public final class LoaderProfileStackMerger {
     public static JsonNode merge(
             JsonNode vanilla,
             List<JsonNode> orderedOverlays,
+            LoaderStackConfiguration configuration
+    ) {
+        if (configuration == null) {
+            throw new IllegalArgumentException("Loader stack configuration is required.");
+        }
+        return merge(vanilla, orderedOverlays, configuration.getOrderedTweakers());
+    }
+
+    public static JsonNode merge(
+            JsonNode vanilla,
+            List<JsonNode> orderedOverlays,
             List<String> explicitlyOrderedTweakers
     ) {
         if (vanilla == null || !vanilla.isObject()) {
