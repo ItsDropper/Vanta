@@ -49,6 +49,12 @@ public final class InstanceRecoveryService {
 
     static RecoveryPoint createRecoveryPoint(Instance instance, String reason, Path vantaDirectory)
             throws IOException {
+        return createRecoveryPoint(instance, reason, vantaDirectory, true);
+    }
+
+    private static RecoveryPoint createRecoveryPoint(
+            Instance instance, String reason, Path vantaDirectory, boolean applyRetention
+    ) throws IOException {
         Path instanceDirectory = requireInstanceDirectory(instance);
         String instanceId = safeInstanceId(instance.getId());
         Path recoveryDirectory = recoveryDirectory(instanceId, vantaDirectory);
@@ -123,11 +129,13 @@ public final class InstanceRecoveryService {
             }
 
             RecoveryPoint point = new RecoveryPoint(id, parseTimestamp(id), safeReason, expandedBytes, fileCount);
-            try {
-                pruneRecoveryPoints(instanceId, DEFAULT_RETENTION, vantaDirectory);
-            } catch (IOException cleanupFailure) {
-                System.err.println("Recovery point was saved, but retention cleanup failed: "
-                        + cleanupFailure.getMessage());
+            if (applyRetention) {
+                try {
+                    pruneRecoveryPoints(instanceId, DEFAULT_RETENTION, vantaDirectory);
+                } catch (IOException cleanupFailure) {
+                    System.err.println("Recovery point was saved, but retention cleanup failed: "
+                            + cleanupFailure.getMessage());
+                }
             }
             return point;
         } catch (Exception failure) {
@@ -184,6 +192,9 @@ public final class InstanceRecoveryService {
         }
         inspectArchive(archive);
 
+        // Preserve the current state before replacing it, so a restore can itself be undone.
+        createRecoveryPoint(instance, "Automatic snapshot before recovery restore", vantaDirectory, false);
+
         Path transaction = Files.createTempDirectory(instanceDirectory, ".vanta-recovery-");
         Path staged = transaction.resolve("staged");
         Path rollback = transaction.resolve("rollback");
@@ -239,6 +250,11 @@ public final class InstanceRecoveryService {
                     System.err.println("Recovery transaction cleanup failed; leaving its directory for inspection: "
                             + transaction + " (" + cleanupFailure.getMessage() + ")");
                 }
+            }
+            try {
+                pruneRecoveryPoints(instanceId, DEFAULT_RETENTION, vantaDirectory);
+            } catch (IOException cleanupFailure) {
+                System.err.println("Recovery retention cleanup failed: " + cleanupFailure.getMessage());
             }
         }
     }
