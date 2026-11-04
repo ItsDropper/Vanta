@@ -34,7 +34,7 @@ public class Main extends Application {
         // hidden while Minecraft is running.
         javafx.application.Platform.setImplicitExit(false);
 
-        stage.initStyle(StageStyle.TRANSPARENT);
+        stage.initStyle(screenshotMode ? StageStyle.UNDECORATED : StageStyle.TRANSPARENT);
 
         if (screenshotMode) {
             startScreenshotCapture(stage, arguments);
@@ -90,7 +90,7 @@ public class Main extends Application {
 
         LauncherView launcher = new LauncherView(stage, () -> {}, true);
         Scene scene = new Scene(launcher.getRoot(), WINDOW_WIDTH, WINDOW_HEIGHT);
-        scene.setFill(Color.TRANSPARENT);
+        scene.setFill(Color.web("#0B0D12"));
         applyLauncherStylesheets(scene);
 
         stage.setTitle("Vanta — UI screenshot capture");

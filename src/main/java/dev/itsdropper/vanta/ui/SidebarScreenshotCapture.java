@@ -2,8 +2,10 @@ package dev.itsdropper.vanta.ui;
 
 import dev.itsdropper.vanta.ui.components.Sidebar;
 import javafx.animation.PauseTransition;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.SnapshotParameters;
+import javafx.scene.paint.Color;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelReader;
 import javafx.scene.image.WritableImage;
@@ -20,7 +22,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -88,7 +92,9 @@ public final class SidebarScreenshotCapture {
             try {
                 root.applyCss();
                 root.layout();
-                WritableImage image = root.snapshot(new SnapshotParameters(), null);
+                SnapshotParameters parameters = new SnapshotParameters();
+                parameters.setFill(Color.web("#0B0D12"));
+                WritableImage image = root.snapshot(parameters, null);
                 writePng(image, outputDirectory.resolve(fileName(page)));
             } catch (Throwable failure) {
                 completion.accept(failure);
@@ -113,6 +119,20 @@ public final class SidebarScreenshotCapture {
 
         int[] pixels = new int[width * height];
         reader.getPixels(0, 0, width, height, PixelFormat.getIntArgbInstance(), pixels, 0, width);
+
+        Set<Integer> sampledColors = new HashSet<>();
+        int sampleStep = Math.max(1, pixels.length / 12_000);
+        for (int i = 0; i < pixels.length; i += sampleStep) {
+            sampledColors.add(pixels[i]);
+            if (sampledColors.size() >= 64) {
+                break;
+            }
+        }
+        if (sampledColors.size() < 32) {
+            throw new IOException("Screenshot appears blank or unrendered ("
+                    + sampledColors.size() + " sampled colors)");
+        }
+
         BufferedImage buffered = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         buffered.setRGB(0, 0, width, height, pixels, 0, width);
         if (!ImageIO.write(buffered, "png", destination.toFile())) {
