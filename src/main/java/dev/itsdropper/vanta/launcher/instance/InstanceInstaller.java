@@ -822,7 +822,7 @@ public class InstanceInstaller {
         if ("LiteLoader".equalsIgnoreCase(loader)) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
-            LiteLoaderInstaller.install(instance, minecraftVersion);
+            loaderVersion = LiteLoaderInstaller.install(instance, minecraftVersion);
             finalMetadata = new com.fasterxml.jackson.databind.ObjectMapper()
                     .readTree(instance.getDirectory().resolve("minecraft").resolve("version.json").toFile());
         }
@@ -840,7 +840,8 @@ public class InstanceInstaller {
         Instance updatedInstance =
                 InstanceManager.updateMinecraftVersion(
                         instance,
-                        minecraftVersion
+                        minecraftVersion,
+                        loaderVersion
                 );
 
         System.out.println(
