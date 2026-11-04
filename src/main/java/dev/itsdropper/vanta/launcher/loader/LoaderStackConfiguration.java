@@ -130,10 +130,30 @@ public final class LoaderStackConfiguration {
             String version,
             LayerType type,
             int order,
-            List<String> launchTweakers
+            List<String> launchTweakers,
+            String profileFile
     ) {
+        public Layer(
+                String id,
+                String version,
+                LayerType type,
+                int order,
+                List<String> launchTweakers
+        ) {
+            this(id, version, type, order, launchTweakers, null);
+        }
+
         public Layer {
             launchTweakers = launchTweakers == null ? List.of() : List.copyOf(launchTweakers);
+            if (profileFile != null && !profileFile.isBlank()) {
+                java.nio.file.Path path = java.nio.file.Path.of(profileFile).normalize();
+                if (path.isAbsolute() || path.startsWith("..")
+                        || !path.toString().replace('\\\\', '/').startsWith("loader-profiles/")) {
+                    throw new IllegalStateException("Loader profile path must stay inside loader-profiles/.");
+                }
+            } else {
+                profileFile = null;
+            }
         }
     }
 }
