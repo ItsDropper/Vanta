@@ -61,6 +61,12 @@ public final class LoaderStackConfiguration {
                 .toList();
     }
 
+    public List<String> getOrderedTweakers() {
+        return getOrderedLayers().stream()
+                .flatMap(layer -> layer.launchTweakers().stream())
+                .toList();
+    }
+
     public void validate() {
         if (schemaVersion != CURRENT_SCHEMA_VERSION) {
             throw new IllegalStateException("Unsupported loader stack schema version: " + schemaVersion);
