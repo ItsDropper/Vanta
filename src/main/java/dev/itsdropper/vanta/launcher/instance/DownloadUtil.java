@@ -34,10 +34,12 @@ public class DownloadUtil {
 
     private static final class DownloadHttpException extends IOException {
         private final int statusCode;
+        private final String retryAfter;
 
-        private DownloadHttpException(int statusCode, String url) {
+        private DownloadHttpException(int statusCode, String url, String retryAfter) {
             super("HTTP " + statusCode + " while downloading " + url);
             this.statusCode = statusCode;
+            this.retryAfter = retryAfter;
         }
     }
 
@@ -132,9 +134,10 @@ public class DownloadUtil {
                 HttpResponse<String> response =
                         send(request, HttpResponse.BodyHandlers.ofString());
 
-                if (response.statusCode() != 200 && response.statusCode() != 206) {
+                if (response.statusCode() != 200) {
 
-                    throw new DownloadHttpException(response.statusCode(), url);
+                    throw new DownloadHttpException(response.statusCode(), url,
+                            response.headers().firstValue("Retry-After").orElse(null));
                 }
 
                 return MAPPER.readTree(
@@ -144,7 +147,7 @@ public class DownloadUtil {
             } catch (Exception e) {
                 lastException = e;
                 if (!isRetryableDownloadFailure(e)) break;
-                if (attempt < maxRetries()) sleepBeforeRetry(attempt);
+                if (attempt < maxRetries()) sleepBeforeRetry(attempt, e);
             }
         }
 
@@ -269,15 +272,15 @@ public class DownloadUtil {
                 HttpResponse<InputStream> response = send(
                         request, HttpResponse.BodyHandlers.ofInputStream());
 
-                if (response.statusCode() < 200
-                        || response.statusCode() >= 300) {
+                if (response.statusCode() != 200 && response.statusCode() != 206) {
 
                     try {
                         response.body().close();
                     } catch (IOException ignored) {
                     }
 
-                    throw new DownloadHttpException(response.statusCode(), url);
+                    throw new DownloadHttpException(response.statusCode(), url,
+                            response.headers().firstValue("Retry-After").orElse(null));
                 }
 
                 boolean append = existingBytes > 0 && response.statusCode() == 206;
@@ -744,25 +747,37 @@ public class DownloadUtil {
     // RETRY
     // =============================================================
 
-    private static void sleepBeforeRetry(
-            int attempt
-    ) {
-
+    private static void sleepBeforeRetry(int attempt, Exception failure) {
+        long delay = retryDelayMillis(attempt, failure);
         try {
-
-            long delay =
-                    1000L * attempt;
-
             Thread.sleep(delay);
-
-        } catch (InterruptedException e) {
-
+        } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
-
-            throw new RuntimeException(
-                    "Download retry interrupted.",
-                    e
-            );
+            throw new RuntimeException("Download retry interrupted.", interrupted);
         }
+    }
+
+    static long retryDelayMillis(int attempt, Exception failure) {
+        if (failure instanceof DownloadHttpException httpFailure
+                && httpFailure.retryAfter != null) {
+            String value = httpFailure.retryAfter.trim();
+            try {
+                long seconds = Long.parseLong(value);
+                return Math.max(0L, Math.min(120_000L, seconds * 1000L));
+            } catch (NumberFormatException ignored) {
+                try {
+                    java.time.Instant retryAt = java.time.ZonedDateTime
+                            .parse(value, java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME)
+                            .toInstant();
+                    long millis = java.time.Duration.between(java.time.Instant.now(), retryAt).toMillis();
+                    return Math.max(0L, Math.min(120_000L, millis));
+                } catch (java.time.DateTimeException invalidDate) {
+                    // Ignore malformed Retry-After and use bounded exponential backoff.
+                }
+            }
+        }
+        int exponent = Math.max(0, Math.min(5, attempt - 1));
+        long exponential = Math.min(30_000L, 1_000L << exponent);
+        return exponential + java.util.concurrent.ThreadLocalRandom.current().nextLong(0, 251);
     }
 }
