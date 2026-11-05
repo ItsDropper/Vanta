@@ -137,14 +137,8 @@ public final class UpdaterMain {
                         .toAbsolutePath()
                         .normalize();
 
-        Path readyFile = Path.of(args[3]).toAbsolutePath().normalize();
         Path helperApplication = ApplicationLocator.getApplicationDirectory();
-        Path helperWorkspace = helperApplication.getParent();
-        if (helperWorkspace == null
-                || !helperWorkspace.equals(readyFile.getParent())
-                || !"updater-ready".equals(readyFile.getFileName().toString())) {
-            throw new IOException("Updater readiness file must be inside its private helper workspace.");
-        }
+        Path readyFile = validateReadinessFile(helperApplication, Path.of(args[3]));
 
         log("---------- ENVIRONMENT ----------");
 
@@ -376,6 +370,21 @@ public final class UpdaterMain {
         log(
                 "Updated Vanta launched."
         );
+    }
+
+    static Path validateReadinessFile(Path helperApplication, Path readyFile) throws IOException {
+        if (helperApplication == null || readyFile == null) {
+            throw new IllegalArgumentException("Helper application and readiness file are required.");
+        }
+        Path helperRoot = helperApplication.toAbsolutePath().normalize();
+        Path workspace = helperRoot.getParent();
+        Path normalizedReadyFile = readyFile.toAbsolutePath().normalize();
+        if (workspace == null
+                || !workspace.equals(normalizedReadyFile.getParent())
+                || !"updater-ready".equals(normalizedReadyFile.getFileName().toString())) {
+            throw new IOException("Updater readiness file must be inside its private helper workspace.");
+        }
+        return normalizedReadyFile;
     }
 
     private static void verifyInput(
