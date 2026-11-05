@@ -34,6 +34,28 @@ jobs:
       - name: Run tests and build portable distributions (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat test distZip distTar platformImageChecksum
+      - name: Verify Windows application image layout
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (!(Test-Path 'build/packages/Vanta/Vanta.exe')) { throw 'Missing Windows launcher' }
+          if (!(Test-Path 'build/packages/Vanta/runtime/bin/java.exe')) { throw 'Missing bundled Windows Java' }
+          if (!(Test-Path 'build/packages/Vanta/app/updater/VantaUpdater.jar')) { throw 'Missing external updater JAR' }
+      - name: Verify Linux application image layout
+        if: runner.os == 'Linux'
+        run: |
+          test -x build/packages/Vanta/bin/Vanta
+          test -x build/packages/Vanta/lib/runtime/bin/java
+          test -f build/packages/Vanta/lib/app/updater/VantaUpdater.jar
+      - name: Verify macOS application bundle layout
+        if: runner.os == 'macOS'
+        run: |
+          test -x build/packages/Vanta.app/Contents/MacOS/Vanta
+          test -d build/packages/Vanta.app/Contents/app
+          JAVA_BIN="$(find build/packages/Vanta.app/Contents/runtime -path '*/bin/java' -type f -print -quit)"
+          test -n "$JAVA_BIN"
+          test -x "$JAVA_BIN"
+          test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
       - name: Smoke test Linux application image
         if: runner.os == 'Linux' && runner.arch == 'X64'
         env:
