@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.launcher.update;
 
+import dev.itsdropper.vanta.launcher.Platform;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -38,9 +40,9 @@ public final class UpdaterLauncher {
     public static Path getUpdaterDirectory() {
 
         Path directory =
-                ApplicationLocator
-                        .getApplicationDirectory()
-                        .resolve("updater");
+                ApplicationLocator.getUpdaterDirectory(
+                        ApplicationLocator.getApplicationDirectory()
+                );
 
         log(
                 "getUpdaterDirectory() -> "
@@ -254,7 +256,7 @@ public final class UpdaterLauncher {
         Path tempJavaExecutable =
                 tempRuntimeDirectory
                         .resolve("bin")
-                        .resolve("java.exe");
+                        .resolve(Platform.javaExecutableName());
 
         log("---------- PREPARING EXTERNAL UPDATER ----------");
 
@@ -515,84 +517,37 @@ public final class UpdaterLauncher {
             Path applicationDirectory,
             Path destination
     ) throws IOException {
-
-        Path source =
-                applicationDirectory
-                        .resolve("runtime");
-
-        log(
-                "Copying bundled Java runtime:"
-        );
-
-        log(
-                "  FROM: "
-                        + source
-        );
-
-        log(
-                "  TO:   "
-                        + destination
-        );
-
+        Path source = ApplicationLocator.getRuntimeDirectory(applicationDirectory);
+        log("Copying bundled Java runtime from " + source + " to " + destination);
         if (!Files.isDirectory(source)) {
-
-            throw new IOException(
-                    "Bundled Java runtime directory does not exist: "
-                            + source
-            );
+            throw new IOException("Bundled Java runtime directory does not exist: " + source);
         }
 
-        Files.walk(source)
-                .forEach(sourcePath -> {
-
-                    try {
-
-                        Path relative =
-                                source.relativize(
-                                        sourcePath
-                                );
-
-                        Path destinationPath =
-                                destination.resolve(
-                                        relative
-                                );
-
-                        if (Files.isDirectory(sourcePath)) {
-
-                            Files.createDirectories(
-                                    destinationPath
-                            );
-
-                        } else {
-
-                            Path parent =
-                                    destinationPath.getParent();
-
-                            if (parent != null) {
-
-                                Files.createDirectories(
-                                        parent
-                                );
-                            }
-
-                            Files.copy(
-                                    sourcePath,
-                                    destinationPath,
-                                    StandardCopyOption.REPLACE_EXISTING
-                            );
-                        }
-
-                    } catch (IOException e) {
-
-                        throw new RuntimeCopyException(
-                                e
-                        );
-                    }
-                });
-
-        log(
-                "Bundled Java runtime copied successfully."
-        );
+        Files.createDirectories(destination);
+        try (var paths = Files.walk(source)) {
+            for (Path sourcePath : paths.toList()) {
+                Path relative = source.relativize(sourcePath);
+                Path destinationPath = destination.resolve(relative);
+                if (Files.isSymbolicLink(sourcePath)) {
+                    Path linkTarget = Files.readSymbolicLink(sourcePath);
+                    Files.createDirectories(destinationPath.getParent());
+                    Files.createSymbolicLink(destinationPath, linkTarget);
+                } else if (Files.isDirectory(sourcePath)) {
+                    Files.createDirectories(destinationPath);
+                } else {
+                    Files.createDirectories(destinationPath.getParent());
+                    Files.copy(sourcePath, destinationPath,
+                            StandardCopyOption.REPLACE_EXISTING,
+                            StandardCopyOption.COPY_ATTRIBUTES);
+                }
+            }
+        }
+        Path javaExecutable = destination.resolve("bin")
+                .resolve(Platform.javaExecutableName());
+        if (!Files.isRegularFile(javaExecutable) || !Files.isExecutable(javaExecutable)) {
+            throw new IOException("Copied updater Java runtime is not executable: " + javaExecutable);
+        }
+        log("Bundled Java runtime copied successfully.");
     }
 
     private static Path getUpdaterOutputLog() {
