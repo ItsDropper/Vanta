@@ -65,7 +65,18 @@ class DownloadUtilTest {
         assertFalse(DownloadUtil.isRetryableHttpStatus(401));
         assertFalse(DownloadUtil.isRetryableHttpStatus(403));
         assertFalse(DownloadUtil.isRetryableHttpStatus(404));
-        assertFalse(DownloadUtil.isRetryableHttpStatus(501 + 100));
+        assertFalse(DownloadUtil.isRetryableHttpStatus(501));
+    }
+
+    @Test
+    void retryBackoffGrowsAndRemainsBounded() {
+        IOException transientFailure = new IOException("temporary network failure");
+        long first = DownloadUtil.retryDelayMillis(1, transientFailure);
+        long third = DownloadUtil.retryDelayMillis(3, transientFailure);
+        long finalAttempt = DownloadUtil.retryDelayMillis(20, transientFailure);
+        assertTrue(first >= 1_000L && first <= 1_250L);
+        assertTrue(third >= 4_000L && third <= 4_250L);
+        assertTrue(finalAttempt >= 30_000L && finalAttempt <= 30_250L);
     }
 
     @Test
