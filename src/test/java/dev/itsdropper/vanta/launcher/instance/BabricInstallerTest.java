@@ -62,6 +62,25 @@ class BabricInstallerTest {
     }
 
     @Test
+    void replacesIncompleteArtifactMetadataForNativeOnlyLibraries() throws Exception {
+        ObjectNode library = (ObjectNode) MAPPER.readTree("""
+                {
+                  "name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.4+legacyfabric.17",
+                  "url": "https://repo.legacyfabric.net/legacyfabric/",
+                  "natives": {"windows": "natives-windows"},
+                  "downloads": {"artifact": {}}
+                }
+                """);
+
+        BabricInstaller.normalizeLegacyNativeLibrary(library);
+
+        assertTrue(library.path("downloads").path("artifact").isMissingNode());
+        assertTrue(library.path("downloads").path("classifiers")
+                .path("natives-windows").path("path").asText()
+                .endsWith("-natives-windows.jar"));
+    }
+
+    @Test
     void usesTheLoaderVersionPinnedByTheOfficialBabricInstance() throws Exception {
         assertEquals("0.19.5", BabricInstaller.findLatestLoaderVersion("b1.7.3"));
     }
