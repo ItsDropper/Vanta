@@ -1196,10 +1196,10 @@ public class LauncherView {
     private void performUpdate(
             UpdateInfo updateInfo
     ) {
-        if (Platform.operatingSystem() != Platform.OperatingSystem.WINDOWS) {
+        if (!Platform.supportsDesktop()) {
             notifications.error(
                     "Automatic updates unavailable",
-                    "Install the matching Linux or macOS Vanta distribution manually."
+                    "No Vanta update package is published for this operating system or CPU architecture."
             );
             return;
         }
