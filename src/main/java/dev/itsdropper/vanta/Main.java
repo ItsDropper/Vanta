@@ -196,7 +196,18 @@ public class Main extends Application {
         return false;
     }
 
+    static boolean isUpdaterInvocation(String[] args) {
+        return args != null && args.length > 0 && "--vanta-updater".equals(args[0]);
+    }
+
     public static void main(String[] args) {
+        if (isUpdaterInvocation(args)) {
+            dev.itsdropper.vanta.launcher.update.UpdaterMain.main(
+                    java.util.Arrays.copyOfRange(args, 1, args.length)
+            );
+            return;
+        }
+
         boolean screenshotMode = isScreenshotCapture(args);
         if (!screenshotMode) {
             TelemetryService.installUncaughtExceptionHandler();
