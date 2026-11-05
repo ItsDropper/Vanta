@@ -274,6 +274,14 @@ public class DownloadUtil {
                 HttpRequest request = requestBuilder.build();
                 HttpResponse<InputStream> response = send(
                         request, HttpResponse.BodyHandlers.ofInputStream());
+                if (response.statusCode() == 416 && existingBytes > 0) {
+                    try { response.body().close(); } catch (IOException ignored) { }
+                    Files.deleteIfExists(temporary);
+                    existingBytes = 0L;
+                    request = HttpRequest.newBuilder(URI.create(url))
+                            .timeout(REQUEST_TIMEOUT).GET().build();
+                    response = send(request, HttpResponse.BodyHandlers.ofInputStream());
+                }
 
                 if (response.statusCode() != 200 && response.statusCode() != 206) {
 
