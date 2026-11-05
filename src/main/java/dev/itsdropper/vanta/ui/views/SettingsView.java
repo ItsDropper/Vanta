@@ -23,6 +23,7 @@ import javafx.scene.paint.Color;
 import javafx.util.StringConverter;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.service.AccountService;
@@ -733,12 +734,22 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 LauncherSettings.setUpdateChecksEnabled(updates.isSelected())
         );
 
-        CheckBox autoUpdate = new CheckBox("Automatically install launcher updates on every launch");
-        autoUpdate.setSelected(LauncherSettings.isAutoUpdateOnLaunchEnabled());
-        autoUpdate.getStyleClass().add("settings-checkbox");
-        autoUpdate.setTooltip(new javafx.scene.control.Tooltip(
-                "When an update is available, Vanta downloads, verifies and installs it automatically, then restarts."
-        ));
+        boolean nativeUpdaterSupported =
+                Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
+        updates.setDisable(!nativeUpdaterSupported);
+        autoUpdate.setDisable(!nativeUpdaterSupported);
+        if (!nativeUpdaterSupported) {
+            javafx.scene.control.Tooltip unsupportedUpdateTooltip =
+                    new javafx.scene.control.Tooltip(
+                            "Automatic update installation is not available in the Linux/macOS distribution yet."
+                    );
+            updates.setTooltip(unsupportedUpdateTooltip);
+            autoUpdate.setTooltip(unsupportedUpdateTooltip);
+        } else {
+            autoUpdate.setTooltip(new javafx.scene.control.Tooltip(
+                    "When an update is available, Vanta downloads, verifies and installs it automatically, then restarts."
+            ));
+        }
         autoUpdate.setOnAction(event ->
                 LauncherSettings.setAutoUpdateOnLaunchEnabled(autoUpdate.isSelected())
         );
