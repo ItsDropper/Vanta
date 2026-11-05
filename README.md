@@ -2,7 +2,7 @@
 
 **A cross-platform Minecraft launcher built around isolated instances, repairability, and control.**
 
-Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, Fabric, Forge, Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, VantaLoader, LiteLoader, and Risugami ModLoader installations, Modrinth content, installation health, and verified launcher updates.
+Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, Vanilla, Fabric, Forge, Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, VantaLoader, LiteLoader, original Rift, and Risugami's ModLoader installations, Modrinth content, installation health, and launcher self-updates. The supported loader integrations and updater have been tested end to end in released builds.
 
 > Vanta is under active development. Features and compatibility can change between releases; do not treat roadmap items as shipped functionality.
 
@@ -10,10 +10,10 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 
 - **Instance isolation** — keep mods, settings, worlds, logs, screenshots, resource packs, and shader packs separated by instance.
 - **Minecraft installation** — resolve version metadata, client files, libraries, assets, natives, and launch arguments.
-- **Fabric and Forge** — established loader installation and repair. **Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, LiteLoader, original Rift (Minecraft 1.13), and Risugami ModLoader** — initial installation integrations are implemented; real-game validation remains pending. Babric is version-gated to Beta 1.7.3. NilLoader and experimental VantaLoader use instance-local Java agents; VantaLoader currently initializes native mod entrypoints before Minecraft startup but does not yet provide game hooks or bytecode transformations. LiteLoader uses an ordered LaunchWrapper profile overlay. Risugami ModLoader uses checksum-pinned legacy patch archives and modifies only the instance-local client JAR; supported archive versions are listed in `docs/LOADER_COMPATIBILITY.md`. Instance Settings now includes an ordered loader-stack editor for importing profile JSON overlays and specifying LaunchWrapper tweakers; profile libraries are installed and merged into instance launch metadata, with repair/rebuild reapplication. The vanilla version picker includes Mojang's official old Alpha/Beta catalog entries and uses their legacy launch arguments and virtual assets. Pre-Classic versions absent from Mojang's manifest are not yet included.
-- **Modrinth integration** — search projects, install content, resolve dependencies, scan installed mods, and repair dependencies.
+- **Modloader support** — end-to-end tested installation and launching for Fabric, Forge, Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, VantaLoader, LiteLoader, original Rift (Minecraft 1.13), and Risugami's ModLoader. Loader-specific version limits and implementation details are documented in [Loader Compatibility](docs/LOADER_COMPATIBILITY.md). Babric is version-gated to Beta 1.7.3; Rift support targets the original 1.13 release, not community forks; legacy ModLoader support is limited to versions with pinned, verified patch archives. NilLoader and VantaLoader use instance-local Java-agent bootstraps; VantaLoader remains an experimental agent API and does not claim Minecraft event hooks or bytecode transformations. LiteLoader and compatible profile overlays use the ordered LaunchWrapper profile-stack system. The vanilla version picker includes Mojang's official old Alpha/Beta catalog entries and their legacy launch arguments and virtual assets. Pre-Classic versions absent from Mojang's manifest are not included.
+- **Modrinth and modpacks** — search projects, install content, resolve dependencies, scan installed mods, repair dependencies, import `.mrpack` modpacks, and export `.vantapack` packs.
 - **State Center** — inspect instance and shared-resource health and identify missing or invalid files.
-- **Recovery-oriented updates** — download release packages, verify SHA-256 checksums, and use an external updater with staging and rollback.
+- **Self-updating releases** — download platform-specific release packages, verify SHA-256 checksums, stage updates through an external updater, replace the application image, and roll back on failure. The updater has been verified end to end in released builds.
 - **Local server management** — manage Java server profiles, process lifecycle, live console, basic properties, offline backups/restores, and crash reports. Vanta can provision a private Eclipse Temurin JRE for supported server JARs on supported OS/CPU combinations.
 - **Local-first data** — keep launcher and instance data on the user's device wherever possible.
 - **JavaFX interface** — a native Java desktop application rather than an embedded web application.
@@ -30,7 +30,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 - **Build:** Gradle wrapper
 - **License:** See [LICENSE](LICENSE)
 
-Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and validates application-image and update-archive layouts across five OS/architecture targets; Linux x64 and ARM64 also get JavaFX GUI smoke tests, and the x64 image is exercised on Ubuntu, Debian, Fedora, and Arch Linux containers. Platform-specific update archives and all three jpackage layouts are implemented. The updater now launches from an isolated copy of the application image on every OS; actual in-place update testing on physical installations remains outstanding. See [Platform Support](docs/PLATFORM_SUPPORT.md) for the exact support boundary. Signed/notarized builds and native installers remain unfinished.
+Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and validates application-image and update-archive layouts across five OS/architecture targets; Linux x64 and ARM64 also get JavaFX GUI smoke tests, and the x64 image is exercised on Ubuntu, Debian, Fedora, and Arch Linux containers. Platform-specific update archives and all three jpackage layouts are implemented. The updater launches from an isolated copy of the application image and has been verified end to end in a released build. See [Platform Support](docs/PLATFORM_SUPPORT.md) for the exact support boundary. Signed/notarized builds and native installers remain unfinished.
 
 ## Getting started
 
@@ -71,7 +71,7 @@ To run from an IDE, use the configured Gradle application task or create a run c
 | UI | JavaFX screens, settings, navigation, progress, and user feedback |
 | Accounts and authentication | Microsoft sign-in flow, session lifecycle, account switching, and local account state |
 | Minecraft installation | Version metadata, client files, libraries, assets, natives, and launch configuration |
-| Loader integrations | Fabric and Forge metadata, installation, and repair |
+| Loader integrations | Version-aware installation, launch, and repair across the supported loader set |
 | Modrinth | Catalog search, dependency graph resolution, installation, scanning, and repair |
 | State Center | Instance/shared-resource inspection and health classification |
 | Update system | Release discovery, SHA-256 verification, external replacement, and rollback |
@@ -115,7 +115,7 @@ For code changes, include the problem, implementation approach, compatibility im
 
 ## Roadmap
 
-Areas under consideration include broader Minecraft compatibility, improved repair coverage, instance import/export, modpack formats, further diagnostics, and platform-specific update/install improvements. The roadmap is not a guarantee that any particular feature is already implemented or scheduled for a specific release.
+Remaining work is focused on broader edge-case compatibility, deeper loader-specific regression coverage, diagnostics, code signing/notarization, native installers, and platform-specific polish. Core supported-loader launching, modpack workflows, and launcher self-updating are implemented; see the linked compatibility and platform documents for explicit limits. The roadmap is not a guarantee that any particular feature is already implemented or scheduled for a specific release.
 
 ## Disclaimer
 
