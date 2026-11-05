@@ -816,7 +816,7 @@
 
 /* Vanta navigation rail: quieter, sharper, and visually separate from content. */
 .sidebar {
-    -fx-background-color: linear-gradient(to bottom, #101915, #0c120f);
+    -fx-background-color: linear-gradient(to bottom, -vantasurface, -vantabg);
     -fx-background-radius: 10px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
@@ -828,12 +828,12 @@
     -fx-letter-spacing: 1.8px;
 }
 .sidebar-subtitle {
-    -fx-text-fill: #84948a;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 8px;
     -fx-letter-spacing: 1.1px;
 }
 .sidebar-section-label {
-    -fx-text-fill: #77877c;
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 8px;
     -fx-font-weight: 900;
     -fx-letter-spacing: 1.5px;
