@@ -915,4 +915,5 @@ private void removeInstalledMod(
                 );
             }
         }
-    }}
+    }
+}
