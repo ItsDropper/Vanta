@@ -79,7 +79,7 @@ shadowJar {
 
 
 tasks.register('platformAppImage', Exec) {
-    dependsOn tasks.named('installDist'), 'updaterJar'
+    dependsOn tasks.named('installDist')
 
     def packageName = 'Vanta'
     def packageInput = layout.buildDirectory.dir("install/${project.name}/lib")
@@ -130,27 +130,7 @@ tasks.register('platformAppImage', Exec) {
                 '--dest', packageOutput.get().asFile.absolutePath
         )
     }
-    doLast {
-        def imageDirectory = packageOutput.get().dir(macHost ? packageName + '.app' : packageName).asFile
-        def appPayloadDirectory
-        if (windowsHost) {
-            appPayloadDirectory = new File(imageDirectory, 'app')
-        } else if (macHost) {
-            appPayloadDirectory = new File(imageDirectory, 'Contents/app')
-        } else {
-            appPayloadDirectory = new File(imageDirectory, 'lib/app')
-        }
-        if (!appPayloadDirectory.isDirectory()) {
-            throw new GradleException("Could not locate jpackage application payload: ${appPayloadDirectory}")
-        }
-        def updaterDirectory = new File(appPayloadDirectory, 'updater')
-        updaterDirectory.mkdirs()
-        copy {
-            from tasks.named('updaterJar').get().archiveFile
-            into updaterDirectory
-            rename { 'VantaUpdater.jar' }
-        }
-    }
+
 }
 
 def releaseHostOs = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT)
@@ -199,28 +179,5 @@ tasks.register('platformImageChecksum') {
         def checksum = digest.digest().collect { String.format('%02x', it & 0xff) }.join()
         new File(archive.parentFile, archive.name + '.sha256').text =
                 "${checksum}  ${archive.name}${System.lineSeparator()}"
-    }
-}
-
-tasks.register('updaterJar', Jar) {
-    dependsOn tasks.named('classes')
-
-    archiveBaseName = 'VantaUpdater'
-    archiveVersion = project.version.toString()
-
-    destinationDirectory = layout.buildDirectory.dir('updater')
-
-    from sourceSets.main.output
-
-    include 'dev/itsdropper/vanta/launcher/update/UpdaterMain.class'
-    include 'dev/itsdropper/vanta/launcher/update/UpdaterMain$*.class'
-    include 'dev/itsdropper/vanta/launcher/update/ApplicationLocator.class'
-    include 'dev/itsdropper/vanta/launcher/Platform.class'
-    include 'dev/itsdropper/vanta/launcher/Platform$*.class'
-
-    manifest {
-        attributes(
-                'Main-Class': 'dev.itsdropper.vanta.launcher.update.UpdaterMain'
-        )
     }
 }
