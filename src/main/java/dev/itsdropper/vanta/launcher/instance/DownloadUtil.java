@@ -223,6 +223,7 @@ public class DownloadUtil {
     ) throws Exception {
 
         if (target.getParent() != null) Files.createDirectories(target.getParent());
+        cleanupAbandonedSegmentedArtifacts(target);
         if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
             Path cached = cachePath(expectedSha1);
             if (Files.isRegularFile(cached) && expectedSha1.equalsIgnoreCase(calculateSha1(cached))) {
@@ -580,6 +581,31 @@ public class DownloadUtil {
             } else {
                 System.err.println("Segment workers did not stop; preserving staging directory for safe cleanup: " + staging);
             }
+        }
+    }
+
+    private static void cleanupAbandonedSegmentedArtifacts(Path target) {
+        Path parent = target.toAbsolutePath().getParent();
+        if (parent == null || !Files.isDirectory(parent)) return;
+        String name = target.getFileName().toString();
+        String segmentPrefix = name + ".segments-";
+        String assemblyPrefix = name + ".download-";
+        try (var entries = Files.list(parent)) {
+            entries.filter(path -> {
+                String candidate = path.getFileName().toString();
+                return candidate.startsWith(segmentPrefix) || candidate.startsWith(assemblyPrefix);
+            }).forEach(path -> {
+                if (Files.isDirectory(path)) {
+                    deleteTreeBestEffort(path);
+                } else {
+                    try { Files.deleteIfExists(path); }
+                    catch (IOException failure) {
+                        System.err.println("Could not remove abandoned download artifact: " + failure.getMessage());
+                    }
+                }
+            });
+        } catch (IOException failure) {
+            System.err.println("Could not inspect abandoned download artifacts: " + failure.getMessage());
         }
     }
 
