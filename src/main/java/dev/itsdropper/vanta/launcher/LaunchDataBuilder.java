@@ -1,5 +1,8 @@
 package dev.itsdropper.vanta.launcher;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
 import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
@@ -141,6 +144,26 @@ public class LaunchDataBuilder {
         data.loaderVersion =
                 instance.getLoaderVersion();
 
+        if ("NeoForge".equalsIgnoreCase(instance.getLoader())) {
+            if (data.loaderVersion == null || data.loaderVersion.isBlank()) {
+                throw new IllegalStateException("NeoForge instance has no NeoForge version.");
+            }
+            Path versionJson = instanceDirectory.resolve("minecraft").resolve("version.json");
+            try {
+                JsonNode metadata = new ObjectMapper().readTree(versionJson.toFile());
+                JsonNode gameArguments = metadata.path("arguments").path("game");
+                data.neoForgeFmlVersion = argumentValue(gameArguments, "--fml.fmlVersion");
+                data.neoFormVersion = argumentValue(gameArguments, "--fml.neoFormVersion");
+            } catch (java.io.IOException e) {
+                throw new IllegalStateException("Could not read NeoForge launch metadata.", e);
+            }
+            if (data.neoForgeFmlVersion == null || data.neoForgeFmlVersion.isBlank()
+                    || data.neoFormVersion == null || data.neoFormVersion.isBlank()) {
+                throw new IllegalStateException(
+                        "NeoForge launch metadata is missing its FML or NeoForm version. Repair this instance before launching.");
+            }
+        }
+
         if ("NilLoader".equalsIgnoreCase(instance.getLoader())) {
             Path agent = NilLoaderInstaller.agentPath(instance);
             if (!NilLoaderInstaller.hasAgentEntrypoint(agent)) {
@@ -224,6 +247,22 @@ public class LaunchDataBuilder {
         }
 
         return data;
+    }
+
+    private static String argumentValue(JsonNode arguments, String key) {
+        if (arguments == null || !arguments.isArray()) {
+            return null;
+        }
+        for (int i = 0; i + 1 < arguments.size(); i++) {
+            JsonNode current = arguments.get(i);
+            JsonNode next = arguments.get(i + 1);
+            if (current != null && current.isTextual()
+                    && key.equals(current.asText())
+                    && next != null && next.isTextual()) {
+                return next.asText();
+            }
+        }
+        return null;
     }
 
     // =============================================================
