@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
-import dev.itsdropper.vanta.launcher.security.WindowsCredentialManager;
+import dev.itsdropper.vanta.launcher.security.CredentialManager;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -81,8 +81,9 @@ public class AccountManager {
         );
 
         String encrypted =
-                WindowsCredentialManager.encrypt(
-                        sessionJson.toString()
+                CredentialManager.encrypt(
+                        sessionJson.toString(),
+                        uuid
                 );
 
         System.out.println(
@@ -248,6 +249,11 @@ public class AccountManager {
             return;
         }
 
+        JsonObject storedAccount = JsonParser.parseString(
+                Files.readString(file, StandardCharsets.UTF_8)).getAsJsonObject();
+        if (storedAccount.has("encryptedSession")) {
+            CredentialManager.delete(storedAccount.get("encryptedSession").getAsString());
+        }
         Files.delete(file);
 
         /*
@@ -293,18 +299,15 @@ public class AccountManager {
                                         .endsWith(".json")
                         )
                         .forEach(path -> {
-
                             try {
-
-                                Files.deleteIfExists(
-                                        path
-                                );
-
+                                JsonObject stored = JsonParser.parseString(
+                                        Files.readString(path, StandardCharsets.UTF_8)).getAsJsonObject();
+                                if (stored.has("encryptedSession")) {
+                                    CredentialManager.delete(stored.get("encryptedSession").getAsString());
+                                }
+                                Files.deleteIfExists(path);
                             } catch (IOException e) {
-
-                                throw new RuntimeException(
-                                        e
-                                );
+                                throw new RuntimeException(e);
                             }
                         });
             }
@@ -440,7 +443,7 @@ public class AccountManager {
         try {
 
             decrypted =
-                    WindowsCredentialManager.decrypt(
+                    CredentialManager.decrypt(
                             encrypted
                     );
 
