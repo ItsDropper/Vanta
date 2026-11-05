@@ -47,6 +47,16 @@ class DownloadUtilTest {
     }
 
     @Test
+    void enforcesMetadataResponseSizeLimit() throws Exception {
+        assertDoesNotThrow(() ->
+                DownloadUtil.validateJsonResponseSize(DownloadUtil.MAX_JSON_RESPONSE_BYTES));
+        assertThrows(IOException.class, () ->
+                DownloadUtil.validateJsonResponseSize(DownloadUtil.MAX_JSON_RESPONSE_BYTES + 1L));
+        assertThrows(IOException.class, () ->
+                DownloadUtil.validateJsonResponseSize(-1L));
+    }
+
+    @Test
     void rejectsInvalidDownloadUrlsAndDigests() {
         assertThrows(IllegalArgumentException.class, () ->
                 DownloadUtil.validateDownloadRequest("file:///etc/passwd", null));
