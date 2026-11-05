@@ -69,8 +69,9 @@ jobs:
           fi
           ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
           test -n "$ARCHIVE"
-          unzip -Z1 "$ARCHIVE" | grep -Fxq 'bin/Vanta'
-          unzip -Z1 "$ARCHIVE" | grep -Fxq 'lib/runtime/lib/modules'
+          unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
+          grep -Fxq 'bin/Vanta' build/distributions/archive-entries.txt
+          grep -Fxq 'lib/runtime/lib/modules' build/distributions/archive-entries.txt
       - name: Verify macOS application bundle layout
         if: runner.os == 'macOS'
         run: |
@@ -85,8 +86,9 @@ jobs:
           test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
           ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
           test -n "$ARCHIVE"
-          unzip -Z1 "$ARCHIVE" | grep -Fxq 'Contents/MacOS/Vanta'
-          unzip -Z1 "$ARCHIVE" | grep -Fxq 'Contents/app/Vanta.cfg'
+          unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/MacOS/Vanta' build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/app/Vanta.cfg' build/distributions/archive-entries.txt
       - name: Smoke test Linux application image
         if: runner.os == 'Linux' && runner.arch == 'X64'
         env:
