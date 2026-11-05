@@ -504,6 +504,16 @@ public class MinecraftLauncher {
     
         }
 
+        // Rift's legacy tweaker dereferences LaunchWrapper's assetsDir
+        // unconditionally in acceptOptions(). Some inherited 1.13 argument
+        // templates omit one or more LaunchWrapper bootstrap options, so
+        // normalize these three values after profile/game arguments are built.
+        if ("Rift".equalsIgnoreCase(data.loader)) {
+            ensureLaunchWrapperOption(command, data.mainClass, "--gameDir", minecraft.toString());
+            ensureLaunchWrapperOption(command, data.mainClass, "--assetsDir", assets.toString());
+            ensureLaunchWrapperOption(command, data.mainClass, "--version", data.version);
+        }
+
         // =============================================================
         // DEBUG
         // =============================================================
@@ -582,6 +592,34 @@ public class MinecraftLauncher {
         );
 
         return process;
+    }
+
+    static void ensureLaunchWrapperOption(
+            List<String> command,
+            String mainClass,
+            String option,
+            String value
+    ) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException("Missing required Rift LaunchWrapper value for " + option + ".");
+        }
+        int mainClassIndex = command.indexOf(mainClass);
+        if (mainClassIndex < 0) {
+            throw new IllegalStateException("LaunchWrapper main class is missing from the command.");
+        }
+
+        for (int i = mainClassIndex + 1; i < command.size();) {
+            if (option.equals(command.get(i))) {
+                command.remove(i);
+                if (i < command.size() && !command.get(i).startsWith("--")) {
+                    command.remove(i);
+                }
+            } else {
+                i++;
+            }
+        }
+        command.add(option);
+        command.add(value);
     }
 
     /**
