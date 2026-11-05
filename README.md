@@ -14,14 +14,17 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 - **Modrinth integration** — search projects, install content, resolve dependencies, scan installed mods, and repair dependencies.
 - **State Center** — inspect instance and shared-resource health and identify missing or invalid files.
 - **Recovery-oriented updates** — download release packages, verify SHA-256 checksums, and use an external updater with staging and rollback.
-- **Local server management** — manage Java server profiles, process lifecycle, live console, basic properties, offline backups/restores, and crash reports. On Windows x64, Vanta detects the Java class-file requirement of supported vanilla server JARs and downloads a private Eclipse Temurin JRE when the selected runtime is too old.
+- **Local server management** — manage Java server profiles, process lifecycle, live console, basic properties, offline backups/restores, and crash reports. Vanta can provision a private Eclipse Temurin JRE for supported server JARs on supported OS/CPU combinations.
 - **Local-first data** — keep launcher and instance data on the user's device wherever possible.
 - **JavaFX interface** — a native Java desktop application rather than an embedded web application.
 
 ## Status and platform
 
 - **Development status:** Active development
-- **Current target:** Windows 10/11
+- **Platform targets:** Windows 10/11, mainstream Linux distributions, and macOS (Intel and Apple Silicon); cross-platform support is in active validation
+- **Portable distributions:** ZIP (Windows) and TAR.GZ (Linux/macOS); signed native installers are not yet provided
+- **Automatic self-update:** currently Windows-only; Linux/macOS users must install the matching platform distribution manually
+- **Secure account storage:** Windows DPAPI, macOS Keychain, or Linux Secret Service (requires a Secret Service provider and the secret-tool command from libsecret-tools)
 - **Runtime/toolchain:** Java 21
 - **UI:** JavaFX 21
 - **Build:** Gradle wrapper
@@ -33,18 +36,26 @@ Linux and macOS support are future goals, not a claim of current platform suppor
 
 ### Requirements
 
-- Windows 10 or Windows 11
+- Windows 10/11, a supported Linux desktop, or macOS 12+
 - JDK 21 for source development
+- On Linux, a working JavaFX display stack; account persistence additionally requires Secret Service and the secret-tool command
 - Git
 - IntelliJ IDEA or another Java IDE (recommended)
 
 ### Build and test
 
-Clone the repository, open the root directory in your IDE, and allow Gradle to import the project. From PowerShell, run:
+Clone the repository, open the root directory in your IDE, and allow Gradle to import the project.
+
+On Windows PowerShell:
 
 ```powershell
-.gradlew.bat clean test
-.gradlew.bat build
+.\\gradlew.bat clean test distZip distTar
+```
+
+On Linux and macOS:
+
+```bash
+./gradlew clean test distZip distTar
 ```
 
 Use the checked-in Gradle wrapper rather than installing a separate Gradle version. See the [Development Guide](docs/DEVELOPMENT.md) for setup, packaging, debugging, and validation notes.
