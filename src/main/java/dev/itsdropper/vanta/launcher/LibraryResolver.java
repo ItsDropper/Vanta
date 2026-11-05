@@ -566,26 +566,14 @@ public final class LibraryResolver {
     // =============================================================
 
     private static String getOperatingSystem() {
-        String os =
-                System.getProperty(
-                        "os.name",
-                        ""
-                ).toLowerCase(Locale.ROOT);
-
-        if (os.contains("mac") || os.contains("darwin")) {
-            return "osx";
-        }
-
-        if (os.contains("windows")) {
-            return "windows";
-        }
-
-        if (os.contains("linux")
-                || os.contains("unix")) {
-            return "linux";
-        }
-
-        return os;
+        return switch (Platform.operatingSystem()) {
+            case WINDOWS -> "windows";
+            case LINUX -> "linux";
+            case MACOS -> "osx";
+            case UNKNOWN -> throw new IllegalStateException(
+                    "Unsupported Minecraft host operating system: "
+                            + System.getProperty("os.name", "unknown"));
+        };
     }
 
     // =============================================================
