@@ -96,7 +96,7 @@ public final class ModLoaderInstaller {
         // resource URI is jar:file:...!/ and is not a hierarchical file URI.
         // Load ModLoader from an exploded instance-local directory instead.
         extractBootstrapClasses(clientJar,
-                root.resolve("minecraft").resolve("modloader-bootstrap"));
+                root.resolve("modloader-bootstrap"));
     }
 
     static void mergeArchiveIntoClient(Path vanillaJar, Path patchArchive, Path outputJar)
