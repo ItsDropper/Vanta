@@ -38,6 +38,26 @@ class MinecraftLauncherTest {
     }
 
     @Test
+    void extractsRiftTweakersWithoutDroppingAuthenticationArgumentsFromNormalLaunchPath() {
+        assertEquals(List.of(
+                "--tweakClass", "org.dimdev.riftloader.launch.RiftLoaderClientTweaker"
+        ), MinecraftLauncher.riftTweakerArguments(
+                "--tweakClass \"org.dimdev.riftloader.launch.RiftLoaderClientTweaker\""));
+    }
+
+    @Test
+    void rejectsRiftProfileWithoutTweaker() {
+        assertThrows(IllegalStateException.class, () ->
+                MinecraftLauncher.riftTweakerArguments("--someOtherOption value"));
+    }
+
+    @Test
+    void rejectsRiftTweakerWithoutClassName() {
+        assertThrows(IllegalStateException.class, () ->
+                MinecraftLauncher.riftTweakerArguments("--tweakClass"));
+    }
+
+    @Test
     void rejectsMissingLaunchWrapperOptionValue() {
         List<String> command = new ArrayList<>(List.of(
                 "java", "net.minecraft.launchwrapper.Launch"
