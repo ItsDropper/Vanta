@@ -17,6 +17,14 @@ class PlatformTest {
     }
 
     @Test
+    void doesNotMisclassifyOtherUnixFamiliesAsLinux() {
+        assertEquals(Platform.OperatingSystem.UNKNOWN, Platform.operatingSystem("FreeBSD"));
+        assertEquals(Platform.OperatingSystem.UNKNOWN, Platform.operatingSystem("OpenBSD"));
+        assertEquals(Platform.OperatingSystem.UNKNOWN, Platform.operatingSystem("SunOS"));
+        assertEquals(Platform.OperatingSystem.UNKNOWN, Platform.operatingSystem("AIX"));
+    }
+
+    @Test
     void resolvesWindowsRoamingDataDirectory() {
         assertEquals(Path.of("C:/Users/test/AppData/Roaming/Vanta").toAbsolutePath().normalize(),
                 MinecraftLocator.resolveVantaDirectory("Windows 11", "C:/Users/test",
