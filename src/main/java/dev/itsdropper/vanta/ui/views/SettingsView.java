@@ -1105,10 +1105,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Select default Java executable");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-                    System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win")
+                    Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS
                             ? "Java executable (java.exe)" : "Java executable",
-                    System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win")
-                            ? "java.exe" : "*"
+                    Platform.javaExecutableName()
             ));
             File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
             if (selected != null) javaPath.setText(selected.getAbsolutePath());
