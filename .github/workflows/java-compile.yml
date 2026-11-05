@@ -66,7 +66,7 @@ jobs:
           Get-ChildItem 'build/packages/Vanta' -Force
           Get-ChildItem 'build/packages/Vanta/runtime/bin' -Force
           if (!(Test-Path 'build/packages/Vanta/Vanta.exe')) { throw 'Missing Windows launcher' }
-          if (!(Test-Path 'build/packages/Vanta/runtime/bin/java.exe') -and !(Test-Path 'build/packages/Vanta/runtime/bin/javaw.exe')) { throw 'Missing bundled Windows Java launcher' }
+          if (!(Test-Path 'build/packages/Vanta/runtime/bin/java.dll')) { throw 'Missing bundled Windows JVM runtime library' }
           if (!(Test-Path 'build/packages/Vanta/runtime/lib/modules')) { throw 'Missing Windows runtime modules' }
           if (!(Test-Path 'build/packages/Vanta/app/updater/VantaUpdater.jar')) { throw 'Missing external updater JAR' }
           Add-Type -AssemblyName System.IO.Compression.FileSystem
@@ -95,8 +95,288 @@ jobs:
           ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
           test -n "$ARCHIVE"
           unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
-          grep -Fxq 'bin/Vanta' build/distributions/archive-entries.txt
-          grep -Fxq 'lib/runtime/lib/modules' build/distributions/archive-entries.txt
+          grep -Eq '(^|/)bin/Vanta
+      - name: Verify macOS application bundle layout
+        if: runner.os == 'macOS'
+        run: |
+          test -x build/packages/Vanta.app/Contents/MacOS/Vanta
+          test -d build/packages/Vanta.app/Contents/app
+          RUNTIME_MODULES="$(find build/packages/Vanta.app/Contents/runtime -path '*/lib/modules' -print -quit)"
+          if [ -z "$RUNTIME_MODULES" ]; then
+            echo "Missing macOS runtime modules"
+            find build/packages/Vanta.app/Contents/runtime -maxdepth 5 -print
+            exit 1
+          fi
+          test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
+          grep -Eq '(^|/)Contents/MacOS/Vanta
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/distributions/*
+            build/packages/*
+          if-no-files-found: error
+          retention-days: 14
+ build/distributions/archive-entries.txt
+          grep -Eq '(^|/)lib/runtime/lib/modules
+      - name: Verify macOS application bundle layout
+        if: runner.os == 'macOS'
+        run: |
+          test -x build/packages/Vanta.app/Contents/MacOS/Vanta
+          test -d build/packages/Vanta.app/Contents/app
+          RUNTIME_MODULES="$(find build/packages/Vanta.app/Contents/runtime -path '*/lib/modules' -print -quit)"
+          if [ -z "$RUNTIME_MODULES" ]; then
+            echo "Missing macOS runtime modules"
+            find build/packages/Vanta.app/Contents/runtime -maxdepth 5 -print
+            exit 1
+          fi
+          test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/MacOS/Vanta' build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/app/Vanta.cfg' build/distributions/archive-entries.txt
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/distributions/*
+            build/packages/*
+          if-no-files-found: error
+          retention-days: 14
+ build/distributions/archive-entries.txt
+      - name: Verify macOS application bundle layout
+        if: runner.os == 'macOS'
+        run: |
+          test -x build/packages/Vanta.app/Contents/MacOS/Vanta
+          test -d build/packages/Vanta.app/Contents/app
+          RUNTIME_MODULES="$(find build/packages/Vanta.app/Contents/runtime -path '*/lib/modules' -print -quit)"
+          if [ -z "$RUNTIME_MODULES" ]; then
+            echo "Missing macOS runtime modules"
+            find build/packages/Vanta.app/Contents/runtime -maxdepth 5 -print
+            exit 1
+          fi
+          test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/MacOS/Vanta' build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/app/Vanta.cfg' build/distributions/archive-entries.txt
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/distributions/*
+            build/packages/*
+          if-no-files-found: error
+          retention-days: 14
+ build/distributions/archive-entries.txt
+          grep -Eq '(^|/)Contents/app/Vanta.cfg
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/distributions/*
+            build/packages/*
+          if-no-files-found: error
+          retention-days: 14
+ build/distributions/archive-entries.txt
+          grep -Eq '(^|/)lib/runtime/lib/modules
+      - name: Verify macOS application bundle layout
+        if: runner.os == 'macOS'
+        run: |
+          test -x build/packages/Vanta.app/Contents/MacOS/Vanta
+          test -d build/packages/Vanta.app/Contents/app
+          RUNTIME_MODULES="$(find build/packages/Vanta.app/Contents/runtime -path '*/lib/modules' -print -quit)"
+          if [ -z "$RUNTIME_MODULES" ]; then
+            echo "Missing macOS runtime modules"
+            find build/packages/Vanta.app/Contents/runtime -maxdepth 5 -print
+            exit 1
+          fi
+          test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/MacOS/Vanta' build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/app/Vanta.cfg' build/distributions/archive-entries.txt
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/distributions/*
+            build/packages/*
+          if-no-files-found: error
+          retention-days: 14
+ build/distributions/archive-entries.txt
+      - name: Verify macOS application bundle layout
+        if: runner.os == 'macOS'
+        run: |
+          test -x build/packages/Vanta.app/Contents/MacOS/Vanta
+          test -d build/packages/Vanta.app/Contents/app
+          RUNTIME_MODULES="$(find build/packages/Vanta.app/Contents/runtime -path '*/lib/modules' -print -quit)"
+          if [ -z "$RUNTIME_MODULES" ]; then
+            echo "Missing macOS runtime modules"
+            find build/packages/Vanta.app/Contents/runtime -maxdepth 5 -print
+            exit 1
+          fi
+          test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/MacOS/Vanta' build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/app/Vanta.cfg' build/distributions/archive-entries.txt
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/distributions/*
+            build/packages/*
+          if-no-files-found: error
+          retention-days: 14
+ build/distributions/archive-entries.txt
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/distributions/*
+            build/packages/*
+          if-no-files-found: error
+          retention-days: 14
+ build/distributions/archive-entries.txt
+          grep -Eq '(^|/)lib/runtime/lib/modules
+      - name: Verify macOS application bundle layout
+        if: runner.os == 'macOS'
+        run: |
+          test -x build/packages/Vanta.app/Contents/MacOS/Vanta
+          test -d build/packages/Vanta.app/Contents/app
+          RUNTIME_MODULES="$(find build/packages/Vanta.app/Contents/runtime -path '*/lib/modules' -print -quit)"
+          if [ -z "$RUNTIME_MODULES" ]; then
+            echo "Missing macOS runtime modules"
+            find build/packages/Vanta.app/Contents/runtime -maxdepth 5 -print
+            exit 1
+          fi
+          test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/MacOS/Vanta' build/distributions/archive-entries.txt
+          grep -Fxq 'Contents/app/Vanta.cfg' build/distributions/archive-entries.txt
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux' && runner.arch == 'X64'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: |
+            build/distributions/*
+            build/packages/*
+          if-no-files-found: error
+          retention-days: 14
+ build/distributions/archive-entries.txt
       - name: Verify macOS application bundle layout
         if: runner.os == 'macOS'
         run: |
