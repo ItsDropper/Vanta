@@ -1,133 +1,46 @@
 package dev.itsdropper.vanta.launcher.instance;
 
 import com.fasterxml.jackson.databind.JsonNode;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.launcher.LibraryResolver;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.NativeExtractor;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.model.Library;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-public class NativeInstaller {
+/** Extracts only the native archives selected for the current host platform. */
+public final class NativeInstaller {
+    private static final ObjectMapper JSON = new ObjectMapper();
 
-    public static Path extract(
-            Instance instance,
-            JsonNode metadata
-    ) throws Exception {
+    private NativeInstaller() {}
 
-        Path nativesDirectory =
-                instance
-                        .getDirectory()
-                        .resolve("natives");
+    public static Path extract(Instance instance, JsonNode metadata) throws Exception {
+        if (instance == null || metadata == null) {
+            throw new IllegalArgumentException("Instance and version metadata are required.");
+        }
 
-        Files.createDirectories(
-                nativesDirectory
-        );
+        Path nativesDirectory = instance.getDirectory().resolve("natives");
+        Files.createDirectories(nativesDirectory);
 
-        JsonNode libraries =
-                metadata.get("libraries");
-
-        if (libraries == null
-                || !libraries.isArray()) {
-
+        JsonNode libraries = metadata.get("libraries");
+        if (libraries == null || !libraries.isArray()) {
             return nativesDirectory;
         }
 
-        Path librariesDirectory =
-                MinecraftLocator
-                        .getLibrariesDirectory();
-
-        for (JsonNode library : libraries) {
-
-            JsonNode downloads =
-                    library.get("downloads");
-
-            if (downloads == null) {
-                continue;
-            }
-
-            JsonNode classifiers =
-                    downloads.get("classifiers");
-
-            if (classifiers == null) {
-                continue;
-            }
-
-            JsonNode windows =
-                    classifiers.get(
-                            "natives-windows"
-                    );
-
-            if (windows == null) {
-                continue;
-            }
-
-            JsonNode pathNode =
-                    windows.get("path");
-
-            if (pathNode == null) {
-                continue;
-            }
-
-            String path =
-                    pathNode.asText();
-
-            Path nativeJar =
-                    librariesDirectory.resolve(
-                            path
-                    );
-
-            if (!Files.exists(nativeJar)) {
-                continue;
-            }
-
-            System.out.println(
-                    "Extracting natives: "
-                            + nativeJar.getFileName()
-            );
-
-            try (ZipInputStream zip =
-                         new ZipInputStream(
-                                 Files.newInputStream(
-                                         nativeJar
-                                 )
-                         )) {
-
-                ZipEntry entry;
-
-                while ((entry =
-                        zip.getNextEntry()) != null) {
-
-                    if (entry.isDirectory()) {
-                        continue;
-                    }
-
-                    String fileName =
-                            entry.getName();
-
-                    if (!fileName.endsWith(".dll")) {
-                        continue;
-                    }
-
-                    Path target =
-                            nativesDirectory.resolve(
-                                    Path.of(
-                                            fileName
-                                    ).getFileName()
-                            );
-
-                    Files.copy(
-                            zip,
-                            target,
-                            StandardCopyOption.REPLACE_EXISTING
-                    );
-                }
-            }
+        List<Path> nativeJars = new ArrayList<>();
+        Path minecraftDirectory = MinecraftLocator.getVantaDirectory();
+        for (JsonNode libraryNode : libraries) {
+            Library library = JSON.treeToValue(libraryNode, Library.class);
+            Path nativeJar = LibraryResolver.resolveNative(minecraftDirectory, library);
+            if (nativeJar != null) nativeJars.add(nativeJar);
         }
 
+        NativeExtractor.extractAll(nativeJars, nativesDirectory);
         return nativesDirectory;
     }
 }
