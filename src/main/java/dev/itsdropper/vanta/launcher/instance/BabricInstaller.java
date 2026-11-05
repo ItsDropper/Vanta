@@ -98,8 +98,30 @@ public final class BabricInstaller {
 
         // Native-only entries use classifier metadata and must be resolved
         // by the Minecraft artifact installer, not the Maven downloader.
-        MinecraftFileInstaller.installLibraries(fabricProfile);
-        MinecraftFileInstaller.installLibraries(babricOverlay);
+        // Fabric's ordinary Maven entries (for example jinput) are already
+        // installed above; many have no Mojang downloads.artifact.path.
+        MinecraftFileInstaller.installLibraries(nativeLibraryMetadata(fabricProfile));
+        MinecraftFileInstaller.installLibraries(nativeLibraryMetadata(babricOverlay));
+    }
+
+    static JsonNode nativeLibraryMetadata(JsonNode metadata) {
+        if (metadata == null || !metadata.isObject()) {
+            throw new IllegalArgumentException("Library metadata must be an object.");
+        }
+
+        ObjectNode filtered = (ObjectNode) metadata.deepCopy();
+        JsonNode libraries = metadata.get("libraries");
+        ArrayNode nativeLibraries = MAPPER.createArrayNode();
+        if (libraries != null && libraries.isArray()) {
+            for (JsonNode library : libraries) {
+                JsonNode classifiers = library.path("downloads").path("classifiers");
+                if (classifiers.isObject() && !classifiers.isEmpty()) {
+                    nativeLibraries.add(library.deepCopy());
+                }
+            }
+        }
+        filtered.set("libraries", nativeLibraries);
+        return filtered;
     }
 
     public static JsonNode mergeProfile(
