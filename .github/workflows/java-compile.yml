@@ -30,7 +30,7 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           chmod +x ./gradlew
-          ./gradlew test distZip distTar platformAppImage
+          ./gradlew test distZip distTar platformImageChecksum
       - name: Run tests and build portable distributions (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat test distZip distTar platformAppImage
