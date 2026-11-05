@@ -50,18 +50,41 @@ class UpdaterMainPlatformTest {
             System.setProperty("os.name", "Mac OS X");
             Path root = temporaryDirectory.resolve("Vanta.app");
             Path launcher = createFile(root.resolve("Contents/MacOS/Vanta"));
-            Path java = createFile(root.resolve("Contents/runtime/Contents/Home/bin/java"));
+            Path modules = createFile(root.resolve("Contents/runtime/Contents/Home/lib/modules"));
             Path spawnHelper = createFile(root.resolve("Contents/runtime/Contents/Home/lib/jspawnhelper"));
             createFile(root.resolve("Contents/app/Vanta.cfg"));
 
             launcher.toFile().setExecutable(false, false);
-            java.toFile().setExecutable(false, false);
+            modules.toFile().setExecutable(false, false);
             spawnHelper.toFile().setExecutable(false, false);
             UpdaterMain.restoreExecutablePermissions(root);
 
             assertTrue(Files.isExecutable(launcher));
-            assertTrue(Files.isExecutable(java));
+            assertFalse(Files.isExecutable(modules));
             assertTrue(Files.isExecutable(spawnHelper));
+        } finally {
+            restoreOs(previous);
+        }
+    }
+
+    @Test
+    void restoresLinuxLauncherWithoutStandaloneJavaCommand() throws Exception {
+        assumeFalse(System.getProperty("os.name", "").toLowerCase().contains("windows"));
+        String previous = System.getProperty("os.name");
+        try {
+            System.setProperty("os.name", "Linux");
+            Path root = temporaryDirectory.resolve("Vanta-Linux-MinimalRuntime");
+            Path launcher = createFile(root.resolve("bin/Vanta"));
+            createFile(root.resolve("lib/runtime/lib/modules"));
+            createFile(root.resolve("lib/app/Vanta.cfg"));
+            launcher.toFile().setExecutable(false, false);
+
+            UpdaterMain.restoreExecutablePermissions(root);
+
+            assertTrue(Files.isExecutable(launcher));
+            assertTrue(ApplicationLocator.isSupportedInstallation(root));
+            assertEquals(root.resolve("lib/runtime"),
+                    ApplicationLocator.getRuntimeDirectory(root));
         } finally {
             restoreOs(previous);
         }
