@@ -68,7 +68,14 @@ public final class LegacyFabricInstaller {
 
     public static void installLibraries(JsonNode profile) throws Exception {
         validateProfile(profile);
+
+        // Install legacy Maven artifacts first. This installer skips
+        // native-only entries that have classifier metadata but no artifact.
         FabricInstaller.installLibraries(profile);
+
+        // Download normalized platform-specific native classifier JARs
+        // before NativeInstaller attempts to extract them.
+        MinecraftFileInstaller.installLibraries(profile);
     }
 
     public static JsonNode mergeProfile(JsonNode vanilla, JsonNode profile) {
