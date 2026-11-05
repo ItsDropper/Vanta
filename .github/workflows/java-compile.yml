@@ -65,7 +65,11 @@ jobs:
             if (!($entries | Where-Object { $_ -eq 'Vanta.exe' -or $_ -like '*/Vanta.exe' })) {
               throw 'Windows update archive does not contain the native launcher'
             }
-            if (!($entries | Where-Object { $_ -like '*/runtime/lib/modules' })) {
+            $runtimeEntry = $entries | Where-Object {
+              $_ -eq 'runtime/lib/modules' -or $_ -like '*/runtime/lib/modules'
+            } | Select-Object -First 1
+            if (!$runtimeEntry) {
+              $entries | Where-Object { $_ -match 'runtime|modules' } | Write-Host
               throw 'Windows update archive does not contain the bundled runtime'
             }
           } finally {
