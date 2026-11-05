@@ -25,3 +25,17 @@ jobs:
         run: chmod +x ./gradlew
       - name: Compile launcher and run regression tests
         run: ./gradlew test
+
+  windows-download-regression:
+    runs-on: windows-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+      - name: Run download engine regression tests
+        run: .\gradlew.bat test --tests "dev.itsdropper.vanta.launcher.instance.DownloadUtilTest" --tests "dev.itsdropper.vanta.launcher.instance.DownloadUtilIntegrationTest"
