@@ -422,15 +422,19 @@ public class DownloadUtil {
         boolean ranges = metadata.headers().firstValue("Accept-Ranges")
                 .map(v -> v.toLowerCase(java.util.Locale.ROOT).contains("bytes")).orElse(false);
         if (!ranges || length < 32L * 1024 * 1024) return false;
+
         final int segments = 4;
         Path staging = target.resolveSibling(
                 target.getFileName() + ".segments-" + java.util.UUID.randomUUID());
-        Files.createDirectories(staging);
+        Path assembled = target.resolveSibling(
+                target.getFileName() + ".download-" + java.util.UUID.randomUUID());
         ExecutorService pool = Executors.newFixedThreadPool(segments);
         List<Future<?>> futures = new ArrayList<>();
         try {
+            Files.createDirectories(staging);
             for (int i = 0; i < segments; i++) {
-                final int index = i; final long begin = (length * i) / segments;
+                final int index = i;
+                final long begin = (length * i) / segments;
                 final long finish = (length * (i + 1)) / segments - 1;
                 futures.add(pool.submit(() -> {
                     Path part = staging.resolve("part-" + index);
@@ -444,37 +448,101 @@ public class DownloadUtil {
                     validateContentRange(
                             response.headers().firstValue("Content-Range").orElse(null),
                             begin, finish, length);
-                    try (InputStream in = response.body()) { Files.copy(in, part, StandardCopyOption.REPLACE_EXISTING); }
-                    if (Files.size(part) != finish - begin + 1) throw new IOException("Incomplete segment " + index);
+                    long expectedPartSize = finish - begin + 1;
+                    long declaredPartSize = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
+                    if (declaredPartSize >= 0 && declaredPartSize != expectedPartSize) {
+                        try { response.body().close(); } catch (IOException ignored) { }
+                        throw new IOException("Segment Content-Length does not match its requested range.");
+                    }
+                    long actualPartSize;
+                    try (InputStream in = response.body()) {
+                        actualPartSize = Files.copy(in, part, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    if (actualPartSize != expectedPartSize) {
+                        throw new IOException("Incomplete segment " + index);
+                    }
                     return null;
                 }));
             }
             for (Future<?> future : futures) future.get();
-        } finally { pool.shutdownNow(); }
-        Path assembled = target.resolveSibling(
-                target.getFileName() + ".download-" + java.util.UUID.randomUUID());
-        try {
-            try (OutputStream out = Files.newOutputStream(assembled, java.nio.file.StandardOpenOption.CREATE,
-                    java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
+            pool.shutdown();
+            if (!pool.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS)) {
+                pool.shutdownNow();
+                throw new IOException("Segment download workers did not terminate.");
+            }
+
+            try (OutputStream out = Files.newOutputStream(assembled,
+                    java.nio.file.StandardOpenOption.CREATE_NEW,
+                    java.nio.file.StandardOpenOption.WRITE)) {
                 for (int i = 0; i < segments; i++) {
-                    try (InputStream in = Files.newInputStream(staging.resolve("part-" + i))) { in.transferTo(out); }
+                    try (InputStream in = Files.newInputStream(staging.resolve("part-" + i))) {
+                        in.transferTo(out);
+                    }
                 }
             }
-            if (Files.size(assembled) != length) throw new IOException("Segmented download size mismatch");
-            if (expectedSha1 != null && !expectedSha1.isBlank() && !expectedSha1.equalsIgnoreCase(calculateSha1(assembled)))
-                throw new IOException("Segmented download checksum mismatch");
-            try { Files.move(assembled, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING); }
-            catch (java.nio.file.AtomicMoveNotSupportedException ex) { Files.move(assembled, target, StandardCopyOption.REPLACE_EXISTING); }
-            if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
-                Path cached = cachePath(expectedSha1); Files.createDirectories(cached.getParent());
-                Files.copy(target, cached, StandardCopyOption.REPLACE_EXISTING);
+            if (Files.size(assembled) != length) {
+                throw new IOException("Segmented download size mismatch.");
+            }
+            if (expectedSha1 != null && !expectedSha1.isBlank()
+                    && !expectedSha1.equalsIgnoreCase(calculateSha1(assembled))) {
+                throw new IOException("Segmented download checksum mismatch.");
+            }
+            try {
+                Files.move(assembled, target,
+                        StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(assembled, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+            if (LauncherSettings.isDownloadCacheEnabled()
+                    && expectedSha1 != null && !expectedSha1.isBlank()) {
+                try {
+                    publishCacheEntry(target, expectedSha1);
+                } catch (IOException cacheFailure) {
+                    System.err.println("Could not save download cache entry: " + cacheFailure.getMessage());
+                }
             }
             return true;
+        } catch (Exception failure) {
+            for (Future<?> future : futures) future.cancel(true);
+            throw failure;
         } finally {
-            Files.deleteIfExists(assembled);
-            try (var walk = Files.walk(staging)) {
-                walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> { try { Files.deleteIfExists(p); } catch (IOException ignored) { } });
+            pool.shutdownNow();
+            try { Files.deleteIfExists(assembled); }
+            catch (IOException cleanupFailure) {
+                System.err.println("Could not remove temporary download assembly: " + cleanupFailure.getMessage());
             }
+            deleteTreeBestEffort(staging);
+        }
+    }
+
+    private static void deleteTreeBestEffort(Path directory) {
+        if (directory == null || !Files.exists(directory)) return;
+        try (var walk = Files.walk(directory)) {
+            walk.sorted(java.util.Comparator.reverseOrder()).forEach(path -> {
+                try { Files.deleteIfExists(path); }
+                catch (IOException failure) {
+                    System.err.println("Could not remove download staging entry: " + failure.getMessage());
+                }
+            });
+        } catch (IOException failure) {
+            System.err.println("Could not inspect download staging directory: " + failure.getMessage());
+        }
+    }
+
+    private static void publishCacheEntry(Path source, String sha1) throws IOException {
+        Path cached = cachePath(sha1);
+        Files.createDirectories(cached.getParent());
+        Path temporary = cached.resolveSibling(cached.getFileName() + "." + java.util.UUID.randomUUID() + ".tmp");
+        try {
+            Files.copy(source, temporary, StandardCopyOption.COPY_ATTRIBUTES);
+            try {
+                Files.move(temporary, cached,
+                        StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, cached, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
         }
     }
 
