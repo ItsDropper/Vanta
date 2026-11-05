@@ -42,24 +42,6 @@ public final class ApplicationLocator {
         throw new IllegalStateException("Could not locate the bundled Java runtime in " + normalized);
     }
 
-    /** Selects a runnable Java command from the bundled runtime. */
-    public static Path getJavaExecutable(Path root) {
-        return getJavaExecutableFromRuntime(getRuntimeDirectory(root));
-    }
-
-    public static Path getJavaExecutableFromRuntime(Path runtime) {
-        Path bin = runtime.resolve("bin");
-        Path[] candidates = {
-                bin.resolve("java.exe"),
-                bin.resolve("javaw.exe"),
-                bin.resolve("java")
-        };
-        for (Path candidate : candidates) {
-            if (Files.isRegularFile(candidate) && Files.isExecutable(candidate)) return candidate;
-        }
-        throw new IllegalStateException("Could not locate an executable Java command in " + bin);
-    }
-
     /** Returns the directory containing the application JAR and configuration. */
     public static Path getApplicationPayloadDirectory(Path root) {
         Path normalized = root.toAbsolutePath().normalize();
@@ -89,10 +71,6 @@ public final class ApplicationLocator {
             if (Files.isRegularFile(candidate)) return candidate;
         }
         throw new IllegalStateException("Could not locate the Vanta launcher executable in " + normalized);
-    }
-
-    public static Path getUpdaterDirectory(Path root) {
-        return getApplicationPayloadDirectory(root).resolve("updater");
     }
 
     /** True only when the complete image signature for a supported OS exists. */
