@@ -29,6 +29,7 @@ public final class CredentialManager {
         int SecKeychainItemModifyAttributesAndData(Pointer item, Pointer attributes,
                 int passwordLength, byte[] password);
         int SecKeychainItemFreeContent(Pointer attributes, Pointer data);
+        int SecKeychainItemDelete(Pointer item);
     }
 
     private CredentialManager() {}
@@ -58,7 +59,7 @@ public final class CredentialManager {
         if (!storedValue.startsWith(MARKER)) {
             try {
                 return WindowsCredentialManager.decrypt(storedValue);
-            } catch (RuntimeException | UnsupportedOperationException failure) {
+            } catch (RuntimeException failure) {
                 throw new IOException("This account uses Windows DPAPI and cannot be decrypted on this platform.", failure);
             }
         }
@@ -145,9 +146,8 @@ public final class CredentialManager {
         if (data.getValue() != null) security.SecKeychainItemFreeContent(null, data.getValue());
         if (status == -25300) return;
         if (status != 0) throw new IOException("macOS Keychain lookup failed (status " + status + ").");
-        // Delete is performed by updating the item to an empty secret; the account file is removed separately.
-        int update = security.SecKeychainItemModifyAttributesAndData(item.getValue(), null, 0, new byte[0]);
-        if (update != 0) throw new IOException("macOS Keychain cleanup failed (status " + update + ").");
+        int deleted = security.SecKeychainItemDelete(item.getValue());
+        if (deleted != 0) throw new IOException("macOS Keychain cleanup failed (status " + deleted + ").");
     }
 
     private static void storeLinuxCredential(String accountId, String value) throws IOException {
