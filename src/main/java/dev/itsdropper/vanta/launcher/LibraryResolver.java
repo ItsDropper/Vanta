@@ -630,13 +630,12 @@ public final class LibraryResolver {
                         ""
                 ).toLowerCase(Locale.ROOT);
 
-        if (os.contains("win")) {
-            return "windows";
+        if (os.contains("mac") || os.contains("darwin")) {
+            return "osx";
         }
 
-        if (os.contains("mac")
-                || os.contains("darwin")) {
-            return "osx";
+        if (os.contains("windows")) {
+            return "windows";
         }
 
         if (os.contains("linux")
