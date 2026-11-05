@@ -31,6 +31,11 @@ public final class RiftInstaller {
             "https://github.com/DimensionalDevelopment/Rift/releases/download/v1.0.4-87/Rift-1.0.4-87.jar";
     public static final String MIXIN_REPOSITORY =
             "https://repo.spongepowered.org/repository/maven-public/";
+    public static final String MIXIN_VERSION = "0.7.11-SNAPSHOT";
+    public static final String MIXIN_ARTIFACT_VERSION = "0.7.11-20180703.121122-1";
+    public static final String MIXIN_ARTIFACT_URL =
+            MIXIN_REPOSITORY + "org/spongepowered/mixin/" + MIXIN_VERSION
+                    + "/mixin-" + MIXIN_ARTIFACT_VERSION + ".jar";
     public static final String TWEAKER = "org.dimdev.riftloader.launch.RiftLoaderClientTweaker";
     public static final String LAUNCHWRAPPER_MAIN = "net.minecraft.launchwrapper.Launch";
 
@@ -57,11 +62,11 @@ public final class RiftInstaller {
 
         ArrayNode libraries = overlay.putArray("libraries");
         addLibrary(libraries, "org.dimdev:rift:" + LOADER_VERSION, MIXIN_REPOSITORY);
-        // Maven snapshot repositories publish timestamped snapshot artifacts.
-        // Requesting the literal "-SNAPSHOT.jar" path returns 404; pin the
-        // timestamped 0.7.11 build used by the original Rift dependency.
+        // Keep the logical Maven coordinate at -SNAPSHOT. The repository stores
+        // the timestamped JAR inside the -SNAPSHOT directory; installMixinLibrary
+        // downloads that exact file into the conventional local snapshot filename.
         addLibrary(libraries,
-                "org.spongepowered:mixin:0.7.11-20180703.121122-1", MIXIN_REPOSITORY);
+                "org.spongepowered:mixin:" + MIXIN_VERSION, MIXIN_REPOSITORY);
         addLibrary(libraries, "net.minecraft:launchwrapper:1.12",
                 "https://libraries.minecraft.net/");
         addLibrary(libraries, "org.ow2.asm:asm:6.2",
@@ -106,6 +111,7 @@ public final class RiftInstaller {
                 dependencyLibraries.remove(i);
             }
         }
+        installMixinLibrary();
         FabricInstaller.installLibraries(dependencyOverlay);
         verifyRiftArtifact(version);
 
@@ -131,6 +137,40 @@ public final class RiftInstaller {
         ObjectNode library = libraries.addObject();
         library.put("name", coordinate);
         library.put("url", repository);
+    }
+
+    private static void installMixinLibrary() throws Exception {
+        Path libraries = MinecraftLocator.getLibrariesDirectoryPath()
+                .toAbsolutePath().normalize();
+        Path target = libraries.resolve("org").resolve("spongepowered")
+                .resolve("mixin").resolve(MIXIN_VERSION)
+                .resolve("mixin-" + MIXIN_VERSION + ".jar").normalize();
+        if (!target.startsWith(libraries)) {
+            throw new IOException("Mixin library path escapes the shared libraries directory.");
+        }
+
+        if (isValidJar(target)) {
+            return;
+        }
+        Files.deleteIfExists(target);
+        Files.createDirectories(target.getParent());
+        System.out.println("Downloading Rift Mixin snapshot: " + MIXIN_ARTIFACT_URL);
+        DownloadUtil.downloadFile(MIXIN_ARTIFACT_URL, target);
+        if (!isValidJar(target)) {
+            Files.deleteIfExists(target);
+            throw new IOException("Rift Mixin snapshot download produced an invalid JAR.");
+        }
+    }
+
+    private static boolean isValidJar(Path artifact) {
+        if (!Files.isRegularFile(artifact)) {
+            return false;
+        }
+        try (JarFile ignored = new JarFile(artifact.toFile())) {
+            return true;
+        } catch (IOException invalid) {
+            return false;
+        }
     }
 
     private static Path artifactPath(String version) throws IOException {
