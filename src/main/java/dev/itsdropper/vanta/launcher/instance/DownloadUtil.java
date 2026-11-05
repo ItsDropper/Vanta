@@ -113,8 +113,7 @@ public class DownloadUtil {
                                 HttpResponse.BodyHandlers.ofString()
                         );
 
-                if (response.statusCode() < 200
-                        || response.statusCode() >= 300) {
+                if (response.statusCode() != 200 && response.statusCode() != 206) {
 
                     throw new IOException(
                             "HTTP "
@@ -271,10 +270,16 @@ public class DownloadUtil {
                 }
 
                 boolean append = existingBytes > 0 && response.statusCode() == 206;
+                String contentRange = response.headers().firstValue("Content-Range").orElse(null);
+                long expectedFinalSize = -1L;
                 if (append) {
-                    validateContentRange(
-                            response.headers().firstValue("Content-Range").orElse(null),
-                            existingBytes, -1L, -1L);
+                    validateContentRange(contentRange, existingBytes, -1L, -1L);
+                    expectedFinalSize = contentRangeTotal(contentRange);
+                    long rangeLength = contentRangeEnd(contentRange) - existingBytes + 1L;
+                    if (response.headers().firstValueAsLong("Content-Length").orElse(-1L) != rangeLength) {
+                        try { response.body().close(); } catch (IOException ignored) { }
+                        throw new IOException("Resume response length does not match Content-Range.");
+                    }
                 } else {
                     // A partial response without a matching local prefix is not a complete file.
                     if (response.statusCode() == 206) {
@@ -284,8 +289,10 @@ public class DownloadUtil {
                     if (existingBytes > 0) existingBytes = 0;
                 }
                 long responseLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
-                long totalBytes = responseLength > 0 ? responseLength + (append ? existingBytes : 0L) : -1L;
+                if (!append) expectedFinalSize = responseLength;
+                long totalBytes = expectedFinalSize;
                 long receivedBytes = append ? existingBytes : 0L;
+                long responseBytes = 0L;
                 long lastProgressNanos = 0L;
                 byte[] buffer = new byte[64 * 1024];
                 try (InputStream input = response.body();
@@ -296,6 +303,7 @@ public class DownloadUtil {
                     int read;
                     while ((read = input.read(buffer)) != -1) {
                         output.write(buffer, 0, read);
+                        responseBytes += read;
                         receivedBytes += read;
                         long now = System.nanoTime();
                         if (now - lastProgressNanos >= 200_000_000L) {
@@ -304,6 +312,12 @@ public class DownloadUtil {
                             lastProgressNanos = now;
                         }
                     }
+                }
+                if (responseLength >= 0 && responseBytes != responseLength) {
+                    throw new IOException("Download response was truncated or exceeded Content-Length.");
+                }
+                if (expectedFinalSize >= 0 && receivedBytes != expectedFinalSize) {
+                    throw new IOException("Downloaded file size does not match the server's declared total length.");
                 }
                 dev.itsdropper.vanta.launcher.download.DownloadCenterService
                         .getInstance().verifying(taskId, receivedBytes, totalBytes);
@@ -483,6 +497,24 @@ public class DownloadUtil {
                 && !expectedSha1.matches("(?i)[0-9a-f]{40}")) {
             throw new IllegalArgumentException("Expected SHA-1 must contain exactly 40 hexadecimal characters.");
         }
+    }
+
+    private static long contentRangeEnd(String header) throws IOException {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("(?i)^bytes ([0-9]+)-([0-9]+)/([0-9]+)$")
+                .matcher(header == null ? "" : header.trim());
+        if (!matcher.matches()) throw new IOException("Invalid Content-Range header.");
+        try { return Long.parseLong(matcher.group(2)); }
+        catch (NumberFormatException invalid) { throw new IOException("Invalid Content-Range end.", invalid); }
+    }
+
+    private static long contentRangeTotal(String header) throws IOException {
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("(?i)^bytes ([0-9]+)-([0-9]+)/([0-9]+)$")
+                .matcher(header == null ? "" : header.trim());
+        if (!matcher.matches()) throw new IOException("Invalid Content-Range header.");
+        try { return Long.parseLong(matcher.group(3)); }
+        catch (NumberFormatException invalid) { throw new IOException("Invalid Content-Range total.", invalid); }
     }
 
     static void validateContentRange(
