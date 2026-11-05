@@ -333,7 +333,7 @@
 }
 .global-mods-page .page-subtitle, .instance-mods-page .page-subtitle {
     -fx-font-size: 12px;
-    -fx-text-fill: #9ca9a2;
+    -fx-text-fill: -vantamuted;
 }
 .global-mods-page .create-field, .instance-mods-page .instances-search {
     -fx-background-color: -vantasurface;
@@ -348,7 +348,7 @@
 }
 .global-mods-page .create-field:focused, .instance-mods-page .instances-search:focused {
     -fx-border-color: -vantaaccent;
-    -fx-effect: dropshadow(gaussian, rgba(125,169,143,.12), 12, .1, 0, 0);
+    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -82%), 12, .1, 0, 0);
 }
 .global-mods-page .create-combo {
     -fx-background-color: -vantasurface;
@@ -359,7 +359,7 @@
 .global-mods-page .settings-section-title {
     -fx-font-size: 12px;
     -fx-letter-spacing: 1.2px;
-    -fx-text-fill: #d7e2da;
+    -fx-text-fill: -vantatext;
 }
 .global-mods-page .instance-list, .instance-mods-page .instance-list {
     -fx-spacing: 8px;
@@ -406,11 +406,11 @@
     -fx-cursor: hand;
 }
 .instance-mods-page .instances-status {
-    -fx-text-fill: #95a49a;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
 }
 .modrinth-popup {
-    -fx-background-color: #101714;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 12px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 12px;
