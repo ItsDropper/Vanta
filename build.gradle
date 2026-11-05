@@ -45,6 +45,7 @@ dependencies {
 
     // Minecraft authentication
     implementation 'net.raphimc:MinecraftAuth:4.1.0'
+    runtimeOnly 'org.slf4j:slf4j-nop:2.0.13'
 
     // Windows credential storage / native access
     implementation 'net.java.dev.jna:jna:5.16.0'
