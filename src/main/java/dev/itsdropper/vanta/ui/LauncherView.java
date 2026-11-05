@@ -83,7 +83,10 @@ public class LauncherView {
         this.stage = stage;
         this.onReady = onReady;
         this.screenshotMode = screenshotMode;
-        VantaUI.setSquircleClippingEnabled(!screenshotMode);
+        // Keep CSS-based rounded surfaces, but avoid custom JavaFX Path clips
+        // in the live scene. On some Windows rendering pipelines these clips
+        // can make the scene contents disappear after the splash-root swap.
+        VantaUI.setSquircleClippingEnabled(false);
 
         root =
                 new StackPane();
