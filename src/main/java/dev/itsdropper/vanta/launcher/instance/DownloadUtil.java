@@ -36,7 +36,7 @@ public class DownloadUtil {
         private final int statusCode;
         private final String retryAfter;
 
-        private DownloadHttpException(int statusCode, String url, String retryAfter) {
+        private DownloadHttpException(int statusCode, String retryAfter) {
             super("HTTP " + statusCode + " from the download server.");
             this.statusCode = statusCode;
             this.retryAfter = retryAfter;
@@ -136,7 +136,7 @@ public class DownloadUtil {
 
                 if (response.statusCode() != 200) {
 
-                    throw new DownloadHttpException(response.statusCode(), safeSourceLabel(url),
+                    throw new DownloadHttpException(response.statusCode(),
                             response.headers().firstValue("Retry-After").orElse(null));
                 }
 
