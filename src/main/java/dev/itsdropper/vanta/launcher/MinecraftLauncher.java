@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher;
 
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.java.JavaLocator;
+import dev.itsdropper.vanta.launcher.instance.RiftModMetadataCompatibility;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,6 +48,17 @@ public class MinecraftLauncher {
         }
         if (!Files.isWritable(minecraft)) {
             throw new IllegalStateException("Minecraft instance directory is not writable: " + minecraft);
+        }
+
+        // Rift's Gson metadata parser leaves omitted listener sides null.
+        // Normalize instance-local mod metadata before Rift scans the mods folder.
+        if ("Rift".equalsIgnoreCase(data.loader)) {
+            int normalizedMods = RiftModMetadataCompatibility.normalizeModsDirectory(
+                    minecraft.resolve("mods"));
+            if (normalizedMods > 0) {
+                System.out.println("[Vanta Rift Compatibility] Normalized "
+                        + normalizedMods + " mod archive(s).");
+            }
         }
 
         // =============================================================
