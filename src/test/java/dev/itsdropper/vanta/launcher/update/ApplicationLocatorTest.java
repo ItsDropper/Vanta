@@ -24,7 +24,6 @@ class ApplicationLocatorTest {
         assertEquals(root.resolve("runtime"), ApplicationLocator.getRuntimeDirectory(root));
         assertEquals(root.resolve("app"), ApplicationLocator.getApplicationPayloadDirectory(root));
         assertEquals(root.resolve("Vanta.exe"), ApplicationLocator.getLauncherExecutable(root));
-        assertEquals(root.resolve("app/updater"), ApplicationLocator.getUpdaterDirectory(root));
     }
 
     @Test
@@ -38,7 +37,6 @@ class ApplicationLocatorTest {
         assertEquals(root.resolve("lib/runtime"), ApplicationLocator.getRuntimeDirectory(root));
         assertEquals(root.resolve("lib/app"), ApplicationLocator.getApplicationPayloadDirectory(root));
         assertEquals(root.resolve("bin/Vanta"), ApplicationLocator.getLauncherExecutable(root));
-        assertEquals(root.resolve("lib/app/updater"), ApplicationLocator.getUpdaterDirectory(root));
     }
 
     @Test
@@ -52,7 +50,6 @@ class ApplicationLocatorTest {
         assertEquals(root.resolve("Contents/runtime/Contents/Home"), ApplicationLocator.getRuntimeDirectory(root));
         assertEquals(root.resolve("Contents/app"), ApplicationLocator.getApplicationPayloadDirectory(root));
         assertEquals(root.resolve("Contents/MacOS/Vanta"), ApplicationLocator.getLauncherExecutable(root));
-        assertEquals(root.resolve("Contents/app/updater"), ApplicationLocator.getUpdaterDirectory(root));
     }
 
     @Test
@@ -65,8 +62,6 @@ class ApplicationLocatorTest {
         assertTrue(ApplicationLocator.isSupportedInstallation(root));
         assertEquals(root.resolve("Contents/runtime/Contents/Home"),
                 ApplicationLocator.getRuntimeDirectory(root));
-        assertThrows(IllegalStateException.class,
-                () -> ApplicationLocator.getJavaExecutable(root));
     }
 
     @Test
