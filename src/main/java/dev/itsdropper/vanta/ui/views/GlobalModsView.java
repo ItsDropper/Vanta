@@ -53,7 +53,9 @@ public class GlobalModsView extends VBox {
     private final TextField searchField;
     private final ComboBox<String> loaderBox;
     private final ComboBox<String> versionBox;
+    private final TextField versionSearchField;
     private final ComboBox<ModrinthContentType> contentTypeBox;
+    private final List<String> allMinecraftVersions = new ArrayList<>();
 
     private final VBox popularResults;
     private final Label popularStatusLabel;
@@ -135,11 +137,19 @@ public class GlobalModsView extends VBox {
         versionBox.setPrefHeight(42);
         versionBox.getStyleClass().add("create-combo");
 
+        versionSearchField = new TextField();
+        versionSearchField.setPromptText("Find version (e.g. b1.7.3, 1.12.2)");
+        versionSearchField.setAccessibleText("Search Minecraft versions");
+        versionSearchField.setPrefWidth(210);
+        versionSearchField.setPrefHeight(42);
+        versionSearchField.getStyleClass().add("create-field");
+
         FlowPane filters = new FlowPane(
                 10, 8,
                 contentTypeBox,
                 loaderBox,
-                versionBox
+                versionBox,
+                versionSearchField
         );
         filters.setAlignment(Pos.CENTER_LEFT);
         filters.setMaxWidth(Double.MAX_VALUE);
@@ -159,14 +169,17 @@ public class GlobalModsView extends VBox {
             refreshForCurrentFilters();
         });
 
+        versionSearchField.textProperty().addListener((obs, oldValue, newValue) ->
+                filterVersionChoices(newValue));
+
         if (!screenshotPreview) {
             UiExecutor.shared().execute(() -> {
                 try {
                     List<String> versions = MinecraftVersionResolver.getAllVersions();
                     UiExecutor.shared().dispatchToUi(() -> {
-                        versionBox.getItems().setAll("All versions");
-                        versionBox.getItems().addAll(versions);
-                        versionBox.getSelectionModel().select("All versions");
+                        allMinecraftVersions.clear();
+                        allMinecraftVersions.addAll(versions);
+                        filterVersionChoices(versionSearchField.getText());
                     });
                 } catch (Throwable ex) {
                     ex.printStackTrace();
@@ -394,6 +407,25 @@ public class GlobalModsView extends VBox {
             statusLabel.setManaged(false);
         } else {
             loadMostDownloadedMods();
+        }
+    }
+
+    private void filterVersionChoices(String query) {
+        String selected = versionBox.getValue();
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase(java.util.Locale.ROOT);
+
+        List<String> filtered = allMinecraftVersions.stream()
+                .filter(version -> normalizedQuery.isEmpty()
+                        || version.toLowerCase(java.util.Locale.ROOT).contains(normalizedQuery))
+                .toList();
+
+        versionBox.getItems().setAll("All versions");
+        versionBox.getItems().addAll(filtered);
+
+        if (selected != null && (selected.equals("All versions") || filtered.contains(selected))) {
+            versionBox.getSelectionModel().select(selected);
+        } else {
+            versionBox.getSelectionModel().select("All versions");
         }
     }
 
