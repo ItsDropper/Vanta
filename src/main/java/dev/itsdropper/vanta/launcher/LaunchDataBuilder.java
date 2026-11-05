@@ -274,11 +274,20 @@ public class LaunchDataBuilder {
         if (!arguments.isArray()) return null;
         for (int i = 0; i < arguments.size(); i++) {
             JsonNode current = arguments.get(i);
-            if (current != null && current.isTextual() && key.equals(current.asText())
-                    && i + 1 < arguments.size()) {
-                JsonNode next = arguments.get(i + 1);
-                if (next != null && next.isTextual() && !next.asText().isBlank()) {
-                    return next.asText();
+            if (current != null && current.isTextual()) {
+                String token = current.asText();
+                if (key.equals(token) && i + 1 < arguments.size()) {
+                    JsonNode next = arguments.get(i + 1);
+                    if (next != null && next.isTextual() && !next.asText().isBlank()) {
+                        return next.asText();
+                    }
+                }
+                String assignmentPrefix = key + "=";
+                if (token.startsWith(assignmentPrefix)) {
+                    String value = token.substring(assignmentPrefix.length()).trim();
+                    if (!value.isBlank()) {
+                        return value;
+                    }
                 }
             }
             String nested = argumentValue(current, key);
