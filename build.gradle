@@ -178,9 +178,10 @@ tasks.register('platformImageZip', Zip) {
     dependsOn tasks.named('platformAppImage')
     archiveFileName = "Vanta-${project.version}-${releasePlatformId}.zip"
     destinationDirectory = layout.buildDirectory.dir('distributions')
-    from(layout.buildDirectory.dir('packages')) {
-        include "${releaseImageName}/**"
-    }
+    // Archive the image contents at the ZIP root. UpdaterMain extracts
+    // directly into the staging directory and verifies that directory as
+    // the application image (including the Vanta.app Contents/ tree on macOS).
+    from(layout.buildDirectory.dir("packages/${releaseImageName}"))
 }
 
 tasks.register('platformImageChecksum') {
