@@ -20,6 +20,8 @@ import dev.itsdropper.vanta.ui.LauncherSettings;
 
 public class MinecraftFileInstaller {
 
+    private static final ObjectMapper LIBRARY_JSON = new ObjectMapper();
+
     // =============================================================
     // CLIENT
     // =============================================================
@@ -110,7 +112,7 @@ public class MinecraftFileInstaller {
                 ));
             }
 
-            Library libraryModel = new ObjectMapper().treeToValue(library, Library.class);
+            Library libraryModel = LIBRARY_JSON.treeToValue(library, Library.class);
             Library.Artifact nativeArtifact = LibraryResolver.findNativeArtifact(libraryModel);
             if (nativeArtifact != null) {
                 downloads.add(new LibraryDownload(
