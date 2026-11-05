@@ -86,7 +86,7 @@ tasks.register('platformAppImage', Exec) {
     def packageOutput = layout.buildDirectory.dir('packages')
     def mainJar = tasks.named('jar').get().archiveFileName.get()
     def javaHome = System.getProperty('java.home')
-    def windowsHost = System.getProperty('os.name', '').toLowerCase(Locale.ROOT).contains('windows')
+    def windowsHost = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT).contains('windows')
     def jpackageExecutable = windowsHost
             ? file("${javaHome}/bin/jpackage.exe")
             : file("${javaHome}/bin/jpackage")
