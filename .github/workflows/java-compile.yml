@@ -129,8 +129,8 @@ jobs:
             image: ubuntu:22.04
           - distro: Debian 12
             image: debian:12
-          - distro: Fedora 42
-            image: fedora:42
+          - distro: Fedora (current)
+            image: fedora:latest
           - distro: Arch Linux
             image: archlinux:latest
     steps:
@@ -159,7 +159,7 @@ jobs:
                 libxinerama1 libxxf86vm1 libgl1 libasound2 libxkbcommon0 \
                 libfontconfig1 libfreetype6 libcups2
               ;;
-            "Fedora 42")
+            "Fedora (current)")
               dnf install -y \
                 xorg-x11-server-Xvfb gtk3 libXtst libXi libXrender libXrandr \
                 libXinerama libXxf86vm mesa-libGL alsa-lib libxkbcommon \
