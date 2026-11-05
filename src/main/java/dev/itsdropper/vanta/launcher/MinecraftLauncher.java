@@ -10,6 +10,16 @@ import java.util.List;
 
 public class MinecraftLauncher {
 
+    private static boolean requiresNeoForgeFmlVersion(String minecraftVersion) {
+        if (minecraftVersion == null || minecraftVersion.isBlank()) return true;
+        String firstComponent = minecraftVersion.split("\\.", 2)[0];
+        try {
+            return Integer.parseInt(firstComponent) < 26;
+        } catch (NumberFormatException ignored) {
+            return true;
+        }
+    }
+
     public static Process launch(
             Account account,
             LaunchData data
@@ -301,8 +311,9 @@ public class MinecraftLauncher {
             }
 
             if ("NeoForge".equalsIgnoreCase(data.loader)) {
+                boolean requiresFmlVersion = requiresNeoForgeFmlVersion(data.version);
                 if (data.loaderVersion == null || data.loaderVersion.isBlank()
-                        || data.neoForgeFmlVersion == null || data.neoForgeFmlVersion.isBlank()
+                        || (requiresFmlVersion && (data.neoForgeFmlVersion == null || data.neoForgeFmlVersion.isBlank()))
                         || data.neoFormVersion == null || data.neoFormVersion.isBlank()) {
                     throw new IllegalStateException(
                             "NeoForge launch identity is incomplete. Repair this instance before launching.");
@@ -314,8 +325,10 @@ public class MinecraftLauncher {
                 command.add("--fml.neoForgeVersion");
                 command.add(data.loaderVersion);
 
-                command.add("--fml.fmlVersion");
-                command.add(data.neoForgeFmlVersion);
+                if (requiresFmlVersion) {
+                    command.add("--fml.fmlVersion");
+                    command.add(data.neoForgeFmlVersion);
+                }
 
                 command.add("--fml.mcVersion");
                 command.add(data.version);
