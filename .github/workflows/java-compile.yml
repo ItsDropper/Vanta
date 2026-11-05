@@ -111,6 +111,33 @@ jobs:
           test -s build/app-image-smoke/index.md
           test -s build/app-image-smoke/overview.png
 
+      - name: Smoke test Windows application image
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $env:APPDATA = Join-Path $env:RUNNER_TEMP 'vanta-windows-smoke'
+          New-Item -ItemType Directory -Force -Path $env:APPDATA | Out-Null
+          $env:JAVA_TOOL_OPTIONS = '-Dprism.order=sw -Djava.awt.headless=false'
+          & build/packages/Vanta/Vanta.exe --capture-sidebar-screenshots build/app-image-smoke
+          if ($LASTEXITCODE -ne 0) { throw "Vanta exited with code $LASTEXITCODE" }
+          $screenshots = Get-ChildItem 'build/app-image-smoke/[0-9][0-9]-*.png' -ErrorAction SilentlyContinue
+          if ($screenshots.Count -ne 9) { throw "Expected 9 screenshots, found $($screenshots.Count)" }
+          if (!(Test-Path 'build/app-image-smoke/index.md')) { throw 'Missing screenshot index' }
+          if (!(Test-Path 'build/app-image-smoke/overview.png')) { throw 'Missing screenshot overview' }
+
+      - name: Smoke test macOS application bundle
+        if: runner.os == 'macOS'
+        env:
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          export HOME="$RUNNER_TEMP/vanta-macos-home"
+          mkdir -p "$HOME"
+          build/packages/Vanta.app/Contents/MacOS/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s build/app-image-smoke/index.md
+          test -s build/app-image-smoke/overview.png
+
       - name: Upload platform distributions
         uses: actions/upload-artifact@v4
         with:
