@@ -229,7 +229,7 @@ public class DownloadUtil {
             }
         }
         if (LauncherSettings.isSegmentedDownloadsEnabled()) {
-            try { if (downloadSegmented(url, target, expectedSha1)) return; }
+            try { if (downloadSegmented(url, target, expectedSha1, taskId)) return; }
             catch (Exception ex) { System.err.println("Segmented transfer unavailable; falling back: " + ex.getMessage()); }
         }
         Exception lastException = null;
@@ -424,7 +424,9 @@ public class DownloadUtil {
                 .resolve(sha1.toLowerCase(java.util.Locale.ROOT));
     }
 
-    private static boolean downloadSegmented(String url, Path target, String expectedSha1) throws Exception {
+    private static boolean downloadSegmented(
+            String url, Path target, String expectedSha1, long taskId
+    ) throws Exception {
         HttpRequest head = HttpRequest.newBuilder(URI.create(url)).timeout(Duration.ofSeconds(20))
                 .method("HEAD", HttpRequest.BodyPublishers.noBody()).build();
         HttpResponse<Void> metadata = send(head, HttpResponse.BodyHandlers.discarding());
@@ -441,6 +443,8 @@ public class DownloadUtil {
                 target.getFileName() + ".download-" + java.util.UUID.randomUUID());
         ExecutorService pool = Executors.newFixedThreadPool(segments);
         List<Future<?>> futures = new ArrayList<>();
+        java.util.concurrent.atomic.AtomicLong received = new java.util.concurrent.atomic.AtomicLong();
+        java.util.concurrent.atomic.AtomicLong lastProgressNanos = new java.util.concurrent.atomic.AtomicLong();
         try {
             Files.createDirectories(staging);
             for (int i = 0; i < segments; i++) {
@@ -465,9 +469,24 @@ public class DownloadUtil {
                         try { response.body().close(); } catch (IOException ignored) { }
                         throw new IOException("Segment Content-Length does not match its requested range.");
                     }
-                    long actualPartSize;
-                    try (InputStream in = response.body()) {
-                        actualPartSize = Files.copy(in, part, StandardCopyOption.REPLACE_EXISTING);
+                    long actualPartSize = 0L;
+                    byte[] buffer = new byte[64 * 1024];
+                    try (InputStream in = response.body();
+                         OutputStream out = Files.newOutputStream(part,
+                                 StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+                        int read;
+                        while ((read = in.read(buffer)) != -1) {
+                            out.write(buffer, 0, read);
+                            actualPartSize += read;
+                            long totalReceived = received.addAndGet(read);
+                            long now = System.nanoTime();
+                            long previous = lastProgressNanos.get();
+                            if (now - previous >= 200_000_000L
+                                    && lastProgressNanos.compareAndSet(previous, now)) {
+                                dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                                        .getInstance().progress(taskId, totalReceived, length);
+                            }
+                        }
                     }
                     if (actualPartSize != expectedPartSize) {
                         throw new IOException("Incomplete segment " + index);
@@ -482,6 +501,8 @@ public class DownloadUtil {
                 throw new IOException("Segment download workers did not terminate.");
             }
 
+            dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                    .getInstance().verifying(taskId, received.get(), length);
             try (OutputStream out = Files.newOutputStream(assembled,
                     java.nio.file.StandardOpenOption.CREATE_NEW,
                     java.nio.file.StandardOpenOption.WRITE)) {
