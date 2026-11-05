@@ -139,8 +139,9 @@ public final class UpdaterLauncher {
                         + System.getProperty("java.io.tmpdir")
         );
 
-        Path updaterJar =
-                getUpdaterJar();
+        boolean windowsHost =
+                Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
+        Path updaterJar = windowsHost ? getUpdaterJar() : null;
 
         Path absoluteZip =
                 updateZip
@@ -156,7 +157,7 @@ public final class UpdaterLauncher {
 
         log(
                 "Updater JAR: "
-                        + updaterJar
+                        + (updaterJar == null ? "<embedded native helper>" : updaterJar)
         );
 
         log(
@@ -171,7 +172,7 @@ public final class UpdaterLauncher {
 
         log("---------- VALIDATION ----------");
 
-        if (!Files.isRegularFile(updaterJar)) {
+        if (windowsHost && !Files.isRegularFile(updaterJar)) {
 
             log(
                     "FAIL: updater JAR does not exist."
@@ -207,11 +208,9 @@ public final class UpdaterLauncher {
             );
         }
 
-        log(
-                "Updater JAR size: "
-                        + Files.size(updaterJar)
-                        + " bytes"
-        );
+        if (windowsHost) {
+            log("Updater JAR size: " + Files.size(updaterJar) + " bytes");
+        }
 
         log(
                 "Update ZIP size: "
@@ -220,31 +219,12 @@ public final class UpdaterLauncher {
         );
 
         /*
-         * IMPORTANT:
-         *
-         * The updater must NOT run from inside VantaLauncher.
-         *
-         * Vanta is currently running from the bundled runtime
-         * inside VantaLauncher. If we launch the updater using
-         * that same runtime, Windows can keep the runtime files
-         * locked and prevent the entire VantaLauncher directory
-         * from being renamed.
-         *
-         * Therefore we create a completely external temporary
-         * updater environment containing:
-         *
-         *   %TEMP%\Vanta-updater\<id>\
-         *       updater\
-         *           VantaUpdater.jar
-         *       runtime\
-         *           ...
-         *
-         * The updater process then runs entirely from there.
-         */
-
+         * Windows must run the updater from a copied runtime because
+         * the operating system locks loaded executable/runtime files.
+         * Linux and macOS re-enter the native launcher in helper mode;
+         * their process can keep the mapped runtime alive while the
+         * application bundle is replaced.
         Path tempUpdaterDirectory = createTemporaryUpdaterDirectory();
-        boolean windowsHost =
-                Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
         List<String> command;
 
         log("---------- PREPARING EXTERNAL UPDATER ----------");
