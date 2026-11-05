@@ -19,7 +19,7 @@ Vanta uses the Java 21 toolchain and JavaFX 21. Use the checked-in wrapper so lo
 On Windows PowerShell:
 
 ```powershell
-.\gradlew.bat clean test distZip distTar
+.\gradlew.bat clean test distZip distTar platformAppImage
 ```
 
 On Linux and macOS:
@@ -42,7 +42,7 @@ The UI screenshots GitHub Actions workflow performs the same capture under Xvfb,
 
 ## Packaging
 
-The application plugin creates portable platform distributions through `distZip` and `distTar`. CI builds and tests these distributions on Windows, Linux, and macOS. Windows still has the only integrated self-updater; Linux/macOS releases currently require manual replacement with the matching distribution. Signed native installers (MSI/EXE, DEB/RPM, and DMG) are not yet produced.
+The application plugin creates portable distributions through `distZip` and `distTar`. The `platformAppImage` task uses the host JDK's `jpackage` to create a self-contained application image with a private runtime. CI builds/tests these on Windows, Linux, and macOS. Windows still has the only integrated self-updater; Linux/macOS releases currently require manual replacement with the matching application image. Signed native installers (MSI/EXE, DEB/RPM, and DMG) are not yet produced.
 
 Do not commit build output from `build/`, generated installers, or local runtime data.
 
