@@ -426,6 +426,9 @@ public class DownloadUtil {
     }
 
     static void validateDownloadRequest(String url, String expectedSha1) {
+        if (url == null || url.isBlank()) {
+            throw new IllegalArgumentException("Download URL is required.");
+        }
         URI uri;
         try {
             uri = URI.create(url);
