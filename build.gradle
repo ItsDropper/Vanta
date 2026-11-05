@@ -149,6 +149,50 @@ tasks.register('platformAppImage', Exec) {
     }
 }
 
+def releaseHostOs = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT)
+def releaseHostArch = System.getProperty('os.arch', '').toLowerCase(java.util.Locale.ROOT)
+def releaseWindows = releaseHostOs.contains('windows')
+def releaseMac = releaseHostOs.contains('mac') || releaseHostOs.contains('darwin')
+def releaseArch = (releaseHostArch in ['amd64', 'x86_64', 'x86-64', 'x64'])
+        ? 'x64'
+        : ((releaseHostArch in ['aarch64', 'arm64']) ? 'aarch64' : null)
+if (releaseArch == null) {
+    throw new GradleException("Unsupported release CPU architecture: ${releaseHostArch}")
+}
+if (releaseWindows && releaseArch != 'x64') {
+    throw new GradleException("Windows application images are currently supported on x64 only.")
+}
+def releasePlatformId = releaseWindows ? "windows-${releaseArch}"
+        : (releaseMac ? "macos-${releaseArch}" : "linux-${releaseArch}")
+def releaseImageName = releaseMac ? 'Vanta.app' : 'Vanta'
+
+tasks.register('platformImageZip', Zip) {
+    dependsOn tasks.named('platformAppImage')
+    archiveFileName = "Vanta-${project.version}-${releasePlatformId}.zip"
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+    from(layout.buildDirectory.dir('packages')) {
+        include "${releaseImageName}/**"
+    }
+}
+
+tasks.register('platformImageChecksum') {
+    dependsOn tasks.named('platformImageZip')
+    doLast {
+        def archive = tasks.named('platformImageZip').get().archiveFile.get().asFile
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        archive.withInputStream { input ->
+            byte[] buffer = new byte[65536]
+            int read
+            while ((read = input.read(buffer)) != -1) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        def checksum = digest.digest().collect { String.format('%02x', it & 0xff) }.join()
+        new File(archive.parentFile, archive.name + '.sha256').text =
+                "${checksum}  ${archive.name}${System.lineSeparator()}"
+    }
+}
+
 tasks.register('updaterJar', Jar) {
     dependsOn tasks.named('classes')
 
