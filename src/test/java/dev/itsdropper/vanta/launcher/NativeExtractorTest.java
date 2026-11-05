@@ -78,6 +78,52 @@ class NativeExtractorTest {
     }
 
     @Test
+    void publishesNativeDirectoryWithoutStaleFiles() throws Exception {
+        String previous = System.getProperty("os.name");
+        try {
+            System.setProperty("os.name", "Linux");
+            Path output = temporaryDirectory.resolve("instance/natives");
+            Files.createDirectories(output);
+            Files.writeString(output.resolve("old-library.so"), "stale");
+            Files.writeString(output.resolve("old-windows.dll"), "stale");
+            Path archive = createArchive("replacement.jar", "libcurrent.so");
+
+            NativeExtractor.extractAll(java.util.List.of(archive), output);
+
+            assertTrue(Files.isRegularFile(output.resolve("libcurrent.so")));
+            assertFalse(Files.exists(output.resolve("old-library.so")));
+            assertFalse(Files.exists(output.resolve("old-windows.dll")));
+        } finally {
+            restoreProperty("os.name", previous);
+        }
+    }
+
+    @Test
+    void failedNativeExtractionPreservesPreviousDirectory() throws Exception {
+        String previous = System.getProperty("os.name");
+        try {
+            System.setProperty("os.name", "Linux");
+            Path output = temporaryDirectory.resolve("instance/natives");
+            Files.createDirectories(output);
+            Path previousNative = output.resolve("known-good.so");
+            Files.writeString(previousNative, "known-good");
+            Path invalidArchive = temporaryDirectory.resolve("invalid.jar");
+            Files.writeString(invalidArchive, "not a zip archive");
+
+            assertThrows(Exception.class,
+                    () -> NativeExtractor.extractAll(java.util.List.of(invalidArchive), output));
+
+            assertEquals("known-good", Files.readString(previousNative));
+            try (var children = Files.list(output.getParent())) {
+                assertFalse(children.anyMatch(path ->
+                        path.getFileName().toString().contains(".staging-")));
+            }
+        } finally {
+            restoreProperty("os.name", previous);
+        }
+    }
+
+    @Test
     void selectsArm64ModernNativeClassifierOnLinux() {
         String previousOs = System.getProperty("os.name");
         String previousArch = System.getProperty("os.arch");
