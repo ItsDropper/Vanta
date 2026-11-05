@@ -798,7 +798,8 @@ public class DownloadUtil {
         String value = header.trim();
         try {
             long seconds = Long.parseLong(value);
-            return Math.max(0L, Math.min(120_000L, Math.multiplyExact(seconds, 1000L)));
+            if (seconds < 0) return -1L;
+            return Math.min(120_000L, Math.multiplyExact(seconds, 1000L));
         } catch (NumberFormatException | ArithmeticException ignored) {
             try {
                 java.time.Instant retryAt = java.time.ZonedDateTime
