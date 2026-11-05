@@ -22,6 +22,9 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
@@ -177,17 +180,25 @@ public class DownloadUtil {
         Path lockKey = target.toAbsolutePath().normalize();
         DownloadLock downloadLock = acquireDownloadLock(lockKey);
         try {
-            long taskId = dev.itsdropper.vanta.launcher.download.DownloadCenterService
-                    .getInstance().begin(url, target, expectedSha1);
-            try {
-                downloadFileInternal(url, target, expectedSha1, taskId);
-                long size = Files.isRegularFile(target) ? Files.size(target) : 0L;
-                dev.itsdropper.vanta.launcher.download.DownloadCenterService
-                        .getInstance().complete(taskId, size);
-            } catch (Exception failure) {
-                dev.itsdropper.vanta.launcher.download.DownloadCenterService
-                        .getInstance().fail(taskId, failure);
-                throw failure;
+            Path parent = lockKey.getParent();
+            if (parent != null) Files.createDirectories(parent);
+            Path processLockPath = lockKey.resolveSibling(
+                    "." + lockKey.getFileName() + ".vanta-download.lock");
+            try (FileChannel channel = FileChannel.open(processLockPath,
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                 FileLock ignored = channel.lock()) {
+                long taskId = dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                        .getInstance().begin(url, target, expectedSha1);
+                try {
+                    downloadFileInternal(url, target, expectedSha1, taskId);
+                    long size = Files.isRegularFile(target) ? Files.size(target) : 0L;
+                    dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                            .getInstance().complete(taskId, size);
+                } catch (Exception failure) {
+                    dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                            .getInstance().fail(taskId, failure);
+                    throw failure;
+                }
             }
         } finally {
             releaseDownloadLock(lockKey, downloadLock);
