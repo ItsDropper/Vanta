@@ -54,6 +54,42 @@ class LoaderProfileStackMergerTest {
     }
 
     @Test
+    void preservesDifferentLibraryVersionsWhenOperatingSystemRulesAreDisjoint() throws Exception {
+        JsonNode base = MAPPER.readTree("""
+                {
+                  "mainClass":"net.minecraft.launchwrapper.Launch",
+                  "libraries":[{
+                    "name":"org.lwjgl.lwjgl:lwjgl:2.9.1",
+                    "rules":[
+                      {"action":"allow"},
+                      {"action":"disallow","os":{"name":"osx"}}
+                    ]
+                  }]
+                }
+                """);
+        JsonNode macOverlay = MAPPER.readTree("""
+                {
+                  "mainClass":"net.minecraft.launchwrapper.Launch",
+                  "libraries":[{
+                    "name":"org.lwjgl.lwjgl:lwjgl:2.9.2-nightly-20140822",
+                    "rules":[
+                      {"action":"allow","os":{"name":"osx"}}
+                    ]
+                  }]
+                }
+                """);
+
+        JsonNode merged = LoaderProfileStackMerger.merge(
+                base, List.of(macOverlay), List.of());
+
+        assertEquals(2, merged.path("libraries").size());
+        assertEquals("org.lwjgl.lwjgl:lwjgl:2.9.1",
+                merged.path("libraries").get(0).path("name").asText());
+        assertEquals("org.lwjgl.lwjgl:lwjgl:2.9.2-nightly-20140822",
+                merged.path("libraries").get(1).path("name").asText());
+    }
+
+    @Test
     void rejectsProfilesWithIncompatibleMainClasses() throws Exception {
         JsonNode base = MAPPER.readTree("""
                 {"mainClass":"example.VanillaMain","libraries":[]}
