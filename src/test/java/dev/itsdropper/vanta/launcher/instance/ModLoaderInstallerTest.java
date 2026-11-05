@@ -40,6 +40,23 @@ class ModLoaderInstallerTest {
     }
 
     @Test
+    void extractsModLoaderBootstrapClassesIntoAnExplodedDirectory() throws Exception {
+        Path client = createZip(
+                "ModLoader.class", new byte[]{7, 8, 9},
+                "ModLoader$1.class", new byte[]{10},
+                "net/minecraft/client/Minecraft.class", new byte[]{1});
+        Path output = Files.createTempDirectory("vanta-modloader-bootstrap");
+
+        ModLoaderInstaller.extractBootstrapClasses(client, output);
+
+        assertArrayEquals(new byte[]{7, 8, 9},
+                Files.readAllBytes(output.resolve("ModLoader.class")));
+        assertArrayEquals(new byte[]{10},
+                Files.readAllBytes(output.resolve("ModLoader$1.class")));
+        assertFalse(Files.exists(output.resolve("net/minecraft/client/Minecraft.class")));
+    }
+
+    @Test
     void rejectsArchivePathTraversal() throws Exception {
         Path vanilla = createZip("Minecraft.class", new byte[]{1});
         Path patch = createZip("../escape.class", new byte[]{2});
