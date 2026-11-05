@@ -100,7 +100,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         statusRow.setAlignment(Pos.CENTER_LEFT);
         statusRow.getStyleClass().add("server-status-row");
 
-        javaInput.setPromptText("java (or absolute path to java.exe)");
+        javaInput.setPromptText("java (or an absolute path to the Java executable)");
         javaInput.getStyleClass().add("server-input");
         minRam.setEditable(true);
         maxRam.setEditable(true);
