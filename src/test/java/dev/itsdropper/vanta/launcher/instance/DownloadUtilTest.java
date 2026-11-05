@@ -86,12 +86,16 @@ class DownloadUtilTest {
         assertTrue(DownloadUtil.isRetryableHttpStatus(425));
         assertTrue(DownloadUtil.isRetryableHttpStatus(429));
         assertTrue(DownloadUtil.isRetryableHttpStatus(500));
+        assertTrue(DownloadUtil.isRetryableHttpStatus(502));
         assertTrue(DownloadUtil.isRetryableHttpStatus(503));
+        assertTrue(DownloadUtil.isRetryableHttpStatus(504));
         assertFalse(DownloadUtil.isRetryableHttpStatus(400));
         assertFalse(DownloadUtil.isRetryableHttpStatus(401));
         assertFalse(DownloadUtil.isRetryableHttpStatus(403));
         assertFalse(DownloadUtil.isRetryableHttpStatus(404));
         assertFalse(DownloadUtil.isRetryableHttpStatus(501));
+        assertFalse(DownloadUtil.isRetryableHttpStatus(505));
+        assertFalse(DownloadUtil.isRetryableHttpStatus(511));
     }
 
     @Test
