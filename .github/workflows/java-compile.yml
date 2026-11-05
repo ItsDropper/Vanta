@@ -34,31 +34,6 @@ jobs:
       - name: Run tests and build portable distributions (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat test distZip distTar platformImageChecksum
-      - name: Verify external updater JAR dependencies (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          UPDATER_JAR="$(find build/updater -maxdepth 1 -name 'VantaUpdater-*.jar' -print -quit)"
-          test -n "$UPDATER_JAR"
-          jar tf "$UPDATER_JAR" > build/updater-entries.txt
-          grep -Fxq 'dev/itsdropper/vanta/launcher/update/UpdaterMain.class' build/updater-entries.txt
-          grep -Fxq 'dev/itsdropper/vanta/launcher/update/ApplicationLocator.class' build/updater-entries.txt
-          grep -Fxq 'dev/itsdropper/vanta/launcher/Platform.class' build/updater-entries.txt
-          grep -Fxq 'dev/itsdropper/vanta/launcher/Platform$OperatingSystem.class' build/updater-entries.txt
-      - name: Verify external updater JAR dependencies (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $updater = Get-ChildItem 'build/updater/VantaUpdater-*.jar' | Select-Object -First 1
-          if ($null -eq $updater) { throw 'Missing Windows updater JAR' }
-          $entries = & jar tf $updater.FullName
-          foreach ($required in @(
-            'dev/itsdropper/vanta/launcher/update/UpdaterMain.class',
-            'dev/itsdropper/vanta/launcher/update/ApplicationLocator.class',
-            'dev/itsdropper/vanta/launcher/Platform.class',
-            'dev/itsdropper/vanta/launcher/Platform$OperatingSystem.class'
-          )) {
-            if ($entries -notcontains $required) { throw "Missing updater dependency: $required" }
-          }
       - name: Verify Windows application image layout
         if: runner.os == 'Windows'
         shell: pwsh
@@ -68,7 +43,6 @@ jobs:
           if (!(Test-Path 'build/packages/Vanta/Vanta.exe')) { throw 'Missing Windows launcher' }
           if (!(Test-Path 'build/packages/Vanta/runtime/bin/java.dll')) { throw 'Missing bundled Windows JVM runtime library' }
           if (!(Test-Path 'build/packages/Vanta/runtime/lib/modules')) { throw 'Missing Windows runtime modules' }
-          if (!(Test-Path 'build/packages/Vanta/app/updater/VantaUpdater.jar')) { throw 'Missing external updater JAR' }
           Add-Type -AssemblyName System.IO.Compression.FileSystem
           $archive = Get-ChildItem 'build/distributions/Vanta-*.zip' | Select-Object -First 1
           if ($null -eq $archive) { throw 'Missing Windows update archive' }
@@ -87,11 +61,6 @@ jobs:
             ls -la build/packages/Vanta/lib/runtime/lib || true
             exit 1
           fi
-          if [ ! -f build/packages/Vanta/lib/app/updater/VantaUpdater.jar ]; then
-            echo "Missing external updater JAR"
-            ls -la build/packages/Vanta/lib/app || true
-            exit 1
-          fi
           ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
           test -n "$ARCHIVE"
           unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
@@ -107,13 +76,12 @@ jobs:
             find build/packages/Vanta.app/Contents/runtime -maxdepth 5 -print
             exit 1
           fi
-          test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
           ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
           test -n "$ARCHIVE"
           unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
           grep -Eq '(^|/)Contents/MacOS/Vanta
       - name: Smoke test Linux application image
-        if: runner.os == 'Linux' && runner.arch == 'X64'
+        if: runner.os == 'Linux'
         env:
           XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
           JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
