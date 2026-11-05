@@ -59,6 +59,9 @@ public final class ApplicationLocator {
     /** Returns the native jpackage launcher executable for the image layout. */
     public static Path getLauncherExecutable(Path root) {
         Path normalized = root.toAbsolutePath().normalize();
+        if (!isSupportedInstallation(normalized)) {
+            throw new IllegalStateException("Not a supported Vanta application image: " + normalized);
+        }
         Path[] candidates = {
                 normalized.resolve("Vanta.exe"),
                 normalized.resolve("bin/Vanta"),
