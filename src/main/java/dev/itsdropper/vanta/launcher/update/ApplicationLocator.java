@@ -3,122 +3,112 @@ package dev.itsdropper.vanta.launcher.update;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Locale;
 import java.util.Optional;
 
+/** Locates and describes the three jpackage application-image layouts. */
 public final class ApplicationLocator {
+    private ApplicationLocator() {}
 
-    private static final String EXECUTABLE_NAME = "Vanta.exe";
-    private static final String RUNTIME_DIRECTORY = "runtime";
-
-    private ApplicationLocator() {
-    }
-
-    /**
-     * Locates the root directory of the packaged Vanta installation.
-     *
-     * <p>jpackage runs Vanta from a private runtime located at
-     * {@code <installation>/runtime}. That makes {@code java.home} a much
-     * more reliable installation anchor than the process command, because
-     * the process command may be java.exe/javaw.exe rather than Vanta.exe.</p>
-     */
     public static Path getApplicationDirectory() {
         Path fromRuntime = findFromJavaHome();
-        if (fromRuntime != null) {
-            return fromRuntime;
-        }
+        if (fromRuntime != null) return fromRuntime;
 
         Path fromProcess = findFromProcessCommand();
-        if (fromProcess != null) {
-            return fromProcess;
-        }
+        if (fromProcess != null) return fromProcess;
 
         Path fromCodeSource = findFromCodeSource();
-        if (fromCodeSource != null) {
-            return fromCodeSource;
-        }
+        if (fromCodeSource != null) return fromCodeSource;
 
-        Path fromWorkingDirectory = findFromWorkingDirectory();
-        if (fromWorkingDirectory != null) {
-            return fromWorkingDirectory;
-        }
+        Path fromWorkingDirectory = findInstallationRoot(
+                Path.of(System.getProperty("user.dir", ".")).toAbsolutePath().normalize());
+        if (fromWorkingDirectory != null) return fromWorkingDirectory;
 
         throw new IllegalStateException(
-                "Could not locate Vanta installation. "
-                        + "Rollback and launcher self update require a packaged Vanta installation."
-        );
+                "Could not locate the Vanta application image. Self-update requires a packaged installation.");
+    }
+
+    /** Returns the private runtime directory inside a jpackage image. */
+    public static Path getRuntimeDirectory(Path root) {
+        Path normalized = root.toAbsolutePath().normalize();
+        Path[] candidates = {
+                normalized.resolve("runtime"),
+                normalized.resolve("lib/runtime"),
+                normalized.resolve("Contents/runtime")
+        };
+        for (Path candidate : candidates) {
+            if (isJavaRuntime(candidate)) return candidate;
+        }
+        throw new IllegalStateException("Could not locate the bundled Java runtime in " + normalized);
+    }
+
+    /** Returns the directory containing the application JAR and configuration. */
+    public static Path getApplicationPayloadDirectory(Path root) {
+        Path normalized = root.toAbsolutePath().normalize();
+        Path[] candidates = {
+                normalized.resolve("app"),
+                normalized.resolve("lib/app"),
+                normalized.resolve("Contents/app")
+        };
+        for (Path candidate : candidates) {
+            if (Files.isDirectory(candidate)) return candidate;
+        }
+        throw new IllegalStateException("Could not locate the Vanta application payload in " + normalized);
+    }
+
+    /** Returns the native jpackage launcher executable for the image layout. */
+    public static Path getLauncherExecutable(Path root) {
+        Path normalized = root.toAbsolutePath().normalize();
+        Path[] candidates = {
+                normalized.resolve("Vanta.exe"),
+                normalized.resolve("bin/Vanta"),
+                normalized.resolve("Contents/MacOS/Vanta")
+        };
+        for (Path candidate : candidates) {
+            if (Files.isRegularFile(candidate)) return candidate;
+        }
+        throw new IllegalStateException("Could not locate the Vanta launcher executable in " + normalized);
+    }
+
+    public static Path getUpdaterDirectory(Path root) {
+        return getApplicationPayloadDirectory(root).resolve("updater");
+    }
+
+    /** True only when the complete image signature for a supported OS exists. */
+    public static boolean isSupportedInstallation(Path root) {
+        return root != null && detectLayout(root.toAbsolutePath().normalize()) != Layout.UNKNOWN;
     }
 
     private static Path findFromJavaHome() {
         try {
-            String javaHomeProperty =
-                    System.getProperty("java.home");
-
-            if (javaHomeProperty == null
-                    || javaHomeProperty.isBlank()) {
-                return null;
+            Path javaHome = Path.of(System.getProperty("java.home"))
+                    .toAbsolutePath().normalize();
+            Path current = javaHome;
+            for (int depth = 0; current != null && depth < 4; depth++, current = current.getParent()) {
+                Path root = current;
+                if (current.getFileName() != null
+                        && "runtime".equalsIgnoreCase(current.getFileName().toString())) {
+                    root = current.getParent();
+                    if (root != null && root.getFileName() != null
+                            && "lib".equalsIgnoreCase(root.getFileName().toString())) {
+                        root = root.getParent();
+                    } else if (root != null && root.getFileName() != null
+                            && "Contents".equalsIgnoreCase(root.getFileName().toString())) {
+                        root = root.getParent();
+                    }
+                }
+                if (root != null && isSupportedInstallation(root)) return root;
             }
-
-            Path javaHome =
-                    Path.of(javaHomeProperty)
-                            .toAbsolutePath()
-                            .normalize();
-
-            /*
-             * Packaged jpackage layout:
-             *
-             * Vanta/
-             *   Vanta.exe
-             *   runtime/
-             *     bin/java.exe
-             *
-             * java.home therefore points directly at <Vanta>/runtime.
-             */
-            Path runtimeDirectory =
-                    javaHome.getFileName() != null
-                            && RUNTIME_DIRECTORY.equalsIgnoreCase(
-                            javaHome.getFileName().toString()
-                    )
-                            ? javaHome
-                            : null;
-
-            if (runtimeDirectory == null) {
-                return null;
-            }
-
-            return findInstallationRoot(
-                    runtimeDirectory.getParent()
-            );
         } catch (RuntimeException ignored) {
-            return null;
+            // Try the other process-location strategies.
         }
+        return null;
     }
 
     private static Path findFromProcessCommand() {
         try {
-            Optional<String> command =
-                    ProcessHandle.current()
-                            .info()
-                            .command();
-
-            if (command.isEmpty()) {
-                return null;
-            }
-
-            Path executable =
-                    Path.of(command.get())
-                            .toAbsolutePath()
-                            .normalize();
-
-            Path start = executable.getParent();
-
-            /*
-             * The jpackage launcher can appear as Vanta.exe, java.exe,
-             * or javaw.exe depending on how the application was started.
-             * We therefore search from its directory rather than requiring
-             * the process itself to be named Vanta.exe.
-             */
-            return findInstallationRoot(start);
+            Optional<String> command = ProcessHandle.current().info().command();
+            if (command.isEmpty()) return null;
+            return findInstallationRoot(Path.of(command.get()).toAbsolutePath().normalize().getParent());
         } catch (RuntimeException ignored) {
             return null;
         }
@@ -126,107 +116,52 @@ public final class ApplicationLocator {
 
     private static Path findFromCodeSource() {
         try {
-            Path location =
-                    Path.of(
-                                    ApplicationLocator.class
-                                            .getProtectionDomain()
-                                            .getCodeSource()
-                                            .getLocation()
-                                            .toURI()
-                            )
-                            .toAbsolutePath()
-                            .normalize();
-
-            Path start =
-                    Files.isRegularFile(location)
-                            ? location.getParent()
-                            : location;
-
-            return findInstallationRoot(start);
+            Path location = Path.of(ApplicationLocator.class.getProtectionDomain()
+                            .getCodeSource().getLocation().toURI())
+                    .toAbsolutePath().normalize();
+            return findInstallationRoot(Files.isRegularFile(location) ? location.getParent() : location);
         } catch (URISyntaxException | RuntimeException ignored) {
-            return null;
-        }
-    }
-
-    private static Path findFromWorkingDirectory() {
-        try {
-            Path workingDirectory =
-                    Path.of(
-                            System.getProperty("user.dir", ".")
-                    )
-                    .toAbsolutePath()
-                    .normalize();
-
-            return findInstallationRoot(
-                    workingDirectory
-            );
-        } catch (RuntimeException ignored) {
             return null;
         }
     }
 
     private static Path findInstallationRoot(Path start) {
         Path current = start;
-
-        /*
-         * A normal jpackage layout is:
-         *
-         * Vanta/
-         *   Vanta.exe
-         *   runtime/
-         *   app/
-         *
-         * The starting point may be runtime/bin, app, updater, or another
-         * nested directory, so walk upward until the complete installation
-         * signature is found.
-         */
-        for (int depth = 0;
-             current != null && depth < 16;
-             depth++) {
-
-            if (isInstallationRoot(current)) {
-                return current;
-            }
-
-            current = current.getParent();
+        for (int depth = 0; current != null && depth < 16; depth++, current = current.getParent()) {
+            if (isSupportedInstallation(current)) return current;
         }
-
         return null;
     }
 
-    private static boolean isInstallationRoot(Path directory) {
-        if (directory == null
-                || !Files.isDirectory(directory)) {
-            return false;
-        }
-
-        Path executable =
-                directory.resolve(
-                        EXECUTABLE_NAME
-                );
-
-        Path runtime =
-                directory.resolve(
-                        RUNTIME_DIRECTORY
-                );
-
-        if (!Files.isRegularFile(executable)
-                || !Files.isDirectory(runtime)) {
-            return false;
-        }
-
-        /*
-         * The bundled runtime is part of the install signature. Checking
-         * both Java launchers makes this work with normal Windows jpackage
-         * runtimes as well as layouts where only javaw.exe is present.
-         */
-        Path javaExecutable =
-                runtime.resolve("bin").resolve("java.exe");
-
-        Path javawExecutable =
-                runtime.resolve("bin").resolve("javaw.exe");
-
-        return Files.isRegularFile(javaExecutable)
-                || Files.isRegularFile(javawExecutable);
+    private static boolean isJavaRuntime(Path runtime) {
+        return Files.isRegularFile(runtime.resolve("bin/java"))
+                || Files.isRegularFile(runtime.resolve("bin/java.exe"))
+                || Files.isRegularFile(runtime.resolve("bin/javaw.exe"));
     }
+
+    private static Layout detectLayout(Path root) {
+        if (!Files.isDirectory(root)) return Layout.UNKNOWN;
+
+        if (Files.isRegularFile(root.resolve("Vanta.exe"))
+                && Files.isDirectory(root.resolve("app"))
+                && isJavaRuntime(root.resolve("runtime"))) {
+            return Layout.WINDOWS;
+        }
+
+        if (Files.isRegularFile(root.resolve("bin/Vanta"))
+                && Files.isDirectory(root.resolve("lib/app"))
+                && isJavaRuntime(root.resolve("lib/runtime"))) {
+            return Layout.LINUX;
+        }
+
+        Path contents = root.resolve("Contents");
+        if (Files.isRegularFile(contents.resolve("MacOS/Vanta"))
+                && Files.isDirectory(contents.resolve("app"))
+                && isJavaRuntime(contents.resolve("runtime"))) {
+            return Layout.MACOS;
+        }
+        return Layout.UNKNOWN;
+    }
+
+    private enum Layout { WINDOWS, LINUX, MACOS, UNKNOWN }
 }
