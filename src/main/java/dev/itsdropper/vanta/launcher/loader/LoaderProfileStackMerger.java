@@ -112,10 +112,83 @@ public final class LoaderProfileStackMerger {
             if (name == null) {
                 throw new IllegalStateException("Profile library is missing its Maven coordinate.");
             }
-            // LinkedHashMap preserves first-seen classpath position while the
-            // latest profile definition replaces the metadata for that coordinate.
-            target.put(libraryKey(name), library.deepCopy());
+
+            String key = libraryKey(name);
+            JsonNode existing = target.get(key);
+            if (existing != null && !sameCoordinateVersion(existing, library)) {
+                java.util.Set<String> existingPlatforms = exclusiveOperatingSystems(existing);
+                java.util.Set<String> incomingPlatforms = exclusiveOperatingSystems(library);
+
+                // Keep different versions side-by-side only when their metadata
+                // proves they target disjoint operating systems. Legacy game
+                // manifests commonly provide one LWJGL version for Windows/Linux
+                // and another for macOS. A plain group:artifact dedupe otherwise
+                // drops the host-compatible version when a loader overlay is merged.
+                if (existingPlatforms != null && incomingPlatforms != null
+                        && java.util.Collections.disjoint(existingPlatforms, incomingPlatforms)) {
+                    key = key + "@" + String.join(",", incomingPlatforms);
+                }
+            }
+
+            // LinkedHashMap preserves first-seen classpath position while a
+            // later definition replaces the same artifact/version/platform entry.
+            target.put(key, library.deepCopy());
         }
+    }
+
+    private static boolean sameCoordinateVersion(JsonNode first, JsonNode second) {
+        return java.util.Objects.equals(
+                text(first.get("name")),
+                text(second.get("name")));
+    }
+
+    private static java.util.Set<String> exclusiveOperatingSystems(JsonNode library) {
+        JsonNode rules = library.get("rules");
+        if (rules == null || !rules.isArray() || rules.isEmpty()) {
+            return null;
+        }
+
+        java.util.Set<String> allowed = new java.util.LinkedHashSet<>();
+        for (String operatingSystem : List.of("windows", "linux", "osx")) {
+            boolean hasAllowRule = false;
+            boolean matchedAllowRule = false;
+            boolean rejected = false;
+
+            for (JsonNode rule : rules) {
+                String action = text(rule.get("action"));
+                if (action == null) {
+                    continue;
+                }
+
+                JsonNode os = rule.get("os");
+                boolean matches = true;
+                if (os != null && os.isObject()) {
+                    // Architecture/version constraints make exclusivity
+                    // impossible to prove from OS names alone.
+                    if (text(os.get("arch")) != null || text(os.get("version")) != null) {
+                        return null;
+                    }
+                    String ruleOs = text(os.get("name"));
+                    matches = ruleOs == null || operatingSystem.equalsIgnoreCase(ruleOs);
+                }
+
+                if ("allow".equalsIgnoreCase(action)) {
+                    hasAllowRule = true;
+                    if (matches) {
+                        matchedAllowRule = true;
+                    }
+                } else if ("disallow".equalsIgnoreCase(action) && matches) {
+                    rejected = true;
+                    break;
+                }
+            }
+
+            if (!rejected && (!hasAllowRule || matchedAllowRule)) {
+                allowed.add(operatingSystem);
+            }
+        }
+
+        return allowed.isEmpty() ? null : allowed;
     }
 
     private static String libraryKey(String coordinate) {
@@ -123,8 +196,8 @@ public final class LoaderProfileStackMerger {
         if (parts.length < 3 || parts.length > 4) {
             return coordinate;
         }
-        // A loader overlay replaces an earlier version of the same
-        // Maven artifact, while classifier variants remain distinct.
+        // Same Maven artifact replaces its prior version by default.
+        // collectLibraries adds an OS suffix only for proven-disjoint variants.
         return parts[0] + ":" + parts[1]
                 + (parts.length == 4 ? ":" + parts[3] : "");
     }
