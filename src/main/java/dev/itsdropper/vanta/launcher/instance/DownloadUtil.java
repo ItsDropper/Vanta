@@ -290,7 +290,7 @@ public class DownloadUtil {
                     } catch (IOException ignored) {
                     }
 
-                    throw new DownloadHttpException(response.statusCode(), safeSourceLabel(url),
+                    throw new DownloadHttpException(response.statusCode(),
                             response.headers().firstValue("Retry-After").orElse(null));
                 }
 
