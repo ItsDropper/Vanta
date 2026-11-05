@@ -231,7 +231,18 @@ public class DownloadUtil {
                 }
 
                 boolean append = existingBytes > 0 && response.statusCode() == 206;
-                if (existingBytes > 0 && response.statusCode() != 206) existingBytes = 0;
+                if (append) {
+                    validateContentRange(
+                            response.headers().firstValue("Content-Range").orElse(null),
+                            existingBytes, -1L, -1L);
+                } else {
+                    // A partial response without a matching local prefix is not a complete file.
+                    if (response.statusCode() == 206) {
+                        try { response.body().close(); } catch (IOException ignored) { }
+                        throw new IOException("Server returned an unsolicited partial response.");
+                    }
+                    if (existingBytes > 0) existingBytes = 0;
+                }
                 long responseLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
                 long totalBytes = responseLength > 0 ? responseLength + (append ? existingBytes : 0L) : -1L;
                 long receivedBytes = append ? existingBytes : 0L;
@@ -358,7 +369,8 @@ public class DownloadUtil {
                 .map(v -> v.toLowerCase(java.util.Locale.ROOT).contains("bytes")).orElse(false);
         if (!ranges || length < 32L * 1024 * 1024) return false;
         final int segments = 4;
-        Path staging = target.resolveSibling(target.getFileName() + ".segments");
+        Path staging = target.resolveSibling(
+                target.getFileName() + ".segments-" + java.util.UUID.randomUUID());
         Files.createDirectories(staging);
         ExecutorService pool = Executors.newFixedThreadPool(segments);
         List<Future<?>> futures = new ArrayList<>();
@@ -375,6 +387,9 @@ public class DownloadUtil {
                         try { response.body().close(); } catch (IOException ignored) { }
                         throw new IOException("Server did not honor range request (HTTP " + response.statusCode() + ")");
                     }
+                    validateContentRange(
+                            response.headers().firstValue("Content-Range").orElse(null),
+                            begin, finish, length);
                     try (InputStream in = response.body()) { Files.copy(in, part, StandardCopyOption.REPLACE_EXISTING); }
                     if (Files.size(part) != finish - begin + 1) throw new IOException("Incomplete segment " + index);
                     return null;
@@ -405,6 +420,36 @@ public class DownloadUtil {
             try (var walk = Files.walk(staging)) {
                 walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> { try { Files.deleteIfExists(p); } catch (IOException ignored) { } });
             }
+        }
+    }
+
+    static void validateContentRange(
+            String header, long expectedStart, long expectedEnd, long expectedTotal
+    ) throws IOException {
+        if (header == null) {
+            throw new IOException("Server omitted the Content-Range header.");
+        }
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("(?i)^bytes ([0-9]+)-([0-9]+)/([0-9]+)$")
+                .matcher(header.trim());
+        if (!matcher.matches()) {
+            throw new IOException("Server returned an invalid Content-Range header.");
+        }
+        long start;
+        long end;
+        long total;
+        try {
+            start = Long.parseLong(matcher.group(1));
+            end = Long.parseLong(matcher.group(2));
+            total = Long.parseLong(matcher.group(3));
+        } catch (NumberFormatException invalid) {
+            throw new IOException("Server returned an invalid Content-Range value.", invalid);
+        }
+        if (start != expectedStart || end < start
+                || (expectedEnd >= 0 && end != expectedEnd)
+                || total <= end
+                || (expectedTotal >= 0 && total != expectedTotal)) {
+            throw new IOException("Server returned a byte range that does not match the requested range.");
         }
     }
 
