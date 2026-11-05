@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.launcher.loader;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -53,6 +54,7 @@ public final class LoaderStackConfiguration {
     }
 
     /** Returns layers in deterministic launch order without mutating storage. */
+    @JsonIgnore
     public List<Layer> getOrderedLayers() {
         validate();
         return layers.stream()
@@ -61,6 +63,7 @@ public final class LoaderStackConfiguration {
                 .toList();
     }
 
+    @JsonIgnore
     public List<String> getOrderedTweakers() {
         return getOrderedLayers().stream()
                 .flatMap(layer -> layer.launchTweakers().stream())
