@@ -8,6 +8,7 @@ Vanta ships self-contained Java 21 application images. A system-wide Java instal
 |---|---|---|
 | Windows 10/11 | x64 | CI build and test target |
 | Linux | x64 | CI build, test, and GUI smoke-test target |
+| Linux | ARM64 | CI build, test, and GUI smoke-test target |
 | Linux | ARM64 | CI build and test target |
 | macOS | Intel x64 | CI build and test target |
 | macOS | Apple Silicon ARM64 | CI build and test target |
@@ -18,8 +19,9 @@ The GitHub Actions matrix builds the five targets above. It checks the app-image
 
 - **Linux:** use a mainstream glibc-based desktop distribution with a working GTK/graphics stack. Secure account-session storage requires a Secret Service implementation and the `secret-tool` command (commonly provided by `libsecret-tools`). Vanta does not silently store account tokens in plaintext when that service is unavailable.
 - **macOS:** Intel and Apple Silicon application images are built separately. Packages are currently unsigned and not notarized; native DMG installers are not yet produced.
-- **Windows:** the supported application image is x64. Credentials use Windows DPAPI.
-- **Not supported:** Windows ARM64, 32-bit systems, FreeBSD, OpenBSD, Solaris, and other unlisted operating systems/architectures. They are intentionally not reported as Linux.
+- **Windows:** the native application image is x64. Windows ARM64 may run that package through Windows 11 x64 emulation with an x64 Java runtime; native Windows ARM64 packaging is not implemented or CI-tested. Credentials use Windows DPAPI.
+- **Linux:** the supported ABI is glibc. Alpine/musl is not a supported target. The distro matrix is a compatibility sample, not a guarantee for every derivative or desktop environment.
+- **Not supported:** native Windows ARM64, 32-bit systems, RISC-V, PowerPC, FreeBSD, OpenBSD, Solaris, and other unlisted operating systems/architectures. They are intentionally not reported as Linux.
 
 ## Updates
 
