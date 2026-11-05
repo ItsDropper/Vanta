@@ -687,7 +687,8 @@ public class DownloadUtil {
 
     static boolean isRetryableHttpStatus(int statusCode) {
         return statusCode == 408 || statusCode == 425 || statusCode == 429
-                || statusCode >= 500 && statusCode <= 599;
+                || statusCode >= 500 && statusCode <= 599
+                && statusCode != 501 && statusCode != 505 && statusCode != 511;
     }
 
     private static boolean isRetryableDownloadFailure(Exception failure) {
