@@ -57,7 +57,10 @@ public final class RiftInstaller {
 
         ArrayNode libraries = overlay.putArray("libraries");
         addLibrary(libraries, "org.dimdev:rift:" + LOADER_VERSION, MIXIN_REPOSITORY);
-        addLibrary(libraries, "org.dimdev:mixin:0.7.11-SNAPSHOT", MIXIN_REPOSITORY);
+        // The original org.dimdev:mixin coordinate was only hosted on the
+        // unavailable DimDev Maven server. Rift uses Sponge Mixin classes, so
+        // resolve the compatible upstream artifact from Sponge's public Maven.
+        addLibrary(libraries, "org.spongepowered:mixin:0.7.11-SNAPSHOT", MIXIN_REPOSITORY);
         addLibrary(libraries, "net.minecraft:launchwrapper:1.12",
                 "https://libraries.minecraft.net/");
         addLibrary(libraries, "org.ow2.asm:asm:6.2",
