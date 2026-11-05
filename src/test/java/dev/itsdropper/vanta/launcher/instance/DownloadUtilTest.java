@@ -55,6 +55,30 @@ class DownloadUtilTest {
     }
 
     @Test
+    void partitionsUnevenFilesWithoutGapsOrOverlaps() {
+        long[][] expected = {{0, 2}, {3, 5}, {6, 7}, {8, 9}};
+        for (int index = 0; index < expected.length; index++) {
+            assertEquals(expected[index][0], DownloadUtil.segmentStart(10, index, 4));
+            assertEquals(expected[index][1], DownloadUtil.segmentEnd(10, index, 4));
+        }
+    }
+
+    @Test
+    void partitionsMaximumLongLengthWithoutOverflow() {
+        assertEquals(0L, DownloadUtil.segmentStart(Long.MAX_VALUE, 0, 4));
+        assertEquals(Long.MAX_VALUE - 1,
+                DownloadUtil.segmentEnd(Long.MAX_VALUE, 3, 4));
+    }
+
+    @Test
+    void rejectsInvalidSegmentPartitions() {
+        assertThrows(IllegalArgumentException.class,
+                () -> DownloadUtil.segmentStart(3, 0, 4));
+        assertThrows(IllegalArgumentException.class,
+                () -> DownloadUtil.segmentEnd(10, 4, 4));
+    }
+
+    @Test
     void retriesOnlyTransientHttpStatuses() {
         assertTrue(DownloadUtil.isRetryableHttpStatus(408));
         assertTrue(DownloadUtil.isRetryableHttpStatus(425));
