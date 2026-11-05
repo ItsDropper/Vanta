@@ -43,7 +43,7 @@ jobs:
           grep -Fxq 'dev/itsdropper/vanta/launcher/update/UpdaterMain.class' build/updater-entries.txt
           grep -Fxq 'dev/itsdropper/vanta/launcher/update/ApplicationLocator.class' build/updater-entries.txt
           grep -Fxq 'dev/itsdropper/vanta/launcher/Platform.class' build/updater-entries.txt
-          grep -Fxq 'dev/itsdropper/vanta/launcher/Platform\$OperatingSystem.class' build/updater-entries.txt
+          grep -Fxq 'dev/itsdropper/vanta/launcher/Platform$OperatingSystem.class' build/updater-entries.txt
       - name: Verify external updater JAR dependencies (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
