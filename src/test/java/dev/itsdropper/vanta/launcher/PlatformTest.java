@@ -26,9 +26,10 @@ class PlatformTest {
 
     @Test
     void resolvesWindowsRoamingDataDirectory() {
-        assertEquals(Path.of("C:/Users/test/AppData/Roaming/Vanta").toAbsolutePath().normalize(),
-                MinecraftLocator.resolveVantaDirectory("Windows 11", "C:/Users/test",
-                        "C:/Users/test/AppData/Roaming", null));
+        Path roaming = temporaryDirectory.resolve("windows-roaming");
+        assertEquals(roaming.resolve("Vanta").normalize(),
+                MinecraftLocator.resolveVantaDirectory("Windows 11", temporaryDirectory.toString(),
+                        roaming.toString(), null));
     }
 
     @Test
@@ -61,6 +62,12 @@ class PlatformTest {
                 () -> MinecraftLocator.resolveVantaDirectory("Linux", null, null, null));
         assertThrows(IllegalStateException.class,
                 () -> MinecraftLocator.resolveVantaDirectory("Windows 11", "/home/test", null, null));
+        assertThrows(IllegalStateException.class,
+                () -> MinecraftLocator.resolveVantaDirectory("Windows 11", "/home/test", "relative-appdata", null));
+        assertThrows(IllegalStateException.class,
+                () -> MinecraftLocator.resolveVantaDirectory("Linux", "relative-home", null, null));
+        assertThrows(IllegalStateException.class,
+                () -> MinecraftLocator.resolveVantaDirectory("Mac OS X", "relative-home", null, null));
     }
 
     @Test
