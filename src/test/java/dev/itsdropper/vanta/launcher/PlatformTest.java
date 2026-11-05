@@ -12,6 +12,7 @@ class PlatformTest {
         assertEquals(Platform.OperatingSystem.WINDOWS, Platform.operatingSystem("Windows 11"));
         assertEquals(Platform.OperatingSystem.LINUX, Platform.operatingSystem("Linux"));
         assertEquals(Platform.OperatingSystem.MACOS, Platform.operatingSystem("Mac OS X"));
+        assertEquals(Platform.OperatingSystem.MACOS, Platform.operatingSystem("Darwin"));
         assertEquals(Platform.OperatingSystem.UNKNOWN, Platform.operatingSystem("Plan 9"));
     }
 
