@@ -43,6 +43,19 @@ public class ClasspathBuilder {
             );
         }
 
+        // ModLoader 1.2.5 calls File(URI) on its class resource URL.
+        // Load its bootstrap from an exploded directory so the URL is file:
+        // rather than jar:file:...!/ (which is not a hierarchical URI).
+        if ("ModLoader".equalsIgnoreCase(instance.getLoader())) {
+            Path bootstrapDirectory = instanceDirectory.resolve("minecraft")
+                    .resolve("modloader-bootstrap");
+            if (!Files.isRegularFile(bootstrapDirectory.resolve("ModLoader.class"))) {
+                throw new IllegalStateException(
+                        "ModLoader bootstrap class missing. Repair this instance before launching.");
+            }
+            classpath.add(bootstrapDirectory);
+        }
+
         /*
          * Legacy Minecraft metadata can include asm-all (for example,
          * ASM 4.1 on b1.7.3). Modern Fabric-family loaders also provide
