@@ -196,8 +196,13 @@ jobs:
         run: |
           $env:APPDATA = Join-Path $env:RUNNER_TEMP 'vanta-arm64-smoke'
           New-Item -ItemType Directory -Force -Path $env:APPDATA | Out-Null
-          & build/packages/Vanta/Vanta.exe --capture-sidebar-screenshots build/app-image-smoke
-          if ($LASTEXITCODE -ne 0) { throw "Vanta exited with code $LASTEXITCODE" }
+          $process = Start-Process -FilePath 'build/packages/Vanta/Vanta.exe' `
+            -ArgumentList '--capture-sidebar-screenshots', 'build/app-image-smoke' -PassThru
+          if (!$process.WaitForExit(90000)) {
+            $process.Kill()
+            throw 'Vanta screenshot smoke test timed out after 90 seconds'
+          }
+          if ($process.ExitCode -ne 0) { throw "Vanta exited with code $($process.ExitCode)" }
           $screenshots = Get-ChildItem 'build/app-image-smoke/[0-9][0-9]-*.png' -ErrorAction SilentlyContinue
           if ($screenshots.Count -ne 9) { throw "Expected 9 screenshots, found $($screenshots.Count)" }
           if (!(Test-Path 'build/app-image-smoke/index.md')) { throw 'Missing screenshot index' }
