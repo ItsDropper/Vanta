@@ -13,6 +13,29 @@ class UpdaterLauncherPlatformTest {
     Path temporaryDirectory;
 
     @Test
+    void acceptsWritableInstallParent() throws Exception {
+        Path application = temporaryDirectory.resolve("install/Vanta");
+        Files.createDirectories(application);
+        assertDoesNotThrow(() -> UpdaterLauncher.verifyWritableInstallParent(application));
+    }
+
+    @Test
+    void rejectsInstallWithoutAnExistingParent() {
+        Path application = temporaryDirectory.resolve("missing/Vanta");
+        assertThrows(java.io.IOException.class,
+                () -> UpdaterLauncher.verifyWritableInstallParent(application));
+    }
+
+    @Test
+    void identifiesMacAppTranslocationPaths() {
+        Path translocated = temporaryDirectory.resolve(
+                "private/var/folders/AppTranslocation/session/d/Vanta.app");
+        Path normal = temporaryDirectory.resolve("Applications/Vanta.app");
+        assertTrue(ApplicationLocator.isTranslocatedApplication(translocated));
+        assertFalse(ApplicationLocator.isTranslocatedApplication(normal));
+    }
+
+    @Test
     void copiesCompleteWindowsImageWithoutStandaloneJavaExecutable() throws Exception {
         Path source = temporaryDirectory.resolve("installed/Vanta");
         Path launcher = createFile(source.resolve("Vanta.exe"), "native-launcher");
