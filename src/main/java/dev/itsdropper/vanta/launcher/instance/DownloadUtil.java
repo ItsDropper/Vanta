@@ -461,8 +461,8 @@ public class DownloadUtil {
             Files.createDirectories(staging);
             for (int i = 0; i < segments; i++) {
                 final int index = i;
-                final long begin = (length * i) / segments;
-                final long finish = (length * (i + 1)) / segments - 1;
+                final long begin = segmentStart(length, index, segments);
+                final long finish = segmentEnd(length, index, segments);
                 futures.add(pool.submit(() -> {
                     Path part = staging.resolve("part-" + index);
                     HttpRequest range = HttpRequest.newBuilder(URI.create(url)).timeout(REQUEST_TIMEOUT)
@@ -618,6 +618,30 @@ public class DownloadUtil {
             }
         } finally {
             Files.deleteIfExists(temporary);
+        }
+    }
+
+    static long segmentStart(long totalLength, int segmentIndex, int segmentCount) {
+        validateSegmentArguments(totalLength, segmentIndex, segmentCount);
+        long baseSize = totalLength / segmentCount;
+        long remainder = totalLength % segmentCount;
+        return baseSize * segmentIndex + Math.min(segmentIndex, remainder);
+    }
+
+    static long segmentEnd(long totalLength, int segmentIndex, int segmentCount) {
+        validateSegmentArguments(totalLength, segmentIndex, segmentCount);
+        long baseSize = totalLength / segmentCount;
+        long remainder = totalLength % segmentCount;
+        return baseSize * (segmentIndex + 1L)
+                + Math.min(segmentIndex + 1L, remainder) - 1L;
+    }
+
+    private static void validateSegmentArguments(
+            long totalLength, int segmentIndex, int segmentCount
+    ) {
+        if (totalLength < 1 || segmentCount < 1 || segmentCount > totalLength
+                || segmentIndex < 0 || segmentIndex >= segmentCount) {
+            throw new IllegalArgumentException("Invalid segmented download range.");
         }
     }
 
