@@ -362,24 +362,6 @@ public class MinecraftFileInstaller {
         };
     }
 
-    private static String getArchitecture() {
-
-        String arch =
-                System.getProperty(
-                        "os.arch",
-                        ""
-                ).toLowerCase();
-
-        if (arch.equals("amd64") || arch.equals("x86_64")
-                || arch.equals("x86-64") || arch.equals("x64")
-                || arch.equals("aarch64") || arch.equals("arm64")) {
-            return "64";
-        }
-        if (arch.matches("x86|i[3-6]86|x86_32|x32")) {
-            return "32";
-        }
-        throw new IllegalStateException("Unsupported Minecraft native architecture: " + arch);
-    }
 
     private static boolean matchesArchitecture(
             String required,
@@ -398,29 +380,41 @@ public class MinecraftFileInstaller {
 
         if ("x86_64".equals(requiredNormalized)
                 || "amd64".equals(requiredNormalized)
-                || "64".equals(requiredNormalized)) {
-
+                || "x64".equals(requiredNormalized)) {
             return actualNormalized.equals("amd64")
                     || actualNormalized.equals("x86_64")
                     || actualNormalized.equals("x86-64")
-                    || actualNormalized.contains("64");
+                    || actualNormalized.equals("x64");
         }
 
-        if ("x86".equals(requiredNormalized)
-                || "32".equals(requiredNormalized)
+        if ("64".equals(requiredNormalized)) {
+            return actualNormalized.equals("amd64") || actualNormalized.equals("x86_64")
+                    || actualNormalized.equals("x86-64") || actualNormalized.equals("x64")
+                    || actualNormalized.equals("aarch64") || actualNormalized.equals("arm64")
+                    || actualNormalized.equals("armv8") || actualNormalized.equals("armv8l")
+                    || actualNormalized.equals("64");
+        }
+
+        if ("aarch64".equals(requiredNormalized) || "arm64".equals(requiredNormalized)) {
+            return actualNormalized.equals("aarch64") || actualNormalized.equals("arm64")
+                    || actualNormalized.equals("armv8") || actualNormalized.equals("armv8l");
+        }
+
+        if ("arm".equals(requiredNormalized) || "arm32".equals(requiredNormalized)) {
+            return actualNormalized.equals("arm") || actualNormalized.equals("arm32")
+                    || actualNormalized.equals("armv7") || actualNormalized.equals("armv7l")
+                    || actualNormalized.equals("armv6") || actualNormalized.equals("armv6l");
+        }
+
+        if ("x86".equals(requiredNormalized) || "32".equals(requiredNormalized)
                 || "x86_32".equals(requiredNormalized)) {
-
-            return actualNormalized.equals("x86")
-                    || actualNormalized.equals("i386")
-                    || actualNormalized.equals("i486")
-                    || actualNormalized.equals("i586")
-                    || actualNormalized.equals("i686")
-                    || actualNormalized.contains("32");
+            return actualNormalized.equals("x86") || actualNormalized.equals("i386")
+                    || actualNormalized.equals("i486") || actualNormalized.equals("i586")
+                    || actualNormalized.equals("i686") || actualNormalized.equals("x86_32")
+                    || actualNormalized.equals("x32") || actualNormalized.equals("32");
         }
 
-        return requiredNormalized.equals(
-                actualNormalized
-        );
+        return requiredNormalized.equals(actualNormalized);
     }
 
     // =============================================================
