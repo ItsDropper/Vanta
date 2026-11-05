@@ -31,6 +31,8 @@ public class LaunchData {
 
     public String neoFormVersion;
 
+    public List<String> neoForgeJvmArguments;
+
     public Path javaAgent;
 
     public Path minecraftMappings;
