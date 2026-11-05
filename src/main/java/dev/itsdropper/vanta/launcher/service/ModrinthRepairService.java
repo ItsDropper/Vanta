@@ -791,13 +791,7 @@ private void removeInstalledMod(
                 continue;
             }
 
-            String versionNumber = version.getVersionNumber();
-            int metadataSeparator = versionNumber.indexOf('+');
-            if (metadataSeparator >= 0) {
-                versionNumber = versionNumber.substring(0, metadataSeparator);
-            }
-
-            boolean correctVersion = "0.9.3-beta.1".equals(versionNumber);
+            boolean correctVersion = "SS023RVV".equals(version.getId());
             boolean correctLoader = version.getLoaders() != null
                     && version.getLoaders().stream()
                     .map(ModrinthLoaderIds::normalize)
