@@ -406,7 +406,7 @@ public class DownloadUtil {
                     try { Files.deleteIfExists(temporary); } catch (IOException ignored) { }
                 }
                 if (permanentFailure) break;
-                if (attempt < maxRetries()) sleepBeforeRetry(attempt);
+                if (attempt < maxRetries()) sleepBeforeRetry(attempt, e);
             }
         }
 
