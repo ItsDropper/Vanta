@@ -214,9 +214,7 @@ public class FabricInstaller {
                     nameNode.asText().trim();
 
             JsonNode downloads = library.get("downloads");
-            if (downloads != null
-                    && downloads.get("artifact") == null
-                    && downloads.has("classifiers")
+            if ((downloads == null || downloads.get("artifact") == null)
                     && library.has("natives")) {
                 // Native-only Maven entries are installed from their
                 // platform classifier by MinecraftFileInstaller.
