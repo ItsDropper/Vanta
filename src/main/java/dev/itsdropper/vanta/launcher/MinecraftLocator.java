@@ -27,22 +27,29 @@ public class MinecraftLocator {
             if (appData == null || appData.isBlank()) {
                 throw new IllegalStateException("APPDATA is not available on Windows.");
             }
-            return Paths.get(appData, "Vanta").toAbsolutePath().normalize();
+            Path appDataPath = Paths.get(appData);
+            if (!appDataPath.isAbsolute()) {
+                throw new IllegalStateException("APPDATA must be an absolute path on Windows.");
+            }
+            return appDataPath.resolve("Vanta").normalize();
         }
 
         if (home == null || home.isBlank()) {
             throw new IllegalStateException("The user home directory is not available.");
         }
+        Path homePath = Paths.get(home);
+        if (!homePath.isAbsolute()) {
+            throw new IllegalStateException("The user home directory must be an absolute path.");
+        }
         if (os == Platform.OperatingSystem.MACOS) {
-            return Paths.get(home, "Library", "Application Support", "Vanta")
-                    .toAbsolutePath().normalize();
+            return homePath.resolve(Path.of("Library", "Application Support", "Vanta")).normalize();
         }
         if (os == Platform.OperatingSystem.LINUX) {
             Path dataHome = xdgDataHome != null && !xdgDataHome.isBlank()
                     && Paths.get(xdgDataHome).isAbsolute()
                     ? Paths.get(xdgDataHome)
-                    : Paths.get(home, ".local", "share");
-            return dataHome.resolve("Vanta").toAbsolutePath().normalize();
+                    : homePath.resolve(Path.of(".local", "share"));
+            return dataHome.resolve("Vanta").normalize();
         }
         throw new UnsupportedOperationException("Unsupported operating system: " + osName);
     }
