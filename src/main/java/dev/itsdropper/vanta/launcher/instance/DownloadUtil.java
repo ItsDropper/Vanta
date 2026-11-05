@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher.instance;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.io.OutputStream;
@@ -202,7 +203,7 @@ public class DownloadUtil {
             throw new IllegalArgumentException("Download target is required.");
         }
         Path lockKey = target.toAbsolutePath().normalize();
-        if (System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win")) {
+        if (Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS) {
             lockKey = Path.of(lockKey.toString().toLowerCase(java.util.Locale.ROOT));
         }
         DownloadLock downloadLock = acquireDownloadLock(lockKey);
