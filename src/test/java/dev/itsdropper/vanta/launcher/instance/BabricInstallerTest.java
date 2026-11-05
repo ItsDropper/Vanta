@@ -36,6 +36,11 @@ class BabricInstallerTest {
     }
 
     @Test
+    void usesSupportedFabricMetaGameVersionForLegacyBabricBootstrap() {
+        assertEquals("1.21.11", BabricInstaller.fabricProfileReferenceGameVersion());
+    }
+
+    @Test
     void rejectsMinecraftVersionsOutsideTheVerifiedBabricTarget() {
         assertThrows(IllegalArgumentException.class,
                 () -> BabricInstaller.findLatestLoaderVersion("1.20.1"));
