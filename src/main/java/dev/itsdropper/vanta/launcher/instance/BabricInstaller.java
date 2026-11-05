@@ -82,7 +82,9 @@ public final class BabricInstaller {
                     || !library.path("name").isTextual()) {
                 throw new IllegalStateException("Official Babric LWJGL patch contains an invalid library.");
             }
-            libraries.add(library.deepCopy());
+            ObjectNode normalizedLibrary = (ObjectNode) library.deepCopy();
+            normalizeLegacyNativeLibrary(normalizedLibrary);
+            libraries.add(normalizedLibrary);
         }
         return overlay;
     }
@@ -134,6 +136,83 @@ public final class BabricInstaller {
                 """);
         overlay.put("mainClass", fabricProfile.path("mainClass").asText());
         return overlay;
+    }
+
+    /**
+     * Converts the legacy Maven-style native declaration used by Babric's
+     * official LWJGL patch into the downloads.classifiers format understood
+     * by Vanta's shared library and native installers.
+     *
+     * The upstream patch intentionally has no ordinary artifact for
+     * lwjgl-platform: it publishes OS-specific classifier JARs instead.
+     */
+    static void normalizeLegacyNativeLibrary(ObjectNode library) {
+        JsonNode natives = library.get("natives");
+        if (natives == null || !natives.isObject() || natives.isEmpty()) {
+            return;
+        }
+
+        JsonNode existingDownloads = library.get("downloads");
+        if (existingDownloads != null && existingDownloads.isObject()
+                && existingDownloads.hasNonNull("artifact")) {
+            return;
+        }
+
+        String name = library.path("name").asText("");
+        String[] coordinate = name.split(":", -1);
+        if (coordinate.length != 3
+                || coordinate[0].isBlank()
+                || coordinate[1].isBlank()
+                || coordinate[2].isBlank()
+                || coordinate[0].contains("/")
+                || coordinate[1].contains("/")
+                || coordinate[2].contains("/")
+                || coordinate[0].contains("\\\\")
+                || coordinate[1].contains("\\\\")
+                || coordinate[2].contains("\\\\")
+                || coordinate[0].contains("..")
+                || coordinate[1].contains("..")
+                || coordinate[2].contains("..")) {
+            throw new IllegalStateException("Invalid Babric native Maven coordinate: " + name);
+        }
+
+        String baseUrl = library.path("url").asText("https://repo.legacyfabric.net/legacyfabric/");
+        try {
+            java.net.URI repository = java.net.URI.create(baseUrl);
+            if ("maven.legacyfabric.net".equalsIgnoreCase(repository.getHost())) {
+                baseUrl = "https://repo.legacyfabric.net/legacyfabric/";
+            }
+        } catch (IllegalArgumentException invalidUrl) {
+            throw new IllegalStateException("Invalid Babric native repository URL for " + name, invalidUrl);
+        }
+        if (!baseUrl.endsWith("/")) {
+            baseUrl += "/";
+        }
+
+        String groupPath = coordinate[0].replace('.', '/');
+        String artifact = coordinate[1];
+        String version = coordinate[2];
+        ObjectNode downloads = library.with("downloads");
+        ObjectNode classifiers = downloads.with("classifiers");
+
+        java.util.Iterator<java.util.Map.Entry<String, JsonNode>> entries = natives.fields();
+        while (entries.hasNext()) {
+            java.util.Map.Entry<String, JsonNode> entry = entries.next();
+            String classifier = entry.getValue().asText("");
+            if (classifier.isBlank()
+                    || classifier.contains("/")
+                    || classifier.contains("\\\\")
+                    || classifier.contains("..")) {
+                throw new IllegalStateException("Invalid Babric native classifier for " + name);
+            }
+
+            String relativePath = groupPath + "/" + artifact + "/" + version + "/"
+                    + artifact + "-" + version + "-" + classifier + ".jar";
+            ObjectNode classifierMetadata = MAPPER.createObjectNode();
+            classifierMetadata.put("path", relativePath);
+            classifierMetadata.put("url", baseUrl + relativePath);
+            classifiers.set(classifier, classifierMetadata);
+        }
     }
 
     static String fabricProfileReferenceGameVersion() {
