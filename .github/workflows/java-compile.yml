@@ -44,6 +44,11 @@ jobs:
           if (!(Test-Path 'build/packages/Vanta/runtime/bin/java.exe') -and !(Test-Path 'build/packages/Vanta/runtime/bin/javaw.exe')) { throw 'Missing bundled Windows Java launcher' }
           if (!(Test-Path 'build/packages/Vanta/runtime/lib/modules')) { throw 'Missing Windows runtime modules' }
           if (!(Test-Path 'build/packages/Vanta/app/updater/VantaUpdater.jar')) { throw 'Missing external updater JAR' }
+          Add-Type -AssemblyName System.IO.Compression.FileSystem
+          $archive = Get-ChildItem 'build/distributions/Vanta-*.zip' | Select-Object -First 1
+          if ($null -eq $archive) { throw 'Missing Windows update archive' }
+          $entries = [System.IO.Compression.ZipFile]::OpenRead($archive.FullName).Entries.FullName
+          if ($entries -notcontains 'Vanta.exe') { throw 'Windows update archive must contain Vanta.exe at its root' }
       - name: Verify Linux application image layout
         if: runner.os == 'Linux'
         run: |
@@ -62,6 +67,10 @@ jobs:
             ls -la build/packages/Vanta/lib/app || true
             exit 1
           fi
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -Z1 "$ARCHIVE" | grep -Fxq 'bin/Vanta'
+          unzip -Z1 "$ARCHIVE" | grep -Fxq 'lib/runtime/lib/modules'
       - name: Verify macOS application bundle layout
         if: runner.os == 'macOS'
         run: |
@@ -74,6 +83,10 @@ jobs:
             exit 1
           fi
           test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          unzip -Z1 "$ARCHIVE" | grep -Fxq 'Contents/MacOS/Vanta'
+          unzip -Z1 "$ARCHIVE" | grep -Fxq 'Contents/app/Vanta.cfg'
       - name: Smoke test Linux application image
         if: runner.os == 'Linux' && runner.arch == 'X64'
         env:
