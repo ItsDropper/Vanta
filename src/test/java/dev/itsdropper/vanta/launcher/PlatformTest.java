@@ -26,9 +26,10 @@ class PlatformTest {
 
     @Test
     void resolvesWindowsRoamingDataDirectory() {
-        Path roaming = temporaryDirectory.resolve("windows-roaming");
+        Path home = Path.of(System.getProperty("java.io.tmpdir")).toAbsolutePath().normalize();
+        Path roaming = home.resolve("windows-roaming");
         assertEquals(roaming.resolve("Vanta").normalize(),
-                MinecraftLocator.resolveVantaDirectory("Windows 11", temporaryDirectory.toString(),
+                MinecraftLocator.resolveVantaDirectory("Windows 11", home.toString(),
                         roaming.toString(), null));
     }
 
