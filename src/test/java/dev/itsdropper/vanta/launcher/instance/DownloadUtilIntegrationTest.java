@@ -83,6 +83,31 @@ class DownloadUtilIntegrationTest {
     }
 
     @Test
+    void restartsFromZeroWhenServerRejectsStaleResumeOffset() throws Exception {
+        byte[] payload = "current artifact bytes".getBytes(StandardCharsets.UTF_8);
+        java.util.concurrent.atomic.AtomicInteger requests = new java.util.concurrent.atomic.AtomicInteger();
+        String url = serve(exchange -> {
+            if (exchange.getRequestHeaders().getFirst("Range") != null) {
+                requests.incrementAndGet();
+                exchange.getResponseHeaders().set("Content-Range", "bytes */" + payload.length);
+                exchange.sendResponseHeaders(416, -1);
+                exchange.close();
+                return;
+            }
+            requests.incrementAndGet();
+            writeResponse(exchange, 200, payload);
+        });
+        Path target = temporaryDirectory.resolve("stale-resume.jar");
+        Files.write(target.resolveSibling("stale-resume.jar.download"),
+                "an obsolete and longer partial file".getBytes(StandardCharsets.UTF_8));
+
+        DownloadUtil.downloadFileInternal(url, target, sha1(payload), 0L);
+
+        assertArrayEquals(payload, Files.readAllBytes(target));
+        assertEquals(2, requests.get());
+    }
+
+    @Test
     void rejectsResumeResponseWithWrongStartingOffset() throws Exception {
         byte[] payload = "a resumable Vanta artifact payload".getBytes(StandardCharsets.UTF_8);
         int offset = 9;
