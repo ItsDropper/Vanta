@@ -16,8 +16,9 @@ public final class Platform {
 
     static OperatingSystem operatingSystem(String name) {
         String normalized = name == null ? "" : name.toLowerCase(Locale.ROOT);
-        if (normalized.contains("win")) return OperatingSystem.WINDOWS;
+        // "Darwin" contains the substring "win", so detect Apple platforms first.
         if (normalized.contains("mac") || normalized.contains("darwin")) return OperatingSystem.MACOS;
+        if (normalized.contains("windows")) return OperatingSystem.WINDOWS;
         if (normalized.contains("linux") || normalized.contains("unix") || normalized.contains("bsd")) {
             return OperatingSystem.LINUX;
         }
