@@ -1,7 +1,5 @@
 package dev.itsdropper.vanta.launcher.update;
 
-import dev.itsdropper.vanta.launcher.Platform;
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -138,6 +136,24 @@ public final class UpdaterLauncher {
                 "TEMP: "
                         + System.getProperty("java.io.tmpdir")
         );
+
+        if (processId <= 0 || updateZip == null || applicationDirectory == null) {
+            throw new IllegalArgumentException("A valid process ID, update archive, and application directory are required.");
+        }
+
+        Path absoluteZip = updateZip.toAbsolutePath().normalize();
+        Path absoluteApplication = applicationDirectory.toAbsolutePath().normalize();
+        if (!Files.isRegularFile(absoluteZip)) {
+            throw new IOException("Update archive does not exist: " + absoluteZip);
+        }
+        if (!ApplicationLocator.isSupportedInstallation(absoluteApplication)) {
+            throw new IOException("Unsupported Vanta application image: " + absoluteApplication);
+        }
+
+        Path tempUpdaterDirectory = createTemporaryUpdaterDirectory();
+        log("Update archive: " + absoluteZip);
+        log("Application image: " + absoluteApplication);
+        log("Updater workspace: " + tempUpdaterDirectory);
 
         /*
          * Run the updater from a private copy of the complete application image.
@@ -279,6 +295,57 @@ public final class UpdaterLauncher {
         );
 
         return directory;
+    }
+
+    static void copyApplicationImage(Path source, Path destination) throws IOException {
+        if (source == null || destination == null) {
+            throw new IllegalArgumentException("Application source and destination are required.");
+        }
+        Path sourceRoot = source.toRealPath();
+        Path destinationRoot = destination.toAbsolutePath().normalize();
+        if (!Files.isDirectory(sourceRoot)) {
+            throw new IOException("Application image source is not a directory: " + sourceRoot);
+        }
+        if (destinationRoot.startsWith(sourceRoot) || sourceRoot.startsWith(destinationRoot)) {
+            throw new IOException("Updater copy must be outside the source application image.");
+        }
+        copyDirectoryContents(sourceRoot, destinationRoot, sourceRoot, new java.util.HashSet<>());
+    }
+
+    private static void copyDirectoryContents(
+            Path sourceDirectory,
+            Path destinationDirectory,
+            Path sourceRoot,
+            java.util.Set<Path> activeDirectories
+    ) throws IOException {
+        Path realDirectory = sourceDirectory.toRealPath();
+        if (!realDirectory.startsWith(sourceRoot)) {
+            throw new IOException("Application image contains a link outside its root: " + sourceDirectory);
+        }
+        if (!activeDirectories.add(realDirectory)) {
+            throw new IOException("Application image contains a directory-link cycle: " + sourceDirectory);
+        }
+
+        Files.createDirectories(destinationDirectory);
+        try (var children = Files.newDirectoryStream(realDirectory)) {
+            for (Path child : children) {
+                Path realChild = child.toRealPath();
+                if (!realChild.startsWith(sourceRoot)) {
+                    throw new IOException("Application image contains a link outside its root: " + child);
+                }
+                Path target = destinationDirectory.resolve(child.getFileName().toString());
+                if (Files.isDirectory(realChild)) {
+                    copyDirectoryContents(realChild, target, sourceRoot, activeDirectories);
+                } else {
+                    Files.createDirectories(target.getParent());
+                    Files.copy(realChild, target,
+                            StandardCopyOption.REPLACE_EXISTING,
+                            StandardCopyOption.COPY_ATTRIBUTES);
+                }
+            }
+        } finally {
+            activeDirectories.remove(realDirectory);
+        }
     }
 
     private static Path getUpdaterOutputLog() {
