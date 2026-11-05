@@ -156,7 +156,7 @@
     -fx-border-width: 1px;
     -fx-border-radius: 7px;
 
-    -fx-text-fill: -vantabg;
+    -fx-text-fill: -vantaaccentforeground;
 
     -fx-font-size: 10px;
     -fx-font-weight: 800;
@@ -712,8 +712,8 @@
 }
 
 .home-featured-card .home-featured-icon-frame {
-    -fx-background-color: rgba(8, 16, 12, 0.76);
-    -fx-border-color: rgba(180, 210, 190, 0.30);
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-background-radius: 10px;
     -fx-border-radius: 10px;
@@ -733,13 +733,13 @@
 }
 
 .home-featured-card .home-featured-meta {
-    -fx-text-fill: #E0E9E2;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
     -fx-font-weight: 600;
 }
 
 .home-featured-card .home-featured-playtime {
-    -fx-text-fill: #B9C9BE;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
 }
 
@@ -748,7 +748,7 @@
     -fx-background-radius: 6px;
     -fx-border-color: transparent;
     -fx-border-radius: 6px;
-    -fx-text-fill: -vantabg;
+    -fx-text-fill: -vantaaccentforeground;
     -fx-font-size: 11px;
     -fx-font-weight: 800;
     -fx-padding: 0 22px;
@@ -828,7 +828,7 @@
 
 .home-recent-play:hover {
     -fx-background-color: -vantaaccent;
-    -fx-text-fill: -vantabg;
+    -fx-text-fill: -vantaaccentforeground;
 }
 
 .home-recent-stop {
