@@ -25,7 +25,7 @@ On Windows PowerShell:
 On Linux and macOS:
 
 ```bash
-./gradlew clean test distZip distTar platformAppImage
+./gradlew clean test distZip distTar platformImageChecksum
 ```
 
 The first build may download Gradle dependencies. A successful compile is not a substitute for testing the affected runtime behavior.
@@ -42,7 +42,7 @@ The UI screenshots GitHub Actions workflow performs the same capture under Xvfb,
 
 ## Packaging
 
-The application plugin creates portable distributions through `distZip` and `distTar`. The `platformAppImage` task uses the host JDK's `jpackage` to create a self-contained application image with a private runtime. CI builds/tests these on Windows, Linux, and macOS. Windows still has the only integrated self-updater; Linux/macOS releases currently require manual replacement with the matching application image. Signed native installers (MSI/EXE, DEB/RPM, and DMG) are not yet produced.
+The application plugin creates portable distributions through `distZip` and `distTar`. The `platformAppImage` task uses the host JDK's `jpackage` to create a self-contained application image with a private runtime. `platformImageChecksum` additionally creates a platform/architecture-specific ZIP and SHA-256 file. CI validates Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon. The external updater and release asset selection support all those image layouts; actual in-place updates on each host still need end-to-end validation. Signed/notarized packages and native installers (MSI/EXE, DEB/RPM, and DMG) are not yet produced.
 
 Do not commit build output from `build/`, generated installers, or local runtime data.
 
