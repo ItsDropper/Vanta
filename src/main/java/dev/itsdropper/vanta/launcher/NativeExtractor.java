@@ -116,31 +116,74 @@ public class NativeExtractor {
         };
     }
 
-    public static void extractAll(
-            List<Path> jars,
-            Path outputFolder
-    ) throws Exception {
-
-        if (jars == null
-                || jars.isEmpty()) {
-
-            return;
+    public static void extractAll(List<Path> jars, Path outputFolder) throws Exception {
+        if (outputFolder == null) {
+            throw new IllegalArgumentException("Native output directory is required.");
+        }
+        Path target = outputFolder.toAbsolutePath().normalize();
+        if (Files.isSymbolicLink(target)) {
+            throw new IllegalStateException("Native output directory cannot be a symbolic link.");
+        }
+        if (Files.exists(target) && !Files.isDirectory(target)) {
+            throw new IllegalStateException("Native output path is not a directory: " + target);
         }
 
-        Files.createDirectories(
-                outputFolder
-        );
+        Path parent = target.getParent();
+        if (parent == null) throw new IllegalStateException("Native output directory has no parent.");
+        Files.createDirectories(parent);
 
-        for (Path jar : jars) {
+        String suffix = java.util.UUID.randomUUID().toString();
+        Path staging = parent.resolve(target.getFileName() + ".staging-" + suffix);
+        Path backup = parent.resolve(target.getFileName() + ".backup-" + suffix);
+        boolean backedUp = false;
+        boolean published = false;
 
-            if (jar == null) {
-                continue;
+        try {
+            Files.createDirectory(staging);
+            if (jars != null) {
+                for (Path jar : jars) {
+                    if (jar != null) extract(jar, staging);
+                }
             }
 
-            extract(
-                    jar,
-                    outputFolder
-            );
+            if (Files.exists(target)) {
+                moveDirectory(target, backup);
+                backedUp = true;
+            }
+            moveDirectory(staging, target);
+            published = true;
+        } catch (Exception failure) {
+            if (backedUp && !Files.exists(target) && Files.exists(backup)) {
+                try {
+                    moveDirectory(backup, target);
+                    backedUp = false;
+                } catch (Exception rollbackFailure) {
+                    failure.addSuppressed(rollbackFailure);
+                }
+            }
+            throw failure;
+        } finally {
+            deleteTreeQuietly(staging);
+            if (published && backedUp) deleteTreeQuietly(backup);
+        }
+    }
+
+    private static void moveDirectory(Path source, Path destination) throws java.io.IOException {
+        try {
+            Files.move(source, destination, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+        } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+            Files.move(source, destination);
+        }
+    }
+
+    private static void deleteTreeQuietly(Path root) {
+        if (root == null || !Files.exists(root)) return;
+        try (var paths = Files.walk(root)) {
+            for (Path path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) {
+                Files.deleteIfExists(path);
+            }
+        } catch (Exception ignored) {
+            // Stale staging/backup directories are harmless and can be inspected manually.
         }
     }
 }
