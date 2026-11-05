@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: cross-platform-checks-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-and-test:
     name: ${{ matrix.os }} — tests and distributions
