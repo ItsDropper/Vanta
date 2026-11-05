@@ -53,6 +53,41 @@ class ApplicationLocatorTest {
     }
 
     @Test
+    void locatesWindowsImageFromItsBundledRuntime() throws Exception {
+        Path root = temporaryDirectory.resolve("Vanta-Windows-Home");
+        touch(root.resolve("Vanta.exe"));
+        touch(root.resolve("app/Vanta.cfg"));
+        touch(root.resolve("runtime/bin/java.dll"));
+        touch(root.resolve("runtime/lib/modules"));
+
+        assertEquals(root.toAbsolutePath().normalize(),
+                ApplicationLocator.findFromJavaHome(root.resolve("runtime")));
+    }
+
+    @Test
+    void locatesLinuxImageFromItsBundledRuntime() throws Exception {
+        Path root = temporaryDirectory.resolve("Vanta-Linux-Home");
+        touch(root.resolve("bin/Vanta"));
+        touch(root.resolve("lib/app/Vanta.cfg"));
+        touch(root.resolve("lib/runtime/lib/modules"));
+
+        assertEquals(root.toAbsolutePath().normalize(),
+                ApplicationLocator.findFromJavaHome(root.resolve("lib/runtime")));
+    }
+
+    @Test
+    void locatesMacImageFromItsNestedBundledRuntime() throws Exception {
+        Path root = temporaryDirectory.resolve("Vanta-Home.app");
+        touch(root.resolve("Contents/MacOS/Vanta"));
+        touch(root.resolve("Contents/app/Vanta.cfg"));
+        touch(root.resolve("Contents/runtime/Contents/Home/lib/modules"));
+
+        assertEquals(root.toAbsolutePath().normalize(),
+                ApplicationLocator.findFromJavaHome(
+                        root.resolve("Contents/runtime/Contents/Home")));
+    }
+
+    @Test
     void rejectsIncompleteOrUnknownApplicationImages() throws Exception {
         Path root = temporaryDirectory.resolve("not-vanta");
         touch(root.resolve("Vanta.exe"));
