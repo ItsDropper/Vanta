@@ -61,10 +61,19 @@ public class JavaInstaller {
 
         String os = Platform.adoptiumOs();
         String architecture = Platform.adoptiumArchitecture();
-        String url =
-                "https://api.adoptium.net/v3/binary/latest/"
-                        + version
-                        + "/ga/" + os + "/" + architecture + "/jdk/hotspot/normal/eclipse";
+        String metadataUrl = "https://api.adoptium.net/v3/assets/latest/" + version
+                + "/hotspot?architecture=" + architecture + "&image_type=jdk&os=" + os + "&vendor=eclipse";
+        com.fasterxml.jackson.databind.JsonNode assets =
+                dev.itsdropper.vanta.launcher.instance.DownloadUtil.downloadJson(metadataUrl);
+        com.fasterxml.jackson.databind.JsonNode packageInfo = assets.isArray() && !assets.isEmpty()
+                ? assets.get(0).path("binary").path("package")
+                : com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.nullNode();
+        String downloadUrl = packageInfo.path("link").asText("");
+        String expectedSha256 = packageInfo.path("checksum").asText("").toLowerCase(java.util.Locale.ROOT);
+        if (!downloadUrl.startsWith("https://github.com/adoptium/")
+                || !expectedSha256.matches("[0-9a-f]{64}")) {
+            throw new IOException("Eclipse Temurin did not provide a trusted download URL and SHA-256 checksum.");
+        }
 
         System.out.println(
                 "Downloading Temurin Java "
@@ -75,7 +84,11 @@ public class JavaInstaller {
         boolean windows = Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
         Path archive = javaDirectory.resolve(windows ? "java.zip" : "java.tar.gz");
 
-        dev.itsdropper.vanta.launcher.instance.DownloadUtil.downloadFile(url, archive, null);
+        dev.itsdropper.vanta.launcher.instance.DownloadUtil.downloadFile(downloadUrl, archive, null);
+        if (!sha256(archive).equals(expectedSha256)) {
+            Files.deleteIfExists(archive);
+            throw new IOException("Temurin Java archive failed SHA-256 verification.");
+        }
 
         System.out.println(
                 "Extracting Java "
@@ -167,6 +180,23 @@ public class JavaInstaller {
 
             return null;
         }
+    }
+
+    private static String sha256(Path file) throws IOException {
+        final java.security.MessageDigest digest;
+        try {
+            digest = java.security.MessageDigest.getInstance("SHA-256");
+        } catch (java.security.NoSuchAlgorithmException impossible) {
+            throw new IllegalStateException("SHA-256 is unavailable.", impossible);
+        }
+        try (InputStream input = Files.newInputStream(file)) {
+            byte[] buffer = new byte[64 * 1024];
+            int read;
+            while ((read = input.read(buffer)) != -1) digest.update(buffer, 0, read);
+        }
+        StringBuilder result = new StringBuilder(64);
+        for (byte value : digest.digest()) result.append(String.format("%02x", value & 0xff));
+        return result.toString();
     }
 
     // =============================================================
