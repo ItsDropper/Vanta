@@ -136,6 +136,10 @@ public final class BabricInstaller {
         return overlay;
     }
 
+    static String fabricProfileReferenceGameVersion() {
+        return FABRIC_PROFILE_REFERENCE_GAME_VERSION;
+    }
+
     private static void validateFabricBootstrap(JsonNode profile) {
         if (profile == null || !profile.isObject()
                 || !profile.path("mainClass").isTextual()
