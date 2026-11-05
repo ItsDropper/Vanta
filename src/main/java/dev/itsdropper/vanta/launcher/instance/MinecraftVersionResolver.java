@@ -92,6 +92,33 @@ public class MinecraftVersionResolver {
         return result;
     }
 
+    /**
+     * Returns every game version published in Mojang's official manifest,
+     * including releases, snapshots, old Beta and old Alpha versions.
+     * The manifest order is retained (newest entries first).
+     */
+    public static java.util.List<String> getAllVersions()
+            throws Exception {
+
+        JsonNode manifest = DownloadUtil.downloadJson(VERSION_MANIFEST_URL);
+        JsonNode versions = manifest.get("versions");
+
+        if (versions == null || !versions.isArray()) {
+            throw new IllegalStateException("Invalid Minecraft version manifest.");
+        }
+
+        java.util.List<String> result = new java.util.ArrayList<>();
+        for (JsonNode version : versions) {
+            JsonNode id = version.get("id");
+            JsonNode type = version.get("type");
+            if (id != null && !id.asText().isBlank()
+                    && type != null && !type.asText().isBlank()) {
+                result.add(id.asText());
+            }
+        }
+        return result;
+    }
+
     // =============================================================
     // VERSION
     // =============================================================
