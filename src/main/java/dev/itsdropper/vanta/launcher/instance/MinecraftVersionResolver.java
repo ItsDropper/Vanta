@@ -154,11 +154,22 @@ public class MinecraftVersionResolver {
         Path versionFile =
                 minecraftDirectory
                         .resolve("version.json");
+        Path temporary = minecraftDirectory.resolve(
+                "version.json." + java.util.UUID.randomUUID() + ".tmp");
 
-        MAPPER.writerWithDefaultPrettyPrinter()
-                .writeValue(
-                        versionFile.toFile(),
-                        metadata
-                );
+        try {
+            MAPPER.writerWithDefaultPrettyPrinter()
+                    .writeValue(temporary.toFile(), metadata);
+            try {
+                Files.move(temporary, versionFile,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, versionFile,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
     }
 }
