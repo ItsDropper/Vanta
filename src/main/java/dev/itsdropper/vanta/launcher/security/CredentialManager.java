@@ -9,7 +9,6 @@ import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 
 /**
  * Stores account sessions in the host operating system's credential vault.
