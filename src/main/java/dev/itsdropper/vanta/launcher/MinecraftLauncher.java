@@ -299,6 +299,33 @@ public class MinecraftLauncher {
                 command.add("--fml.forgeGroup");
                 command.add("net.minecraftforge");
             }
+
+            if ("NeoForge".equalsIgnoreCase(data.loader)) {
+                if (data.loaderVersion == null || data.loaderVersion.isBlank()
+                        || data.neoForgeFmlVersion == null || data.neoForgeFmlVersion.isBlank()
+                        || data.neoFormVersion == null || data.neoFormVersion.isBlank()) {
+                    throw new IllegalStateException(
+                            "NeoForge launch identity is incomplete. Repair this instance before launching.");
+                }
+
+                // NeoForge's FML VersionInfo requires all three version values.
+                // These must be passed as program arguments, not inferred from
+                // the classpath or the Minecraft --version argument.
+                command.add("--fml.neoForgeVersion");
+                command.add(data.loaderVersion);
+
+                command.add("--fml.fmlVersion");
+                command.add(data.neoForgeFmlVersion);
+
+                command.add("--fml.mcVersion");
+                command.add(data.version);
+
+                command.add("--fml.neoFormVersion");
+                command.add(data.neoFormVersion);
+
+                command.add("--launchTarget");
+                command.add("forgeclient");
+            }
     
             // =============================================================
             // ASSET INDEX
