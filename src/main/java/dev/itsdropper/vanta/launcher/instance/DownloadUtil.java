@@ -67,6 +67,15 @@ public class DownloadUtil {
         private int users;
     }
 
+    private static Path processLockPath(Path target) throws Exception {
+        byte[] digest = MessageDigest.getInstance("SHA-256")
+                .digest(target.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        StringBuilder key = new StringBuilder(digest.length * 2);
+        for (byte value : digest) key.append(String.format("%02x", value & 0xff));
+        return MinecraftLocator.getVantaDirectory()
+                .resolve("download-locks").resolve(key + ".lock");
+    }
+
     private static DownloadLock acquireDownloadLock(Path target) {
         DownloadLock entry;
         synchronized (DOWNLOAD_LOCKS) {
@@ -180,10 +189,8 @@ public class DownloadUtil {
         Path lockKey = target.toAbsolutePath().normalize();
         DownloadLock downloadLock = acquireDownloadLock(lockKey);
         try {
-            Path parent = lockKey.getParent();
-            if (parent != null) Files.createDirectories(parent);
-            Path processLockPath = lockKey.resolveSibling(
-                    "." + lockKey.getFileName() + ".vanta-download.lock");
+            Path processLockPath = processLockPath(lockKey);
+            Files.createDirectories(processLockPath.getParent());
             try (FileChannel channel = FileChannel.open(processLockPath,
                     StandardOpenOption.CREATE, StandardOpenOption.WRITE);
                  FileLock ignored = channel.lock()) {
@@ -511,11 +518,21 @@ public class DownloadUtil {
             throw failure;
         } finally {
             pool.shutdownNow();
+            boolean workersStopped = false;
+            try {
+                workersStopped = pool.awaitTermination(30, java.util.concurrent.TimeUnit.SECONDS);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+            }
             try { Files.deleteIfExists(assembled); }
             catch (IOException cleanupFailure) {
                 System.err.println("Could not remove temporary download assembly: " + cleanupFailure.getMessage());
             }
-            deleteTreeBestEffort(staging);
+            if (workersStopped) {
+                deleteTreeBestEffort(staging);
+            } else {
+                System.err.println("Segment workers did not stop; preserving staging directory for safe cleanup: " + staging);
+            }
         }
     }
 
