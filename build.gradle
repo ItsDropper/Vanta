@@ -214,6 +214,9 @@ tasks.register('updaterJar', Jar) {
 
     include 'dev/itsdropper/vanta/launcher/update/UpdaterMain.class'
     include 'dev/itsdropper/vanta/launcher/update/UpdaterMain$*.class'
+    include 'dev/itsdropper/vanta/launcher/update/ApplicationLocator.class'
+    include 'dev/itsdropper/vanta/launcher/Platform.class'
+    include 'dev/itsdropper/vanta/launcher/Platform$*.class'
 
     manifest {
         attributes(
