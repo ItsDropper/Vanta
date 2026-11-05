@@ -315,14 +315,18 @@ public class DownloadUtil {
                 long expectedFinalSize = -1L;
                 long expectedResponseBytes = -1L;
                 if (append) {
-                    validateContentRange(contentRange, existingBytes, -1L, -1L);
-                    expectedFinalSize = contentRangeTotal(contentRange);
-                    long rangeLength = contentRangeEnd(contentRange) - existingBytes + 1L;
-                    expectedResponseBytes = rangeLength;
-                    long declaredRangeLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
-                    if (declaredRangeLength >= 0 && declaredRangeLength != rangeLength) {
-                        try { response.body().close(); } catch (IOException ignored) { }
-                        throw new IOException("Resume response length does not match Content-Range.");
+                    try {
+                        validateContentRange(contentRange, existingBytes, -1L, -1L);
+                        expectedFinalSize = contentRangeTotal(contentRange);
+                        long rangeLength = contentRangeEnd(contentRange) - existingBytes + 1L;
+                        expectedResponseBytes = rangeLength;
+                        long declaredRangeLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
+                        if (declaredRangeLength >= 0 && declaredRangeLength != rangeLength) {
+                            throw new IOException("Resume response length does not match Content-Range.");
+                        }
+                    } catch (IOException invalidRange) {
+                        closeQuietly(response.body());
+                        throw invalidRange;
                     }
                 } else {
                     // A partial response without a matching local prefix is not a complete file.
@@ -499,9 +503,14 @@ public class DownloadUtil {
                         try { response.body().close(); } catch (IOException ignored) { }
                         throw new IOException("Server did not honor range request (HTTP " + response.statusCode() + ")");
                     }
-                    validateContentRange(
-                            response.headers().firstValue("Content-Range").orElse(null),
-                            begin, finish, length);
+                    try {
+                        validateContentRange(
+                                response.headers().firstValue("Content-Range").orElse(null),
+                                begin, finish, length);
+                    } catch (IOException invalidRange) {
+                        closeQuietly(response.body());
+                        throw invalidRange;
+                    }
                     long expectedPartSize = finish - begin + 1;
                     long declaredPartSize = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
                     if (declaredPartSize >= 0 && declaredPartSize != expectedPartSize) {
@@ -622,6 +631,11 @@ public class DownloadUtil {
         } catch (IOException failure) {
             System.err.println("Could not inspect abandoned download artifacts: " + failure.getMessage());
         }
+    }
+
+    private static void closeQuietly(InputStream input) {
+        try { input.close(); }
+        catch (IOException ignored) { }
     }
 
     private static void deleteTreeBestEffort(Path directory) {
