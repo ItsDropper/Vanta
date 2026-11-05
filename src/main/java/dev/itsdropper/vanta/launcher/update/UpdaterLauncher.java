@@ -463,7 +463,8 @@ public final class UpdaterLauncher {
 
     private static void copyBundledRuntime(
             Path applicationDirectory,
-            Path destination
+            Path destination,
+            String javaExecutableName
     ) throws IOException {
         Path source = ApplicationLocator.getRuntimeDirectory(applicationDirectory);
         log("Copying bundled Java runtime from " + source + " to " + destination);
@@ -491,7 +492,7 @@ public final class UpdaterLauncher {
             }
         }
         Path javaExecutable = destination.resolve("bin")
-                .resolve(Platform.javaExecutableName());
+                .resolve(javaExecutableName);
         if (!Files.isRegularFile(javaExecutable) || !Files.isExecutable(javaExecutable)) {
             throw new IOException("Copied updater Java runtime is not executable: " + javaExecutable);
         }
