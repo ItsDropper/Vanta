@@ -144,6 +144,11 @@ public final class InstanceRepairService {
             repairForge(
                     instance
             );
+        } else if (loader.equalsIgnoreCase("quilt")) {
+            repairQuilt(
+                    instance,
+                    vanillaMetadata
+            );
         } else if (loader.equalsIgnoreCase("babric")) {
             repairBabric(instance, vanillaMetadata);
         } else if (loader.equalsIgnoreCase("nilloader")) {
@@ -255,6 +260,57 @@ public final class InstanceRepairService {
             InstanceManager.saveInstance(
                     repaired
             );
+        }
+    }
+
+    private static void repairQuilt(
+            Instance instance,
+            JsonNode vanillaMetadata
+    ) throws Exception {
+        // Always resolve the current stable loader for this exact Minecraft
+        // version. Reusing a stale pinned version is what left old Quilt builds
+        // (and their incompatible ASM) in existing instances.
+        String loaderVersion =
+                QuiltInstaller.findLatestLoaderVersion(instance.getMinecraftVersion());
+
+        JsonNode profile =
+                QuiltInstaller.downloadProfile(
+                        instance.getMinecraftVersion(),
+                        loaderVersion
+                );
+
+        QuiltInstaller.installLibraries(profile);
+
+        JsonNode merged =
+                QuiltInstaller.mergeProfile(
+                        vanillaMetadata,
+                        profile
+                );
+
+        MinecraftVersionResolver.saveMetadata(
+                instance,
+                merged
+        );
+
+        if (!loaderVersion.equals(instance.getLoaderVersion())) {
+            System.out.println(
+                    "[Vanta Repair] Updating Quilt Loader "
+                            + (instance.getLoaderVersion() == null
+                            || instance.getLoaderVersion().isBlank()
+                            ? "(unknown)" : instance.getLoaderVersion())
+                            + " -> " + loaderVersion
+            );
+
+            Instance repaired = new Instance(
+                    instance.getId(),
+                    instance.getName(),
+                    instance.getMinecraftVersion(),
+                    instance.getLoader(),
+                    loaderVersion,
+                    instance.getDirectory()
+            );
+
+            InstanceManager.saveInstance(repaired);
         }
     }
 
