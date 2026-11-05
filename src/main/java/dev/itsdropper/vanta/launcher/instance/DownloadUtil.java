@@ -149,8 +149,8 @@ public class DownloadUtil {
                 }
 
                 long declaredLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
-                if (declaredLength > 0) validateJsonResponseSize(declaredLength);
                 try (InputStream input = response.body()) {
+                    if (declaredLength > 0) validateJsonResponseSize(declaredLength);
                     byte[] json = input.readNBytes(MAX_JSON_RESPONSE_BYTES + 1);
                     validateJsonResponseSize(json.length);
                     return MAPPER.readTree(json);
