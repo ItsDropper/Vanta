@@ -514,105 +514,31 @@ public final class UpdaterMain {
     private static void verifyExtractedApplication(
             Path applicationDirectory
     ) throws IOException {
+        if (!ApplicationLocator.isSupportedInstallation(applicationDirectory)) {
+            throw new IOException("Extracted Vanta package is not a supported Windows, Linux, or macOS application image: "
+                    + applicationDirectory);
+        }
+        Path launcher = ApplicationLocator.getLauncherExecutable(applicationDirectory);
+        Path runtime = ApplicationLocator.getRuntimeDirectory(applicationDirectory);
+        Path payload = ApplicationLocator.getApplicationPayloadDirectory(applicationDirectory);
+        Path javaExecutable = runtime.resolve("bin")
+                .resolve(dev.itsdropper.vanta.launcher.Platform.javaExecutableName());
 
-        if (!Files.isDirectory(
-                applicationDirectory
-        )) {
-
-            throw new IOException(
-                    "Application directory is missing: "
-                            + applicationDirectory
-            );
+        if (!Files.isExecutable(launcher)) {
+            throw new IOException("Vanta launcher is not executable: " + launcher);
+        }
+        if (!Files.isRegularFile(javaExecutable) || !Files.isExecutable(javaExecutable)) {
+            throw new IOException("Bundled Java runtime is missing or not executable: " + javaExecutable);
+        }
+        if (!Files.isRegularFile(payload.resolve("Vanta.jar"))
+                && !Files.isRegularFile(payload.resolve("Vanta.cfg"))) {
+            throw new IOException("Application payload is missing its jpackage launcher metadata.");
         }
 
-        Path executable =
-                applicationDirectory.resolve(
-                        "Vanta.exe"
-                );
-
-        Path appDirectory =
-                applicationDirectory.resolve(
-                        "app"
-                );
-
-        Path runtimeDirectory =
-                applicationDirectory.resolve(
-                        "runtime"
-                );
-
-        Path javaExecutable =
-                runtimeDirectory
-                        .resolve("bin")
-                        .resolve("java.exe");
-
-        log(
-                "Checking application: "
-                        + applicationDirectory
-        );
-
-        log(
-                "Vanta.exe: "
-                        + Files.isRegularFile(
-                        executable
-                )
-        );
-
-        log(
-                "app/: "
-                        + Files.isDirectory(
-                        appDirectory
-                )
-        );
-
-        log(
-                "runtime/: "
-                        + Files.isDirectory(
-                        runtimeDirectory
-                )
-        );
-
-        log(
-                "runtime/bin/java.exe: "
-                        + Files.isRegularFile(
-                        javaExecutable
-                )
-        );
-
-        if (!Files.isRegularFile(
-                executable
-        )) {
-
-            throw new IOException(
-                    "Application does not contain Vanta.exe."
-            );
-        }
-
-        if (!Files.isDirectory(
-                appDirectory
-        )) {
-
-            throw new IOException(
-                    "Application does not contain app directory."
-            );
-        }
-
-        if (!Files.isDirectory(
-                runtimeDirectory
-        )) {
-
-            throw new IOException(
-                    "Application does not contain runtime directory."
-            );
-        }
-
-        if (!Files.isRegularFile(
-                javaExecutable
-        )) {
-
-            throw new IOException(
-                    "Application does not contain bundled Java."
-            );
-        }
+        log("Verified application image: " + applicationDirectory);
+        log("Launcher: " + launcher);
+        log("Runtime: " + runtime);
+        log("Payload: " + payload);
     }
 
     private static void moveApplication(
@@ -819,46 +745,18 @@ public final class UpdaterMain {
     private static void startVanta(
             Path applicationDirectory
     ) throws IOException {
-
-        Path executable =
-                applicationDirectory.resolve(
-                                "Vanta.exe"
-                        )
-                        .toAbsolutePath()
-                        .normalize();
-
-        if (!Files.isRegularFile(
-                executable
-        )) {
-
-            throw new IOException(
-                    "Updated Vanta.exe was not found."
-            );
+        Path executable = ApplicationLocator.getLauncherExecutable(applicationDirectory)
+                .toAbsolutePath().normalize();
+        if (!Files.isRegularFile(executable) || !Files.isExecutable(executable)) {
+            throw new IOException("Updated Vanta launcher is missing or not executable: " + executable);
         }
 
-        log(
-                "Starting: "
-                        + executable
-        );
-
-        Process process =
-                new ProcessBuilder(
-                        executable.toString()
-                )
-                        .directory(
-                                applicationDirectory.toFile()
-                        )
-                        .start();
-
-        log(
-                "New Vanta PID: "
-                        + process.pid()
-        );
-
-        log(
-                "New Vanta alive: "
-                        + process.isAlive()
-        );
+        log("Starting updated Vanta: " + executable);
+        Process process = new ProcessBuilder(executable.toString())
+                .directory(applicationDirectory.toFile())
+                .start();
+        log("New Vanta PID: " + process.pid());
+        log("New Vanta alive: " + process.isAlive());
     }
 
     private static void extractZip(
