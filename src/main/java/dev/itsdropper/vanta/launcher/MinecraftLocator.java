@@ -11,29 +11,40 @@ public class MinecraftLocator {
      * standard application-data location. The path is returned without creation.
      */
     public static Path getVantaDirectoryPath() {
-        String os = System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT);
-        if (os.contains("win")) {
-            String appData = System.getenv("APPDATA");
+        return resolveVantaDirectory(
+                System.getProperty("os.name", ""),
+                System.getProperty("user.home"),
+                System.getenv("APPDATA"),
+                System.getenv("XDG_DATA_HOME")
+        );
+    }
+
+    static Path resolveVantaDirectory(
+            String osName, String home, String appData, String xdgDataHome
+    ) {
+        Platform.OperatingSystem os = Platform.operatingSystem(osName);
+        if (os == Platform.OperatingSystem.WINDOWS) {
             if (appData == null || appData.isBlank()) {
                 throw new IllegalStateException("APPDATA is not available on Windows.");
             }
             return Paths.get(appData, "Vanta").toAbsolutePath().normalize();
         }
 
-        String home = System.getProperty("user.home");
         if (home == null || home.isBlank()) {
             throw new IllegalStateException("The user home directory is not available.");
         }
-        if (os.contains("mac") || os.contains("darwin")) {
+        if (os == Platform.OperatingSystem.MACOS) {
             return Paths.get(home, "Library", "Application Support", "Vanta")
                     .toAbsolutePath().normalize();
         }
-
-        String xdgConfigHome = System.getenv("XDG_CONFIG_HOME");
-        Path configHome = xdgConfigHome != null && !xdgConfigHome.isBlank()
-                ? Paths.get(xdgConfigHome)
-                : Paths.get(home, ".config");
-        return configHome.resolve("Vanta").toAbsolutePath().normalize();
+        if (os == Platform.OperatingSystem.LINUX) {
+            Path dataHome = xdgDataHome != null && !xdgDataHome.isBlank()
+                    && Paths.get(xdgDataHome).isAbsolute()
+                    ? Paths.get(xdgDataHome)
+                    : Paths.get(home, ".local", "share");
+            return dataHome.resolve("Vanta").toAbsolutePath().normalize();
+        }
+        throw new UnsupportedOperationException("Unsupported operating system: " + osName);
     }
 
     public static Path getVantaDirectory() {
