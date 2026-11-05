@@ -139,144 +139,29 @@ public final class UpdaterLauncher {
                         + System.getProperty("java.io.tmpdir")
         );
 
-        boolean windowsHost =
-                Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
-        Path updaterJar = windowsHost ? getUpdaterJar() : null;
-
-        Path absoluteZip =
-                updateZip
-                        .toAbsolutePath()
-                        .normalize();
-
-        Path absoluteApplication =
-                applicationDirectory
-                        .toAbsolutePath()
-                        .normalize();
-
-        log("---------- PATHS ----------");
-
-        log(
-                "Updater JAR: "
-                        + (updaterJar == null ? "<embedded native helper>" : updaterJar)
-        );
-
-        log(
-                "Update ZIP: "
-                        + absoluteZip
-        );
-
-        log(
-                "Application directory: "
-                        + absoluteApplication
-        );
-
-        log("---------- VALIDATION ----------");
-
-        if (windowsHost && !Files.isRegularFile(updaterJar)) {
-
-            log(
-                    "FAIL: updater JAR does not exist."
-            );
-
-            throw new IllegalStateException(
-                    "Vanta updater JAR was not found: "
-                            + updaterJar
-            );
-        }
-
-        if (!Files.isRegularFile(absoluteZip)) {
-
-            log(
-                    "FAIL: update ZIP does not exist."
-            );
-
-            throw new IllegalArgumentException(
-                    "Update ZIP was not found: "
-                            + absoluteZip
-            );
-        }
-
-        if (!Files.isDirectory(absoluteApplication)) {
-
-            log(
-                    "FAIL: application directory does not exist."
-            );
-
-            throw new IllegalArgumentException(
-                    "Vanta application directory was not found: "
-                            + absoluteApplication
-            );
-        }
-
-        if (windowsHost) {
-            log("Updater JAR size: " + Files.size(updaterJar) + " bytes");
-        }
-
-        log(
-                "Update ZIP size: "
-                        + Files.size(absoluteZip)
-                        + " bytes"
-        );
-
         /*
-         * Windows must run the updater from a copied runtime because
-         * the operating system locks loaded executable/runtime files.
-         * Linux and macOS re-enter the native launcher in helper mode;
-         * their process can keep the mapped runtime alive while the
-         * application bundle is replaced.
+         * Run the updater from a private copy of the complete application image.
+         * This avoids Windows executable/DLL locks and avoids relying on a
+         * standalone java/javaw binary that jpackage does not guarantee to ship.
+         * The helper can then replace the original image on every supported OS.
          */
-        Path tempUpdaterDirectory = createTemporaryUpdaterDirectory();
-        List<String> command;
-
-        log("---------- PREPARING EXTERNAL UPDATER ----------");
-        log("Application image: " + absoluteApplication);
-        log("Temporary updater workspace: " + tempUpdaterDirectory);
-
-        if (windowsHost) {
-            Path tempUpdaterJar = tempUpdaterDirectory.resolve("VantaUpdater.jar");
-            Path tempRuntimeDirectory = tempUpdaterDirectory.resolve("runtime");
-            Path bundledJava = ApplicationLocator.getJavaExecutable(absoluteApplication);
-            Path tempJavaExecutable = tempRuntimeDirectory.resolve("bin")
-                    .resolve(bundledJava.getFileName().toString());
-
-            log("Windows requires an updater runtime outside the application image.");
-            copyUpdaterJar(updaterJar, tempUpdaterJar);
-            copyBundledRuntime(
-                    absoluteApplication,
-                    tempRuntimeDirectory,
-                    bundledJava.getFileName().toString()
-            );
-
-            if (!Files.isRegularFile(tempJavaExecutable) || !Files.isExecutable(tempJavaExecutable)) {
-                throw new IllegalStateException(
-                        "External updater Java was not created or is not executable: " + tempJavaExecutable);
-            }
-
-            command = List.of(
-                    tempJavaExecutable.toString(),
-                    "-jar",
-                    tempUpdaterJar.toString(),
-                    Long.toString(processId),
-                    absoluteZip.toString(),
-                    absoluteApplication.toString()
-            );
-        } else {
-            /*
-             * Linux and macOS jpackage runtimes may omit the standalone
-             * bin/java command. Re-enter the packaged native launcher in a
-             * dedicated helper mode instead. The updater process remains
-             * independent of the original launcher JVM.
-             */
-            Path nativeLauncher = ApplicationLocator.getLauncherExecutable(absoluteApplication);
-            command = List.of(
-                    nativeLauncher.toString(),
-                    "--vanta-updater",
-                    Long.toString(processId),
-                    absoluteZip.toString(),
-                    absoluteApplication.toString()
-            );
-            log("Unix updater will run through the packaged native launcher: " + nativeLauncher);
+        Path helperApplication = tempUpdaterDirectory.resolve("application");
+        copyApplicationImage(absoluteApplication, helperApplication);
+        Path helperLauncher = ApplicationLocator.getLauncherExecutable(helperApplication);
+        if (!Files.isRegularFile(helperLauncher) || !Files.isExecutable(helperLauncher)) {
+            throw new IOException("Copied updater launcher is missing or not executable: " + helperLauncher);
         }
+
+        List<String> command = List.of(
+                helperLauncher.toString(),
+                "--vanta-updater",
+                Long.toString(processId),
+                absoluteZip.toString(),
+                absoluteApplication.toString()
+        );
+
+        log("Copied application image for isolated updater: " + helperApplication);
+        log("Updater helper executable: " + helperLauncher);
 
         for (int i = 0; i < command.size(); i++) {
             log("[" + i + "] " + command.get(i));
@@ -396,90 +281,6 @@ public final class UpdaterLauncher {
         return directory;
     }
 
-    private static void copyUpdaterJar(
-            Path source,
-            Path destination
-    ) throws IOException {
-
-        log(
-                "Copying updater JAR:"
-        );
-
-        log(
-                "  FROM: "
-                        + source
-        );
-
-        log(
-                "  TO:   "
-                        + destination
-        );
-
-        Path parent =
-                destination.getParent();
-
-        if (parent != null) {
-
-            Files.createDirectories(
-                    parent
-            );
-        }
-
-        Files.copy(
-                source,
-                destination,
-                StandardCopyOption.REPLACE_EXISTING
-        );
-
-        log(
-                "Updater JAR copied successfully."
-        );
-
-        log(
-                "Copied JAR size: "
-                        + Files.size(destination)
-                        + " bytes"
-        );
-    }
-
-    private static void copyBundledRuntime(
-            Path applicationDirectory,
-            Path destination,
-            String javaExecutableName
-    ) throws IOException {
-        Path source = ApplicationLocator.getRuntimeDirectory(applicationDirectory);
-        log("Copying bundled Java runtime from " + source + " to " + destination);
-        if (!Files.isDirectory(source)) {
-            throw new IOException("Bundled Java runtime directory does not exist: " + source);
-        }
-
-        Files.createDirectories(destination);
-        try (var paths = Files.walk(source)) {
-            for (Path sourcePath : paths.toList()) {
-                Path relative = source.relativize(sourcePath);
-                Path destinationPath = destination.resolve(relative);
-                if (Files.isSymbolicLink(sourcePath)) {
-                    Path linkTarget = Files.readSymbolicLink(sourcePath);
-                    Files.createDirectories(destinationPath.getParent());
-                    Files.createSymbolicLink(destinationPath, linkTarget);
-                } else if (Files.isDirectory(sourcePath)) {
-                    Files.createDirectories(destinationPath);
-                } else {
-                    Files.createDirectories(destinationPath.getParent());
-                    Files.copy(sourcePath, destinationPath,
-                            StandardCopyOption.REPLACE_EXISTING,
-                            StandardCopyOption.COPY_ATTRIBUTES);
-                }
-            }
-        }
-        Path javaExecutable = destination.resolve("bin")
-                .resolve(javaExecutableName);
-        if (!Files.isRegularFile(javaExecutable) || !Files.isExecutable(javaExecutable)) {
-            throw new IOException("Copied updater Java runtime is not executable: " + javaExecutable);
-        }
-        log("Bundled Java runtime copied successfully.");
-    }
-
     private static Path getUpdaterOutputLog() {
 
         return Path.of(
@@ -513,18 +314,4 @@ public final class UpdaterLauncher {
         }
     }
 
-    private static final class RuntimeCopyException
-            extends RuntimeException {
-
-        private RuntimeCopyException(
-                IOException cause
-        ) {
-            super(cause);
-        }
-
-        @Override
-        public synchronized IOException getCause() {
-            return (IOException) super.getCause();
-        }
-    }
 }
