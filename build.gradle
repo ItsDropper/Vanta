@@ -119,8 +119,8 @@ tasks.register('platformAppImage', Exec) {
                 '--main-jar', mainJar,
                 '--main-class', application.mainClass.get(),
                 '--module-path', modulePath,
-                '--add-modules', 'javafx.controls',
-                '--java-options', '--add-modules=javafx.controls',
+                '--add-modules', 'ALL-MODULE-PATH',
+                '--java-options', '--add-modules=ALL-MODULE-PATH',
                 '--dest', packageOutput.get().asFile.absolutePath
         )
     }
