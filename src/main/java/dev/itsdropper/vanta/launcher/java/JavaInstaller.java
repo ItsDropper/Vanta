@@ -147,7 +147,6 @@ public class JavaInstaller {
                                 path.getFileName()
                                         .toString()
                                         .equalsIgnoreCase(
-.equalsIgnoreCase(
                                                 Platform.javaExecutableName()
                                         )
                         )
