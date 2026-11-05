@@ -25,7 +25,7 @@ On Windows PowerShell:
 On Linux and macOS:
 
 ```bash
-./gradlew clean test distZip distTar
+./gradlew clean test distZip distTar platformAppImage
 ```
 
 The first build may download Gradle dependencies. A successful compile is not a substitute for testing the affected runtime behavior.
