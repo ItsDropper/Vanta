@@ -49,7 +49,7 @@ Clone the repository, open the root directory in your IDE, and allow Gradle to i
 On Windows PowerShell:
 
 ```powershell
-.\\gradlew.bat clean test distZip distTar
+.\gradlew.bat clean test distZip distTar
 ```
 
 On Linux and macOS:
