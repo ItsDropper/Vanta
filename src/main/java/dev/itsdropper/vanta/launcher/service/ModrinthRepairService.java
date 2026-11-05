@@ -72,6 +72,21 @@ public Path repairModDependency(
         roots.add(repairedProject);
 
         /*
+         * Sodium 0.9.2 has a NeoForge 26.3 LevelExtractor mixin failure.
+         * Do not send this known repair through the generic graph resolver:
+         * install the exact compatible release and quarantine stale Sodium
+         * jars that are not represented in Vanta's installed-mod registry.
+         */
+        if ("AANobbMI".equals(projectId)
+                && requiredVersions != null
+                && requiredVersions.contains("0.9.3-beta.1")
+                && instance.getMinecraftVersion() != null
+                && instance.getMinecraftVersion().startsWith("26.3")
+                && "neoforge".equalsIgnoreCase(instance.getLoader())) {
+            return repairPinnedSodiumForNeoForge263(instance, projectId);
+        }
+
+        /*
          * Find installed mods whose Modrinth version directly
          * depends on the project being repaired.
          */
@@ -762,5 +777,125 @@ private void removeInstalledMod(
                 instance,
                 projectId
         );
+    }
+
+    private Path repairPinnedSodiumForNeoForge263(
+            Instance instance,
+            String projectId
+    ) throws IOException, InterruptedException {
+        List<ModrinthVersion> versions = client.getVersions(projectId);
+        ModrinthVersion target = null;
+
+        for (ModrinthVersion version : versions) {
+            if (version == null || version.getVersionNumber() == null) {
+                continue;
+            }
+
+            String versionNumber = version.getVersionNumber();
+            int metadataSeparator = versionNumber.indexOf('+');
+            if (metadataSeparator >= 0) {
+                versionNumber = versionNumber.substring(0, metadataSeparator);
+            }
+
+            boolean correctVersion = "0.9.3-beta.1".equals(versionNumber);
+            boolean correctLoader = version.getLoaders() != null
+                    && version.getLoaders().stream()
+                    .map(ModrinthLoaderIds::normalize)
+                    .anyMatch("neoforge"::equals);
+            boolean correctGameVersion = version.getGameVersions() != null
+                    && version.getGameVersions().stream()
+                    .anyMatch(gameVersion -> gameVersion != null
+                            && (gameVersion.equals("26.3")
+                            || gameVersion.startsWith("26.3.")));
+
+            if (correctVersion && correctLoader && correctGameVersion) {
+                target = version;
+                break;
+            }
+        }
+
+        if (target == null) {
+            throw new IOException(
+                    "Modrinth does not currently expose Sodium 0.9.3-beta.1 "
+                            + "for NeoForge 26.3. Vanta refused to install a different version."
+            );
+        }
+
+        System.out.println(
+                "[Vanta Repair] Installing pinned Sodium version "
+                        + target.getVersionNumber()
+                        + " for NeoForge 26.3."
+        );
+
+        Path installedFile = installer.installModVersion(
+                instance,
+                projectId,
+                target
+        );
+
+        if (!Files.isRegularFile(installedFile)) {
+            throw new IOException("Sodium repair finished without producing an installed JAR.");
+        }
+
+        InstalledMod installedMetadata = installedModScanner.scanFile(installedFile);
+        if (installedMetadata == null || !"sodium".equalsIgnoreCase(installedMetadata.getModId())) {
+            throw new IOException(
+                    "The downloaded repair file did not identify itself as the Sodium mod."
+            );
+        }
+
+        quarantineStaleSodiumJars(instance, installedFile);
+
+        System.out.println(
+                "[Vanta Repair] Pinned Sodium repair installed at "
+                        + installedFile.getFileName()
+        );
+        return installedFile;
+    }
+
+    private void quarantineStaleSodiumJars(
+            Instance instance,
+            Path retainedFile
+    ) throws IOException {
+        Path modsDirectory = instance.getDirectory().resolve("mods").toAbsolutePath().normalize();
+        Path retained = retainedFile.toAbsolutePath().normalize();
+        Path backupDirectory = instance.getDirectory()
+                .resolve(".vanta-repair-backups")
+                .resolve("sodium")
+                .toAbsolutePath()
+                .normalize();
+
+        if (!retained.startsWith(modsDirectory) || !Files.isRegularFile(retained)) {
+            throw new IOException("The repaired Sodium JAR is outside the instance mods directory.");
+        }
+
+        List<InstalledMod> installed = installedModScanner.scan(instance);
+        for (InstalledMod mod : installed) {
+            if (mod == null
+                    || !"sodium".equalsIgnoreCase(mod.getModId())
+                    || mod.getFilename() == null
+                    || mod.getFilename().isBlank()) {
+                continue;
+            }
+
+            Path candidate = modsDirectory.resolve(mod.getFilename()).normalize();
+            if (!candidate.startsWith(modsDirectory)
+                    || !Files.isRegularFile(candidate)
+                    || candidate.equals(retained)) {
+                continue;
+            }
+
+            Files.createDirectories(backupDirectory);
+            Path backup = backupDirectory.resolve(
+                    candidate.getFileName() + "." + UUID.randomUUID() + ".bak"
+            );
+            Files.move(candidate, backup);
+            System.out.println(
+                    "[Vanta Repair] Quarantined stale Sodium JAR "
+                            + candidate.getFileName()
+                            + " -> "
+                            + backup
+            );
+        }
     }
 }
