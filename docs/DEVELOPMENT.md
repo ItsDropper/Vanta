@@ -19,7 +19,7 @@ Vanta uses the Java 21 toolchain and JavaFX 21. Use the checked-in wrapper so lo
 On Windows PowerShell:
 
 ```powershell
-.\\gradlew.bat clean test distZip distTar
+.\gradlew.bat clean test distZip distTar
 ```
 
 On Linux and macOS:
