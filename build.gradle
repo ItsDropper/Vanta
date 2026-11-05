@@ -90,7 +90,9 @@ tasks.register('platformAppImage', Exec) {
     }
     def mainJar = tasks.named('jar').get().archiveFileName.get()
     def javaHome = System.getProperty('java.home')
-    def windowsHost = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT).contains('windows')
+    def hostOs = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT)
+    def windowsHost = hostOs.contains('windows')
+    def macHost = hostOs.contains('mac') || hostOs.contains('darwin')
     def jpackageExecutable = windowsHost
             ? file("${javaHome}/bin/jpackage.exe")
             : file("${javaHome}/bin/jpackage")
@@ -125,14 +127,24 @@ tasks.register('platformAppImage', Exec) {
         )
     }
     doLast {
+        def imageDirectory = packageOutput.get().dir(packageName).asFile
+        def appPayloadDirectory
         if (windowsHost) {
-            def updaterDirectory = packageOutput.get().dir(packageName).dir('updater').asFile
-            updaterDirectory.mkdirs()
-            copy {
-                from tasks.named('updaterJar').get().archiveFile
-                into updaterDirectory
-                rename { 'VantaUpdater.jar' }
-            }
+            appPayloadDirectory = new File(imageDirectory, 'app')
+        } else if (macHost) {
+            appPayloadDirectory = new File(imageDirectory, 'Contents/app')
+        } else {
+            appPayloadDirectory = new File(imageDirectory, 'lib/app')
+        }
+        if (!appPayloadDirectory.isDirectory()) {
+            throw new GradleException("Could not locate jpackage application payload: ${appPayloadDirectory}")
+        }
+        def updaterDirectory = new File(appPayloadDirectory, 'updater')
+        updaterDirectory.mkdirs()
+        copy {
+            from tasks.named('updaterJar').get().archiveFile
+            into updaterDirectory
+            rename { 'VantaUpdater.jar' }
         }
     }
 }
