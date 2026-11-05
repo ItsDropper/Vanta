@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher.server;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,16 +43,18 @@ final class ManagedJavaRuntimeService {
         int selectedMajor = detectJavaMajor(selectedJava);
         if (selectedMajor >= requiredMajor) return selectedJava;
 
-        if (!System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win")
-                || !System.getProperty("os.arch", "").toLowerCase(Locale.ROOT).matches("amd64|x86_64")) {
-            throw new IOException("This server requires Java " + requiredMajor
-                    + ", but the selected runtime is Java " + (selectedMajor < 0 ? "unknown" : selectedMajor)
-                    + ". Vanta's automatic runtime installer currently supports Windows x64. Install Java "
-                    + requiredMajor + " and select its java executable.");
+        final String os;
+        final String architecture;
+        try {
+            os = Platform.adoptiumOs();
+            architecture = Platform.adoptiumArchitecture();
+        } catch (UnsupportedOperationException unsupported) {
+            throw new IOException("Automatic Java runtime installation is unavailable on this platform. "
+                    + "Install Java " + requiredMajor + " and select its executable.", unsupported);
         }
 
-        Path runtime = managedRuntimePath(requiredMajor);
-        Path executable = runtime.resolve("bin").resolve("java.exe");
+        Path runtime = managedRuntimePath(requiredMajor, os, architecture);
+        Path executable = runtime.resolve("bin").resolve(Platform.javaExecutableName());
         if (!Files.isRegularFile(executable)) {
             log.accept("Vanta: this server requires Java " + requiredMajor
                     + "; downloading a private Temurin JRE. This does not change your system Java.");
@@ -96,21 +99,23 @@ final class ManagedJavaRuntimeService {
         }
     }
 
-    private static Path managedRuntimePath(int major) {
+    private static Path managedRuntimePath(int major, String os, String architecture) {
         return MinecraftLocator.getVantaDirectory().resolve("runtimes")
-                .resolve("temurin-jre-" + major + "-windows-x64");
+                .resolve("temurin-jre-" + major + "-" + os + "-" + architecture);
     }
 
     private static void installTemurinJre(int major, Path target, Consumer<String> log) throws IOException {
         Path parent = target.getParent();
         Files.createDirectories(parent);
-        Path archive = parent.resolve("temurin-jre-" + major + ".zip.download");
+        boolean windows = Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
+        Path archive = parent.resolve("temurin-jre-" + major + (windows ? ".zip.download" : ".tar.gz.download"));
         Path staging = parent.resolve("temurin-jre-" + major + ".installing");
         deleteTree(staging);
         Files.createDirectories(staging);
         try {
             String api = "https://api.adoptium.net/v3/assets/latest/" + major
-                    + "/hotspot?architecture=x64&image_type=jre&os=windows&vendor=eclipse";
+                    + "/hotspot?architecture=" + Platform.adoptiumArchitecture()
+                    + "&image_type=jre&os=" + Platform.adoptiumOs() + "&vendor=eclipse";
             HttpRequest metadataRequest = HttpRequest.newBuilder(URI.create(api))
                     .timeout(Duration.ofSeconds(30)).header("Accept", "application/json").GET().build();
             HttpResponse<String> metadata = HTTP.send(metadataRequest, HttpResponse.BodyHandlers.ofString());
@@ -124,7 +129,7 @@ final class ManagedJavaRuntimeService {
             String expectedSha256 = packageInfo.path("checksum").asText("").toLowerCase(Locale.ROOT);
             if (!downloadUrl.startsWith("https://github.com/adoptium/")
                     || !expectedSha256.matches("[0-9a-f]{64}")) {
-                throw new IOException("Temurin did not return a trusted URL and SHA-256 checksum for the Windows JRE.");
+                throw new IOException("Temurin did not return a trusted URL and SHA-256 checksum for this platform's JRE.");
             }
 
             log.accept("Vanta: downloading Java " + major + " runtime from Eclipse Temurin...");
@@ -152,28 +157,33 @@ final class ManagedJavaRuntimeService {
             }
 
             log.accept("Vanta: SHA-256 verified. Installing Java " + major + " into Vanta's local runtime directory...");
-            try (ZipInputStream zip = new ZipInputStream(Files.newInputStream(archive))) {
-                ZipEntry entry;
-                while ((entry = zip.getNextEntry()) != null) {
-                    Path output = staging.resolve(entry.getName()).normalize();
-                    if (!output.startsWith(staging) || entry.getName().startsWith("/")
-                            || entry.getName().contains("\\\\") || entry.getName().matches("^[A-Za-z]:.*")) {
-                        throw new IOException("Java runtime archive contains an unsafe path.");
+            if (windows) {
+                try (ZipInputStream zip = new ZipInputStream(Files.newInputStream(archive))) {
+                    ZipEntry entry;
+                    while ((entry = zip.getNextEntry()) != null) {
+                        Path output = staging.resolve(entry.getName()).normalize();
+                        if (!output.startsWith(staging) || entry.getName().startsWith("/")
+                                || entry.getName().contains("\\\\") || entry.getName().matches("^[A-Za-z]:.*")) {
+                            throw new IOException("Java runtime archive contains an unsafe path.");
+                        }
+                        if (entry.isDirectory()) Files.createDirectories(output);
+                        else {
+                            Files.createDirectories(output.getParent());
+                            Files.copy(zip, output, StandardCopyOption.REPLACE_EXISTING);
+                        }
+                        zip.closeEntry();
                     }
-                    if (entry.isDirectory()) {
-                        Files.createDirectories(output);
-                    } else {
-                        Files.createDirectories(output.getParent());
-                        Files.copy(zip, output, StandardCopyOption.REPLACE_EXISTING);
-                    }
-                    zip.closeEntry();
                 }
+            } else {
+                extractTarGz(archive, staging);
             }
+            String javaName = Platform.javaExecutableName();
             Path javaExe;
-            try (var paths = Files.walk(staging)) {
-                javaExe = paths.filter(p -> p.getFileName().toString().equalsIgnoreCase("java.exe")
-                                && p.getParent() != null && p.getParent().getFileName().toString().equalsIgnoreCase("bin"))
-                        .findFirst().orElseThrow(() -> new IOException("Downloaded archive does not contain bin/java.exe."));
+            try (var paths = Files.walk(staging, 8)) {
+                javaExe = paths.filter(p -> p.getFileName().toString().equals(javaName)
+                                && p.getParent() != null && p.getParent().getFileName().toString().equals("bin"))
+                        .findFirst().orElseThrow(() -> new IOException(
+                                "Downloaded archive does not contain bin/" + javaName + "."));
             }
             // Verify the downloaded executable really reports the requested major.
             int installedMajor = detectJavaMajor(javaExe.toAbsolutePath().toString());
@@ -195,6 +205,40 @@ final class ManagedJavaRuntimeService {
         } finally {
             Files.deleteIfExists(archive);
             deleteTree(staging);
+        }
+    }
+
+    private static void extractTarGz(Path archive, Path destination) throws IOException {
+        Process listing = new ProcessBuilder("tar", "-tzf", archive.toString()).start();
+        String entries;
+        try (InputStream input = listing.getInputStream()) {
+            entries = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        try {
+            if (listing.waitFor() != 0) throw new IOException("Java runtime archive could not be inspected.");
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while inspecting Java runtime archive.", interrupted);
+        }
+        Path root = destination.toAbsolutePath().normalize();
+        for (String entry : entries.split("\\R")) {
+            if (entry.isBlank()) continue;
+            Path item = Path.of(entry);
+            if (item.isAbsolute() || !root.resolve(item).normalize().startsWith(root)) {
+                throw new IOException("Java runtime archive contains an unsafe path.");
+            }
+        }
+        Process extraction = new ProcessBuilder("tar", "-xzf", archive.toString(), "-C", root.toString())
+                .redirectErrorStream(true).start();
+        String output;
+        try (InputStream input = extraction.getInputStream()) {
+            output = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        try {
+            if (extraction.waitFor() != 0) throw new IOException("Java runtime extraction failed: " + output);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while extracting Java runtime archive.", interrupted);
         }
     }
 
