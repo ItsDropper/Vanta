@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.launcher.security;
 
 import com.sun.jna.platform.win32.Crypt32Util;
+import dev.itsdropper.vanta.launcher.Platform;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -48,8 +49,6 @@ public final class WindowsCredentialManager {
     }
 
     private static boolean isWindows() {
-        return System.getProperty("os.name")
-                .toLowerCase()
-                .contains("win");
+        return Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
     }
 }
