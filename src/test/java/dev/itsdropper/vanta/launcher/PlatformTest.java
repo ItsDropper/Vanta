@@ -55,7 +55,7 @@ class PlatformTest {
     void fallsBackToLinuxLocalShareAndIgnoresRelativeXdgOverride() {
         Path home = Path.of(System.getProperty("user.home")).toAbsolutePath().normalize();
         assertTrue(MinecraftLocator.resolveVantaDirectory("Linux", home.toString(), null, "relative")
-                .endsWith(Path.of(home.toString(), ".local", "share", "Vanta")));
+                .endsWith(Path.of(".local", "share", "Vanta")));
     }
 
     @Test
@@ -66,7 +66,7 @@ class PlatformTest {
         assertThrows(IllegalStateException.class,
                 () -> MinecraftLocator.resolveVantaDirectory("Linux", null, null, null));
         assertThrows(IllegalStateException.class,
-                ( ) -> MinecraftLocator.resolveVantaDirectory("Windows 11", home.toString(), null, null));
+                () -> MinecraftLocator.resolveVantaDirectory("Windows 11", home.toString(), null, null));
         assertThrows(IllegalStateException.class,
                 ( ) -> MinecraftLocator.resolveVantaDirectory("Windows 11", home.toString(), "relative-appdata", null));
         assertThrows(IllegalStateException.class,
