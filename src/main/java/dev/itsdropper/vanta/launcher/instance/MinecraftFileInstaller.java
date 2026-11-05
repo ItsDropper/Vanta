@@ -104,17 +104,34 @@ public class MinecraftFileInstaller {
             }
 
             JsonNode artifact = libraryDownloads.get("artifact");
-            if (artifact != null) {
+            String artifactPath = artifact == null
+                    ? "" : artifact.path("path").asText("");
+            if (!artifactPath.isBlank()) {
                 downloads.add(new LibraryDownload(
                         artifact.path("url").asText(),
-                        resolveLibraryPath(artifact.path("path").asText()),
+                        resolveLibraryPath(artifactPath),
                         getSha1(artifact)
                 ));
+            } else if (artifact != null) {
+                JsonNode classifiers = libraryDownloads.get("classifiers");
+                if (classifiers == null || !classifiers.isObject() || classifiers.isEmpty()) {
+                    throw new IllegalStateException(
+                            "Minecraft library artifact metadata has no path and no native classifiers: "
+                                    + library.path("name").asText("<unnamed library>"));
+                }
+                // Native-only legacy metadata can contain an empty artifact
+                // object. It is not a downloadable JAR; resolve its classifier below.
             }
 
             Library libraryModel = LIBRARY_JSON.treeToValue(library, Library.class);
             Library.Artifact nativeArtifact = LibraryResolver.findNativeArtifact(libraryModel);
             if (nativeArtifact != null) {
+                if (nativeArtifact.path == null || nativeArtifact.path.isBlank()
+                        || nativeArtifact.url == null || nativeArtifact.url.isBlank()) {
+                    throw new IllegalStateException(
+                            "Minecraft native classifier metadata is incomplete for "
+                                    + library.path("name").asText("<unnamed library>"));
+                }
                 downloads.add(new LibraryDownload(
                         nativeArtifact.url,
                         resolveLibraryPath(nativeArtifact.path),
