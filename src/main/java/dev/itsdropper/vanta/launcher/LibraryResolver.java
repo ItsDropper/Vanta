@@ -135,99 +135,41 @@ public final class LibraryResolver {
             Path minecraftDirectory,
             Library library
     ) {
-        if (library == null) {
-            return null;
-        }
+        Library.Artifact artifact = findNativeArtifact(library);
+        if (artifact == null) return null;
+        return resolveNativeArtifact(artifact, artifact.path);
+    }
 
-        if (!isAllowedOnCurrentPlatform(library)) {
-            return null;
-        }
-
-        if (library.downloads == null
-                || library.downloads.classifiers == null
+    /**
+     * Returns the current platform's native archive metadata without
+     * requiring the archive to have been downloaded yet.
+     */
+    public static Library.Artifact findNativeArtifact(Library library) {
+        if (library == null || !isAllowedOnCurrentPlatform(library)
+                || library.downloads == null || library.downloads.classifiers == null
                 || library.downloads.classifiers.isEmpty()) {
             return null;
         }
 
-        Map<String, Library.Artifact> classifiers =
-                library.downloads.classifiers;
-
+        Map<String, Library.Artifact> classifiers = library.downloads.classifiers;
         String osName = getOperatingSystem();
         String architecture = getArchitecture();
 
-        /*
-         * First handle the traditional Mojang format:
-         *
-         * natives:
-         *   windows: natives-windows-${arch}
-         */
-        if (library.natives != null
-                && !library.natives.isEmpty()) {
-
-            String nativeClassifier =
-                    findNativeClassifierFromMap(
-                            library.natives,
-                            osName
-                    );
-
+        if (library.natives != null && !library.natives.isEmpty()) {
+            String nativeClassifier = findNativeClassifierFromMap(library.natives, osName);
             if (nativeClassifier != null) {
-                nativeClassifier =
-                        substituteArchitecture(
-                                nativeClassifier,
-                                architecture
-                        );
-
-                Library.Artifact artifact =
-                        classifiers.get(nativeClassifier);
-
-                if (artifact != null) {
-                    return resolveNativeArtifact(
-                            artifact,
-                            nativeClassifier
-                    );
-                }
-
-                /*
-                 * The manifest explicitly requested a classifier but
-                 * it wasn't present. Do not silently select a random
-                 * classifier.
-                 */
+                nativeClassifier = substituteArchitecture(nativeClassifier, architecture);
+                Library.Artifact artifact = classifiers.get(nativeClassifier);
+                if (artifact != null) return artifact;
                 throw new IllegalStateException(
-                        "Native classifier not found: "
-                                + nativeClassifier
-                                + " for "
-                                + safeLibraryName(library)
-                );
+                        "Native classifier not found: " + nativeClassifier
+                                + " for " + safeLibraryName(library));
             }
         }
 
-        /*
-         * Newer manifests can have native classifiers without the
-         * old natives map. Try to identify the current platform from
-         * the classifier itself.
-         */
         String detectedClassifier =
-                findModernNativeClassifier(
-                        classifiers,
-                        osName,
-                        architecture
-                );
-
-        if (detectedClassifier == null) {
-            return null;
-        }
-
-        Library.Artifact artifact =
-                classifiers.get(detectedClassifier);
-
-        if (artifact == null) {
-            return null;
-        }
-
-        return resolveNativeArtifact(
-                artifact,
-                detectedClassifier
-        );
+                findModernNativeClassifier(classifiers, osName, architecture);
+        return detectedClassifier == null ? null : classifiers.get(detectedClassifier);
     }
 
     // =============================================================
