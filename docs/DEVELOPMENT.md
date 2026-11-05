@@ -16,11 +16,16 @@ Vanta uses the Java 21 toolchain and JavaFX 21. Use the checked-in wrapper so lo
 3. Confirm the IDE uses JDK 21 for Gradle and the project toolchain.
 4. Run the application through the configured Gradle application task or IDE run configuration.
 
-From PowerShell, run the baseline checks:
+On Windows PowerShell:
 
 ```powershell
-.gradlew.bat clean test
-.gradlew.bat build
+.\\gradlew.bat clean test distZip distTar
+```
+
+On Linux and macOS:
+
+```bash
+./gradlew clean test distZip distTar
 ```
 
 The first build may download Gradle dependencies. A successful compile is not a substitute for testing the affected runtime behavior.
