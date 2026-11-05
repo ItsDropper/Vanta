@@ -51,6 +51,8 @@ class DownloadUtilTest {
         assertThrows(IllegalArgumentException.class, () ->
                 DownloadUtil.validateDownloadRequest("file:///etc/passwd", null));
         assertThrows(IllegalArgumentException.class, () ->
+                DownloadUtil.validateDownloadRequest("https://user:password@example.com/file.jar", null));
+        assertThrows(IllegalArgumentException.class, () ->
                 DownloadUtil.validateDownloadRequest("https://example.com/file.jar", "not-a-sha1"));
     }
 
