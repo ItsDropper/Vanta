@@ -35,7 +35,7 @@ The updater selects a package matching the host OS and architecture. Release ass
 
 Each archive has a corresponding `.sha256` file. The `Platform release packages` workflow builds and publishes these assets for a stable `vMAJOR.MINOR.PATCH` tag.
 
-All three operating systems run the updater from a private copy of the complete application image. This avoids depending on a standalone `bin/java` executable (which jpackage may omit) and prevents the helper from locking files in the installation it must replace. The updater validates the staged image before replacing the existing installation and only starts the updated launcher after replacement succeeds.
+All three operating systems run the updater from a private copy of the complete application image. This avoids depending on a standalone `bin/java` executable (which jpackage may omit) and prevents the helper from locking files in the installation it must replace. The updater validates the staged image before replacing the existing installation and only starts the updated launcher after replacement succeeds. The installation's parent directory must be writable by the current user; elevated updates for protected locations such as system-wide Program Files or /Applications installs are not implemented. macOS App Translocation is detected and blocks self-update until the bundle is moved to a normal installation location.
 
 The updater has platform-layout, permission, and helper-copy tests. Actual in-place update testing on physical Windows, Linux, and macOS installations remains outstanding; CI does not claim that end-to-end guarantee yet.
 
