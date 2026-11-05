@@ -66,11 +66,27 @@ public class ClasspathBuilder {
          * but append it after the loader's modular ASM libraries.
          */
         LinkedHashSet<Path> legacyAsmAll = new LinkedHashSet<>();
+        boolean fabricLoaderProvidesAsm =
+                "Babric".equalsIgnoreCase(instance.getLoader());
 
         if (manifest.libraries != null) {
 
             for (Library library :
                     manifest.libraries) {
+
+                boolean legacyAsmAllLibrary =
+                        library.name != null
+                                && library.name.startsWith("org.ow2.asm:asm-all:");
+
+                // Babric runs on Fabric Loader, which brings a modern,
+                // modular ASM stack. Keeping Beta 1.7.3's asm-all 4.1
+                // alongside ASM 9 duplicates org.objectweb.asm classes;
+                // Fabric Loader rejects the classpath before game startup.
+                // The legacy aggregate is only retained for non-Fabric
+                // legacy launchers that may still depend on it.
+                if (fabricLoaderProvidesAsm && legacyAsmAllLibrary) {
+                    continue;
+                }
 
                 Path jar =
                         LibraryResolver.resolve(
@@ -79,8 +95,7 @@ public class ClasspathBuilder {
                         );
 
                 if (jar != null) {
-                    if (library.name != null
-                            && library.name.startsWith("org.ow2.asm:asm-all:")) {
+                    if (legacyAsmAllLibrary) {
                         legacyAsmAll.add(jar);
                     } else {
                         classpath.add(jar);
