@@ -90,6 +90,13 @@ public final class ModLoaderInstaller {
         } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
             Files.move(patched, clientJar, StandardCopyOption.REPLACE_EXISTING);
         }
+
+        // ModLoader 1.2.5 resolves its installation root from a class resource
+        // URL and passes that URI to File. When loaded from client.jar the
+        // resource URI is jar:file:...!/ and is not a hierarchical file URI.
+        // Load ModLoader from an exploded instance-local directory instead.
+        extractBootstrapClasses(clientJar,
+                root.resolve("minecraft").resolve("modloader-bootstrap"));
     }
 
     static void mergeArchiveIntoClient(Path vanillaJar, Path patchArchive, Path outputJar)
