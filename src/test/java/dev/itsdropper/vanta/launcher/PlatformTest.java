@@ -35,7 +35,8 @@ class PlatformTest {
 
     @Test
     void resolvesMacApplicationSupportDirectory() {
-        assertTrue(MinecraftLocator.resolveVantaDirectory("Mac OS X", "/Users/test", null, null)
+        Path home = Path.of(System.getProperty("user.home")).toAbsolutePath().normalize();
+        assertTrue(MinecraftLocator.resolveVantaDirectory("Mac OS X", home.toString(), null, null)
                 .endsWith(Path.of("Library", "Application Support", "Vanta")));
     }
 
@@ -44,27 +45,30 @@ class PlatformTest {
         Path xdgDataHome = Path.of(System.getProperty("java.io.tmpdir"), "vanta-xdg-data")
                 .toAbsolutePath().normalize();
         assertTrue(xdgDataHome.isAbsolute());
+        Path home = Path.of(System.getProperty("user.home")).toAbsolutePath().normalize();
         assertTrue(MinecraftLocator.resolveVantaDirectory(
-                "Linux", "/home/test", null, xdgDataHome.toString())
+                "Linux", home.toString(), null, xdgDataHome.toString())
                 .endsWith(Path.of("vanta-xdg-data", "Vanta")));
     }
 
     @Test
     void fallsBackToLinuxLocalShareAndIgnoresRelativeXdgOverride() {
-        assertTrue(MinecraftLocator.resolveVantaDirectory("Linux", "/home/test", null, "relative")
-                .endsWith(Path.of("home", "test", ".local", "share", "Vanta")));
+        Path home = Path.of(System.getProperty("user.home")).toAbsolutePath().normalize();
+        assertTrue(MinecraftLocator.resolveVantaDirectory("Linux", home.toString(), null, "relative")
+                .endsWith(Path.of(home.toString(), ".local", "share", "Vanta")));
     }
 
     @Test
     void rejectsUnknownOperatingSystemsAndMissingRequiredHomes() {
+        Path home = Path.of(System.getProperty("user.home")).toAbsolutePath().normalize();
         assertThrows(UnsupportedOperationException.class,
-                () -> MinecraftLocator.resolveVantaDirectory("Plan 9", "/home/test", null, null));
+                () -> MinecraftLocator.resolveVantaDirectory("Plan 9", home.toString(), null, null));
         assertThrows(IllegalStateException.class,
                 () -> MinecraftLocator.resolveVantaDirectory("Linux", null, null, null));
         assertThrows(IllegalStateException.class,
-                () -> MinecraftLocator.resolveVantaDirectory("Windows 11", "/home/test", null, null));
+                ( ) -> MinecraftLocator.resolveVantaDirectory("Windows 11", home.toString(), null, null));
         assertThrows(IllegalStateException.class,
-                () -> MinecraftLocator.resolveVantaDirectory("Windows 11", "/home/test", "relative-appdata", null));
+                ( ) -> MinecraftLocator.resolveVantaDirectory("Windows 11", home.toString(), "relative-appdata", null));
         assertThrows(IllegalStateException.class,
                 () -> MinecraftLocator.resolveVantaDirectory("Linux", "relative-home", null, null));
         assertThrows(IllegalStateException.class,
