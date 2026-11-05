@@ -32,6 +32,26 @@ class UpdateServicePlatformTest {
     }
 
     @Test
+    void reportsNoUpdateWhenLatestReleaseHasNoCompatiblePlatformPackage() throws Exception {
+        withPlatform("Linux", "amd64", () -> {
+            JsonNode release = JSON.readTree("""
+                    {
+                      "tag_name": "v1.2.8",
+                      "body": "Release notes",
+                      "assets": [
+                        {"name":"Vanta-1.2.8-windows-x64.zip","browser_download_url":"https://example.invalid/windows.zip"},
+                        {"name":"Vanta-1.2.8-windows-x64.zip.sha256","browser_download_url":"https://example.invalid/windows.sha256"}
+                      ]
+                    }
+                    """);
+            UpdateInfo info = new UpdateService().parseLatestRelease(release, "1.2.7");
+            assertFalse(info.isUpdateAvailable());
+            assertEquals("1.2.7", info.getLatestVersion());
+            assertNull(info.getDownloadUrl());
+        });
+    }
+
+    @Test
     void doesNotOfferLegacyWindowsPackageToLinuxOrMac() throws Exception {
         withPlatform("Linux", "amd64", () -> {
             JsonNode release = JSON.readTree("""
