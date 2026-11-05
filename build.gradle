@@ -77,6 +77,38 @@ shadowJar {
     // can rely on reflection/runtime discovery.
 }
 
+
+tasks.register('platformAppImage', Exec) {
+    dependsOn tasks.named('installDist')
+
+    def packageName = 'Vanta'
+    def packageInput = layout.buildDirectory.dir("install/${project.name}/lib")
+    def packageOutput = layout.buildDirectory.dir('packages')
+    def mainJar = tasks.named('jar').get().archiveFileName.get()
+    def javaHome = System.getProperty('java.home')
+    def jpackageExecutable = org.gradle.internal.os.OperatingSystem.current().isWindows()
+            ? file("${javaHome}/bin/jpackage.exe")
+            : file("${javaHome}/bin/jpackage")
+
+    doFirst {
+        if (!jpackageExecutable.isFile()) {
+            throw new GradleException("jpackage is required to create the platform application image.")
+        }
+        packageOutput.get().asFile.mkdirs()
+        commandLine(
+                jpackageExecutable.absolutePath,
+                '--type', 'app-image',
+                '--name', packageName,
+                '--app-version', project.version.toString(),
+                '--vendor', 'ItsDropper',
+                '--input', packageInput.get().asFile.absolutePath,
+                '--main-jar', mainJar,
+                '--main-class', application.mainClass.get(),
+                '--dest', packageOutput.get().asFile.absolutePath
+        )
+    }
+}
+
 tasks.register('updaterJar', Jar) {
     dependsOn tasks.named('classes')
 
