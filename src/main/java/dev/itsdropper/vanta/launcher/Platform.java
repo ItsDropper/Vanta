@@ -30,7 +30,12 @@ public final class Platform {
     }
 
     static String javaExecutableName(String osName) {
-        return operatingSystem(osName) == OperatingSystem.WINDOWS ? "java.exe" : "java";
+        return switch (operatingSystem(osName)) {
+            case WINDOWS -> "java.exe";
+            case LINUX, MACOS -> "java";
+            case UNKNOWN -> throw new UnsupportedOperationException(
+                    "Unsupported operating system: " + osName);
+        };
     }
 
     public static String adoptiumOs() {
@@ -64,11 +69,32 @@ public final class Platform {
         };
     }
 
+    public static String distributionId() {
+        return distributionId(System.getProperty("os.name", ""),
+                System.getProperty("os.arch", ""));
+    }
+
+    static String distributionId(String osName, String architecture) {
+        String arch = adoptiumArchitecture(architecture);
+        return switch (operatingSystem(osName)) {
+            case WINDOWS -> {
+                if (!"x64".equals(arch)) {
+                    throw new UnsupportedOperationException(
+                            "Windows application images are currently supported on x64 only.");
+                }
+                yield "windows-x64";
+            }
+            case LINUX -> "linux-" + arch;
+            case MACOS -> "macos-" + arch;
+            case UNKNOWN -> throw new UnsupportedOperationException(
+                    "Unsupported operating system: " + osName);
+        };
+    }
+
     public static boolean supportsDesktop() {
-        if (operatingSystem() == OperatingSystem.UNKNOWN) return false;
         try {
-            String architecture = adoptiumArchitecture();
-            return architecture.equals("x64") || architecture.equals("aarch64");
+            distributionId();
+            return true;
         } catch (UnsupportedOperationException unsupported) {
             return false;
         }
