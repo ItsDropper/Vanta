@@ -237,7 +237,8 @@ public class MinecraftLauncher {
         );
 
         if (data.minecraftArguments != null && !data.minecraftArguments.isBlank()
-                && !"Forge".equalsIgnoreCase(data.loader)) {
+                && !"Forge".equalsIgnoreCase(data.loader)
+                && !"Rift".equalsIgnoreCase(data.loader)) {
             command.addAll(buildLegacyGameArguments(
                     data.minecraftArguments,
                     account,
@@ -359,6 +360,14 @@ public class MinecraftLauncher {
                 }
             }
     
+            // Rift 1.13 stores its tweaker in the legacy profile field,
+            // but the inherited Minecraft 1.13 profile uses modern game
+            // arguments. Build the standard authenticated arguments above,
+            // then forward only Rift tweaker declarations to LaunchWrapper.
+            if ("Rift".equalsIgnoreCase(data.loader)) {
+                command.addAll(riftTweakerArguments(data.minecraftArguments));
+            }
+
             // =============================================================
             // ASSET INDEX
             // =============================================================
@@ -592,6 +601,40 @@ public class MinecraftLauncher {
         );
 
         return process;
+    }
+
+    static List<String> riftTweakerArguments(String template) {
+        if (template == null || template.isBlank()) {
+            throw new IllegalStateException("Rift profile is missing its launch tweaker.");
+        }
+
+        List<String> tokens = splitArguments(template);
+        List<String> result = new ArrayList<>();
+        for (int i = 0; i < tokens.size(); i++) {
+            String token = tokens.get(i);
+            String tweaker;
+            if ("--tweakClass".equals(token)) {
+                if (++i >= tokens.size()) {
+                    throw new IllegalStateException("Rift profile has --tweakClass without a class name.");
+                }
+                tweaker = tokens.get(i);
+            } else if (token.startsWith("--tweakClass=")) {
+                tweaker = token.substring("--tweakClass=".length());
+            } else {
+                continue;
+            }
+
+            if (!tweaker.matches("[A-Za-z_$][A-Za-z0-9_$.]*")) {
+                throw new IllegalStateException("Rift profile contains an invalid launch tweaker class.");
+            }
+            result.add("--tweakClass");
+            result.add(tweaker);
+        }
+
+        if (result.isEmpty()) {
+            throw new IllegalStateException("Rift profile is missing its launch tweaker.");
+        }
+        return List.copyOf(result);
     }
 
     static void ensureLaunchWrapperOption(
