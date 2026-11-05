@@ -34,6 +34,31 @@ jobs:
       - name: Run tests and build portable distributions (Windows)
         if: runner.os == 'Windows'
         run: .\gradlew.bat test distZip distTar platformImageChecksum
+      - name: Verify external updater JAR dependencies (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          UPDATER_JAR="$(find build/updater -maxdepth 1 -name 'VantaUpdater-*.jar' -print -quit)"
+          test -n "$UPDATER_JAR"
+          jar tf "$UPDATER_JAR" > build/updater-entries.txt
+          grep -Fxq 'dev/itsdropper/vanta/launcher/update/UpdaterMain.class' build/updater-entries.txt
+          grep -Fxq 'dev/itsdropper/vanta/launcher/update/ApplicationLocator.class' build/updater-entries.txt
+          grep -Fxq 'dev/itsdropper/vanta/launcher/Platform.class' build/updater-entries.txt
+          grep -Fxq 'dev/itsdropper/vanta/launcher/Platform\$OperatingSystem.class' build/updater-entries.txt
+      - name: Verify external updater JAR dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $updater = Get-ChildItem 'build/updater/VantaUpdater-*.jar' | Select-Object -First 1
+          if ($null -eq $updater) { throw 'Missing Windows updater JAR' }
+          $entries = & jar tf $updater.FullName
+          foreach ($required in @(
+            'dev/itsdropper/vanta/launcher/update/UpdaterMain.class',
+            'dev/itsdropper/vanta/launcher/update/ApplicationLocator.class',
+            'dev/itsdropper/vanta/launcher/Platform.class',
+            'dev/itsdropper/vanta/launcher/Platform$OperatingSystem.class'
+          )) {
+            if ($entries -notcontains $required) { throw "Missing updater dependency: $required" }
+          }
       - name: Verify Windows application image layout
         if: runner.os == 'Windows'
         shell: pwsh
