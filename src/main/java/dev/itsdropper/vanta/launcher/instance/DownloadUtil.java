@@ -32,6 +32,14 @@ import java.time.Duration;
 
 public class DownloadUtil {
 
+    static final int MAX_JSON_RESPONSE_BYTES = 16 * 1024 * 1024;
+
+    private static final class PayloadTooLargeException extends IOException {
+        private PayloadTooLargeException() {
+            super("Metadata response exceeded the maximum permitted size.");
+        }
+    }
+
     private static final class DownloadHttpException extends IOException {
         private final int statusCode;
         private final String retryAfter;
@@ -131,18 +139,22 @@ public class DownloadUtil {
                                 .GET()
                                 .build();
 
-                HttpResponse<String> response =
-                        send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<InputStream> response =
+                        send(request, HttpResponse.BodyHandlers.ofInputStream());
 
                 if (response.statusCode() != 200) {
-
+                    try { response.body().close(); } catch (IOException ignored) { }
                     throw new DownloadHttpException(response.statusCode(),
                             response.headers().firstValue("Retry-After").orElse(null));
                 }
 
-                return MAPPER.readTree(
-                        response.body()
-                );
+                long declaredLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
+                if (declaredLength > 0) validateJsonResponseSize(declaredLength);
+                try (InputStream input = response.body()) {
+                    byte[] json = input.readNBytes(MAX_JSON_RESPONSE_BYTES + 1);
+                    validateJsonResponseSize(json.length);
+                    return MAPPER.readTree(json);
+                }
 
             } catch (Exception e) {
                 lastException = e;
@@ -692,11 +704,18 @@ public class DownloadUtil {
     }
 
     private static boolean isRetryableDownloadFailure(Exception failure) {
+        if (failure instanceof PayloadTooLargeException) return false;
         if (failure instanceof DownloadHttpException httpFailure) {
             return isRetryableHttpStatus(httpFailure.statusCode);
         }
         if (failure instanceof InterruptedException) return false;
         return failure instanceof IOException;
+    }
+
+    static void validateJsonResponseSize(long size) throws IOException {
+        if (size < 0 || size > MAX_JSON_RESPONSE_BYTES) {
+            throw new PayloadTooLargeException();
+        }
     }
 
     private static String safeSourceLabel(String url) {
