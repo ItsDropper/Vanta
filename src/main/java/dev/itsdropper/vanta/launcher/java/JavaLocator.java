@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.launcher.java;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -81,7 +82,7 @@ public class JavaLocator {
                                     )
                             )
                             .resolve("bin")
-                            .resolve("java.exe");
+                            .resolve(Platform.javaExecutableName());
 
             if (Files.isRegularFile(java)) {
 
@@ -230,38 +231,21 @@ public class JavaLocator {
             int requiredVersion
     ) {
 
-        String programFiles =
-                System.getenv("ProgramFiles");
-
-        String javaHome =
-                System.getenv("JAVA_HOME");
+        String programFiles = System.getenv("ProgramFiles");
+        String javaHome = System.getenv("JAVA_HOME");
+        String home = System.getProperty("user.home", "");
 
         Path[] locations = {
-
-                javaHome != null
-                        ? Path.of(javaHome)
-                        : null,
-
-                programFiles != null
-                        ? Path.of(
-                        programFiles,
-                        "Java"
-                )
-                        : null,
-
-                programFiles != null
-                        ? Path.of(
-                        programFiles,
-                        "Eclipse Adoptium"
-                )
-                        : null,
-
-                Path.of(
-                        System.getProperty(
-                                "user.home"
-                        ),
-                        ".jdks"
-                )
+                javaHome != null && !javaHome.isBlank() ? Path.of(javaHome) : null,
+                programFiles != null ? Path.of(programFiles, "Java") : null,
+                programFiles != null ? Path.of(programFiles, "Eclipse Adoptium") : null,
+                home.isBlank() ? null : Path.of(home, ".jdks"),
+                home.isBlank() ? null : Path.of(home, ".sdkman", "candidates", "java"),
+                home.isBlank() ? null : Path.of(home, "Library", "Java", "JavaVirtualMachines"),
+                Path.of("/usr/lib/jvm"),
+                Path.of("/usr/java"),
+                Path.of("/opt/java"),
+                Path.of("/opt/homebrew/opt/openjdk")
         };
 
         for (Path location : locations) {
@@ -306,7 +290,7 @@ public class JavaLocator {
                         .filter(Files::isDirectory)
                         .map(path ->
                                 path.resolve("bin")
-                                        .resolve("java.exe")
+                                        .resolve(Platform.javaExecutableName())
                         )
                         .filter(Files::isRegularFile)
                         .filter(path ->
@@ -371,7 +355,7 @@ public class JavaLocator {
                                 path.getFileName()
                                         .toString()
                                         .equalsIgnoreCase(
-                                                "java.exe"
+                                                Platform.javaExecutableName()
                                         )
                         )
                         .filter(path ->
