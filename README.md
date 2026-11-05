@@ -1,6 +1,6 @@
 # Vanta
 
-**A Windows-focused Minecraft launcher built around isolated instances, repairability, and control.**
+**A cross-platform Minecraft launcher built around isolated instances, repairability, and control.**
 
 Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, Fabric, Forge, Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, VantaLoader, LiteLoader, and Risugami ModLoader installations, Modrinth content, installation health, and verified launcher updates.
 
@@ -30,7 +30,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 - **Build:** Gradle wrapper
 - **License:** See [LICENSE](LICENSE)
 
-Linux and macOS support are future goals, not a claim of current platform support.
+Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and creates a self-contained application image on all three; the Linux image is also launched in CI for a JavaFX smoke test. Linux/macOS automatic updates and signed native installers remain unfinished.
 
 ## Getting started
 
@@ -55,7 +55,7 @@ On Windows PowerShell:
 On Linux and macOS:
 
 ```bash
-./gradlew clean test distZip distTar
+./gradlew clean test distZip distTar platformAppImage
 ```
 
 Use the checked-in Gradle wrapper rather than installing a separate Gradle version. See the [Development Guide](docs/DEVELOPMENT.md) for setup, packaging, debugging, and validation notes.
@@ -115,7 +115,7 @@ For code changes, include the problem, implementation approach, compatibility im
 
 ## Roadmap
 
-Areas under consideration include broader Minecraft compatibility, improved repair coverage, instance import/export, modpack formats, further diagnostics, and additional platform support. The roadmap is not a guarantee that any particular feature is already implemented or scheduled for a specific release.
+Areas under consideration include broader Minecraft compatibility, improved repair coverage, instance import/export, modpack formats, further diagnostics, and platform-specific update/install improvements. The roadmap is not a guarantee that any particular feature is already implemented or scheduled for a specific release.
 
 ## Disclaimer
 
