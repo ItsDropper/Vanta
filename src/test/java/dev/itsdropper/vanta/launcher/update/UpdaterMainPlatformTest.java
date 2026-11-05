@@ -14,6 +14,22 @@ class UpdaterMainPlatformTest {
     Path temporaryDirectory;
 
     @Test
+    void acceptsOnlyReadinessMarkerInsidePrivateHelperWorkspace() throws Exception {
+        Path workspace = temporaryDirectory.resolve("session-123");
+        Path helperApplication = workspace.resolve("application");
+        Path readyFile = workspace.resolve("updater-ready");
+
+        assertEquals(readyFile.toAbsolutePath().normalize(),
+                UpdaterMain.validateReadinessFile(helperApplication, readyFile));
+        assertThrows(java.io.IOException.class,
+                () -> UpdaterMain.validateReadinessFile(helperApplication,
+                        temporaryDirectory.resolve("updater-ready")));
+        assertThrows(java.io.IOException.class,
+                () -> UpdaterMain.validateReadinessFile(helperApplication,
+                        workspace.resolve("unexpected-marker")));
+    }
+
+    @Test
     void restoresLinuxLauncherAndRuntimeExecutablePermissions() throws Exception {
         assumeFalse(System.getProperty("os.name", "").toLowerCase().contains("windows"));
         String previous = System.getProperty("os.name");
