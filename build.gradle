@@ -93,11 +93,15 @@ tasks.register('platformAppImage', Exec) {
     def hostOs = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT)
     def windowsHost = hostOs.contains('windows')
     def macHost = hostOs.contains('mac') || hostOs.contains('darwin')
+    def linuxHost = hostOs.contains('linux')
     def jpackageExecutable = windowsHost
             ? file("${javaHome}/bin/jpackage.exe")
             : file("${javaHome}/bin/jpackage")
 
     doFirst {
+        if (!windowsHost && !macHost && !linuxHost) {
+            throw new GradleException("Unsupported jpackage host operating system: ${hostOs}")
+        }
         if (!jpackageExecutable.isFile()) {
             throw new GradleException("jpackage is required to create the platform application image.")
         }
@@ -153,11 +157,15 @@ def releaseHostOs = System.getProperty('os.name', '').toLowerCase(java.util.Loca
 def releaseHostArch = System.getProperty('os.arch', '').toLowerCase(java.util.Locale.ROOT)
 def releaseWindows = releaseHostOs.contains('windows')
 def releaseMac = releaseHostOs.contains('mac') || releaseHostOs.contains('darwin')
+def releaseLinux = releaseHostOs.contains('linux')
 def releaseArch = (releaseHostArch in ['amd64', 'x86_64', 'x86-64', 'x64'])
         ? 'x64'
         : ((releaseHostArch in ['aarch64', 'arm64']) ? 'aarch64' : null)
 if (releaseArch == null) {
     throw new GradleException("Unsupported release CPU architecture: ${releaseHostArch}")
+}
+if (!releaseWindows && !releaseMac && !releaseLinux) {
+    throw new GradleException("Unsupported release host operating system: ${releaseHostOs}")
 }
 if (releaseWindows && releaseArch != 'x64') {
     throw new GradleException("Windows application images are currently supported on x64 only.")
