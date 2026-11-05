@@ -157,10 +157,16 @@ public class LaunchDataBuilder {
             } catch (java.io.IOException e) {
                 throw new IllegalStateException("Could not read NeoForge launch metadata.", e);
             }
-            if (data.neoForgeFmlVersion == null || data.neoForgeFmlVersion.isBlank()
-                    || data.neoFormVersion == null || data.neoFormVersion.isBlank()) {
+            // NeoForge 26.1+ removed the separate FML version from its
+            // VersionInfo contract. Older 1.x releases still require it.
+            if (requiresNeoForgeFmlVersion(data.version)
+                    && (data.neoForgeFmlVersion == null || data.neoForgeFmlVersion.isBlank())) {
                 throw new IllegalStateException(
-                        "NeoForge launch metadata is missing its FML or NeoForm version. Repair this instance before launching.");
+                        "NeoForge launch metadata is missing its FML version. Repair this instance before launching.");
+            }
+            if (data.neoFormVersion == null || data.neoFormVersion.isBlank()) {
+                throw new IllegalStateException(
+                        "NeoForge launch metadata is missing its NeoForm version. Repair this instance before launching.");
             }
         }
 
@@ -250,19 +256,46 @@ public class LaunchDataBuilder {
     }
 
     private static String argumentValue(JsonNode arguments, String key) {
-        if (arguments == null || !arguments.isArray()) {
+        if (arguments == null || arguments.isMissingNode() || arguments.isNull()) {
             return null;
         }
-        for (int i = 0; i + 1 < arguments.size(); i++) {
-            JsonNode current = arguments.get(i);
-            JsonNode next = arguments.get(i + 1);
-            if (current != null && current.isTextual()
-                    && key.equals(current.asText())
-                    && next != null && next.isTextual()) {
-                return next.asText();
+        if (arguments.isObject()) {
+            JsonNode direct = arguments.get(key);
+            if (direct != null && direct.isValueNode() && !direct.asText().isBlank()) {
+                return direct.asText();
             }
+            var fields = arguments.fields();
+            while (fields.hasNext()) {
+                String value = argumentValue(fields.next().getValue(), key);
+                if (value != null && !value.isBlank()) return value;
+            }
+            return null;
+        }
+        if (!arguments.isArray()) return null;
+        for (int i = 0; i < arguments.size(); i++) {
+            JsonNode current = arguments.get(i);
+            if (current != null && current.isTextual() && key.equals(current.asText())
+                    && i + 1 < arguments.size()) {
+                JsonNode next = arguments.get(i + 1);
+                if (next != null && next.isTextual() && !next.asText().isBlank()) {
+                    return next.asText();
+                }
+            }
+            String nested = argumentValue(current, key);
+            if (nested != null && !nested.isBlank()) return nested;
         }
         return null;
+    }
+
+    private static boolean requiresNeoForgeFmlVersion(String minecraftVersion) {
+        if (minecraftVersion == null || minecraftVersion.isBlank()) return true;
+        String firstComponent = minecraftVersion.split("\\.", 2)[0];
+        try {
+            return Integer.parseInt(firstComponent) < 26;
+        } catch (NumberFormatException ignored) {
+            // Unknown version schemes retain the conservative legacy contract.
+            return true;
+        }
     }
 
     // =============================================================
