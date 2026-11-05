@@ -159,7 +159,9 @@ public final class ApplicationLocator {
         return Files.isRegularFile(runtime.resolve("bin/java"))
                 || Files.isRegularFile(runtime.resolve("bin/java.exe"))
                 || Files.isRegularFile(runtime.resolve("bin/javaw.exe"))
-                || Files.isRegularFile(runtime.resolve("Contents/Home/bin/java"));
+                || Files.isRegularFile(runtime.resolve("Contents/Home/bin/java"))
+                || Files.isRegularFile(runtime.resolve("lib/modules"))
+                || Files.isRegularFile(runtime.resolve("Contents/Home/lib/modules"));
     }
 
     private static Layout detectLayout(Path root) {
