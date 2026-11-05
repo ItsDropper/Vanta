@@ -508,7 +508,7 @@ public final class UpdaterMain {
         );
     }
 
-    private static void restoreExecutablePermissions(Path applicationDirectory)
+    static void restoreExecutablePermissions(Path applicationDirectory)
             throws IOException {
         if (dev.itsdropper.vanta.launcher.Platform.operatingSystem()
                 == dev.itsdropper.vanta.launcher.Platform.OperatingSystem.WINDOWS) {
