@@ -7,6 +7,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
+import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstancePreset;
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthContentType;
@@ -1139,6 +1140,11 @@ public class LauncherView {
     }
 
     private void checkForUpdates() {
+        // The current release updater replaces the Windows jpackage layout.
+        // Do not offer Windows update archives to Linux/macOS installations.
+        if (Platform.operatingSystem() != Platform.OperatingSystem.WINDOWS) {
+            return;
+        }
 
         UpdateChecker updateChecker =
                 new UpdateChecker();
@@ -1191,6 +1197,13 @@ public class LauncherView {
     private void performUpdate(
             UpdateInfo updateInfo
     ) {
+        if (Platform.operatingSystem() != Platform.OperatingSystem.WINDOWS) {
+            notifications.error(
+                    "Automatic updates unavailable",
+                    "Install the matching Linux or macOS Vanta distribution manually."
+            );
+            return;
+        }
 
         notifications.showProgress(
                 "Updating Vanta",
