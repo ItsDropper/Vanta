@@ -57,13 +57,11 @@ public class ClasspathBuilder {
 
         /*
          * Legacy Minecraft metadata can include asm-all (for example,
-         * ASM 4.1 on b1.7.3). Modern Fabric-family loaders also provide
-         * modular ASM artifacts. If asm-all is placed first, its older
-         * org.objectweb.asm classes shadow the loader's newer ASM and
-         * can make ClassVisitor reject the loader's ASM API constant.
-         *
-         * Keep asm-all on the classpath for legacy launch components,
-         * but append it after the loader's modular ASM libraries.
+         * ASM 4.1 on b1.7.3). Babric uses Fabric Loader, which supplies
+         * modern modular ASM. Fabric Loader scans the entire classpath
+         * and rejects duplicate org.objectweb.asm classes regardless
+         * of JAR ordering, so Babric must omit the legacy aggregate.
+         * Other legacy loaders retain asm-all for compatibility.
          */
         LinkedHashSet<Path> legacyAsmAll = new LinkedHashSet<>();
         boolean fabricLoaderProvidesAsm =
