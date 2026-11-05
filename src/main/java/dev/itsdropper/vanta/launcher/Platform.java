@@ -25,7 +25,11 @@ public final class Platform {
     }
 
     public static String javaExecutableName() {
-        return operatingSystem() == OperatingSystem.WINDOWS ? "java.exe" : "java";
+        return javaExecutableName(System.getProperty("os.name", ""));
+    }
+
+    static String javaExecutableName(String osName) {
+        return operatingSystem(osName) == OperatingSystem.WINDOWS ? "java.exe" : "java";
     }
 
     public static String adoptiumOs() {
@@ -39,7 +43,11 @@ public final class Platform {
     }
 
     public static String adoptiumArchitecture() {
-        String arch = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
+        return adoptiumArchitecture(System.getProperty("os.arch", ""));
+    }
+
+    static String adoptiumArchitecture(String architecture) {
+        String arch = architecture == null ? "" : architecture.toLowerCase(Locale.ROOT);
         return switch (arch) {
             case "amd64", "x86_64", "x86-64", "x64" -> "x64";
             case "aarch64", "arm64" -> "aarch64";
