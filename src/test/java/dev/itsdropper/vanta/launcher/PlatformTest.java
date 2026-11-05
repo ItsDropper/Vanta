@@ -31,8 +31,10 @@ class PlatformTest {
 
     @Test
     void resolvesLinuxXdgDataDirectory() {
-        assertTrue(MinecraftLocator.resolveVantaDirectory("Linux", "/home/test", null, "/data/user")
-                .endsWith(Path.of("data", "user", "Vanta")));
+        Path xdgDataHome = Path.of(System.getProperty("java.io.tmpdir"), "vanta-xdg-data")
+                .toAbsolutePath().normalize();
+        assertEquals(xdgDataHome.resolve("Vanta"),
+                MinecraftLocator.resolveVantaDirectory("Linux", "/home/test", null, xdgDataHome.toString()));
     }
 
     @Test
