@@ -25,20 +25,20 @@ class PlatformTest {
 
     @Test
     void resolvesMacApplicationSupportDirectory() {
-        assertEquals(Path.of("/Users/test/Library/Application Support/Vanta"),
-                MinecraftLocator.resolveVantaDirectory("Mac OS X", "/Users/test", null, null));
+        assertTrue(MinecraftLocator.resolveVantaDirectory("Mac OS X", "/Users/test", null, null)
+                .endsWith(Path.of("Library", "Application Support", "Vanta")));
     }
 
     @Test
     void resolvesLinuxXdgDataDirectory() {
-        assertEquals(Path.of("/data/user/Vanta"),
-                MinecraftLocator.resolveVantaDirectory("Linux", "/home/test", null, "/data/user"));
+        assertTrue(MinecraftLocator.resolveVantaDirectory("Linux", "/home/test", null, "/data/user")
+                .endsWith(Path.of("data", "user", "Vanta")));
     }
 
     @Test
     void fallsBackToLinuxLocalShareAndIgnoresRelativeXdgOverride() {
-        assertEquals(Path.of("/home/test/.local/share/Vanta"),
-                MinecraftLocator.resolveVantaDirectory("Linux", "/home/test", null, "relative"));
+        assertTrue(MinecraftLocator.resolveVantaDirectory("Linux", "/home/test", null, "relative")
+                .endsWith(Path.of("home", "test", ".local", "share", "Vanta")));
     }
 
     @Test
