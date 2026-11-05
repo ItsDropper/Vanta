@@ -55,6 +55,32 @@ class ApplicationLocatorTest {
     }
 
     @Test
+    void recognizesMacRuntimeImagesThatOmitStandaloneJavaCommand() throws Exception {
+        Path root = temporaryDirectory.resolve("Vanta-NoJavaCommand.app");
+        touch(root.resolve("Contents/MacOS/Vanta"));
+        touch(root.resolve("Contents/app/Vanta.cfg"));
+        touch(root.resolve("Contents/runtime/Contents/Home/lib/modules"));
+
+        assertTrue(ApplicationLocator.isSupportedInstallation(root));
+        assertEquals(root.resolve("Contents/runtime/Contents/Home"),
+                ApplicationLocator.getRuntimeDirectory(root));
+        assertThrows(IllegalStateException.class,
+                () -> ApplicationLocator.getJavaExecutable(root));
+    }
+
+    @Test
+    void selectsJavawWhenWindowsRuntimeOmitsJavaExe() throws Exception {
+        Path root = temporaryDirectory.resolve("Vanta-Windows-Javaw");
+        touch(root.resolve("Vanta.exe"));
+        touch(root.resolve("app/Vanta.cfg"));
+        touch(root.resolve("runtime/bin/javaw.exe"));
+
+        assertTrue(ApplicationLocator.isSupportedInstallation(root));
+        assertEquals(root.resolve("runtime/bin/javaw.exe"),
+                ApplicationLocator.getJavaExecutable(root));
+    }
+
+    @Test
     void rejectsIncompleteOrUnknownApplicationImages() throws Exception {
         Path root = temporaryDirectory.resolve("not-vanta");
         touch(root.resolve("Vanta.exe"));
