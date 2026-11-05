@@ -140,6 +140,11 @@ public final class InstanceRepairService {
                     instance,
                     vanillaMetadata
             );
+        } else if (loader.equalsIgnoreCase("legacyfabric")) {
+            repairLegacyFabric(
+                    instance,
+                    vanillaMetadata
+            );
         } else if (loader.equalsIgnoreCase("forge")) {
             repairForge(
                     instance
@@ -260,6 +265,48 @@ public final class InstanceRepairService {
             InstanceManager.saveInstance(
                     repaired
             );
+        }
+    }
+
+    private static void repairLegacyFabric(
+            Instance instance,
+            JsonNode vanillaMetadata
+    ) throws Exception {
+
+        String loaderVersion = instance.getLoaderVersion();
+        if (loaderVersion == null || loaderVersion.isBlank()) {
+            loaderVersion = LegacyFabricInstaller.findLatestLoaderVersion(
+                    instance.getMinecraftVersion()
+            );
+        }
+
+        JsonNode profile = LegacyFabricInstaller.downloadProfile(
+                instance.getMinecraftVersion(),
+                loaderVersion
+        );
+
+        // Legacy Fabric profiles can contain pre-Mojang native metadata.
+        // downloadProfile normalizes those entries before library installation.
+        LegacyFabricInstaller.installLibraries(profile);
+
+        JsonNode merged = LegacyFabricInstaller.mergeProfile(
+                vanillaMetadata,
+                profile
+        );
+
+        MinecraftVersionResolver.saveMetadata(instance, merged);
+        NativeInstaller.extract(instance, merged);
+
+        if (!loaderVersion.equals(instance.getLoaderVersion())) {
+            Instance repaired = new Instance(
+                    instance.getId(),
+                    instance.getName(),
+                    instance.getMinecraftVersion(),
+                    instance.getLoader(),
+                    loaderVersion,
+                    instance.getDirectory()
+            );
+            InstanceManager.saveInstance(repaired);
         }
     }
 
