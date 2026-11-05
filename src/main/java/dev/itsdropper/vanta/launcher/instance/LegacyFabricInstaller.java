@@ -129,10 +129,10 @@ public final class LegacyFabricInstaller {
                                 + library.path("name").asText("<missing>"));
             }
 
+            validateMavenPathPart(coordinate[0], "group", library);
             String groupPath = coordinate[0].replace('.', '/');
             String artifact = coordinate[1];
             String version = coordinate[2];
-            validateMavenPathPart(groupPath, "group", library);
             validateMavenPathPart(artifact, "artifact", library);
             validateMavenPathPart(version, "version", library);
 
