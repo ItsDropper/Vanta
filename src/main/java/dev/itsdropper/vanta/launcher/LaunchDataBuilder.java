@@ -13,6 +13,7 @@ import dev.itsdropper.vanta.launcher.model.VersionManifest;
 import dev.itsdropper.vanta.launcher.service.ServerTarget;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class LaunchDataBuilder {
@@ -154,6 +155,17 @@ public class LaunchDataBuilder {
                 JsonNode gameArguments = metadata.path("arguments").path("game");
                 data.neoForgeFmlVersion = argumentValue(gameArguments, "--fml.fmlVersion");
                 data.neoFormVersion = argumentValue(gameArguments, "--fml.neoFormVersion");
+                data.neoForgeJvmArguments = stringArguments(metadata.path("arguments").path("jvm"));
+                if (data.neoForgeJvmArguments.isEmpty()) {
+                    throw new IllegalStateException(
+                            "NeoForge launch metadata is missing its required JVM arguments. Repair this instance before launching.");
+                }
+                Path librariesDirectory = MinecraftLocator.getLibrariesDirectoryPath()
+                        .toAbsolutePath().normalize();
+                data.neoForgeJvmArguments = data.neoForgeJvmArguments.stream()
+                        .map(argument -> argument.replace("${library_directory}", librariesDirectory.toString())
+                                .replace("${classpath_separator}", java.io.File.pathSeparator))
+                        .toList();
             } catch (java.io.IOException e) {
                 throw new IllegalStateException("Could not read NeoForge launch metadata.", e);
             }
@@ -253,6 +265,19 @@ public class LaunchDataBuilder {
         }
 
         return data;
+    }
+
+    private static List<String> stringArguments(JsonNode arguments) {
+        List<String> result = new ArrayList<>();
+        if (arguments == null || !arguments.isArray()) {
+            return result;
+        }
+        for (JsonNode argument : arguments) {
+            if (argument != null && argument.isTextual()) {
+                result.add(argument.asText());
+            }
+        }
+        return result;
     }
 
     private static String argumentValue(JsonNode arguments, String key) {
