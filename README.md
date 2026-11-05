@@ -30,7 +30,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 - **Build:** Gradle wrapper
 - **License:** See [LICENSE](LICENSE)
 
-Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and creates a self-contained application image on all three; the Linux image is also launched in CI for a JavaFX smoke test. Platform-specific update archives and the updater's three jpackage layouts are implemented; an actual in-place update on each OS is still awaiting end-to-end validation. Signed/notarized builds and native installers remain unfinished.
+Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and validates the application-image and update-archive layouts across five OS/architecture targets; Linux x64 also gets a JavaFX GUI smoke test. Platform-specific update archives and the updater's three jpackage layouts are implemented; an actual in-place update on each OS is still awaiting end-to-end validation. See [Platform Support](docs/PLATFORM_SUPPORT.md) for the exact support boundary. Signed/notarized builds and native installers remain unfinished.
 
 ## Getting started
 
