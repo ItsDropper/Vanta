@@ -352,8 +352,19 @@ public class MinecraftLauncher {
                 command.add("--fml.neoFormVersion");
                 command.add(data.neoFormVersion);
 
-                command.add("--launchTarget");
-                command.add("forgeclient");
+                /*
+                 * Legacy NeoForge releases are bootstrapped through
+                 * ModLauncher and require an explicit launch target.
+                 * Minecraft 26.1+ uses NeoForge's dedicated startup.Client
+                 * main class from version metadata; passing the legacy
+                 * --launchTarget option to that entrypoint causes FML
+                 * startup to abort before the game content classloader is
+                 * completed.
+                 */
+                if (requiresFmlVersion) {
+                    command.add("--launchTarget");
+                    command.add("forgeclient");
+                }
             }
     
             // =============================================================
