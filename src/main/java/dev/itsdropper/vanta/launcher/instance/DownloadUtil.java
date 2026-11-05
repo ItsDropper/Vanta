@@ -215,7 +215,7 @@ public class DownloadUtil {
         }
     }
 
-    private static void downloadFileInternal(
+    static void downloadFileInternal(
             String url,
             Path target,
             String expectedSha1,
