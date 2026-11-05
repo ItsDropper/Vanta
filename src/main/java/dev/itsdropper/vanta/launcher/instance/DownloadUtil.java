@@ -29,6 +29,15 @@ import java.time.Duration;
 
 public class DownloadUtil {
 
+    private static final class DownloadHttpException extends IOException {
+        private final int statusCode;
+
+        private DownloadHttpException(int statusCode, String url) {
+            super("HTTP " + statusCode + " while downloading " + url);
+            this.statusCode = statusCode;
+        }
+    }
+
     private static final ObjectMapper MAPPER =
             new ObjectMapper();
 
@@ -115,12 +124,7 @@ public class DownloadUtil {
 
                 if (response.statusCode() != 200 && response.statusCode() != 206) {
 
-                    throw new IOException(
-                            "HTTP "
-                                    + response.statusCode()
-                                    + " while downloading "
-                                    + url
-                    );
+                    throw new DownloadHttpException(response.statusCode(), url);
                 }
 
                 return MAPPER.readTree(
@@ -383,16 +387,16 @@ public class DownloadUtil {
                 return;
             } catch (Exception e) {
                 lastException = e;
+                boolean permanentFailure = !isRetryableDownloadFailure(e);
+                boolean invalidArtifact = e.getMessage() != null
+                        && (e.getMessage().contains("SHA-1 verification failed")
+                        || e.getMessage().contains("size does not match"));
                 if (!LauncherSettings.isResumableDownloadsEnabled()
-                        || (e.getMessage() != null && (e.getMessage().contains("SHA-1 verification failed")
-                        || e.getMessage().matches("HTTP 4[0-9][0-9].*")))) {
+                        || permanentFailure || invalidArtifact) {
                     try { Files.deleteIfExists(temporary); } catch (IOException ignored) { }
                 }
-
-                if (attempt < maxRetries()) {
-
-                    sleepBeforeRetry(attempt);
-                }
+                if (permanentFailure) break;
+                if (attempt < maxRetries()) sleepBeforeRetry(attempt);
             }
         }
 
@@ -562,6 +566,19 @@ public class DownloadUtil {
         } finally {
             Files.deleteIfExists(temporary);
         }
+    }
+
+    static boolean isRetryableHttpStatus(int statusCode) {
+        return statusCode == 408 || statusCode == 425 || statusCode == 429
+                || statusCode >= 500 && statusCode <= 599;
+    }
+
+    private static boolean isRetryableDownloadFailure(Exception failure) {
+        if (failure instanceof DownloadHttpException httpFailure) {
+            return isRetryableHttpStatus(httpFailure.statusCode);
+        }
+        if (failure instanceof InterruptedException) return false;
+        return failure instanceof IOException;
     }
 
     static void validateDownloadRequest(String url, String expectedSha1) {
