@@ -33,6 +33,7 @@ public final class ApplicationLocator {
         Path[] candidates = {
                 normalized.resolve("runtime"),
                 normalized.resolve("lib/runtime"),
+                normalized.resolve("Contents/runtime/Contents/Home"),
                 normalized.resolve("Contents/runtime")
         };
         for (Path candidate : candidates) {
@@ -136,7 +137,8 @@ public final class ApplicationLocator {
     private static boolean isJavaRuntime(Path runtime) {
         return Files.isRegularFile(runtime.resolve("bin/java"))
                 || Files.isRegularFile(runtime.resolve("bin/java.exe"))
-                || Files.isRegularFile(runtime.resolve("bin/javaw.exe"));
+                || Files.isRegularFile(runtime.resolve("bin/javaw.exe"))
+                || Files.isRegularFile(runtime.resolve("Contents/Home/bin/java"));
     }
 
     private static Layout detectLayout(Path root) {
