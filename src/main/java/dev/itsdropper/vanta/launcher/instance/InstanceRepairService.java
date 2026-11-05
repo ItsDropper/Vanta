@@ -139,31 +139,31 @@ public final class InstanceRepairService {
                 vanillaMetadata
         );
 
-        if (loader.equalsIgnoreCase("fabric")) {
+        if (loaderKey.equals("fabric")) {
             repairFabric(
                     instance,
                     vanillaMetadata
             );
-        } else if (loader.equalsIgnoreCase("legacyfabric")) {
+        } else if (loaderKey.equals("legacyfabric")) {
             repairLegacyFabric(
                     instance,
                     vanillaMetadata
             );
-        } else if (loader.equalsIgnoreCase("forge")) {
+        } else if (loaderKey.equals("forge")) {
             repairForge(
                     instance
             );
-        } else if (loader.equalsIgnoreCase("quilt")) {
+        } else if (loaderKey.equals("quilt")) {
             repairQuilt(
                     instance,
                     vanillaMetadata
             );
-        } else if (loader.equalsIgnoreCase("babric")) {
+        } else if (loaderKey.equals("babric")) {
             repairBabric(instance, vanillaMetadata);
-        } else if (loader.equalsIgnoreCase("nilloader")) {
+        } else if (loaderKey.equals("nilloader")) {
             NilLoaderInstaller.install(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
-        } else if (loader.equalsIgnoreCase("vantaloader")) {
+        } else if (loaderKey.equals("vantaloader")) {
             // Repair is also the explicit update path: resolve the current main
             // commit to an immutable release tag and persist that exact version.
             String latestLoaderVersion = VantaLoaderInstaller.findLatestLoaderVersion();
@@ -177,14 +177,14 @@ public final class InstanceRepairService {
                 InstanceManager.saveInstance(updated);
             }
             instance = updated;
-        } else if (loader.equalsIgnoreCase("modloader")) {
+        } else if (loaderKey.equals("modloader")) {
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             ModLoaderInstaller.install(instance);
-        } else if (loader.equalsIgnoreCase("rift")) {
+        } else if (loaderKey.equals("rift")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             RiftInstaller.install(instance);
-        } else if (loader.equalsIgnoreCase("liteloader")) {
+        } else if (loaderKey.equals("liteloader")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             String repairedLoaderVersion = LiteLoaderInstaller.install(instance);
@@ -193,7 +193,7 @@ public final class InstanceRepairService {
                         instance.getId(), instance.getName(), instance.getMinecraftVersion(),
                         instance.getLoader(), repairedLoaderVersion, instance.getDirectory()));
             }
-        } else if (loader.equalsIgnoreCase("vanilla")) {
+        } else if (loaderKey.equals("vanilla")) {
             MinecraftVersionResolver.saveMetadata(
                     instance,
                     vanillaMetadata
@@ -205,7 +205,7 @@ public final class InstanceRepairService {
             );
         }
 
-        if (!loader.equalsIgnoreCase("liteloader") && !loader.equalsIgnoreCase("rift")) {
+        if (!loaderKey.equals("liteloader") && !loaderKey.equals("rift")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
         }
 
