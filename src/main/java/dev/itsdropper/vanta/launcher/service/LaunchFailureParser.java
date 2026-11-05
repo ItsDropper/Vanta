@@ -70,6 +70,30 @@ public class LaunchFailureParser {
         }
 
         /*
+         * Sodium 0.9.2 for Minecraft 26.3 contains a NeoForge-specific
+         * LevelExtractorMixin whose target no longer exists in the
+         * patched client. Sodium 0.9.3-beta.1 removes that mixin.
+         *
+         * Pin the repair to that exact compatible release rather than
+         * allowing the generic resolver to select the older stable 0.9.2.
+         */
+        if (output.contains("LevelExtractorMixin")
+                && output.contains("extractVisibleBlockEntities")
+                && output.contains("sodium-neoforge.mixins.json")) {
+            issues.add(new RepairView.RepairIssue(
+                    "SODIUM / NEOFORGE INCOMPATIBILITY",
+                    "Sodium's NeoForge renderer mixin is incompatible with Minecraft 26.3",
+                    "The installed Sodium build targets a LevelExtractor method that is not "
+                            + "present in this Minecraft 26.3 client. Update Sodium to "
+                            + "0.9.3-beta.1 for NeoForge 26.3. Vanta will replace the "
+                            + "tracked Sodium installation while preserving unrelated mods.",
+                    "AANobbMI",
+                    List.of("0.9.3-beta.1")
+            ));
+            return issues;
+        }
+
+        /*
          * Essential's shared resource-pack server depends on the JDK
          * HTTP server module. Vanta resolves it during launch, but keep
          * this diagnosis for custom runtimes or older launcher builds
