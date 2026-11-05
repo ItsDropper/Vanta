@@ -33,12 +33,20 @@ public final class Platform {
     }
 
     public static String adoptiumOs() {
-        return switch (operatingSystem()) {
+        return adoptiumOs(System.getProperty("os.name", ""));
+    }
+
+    static String adoptiumOsForTest(String osName) {
+        return adoptiumOs(osName);
+    }
+
+    private static String adoptiumOs(String osName) {
+        return switch (operatingSystem(osName)) {
             case WINDOWS -> "windows";
             case LINUX -> "linux";
             case MACOS -> "mac";
             case UNKNOWN -> throw new UnsupportedOperationException("Unsupported operating system: "
-                    + System.getProperty("os.name", "unknown"));
+                    + osName);
         };
     }
 
