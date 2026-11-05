@@ -53,25 +53,24 @@ public final class LibraryResolver {
 
             String path = library.downloads.artifact.path;
 
-            if (path == null || path.isBlank()) {
-                throw new IllegalStateException(
-                        "Library artifact path is missing: "
-                                + safeLibraryName(library)
+            // Some legacy/third-party profiles serialize an empty
+            // downloads.artifact object for Maven-coordinate libraries.
+            // Only a non-empty Mojang path is authoritative; otherwise
+            // continue to the native-only check and Maven fallback below.
+            if (path != null && !path.isBlank()) {
+                Path artifact = resolveSafePath(
+                        librariesDirectory,
+                        path,
+                        "Library"
                 );
+
+                requireRegularFile(
+                        artifact,
+                        "Library"
+                );
+
+                return artifact;
             }
-
-            Path artifact = resolveSafePath(
-                    librariesDirectory,
-                    path,
-                    "Library"
-            );
-
-            requireRegularFile(
-                    artifact,
-                    "Library"
-            );
-
-            return artifact;
         }
 
         /*
