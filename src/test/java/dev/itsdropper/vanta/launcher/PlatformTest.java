@@ -67,5 +67,7 @@ class PlatformTest {
         assertEquals("aarch64", Platform.adoptiumArchitecture("aarch64"));
         assertThrows(UnsupportedOperationException.class,
                 () -> Platform.adoptiumArchitecture("riscv64"));
+        assertThrows(UnsupportedOperationException.class,
+                () -> Platform.adoptiumArchitecture("x86"));
     }
 }
