@@ -27,6 +27,10 @@ public class LaunchData {
 
     public String loaderVersion;
 
+    public String neoForgeFmlVersion;
+
+    public String neoFormVersion;
+
     public Path javaAgent;
 
     public Path minecraftMappings;
