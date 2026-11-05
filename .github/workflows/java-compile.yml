@@ -33,7 +33,16 @@ jobs:
           ./gradlew test distZip distTar platformAppImage
       - name: Run tests and build portable distributions (Windows)
         if: runner.os == 'Windows'
-        run: .\\gradlew.bat test distZip distTar
+        run: .\gradlew.bat test distZip distTar platformAppImage
+      - name: Smoke test Linux application image
+        if: runner.os == 'Linux'
+        env:
+          XDG_DATA_HOME: ${{ runner.temp }}/vanta-appimage-data
+          JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
+        run: |
+          mkdir -p "$XDG_DATA_HOME"
+          xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
+          test -s build/app-image-smoke/index.html
       - name: Upload platform distributions
         uses: actions/upload-artifact@v4
         with:
