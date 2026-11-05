@@ -23,7 +23,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 - **Development status:** Active development
 - **Platform targets:** Windows 10/11, mainstream Linux distributions, and macOS (Intel and Apple Silicon); cross-platform support is in active validation
 - **Platform builds:** self-contained jpackage application images for Windows, Linux, and macOS, plus portable ZIP/TAR.GZ distributions; builds are not yet code-signed/notarized and native installers (MSI/DEB/RPM/DMG) are not yet provided
-- **Automatic self-update:** currently Windows-only; Linux/macOS users must install the matching platform distribution manually
+- **Automatic self-update:** platform-specific application-image archives for supported Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon releases; unsigned packages still require users to trust the release source
 - **Secure account storage:** Windows DPAPI, macOS Keychain, or Linux Secret Service (requires a Secret Service provider and the secret-tool command from libsecret-tools)
 - **Runtime/toolchain:** Java 21
 - **UI:** JavaFX 21
@@ -60,7 +60,7 @@ On Linux and macOS:
 
 Use the checked-in Gradle wrapper rather than installing a separate Gradle version. See the [Development Guide](docs/DEVELOPMENT.md) for setup, packaging, debugging, and validation notes.
 
-The `platformAppImage` task creates a self-contained application image on the host OS. Linux launches from `build/packages/Vanta/bin/Vanta`, macOS from `build/packages/Vanta.app`, and Windows from `build/packages/Vanta/Vanta.exe`. CI uploads each OS build as a separate artifact.
+The `platformAppImage` task creates a self-contained application image on the host OS. Linux launches from `build/packages/Vanta/bin/Vanta`, macOS from `build/packages/Vanta.app`, and Windows from `build/packages/Vanta/Vanta.exe`. CI uploads each OS build as a separate artifact. For release publishing, run `./gradlew platformImageChecksum -PvantaVersion=1.2.8` (or the Windows wrapper) on each target OS; the `Platform release packages` workflow performs this matrix build and publishes the matching archive and SHA-256 file when a version tag is pushed.
 
 To run from an IDE, use the configured Gradle application task or create a run configuration for the application's main class. A successful build confirms compilation and configured checks only; it does not prove every authentication, download, repair, or packaging path works on every machine.
 
