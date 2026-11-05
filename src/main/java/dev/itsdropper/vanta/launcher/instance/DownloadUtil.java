@@ -102,6 +102,7 @@ public class DownloadUtil {
             String url
     ) throws Exception {
 
+        validateDownloadRequest(url, null);
         Exception lastException = null;
 
         for (int attempt = 1; attempt <= maxRetries(); attempt++) {
@@ -117,10 +118,7 @@ public class DownloadUtil {
                                 .build();
 
                 HttpResponse<String> response =
-                        HTTP.send(
-                                request,
-                                HttpResponse.BodyHandlers.ofString()
-                        );
+                        send(request, HttpResponse.BodyHandlers.ofString());
 
                 if (response.statusCode() != 200 && response.statusCode() != 206) {
 
@@ -132,13 +130,9 @@ public class DownloadUtil {
                 );
 
             } catch (Exception e) {
-
                 lastException = e;
-
-                if (attempt < maxRetries()) {
-
-                    sleepBeforeRetry(attempt);
-                }
+                if (!isRetryableDownloadFailure(e)) break;
+                if (attempt < maxRetries()) sleepBeforeRetry(attempt);
             }
         }
 
@@ -265,12 +259,7 @@ public class DownloadUtil {
                     } catch (IOException ignored) {
                     }
 
-                    throw new IOException(
-                            "HTTP "
-                                    + response.statusCode()
-                                    + " while downloading "
-                                    + url
-                    );
+                    throw new DownloadHttpException(response.statusCode(), url);
                 }
 
                 boolean append = existingBytes > 0 && response.statusCode() == 206;
