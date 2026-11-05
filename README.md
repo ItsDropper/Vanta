@@ -21,7 +21,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 ## Status and platform
 
 - **Development status:** Active development
-- **Platform targets:** Windows 10/11, mainstream Linux distributions, and macOS (Intel and Apple Silicon); cross-platform support is in active validation
+- **Platform targets:** Windows 10/11 x64, mainstream Linux distributions on x64 and ARM64, and macOS on Intel and Apple Silicon; cross-platform support is validated through a multi-architecture CI matrix
 - **Platform builds:** self-contained jpackage application images for Windows, Linux, and macOS, plus portable ZIP/TAR.GZ distributions; builds are not yet code-signed/notarized and native installers (MSI/DEB/RPM/DMG) are not yet provided
 - **Automatic self-update:** platform-specific application-image archives for supported Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon releases; unsigned packages still require users to trust the release source
 - **Secure account storage:** Windows DPAPI, macOS Keychain, or Linux Secret Service (requires a Secret Service provider and the secret-tool command from libsecret-tools)
