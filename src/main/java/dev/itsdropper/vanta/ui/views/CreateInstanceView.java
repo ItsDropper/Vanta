@@ -296,7 +296,8 @@ public class CreateInstanceView extends VBox {
                     setDisable(false);
                 } else {
                     boolean available = availableLoaders.contains(item);
-                    setText(available ? item : item + "  (not available for this version)");
+                    String label = "ModLoader".equals(item) ? "Risugami's ModLoader" : item;
+                    setText(available ? label : label + "  (not available for this version)");
                     setDisable(!available);
                 }
             }
@@ -305,7 +306,8 @@ public class CreateInstanceView extends VBox {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? null : item);
+                setText(empty || item == null ? null
+                        : ("ModLoader".equals(item) ? "Risugami's ModLoader" : item));
             }
         });
         availableLoaders.add("Vanilla");
