@@ -152,10 +152,8 @@ public final class FpsHardwareDetector {
     }
 
     private static boolean isWindows() {
-        return System.getProperty(
-                "os.name",
-                ""
-        ).toLowerCase(Locale.ROOT).contains("win");
+        return dev.itsdropper.vanta.launcher.Platform.operatingSystem()
+                == dev.itsdropper.vanta.launcher.Platform.OperatingSystem.WINDOWS;
     }
 
     private static boolean isTuringOrNewer(String gpuName) {
