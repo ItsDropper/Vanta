@@ -159,9 +159,21 @@ public final class BabricInstaller {
         }
 
         JsonNode existingDownloads = library.get("downloads");
-        if (existingDownloads != null && existingDownloads.isObject()
-                && existingDownloads.hasNonNull("artifact")) {
+        JsonNode existingArtifact = existingDownloads == null
+                ? null : existingDownloads.get("artifact");
+        if (existingArtifact != null
+                && existingArtifact.path("path").isTextual()
+                && !existingArtifact.path("path").asText().isBlank()) {
             return;
+        }
+
+        // Some legacy loader manifests include an empty/incomplete
+        // downloads.artifact object for a native-only library. Keeping it
+        // makes MinecraftFileInstaller treat it as a normal JAR and fail
+        // because artifact.path is absent. The classifiers below are the
+        // authoritative downloads for this native-only entry.
+        if (existingArtifact != null && existingDownloads instanceof ObjectNode downloadsNode) {
+            downloadsNode.remove("artifact");
         }
 
         String name = library.path("name").asText("");
