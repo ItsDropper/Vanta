@@ -1233,13 +1233,13 @@
 }
 .instances-page .instance-card .instance-version { -fx-font-size: 11px; }
 .instances-page .instance-card .instance-play-button {
-    -fx-background-color: #d5e4d8;
-    -fx-text-fill: #102019;
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: -vantaaccentforeground;
     -fx-background-radius: 6px;
     -fx-font-size: 10px;
     -fx-font-weight: 900;
 }
-.instances-page .instance-card .instance-play-button:hover { -fx-background-color: #ffffff; }
+.instances-page .instance-card .instance-play-button:hover { -fx-background-color: -vantaaccenthover; }
 .instances-page .instance-card .instance-settings-button {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
