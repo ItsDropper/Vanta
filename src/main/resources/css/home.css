@@ -531,39 +531,39 @@
 
 /* Featured launch surface: cinematic landscape, restrained and readable. */
 .home-featured-card {
-    -fx-background-color: linear-gradient(to right, #111b1b, #172727 58%, #1c302d);
+    -fx-background-color: linear-gradient(to right, -vantasurface, -vantasurfaceraised 58%, -vantasurfacehover);
     -fx-background-radius: 18px;
-    -fx-border-color: #344b42;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 18px;
     -fx-border-width: 1px;
 }
-.home-featured-card:hover { -fx-border-color: #587766; }
+.home-featured-card:hover { -fx-border-color: -vantaaccent; }
 .home-featured-card .home-featured-icon-frame {
-    -fx-background-color: rgba(10, 22, 20, 0.72);
-    -fx-border-color: rgba(178, 213, 190, 0.24);
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantaborder;
     -fx-background-radius: 15px;
     -fx-border-radius: 15px;
 }
 .home-featured-card .home-featured-eyebrow {
-    -fx-text-fill: #b6d1bd;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 9px;
     -fx-letter-spacing: 1.5px;
 }
 .home-featured-card .home-featured-title { -fx-font-size: 30px; }
 .home-featured-card .home-featured-meta {
-    -fx-text-fill: #d0ddd3;
+    -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
 }
-.home-featured-card .home-featured-playtime { -fx-text-fill: #a3b5a8; }
+.home-featured-card .home-featured-playtime { -fx-text-fill: -vantamuted; }
 .home-featured-card .home-featured-play-button {
-    -fx-background-color: #d5e4d8;
-    -fx-text-fill: #102019;
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: -vantaaccentforeground;
     -fx-background-radius: 6px;
     -fx-font-size: 11px;
     -fx-font-weight: 900;
     -fx-padding: 0 24px;
 }
-.home-featured-card .home-featured-play-button:hover { -fx-background-color: #ffffff; }
+.home-featured-card .home-featured-play-button:hover { -fx-background-color: -vantaaccenthover; }
 .minecraft-backdrop { -fx-background-color: transparent; }
 
 
@@ -571,7 +571,7 @@
 .home-page .home-title { -fx-font-size: 34px; -fx-font-weight: 800; }
 .home-page .home-account-label { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
 .home-page .home-featured-section-eyebrow {
-    -fx-text-fill: #a9c7b1;
+    -fx-text-fill: -vantamuted;
     -fx-font-size: 9px;
     -fx-font-weight: 900;
     -fx-letter-spacing: 1.8px;
@@ -587,7 +587,7 @@
     -fx-font-weight: 800;
 }
 .home-page .home-recent-card, .home-page .home-server-card {
-    -fx-background-color: #111a15;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -612,21 +612,21 @@
     -fx-font-size: 9px;
 }
 .home-page .home-recent-icon {
-    -fx-background-color: #1a2a21;
+    -fx-background-color: -vantasurfaceraised;
     -fx-background-radius: 7px;
-    -fx-border-color: #344b3b;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 7px;
 }
 .home-page .home-recent-card .button, .home-page .home-server-card .button {
     -fx-background-color: -vantaaccent;
     -fx-background-radius: 5px;
-    -fx-text-fill: #102019;
+    -fx-text-fill: -vantaaccentforeground;
     -fx-font-size: 9px;
     -fx-font-weight: 900;
     -fx-padding: 0 15px;
 }
 .home-page .home-recent-card .button:hover, .home-page .home-server-card .button:hover {
-    -fx-background-color: #ffffff;
+    -fx-background-color: -vantaaccenthover;
 }
 .home-page .home-recent-servers-card {
     -fx-background-color: -vantasurface;
