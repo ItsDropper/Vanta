@@ -478,9 +478,8 @@ public class MinecraftFileInstaller {
                             + target
             );
 
-            Files.deleteIfExists(
-                    target
-            );
+            // Keep the previous file until the replacement has been downloaded
+            // and verified. DownloadUtil publishes its temporary file atomically.
         }
 
         DownloadUtil.downloadFile(
