@@ -240,10 +240,9 @@ public class InstanceSettingsView extends VBox {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Select Java executable");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
-                    System.getProperty("os.name", "").toLowerCase().contains("win")
+                    Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS
                             ? "Java executable (java.exe)" : "Java executable",
-                    System.getProperty("os.name", "").toLowerCase().contains("win")
-                            ? "java.exe" : "*"
+                    Platform.javaExecutableName()
             ));
             File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
             if (selected != null) javaPathField.setText(selected.getAbsolutePath());
