@@ -26,6 +26,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: updater-regression-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   updater-process-exit:
     name: Updater process exit (${{ matrix.os }})

@@ -9,6 +9,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ui-screenshots-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   capture-sidebar:
     runs-on: ubuntu-latest
