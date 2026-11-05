@@ -37,7 +37,7 @@ public final class ApplicationLocator {
                 normalized.resolve("Contents/runtime")
         };
         for (Path candidate : candidates) {
-            if (isJavaRuntime(candidate)) return candidate;
+            if (isRuntimeImage(candidate)) return candidate;
         }
         throw new IllegalStateException("Could not locate the bundled Java runtime in " + normalized);
     }
@@ -155,7 +155,7 @@ public final class ApplicationLocator {
         return null;
     }
 
-    private static boolean isJavaRuntime(Path runtime) {
+    private static boolean isRuntimeImage(Path runtime) {
         return Files.isRegularFile(runtime.resolve("bin/java"))
                 || Files.isRegularFile(runtime.resolve("bin/java.exe"))
                 || Files.isRegularFile(runtime.resolve("bin/javaw.exe"))
@@ -169,20 +169,20 @@ public final class ApplicationLocator {
 
         if (Files.isRegularFile(root.resolve("Vanta.exe"))
                 && Files.isDirectory(root.resolve("app"))
-                && isJavaRuntime(root.resolve("runtime"))) {
+                && isRuntimeImage(root.resolve("runtime"))) {
             return Layout.WINDOWS;
         }
 
         if (Files.isRegularFile(root.resolve("bin/Vanta"))
                 && Files.isDirectory(root.resolve("lib/app"))
-                && isJavaRuntime(root.resolve("lib/runtime"))) {
+                && isRuntimeImage(root.resolve("lib/runtime"))) {
             return Layout.LINUX;
         }
 
         Path contents = root.resolve("Contents");
         if (Files.isRegularFile(contents.resolve("MacOS/Vanta"))
                 && Files.isDirectory(contents.resolve("app"))
-                && isJavaRuntime(contents.resolve("runtime"))) {
+                && isRuntimeImage(contents.resolve("runtime"))) {
             return Layout.MACOS;
         }
         return Layout.UNKNOWN;
