@@ -28,6 +28,29 @@ class LoaderStackConfigurationTest {
     }
 
     @Test
+    void savesAndLoadsConfigurationWithoutSerializingDerivedProperties(@TempDir Path tempDir) throws Exception {
+        LoaderStackConfiguration configuration = new LoaderStackConfiguration(List.of(
+                new LoaderStackConfiguration.Layer(
+                        "rift", "1.0.4-87", LoaderStackConfiguration.LayerType.PROFILE_OVERLAY,
+                        10, List.of("org.dimdev.rift.launch.RiftLoader"), "loader-profiles/rift.json"),
+                new LoaderStackConfiguration.Layer(
+                        "compat", "1.0", LoaderStackConfiguration.LayerType.MOD, 20, List.of())
+        ));
+        Path file = tempDir.resolve("loader-stack.json");
+
+        configuration.save(file);
+
+        String json = Files.readString(file);
+        assertFalse(json.contains("orderedLayers"));
+        assertFalse(json.contains("orderedTweakers"));
+
+        LoaderStackConfiguration loaded = LoaderStackConfiguration.load(file);
+        assertEquals(List.of("rift", "compat"), loaded.getOrderedLayers().stream()
+                .map(LoaderStackConfiguration.Layer::id)
+                .toList());
+    }
+
+    @Test
     void rejectsDuplicateLayerIds() {
         assertThrows(IllegalStateException.class, () -> new LoaderStackConfiguration(List.of(
                 new LoaderStackConfiguration.Layer(
