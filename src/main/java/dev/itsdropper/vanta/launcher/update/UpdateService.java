@@ -200,26 +200,26 @@ public class UpdateService {
 
         String downloadUrl = null;
         String checksumUrl = null;
+        String version = release.path("tag_name").asText("")
+                .replaceFirst("^[vV]", "");
+        String expectedArchive = "Vanta-" + version + "-" 
+                + dev.itsdropper.vanta.launcher.Platform.distributionId() + ".zip";
+        String expectedChecksum = expectedArchive + ".sha256";
+        String legacyWindowsArchive = "Vanta-" + version + ".zip";
+        boolean allowLegacyWindowsAsset =
+                dev.itsdropper.vanta.launcher.Platform.operatingSystem()
+                        == dev.itsdropper.vanta.launcher.Platform.OperatingSystem.WINDOWS;
 
         for (JsonNode asset : assets) {
-
-            String name =
-                    asset.path("name").asText();
-
-            String assetUrl =
-                    asset
-                            .path("browser_download_url")
-                            .asText();
-
-            if (name.matches(
-                    "(?i)Vanta-\\d+(?:\\.\\d+){1,2}\\.zip"
-            )) {
+            String name = asset.path("name").asText();
+            String assetUrl = asset.path("browser_download_url").asText();
+            if (name.equalsIgnoreCase(expectedArchive)
+                    || (allowLegacyWindowsAsset && name.equalsIgnoreCase(legacyWindowsArchive))) {
                 downloadUrl = assetUrl;
             }
-
-            if (name.matches(
-                    "(?i)Vanta-\\d+(?:\\.\\d+){1,2}\\.zip\\.sha256"
-            )) {
+            if (name.equalsIgnoreCase(expectedChecksum)
+                    || (allowLegacyWindowsAsset
+                    && name.equalsIgnoreCase(legacyWindowsArchive + ".sha256"))) {
                 checksumUrl = assetUrl;
             }
         }
