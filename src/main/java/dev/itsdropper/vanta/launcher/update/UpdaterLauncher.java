@@ -35,65 +35,6 @@ public final class UpdaterLauncher {
         System.exit(0);
     }
 
-    public static Path getUpdaterDirectory() {
-
-        Path directory =
-                ApplicationLocator.getUpdaterDirectory(
-                        ApplicationLocator.getApplicationDirectory()
-                );
-
-        log(
-                "getUpdaterDirectory() -> "
-                        + directory
-        );
-
-        return directory;
-    }
-
-    public static Path getUpdaterJar() {
-
-        Path jar =
-                getUpdaterDirectory()
-                        .resolve("VantaUpdater.jar");
-
-        log(
-                "getUpdaterJar() -> "
-                        + jar
-        );
-
-        return jar;
-    }
-
-    public static void ensureDirectory()
-            throws Exception {
-
-        log("========================================");
-        log("ensureDirectory() CALLED");
-        log("========================================");
-
-        Path directory =
-                getUpdaterDirectory();
-
-        Files.createDirectories(
-                directory
-        );
-
-        log(
-                "Updater directory: "
-                        + directory
-        );
-
-        log(
-                "Exists: "
-                        + Files.exists(directory)
-        );
-
-        log(
-                "Is directory: "
-                        + Files.isDirectory(directory)
-        );
-    }
-
     public static void start(
             long processId,
             Path updateZip,
