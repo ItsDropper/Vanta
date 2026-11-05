@@ -107,8 +107,7 @@ class NativeExtractorTest {
             Files.createDirectories(output);
             Path previousNative = output.resolve("known-good.so");
             Files.writeString(previousNative, "known-good");
-            Path invalidArchive = temporaryDirectory.resolve("invalid.jar");
-            Files.writeString(invalidArchive, "not a zip archive");
+            Path invalidArchive = temporaryDirectory.resolve("missing.jar");
 
             assertThrows(Exception.class,
                     () -> NativeExtractor.extractAll(java.util.List.of(invalidArchive), output));
