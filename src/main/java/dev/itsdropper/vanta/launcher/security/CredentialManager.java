@@ -9,6 +9,7 @@ import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Stores account sessions in the host operating system's credential vault.
@@ -34,8 +35,9 @@ public final class CredentialManager {
     private CredentialManager() {}
 
     public static String encrypt(String plaintext, String accountId) throws IOException {
-        if (plaintext == null || accountId == null || accountId.isBlank()) {
-            throw new IllegalArgumentException("Credential and account identifier are required.");
+        if (plaintext == null || accountId == null
+                || !accountId.matches("[A-Za-z0-9-]{1,128}")) {
+            throw new IllegalArgumentException("Credential and a valid account identifier are required.");
         }
         return switch (Platform.operatingSystem()) {
             case WINDOWS -> WindowsCredentialManager.encrypt(plaintext);
@@ -176,18 +178,26 @@ public final class CredentialManager {
         } else {
             process.getOutputStream().close();
         }
+        final boolean exited;
+        try {
+            exited = process.waitFor(15, TimeUnit.SECONDS);
+        } catch (InterruptedException interrupted) {
+            process.destroyForcibly();
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while accessing Linux Secret Service.", interrupted);
+        }
+        if (!exited) {
+            process.destroyForcibly();
+            throw new IOException("Linux Secret Service did not respond within 15 seconds.");
+        }
+
         byte[] output;
         try (var input = process.getInputStream()) {
             output = input.readAllBytes();
         }
-        try {
-            if (process.waitFor() != 0) {
-                throw new IOException("Linux Secret Service operation failed: "
-                        + new String(output, StandardCharsets.UTF_8).trim());
-            }
-        } catch (InterruptedException interrupted) {
-            Thread.currentThread().interrupt();
-            throw new IOException("Interrupted while accessing Linux Secret Service.", interrupted);
+        if (process.exitValue() != 0) {
+            throw new IOException("Linux Secret Service operation failed: "
+                    + new String(output, StandardCharsets.UTF_8).trim());
         }
         return new String(output, StandardCharsets.UTF_8).stripTrailing();
     }
