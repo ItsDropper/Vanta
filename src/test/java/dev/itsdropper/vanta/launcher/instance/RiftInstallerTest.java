@@ -28,7 +28,7 @@ class RiftInstallerTest {
                 profile.path("libraries").get(0).path("name").asText());
         assertEquals("org.spongepowered:mixin:0.7.11-20180703.121122-1",
                 profile.path("libraries").get(1).path("name").asText());
-        assertEquals("https://repo.spongepowered.org/maven/",
+        assertEquals("https://repo.spongepowered.org/repository/maven-public/",
                 profile.path("libraries").get(1).path("url").asText());
         assertTrue(profile.path("libraries").toString().contains("net.minecraft:launchwrapper:1.12"));
         assertTrue(profile.path("libraries").toString().contains("org.ow2.asm:asm-tree:6.2"));
