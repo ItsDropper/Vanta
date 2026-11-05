@@ -738,14 +738,13 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         autoUpdate.setSelected(LauncherSettings.isAutoUpdateOnLaunchEnabled());
         autoUpdate.getStyleClass().add("settings-checkbox");
 
-        boolean nativeUpdaterSupported =
-                Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
+        boolean nativeUpdaterSupported = Platform.supportsDesktop();
         updates.setDisable(!nativeUpdaterSupported);
         autoUpdate.setDisable(!nativeUpdaterSupported);
         if (!nativeUpdaterSupported) {
             javafx.scene.control.Tooltip unsupportedUpdateTooltip =
                     new javafx.scene.control.Tooltip(
-                            "Automatic update installation is not available in the Linux/macOS distribution yet."
+                            "Automatic updates are unavailable for this operating system or CPU architecture."
                     );
             updates.setTooltip(unsupportedUpdateTooltip);
             autoUpdate.setTooltip(unsupportedUpdateTooltip);
@@ -1126,8 +1125,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             Path executable;
             if (configured.isBlank()) {
                 executable = Path.of(System.getProperty("java.home"), "bin",
-                        System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win")
-                                ? "java.exe" : "java");
+                        Platform.javaExecutableName());
             } else {
                 executable = Path.of(configured);
             }
@@ -2057,9 +2055,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 Path javaBinary = Path.of(
                         System.getProperty("java.home"),
                         "bin",
-                        System.getProperty("os.name", "").toLowerCase().contains("win")
-                                ? "java.exe"
-                                : "java"
+                        Platform.javaExecutableName()
                 );
 
                 if (!Files.isRegularFile(javaBinary)) {
