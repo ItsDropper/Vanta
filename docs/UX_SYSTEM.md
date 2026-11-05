@@ -70,7 +70,7 @@ Run the production sidebar capture locally:
 ./gradlew run --args="--capture-sidebar-screenshots build/ui-screenshots"
 ```
 
-This generates one PNG per Sidebar.Page, a 3×3 overview contact sheet, and an index. CI captures the production views under Xvfb and uploads them as the vanta-sidebar-screenshots artifact. Capture mode skips account loading, update checks, onboarding, telemetry handlers/events and active-view lifecycle refreshes. On Linux, set APPDATA to a writable temporary directory because the launcher currently targets Windows roaming-data paths.
+This generates one PNG per Sidebar.Page, a 3×3 overview contact sheet, and an index. CI captures the production views under Xvfb and uploads them as the vanta-sidebar-screenshots artifact. Capture mode skips account loading, update checks, onboarding, telemetry handlers/events and active-view lifecycle refreshes. On Linux, the launcher uses XDG_DATA_HOME or ~/.local/share; no Windows APPDATA override is required.
 
 ## Motion and responsiveness
 
