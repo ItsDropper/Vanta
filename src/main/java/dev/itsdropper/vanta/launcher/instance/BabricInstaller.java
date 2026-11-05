@@ -16,6 +16,10 @@ import dev.itsdropper.vanta.launcher.loader.LoaderProfileStackMerger;
  */
 public final class BabricInstaller {
     public static final String SUPPORTED_GAME_VERSION = "b1.7.3";
+    // Matches the Fabric Loader component pinned by babric/prism-instance.
+    // Babric supplies its intermediary separately, so the generic compatibility
+    // endpoint is not a reliable way to discover this legacy loader version.
+    public static final String SUPPORTED_LOADER_VERSION = "0.19.5";
     private static final String BABRIC_PRISM_REVISION = "ebff13db466cb4ccb3ff8bb5e2658ff30bfc913d";
     private static final String BABRIC_ARGUMENTS =
             "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}";
@@ -26,9 +30,11 @@ public final class BabricInstaller {
 
     public static String findLatestLoaderVersion(String minecraftVersion) throws Exception {
         requireSupportedVersion(minecraftVersion);
-        // Babric's upstream Prism profile composes Babric b1.7.3 with the
-        // Fabric Loader component. Query Fabric Meta for the compatible build.
-        return FabricInstaller.findLatestLoaderVersion(SUPPORTED_GAME_VERSION);
+        // Babric's upstream Prism profile pins this Fabric Loader component.
+        // Do not query Fabric Meta's generic game-version list here: its
+        // intermediary compatibility check can reject Babric's custom
+        // b1.7.3 mappings even though the official Babric profile is valid.
+        return SUPPORTED_LOADER_VERSION;
     }
 
     public static JsonNode downloadProfile(String minecraftVersion, String loaderVersion) throws Exception {
