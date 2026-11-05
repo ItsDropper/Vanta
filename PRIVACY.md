@@ -12,7 +12,7 @@ Depending on the features you use, Vanta may process:
 - **Local launcher and game data:** instance settings, installed mods and resource packs, logs, crash reports, screenshots, worlds, and other files you choose to keep in your instances.
 - **Diagnostic information:** local logs and error details created to help investigate failures.
 
-Vanta is designed to store account/session data and instance data locally on your device. Treat your device account and its files as private. Anyone with sufficient access to your device or its backups may be able to access local launcher data.
+Vanta is designed to store account/session data and instance data locally on your device. Treat your device account and its files as private. Anyone with sufficient access to your device or its backups may be able to access local launcher data. Account session secrets are stored using Windows DPAPI, the macOS Keychain, or Linux Secret Service through secret-tool. Linux account persistence requires a running Secret Service provider and libsecret-tools. OS-vault entries are tied to the local user account and are not portable with a copied Vanta data folder; older Windows DPAPI-protected account files cannot be decrypted on Linux or macOS.
 
 ## 2. Optional telemetry and data collection
 
