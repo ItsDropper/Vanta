@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -428,11 +429,7 @@ public final class ForgeInstaller {
                 System.getProperty("java.home");
 
         String executable =
-                System.getProperty("os.name", "")
-                        .toLowerCase()
-                        .contains("win")
-                        ? "java.exe"
-                        : "java";
+                Platform.javaExecutableName();
 
         Path java =
                 Path.of(
