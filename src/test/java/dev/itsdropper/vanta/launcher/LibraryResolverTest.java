@@ -21,8 +21,8 @@ class LibraryResolverTest {
             System.setProperty("os.name", "Linux");
             System.setProperty("user.home", temporaryDirectory.toString());
 
-            Path expected = temporaryDirectory.resolve(
-                    ".local/share/Vanta/libraries/net/java/jinput/jinput/2.0.5/jinput-2.0.5.jar");
+            Path expected = MinecraftLocator.getLibrariesDirectoryPath().resolve(
+                    "net/java/jinput/jinput/2.0.5/jinput-2.0.5.jar");
             Files.createDirectories(expected.getParent());
             Files.write(expected, new byte[]{1, 2, 3});
 
