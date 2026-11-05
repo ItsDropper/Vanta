@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public final class UpdaterLauncher {
 
@@ -109,12 +110,14 @@ public final class UpdaterLauncher {
             throw new IOException("Copied updater launcher is missing or not executable: " + helperLauncher);
         }
 
+        Path readyFile = tempUpdaterDirectory.resolve("updater-ready");
         List<String> command = List.of(
                 helperLauncher.toString(),
                 "--vanta-updater",
                 Long.toString(processId),
                 absoluteZip.toString(),
-                absoluteApplication.toString()
+                absoluteApplication.toString(),
+                readyFile.toString()
         );
 
         log("Copied application image for isolated updater: " + helperApplication);
@@ -140,33 +143,30 @@ public final class UpdaterLauncher {
                             )
                             .start();
 
-            log(
-                    "SUCCESS: updater process started."
-            );
+            log("Updater process PID: " + process.pid());
+            log("Updater command: " + process.info().command().orElse("<unknown>"));
+            log("Waiting for updater readiness handshake.");
 
-            log(
-                    "Updater process PID: "
-                            + process.pid()
-            );
+            long readyDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
+            while (!Files.isRegularFile(readyFile)) {
+                if (!process.isAlive()) {
+                    throw new IOException("Updater helper exited before becoming ready (exit code "
+                            + process.exitValue() + "). See " + getUpdaterOutputLog());
+                }
+                if (System.nanoTime() >= readyDeadline) {
+                    process.destroyForcibly();
+                    throw new IOException("Updater helper did not become ready within 15 seconds.");
+                }
+                try {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                } catch (InterruptedException interrupted) {
+                    process.destroyForcibly();
+                    Thread.currentThread().interrupt();
+                    throw new IOException("Interrupted while waiting for updater readiness.", interrupted);
+                }
+            }
 
-            log(
-                    "Updater process alive: "
-                            + process.isAlive()
-            );
-
-            log(
-                    "Updater command: "
-                            + process.info()
-                            .command()
-                            .orElse("<unknown>")
-            );
-
-            log(
-                    "Updater command line: "
-                            + process.info()
-                            .commandLine()
-                            .orElse("<unknown>")
-            );
+            log("SUCCESS: updater helper validated its inputs and is waiting for the original process to exit.");
 
         } catch (Exception e) {
 
