@@ -145,18 +145,21 @@ jobs:
           if (!(Test-Path "$image/runtime/bin/java.dll")) { throw 'Missing x64 JVM runtime library' }
           if (!(Test-Path "$image/runtime/lib/modules")) { throw 'Missing bundled runtime modules' }
           if (!(Test-Path "$image/app/Vanta.cfg")) { throw 'Missing application configuration' }
-          if ($env:PROCESSOR_ARCHITECTURE -ne 'ARM64') {
-            throw "Expected native ARM64 runner, got $env:PROCESSOR_ARCHITECTURE"
+          $nativeArch = $env:PROCESSOR_ARCHITEW6432
+          if (!$nativeArch) { $nativeArch = $env:PROCESSOR_ARCHITECTURE }
+          if ($nativeArch -ne 'ARM64') {
+            throw "Expected native ARM64 runner, got $nativeArch"
           }
-          if ((& java -XshowSettings:properties -version 2>&1 | Select-String 'os.arch =').ToString() -notmatch 'amd64|x86_64') {
+          $javaProperties = & java -XshowSettings:properties -version 2>&1 | Out-String
+          if ($javaProperties -notmatch 'os\\.arch\\s*=\\s*(amd64|x86_64)') {
             throw 'The test JVM is not running as x64 under emulation'
           }
 
       - name: Smoke test emulated Windows application image
         shell: pwsh
         run: |
-          $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'vanta-arm64-smoke'
-          New-Item -ItemType Directory -Force -Path $env:LOCALAPPDATA | Out-Null
+          $env:APPDATA = Join-Path $env:RUNNER_TEMP 'vanta-arm64-smoke'
+          New-Item -ItemType Directory -Force -Path $env:APPDATA | Out-Null
           & build/packages/Vanta/Vanta.exe --capture-sidebar-screenshots build/app-image-smoke
           if ($LASTEXITCODE -ne 0) { throw "Vanta exited with code $LASTEXITCODE" }
           $screenshots = Get-ChildItem 'build/app-image-smoke/[0-9][0-9]-*.png' -ErrorAction SilentlyContinue
