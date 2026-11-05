@@ -44,9 +44,19 @@ jobs:
       - name: Verify Linux application image layout
         if: runner.os == 'Linux'
         run: |
-          test -x build/packages/Vanta/bin/Vanta
-          test -x build/packages/Vanta/lib/runtime/bin/java
-          test -f build/packages/Vanta/lib/app/updater/VantaUpdater.jar
+          required=(build/packages/Vanta/bin/Vanta build/packages/Vanta/lib/runtime/bin/java)
+          for file in "${required[@]}"; do
+            if [ ! -x "$file" ]; then
+              echo "Missing or non-executable app image file: $file"
+              find build/packages/Vanta -maxdepth 5 -type f -printf '%M %p\n' | head -120
+              exit 1
+            fi
+          done
+          if [ ! -f build/packages/Vanta/lib/app/updater/VantaUpdater.jar ]; then
+            echo "Missing external updater JAR"
+            find build/packages/Vanta -maxdepth 5 -type f -print | head -120
+            exit 1
+          fi
       - name: Verify macOS application bundle layout
         if: runner.os == 'macOS'
         run: |
