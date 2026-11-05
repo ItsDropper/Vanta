@@ -55,11 +55,18 @@ class DownloadUtilIntegrationTest {
         byte[] payload = "Vanta download integration payload".getBytes(StandardCharsets.UTF_8);
         String url = serve(exchange -> writeResponse(exchange, 200, payload));
         Path target = temporaryDirectory.resolve("artifact.jar");
+        Path abandonedSegments = target.resolveSibling("artifact.jar.segments-stale");
+        Path abandonedAssembly = target.resolveSibling("artifact.jar.download-stale");
+        Files.createDirectories(abandonedSegments);
+        Files.writeString(abandonedSegments.resolve("part-0"), "stale");
+        Files.writeString(abandonedAssembly, "stale");
 
         DownloadUtil.downloadFileInternal(url, target, sha1(payload), 0L);
 
         assertArrayEquals(payload, Files.readAllBytes(target));
         assertFalse(Files.exists(target.resolveSibling("artifact.jar.download")));
+        assertFalse(Files.exists(abandonedSegments));
+        assertFalse(Files.exists(abandonedAssembly));
     }
 
     @Test
