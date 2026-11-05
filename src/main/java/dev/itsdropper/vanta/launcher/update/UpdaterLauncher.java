@@ -242,118 +242,66 @@ public final class UpdaterLauncher {
          * The updater process then runs entirely from there.
          */
 
-        Path tempUpdaterDirectory =
-                createTemporaryUpdaterDirectory();
-
-        Path tempUpdaterJar =
-                tempUpdaterDirectory
-                        .resolve("VantaUpdater.jar");
-
-        Path tempRuntimeDirectory =
-                tempUpdaterDirectory
-                        .resolve("runtime");
-
-        Path tempJavaExecutable =
-                tempRuntimeDirectory
-                        .resolve("bin")
-                        .resolve(Platform.javaExecutableName());
+        Path tempUpdaterDirectory = createTemporaryUpdaterDirectory();
+        boolean windowsHost =
+                Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
+        List<String> command;
 
         log("---------- PREPARING EXTERNAL UPDATER ----------");
+        log("Application image: " + absoluteApplication);
+        log("Temporary updater workspace: " + tempUpdaterDirectory);
 
-        log(
-                "External updater directory: "
-                        + tempUpdaterDirectory
-        );
+        if (windowsHost) {
+            Path tempUpdaterJar = tempUpdaterDirectory.resolve("VantaUpdater.jar");
+            Path tempRuntimeDirectory = tempUpdaterDirectory.resolve("runtime");
+            Path bundledJava = ApplicationLocator.getJavaExecutable(absoluteApplication);
+            Path tempJavaExecutable = tempRuntimeDirectory.resolve("bin")
+                    .resolve(bundledJava.getFileName().toString());
 
-        log(
-                "External updater JAR: "
-                        + tempUpdaterJar
-        );
-
-        log(
-                "External runtime directory: "
-                        + tempRuntimeDirectory
-        );
-
-        log(
-                "External Java: "
-                        + tempJavaExecutable
-        );
-
-        copyUpdaterJar(
-                updaterJar,
-                tempUpdaterJar
-        );
-
-        copyBundledRuntime(
-                absoluteApplication,
-                tempRuntimeDirectory
-        );
-
-        if (!Files.isRegularFile(
-                tempJavaExecutable
-        )) {
-
-            throw new IllegalStateException(
-                    "External updater Java was not created: "
-                            + tempJavaExecutable
+            log("Windows requires an updater runtime outside the application image.");
+            copyUpdaterJar(updaterJar, tempUpdaterJar);
+            copyBundledRuntime(
+                    absoluteApplication,
+                    tempRuntimeDirectory,
+                    bundledJava.getFileName().toString()
             );
+
+            if (!Files.isRegularFile(tempJavaExecutable) || !Files.isExecutable(tempJavaExecutable)) {
+                throw new IllegalStateException(
+                        "External updater Java was not created or is not executable: " + tempJavaExecutable);
+            }
+
+            command = List.of(
+                    tempJavaExecutable.toString(),
+                    "-jar",
+                    tempUpdaterJar.toString(),
+                    Long.toString(processId),
+                    absoluteZip.toString(),
+                    absoluteApplication.toString()
+            );
+        } else {
+            /*
+             * Linux and macOS jpackage runtimes may omit the standalone
+             * bin/java command. Re-enter the packaged native launcher in a
+             * dedicated helper mode instead. The updater process remains
+             * independent of the original launcher JVM.
+             */
+            Path nativeLauncher = ApplicationLocator.getLauncherExecutable(absoluteApplication);
+            command = List.of(
+                    nativeLauncher.toString(),
+                    "--vanta-updater",
+                    Long.toString(processId),
+                    absoluteZip.toString(),
+                    absoluteApplication.toString()
+            );
+            log("Unix updater will run through the packaged native launcher: " + nativeLauncher);
         }
 
-        log(
-                "External updater environment prepared successfully."
-        );
-
-        log(
-                "External Java exists: "
-                        + Files.isRegularFile(
-                        tempJavaExecutable
-                )
-        );
-
-        log(
-                "External updater JAR exists: "
-                        + Files.isRegularFile(
-                        tempUpdaterJar
-                )
-        );
-
-        log("---------- UPDATER COMMAND ----------");
-
-        List<String> command =
-                List.of(
-                        tempJavaExecutable.toString(),
-                        "-jar",
-                        tempUpdaterJar.toString(),
-                        Long.toString(processId),
-                        absoluteZip.toString(),
-                        absoluteApplication.toString()
-                );
-
-        for (int i = 0;
-             i < command.size();
-             i++) {
-
-            log(
-                    "[" + i + "] "
-                            + command.get(i)
-            );
+        for (int i = 0; i < command.size(); i++) {
+            log("[" + i + "] " + command.get(i));
         }
 
-        log(
-                "Starting updater using the external temporary runtime."
-        );
-
-        log(
-                "The updater process will NOT use files inside VantaLauncher."
-        );
-
-        log(
-                "The updater will wait for Vanta PID "
-                        + processId
-                        + " to terminate."
-        );
-
+        log("Starting updater process and waiting for original Vanta PID " + processId + " to exit.");
         try {
 
             Process process =
