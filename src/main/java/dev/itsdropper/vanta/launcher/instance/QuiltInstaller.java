@@ -16,18 +16,43 @@ public final class QuiltInstaller {
             throw new IllegalStateException("No Quilt Loader versions found for Minecraft " + minecraftVersion + ".");
         }
 
-        JsonNode fallback = null;
+        String fallback = null;
+        String latestStable = null;
         for (JsonNode entry : versions) {
             if (entry == null || !entry.isObject()) continue;
             JsonNode loader = entry.get("loader");
-            JsonNode version = loader == null ? null : loader.get("version");
-            if (version == null || !version.isTextual() || version.asText().isBlank()) continue;
+            JsonNode versionNode = loader == null ? null : loader.get("version");
+            if (versionNode == null || !versionNode.isTextual() || versionNode.asText().isBlank()) continue;
+
+            String version = versionNode.asText();
             if (fallback == null) fallback = version;
-            JsonNode stable = entry.get("stable");
-            if (stable != null && stable.isBoolean() && stable.asBoolean()) return version.asText();
+
+            // Quilt Meta's loader-version entries do not expose the "stable"
+            // flag at the top level. Stable releases have numeric versions;
+            // prereleases carry a suffix such as "-beta.9".
+            if (version.matches("[0-9]+(?:\\.[0-9]+)*")
+                    && (latestStable == null || compareNumericVersions(version, latestStable) > 0)) {
+                latestStable = version;
+            }
         }
-        if (fallback != null) return fallback.asText();
+        if (latestStable != null) return latestStable;
+        if (fallback != null) return fallback;
         throw new IllegalStateException("Quilt Meta returned no valid loader versions for Minecraft " + minecraftVersion + ".");
+    }
+
+    private static int compareNumericVersions(String left, String right) {
+        String[] leftParts = left.split("\\.");
+        String[] rightParts = right.split("\\.");
+        int count = Math.max(leftParts.length, rightParts.length);
+        for (int i = 0; i < count; i++) {
+            java.math.BigInteger leftPart = i < leftParts.length
+                    ? new java.math.BigInteger(leftParts[i]) : java.math.BigInteger.ZERO;
+            java.math.BigInteger rightPart = i < rightParts.length
+                    ? new java.math.BigInteger(rightParts[i]) : java.math.BigInteger.ZERO;
+            int comparison = leftPart.compareTo(rightPart);
+            if (comparison != 0) return comparison;
+        }
+        return 0;
     }
 
     public static JsonNode downloadProfile(String minecraftVersion, String loaderVersion) throws Exception {
