@@ -158,7 +158,7 @@ public final class RiftModMetadataCompatibility {
     }
 
     private static boolean isSignatureFile(String entryName) {
-        String normalized = entryName.replace('\\\\', '/').toUpperCase(Locale.ROOT);
+        String normalized = entryName.replace('\\', '/').toUpperCase(Locale.ROOT);
         if (!normalized.startsWith("META-INF/")) {
             return false;
         }
