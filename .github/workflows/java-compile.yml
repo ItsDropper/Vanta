@@ -116,3 +116,85 @@ jobs:
             build/packages/*
           if-no-files-found: error
           retention-days: 14
+
+  linux-distribution-smoke:
+    name: Linux desktop smoke — ${{ matrix.distro }}
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: Ubuntu 22.04
+            image: ubuntu:22.04
+          - distro: Debian 12
+            image: debian:12
+          - distro: Fedora 42
+            image: fedora:42
+          - distro: Arch Linux
+            image: archlinux:latest
+    steps:
+      - name: Download Linux x64 application image
+        uses: actions/download-artifact@v4
+        with:
+          name: vanta-distribution-Linux-X64
+          path: linux-x64-artifact
+
+      - name: Launch packaged application on target distribution
+        env:
+          DISTRO: ${{ matrix.distro }}
+          DISTRO_IMAGE: ${{ matrix.image }}
+        run: |
+          docker run --rm \
+            -e VANTA_DISTRO="$DISTRO" \
+            -v "$PWD/linux-x64-artifact:/artifact:ro" \
+            "$DISTRO_IMAGE" bash -s <<'CONTAINER'
+          set -euo pipefail
+
+          case "$VANTA_DISTRO" in
+            "Ubuntu 22.04"|"Debian 12")
+              apt-get update
+              DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+                xvfb libgtk-3-0 libxtst6 libxi6 libxrender1 libxrandr2 \
+                libxinerama1 libxxf86vm1 libgl1 libasound2 libxkbcommon0 \
+                libfontconfig1 libfreetype6 libcups2
+              ;;
+            "Fedora 42")
+              dnf install -y \
+                xorg-x11-server-Xvfb gtk3 libXtst libXi libXrender libXrandr \
+                libXinerama libXxf86vm mesa-libGL alsa-lib libxkbcommon \
+                fontconfig freetype cups-libs
+              ;;
+            "Arch Linux")
+              pacman -Syu --noconfirm --needed \
+                xorg-server-xvfb gtk3 libxtst libxi libxrender libxrandr \
+                libxinerama libxxf86vm mesa libglvnd alsa-lib libxkbcommon \
+                fontconfig freetype2 libcups
+              ;;
+            *)
+              echo "Unknown Linux distribution: $VANTA_DISTRO"
+              exit 2
+              ;;
+          esac
+
+          APP=/artifact/packages/Vanta
+          test -x "$APP/bin/Vanta"
+          test -f "$APP/lib/runtime/lib/modules"
+
+          mkdir -p /tmp/vanta-home /tmp/vanta-xdg-data
+          export HOME=/tmp/vanta-home
+          export XDG_DATA_HOME=/tmp/vanta-xdg-data
+          export DISPLAY=:99
+          export JAVA_TOOL_OPTIONS="-Dprism.order=sw -Djava.awt.headless=false"
+
+          Xvfb :99 -screen 0 1600x1000x24 >/tmp/vanta-xvfb.log 2>&1 &
+          XVFB_PID=$!
+          trap 'kill "$XVFB_PID" 2>/dev/null || true' EXIT
+          sleep 2
+
+          "$APP/bin/Vanta" --capture-sidebar-screenshots /tmp/vanta-distro-smoke
+          screenshots=(/tmp/vanta-distro-smoke/[0-9][0-9]-*.png)
+          test "${#screenshots[@]}" -eq 9
+          test -s /tmp/vanta-distro-smoke/index.md
+          test -s /tmp/vanta-distro-smoke/overview.png
+          CONTAINER
