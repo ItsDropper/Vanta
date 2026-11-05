@@ -20,6 +20,7 @@ public final class BabricInstaller {
     // Babric supplies its intermediary separately, so the generic compatibility
     // endpoint is not a reliable way to discover this legacy loader version.
     public static final String SUPPORTED_LOADER_VERSION = "0.19.5";
+    private static final String FABRIC_PROFILE_REFERENCE_GAME_VERSION = "1.21.11";
     private static final String BABRIC_PRISM_REVISION = "ebff13db466cb4ccb3ff8bb5e2658ff30bfc913d";
     private static final String BABRIC_ARGUMENTS =
             "${auth_player_name} ${auth_session} --gameDir ${game_directory} --assetsDir ${game_assets}";
@@ -49,7 +50,8 @@ public final class BabricInstaller {
     public static JsonNode downloadFabricProfile(String minecraftVersion, String loaderVersion)
             throws Exception {
         requireSupportedVersion(minecraftVersion);
-        JsonNode downloaded = FabricInstaller.downloadProfile(SUPPORTED_GAME_VERSION, loaderVersion);
+        JsonNode downloaded = FabricInstaller.downloadProfile(
+                FABRIC_PROFILE_REFERENCE_GAME_VERSION, loaderVersion);
         validateFabricBootstrap(downloaded);
 
         // Fabric Meta's generic profile may include Fabric's own intermediary
