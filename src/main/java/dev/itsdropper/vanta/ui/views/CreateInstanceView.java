@@ -769,7 +769,6 @@ public class CreateInstanceView extends VBox {
                         "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
                         "LiteLoader", "ModLoader", "Rift", "VantaLoader"
                 );
-                loaderBox.refresh();
 
                 // Keep unsupported loaders visible but prevent selecting them.
                 loaderBox.getSelectionModel().select("Vanilla");
@@ -795,7 +794,6 @@ public class CreateInstanceView extends VBox {
                         || !availableLoaders.contains(loaderBox.getValue())) {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
-                loaderBox.refresh();
 
                 createButton.setDisable(false);
             });
