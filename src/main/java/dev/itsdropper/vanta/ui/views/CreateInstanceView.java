@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
@@ -37,6 +38,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -56,6 +59,7 @@ public class CreateInstanceView extends VBox {
     private final TextField nameField;
     private final ComboBox<String> versionBox;
     private final ComboBox<String> loaderBox;
+    private final Set<String> availableLoaders = new HashSet<>();
 
     private final Button createButton;
     private final Button backButton;
@@ -283,6 +287,28 @@ public class CreateInstanceView extends VBox {
         loaderBox.getStyleClass().add(
                 "create-combo"
         );
+        loaderBox.setCellFactory(combo -> new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                    setDisable(false);
+                } else {
+                    boolean available = availableLoaders.contains(item);
+                    setText(available ? item : item + "  (not available for this version)");
+                    setDisable(!available);
+                }
+            }
+        });
+        loaderBox.setButtonCell(new ListCell<>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item);
+            }
+        });
+        availableLoaders.add("Vanilla");
 
         Label loaderHint = new Label(
                 "Experimental preview: VantaLoader supports native Java mods and exact-target ASM transformations. "
@@ -587,18 +613,9 @@ public class CreateInstanceView extends VBox {
 
         UiExecutor.shared().dispatchToUi(() -> {
             loaderBox.getItems().setAll(
-                    "Vanilla",
-                    "Fabric",
-                    "Quilt",
-                    "Forge",
-                    "NeoForge",
-                    "Ornithe",
-                    "Legacy Fabric",
-                    "Babric",
-                    "NilLoader",
-                    "LiteLoader",
-                    "ModLoader",
-                    "Rift"
+                    "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
+                    "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
+                    "LiteLoader", "ModLoader", "Rift", "VantaLoader"
             );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
@@ -719,6 +736,21 @@ public class CreateInstanceView extends VBox {
                     return;
                 }
 
+                availableLoaders.clear();
+                availableLoaders.add("Vanilla");
+                if (fabric) availableLoaders.add("Fabric");
+                if (forge) availableLoaders.add("Forge");
+                if (quilt) availableLoaders.add("Quilt");
+                if (neoForge) availableLoaders.add("NeoForge");
+                if (ornithe) availableLoaders.add("Ornithe");
+                if (legacyFabric) availableLoaders.add("Legacy Fabric");
+                if (babric) availableLoaders.add("Babric");
+                if (nilLoader) availableLoaders.add("NilLoader");
+                if (liteLoader) availableLoaders.add("LiteLoader");
+                if (modLoader) availableLoaders.add("ModLoader");
+                if (rift) availableLoaders.add("Rift");
+                if (vantaLoader) availableLoaders.add("VantaLoader");
+
                 fabricCheckRunning = false;
                 forgeCheckRunning = false;
                 quiltCheckRunning = false;
@@ -731,20 +763,11 @@ public class CreateInstanceView extends VBox {
                 riftCheckRunning = false;
                 vantaLoaderCheckRunning = false;
                 loaderBox.getItems().setAll(
-                        "Vanilla",
-                        "Fabric",
-                        "Quilt",
-                        "Forge",
-                        "NeoForge",
-                        "Ornithe",
-                        "Legacy Fabric",
-                        "Babric",
-                        "NilLoader",
-                        "LiteLoader",
-                        "ModLoader",
-                        "Rift",
-                        "VantaLoader"
+                        "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
+                        "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
+                        "LiteLoader", "ModLoader", "Rift", "VantaLoader"
                 );
+                loaderBox.refresh();
 
                 // Keep unsupported loaders visible but prevent selecting them.
                 loaderBox.getSelectionModel().select("Vanilla");
@@ -764,59 +787,13 @@ public class CreateInstanceView extends VBox {
 
                 loaderBox.setDisable(false);
 
-                if (!fabric) {
-                    loaderBox.getItems().remove("Fabric");
-                }
-
-                if (!forge) {
-                    loaderBox.getItems().remove("Forge");
-                }
-
-                if (!quilt) {
-                    loaderBox.getItems().remove("Quilt");
-                }
-
-                if (!neoForge) {
-                    loaderBox.getItems().remove("NeoForge");
-                }
-
-                if (!ornithe) {
-                    loaderBox.getItems().remove("Ornithe");
-                }
-
-                if (!legacyFabric) {
-                    loaderBox.getItems().remove("Legacy Fabric");
-                }
-
-                if (!babric) {
-                    loaderBox.getItems().remove("Babric");
-                }
-
-                if (!nilLoader) {
-                    loaderBox.getItems().remove("NilLoader");
-                }
-
-                if (!liteLoader) {
-                    loaderBox.getItems().remove("LiteLoader");
-                }
-
-                if (!modLoader) {
-                    loaderBox.getItems().remove("ModLoader");
-                }
-
-                if (!rift) {
-                    loaderBox.getItems().remove("Rift");
-                }
-
-                if (!vantaLoader) {
-                    loaderBox.getItems().remove("VantaLoader");
-                }
-
-                // A saved default can be unavailable for this Minecraft version.
+                // Keep every implemented loader discoverable. Incompatible
+                // entries remain visible but are disabled by the cell factory.
                 if (loaderBox.getValue() == null
-                        || !loaderBox.getItems().contains(loaderBox.getValue())) {
+                        || !availableLoaders.contains(loaderBox.getValue())) {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
+                loaderBox.refresh();
 
                 createButton.setDisable(false);
             });
@@ -892,56 +869,56 @@ public class CreateInstanceView extends VBox {
          * Extra safety check: only install a loader that the
          * current version check actually exposed in the UI.
          */
-        if ("Babric".equals(loader) && !loaderBox.getItems().contains("Babric")) {
+        if ("Babric".equals(loader) && !availableLoaders.contains("Babric")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("Babric is currently available only for Minecraft b1.7.3.");
             return;
         }
 
-        if ("LiteLoader".equals(loader) && !loaderBox.getItems().contains("LiteLoader")) {
+        if ("LiteLoader".equals(loader) && !availableLoaders.contains("LiteLoader")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("LiteLoader is not available for Minecraft " + version + ".");
             return;
         }
 
-        if ("ModLoader".equals(loader) && !loaderBox.getItems().contains("ModLoader")) {
+        if ("ModLoader".equals(loader) && !availableLoaders.contains("ModLoader")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("No verified Risugami ModLoader archive is available for Minecraft " + version + ".");
             return;
         }
 
-        if ("NilLoader".equals(loader) && !loaderBox.getItems().contains("NilLoader")) {
+        if ("NilLoader".equals(loader) && !availableLoaders.contains("NilLoader")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("NilLoader is not available for this Minecraft version.");
             return;
         }
 
-        if ("Legacy Fabric".equals(loader) && !loaderBox.getItems().contains("Legacy Fabric")) {
+        if ("Legacy Fabric".equals(loader) && !availableLoaders.contains("Legacy Fabric")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("Legacy Fabric is not available for Minecraft " + version + ".");
             return;
         }
 
-        if ("Ornithe".equals(loader) && !loaderBox.getItems().contains("Ornithe")) {
+        if ("Ornithe".equals(loader) && !availableLoaders.contains("Ornithe")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("Ornithe is not available for Minecraft " + version + ".");
             return;
         }
 
-        if ("NeoForge".equals(loader) && !loaderBox.getItems().contains("NeoForge")) {
+        if ("NeoForge".equals(loader) && !availableLoaders.contains("NeoForge")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("NeoForge is not available for Minecraft " + version + ".");
             return;
         }
 
-        if ("Quilt".equals(loader) && !loaderBox.getItems().contains("Quilt")) {
+        if ("Quilt".equals(loader) && !availableLoaders.contains("Quilt")) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("Quilt is not available for Minecraft " + version + ".");
             return;
         }
 
         if ("VantaLoader".equals(loader)
-                && (!loaderBox.getItems().contains("VantaLoader")
+                && (!availableLoaders.contains("VantaLoader")
                 || !VantaLoaderInstaller.supportsMinecraftVersion(version))) {
             loaderBox.getSelectionModel().select("Vanilla");
             statusLabel.setText("VantaLoader is not available for Minecraft " + version + ".");
@@ -951,7 +928,7 @@ public class CreateInstanceView extends VBox {
         if ("Fabric".equals(loader)) {
 
             /* The loader was exposed only after the version check. */
-            if (!loaderBox.getItems().contains("Fabric")) {
+            if (!availableLoaders.contains("Fabric")) {
 
                 loaderBox.getSelectionModel()
                         .select("Vanilla");
