@@ -19,7 +19,7 @@ public final class Platform {
         // "Darwin" contains the substring "win", so detect Apple platforms first.
         if (normalized.contains("mac") || normalized.contains("darwin")) return OperatingSystem.MACOS;
         if (normalized.contains("windows")) return OperatingSystem.WINDOWS;
-        if (normalized.contains("linux") || normalized.contains("unix") || normalized.contains("bsd")) {
+        if (normalized.contains("linux")) {
             return OperatingSystem.LINUX;
         }
         return OperatingSystem.UNKNOWN;
