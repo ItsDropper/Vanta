@@ -12,7 +12,7 @@ Vanta ships self-contained Java 21 application images. A system-wide Java instal
 | macOS | Intel x64 | CI build and test target |
 | macOS | Apple Silicon ARM64 | CI build and test target |
 
-The GitHub Actions matrix builds the five targets above. It checks the app-image layout, bundled runtime, updater helper dependencies, and platform ZIP archive structure. Linux x64 also launches the packaged UI under Xvfb in CI.
+The GitHub Actions matrix builds the five targets above. It checks the app-image layout, bundled runtime, and platform ZIP archive structure. Linux x64 and ARM64 launch the packaged UI under Xvfb in CI.
 
 ## Operating-system requirements and limitations
 
@@ -33,7 +33,7 @@ The updater selects a package matching the host OS and architecture. Release ass
 
 Each archive has a corresponding `.sha256` file. The `Platform release packages` workflow builds and publishes these assets for a stable `vMAJOR.MINOR.PATCH` tag.
 
-Windows runs the updater from a copied private runtime. Linux and macOS re-enter the packaged native launcher in a dedicated updater mode because their jpackage runtime images may omit a standalone `bin/java` command. The updater validates the staged image before replacing the existing installation.
+All three operating systems run the updater from a private copy of the complete application image. This avoids depending on a standalone `bin/java` executable (which jpackage may omit) and prevents the helper from locking files in the installation it must replace. The updater validates the staged image before replacing the existing installation.
 
 The updater has platform-layout and permission tests, but an actual in-place update has not yet been exercised on physical Windows, Linux, and macOS installations. Treat that as remaining validation work, not as a completed guarantee.
 
