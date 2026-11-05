@@ -55,7 +55,7 @@ On Windows PowerShell:
 On Linux and macOS:
 
 ```bash
-./gradlew clean test distZip distTar platformAppImage
+./gradlew clean test distZip distTar platformImageChecksum
 ```
 
 Use the checked-in Gradle wrapper rather than installing a separate Gradle version. See the [Development Guide](docs/DEVELOPMENT.md) for setup, packaging, debugging, and validation notes.
