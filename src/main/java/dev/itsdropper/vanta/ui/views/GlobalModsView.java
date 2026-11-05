@@ -122,8 +122,8 @@ public class GlobalModsView extends VBox {
         contentTypeBox.getStyleClass().add("create-combo");
 
         loaderBox = new ComboBox<>();
-        loaderBox.getItems().addAll("Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric", "NilLoader", "LiteLoader", "Rift", "ModLoader");
-        loaderBox.setValue("Fabric");
+        loaderBox.getItems().addAll("Any", "Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric", "NilLoader", "LiteLoader", "Rift", "ModLoader");
+        loaderBox.setValue("Any");
         loaderBox.setAccessibleText("Minecraft mod loader filter");
         loaderBox.setPrefWidth(140);
         loaderBox.setPrefHeight(42);
@@ -454,7 +454,7 @@ public class GlobalModsView extends VBox {
             return null;
         }
         String selected = loaderBox.getValue();
-        if (selected == null) {
+        if (selected == null || "Any".equalsIgnoreCase(selected)) {
             return null;
         }
         return dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(selected);
