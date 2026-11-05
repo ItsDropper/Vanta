@@ -352,11 +352,21 @@ public class InstanceManager {
                 directory.resolve(
                         "instance.json"
                 );
+        Path temporary = directory.resolve(
+                "instance.json." + java.util.UUID.randomUUID() + ".tmp");
 
-        MAPPER.writeValue(
-                metadata.toFile(),
-                instance
-        );
+        try {
+            MAPPER.writeValue(temporary.toFile(), instance);
+            try {
+                Files.move(temporary, metadata,
+                        StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, metadata, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
+        }
     }
 
     // =============================================================
