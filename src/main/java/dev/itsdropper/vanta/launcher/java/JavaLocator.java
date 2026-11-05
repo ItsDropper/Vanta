@@ -245,7 +245,10 @@ public class JavaLocator {
                 Path.of("/usr/lib/jvm"),
                 Path.of("/usr/java"),
                 Path.of("/opt/java"),
-                Path.of("/opt/homebrew/opt/openjdk")
+                Path.of("/opt/homebrew/opt/openjdk"),
+                Path.of("/opt/homebrew/opt/openjdk@21"),
+                Path.of("/usr/local/opt/openjdk"),
+                Path.of("/Library/Java/JavaVirtualMachines")
         };
 
         for (Path location : locations) {
@@ -263,6 +266,19 @@ public class JavaLocator {
 
             if (found != null) {
                 return found;
+            }
+        }
+
+        String pathValue = System.getenv("PATH");
+        if (pathValue != null && !pathValue.isBlank()) {
+            for (String entry : pathValue.split(java.util.regex.Pattern.quote(
+                    java.io.File.pathSeparator))) {
+                if (entry.isBlank()) continue;
+                Path candidate = Path.of(entry).resolve(Platform.javaExecutableName());
+                if (Files.isRegularFile(candidate)
+                        && isCorrectJavaVersion(candidate, requiredVersion)) {
+                    return candidate.toAbsolutePath().normalize();
+                }
             }
         }
 
@@ -346,7 +362,7 @@ public class JavaLocator {
             try (var stream =
                          Files.walk(
                                  directory,
-                                 4
+                                 7
                          )) {
 
                 return stream
