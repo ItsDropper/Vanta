@@ -271,8 +271,10 @@ public final class UpdaterMain {
                 stagingDirectory
         );
 
+        restoreExecutablePermissions(stagingDirectory);
+
         log(
-                "ZIP extraction completed."
+                "ZIP extraction completed and native executable permissions restored."
         );
 
         verifyExtractedApplication(
@@ -504,6 +506,39 @@ public final class UpdaterMain {
         log(
                 "Finished waiting for application file handles to settle."
         );
+    }
+
+    private static void restoreExecutablePermissions(Path applicationDirectory)
+            throws IOException {
+        if (dev.itsdropper.vanta.launcher.Platform.operatingSystem()
+                == dev.itsdropper.vanta.launcher.Platform.OperatingSystem.WINDOWS) {
+            return;
+        }
+
+        Path launcher = ApplicationLocator.getLauncherExecutable(applicationDirectory);
+        if (!launcher.toFile().setExecutable(true, false) && !Files.isExecutable(launcher)) {
+            throw new IOException("Could not mark the Vanta launcher executable: " + launcher);
+        }
+
+        Path runtime = ApplicationLocator.getRuntimeDirectory(applicationDirectory);
+        Path binaryDirectory = runtime.resolve("bin");
+        if (Files.isDirectory(binaryDirectory)) {
+            try (var paths = Files.list(binaryDirectory)) {
+                for (Path executable : paths.filter(Files::isRegularFile).toList()) {
+                    if (!executable.toFile().setExecutable(true, false)
+                            && !Files.isExecutable(executable)) {
+                        throw new IOException("Could not restore executable permission: " + executable);
+                    }
+                }
+            }
+        }
+
+        Path spawnHelper = runtime.resolve("lib/jspawnhelper");
+        if (Files.isRegularFile(spawnHelper)
+                && !spawnHelper.toFile().setExecutable(true, false)
+                && !Files.isExecutable(spawnHelper)) {
+            throw new IOException("Could not restore Java process helper permissions: " + spawnHelper);
+        }
     }
 
     private static void verifyExtractedApplication(
