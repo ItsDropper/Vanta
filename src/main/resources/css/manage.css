@@ -370,9 +370,9 @@
 /* State Center: a diagnostic workspace with clear health hierarchy. */
 .state-center { -fx-spacing: 18px; }
 .state-center .state-hero {
-    -fx-background-color: linear-gradient(to right, #15221d, -vantaaccentsoft 70%, #1b3028);
+    -fx-background-color: linear-gradient(to right, -vantasurface, -vantaaccentsoft 70%, -vantasurfacehover);
     -fx-background-radius: 12px;
-    -fx-border-color: #3a5546;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 12px;
     -fx-border-width: 1px;
     -fx-padding: 22px;
@@ -403,7 +403,7 @@
     -fx-border-radius: 8px;
     -fx-padding: 13px 15px;
 }
-.state-center .state-card:hover { -fx-background-color: #19271f; -fx-border-color: #526c5a; }
+.state-center .state-card:hover { -fx-background-color: -vantasurfacehover; -fx-border-color: -vantaaccent; }
 .state-center .state-instance-name { -fx-font-size: 13px; -fx-font-weight: 700; }
 .state-center .state-instance-detail, .state-center .state-instance-summary {
     -fx-text-fill: -vantamuted;
@@ -434,17 +434,17 @@
 .server-manager .server-profile-card {
     -fx-background-color: -vantasurfaceraised;
     -fx-background-radius: 7px;
-    -fx-border-color: transparent transparent #2a3931 transparent;
+    -fx-border-color: transparent transparent -vantaborder transparent;
     -fx-border-radius: 0;
     -fx-padding: 12px;
 }
 .server-manager .server-profile-selected {
-    -fx-background-color: #1b2a21;
-    -fx-border-color: #789b81;
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: -vantaaccent;
 }
 .server-manager .server-title { -fx-font-size: 25px; }
 .server-manager .server-status-row {
-    -fx-background-color: #121c17;
+    -fx-background-color: -vantasurface;
     -fx-border-color: -vantaborder;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
@@ -458,12 +458,12 @@
     -fx-padding: 15px;
 }
 .server-manager .server-console {
-    -fx-control-inner-background: #080d0b;
-    -fx-background-color: #080d0b;
+    -fx-control-inner-background: -vantabg;
+    -fx-background-color: -vantabg;
     -fx-text-fill: -vantatext;
     -fx-font-family: "Geist Mono", "Consolas";
     -fx-font-size: 11px;
-    -fx-highlight-fill: #294436;
+    -fx-highlight-fill: -vantaaccent;
 }
 .server-manager .server-input, .server-manager .server-spinner {
     -fx-background-color: -vantasurface;
@@ -476,7 +476,7 @@
 
 /* Download Center: transfer queue with quiet metrics and clear progress. */
 .download-center-page { -fx-spacing: 20px; }
-.download-center-page .download-eyebrow { -fx-text-fill: #a7c7b0; -fx-letter-spacing: 1.8px; }
+.download-center-page .download-eyebrow { -fx-text-fill: -vantamuted; -fx-letter-spacing: 1.8px; }
 .download-center-page .download-stat-card {
     -fx-background-color: -vantasurface;
     -fx-background-radius: 9px;
@@ -488,9 +488,9 @@
 .download-center-page .download-stat-value { -fx-font-size: 29px; }
 .download-center-page .download-section-title { -fx-font-size: 17px; }
 .download-center-page .download-task-card {
-    -fx-background-color: #111a15;
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 8px;
-    -fx-border-color: #2a3a31;
+    -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
     -fx-padding: 15px 17px;
 }
@@ -500,7 +500,7 @@
 
 /* Accounts and skin editor share identity controls, not identical page layouts. */
 .accounts-page .accounts-hero, .skin-changer-page .accounts-hero {
-    -fx-background-color: linear-gradient(to bottom right, #17231d, -vantasurface);
+    -fx-background-color: linear-gradient(to bottom right, -vantasurfaceraised, -vantasurface);
     -fx-background-radius: 12px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 12px;
