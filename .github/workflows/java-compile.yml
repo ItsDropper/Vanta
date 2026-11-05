@@ -53,7 +53,7 @@ jobs:
           if (!(Test-Path "$image/runtime/lib/modules")) { throw 'Missing Windows runtime modules' }
           if (!(Test-Path "$image/app/Vanta.cfg")) { throw 'Missing Windows application configuration' }
           Add-Type -AssemblyName System.IO.Compression.FileSystem
-          $archive = Get-ChildItem 'build/distributions/Vanta-*.zip' | Select-Object -First 1
+          $archive = Get-ChildItem 'build/distributions/Vanta-*-windows-x64.zip' | Select-Object -First 1
           if ($null -eq $archive) { throw 'Missing Windows update archive' }
           $zip = [System.IO.Compression.ZipFile]::OpenRead($archive.FullName)
           try {
@@ -74,7 +74,7 @@ jobs:
           test -x build/packages/Vanta/bin/Vanta
           test -f build/packages/Vanta/lib/runtime/lib/modules
           test -f build/packages/Vanta/lib/app/Vanta.cfg
-          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*-linux-*.zip' -print -quit)"
           test -n "$ARCHIVE"
           unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
           grep -Eq '(^|/)bin/Vanta$' build/distributions/archive-entries.txt
@@ -88,7 +88,7 @@ jobs:
           RUNTIME_MODULES="$(find build/packages/Vanta.app/Contents/runtime -path '*/lib/modules' -print -quit)"
           test -n "$RUNTIME_MODULES"
           test -f build/packages/Vanta.app/Contents/app/Vanta.cfg
-          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*.zip' -print -quit)"
+          ARCHIVE="$(find build/distributions -maxdepth 1 -name 'Vanta-*-macos-*.zip' -print -quit)"
           test -n "$ARCHIVE"
           unzip -Z1 "$ARCHIVE" > build/distributions/archive-entries.txt
           grep -Eq '(^|/)Contents/MacOS/Vanta$' build/distributions/archive-entries.txt
