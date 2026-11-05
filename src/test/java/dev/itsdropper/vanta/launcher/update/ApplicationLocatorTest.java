@@ -45,10 +45,10 @@ class ApplicationLocatorTest {
         Path root = temporaryDirectory.resolve("Vanta.app");
         touch(root.resolve("Contents/MacOS/Vanta"));
         touch(root.resolve("Contents/app/Vanta.cfg"));
-        touch(root.resolve("Contents/runtime/bin/java"));
+        touch(root.resolve("Contents/runtime/Contents/Home/bin/java"));
 
         assertTrue(ApplicationLocator.isSupportedInstallation(root));
-        assertEquals(root.resolve("Contents/runtime"), ApplicationLocator.getRuntimeDirectory(root));
+        assertEquals(root.resolve("Contents/runtime/Contents/Home"), ApplicationLocator.getRuntimeDirectory(root));
         assertEquals(root.resolve("Contents/app"), ApplicationLocator.getApplicationPayloadDirectory(root));
         assertEquals(root.resolve("Contents/MacOS/Vanta"), ApplicationLocator.getLauncherExecutable(root));
         assertEquals(root.resolve("Contents/app/updater"), ApplicationLocator.getUpdaterDirectory(root));
