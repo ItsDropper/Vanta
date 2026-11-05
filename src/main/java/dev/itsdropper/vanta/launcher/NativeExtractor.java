@@ -50,13 +50,7 @@ public class NativeExtractor {
                     String name =
                             entry.getName();
 
-                    if (name == null
-                            || !name
-                            .toLowerCase(
-                                    java.util.Locale.ROOT
-                            )
-                            .endsWith(".dll")) {
-
+                    if (name == null || !isNativeFileForCurrentPlatform(name)) {
                         continue;
                     }
 
@@ -109,6 +103,17 @@ public class NativeExtractor {
                 }
             }
         }
+    }
+
+    private static boolean isNativeFileForCurrentPlatform(String name) {
+        String lower = name.toLowerCase(java.util.Locale.ROOT);
+        return switch (Platform.operatingSystem()) {
+            case WINDOWS -> lower.endsWith(".dll");
+            case LINUX -> lower.endsWith(".so") || lower.matches(".*\\\\.so\\\\.[0-9.]+$");
+            case MACOS -> lower.endsWith(".dylib") || lower.endsWith(".jnilib")
+                    || lower.endsWith(".so");
+            case UNKNOWN -> false;
+        };
     }
 
     public static void extractAll(
