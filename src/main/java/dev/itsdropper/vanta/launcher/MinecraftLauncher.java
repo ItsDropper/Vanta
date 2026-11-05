@@ -116,22 +116,6 @@ public class MinecraftLauncher {
          */
         command.add("-Djava.net.useSystemProxies=true");
 
-        /*
-         * NeoForge's production ModLauncher bootstrap resolves its
-         * libraries from this system property. Vanta stores loader and
-         * Minecraft artifacts in one shared Maven-layout directory, so
-         * point NeoForge at that exact directory rather than the
-         * instance's temporary installer directory.
-         */
-        if ("NeoForge".equalsIgnoreCase(data.loader)) {
-            command.add(
-                    "-DlibraryDirectory="
-                            + MinecraftLocator.getLibrariesDirectory()
-                                    .toAbsolutePath()
-                                    .normalize()
-            );
-        }
-
         if ("VantaLoader".equalsIgnoreCase(data.loader)) {
             command.add("-Dvanta.minecraft.version=" + data.version);
             command.add("-Dvanta.environment=client");
@@ -178,6 +162,14 @@ public class MinecraftLauncher {
                             data.javaArguments
                     )
             );
+        }
+
+        // NeoForge publishes mandatory JVM flags in its version profile.
+        // Preserve their ordering and resolve profile path placeholders in
+        // LaunchDataBuilder rather than maintaining an incomplete local copy.
+        if ("NeoForge".equalsIgnoreCase(data.loader)
+                && data.neoForgeJvmArguments != null) {
+            command.addAll(data.neoForgeJvmArguments);
         }
 
         if (data.javaVersion == 25 && "26.3".equals(data.version)) {
