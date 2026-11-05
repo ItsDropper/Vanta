@@ -37,7 +37,7 @@ public class DownloadUtil {
         private final String retryAfter;
 
         private DownloadHttpException(int statusCode, String url, String retryAfter) {
-            super("HTTP " + statusCode + " while downloading " + url);
+            super("HTTP " + statusCode + " from the download server.");
             this.statusCode = statusCode;
             this.retryAfter = retryAfter;
         }
@@ -136,7 +136,7 @@ public class DownloadUtil {
 
                 if (response.statusCode() != 200) {
 
-                    throw new DownloadHttpException(response.statusCode(), url,
+                    throw new DownloadHttpException(response.statusCode(), safeSourceLabel(url),
                             response.headers().firstValue("Retry-After").orElse(null));
                 }
 
@@ -154,8 +154,8 @@ public class DownloadUtil {
         throw new IOException(
                 "Failed to download JSON after "
                         + maxRetries()
-                        + " attempts: "
-                        + url,
+                        + " attempts from "
+                        + safeSourceLabel(url),
                 lastException
         );
     }
@@ -233,7 +233,10 @@ public class DownloadUtil {
         }
         if (LauncherSettings.isSegmentedDownloadsEnabled()) {
             try { if (downloadSegmented(url, target, expectedSha1, taskId)) return; }
-            catch (Exception ex) { System.err.println("Segmented transfer unavailable; falling back: " + ex.getMessage()); }
+            catch (Exception ex) {
+                System.err.println("Segmented transfer unavailable; falling back to standard transfer ("
+                        + ex.getClass().getSimpleName() + ").");
+            }
         }
         Exception lastException = null;
 
@@ -253,7 +256,7 @@ public class DownloadUtil {
                                 + "/"
                                 + maxRetries()
                                 + "): "
-                                + url
+                                + safeSourceLabel(url)
                 );
 
                 if (target.getParent() != null) {
@@ -279,7 +282,7 @@ public class DownloadUtil {
                     } catch (IOException ignored) {
                     }
 
-                    throw new DownloadHttpException(response.statusCode(), url,
+                    throw new DownloadHttpException(response.statusCode(), safeSourceLabel(url),
                             response.headers().firstValue("Retry-After").orElse(null));
                 }
 
@@ -658,6 +661,15 @@ public class DownloadUtil {
         return failure instanceof IOException;
     }
 
+    private static String safeSourceLabel(String url) {
+        try {
+            String host = URI.create(url).getHost();
+            return host == null ? "remote server" : host;
+        } catch (IllegalArgumentException invalid) {
+            return "remote server";
+        }
+    }
+
     static void validateDownloadRequest(String url, String expectedSha1) {
         if (url == null || url.isBlank()) {
             throw new IllegalArgumentException("Download URL is required.");
@@ -668,7 +680,7 @@ public class DownloadUtil {
         } catch (IllegalArgumentException invalid) {
             throw new IllegalArgumentException("Download URL is invalid.", invalid);
         }
-        if (uri.getHost() == null
+        if (uri.getHost() == null || uri.getUserInfo() != null
                 || !("https".equalsIgnoreCase(uri.getScheme())
                 || "http".equalsIgnoreCase(uri.getScheme()))) {
             throw new IllegalArgumentException("Downloads require a valid HTTP or HTTPS URL.");
