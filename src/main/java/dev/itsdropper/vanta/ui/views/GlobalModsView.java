@@ -162,7 +162,7 @@ public class GlobalModsView extends VBox {
         if (!screenshotPreview) {
             UiExecutor.shared().execute(() -> {
                 try {
-                    List<String> versions = MinecraftVersionResolver.getReleaseVersions();
+                    List<String> versions = MinecraftVersionResolver.getAllVersions();
                     UiExecutor.shared().dispatchToUi(() -> {
                         versionBox.getItems().setAll("All versions");
                         versionBox.getItems().addAll(versions);
