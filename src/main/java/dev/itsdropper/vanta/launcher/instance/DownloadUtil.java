@@ -143,6 +143,7 @@ public class DownloadUtil {
             Path target,
             String expectedSha1
     ) throws Exception {
+        validateDownloadRequest(url, expectedSha1);
         long taskId = dev.itsdropper.vanta.launcher.download.DownloadCenterService
                 .getInstance().begin(url, target, expectedSha1);
         try {
@@ -397,7 +398,8 @@ public class DownloadUtil {
             }
             for (Future<?> future : futures) future.get();
         } finally { pool.shutdownNow(); }
-        Path assembled = target.resolveSibling(target.getFileName() + ".download");
+        Path assembled = target.resolveSibling(
+                target.getFileName() + ".download-" + java.util.UUID.randomUUID());
         try {
             try (OutputStream out = Files.newOutputStream(assembled, java.nio.file.StandardOpenOption.CREATE,
                     java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
@@ -420,6 +422,24 @@ public class DownloadUtil {
             try (var walk = Files.walk(staging)) {
                 walk.sorted(java.util.Comparator.reverseOrder()).forEach(p -> { try { Files.deleteIfExists(p); } catch (IOException ignored) { } });
             }
+        }
+    }
+
+    private static void validateDownloadRequest(String url, String expectedSha1) {
+        URI uri;
+        try {
+            uri = URI.create(url);
+        } catch (IllegalArgumentException invalid) {
+            throw new IllegalArgumentException("Download URL is invalid.", invalid);
+        }
+        if (uri.getHost() == null
+                || !("https".equalsIgnoreCase(uri.getScheme())
+                || "http".equalsIgnoreCase(uri.getScheme()))) {
+            throw new IllegalArgumentException("Downloads require a valid HTTP or HTTPS URL.");
+        }
+        if (expectedSha1 != null && !expectedSha1.isBlank()
+                && !expectedSha1.matches("(?i)[0-9a-f]{40}")) {
+            throw new IllegalArgumentException("Expected SHA-1 must contain exactly 40 hexadecimal characters.");
         }
     }
 
