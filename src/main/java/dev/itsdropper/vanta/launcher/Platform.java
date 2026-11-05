@@ -60,13 +60,17 @@ public final class Platform {
         return switch (arch) {
             case "amd64", "x86_64", "x86-64", "x64" -> "x64";
             case "aarch64", "arm64" -> "aarch64";
-            case "x86", "i386", "i486", "i586", "i686" -> "x86";
             default -> throw new UnsupportedOperationException("Unsupported CPU architecture: " + arch);
         };
     }
 
     public static boolean supportsDesktop() {
-        return operatingSystem() != OperatingSystem.UNKNOWN
-                && (adoptiumArchitecture().equals("x64") || adoptiumArchitecture().equals("aarch64"));
+        if (operatingSystem() == OperatingSystem.UNKNOWN) return false;
+        try {
+            String architecture = adoptiumArchitecture();
+            return architecture.equals("x64") || architecture.equals("aarch64");
+        } catch (UnsupportedOperationException unsupported) {
+            return false;
+        }
     }
 }
