@@ -86,6 +86,10 @@ public final class InstanceRepairService {
                         instance.getLoader(),
                         "Loader"
                 );
+        // Instance metadata stores display names (for example "Legacy Fabric"),
+        // while installer dispatch uses canonical IDs ("legacyfabric").
+        String loaderKey = loader.replaceAll("[^A-Za-z0-9]", "")
+                .toLowerCase(Locale.ROOT);
 
         System.out.println(
                 "[Vanta Repair] Repairing "
