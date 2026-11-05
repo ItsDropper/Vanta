@@ -31,6 +31,11 @@ class BabricInstallerTest {
     }
 
     @Test
+    void usesTheLoaderVersionPinnedByTheOfficialBabricInstance() throws Exception {
+        assertEquals("0.19.5", BabricInstaller.findLatestLoaderVersion("b1.7.3"));
+    }
+
+    @Test
     void rejectsMinecraftVersionsOutsideTheVerifiedBabricTarget() {
         assertThrows(IllegalArgumentException.class,
                 () -> BabricInstaller.findLatestLoaderVersion("1.20.1"));
