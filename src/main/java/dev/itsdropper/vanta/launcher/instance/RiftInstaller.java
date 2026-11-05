@@ -30,7 +30,7 @@ public final class RiftInstaller {
     public static final String RIFT_RELEASE_URL =
             "https://github.com/DimensionalDevelopment/Rift/releases/download/v1.0.4-87/Rift-1.0.4-87.jar";
     public static final String MIXIN_REPOSITORY =
-            "https://repo.spongepowered.org/repository/maven-public/";
+            "https://repo.spongepowered.org/maven/";
     public static final String TWEAKER = "org.dimdev.riftloader.launch.RiftLoaderClientTweaker";
     public static final String LAUNCHWRAPPER_MAIN = "net.minecraft.launchwrapper.Launch";
 
@@ -57,10 +57,11 @@ public final class RiftInstaller {
 
         ArrayNode libraries = overlay.putArray("libraries");
         addLibrary(libraries, "org.dimdev:rift:" + LOADER_VERSION, MIXIN_REPOSITORY);
-        // The original org.dimdev:mixin coordinate was only hosted on the
-        // unavailable DimDev Maven server. Rift uses Sponge Mixin classes, so
-        // resolve the compatible upstream artifact from Sponge's public Maven.
-        addLibrary(libraries, "org.spongepowered:mixin:0.7.11-SNAPSHOT", MIXIN_REPOSITORY);
+        // Maven snapshot repositories publish timestamped snapshot artifacts.
+        // Requesting the literal "-SNAPSHOT.jar" path returns 404; pin the
+        // timestamped 0.7.11 build used by the original Rift dependency.
+        addLibrary(libraries,
+                "org.spongepowered:mixin:0.7.11-20180703.121122-1", MIXIN_REPOSITORY);
         addLibrary(libraries, "net.minecraft:launchwrapper:1.12",
                 "https://libraries.minecraft.net/");
         addLibrary(libraries, "org.ow2.asm:asm:6.2",
