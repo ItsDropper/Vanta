@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,6 +47,33 @@ public class DownloadUtil {
 
     private static final Duration REQUEST_TIMEOUT =
             Duration.ofMinutes(5);
+
+    private static final Map<Path, DownloadLock> DOWNLOAD_LOCKS = new HashMap<>();
+
+    private static final class DownloadLock {
+        private final ReentrantLock lock = new ReentrantLock();
+        private int users;
+    }
+
+    private static DownloadLock acquireDownloadLock(Path target) {
+        DownloadLock entry;
+        synchronized (DOWNLOAD_LOCKS) {
+            entry = DOWNLOAD_LOCKS.computeIfAbsent(target, ignored -> new DownloadLock());
+            entry.users++;
+        }
+        entry.lock.lock();
+        return entry;
+    }
+
+    private static void releaseDownloadLock(Path target, DownloadLock entry) {
+        entry.lock.unlock();
+        synchronized (DOWNLOAD_LOCKS) {
+            entry.users--;
+            if (entry.users == 0) {
+                DOWNLOAD_LOCKS.remove(target, entry);
+            }
+        }
+    }
 
     private static int maxRetries() { return LauncherSettings.getDownloadRetries(); }
 
@@ -144,17 +174,26 @@ public class DownloadUtil {
             String expectedSha1
     ) throws Exception {
         validateDownloadRequest(url, expectedSha1);
-        long taskId = dev.itsdropper.vanta.launcher.download.DownloadCenterService
-                .getInstance().begin(url, target, expectedSha1);
+        if (target == null) {
+            throw new IllegalArgumentException("Download target is required.");
+        }
+        Path lockKey = target.toAbsolutePath().normalize();
+        DownloadLock downloadLock = acquireDownloadLock(lockKey);
         try {
-            downloadFileInternal(url, target, expectedSha1, taskId);
-            long size = Files.isRegularFile(target) ? Files.size(target) : 0L;
-            dev.itsdropper.vanta.launcher.download.DownloadCenterService
-                    .getInstance().complete(taskId, size);
-        } catch (Exception failure) {
-            dev.itsdropper.vanta.launcher.download.DownloadCenterService
-                    .getInstance().fail(taskId, failure);
-            throw failure;
+            long taskId = dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                    .getInstance().begin(url, target, expectedSha1);
+            try {
+                downloadFileInternal(url, target, expectedSha1, taskId);
+                long size = Files.isRegularFile(target) ? Files.size(target) : 0L;
+                dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                        .getInstance().complete(taskId, size);
+            } catch (Exception failure) {
+                dev.itsdropper.vanta.launcher.download.DownloadCenterService
+                        .getInstance().fail(taskId, failure);
+                throw failure;
+            }
+        } finally {
+            releaseDownloadLock(lockKey, downloadLock);
         }
     }
 
