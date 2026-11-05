@@ -302,7 +302,7 @@ public final class UpdaterLauncher {
             throw new IllegalArgumentException("Application source and destination are required.");
         }
         Path sourceRoot = source.toRealPath();
-        Path destinationRoot = destination.toAbsolutePath().normalize();
+        Path destinationRoot = canonicalDestination(destination);
         if (!Files.isDirectory(sourceRoot)) {
             throw new IOException("Application image source is not a directory: " + sourceRoot);
         }
@@ -310,6 +310,17 @@ public final class UpdaterLauncher {
             throw new IOException("Updater copy must be outside the source application image.");
         }
         copyDirectoryContents(sourceRoot, destinationRoot, sourceRoot, new java.util.HashSet<>());
+    }
+
+    private static Path canonicalDestination(Path destination) throws IOException {
+        Path absolute = destination.toAbsolutePath().normalize();
+        Path existing = absolute;
+        while (existing != null && !Files.exists(existing)) {
+            existing = existing.getParent();
+        }
+        if (existing == null) return absolute;
+        Path realExisting = existing.toRealPath();
+        return realExisting.resolve(existing.relativize(absolute)).normalize();
     }
 
     private static void copyDirectoryContents(
