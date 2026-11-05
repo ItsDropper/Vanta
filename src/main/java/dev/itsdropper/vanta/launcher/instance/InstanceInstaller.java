@@ -818,12 +818,25 @@ public class InstanceInstaller {
         }
 
         if ("Quilt".equalsIgnoreCase(loader)) {
-            if (loaderVersion == null || loaderVersion.isBlank()) {
-                throw new IllegalStateException("Quilt Loader version is missing.");
+            // Existing instances may have a loader version pinned from an old
+            // installation. Refresh it during repair/version rebuild so an
+            // obsolete ASM bundled by that loader cannot keep breaking launch.
+            String latestQuiltVersion =
+                    QuiltInstaller.findLatestLoaderVersion(minecraftVersion);
+            if (!latestQuiltVersion.equals(loaderVersion)) {
+                System.out.println(
+                        "[Vanta Repair] Updating Quilt Loader "
+                                + (loaderVersion == null || loaderVersion.isBlank()
+                                ? "(unknown)" : loaderVersion)
+                                + " -> " + latestQuiltVersion
+                );
+                loaderVersion = latestQuiltVersion;
             }
-            JsonNode quiltProfile = QuiltInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            JsonNode quiltProfile =
+                    QuiltInstaller.downloadProfile(minecraftVersion, loaderVersion);
             QuiltInstaller.installLibraries(quiltProfile);
-            finalMetadata = QuiltInstaller.mergeProfile(vanillaMetadata, quiltProfile);
+            finalMetadata =
+                    QuiltInstaller.mergeProfile(vanillaMetadata, quiltProfile);
         }
 
         if ("Ornithe".equalsIgnoreCase(loader)) {
