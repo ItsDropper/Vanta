@@ -285,6 +285,31 @@ public class FabricInstaller {
                 );
             }
 
+            /*
+             * Legacy Fabric's older profiles still advertise the retired
+             * maven.legacyfabric.net hostname. Its published Maven artifacts
+             * are now served from repo.legacyfabric.net/legacyfabric/.
+             * Normalize only this known repository endpoint; do not rewrite
+             * arbitrary metadata URLs or silently fall back after a 404.
+             */
+            try {
+                java.net.URI repository = java.net.URI.create(baseUrl);
+                if ("maven.legacyfabric.net".equalsIgnoreCase(repository.getHost())) {
+                    String pathPrefix = repository.getPath();
+                    if (pathPrefix == null || pathPrefix.isBlank() || "/".equals(pathPrefix)) {
+                        baseUrl = "https://repo.legacyfabric.net/legacyfabric/";
+                    } else {
+                        baseUrl = "https://repo.legacyfabric.net/legacyfabric/"
+                                + pathPrefix.replaceFirst("^/+", "");
+                    }
+                }
+            } catch (IllegalArgumentException invalidRepositoryUrl) {
+                throw new IllegalStateException(
+                        "Invalid Fabric library repository URL for " + name,
+                        invalidRepositoryUrl
+                );
+            }
+
             if (!baseUrl.endsWith("/")) {
                 baseUrl += "/";
             }
