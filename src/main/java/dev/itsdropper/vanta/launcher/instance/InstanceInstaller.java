@@ -563,7 +563,9 @@ public class InstanceInstaller {
             BabricInstaller.installLibraries(fabricProfile, babricOverlay);
             JsonNode merged =
                     BabricInstaller.mergeProfile(vanillaMetadata, fabricProfile, babricOverlay);
-            MinecraftFileInstaller.installLibraries(merged);
+            // All merged dependencies were installed by their owning
+            // metadata resolver above. Re-running the vanilla installer on
+            // the merged profile breaks Maven-only loader library entries.
             MinecraftVersionResolver.saveMetadata(instance, merged);
             NativeInstaller.extract(instance, merged);
             InstanceManager.markInstallationComplete(instance);
