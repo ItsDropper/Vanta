@@ -81,6 +81,37 @@ class BabricInstallerTest {
     }
 
     @Test
+    void nativeInstallerReceivesOnlyLibrariesWithClassifierDownloads() throws Exception {
+        JsonNode metadata = MAPPER.readTree("""
+                {
+                  "libraries": [
+                    {
+                      "name": "net.java.jinput:jinput:2.0.5",
+                      "url": "https://repo1.maven.org/maven2/"
+                    },
+                    {
+                      "name": "org.lwjgl.lwjgl:lwjgl-platform:2.9.4",
+                      "downloads": {
+                        "classifiers": {
+                          "natives-windows": {
+                            "path": "org/lwjgl/lwjgl/lwjgl-platform/2.9.4/lwjgl-platform-2.9.4-natives-windows.jar",
+                            "url": "https://example.invalid/lwjgl-platform-natives-windows.jar"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+                """);
+
+        JsonNode nativeMetadata = BabricInstaller.nativeLibraryMetadata(metadata);
+
+        assertEquals(1, nativeMetadata.path("libraries").size());
+        assertEquals("org.lwjgl.lwjgl:lwjgl-platform:2.9.4",
+                nativeMetadata.path("libraries").get(0).path("name").asText());
+    }
+
+    @Test
     void usesTheLoaderVersionPinnedByTheOfficialBabricInstance() throws Exception {
         assertEquals("0.19.5", BabricInstaller.findLatestLoaderVersion("b1.7.3"));
     }
