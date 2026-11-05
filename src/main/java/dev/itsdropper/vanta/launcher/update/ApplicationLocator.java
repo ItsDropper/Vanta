@@ -73,6 +73,14 @@ public final class ApplicationLocator {
         throw new IllegalStateException("Could not locate the Vanta launcher executable in " + normalized);
     }
 
+    static boolean isTranslocatedApplication(Path root) {
+        if (root == null) return false;
+        for (Path component : root.toAbsolutePath().normalize()) {
+            if ("AppTranslocation".equalsIgnoreCase(component.toString())) return true;
+        }
+        return false;
+    }
+
     /** True only when the complete image signature for a supported OS exists. */
     public static boolean isSupportedInstallation(Path root) {
         return root != null && detectLayout(root.toAbsolutePath().normalize()) != Layout.UNKNOWN;
