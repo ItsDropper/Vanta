@@ -38,23 +38,25 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          Get-ChildItem 'build/packages/Vanta' -Force
+          Get-ChildItem 'build/packages/Vanta/runtime/bin' -Force
           if (!(Test-Path 'build/packages/Vanta/Vanta.exe')) { throw 'Missing Windows launcher' }
-          if (!(Test-Path 'build/packages/Vanta/runtime/bin/java.exe')) { throw 'Missing bundled Windows Java' }
+          if (!(Test-Path 'build/packages/Vanta/runtime/bin/java.exe') -and !(Test-Path 'build/packages/Vanta/runtime/bin/javaw.exe')) { throw 'Missing bundled Windows Java launcher' }
           if (!(Test-Path 'build/packages/Vanta/app/updater/VantaUpdater.jar')) { throw 'Missing external updater JAR' }
       - name: Verify Linux application image layout
         if: runner.os == 'Linux'
         run: |
-          required=(build/packages/Vanta/bin/Vanta build/packages/Vanta/lib/runtime/bin/java)
-          for file in "${required[@]}"; do
+          for file in build/packages/Vanta/bin/Vanta build/packages/Vanta/lib/runtime/bin/java; do
             if [ ! -x "$file" ]; then
               echo "Missing or non-executable app image file: $file"
-              find build/packages/Vanta -maxdepth 5 -type f -printf '%M %p\n' | head -120
+              ls -la "$(dirname "$file")" || true
+              find build/packages/Vanta -maxdepth 5 -name "$(basename "$file")" -print
               exit 1
             fi
           done
           if [ ! -f build/packages/Vanta/lib/app/updater/VantaUpdater.jar ]; then
             echo "Missing external updater JAR"
-            find build/packages/Vanta -maxdepth 5 -type f -print | head -120
+            ls -la build/packages/Vanta/lib/app || true
             exit 1
           fi
       - name: Verify macOS application bundle layout
@@ -62,9 +64,15 @@ jobs:
         run: |
           test -x build/packages/Vanta.app/Contents/MacOS/Vanta
           test -d build/packages/Vanta.app/Contents/app
-          JAVA_BIN="$(find build/packages/Vanta.app/Contents/runtime -path '*/bin/java' -type f -print -quit)"
-          test -n "$JAVA_BIN"
-          test -x "$JAVA_BIN"
+          JAVA_BIN=""
+          for candidate in build/packages/Vanta.app/Contents/runtime/bin/java build/packages/Vanta.app/Contents/runtime/Contents/Home/bin/java; do
+            if [ -x "$candidate" ]; then JAVA_BIN="$candidate"; break; fi
+          done
+          if [ -z "$JAVA_BIN" ]; then
+            echo "Missing executable Java in macOS runtime bundle"
+            find build/packages/Vanta.app/Contents/runtime -name java -print
+            exit 1
+          fi
           test -f build/packages/Vanta.app/Contents/app/updater/VantaUpdater.jar
       - name: Smoke test Linux application image
         if: runner.os == 'Linux' && runner.arch == 'X64'
