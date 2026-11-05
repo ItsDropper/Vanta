@@ -30,7 +30,7 @@ public final class RiftInstaller {
     public static final String RIFT_RELEASE_URL =
             "https://github.com/DimensionalDevelopment/Rift/releases/download/v1.0.4-87/Rift-1.0.4-87.jar";
     public static final String MIXIN_REPOSITORY =
-            "https://repo.spongepowered.org/maven/";
+            "https://repo.spongepowered.org/repository/maven-public/";
     public static final String TWEAKER = "org.dimdev.riftloader.launch.RiftLoaderClientTweaker";
     public static final String LAUNCHWRAPPER_MAIN = "net.minecraft.launchwrapper.Launch";
 
