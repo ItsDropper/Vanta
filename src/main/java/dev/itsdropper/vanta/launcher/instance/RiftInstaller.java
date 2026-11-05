@@ -25,7 +25,12 @@ import java.util.jar.JarFile;
 public final class RiftInstaller {
     public static final String MINECRAFT_VERSION = "1.13";
     public static final String LOADER_VERSION = "1.0.4-87";
-    public static final String RIFT_REPOSITORY = "https://www.dimdev.org/maven/";
+    // The original Maven host no longer resolves reliably. The archived
+    // upstream GitHub release is the canonical source for this pinned binary.
+    public static final String RIFT_RELEASE_URL =
+            "https://github.com/DimensionalDevelopment/Rift/releases/download/v1.0.4-87/Rift-1.0.4-87.jar";
+    public static final String MIXIN_REPOSITORY =
+            "https://repo.spongepowered.org/repository/maven-public/";
     public static final String TWEAKER = "org.dimdev.riftloader.launch.RiftLoaderClientTweaker";
     public static final String LAUNCHWRAPPER_MAIN = "net.minecraft.launchwrapper.Launch";
 
@@ -51,8 +56,8 @@ public final class RiftInstaller {
         overlay.put("type", "release");
 
         ArrayNode libraries = overlay.putArray("libraries");
-        addLibrary(libraries, "org.dimdev:rift:" + LOADER_VERSION, RIFT_REPOSITORY);
-        addLibrary(libraries, "org.dimdev:mixin:0.7.11-SNAPSHOT", RIFT_REPOSITORY);
+        addLibrary(libraries, "org.dimdev:rift:" + LOADER_VERSION, MIXIN_REPOSITORY);
+        addLibrary(libraries, "org.dimdev:mixin:0.7.11-SNAPSHOT", MIXIN_REPOSITORY);
         addLibrary(libraries, "net.minecraft:launchwrapper:1.12",
                 "https://libraries.minecraft.net/");
         addLibrary(libraries, "org.ow2.asm:asm:6.2",
@@ -76,7 +81,28 @@ public final class RiftInstaller {
         if (Files.exists(artifact) && !hasExpectedTweakerClass(artifact)) {
             Files.delete(artifact);
         }
-        FabricInstaller.installLibraries(overlay);
+
+        // Rift's original Maven server (www.dimdev.org) is no longer a
+        // dependable download source. Fetch the exact pinned upstream release
+        // asset instead; keep the Maven coordinate in the profile so the
+        // normal classpath resolver still finds it in the shared library store.
+        if (!hasExpectedTweakerClass(artifact)) {
+            Files.createDirectories(artifact.getParent());
+            DownloadUtil.downloadFile(RIFT_RELEASE_URL, artifact);
+        }
+
+        // The Rift binary is already installed from its GitHub release.
+        // Download only the remaining profile libraries from their active
+        // repositories.
+        ObjectNode dependencyOverlay = overlay.deepCopy();
+        ArrayNode dependencyLibraries = (ArrayNode) dependencyOverlay.path("libraries");
+        for (int i = dependencyLibraries.size() - 1; i >= 0; i--) {
+            if (dependencyLibraries.get(i).path("name").asText()
+                    .equals("org.dimdev:rift:" + version)) {
+                dependencyLibraries.remove(i);
+            }
+        }
+        FabricInstaller.installLibraries(dependencyOverlay);
         verifyRiftArtifact(version);
 
         Path profileDirectory = instance.getDirectory().resolve("loader-profiles");
