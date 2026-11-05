@@ -43,6 +43,18 @@ public class ClasspathBuilder {
             );
         }
 
+        /*
+         * Legacy Minecraft metadata can include asm-all (for example,
+         * ASM 4.1 on b1.7.3). Modern Fabric-family loaders also provide
+         * modular ASM artifacts. If asm-all is placed first, its older
+         * org.objectweb.asm classes shadow the loader's newer ASM and
+         * can make ClassVisitor reject the loader's ASM API constant.
+         *
+         * Keep asm-all on the classpath for legacy launch components,
+         * but append it after the loader's modular ASM libraries.
+         */
+        LinkedHashSet<Path> legacyAsmAll = new LinkedHashSet<>();
+
         if (manifest.libraries != null) {
 
             for (Library library :
@@ -55,10 +67,17 @@ public class ClasspathBuilder {
                         );
 
                 if (jar != null) {
-                    classpath.add(jar);
+                    if (library.name != null
+                            && library.name.startsWith("org.ow2.asm:asm-all:")) {
+                        legacyAsmAll.add(jar);
+                    } else {
+                        classpath.add(jar);
+                    }
                 }
             }
         }
+
+        classpath.addAll(legacyAsmAll);
 
         Path gameJar =
                 instanceDirectory
