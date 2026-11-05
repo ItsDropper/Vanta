@@ -131,7 +131,7 @@ tasks.register('platformAppImage', Exec) {
         )
     }
     doLast {
-        def imageDirectory = packageOutput.get().dir(packageName).asFile
+        def imageDirectory = packageOutput.get().dir(macHost ? packageName + '.app' : packageName).asFile
         def appPayloadDirectory
         if (windowsHost) {
             appPayloadDirectory = new File(imageDirectory, 'app')
