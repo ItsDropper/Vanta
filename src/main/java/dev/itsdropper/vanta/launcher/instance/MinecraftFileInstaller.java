@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.Platform;
+import dev.itsdropper.vanta.launcher.LibraryResolver;
+import dev.itsdropper.vanta.launcher.model.Library;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.nio.file.Files;
@@ -102,47 +105,20 @@ public class MinecraftFileInstaller {
             if (artifact != null) {
                 downloads.add(new LibraryDownload(
                         artifact.path("url").asText(),
-                        MinecraftLocator.getLibrariesDirectory().resolve(
-                                artifact.path("path").asText()
-                        ),
+                        resolveLibraryPath(artifact.path("path").asText()),
                         getSha1(artifact)
                 ));
             }
 
-            JsonNode classifiers = libraryDownloads.get("classifiers");
-            JsonNode natives = library.get("natives");
-            if (classifiers == null || natives == null || !natives.isObject()) {
-                continue;
+            Library libraryModel = new ObjectMapper().treeToValue(library, Library.class);
+            Library.Artifact nativeArtifact = LibraryResolver.findNativeArtifact(libraryModel);
+            if (nativeArtifact != null) {
+                downloads.add(new LibraryDownload(
+                        nativeArtifact.url,
+                        resolveLibraryPath(nativeArtifact.path),
+                        nativeArtifact.sha1
+                ));
             }
-
-            JsonNode windowsClassifier = natives.get("windows");
-            if (windowsClassifier == null || windowsClassifier.isNull()) {
-                continue;
-            }
-
-            String classifier = windowsClassifier.asText();
-            if (classifier == null || classifier.isBlank()) {
-                continue;
-            }
-
-            classifier = classifier.replace("${arch}", getArchitecture());
-            JsonNode nativeArtifact = classifiers.get(classifier);
-            if (nativeArtifact == null) {
-                throw new IllegalStateException(
-                        "Native classifier not found: "
-                                + classifier
-                                + " for "
-                                + library.path("name").asText()
-                );
-            }
-
-            downloads.add(new LibraryDownload(
-                    nativeArtifact.path("url").asText(),
-                    MinecraftLocator.getLibrariesDirectory().resolve(
-                            nativeArtifact.path("path").asText()
-                    ),
-                    getSha1(nativeArtifact)
-            ));
         }
 
         if (downloads.isEmpty()) {
@@ -183,6 +159,18 @@ public class MinecraftFileInstaller {
         } finally {
             executor.shutdownNow();
         }
+    }
+
+    private static Path resolveLibraryPath(String relativePath) {
+        if (relativePath == null || relativePath.isBlank()) {
+            throw new IllegalStateException("Minecraft library artifact path is missing.");
+        }
+        Path root = MinecraftLocator.getLibrariesDirectory().toAbsolutePath().normalize();
+        Path target = root.resolve(relativePath).normalize();
+        if (!target.startsWith(root)) {
+            throw new IllegalStateException("Minecraft library artifact path escapes the library directory.");
+        }
+        return target;
     }
 
     private record LibraryDownload(
