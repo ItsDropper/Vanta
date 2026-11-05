@@ -208,6 +208,47 @@ public final class ModLoaderInstaller {
         }
     }
 
+    static void extractBootstrapClasses(Path clientJar, Path outputDirectory) throws IOException {
+        if (!Files.isRegularFile(clientJar)) {
+            throw new IOException("Patched ModLoader client JAR is missing.");
+        }
+        Files.createDirectories(outputDirectory);
+        int extracted = 0;
+        try (ZipFile jar = new ZipFile(clientJar.toFile())) {
+            var entries = jar.entries();
+            while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                String name = entry.getName();
+                if (entry.isDirectory() || !name.startsWith("ModLoader")
+                        || !name.endsWith(".class") || name.contains("/")) {
+                    continue;
+                }
+                Path target = outputDirectory.resolve(name).normalize();
+                if (!target.getParent().equals(outputDirectory.normalize())) {
+                    throw new IOException("Invalid ModLoader bootstrap class path: " + name);
+                }
+                Path temporary = Files.createTempFile(outputDirectory, ".modloader-", ".tmp");
+                try {
+                    try (InputStream input = jar.getInputStream(entry)) {
+                        Files.copy(input, temporary, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    try {
+                        Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING,
+                                StandardCopyOption.ATOMIC_MOVE);
+                    } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
+                        Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    extracted++;
+                } finally {
+                    Files.deleteIfExists(temporary);
+                }
+            }
+        }
+        if (extracted == 0 || !Files.isRegularFile(outputDirectory.resolve("ModLoader.class"))) {
+            throw new IOException("ModLoader archive did not contain its ModLoader bootstrap class.");
+        }
+    }
+
     private static boolean isSignatureMetadata(String name) {
         String upper = name.toUpperCase(java.util.Locale.ROOT);
         if (!upper.startsWith("META-INF/")) {
