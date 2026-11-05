@@ -793,24 +793,29 @@ public class DownloadUtil {
         }
     }
 
-    static long retryDelayMillis(int attempt, Exception failure) {
-        if (failure instanceof DownloadHttpException httpFailure
-                && httpFailure.retryAfter != null) {
-            String value = httpFailure.retryAfter.trim();
+    static long parseRetryAfterMillis(String header) {
+        if (header == null || header.isBlank()) return -1L;
+        String value = header.trim();
+        try {
+            long seconds = Long.parseLong(value);
+            return Math.max(0L, Math.min(120_000L, Math.multiplyExact(seconds, 1000L)));
+        } catch (NumberFormatException | ArithmeticException ignored) {
             try {
-                long seconds = Long.parseLong(value);
-                return Math.max(0L, Math.min(120_000L, seconds * 1000L));
-            } catch (NumberFormatException ignored) {
-                try {
-                    java.time.Instant retryAt = java.time.ZonedDateTime
-                            .parse(value, java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME)
-                            .toInstant();
-                    long millis = java.time.Duration.between(java.time.Instant.now(), retryAt).toMillis();
-                    return Math.max(0L, Math.min(120_000L, millis));
-                } catch (java.time.DateTimeException invalidDate) {
-                    // Ignore malformed Retry-After and use bounded exponential backoff.
-                }
+                java.time.Instant retryAt = java.time.ZonedDateTime
+                        .parse(value, java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME)
+                        .toInstant();
+                long millis = java.time.Duration.between(java.time.Instant.now(), retryAt).toMillis();
+                return Math.max(0L, Math.min(120_000L, millis));
+            } catch (java.time.DateTimeException invalidDate) {
+                return -1L;
             }
+        }
+    }
+
+    static long retryDelayMillis(int attempt, Exception failure) {
+        if (failure instanceof DownloadHttpException httpFailure) {
+            long serverDelay = parseRetryAfterMillis(httpFailure.retryAfter);
+            if (serverDelay >= 0) return serverDelay;
         }
         int exponent = Math.max(0, Math.min(5, attempt - 1));
         long exponential = Math.min(30_000L, 1_000L << exponent);
