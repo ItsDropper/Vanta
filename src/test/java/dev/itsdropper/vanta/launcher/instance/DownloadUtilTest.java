@@ -93,6 +93,15 @@ class DownloadUtilTest {
     }
 
     @Test
+    void parsesRetryAfterSecondsAndRejectsInvalidValues() {
+        assertEquals(3_000L, DownloadUtil.parseRetryAfterMillis("3"));
+        assertEquals(120_000L, DownloadUtil.parseRetryAfterMillis("9999"));
+        assertEquals(-1L, DownloadUtil.parseRetryAfterMillis("-2"));
+        assertEquals(-1L, DownloadUtil.parseRetryAfterMillis("not-a-date"));
+        assertEquals(-1L, DownloadUtil.parseRetryAfterMillis(null));
+    }
+
+    @Test
     void retryBackoffGrowsAndRemainsBounded() {
         IOException transientFailure = new IOException("temporary network failure");
         long first = DownloadUtil.retryDelayMillis(1, transientFailure);
