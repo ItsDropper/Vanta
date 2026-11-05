@@ -190,6 +190,9 @@ public class DownloadUtil {
             throw new IllegalArgumentException("Download target is required.");
         }
         Path lockKey = target.toAbsolutePath().normalize();
+        if (System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win")) {
+            lockKey = Path.of(lockKey.toString().toLowerCase(java.util.Locale.ROOT));
+        }
         DownloadLock downloadLock = acquireDownloadLock(lockKey);
         try {
             Path processLockPath = processLockPath(lockKey);
