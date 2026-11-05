@@ -37,6 +37,7 @@ public final class InstanceRepairService {
                         || text.contains("version metadata not found")
                         || text.contains("minecraft client jar not found")
                         || text.contains("native library not found")
+                        || text.contains("modloader bootstrap class missing")
                         || text.contains("nilloader agent is missing or invalid")
                         || text.contains("vantaloader agent is missing or invalid")
                         || text.contains("official minecraft client mappings are missing")
