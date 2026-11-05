@@ -163,7 +163,8 @@ public final class RiftModMetadataCompatibility {
             return false;
         }
         String fileName = normalized.substring(normalized.lastIndexOf('/') + 1);
-        return fileName.endsWith(".SF")
+        return fileName.startsWith("SIG-")
+                || fileName.endsWith(".SF")
                 || fileName.endsWith(".RSA")
                 || fileName.endsWith(".DSA")
                 || fileName.endsWith(".EC");
