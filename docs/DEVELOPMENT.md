@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Windows 10 or 11 (the currently supported development target)
+- Windows 10/11, Linux, or macOS
 - JDK 21
 - The repository's Gradle wrapper
 - IntelliJ IDEA or another Java IDE
@@ -33,11 +33,11 @@ Capture all nine top-level sidebar destinations from the actual JavaFX views:
 .\gradlew.bat run --args="--capture-sidebar-screenshots build/ui-screenshots"
 ```
 
-The UI screenshots GitHub Actions workflow performs the same capture under Xvfb, generates individual PNGs plus a 3×3 overview contact sheet, and uploads build/ui-screenshots as an artifact. Screenshot mode does not require a signed-in account or a pre-existing Minecraft instance. On Linux, set APPDATA to a writable temporary directory for the Windows-oriented launcher data-path resolver.
+The UI screenshots GitHub Actions workflow performs the same capture under Xvfb, generates individual PNGs plus a 3×3 overview contact sheet, and uploads build/ui-screenshots as an artifact. Screenshot mode does not require a signed-in account or a pre-existing Minecraft instance. The launcher resolves its Linux data directory through XDG_DATA_HOME (or ~/.local/share) and does not require an APPDATA override.
 
 ## Packaging
 
-The build uses the Shadow plugin for the application JAR and defines a separate updater JAR task. Windows packaging also uses tools from the Java runtime packaging ecosystem, including `jlink` and `jpackage`, and NSIS in the distribution pipeline. Packaging may require a Windows environment and the relevant external tools.
+The application plugin creates portable platform distributions through `distZip` and `distTar`. CI builds and tests these distributions on Windows, Linux, and macOS. Windows still has the only integrated self-updater; Linux/macOS releases currently require manual replacement with the matching distribution. Signed native installers (MSI/EXE, DEB/RPM, and DMG) are not yet produced.
 
 Do not commit build output from `build/`, generated installers, or local runtime data.
 
