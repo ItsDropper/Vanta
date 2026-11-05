@@ -413,17 +413,12 @@ public final class UpdaterMain {
             );
         }
 
-        Path executable =
-                applicationDirectory.resolve(
-                        "Vanta.exe"
-                );
-
-        log(
-                "Current Vanta.exe exists: "
-                        + Files.isRegularFile(
-                        executable
-                )
-        );
+        if (!ApplicationLocator.isSupportedInstallation(applicationDirectory)) {
+            throw new IOException("Current Vanta installation is not a supported application image: "
+                    + applicationDirectory);
+        }
+        log("Current Vanta launcher: "
+                + ApplicationLocator.getLauncherExecutable(applicationDirectory));
     }
 
     private static void waitForProcess(
@@ -486,7 +481,7 @@ public final class UpdaterMain {
     ) throws InterruptedException {
 
         log(
-                "Waiting briefly for Windows to release Vanta files..."
+                "Waiting briefly for the operating system to settle application file handles..."
         );
 
         /*
@@ -507,7 +502,7 @@ public final class UpdaterMain {
         );
 
         log(
-                "Finished waiting for Windows file handles to settle."
+                "Finished waiting for application file handles to settle."
         );
     }
 
