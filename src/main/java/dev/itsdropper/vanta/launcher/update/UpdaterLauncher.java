@@ -84,13 +84,17 @@ public final class UpdaterLauncher {
         }
 
         Path absoluteZip = updateZip.toAbsolutePath().normalize();
-        Path absoluteApplication = applicationDirectory.toAbsolutePath().normalize();
+        Path absoluteApplication = applicationDirectory.toRealPath();
         if (!Files.isRegularFile(absoluteZip)) {
             throw new IOException("Update archive does not exist: " + absoluteZip);
         }
         if (!ApplicationLocator.isSupportedInstallation(absoluteApplication)) {
             throw new IOException("Unsupported Vanta application image: " + absoluteApplication);
         }
+        if (ApplicationLocator.isTranslocatedApplication(absoluteApplication)) {
+            throw new IOException("macOS App Translocation prevents safe self-update. Move Vanta.app to Applications first.");
+        }
+        verifyWritableInstallParent(absoluteApplication);
 
         Path tempUpdaterDirectory = createTemporaryUpdaterDirectory();
         log("Update archive: " + absoluteZip);
@@ -236,6 +240,26 @@ public final class UpdaterLauncher {
         );
 
         return directory;
+    }
+
+    static void verifyWritableInstallParent(Path applicationDirectory) throws IOException {
+        if (applicationDirectory == null) {
+            throw new IllegalArgumentException("Application directory is required.");
+        }
+        Path application = applicationDirectory.toAbsolutePath().normalize();
+        Path parent = application.getParent();
+        if (parent == null || !Files.isDirectory(parent)) {
+            throw new IOException("Vanta's installation parent directory is unavailable: " + parent);
+        }
+        Path probe = null;
+        try {
+            probe = Files.createTempFile(parent, ".vanta-update-preflight-", ".tmp");
+        } catch (IOException failure) {
+            throw new IOException("Vanta cannot update this installation without write access to "
+                    + parent + ". Move it to a user-writable location or replace it manually.", failure);
+        } finally {
+            if (probe != null) Files.deleteIfExists(probe);
+        }
     }
 
     static void copyApplicationImage(Path source, Path destination) throws IOException {
