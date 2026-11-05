@@ -1140,9 +1140,8 @@ public class LauncherView {
     }
 
     private void checkForUpdates() {
-        // The current release updater replaces the Windows jpackage layout.
-        // Do not offer Windows update archives to Linux/macOS installations.
-        if (Platform.operatingSystem() != Platform.OperatingSystem.WINDOWS) {
+        // Only query releases when a matching native package target exists.
+        if (!Platform.supportsDesktop()) {
             return;
         }
 
