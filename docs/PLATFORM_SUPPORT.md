@@ -4,24 +4,24 @@ Vanta ships self-contained Java 21 application images. A system-wide Java instal
 
 ## Supported release targets
 
-| Operating system | CPU architecture | Status |
+| Operating system | CPU architecture | Validation |
 |---|---|---|
-| Windows 10/11 | x64 | CI build and test target |
-| Linux | x64 | CI build, test, and GUI smoke-test target |
-| Linux | ARM64 | CI build, test, and GUI smoke-test target |
-| Linux | ARM64 | CI build and test target |
-| macOS | Intel x64 | CI build and test target |
-| macOS | Apple Silicon ARM64 | CI build and test target |
+| Windows 10/11 | x64 | CI build, tests, and image-layout checks |
+| Linux | x64 | CI build, tests, image checks, and GUI smoke tests |
+| Linux | ARM64 | CI build, tests, image checks, and GUI smoke tests |
+| macOS | Intel x64 | CI build, tests, and image-layout checks |
+| macOS | Apple Silicon ARM64 | CI build, tests, and image-layout checks |
 
-The GitHub Actions matrix builds the five targets above. It checks the app-image layout, bundled runtime, and platform ZIP archive structure. Linux x64 and ARM64 launch the packaged UI under Xvfb in CI.
+The GitHub Actions matrix builds all five targets. A separate Linux compatibility matrix launches the x64 application image on Ubuntu 22.04, Debian 12, current Fedora, and Arch Linux. This is a representative compatibility sample, not proof that every derivative or desktop environment works.
 
 ## Operating-system requirements and limitations
 
-- **Linux:** use a mainstream glibc-based desktop distribution with a working GTK/graphics stack. Secure account-session storage requires a Secret Service implementation and the `secret-tool` command (commonly provided by `libsecret-tools`). Vanta does not silently store account tokens in plaintext when that service is unavailable.
+- **Windows:** the native application image is x64 and uses Windows DPAPI for account credentials. Windows ARM64 may run the x64 package through Windows 11 x64 emulation with an x64 Java runtime; native Windows ARM64 packaging is not implemented or CI-tested.
+- **Linux:** the supported ABI is glibc, with a working GTK and graphics stack. Alpine/musl is not a supported target. Secure account-session storage requires a Secret Service provider and the `secret-tool` command (commonly supplied by `libsecret-tools`). Vanta does not silently store account tokens in plaintext if secure storage is unavailable.
 - **macOS:** Intel and Apple Silicon application images are built separately. Packages are currently unsigned and not notarized; native DMG installers are not yet produced.
-- **Windows:** the native application image is x64. Windows ARM64 may run that package through Windows 11 x64 emulation with an x64 Java runtime; native Windows ARM64 packaging is not implemented or CI-tested. Credentials use Windows DPAPI.
-- **Linux:** the supported ABI is glibc. Alpine/musl is not a supported target. The distro matrix is a compatibility sample, not a guarantee for every derivative or desktop environment.
 - **Not supported:** native Windows ARM64, 32-bit systems, RISC-V, PowerPC, FreeBSD, OpenBSD, Solaris, and other unlisted operating systems/architectures. They are intentionally not reported as Linux.
+
+SteamOS and ChromeOS Linux environments may work when they provide a compatible glibc userspace, supported CPU architecture, desktop display stack, and required native libraries. They are not separate release targets or individually certified platforms.
 
 ## Updates
 
@@ -35,9 +35,9 @@ The updater selects a package matching the host OS and architecture. Release ass
 
 Each archive has a corresponding `.sha256` file. The `Platform release packages` workflow builds and publishes these assets for a stable `vMAJOR.MINOR.PATCH` tag.
 
-All three operating systems run the updater from a private copy of the complete application image. This avoids depending on a standalone `bin/java` executable (which jpackage may omit) and prevents the helper from locking files in the installation it must replace. The updater validates the staged image before replacing the existing installation.
+All three operating systems run the updater from a private copy of the complete application image. This avoids depending on a standalone `bin/java` executable (which jpackage may omit) and prevents the helper from locking files in the installation it must replace. The updater validates the staged image before replacing the existing installation and only starts the updated launcher after replacement succeeds.
 
-The updater has platform-layout and permission tests, but an actual in-place update has not yet been exercised on physical Windows, Linux, and macOS installations. Treat that as remaining validation work, not as a completed guarantee.
+The updater has platform-layout, permission, and helper-copy tests. Actual in-place update testing on physical Windows, Linux, and macOS installations remains outstanding; CI does not claim that end-to-end guarantee yet.
 
 ## Build locally
 
@@ -50,7 +50,7 @@ On the target operating system:
 On Windows PowerShell:
 
 ```powershell
-.\gradlew.bat clean test distZip distTar platformImageChecksum
+.\\gradlew.bat clean test distZip distTar platformImageChecksum
 ```
 
 The self-contained app image is written under `build/packages/`; the platform-specific ZIP and checksum are written under `build/distributions/`.
