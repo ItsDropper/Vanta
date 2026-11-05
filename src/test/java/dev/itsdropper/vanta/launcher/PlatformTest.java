@@ -71,6 +71,21 @@ class PlatformTest {
     }
 
     @Test
+    void mapsSupportedReleaseTargetsAndRejectsUntestedCombinations() {
+        assertEquals("windows-x64", Platform.distributionId("Windows 11", "AMD64"));
+        assertEquals("linux-x64", Platform.distributionId("Linux", "x86_64"));
+        assertEquals("linux-aarch64", Platform.distributionId("Linux", "aarch64"));
+        assertEquals("macos-x64", Platform.distributionId("Mac OS X", "x86_64"));
+        assertEquals("macos-aarch64", Platform.distributionId("Darwin", "arm64"));
+        assertThrows(UnsupportedOperationException.class,
+                () -> Platform.distributionId("Windows 11", "aarch64"));
+        assertThrows(UnsupportedOperationException.class,
+                () -> Platform.distributionId("FreeBSD", "x86_64"));
+        assertThrows(UnsupportedOperationException.class,
+                () -> Platform.javaExecutableName("FreeBSD"));
+    }
+
+    @Test
     void mapsSupportedAdoptiumPlatformsAndArchitectures() {
         assertEquals("windows", Platform.adoptiumOsForTest("Windows 11"));
         assertEquals("linux", Platform.adoptiumOsForTest("Linux"));
