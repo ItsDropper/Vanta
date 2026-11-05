@@ -286,10 +286,12 @@ public class DownloadUtil {
                 boolean append = existingBytes > 0 && response.statusCode() == 206;
                 String contentRange = response.headers().firstValue("Content-Range").orElse(null);
                 long expectedFinalSize = -1L;
+                long expectedResponseBytes = -1L;
                 if (append) {
                     validateContentRange(contentRange, existingBytes, -1L, -1L);
                     expectedFinalSize = contentRangeTotal(contentRange);
                     long rangeLength = contentRangeEnd(contentRange) - existingBytes + 1L;
+                    expectedResponseBytes = rangeLength;
                     long declaredRangeLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
                     if (declaredRangeLength >= 0 && declaredRangeLength != rangeLength) {
                         try { response.body().close(); } catch (IOException ignored) { }
@@ -304,7 +306,10 @@ public class DownloadUtil {
                     if (existingBytes > 0) existingBytes = 0;
                 }
                 long responseLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
-                if (!append) expectedFinalSize = responseLength;
+                if (!append) {
+                    expectedFinalSize = responseLength;
+                    expectedResponseBytes = responseLength;
+                }
                 long totalBytes = expectedFinalSize;
                 long receivedBytes = append ? existingBytes : 0L;
                 long responseBytes = 0L;
@@ -317,6 +322,10 @@ public class DownloadUtil {
                                      : java.nio.file.StandardOpenOption.TRUNCATE_EXISTING)) {
                     int read;
                     while ((read = input.read(buffer)) != -1) {
+                        if (expectedResponseBytes >= 0
+                                && responseBytes + read > expectedResponseBytes) {
+                            throw new IOException("Download response exceeded its declared byte range.");
+                        }
                         output.write(buffer, 0, read);
                         responseBytes += read;
                         receivedBytes += read;
@@ -479,6 +488,9 @@ public class DownloadUtil {
                                  StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
                         int read;
                         while ((read = in.read(buffer)) != -1) {
+                            if (actualPartSize + read > expectedPartSize) {
+                                throw new IOException("Segment exceeded its requested byte range: " + index);
+                            }
                             out.write(buffer, 0, read);
                             actualPartSize += read;
                             long totalReceived = received.addAndGet(read);
