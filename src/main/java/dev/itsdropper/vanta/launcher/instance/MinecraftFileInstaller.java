@@ -363,7 +363,7 @@ public class MinecraftFileInstaller {
     }
 
 
-    private static boolean matchesArchitecture(
+    static boolean matchesArchitecture(
             String required,
             String actual
     ) {
