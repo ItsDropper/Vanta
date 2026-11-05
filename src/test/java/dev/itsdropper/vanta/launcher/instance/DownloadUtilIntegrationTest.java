@@ -1,0 +1,139 @@
+package dev.itsdropper.vanta.launcher.instance;
+
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
+import dev.itsdropper.vanta.ui.LauncherSettings;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.HexFormat;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class DownloadUtilIntegrationTest {
+
+    @TempDir
+    Path temporaryDirectory;
+
+    private HttpServer server;
+    private boolean previousCache;
+    private boolean previousSegmented;
+    private boolean previousResumable;
+    private int previousRetries;
+
+    @BeforeEach
+    void configureIsolatedTransferSettings() {
+        previousCache = LauncherSettings.isDownloadCacheEnabled();
+        previousSegmented = LauncherSettings.isSegmentedDownloadsEnabled();
+        previousResumable = LauncherSettings.isResumableDownloadsEnabled();
+        previousRetries = LauncherSettings.getDownloadRetries();
+        LauncherSettings.setDownloadCacheEnabled(false);
+        LauncherSettings.setSegmentedDownloadsEnabled(false);
+        LauncherSettings.setResumableDownloadsEnabled(true);
+        LauncherSettings.setDownloadRetries(1);
+    }
+
+    @AfterEach
+    void restoreSettingsAndStopServer() {
+        if (server != null) server.stop(0);
+        LauncherSettings.setDownloadCacheEnabled(previousCache);
+        LauncherSettings.setSegmentedDownloadsEnabled(previousSegmented);
+        LauncherSettings.setResumableDownloadsEnabled(previousResumable);
+        LauncherSettings.setDownloadRetries(previousRetries);
+    }
+
+    @Test
+    void downloadsAndPublishesVerifiedArtifact() throws Exception {
+        byte[] payload = "Vanta download integration payload".getBytes(StandardCharsets.UTF_8);
+        String url = serve(exchange -> writeResponse(exchange, 200, payload));
+        Path target = temporaryDirectory.resolve("artifact.jar");
+
+        DownloadUtil.downloadFileInternal(url, target, sha1(payload), 0L);
+
+        assertArrayEquals(payload, Files.readAllBytes(target));
+        assertFalse(Files.exists(target.resolveSibling("artifact.jar.download")));
+    }
+
+    @Test
+    void resumesFromExistingPartialFileUsingValidatedRange() throws Exception {
+        byte[] payload = "a resumable Vanta artifact payload".getBytes(StandardCharsets.UTF_8);
+        int offset = 9;
+        String url = serve(exchange -> {
+            assertEquals("bytes=" + offset + "-", exchange.getRequestHeaders().getFirst("Range"));
+            byte[] remainder = java.util.Arrays.copyOfRange(payload, offset, payload.length);
+            exchange.getResponseHeaders().set("Content-Range",
+                    "bytes " + offset + "-" + (payload.length - 1) + "/" + payload.length);
+            writeResponse(exchange, 206, remainder);
+        });
+        Path target = temporaryDirectory.resolve("resumed.jar");
+        Files.write(target.resolveSibling("resumed.jar.download"),
+                java.util.Arrays.copyOf(payload, offset));
+
+        DownloadUtil.downloadFileInternal(url, target, sha1(payload), 0L);
+
+        assertArrayEquals(payload, Files.readAllBytes(target));
+    }
+
+    @Test
+    void permanentHttpFailureDoesNotReplaceExistingTarget() throws Exception {
+        byte[] original = "known-good-existing-artifact".getBytes(StandardCharsets.UTF_8);
+        String url = serve(exchange -> {
+            exchange.sendResponseHeaders(404, -1);
+            exchange.close();
+        });
+        Path target = temporaryDirectory.resolve("existing.jar");
+        Files.write(target, original);
+
+        assertThrows(IOException.class,
+                () -> DownloadUtil.downloadFileInternal(url, target, null, 0L));
+
+        assertArrayEquals(original, Files.readAllBytes(target));
+    }
+
+    @Test
+    void truncatedResponseDoesNotReplaceExistingTarget() throws Exception {
+        byte[] original = "known-good-existing-artifact".getBytes(StandardCharsets.UTF_8);
+        byte[] truncated = "short".getBytes(StandardCharsets.UTF_8);
+        String url = serve(exchange -> {
+            exchange.sendResponseHeaders(200, truncated.length + 20L);
+            try (var output = exchange.getResponseBody()) {
+                output.write(truncated);
+            }
+        });
+        Path target = temporaryDirectory.resolve("truncated.jar");
+        Files.write(target, original);
+
+        assertThrows(IOException.class,
+                () -> DownloadUtil.downloadFileInternal(url, target, null, 0L));
+
+        assertArrayEquals(original, Files.readAllBytes(target));
+    }
+
+    private String serve(com.sun.net.httpserver.HttpHandler handler) throws IOException {
+        server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/artifact", handler);
+        server.start();
+        return "http://127.0.0.1:" + server.getAddress().getPort() + "/artifact";
+    }
+
+    private static void writeResponse(HttpExchange exchange, int status, byte[] payload)
+            throws IOException {
+        exchange.sendResponseHeaders(status, payload.length);
+        try (var output = exchange.getResponseBody()) {
+            output.write(payload);
+        }
+    }
+
+    private static String sha1(byte[] payload) throws Exception {
+        return HexFormat.of().formatHex(
+                MessageDigest.getInstance("SHA-1").digest(payload));
+    }
+}
