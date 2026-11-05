@@ -21,7 +21,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 ## Status and platform
 
 - **Development status:** Active development
-- **Platform targets:** Windows 10/11 x64, mainstream Linux distributions on x64 and ARM64, and macOS on Intel and Apple Silicon; cross-platform support is validated through a multi-architecture CI matrix
+- **Platform targets:** Windows 10/11 x64 (Windows 11 ARM64 via x64 emulation only), mainstream glibc Linux distributions on x64 and ARM64, and macOS on Intel and Apple Silicon; cross-platform support is validated through a multi-architecture CI matrix
 - **Platform builds:** self-contained jpackage application images for Windows, Linux, and macOS, plus portable ZIP/TAR.GZ distributions; builds are not yet code-signed/notarized and native installers (MSI/DEB/RPM/DMG) are not yet provided
 - **Automatic self-update:** platform-specific application-image archives for supported Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon releases; unsigned packages still require users to trust the release source
 - **Secure account storage:** Windows DPAPI, macOS Keychain, or Linux Secret Service (requires a Secret Service provider and the secret-tool command from libsecret-tools)
@@ -30,7 +30,7 @@ Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. 
 - **Build:** Gradle wrapper
 - **License:** See [LICENSE](LICENSE)
 
-Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and validates application-image and update-archive layouts across five OS/architecture targets; Linux x64 and ARM64 also get JavaFX GUI smoke tests. Platform-specific update archives and all three jpackage layouts are implemented. The updater now launches from an isolated copy of the application image on every OS; actual in-place update testing on physical installations remains outstanding. See [Platform Support](docs/PLATFORM_SUPPORT.md) for the exact support boundary. Signed/notarized builds and native installers remain unfinished.
+Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and validates application-image and update-archive layouts across five OS/architecture targets; Linux x64 and ARM64 also get JavaFX GUI smoke tests, and the x64 image is exercised on Ubuntu, Debian, Fedora, and Arch Linux containers. Platform-specific update archives and all three jpackage layouts are implemented. The updater now launches from an isolated copy of the application image on every OS; actual in-place update testing on physical installations remains outstanding. See [Platform Support](docs/PLATFORM_SUPPORT.md) for the exact support boundary. Signed/notarized builds and native installers remain unfinished.
 
 ## Getting started
 
