@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher.instance;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.nio.file.Files;
@@ -368,14 +369,12 @@ public class MinecraftFileInstaller {
                         ""
                 ).toLowerCase();
 
-        if (os.contains("win")) {
-            return "windows";
+        if (os.contains("mac") || os.contains("darwin")) {
+            return "osx";
         }
 
-        if (os.contains("mac")
-                || os.contains("darwin")) {
-
-            return "osx";
+        if (os.contains("windows")) {
+            return "windows";
         }
 
         if (os.contains("linux")) {
@@ -393,14 +392,15 @@ public class MinecraftFileInstaller {
                         ""
                 ).toLowerCase();
 
-        if (arch.equals("amd64")
-                || arch.equals("x86_64")
-                || arch.equals("x64")) {
-
+        if (arch.equals("amd64") || arch.equals("x86_64")
+                || arch.equals("x86-64") || arch.equals("x64")
+                || arch.equals("aarch64") || arch.equals("arm64")) {
             return "64";
         }
-
-        return "32";
+        if (arch.matches("x86|i[3-6]86|x86_32|x32")) {
+            return "32";
+        }
+        throw new IllegalStateException("Unsupported Minecraft native architecture: " + arch);
     }
 
     private static boolean matchesArchitecture(
