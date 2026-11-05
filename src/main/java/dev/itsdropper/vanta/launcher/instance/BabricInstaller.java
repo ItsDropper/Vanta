@@ -92,8 +92,14 @@ public final class BabricInstaller {
     public static void installLibraries(JsonNode fabricProfile, JsonNode babricOverlay) throws Exception {
         validateFabricBootstrap(fabricProfile);
         validateBabricOverlay(babricOverlay);
+        // Loader libraries use Maven coordinates and repository URLs.
         FabricInstaller.installLibraries(fabricProfile);
         FabricInstaller.installLibraries(babricOverlay);
+
+        // Native-only entries use classifier metadata and must be resolved
+        // by the Minecraft artifact installer, not the Maven downloader.
+        MinecraftFileInstaller.installLibraries(fabricProfile);
+        MinecraftFileInstaller.installLibraries(babricOverlay);
     }
 
     public static JsonNode mergeProfile(
