@@ -734,6 +734,10 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 LauncherSettings.setUpdateChecksEnabled(updates.isSelected())
         );
 
+        CheckBox autoUpdate = new CheckBox("Automatically install launcher updates on every launch");
+        autoUpdate.setSelected(LauncherSettings.isAutoUpdateOnLaunchEnabled());
+        autoUpdate.getStyleClass().add("settings-checkbox");
+
         boolean nativeUpdaterSupported =
                 Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
         updates.setDisable(!nativeUpdaterSupported);
