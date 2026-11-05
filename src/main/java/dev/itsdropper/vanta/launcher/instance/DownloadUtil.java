@@ -207,7 +207,7 @@ public class DownloadUtil {
         if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
             Path cached = cachePath(expectedSha1);
             if (Files.isRegularFile(cached) && expectedSha1.equalsIgnoreCase(calculateSha1(cached))) {
-                Files.copy(cached, target, StandardCopyOption.REPLACE_EXISTING);
+                publishVerifiedFile(cached, target);
                 System.out.println("Reused verified download cache: " + target.getFileName());
                 return;
             }
@@ -276,7 +276,8 @@ public class DownloadUtil {
                     validateContentRange(contentRange, existingBytes, -1L, -1L);
                     expectedFinalSize = contentRangeTotal(contentRange);
                     long rangeLength = contentRangeEnd(contentRange) - existingBytes + 1L;
-                    if (response.headers().firstValueAsLong("Content-Length").orElse(-1L) != rangeLength) {
+                    long declaredRangeLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
+                    if (declaredRangeLength >= 0 && declaredRangeLength != rangeLength) {
                         try { response.body().close(); } catch (IOException ignored) { }
                         throw new IOException("Resume response length does not match Content-Range.");
                     }
@@ -371,11 +372,10 @@ public class DownloadUtil {
                     );
                 }
 
-                if (LauncherSettings.isDownloadCacheEnabled() && expectedSha1 != null && !expectedSha1.isBlank()) {
+                if (LauncherSettings.isDownloadCacheEnabled()
+                        && expectedSha1 != null && !expectedSha1.isBlank()) {
                     try {
-                        Path cached = cachePath(expectedSha1);
-                        Files.createDirectories(cached.getParent());
-                        Files.copy(target, cached, StandardCopyOption.REPLACE_EXISTING);
+                        publishCacheEntry(target, expectedSha1);
                     } catch (IOException cacheFailure) {
                         System.err.println("Could not save download cache entry: " + cacheFailure.getMessage());
                     }
@@ -526,6 +526,24 @@ public class DownloadUtil {
             });
         } catch (IOException failure) {
             System.err.println("Could not inspect download staging directory: " + failure.getMessage());
+        }
+    }
+
+    private static void publishVerifiedFile(Path source, Path target) throws IOException {
+        Path parent = target.toAbsolutePath().getParent();
+        if (parent != null) Files.createDirectories(parent);
+        Path temporary = target.resolveSibling(
+                target.getFileName() + "." + java.util.UUID.randomUUID() + ".tmp");
+        try {
+            Files.copy(source, temporary, StandardCopyOption.REPLACE_EXISTING);
+            try {
+                Files.move(temporary, target,
+                        StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
         }
     }
 
