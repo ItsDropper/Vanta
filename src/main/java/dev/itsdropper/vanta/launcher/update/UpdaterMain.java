@@ -103,10 +103,9 @@ public final class UpdaterMain {
             String[] args
     ) throws Exception {
 
-        if (args.length != 3) {
-
+        if (args.length != 4) {
             throw new IllegalArgumentException(
-                    "Usage: UpdaterMain <pid> <zip> <application>"
+                    "Usage: UpdaterMain <pid> <zip> <application> <ready-file>"
             );
         }
 
@@ -137,6 +136,15 @@ public final class UpdaterMain {
                 Path.of(args[2])
                         .toAbsolutePath()
                         .normalize();
+
+        Path readyFile = Path.of(args[3]).toAbsolutePath().normalize();
+        Path helperApplication = ApplicationLocator.getApplicationDirectory();
+        Path helperWorkspace = helperApplication.getParent();
+        if (helperWorkspace == null
+                || !helperWorkspace.equals(readyFile.getParent())
+                || !"updater-ready".equals(readyFile.getFileName().toString())) {
+            throw new IOException("Updater readiness file must be inside its private helper workspace.");
+        }
 
         log("---------- ENVIRONMENT ----------");
 
@@ -193,6 +201,14 @@ public final class UpdaterMain {
                 zip,
                 applicationDirectory
         );
+
+        Files.writeString(
+                readyFile,
+                "ready" + System.lineSeparator(),
+                StandardOpenOption.CREATE_NEW,
+                StandardOpenOption.WRITE
+        );
+        log("Updater readiness handshake published: " + readyFile);
 
         log("---------- WAITING FOR VANTA ----------");
 
