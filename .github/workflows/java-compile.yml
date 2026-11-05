@@ -1,4 +1,4 @@
-name: Java compile check
+name: Cross-platform Java checks
 
 on:
   push:
@@ -10,8 +10,13 @@ permissions:
   contents: read
 
 jobs:
-  compile:
-    runs-on: ubuntu-latest
+  build-and-test:
+    name: ${{ matrix.os }} — tests and distributions
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -21,21 +26,18 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: gradle
-      - name: Make Gradle wrapper executable
-        run: chmod +x ./gradlew
-      - name: Compile launcher and run regression tests
-        run: ./gradlew test
-
-  windows-download-regression:
-    runs-on: windows-latest
-    steps:
-      - name: Check out source
-        uses: actions/checkout@v4
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
+      - name: Run tests and build portable distributions (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          chmod +x ./gradlew
+          ./gradlew test distZip distTar
+      - name: Run tests and build portable distributions (Windows)
+        if: runner.os == 'Windows'
+        run: .\\gradlew.bat test distZip distTar
+      - name: Upload platform distributions
+        uses: actions/upload-artifact@v4
         with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
-      - name: Run download engine regression tests
-        run: .\gradlew.bat test --tests "dev.itsdropper.vanta.launcher.instance.DownloadUtilTest" --tests "dev.itsdropper.vanta.launcher.instance.DownloadUtilIntegrationTest"
+          name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
+          path: build/distributions/*
+          if-no-files-found: error
+          retention-days: 14
