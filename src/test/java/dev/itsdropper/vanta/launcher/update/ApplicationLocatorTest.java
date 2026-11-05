@@ -17,7 +17,8 @@ class ApplicationLocatorTest {
         Path root = temporaryDirectory.resolve("Vanta-Windows");
         touch(root.resolve("Vanta.exe"));
         touch(root.resolve("app/Vanta.cfg"));
-        touch(root.resolve("runtime/bin/java.exe"));
+        touch(root.resolve("runtime/bin/java.dll"));
+        touch(root.resolve("runtime/lib/modules"));
 
         assertTrue(ApplicationLocator.isSupportedInstallation(root));
         assertEquals(root.resolve("runtime"), ApplicationLocator.getRuntimeDirectory(root));
@@ -69,15 +70,17 @@ class ApplicationLocatorTest {
     }
 
     @Test
-    void selectsJavawWhenWindowsRuntimeOmitsJavaExe() throws Exception {
-        Path root = temporaryDirectory.resolve("Vanta-Windows-Javaw");
+    void recognizesWindowsRuntimeWithoutStandaloneJavaCommand() throws Exception {
+        Path root = temporaryDirectory.resolve("Vanta-Windows-MinimalRuntime");
         touch(root.resolve("Vanta.exe"));
         touch(root.resolve("app/Vanta.cfg"));
-        touch(root.resolve("runtime/bin/javaw.exe"));
+        touch(root.resolve("runtime/bin/java.dll"));
+        touch(root.resolve("runtime/lib/modules"));
 
         assertTrue(ApplicationLocator.isSupportedInstallation(root));
-        assertEquals(root.resolve("runtime/bin/javaw.exe"),
-                ApplicationLocator.getJavaExecutable(root));
+        assertEquals(root.resolve("runtime"), ApplicationLocator.getRuntimeDirectory(root));
+        assertThrows(IllegalStateException.class,
+                () -> ApplicationLocator.getJavaExecutable(root));
     }
 
     @Test
