@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.launcher.java;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,10 +59,12 @@ public class JavaInstaller {
             return existing;
         }
 
+        String os = Platform.adoptiumOs();
+        String architecture = Platform.adoptiumArchitecture();
         String url =
                 "https://api.adoptium.net/v3/binary/latest/"
                         + version
-                        + "/ga/windows/x64/jdk/hotspot/normal/eclipse";
+                        + "/ga/" + os + "/" + architecture + "/jdk/hotspot/normal/eclipse";
 
         System.out.println(
                 "Downloading Temurin Java "
@@ -69,12 +72,10 @@ public class JavaInstaller {
                         + "..."
         );
 
-        Path zip =
-                javaDirectory.resolve(
-                        "java.zip"
-                );
+        boolean windows = Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS;
+        Path archive = javaDirectory.resolve(windows ? "java.zip" : "java.tar.gz");
 
-        dev.itsdropper.vanta.launcher.instance.DownloadUtil.downloadFile(url, zip, null);
+        dev.itsdropper.vanta.launcher.instance.DownloadUtil.downloadFile(url, archive, null);
 
         System.out.println(
                 "Extracting Java "
@@ -82,14 +83,13 @@ public class JavaInstaller {
                         + "..."
         );
 
-        extractZip(
-                zip,
-                javaDirectory
-        );
+        if (windows) {
+            extractZip(archive, javaDirectory);
+        } else {
+            extractTarGz(archive, javaDirectory);
+        }
 
-        Files.deleteIfExists(
-                zip
-        );
+        Files.deleteIfExists(archive);
 
         Path java =
                 findJavaExecutable(
@@ -102,7 +102,7 @@ public class JavaInstaller {
                     "Java "
                             + version
                             + " was downloaded, "
-                            + "but java.exe could not "
+                            + "but the Java executable could not "
                             + "be found."
             );
         }
@@ -138,7 +138,7 @@ public class JavaInstaller {
             try (var stream =
                          Files.walk(
                                  directory,
-                                 4
+                                 6
                          )) {
 
                 return stream
@@ -147,7 +147,8 @@ public class JavaInstaller {
                                 path.getFileName()
                                         .toString()
                                         .equalsIgnoreCase(
-                                                "java.exe"
+.equalsIgnoreCase(
+                                                Platform.javaExecutableName()
                                         )
                         )
                         .filter(path ->
@@ -166,6 +167,53 @@ public class JavaInstaller {
         } catch (IOException e) {
 
             return null;
+        }
+    }
+
+    // =============================================================
+    // EXTRACT TAR.GZ (Linux/macOS)
+    // =============================================================
+
+    private static void extractTarGz(Path archive, Path destination) throws IOException {
+        Process listing = new ProcessBuilder("tar", "-tzf", archive.toString())
+                .redirectErrorStream(true).start();
+        String entries;
+        try (InputStream input = listing.getInputStream()) {
+            entries = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        try {
+            if (listing.waitFor() != 0) {
+                throw new IOException("The downloaded Java archive could not be inspected.");
+            }
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while inspecting the Java archive.", interrupted);
+        }
+
+        Path root = destination.toAbsolutePath().normalize();
+        for (String entry : entries.split("\\R")) {
+            if (entry.isBlank()) continue;
+            Path resolved = root.resolve(entry).normalize();
+            if (Path.of(entry).isAbsolute() || !resolved.startsWith(root)) {
+                throw new IOException("Unsafe Java archive entry rejected.");
+            }
+        }
+
+        Process extraction = new ProcessBuilder(
+                "tar", "-xzf", archive.toString(), "-C", root.toString())
+                .redirectErrorStream(true).start();
+        String output;
+        try (InputStream input = extraction.getInputStream()) {
+            output = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
+        }
+        try {
+            if (extraction.waitFor() != 0) {
+                throw new IOException("Java archive extraction failed: "
+                        + (output.isBlank() ? "tar returned a non-zero exit code." : output));
+            }
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            throw new IOException("Interrupted while extracting the Java archive.", interrupted);
         }
     }
 
