@@ -224,6 +224,7 @@ public final class UpdaterLauncher {
          * Linux and macOS re-enter the native launcher in helper mode;
          * their process can keep the mapped runtime alive while the
          * application bundle is replaced.
+         */
         Path tempUpdaterDirectory = createTemporaryUpdaterDirectory();
         List<String> command;
 
