@@ -425,7 +425,7 @@ public class DownloadUtil {
         }
     }
 
-    private static void validateDownloadRequest(String url, String expectedSha1) {
+    static void validateDownloadRequest(String url, String expectedSha1) {
         URI uri;
         try {
             uri = URI.create(url);
