@@ -185,7 +185,7 @@ public class UpdateService {
         );
     }
 
-    private String[] findUpdateAssets(
+    String[] findUpdateAssets(
             JsonNode release
     ) throws IOException {
 
