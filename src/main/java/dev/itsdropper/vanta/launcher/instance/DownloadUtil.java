@@ -425,8 +425,8 @@ public class DownloadUtil {
         throw new IOException(
                 "Failed to download file after "
                         + maxRetries()
-                        + " attempts: "
-                        + url,
+                        + " attempts from "
+                        + safeSourceLabel(url),
                 lastException
         );
     }
