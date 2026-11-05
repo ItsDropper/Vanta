@@ -80,8 +80,16 @@ public final class ApplicationLocator {
 
     private static Path findFromJavaHome() {
         try {
-            Path javaHome = Path.of(System.getProperty("java.home"))
-                    .toAbsolutePath().normalize();
+            return findFromJavaHome(Path.of(System.getProperty("java.home")));
+        } catch (RuntimeException ignored) {
+            // Try the other process-location strategies.
+            return null;
+        }
+    }
+
+    static Path findFromJavaHome(Path javaHomePath) {
+        try {
+            Path javaHome = javaHomePath.toAbsolutePath().normalize();
             Path current = javaHome;
             for (int depth = 0; current != null && depth < 4; depth++, current = current.getParent()) {
                 Path root = current;
@@ -99,7 +107,7 @@ public final class ApplicationLocator {
                 if (root != null && isSupportedInstallation(root)) return root;
             }
         } catch (RuntimeException ignored) {
-            // Try the other process-location strategies.
+            return null;
         }
         return null;
     }
