@@ -83,6 +83,59 @@ class DownloadUtilIntegrationTest {
     }
 
     @Test
+    void rejectsResumeResponseWithWrongStartingOffset() throws Exception {
+        byte[] payload = "a resumable Vanta artifact payload".getBytes(StandardCharsets.UTF_8);
+        int offset = 9;
+        String url = serve(exchange -> {
+            byte[] remainder = java.util.Arrays.copyOfRange(payload, offset, payload.length);
+            exchange.getResponseHeaders().set("Content-Range",
+                    "bytes " + (offset - 1) + "-" + (payload.length - 1) + "/" + payload.length);
+            writeResponse(exchange, 206, remainder);
+        });
+        Path target = temporaryDirectory.resolve("wrong-range.jar");
+        byte[] original = "existing-good-target".getBytes(StandardCharsets.UTF_8);
+        Files.write(target, original);
+        Files.write(target.resolveSibling("wrong-range.jar.download"),
+                java.util.Arrays.copyOf(payload, offset));
+
+        assertThrows(IOException.class,
+                () -> DownloadUtil.downloadFileInternal(url, target, sha1(payload), 0L));
+
+        assertArrayEquals(original, Files.readAllBytes(target));
+    }
+
+    @Test
+    void rejectsUnsolicitedPartialResponse() throws Exception {
+        byte[] original = "existing-good-target".getBytes(StandardCharsets.UTF_8);
+        String url = serve(exchange -> {
+            exchange.getResponseHeaders().set("Content-Range", "bytes 0-4/10");
+            writeResponse(exchange, 206, "short".getBytes(StandardCharsets.UTF_8));
+        });
+        Path target = temporaryDirectory.resolve("partial.jar");
+        Files.write(target, original);
+
+        assertThrows(IOException.class,
+                () -> DownloadUtil.downloadFileInternal(url, target, null, 0L));
+
+        assertArrayEquals(original, Files.readAllBytes(target));
+    }
+
+    @Test
+    void checksumFailureDoesNotReplaceExistingTarget() throws Exception {
+        byte[] original = "existing-good-target".getBytes(StandardCharsets.UTF_8);
+        byte[] incorrect = "downloaded-but-not-the-expected-artifact".getBytes(StandardCharsets.UTF_8);
+        String url = serve(exchange -> writeResponse(exchange, 200, incorrect));
+        Path target = temporaryDirectory.resolve("checksum.jar");
+        Files.write(target, original);
+        String wrongSha1 = sha1("different artifact".getBytes(StandardCharsets.UTF_8));
+
+        assertThrows(IOException.class,
+                () -> DownloadUtil.downloadFileInternal(url, target, wrongSha1, 0L));
+
+        assertArrayEquals(original, Files.readAllBytes(target));
+    }
+
+    @Test
     void permanentHttpFailureDoesNotReplaceExistingTarget() throws Exception {
         byte[] original = "known-good-existing-artifact".getBytes(StandardCharsets.UTF_8);
         String url = serve(exchange -> {
