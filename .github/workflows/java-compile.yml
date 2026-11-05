@@ -151,7 +151,7 @@ jobs:
             throw "Expected native ARM64 runner, got $nativeArch"
           }
           $javaProperties = & java -XshowSettings:properties -version 2>&1 | Out-String
-          if ($javaProperties -notmatch 'os\\.arch\\s*=\\s*(amd64|x86_64)') {
+          if ($javaProperties -notmatch 'os\.arch\s*=\s*(amd64|x86_64)') {
             throw 'The test JVM is not running as x64 under emulation'
           }
 
