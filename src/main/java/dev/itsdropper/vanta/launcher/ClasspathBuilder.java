@@ -47,8 +47,7 @@ public class ClasspathBuilder {
         // Load its bootstrap from an exploded directory so the URL is file:
         // rather than jar:file:...!/ (which is not a hierarchical URI).
         if ("ModLoader".equalsIgnoreCase(instance.getLoader())) {
-            Path bootstrapDirectory = instanceDirectory.resolve("minecraft")
-                    .resolve("modloader-bootstrap");
+            Path bootstrapDirectory = instanceDirectory.resolve("modloader-bootstrap");
             if (!Files.isRegularFile(bootstrapDirectory.resolve("ModLoader.class"))) {
                 throw new IllegalStateException(
                         "ModLoader bootstrap class missing. Repair this instance before launching.");
