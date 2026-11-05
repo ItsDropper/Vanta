@@ -60,6 +60,8 @@ On Linux and macOS:
 
 Use the checked-in Gradle wrapper rather than installing a separate Gradle version. See the [Development Guide](docs/DEVELOPMENT.md) for setup, packaging, debugging, and validation notes.
 
+The `platformAppImage` task creates a self-contained application image on the host OS. Linux launches from `build/packages/Vanta/bin/Vanta`, macOS from `build/packages/Vanta.app`, and Windows from `build/packages/Vanta/Vanta.exe`. CI uploads each OS build as a separate artifact.
+
 To run from an IDE, use the configured Gradle application task or create a run configuration for the application's main class. A successful build confirms compilation and configured checks only; it does not prove every authentication, download, repair, or packaging path works on every machine.
 
 ## How Vanta is organized
