@@ -5,10 +5,6 @@ import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -16,13 +12,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class JavaInstaller {
-
-    private static final HttpClient HTTP =
-            HttpClient.newBuilder()
-                    .followRedirects(
-                            HttpClient.Redirect.NORMAL
-                    )
-                    .build();
 
     // =============================================================
     // INSTALL JAVA
