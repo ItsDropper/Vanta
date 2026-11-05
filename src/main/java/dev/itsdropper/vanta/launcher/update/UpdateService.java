@@ -31,10 +31,17 @@ public class UpdateService {
         JsonNode release =
                 requestJson(API_BASE + "/latest");
 
-        return parseRelease(
-                release,
-                currentVersion
-        );
+        return parseLatestRelease(release, currentVersion);
+    }
+
+    UpdateInfo parseLatestRelease(JsonNode release, String currentVersion) throws IOException {
+        try {
+            return parseRelease(release, currentVersion);
+        } catch (IOException unavailablePackage) {
+            if (release.path("tag_name").asText("").isBlank()) throw unavailablePackage;
+            return new UpdateInfo(currentVersion, currentVersion, null, null,
+                    "No compatible Vanta package is published for this operating system and architecture yet.");
+        }
     }
 
     public UpdateInfo getVersion(
