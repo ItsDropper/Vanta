@@ -582,7 +582,11 @@ public final class InstanceRecoveryService {
         }
         if (!names.contains("recovery-point.txt")) throw new IOException("Recovery point metadata is missing.");
         for (String directory : RECOVERED_DIRECTORIES) {
-            if (!names.contains(directory)) throw new IOException("Recovery point is missing " + directory + ".");
+            // loader-profiles was added after the original recovery format; old
+            // archives legitimately omit it and restore preserves current profiles.
+            if (!directory.equals("loader-profiles") && !names.contains(directory)) {
+                throw new IOException("Recovery point is missing " + directory + ".");
+            }
         }
     }
 
