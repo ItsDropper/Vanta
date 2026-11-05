@@ -10,6 +10,14 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class CredentialManagerPlatformTest {
     @Test
+    void windowsDpapiStoresAndRetrievesAccountSession() throws Exception {
+        assumeTrue(Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS);
+        String secret = "vanta-dpapi-test-" + UUID.randomUUID();
+        String reference = CredentialManager.encrypt(secret, UUID.randomUUID().toString());
+        assertEquals(secret, CredentialManager.decrypt(reference));
+    }
+
+    @Test
     void macOSKeychainStoresAndRetrievesAccountSession() throws Exception {
         assumeTrue(Platform.operatingSystem() == Platform.OperatingSystem.MACOS);
         String accountId = UUID.randomUUID().toString();
