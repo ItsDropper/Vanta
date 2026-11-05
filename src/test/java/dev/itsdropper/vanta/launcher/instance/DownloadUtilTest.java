@@ -55,6 +55,28 @@ class DownloadUtilTest {
     }
 
     @Test
+    void retriesOnlyTransientHttpStatuses() {
+        assertTrue(DownloadUtil.isRetryableHttpStatus(408));
+        assertTrue(DownloadUtil.isRetryableHttpStatus(425));
+        assertTrue(DownloadUtil.isRetryableHttpStatus(429));
+        assertTrue(DownloadUtil.isRetryableHttpStatus(500));
+        assertTrue(DownloadUtil.isRetryableHttpStatus(503));
+        assertFalse(DownloadUtil.isRetryableHttpStatus(400));
+        assertFalse(DownloadUtil.isRetryableHttpStatus(401));
+        assertFalse(DownloadUtil.isRetryableHttpStatus(403));
+        assertFalse(DownloadUtil.isRetryableHttpStatus(404));
+        assertFalse(DownloadUtil.isRetryableHttpStatus(501 + 100));
+    }
+
+    @Test
+    void rejectsMissingDownloadUrl() {
+        assertThrows(IllegalArgumentException.class, () ->
+                DownloadUtil.validateDownloadRequest(null, null));
+        assertThrows(IllegalArgumentException.class, () ->
+                DownloadUtil.validateDownloadRequest("   ", null));
+    }
+
+    @Test
     void acceptsHttpAndHttpsDownloadUrls() {
         assertDoesNotThrow(() ->
                 DownloadUtil.validateDownloadRequest("https://example.com/file.jar", "0123456789abcdef0123456789abcdef01234567"));
