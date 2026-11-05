@@ -33,7 +33,7 @@ jobs:
           ./gradlew test distZip distTar platformImageChecksum
       - name: Run tests and build portable distributions (Windows)
         if: runner.os == 'Windows'
-        run: .\gradlew.bat test distZip distTar platformAppImage
+        run: .\gradlew.bat test distZip distTar platformImageChecksum
       - name: Smoke test Linux application image
         if: runner.os == 'Linux'
         env:
