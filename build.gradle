@@ -79,7 +79,7 @@ shadowJar {
 
 
 tasks.register('platformAppImage', Exec) {
-    dependsOn tasks.named('installDist'), tasks.named('updaterJar')
+    dependsOn tasks.named('installDist'), 'updaterJar'
 
     def packageName = 'Vanta'
     def packageInput = layout.buildDirectory.dir("install/${project.name}/lib")
