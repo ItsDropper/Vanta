@@ -250,7 +250,7 @@ public final class NeoForgeInstaller {
             /*
              * NeoForge's installer uses the target directory as a
              * temporary Minecraft launcher root. Vanta, however,
-             * keeps shared libraries in %APPDATA%/Vanta/libraries.
+             * keeps shared libraries in Vanta's shared per-user library directory.
              *
              * Copy every library produced by NeoForge into Vanta's
              * shared library store while preserving its Maven path.
