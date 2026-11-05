@@ -837,14 +837,13 @@ private void removeInstalledMod(
             throw new IOException("Sodium repair finished without producing an installed JAR.");
         }
 
-        InstalledMod installedMetadata = installedModScanner.scanFile(installedFile);
-        if (installedMetadata == null || !"sodium".equalsIgnoreCase(installedMetadata.getModId())) {
+        if (!installedFile.getFileName().toString().toLowerCase(Locale.ROOT).contains("sodium")) {
             throw new IOException(
-                    "The downloaded repair file did not identify itself as the Sodium mod."
+                    "The downloaded repair file did not have the expected Sodium filename."
             );
         }
 
-        quarantineStaleSodiumJars(instance, installedFile);
+        quarantineStaleSodiumJars(instance, installedFile, projectId);
 
         System.out.println(
                 "[Vanta Repair] Pinned Sodium repair installed at "
@@ -855,7 +854,8 @@ private void removeInstalledMod(
 
     private void quarantineStaleSodiumJars(
             Instance instance,
-            Path retainedFile
+            Path retainedFile,
+            String projectId
     ) throws IOException {
         Path modsDirectory = instance.getDirectory().resolve("mods").toAbsolutePath().normalize();
         Path retained = retainedFile.toAbsolutePath().normalize();
@@ -869,33 +869,50 @@ private void removeInstalledMod(
             throw new IOException("The repaired Sodium JAR is outside the instance mods directory.");
         }
 
-        List<InstalledMod> installed = installedModScanner.scan(instance);
-        for (InstalledMod mod : installed) {
-            if (mod == null
-                    || !"sodium".equalsIgnoreCase(mod.getModId())
-                    || mod.getFilename() == null
-                    || mod.getFilename().isBlank()) {
-                continue;
+        Set<String> trackedSodiumFiles = new HashSet<>();
+        for (InstalledModRecord record : InstalledModManager.load(instance)) {
+            if (record != null
+                    && projectId.equals(record.getProjectId())
+                    && record.getFilename() != null
+                    && !record.getFilename().isBlank()) {
+                trackedSodiumFiles.add(record.getFilename());
             }
-
-            Path candidate = modsDirectory.resolve(mod.getFilename()).normalize();
-            if (!candidate.startsWith(modsDirectory)
-                    || !Files.isRegularFile(candidate)
-                    || candidate.equals(retained)) {
-                continue;
-            }
-
-            Files.createDirectories(backupDirectory);
-            Path backup = backupDirectory.resolve(
-                    candidate.getFileName() + "." + UUID.randomUUID() + ".bak"
-            );
-            Files.move(candidate, backup);
-            System.out.println(
-                    "[Vanta Repair] Quarantined stale Sodium JAR "
-                            + candidate.getFileName()
-                            + " -> "
-                            + backup
-            );
         }
-    }
-}
+
+        try (var files = Files.list(modsDirectory)) {
+            for (Path candidate : files.toList()) {
+                if (!Files.isRegularFile(candidate)
+                        || !candidate.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".jar")) {
+                    continue;
+                }
+
+                Path normalizedCandidate = candidate.toAbsolutePath().normalize();
+                if (normalizedCandidate.equals(retained)) {
+                    continue;
+                }
+
+                String filename = candidate.getFileName().toString();
+                boolean sodiumFilename = filename.toLowerCase(Locale.ROOT).contains("sodium");
+                boolean trackedSodium = trackedSodiumFiles.contains(filename);
+                InstalledMod metadata = installedModScanner.scanFile(candidate);
+                boolean sodiumMetadata = metadata != null
+                        && "sodium".equalsIgnoreCase(metadata.getModId());
+
+                if (!sodiumFilename && !trackedSodium && !sodiumMetadata) {
+                    continue;
+                }
+
+                Files.createDirectories(backupDirectory);
+                Path backup = backupDirectory.resolve(
+                        filename + "." + UUID.randomUUID() + ".bak"
+                );
+                Files.move(candidate, backup);
+                System.out.println(
+                        "[Vanta Repair] Quarantined stale Sodium JAR "
+                                + filename
+                                + " -> "
+                                + backup
+                );
+            }
+        }
+    }}
