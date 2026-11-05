@@ -551,14 +551,11 @@ public final class UpdaterMain {
         Path launcher = ApplicationLocator.getLauncherExecutable(applicationDirectory);
         Path runtime = ApplicationLocator.getRuntimeDirectory(applicationDirectory);
         Path payload = ApplicationLocator.getApplicationPayloadDirectory(applicationDirectory);
-        Path javaExecutable = runtime.resolve("bin")
-                .resolve(dev.itsdropper.vanta.launcher.Platform.javaExecutableName());
-
         if (!Files.isExecutable(launcher)) {
             throw new IOException("Vanta launcher is not executable: " + launcher);
         }
-        if (!Files.isRegularFile(javaExecutable) || !Files.isExecutable(javaExecutable)) {
-            throw new IOException("Bundled Java runtime is missing or not executable: " + javaExecutable);
+        if (!Files.isRegularFile(runtime.resolve("lib/modules"))) {
+            throw new IOException("Bundled Java runtime modules are missing: " + runtime);
         }
         if (!Files.isRegularFile(payload.resolve("Vanta.jar"))
                 && !Files.isRegularFile(payload.resolve("Vanta.cfg"))) {
