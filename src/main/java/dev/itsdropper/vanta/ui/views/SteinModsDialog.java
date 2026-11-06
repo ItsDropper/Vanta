@@ -143,15 +143,26 @@ public final class SteinModsDialog {
         long generation = ++requestGeneration;
         setBusy(true, Localization.text("steinMods.loading"));
         UiExecutor.shared().execute(() -> {
+            List<SteinModManager.Source> sources = List.of();
             List<SteinModManager.Release> releases = List.of();
             List<SteinModManager.Installed> installed = List.of();
             Exception failure = null;
             try {
+                sources = SteinModManager.loadSources(instance);
                 releases = SteinModManager.refresh(instance);
-                installed = SteinModManager.loadInstalled(instance);
             } catch (Exception error) {
                 failure = error;
             }
+            try {
+                installed = SteinModManager.loadInstalled(instance);
+            } catch (Exception error) {
+                if (failure == null) {
+                    failure = error;
+                } else {
+                    failure.addSuppressed(error);
+                }
+            }
+            List<SteinModManager.Source> finalSources = sources;
             List<SteinModManager.Release> finalReleases = releases;
             List<SteinModManager.Installed> finalInstalled = installed;
             Exception result = failure;
@@ -159,7 +170,7 @@ public final class SteinModsDialog {
                 if (generation != requestGeneration) {
                     return;
                 }
-                renderSources(finalReleases);
+                renderSources(finalSources);
                 renderMods(finalReleases, finalInstalled);
                 setBusy(false, result == null
                         ? finalReleases.size() + " " + Localization.text("steinMods.modsAvailable")
@@ -268,25 +279,21 @@ public final class SteinModsDialog {
         });
     }
 
-    private void renderSources(List<SteinModManager.Release> releases) {
+    private void renderSources(List<SteinModManager.Source> sources) {
         sourceList.getChildren().clear();
-        Map<String, SteinModManager.Release> sources = new LinkedHashMap<>();
-        for (SteinModManager.Release release : releases) {
-            sources.putIfAbsent(release.sourceUrl(), release);
-        }
         if (sources.isEmpty()) {
             Label empty = new Label(Localization.text("steinMods.noSources"));
             empty.getStyleClass().add("instances-status");
             sourceList.getChildren().add(empty);
             return;
         }
-        for (SteinModManager.Release release : sources.values()) {
-            Label details = new Label(release.sourceName() + " • " + release.sourceUrl());
+        for (SteinModManager.Source source : sources) {
+            Label details = new Label(source.name() + " • " + source.url());
             details.setWrapText(true);
             HBox.setHgrow(details, Priority.ALWAYS);
             Button remove = new Button(Localization.text("steinMods.removeSource"));
             remove.getStyleClass().add("secondary-button");
-            remove.setOnAction(event -> removeSource(release.sourceUrl(), release.sourceName()));
+            remove.setOnAction(event -> removeSource(source.url(), source.name()));
             HBox row = new HBox(8, details, remove);
             row.setAlignment(Pos.CENTER_LEFT);
             row.getStyleClass().add("instance-card");
