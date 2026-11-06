@@ -246,6 +246,8 @@ public final class InstanceRepairService {
         Path backupInstall = rollback.resolve("install.json");
         Path backupNatives = rollback.resolve("natives");
 
+        Instance repaired = instance;
+        Exception primaryFailure = null;
         try {
             copyFileIfPresent(client, backupClient);
             copyFileIfPresent(versionMetadata, backupVersion);
@@ -260,7 +262,6 @@ public final class InstanceRepairService {
                 AssetInstaller.install(instance, vanillaMetadata);
 
                 String repairedVersion = SteinInstaller.install(instance, vanillaMetadata);
-                Instance repaired = instance;
                 if (!repairedVersion.equals(instance.getLoaderVersion())) {
                     repaired = new Instance(
                             instance.getId(), instance.getName(), instance.getMinecraftVersion(),
@@ -274,10 +275,28 @@ public final class InstanceRepairService {
                 restoreTree(backupRuntime, runtime, failure);
                 restoreFile(backupInstall, installMetadata, failure);
                 restoreTree(backupNatives, natives, failure);
+                if (!repaired.getLoaderVersion().equals(instance.getLoaderVersion())) {
+                    try {
+                        InstanceManager.saveInstance(instance);
+                    } catch (Exception metadataRollbackFailure) {
+                        failure.addSuppressed(metadataRollbackFailure);
+                    }
+                }
                 throw failure;
             }
+        } catch (Exception failure) {
+            primaryFailure = failure;
+            throw failure;
         } finally {
-            deleteTree(rollback);
+            try {
+                deleteTree(rollback);
+            } catch (java.io.IOException cleanupFailure) {
+                if (primaryFailure != null) {
+                    primaryFailure.addSuppressed(cleanupFailure);
+                } else {
+                    throw cleanupFailure;
+                }
+            }
         }
     }
 
