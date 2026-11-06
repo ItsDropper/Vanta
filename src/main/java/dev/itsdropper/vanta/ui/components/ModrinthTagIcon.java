@@ -94,6 +94,11 @@ public final class ModrinthTagIcon extends Region {
             case "ornithe" -> Color.web("#77A68A");
             case "legacyfabric" -> Color.web("#B79B70");
             case "babric" -> Color.web("#A6A0D8");
+            case "btababric" -> Color.web("#C59B70");
+            case "javaagent" -> Color.web("#75A9D6");
+            case "liteloader" -> Color.web("#A5C56D");
+            case "modloader", "risugamismodloader" -> Color.web("#B59B82");
+            case "nilloader" -> Color.web("#9B82C9");
             default -> Color.web("#9AA3B2");
         };
     }
