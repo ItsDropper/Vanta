@@ -26,8 +26,12 @@ import java.util.jar.JarFile;
 public final class VantaLoaderInstaller {
     private static final String RELEASE_API =
             "https://api.github.com/repos/ItsDropper/VantaLoader/releases/tags/";
-    private static final String MAIN_COMMIT_API =
-            "https://api.github.com/repos/ItsDropper/VantaLoader/commits/main";
+    private static final String RELEASES_API =
+            "https://api.github.com/repos/ItsDropper/VantaLoader/releases?per_page=100";
+    private static final java.util.regex.Pattern NIGHTLY_TAG = java.util.regex.Pattern.compile(
+            "^nightly-\\d+\\.\\d+\\.\\d+-\\d{8}-[0-9a-f]{7}$");
+    private static final java.util.regex.Pattern LEGACY_COMMIT_TAG = java.util.regex.Pattern.compile(
+            "^nightly-[0-9a-f]{40}$");
     private static final String AGENT_ASSET = "VantaLoader-agent.jar";
     private static final String CHECKSUM_ASSET = AGENT_ASSET + ".sha256";
     private static final long MAX_AGENT_BYTES = 64L * 1024 * 1024;
@@ -66,7 +70,9 @@ public final class VantaLoaderInstaller {
 
     public static Path agentPath(Instance instance, String version) {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        if (version == null || !version.matches("nightly|nightly-[0-9a-f]{40}")) {
+        if (version == null || !(version.equals("nightly")
+                || LEGACY_COMMIT_TAG.matcher(version).matches()
+                || NIGHTLY_TAG.matcher(version).matches())) {
             throw new IllegalStateException("VantaLoader instance has an invalid release identifier.");
         }
         return instance.getDirectory().resolve("libraries")
@@ -86,7 +92,11 @@ public final class VantaLoaderInstaller {
         }
         // "nightly" is retained only as a migration path for instances created
         // by older launcher builds. New instances always pin an immutable tag.
-        String resolvedVersion = "nightly".equals(selectedVersion)
+        // Older launcher builds stored either the floating "nightly" marker
+        // or a commit-SHA tag that never matched the actual published release
+        // naming scheme. Migrate both to a real immutable nightly release tag.
+        String resolvedVersion = ("nightly".equals(selectedVersion)
+                || LEGACY_COMMIT_TAG.matcher(selectedVersion).matches())
                 ? latestReleaseTag() : selectedVersion;
         Release release = readRelease(resolvedVersion);
 
@@ -157,7 +167,7 @@ public final class VantaLoaderInstaller {
     }
 
     private static String latestReleaseTag() throws Exception {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(MAIN_COMMIT_API))
+        HttpRequest request = HttpRequest.newBuilder(URI.create(RELEASES_API))
                 .timeout(Duration.ofSeconds(20))
                 .header("Accept", "application/vnd.github+json")
                 .header("X-GitHub-Api-Version", "2022-11-28")
@@ -165,17 +175,49 @@ public final class VantaLoaderInstaller {
                 .GET().build();
         HttpResponse<String> response = HTTP.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
-            throw new IOException("VantaLoader main-branch lookup returned HTTP " + response.statusCode() + ".");
+            throw new IOException("VantaLoader release lookup returned HTTP " + response.statusCode() + ".");
         }
-        String sha = MAPPER.readTree(response.body()).path("sha").asText("");
-        if (!sha.matches("[0-9a-f]{40}")) {
-            throw new IOException("VantaLoader main-branch lookup returned an invalid commit SHA.");
+
+        JsonNode releases = MAPPER.readTree(response.body());
+        String latestTag = null;
+        String latestPublishedAt = "";
+        if (!releases.isArray()) {
+            throw new IOException("VantaLoader release lookup returned an invalid response.");
         }
-        return "nightly-" + sha;
+        for (JsonNode release : releases) {
+            String tag = release.path("tag_name").asText("");
+            String publishedAt = release.path("published_at").asText("");
+            if (release.path("draft").asBoolean(true)
+                    || !NIGHTLY_TAG.matcher(tag).matches()
+                    || publishedAt.isBlank()
+                    || !hasRequiredAssets(release.path("assets"))) {
+                continue;
+            }
+            if (publishedAt.compareTo(latestPublishedAt) > 0) {
+                latestPublishedAt = publishedAt;
+                latestTag = tag;
+            }
+        }
+        if (latestTag == null) {
+            throw new IOException("No published VantaLoader nightly agent release is available.");
+        }
+        return latestTag;
+    }
+
+    private static boolean hasRequiredAssets(JsonNode assets) {
+        if (!assets.isArray()) return false;
+        boolean agent = false;
+        boolean checksum = false;
+        for (JsonNode asset : assets) {
+            String name = asset.path("name").asText("");
+            agent |= AGENT_ASSET.equals(name);
+            checksum |= CHECKSUM_ASSET.equals(name);
+        }
+        return agent && checksum;
     }
 
     private static Release readRelease(String tag) throws Exception {
-        if (tag == null || !tag.matches("nightly-[0-9a-f]{40}")) {
+        if (tag == null || !NIGHTLY_TAG.matcher(tag).matches()) {
             throw new IOException("Invalid pinned VantaLoader release identifier.");
         }
         HttpRequest request = HttpRequest.newBuilder(URI.create(RELEASE_API + tag))
