@@ -245,20 +245,23 @@ public class ModDetailsView extends VBox {
                                 findAuthor(
                                         teamMembers
                                 );
-                        List<ModrinthTag> loaderTags;
-                        List<ModrinthTag> categoryTags;
+                        List<ModrinthTag> loadedLoaderTags;
+                        List<ModrinthTag> loadedCategoryTags;
                         try {
-                            loaderTags = modrinthClient.getLoaderTags(contentType);
-                            categoryTags = modrinthClient.getCategoryTags(contentType);
+                            loadedLoaderTags = modrinthClient.getLoaderTags(contentType);
+                            loadedCategoryTags = modrinthClient.getCategoryTags(contentType);
                         } catch (Exception tagLoadFailure) {
                             // Project details remain useful if the optional tag catalogue is unavailable.
                             java.util.logging.Logger.getLogger(ModDetailsView.class.getName())
                                     .log(java.util.logging.Level.WARNING,
                                             "Could not load Modrinth tag metadata", tagLoadFailure);
-                            loaderTags = List.of();
-                            categoryTags = List.of();
+                            loadedLoaderTags = List.of();
+                            loadedCategoryTags = List.of();
                         }
 
+                        // Capture immutable references for the UI-dispatch lambda.
+                        final List<ModrinthTag> loaderTags = loadedLoaderTags;
+                        final List<ModrinthTag> categoryTags = loadedCategoryTags;
                         UiExecutor.shared().dispatchToUi(
                                 () ->
                                         showProject(
