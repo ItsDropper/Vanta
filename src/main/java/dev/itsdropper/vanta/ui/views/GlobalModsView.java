@@ -5,6 +5,9 @@ import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.components.EmptyState;
+import dev.itsdropper.vanta.ui.components.IconView;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -88,6 +91,7 @@ public class GlobalModsView extends VBox {
     private final Button nextPageButton;
     private final Label pageIndicator;
     private final Button layoutButton;
+    private final PauseTransition searchDebounce = new PauseTransition(Duration.millis(350));
     private final java.util.Map<ModrinthContentType, Button> contentTypeButtons = new java.util.EnumMap<>(ModrinthContentType.class);
 
     public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
@@ -298,27 +302,31 @@ public class GlobalModsView extends VBox {
                 "primary-button"
         );
         searchButton.setAccessibleText(Localization.text("globalMods.searchAccessible"));
+        searchButton.setOnAction(event -> {
+            searchDebounce.stop();
+            search();
+        });
+        searchField.setOnAction(event -> {
+            searchDebounce.stop();
+            search();
+        });
+        searchDebounce.setOnFinished(event -> search());
+        searchField.textProperty().addListener((obs, oldValue, newValue) -> {
+            searchOffset = 0;
+            if (newValue != null && !newValue.isBlank()) {
+                searchDebounce.playFromStart();
+            } else {
+                searchDebounce.stop();
+            }
+        });
 
-        searchButton.setOnAction(
-                event ->
-                        search()
-        );
-
-        searchField.setOnAction(
-                event ->
-                        search()
-        );
-
-        HBox searchBar =
-                new HBox(
-                        10,
-                        searchField,
-                        searchButton
-                );
-
-        searchBar.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        Label searchIcon = new Label();
+        searchIcon.setGraphic(IconView.create(IconView.Type.SEARCH, 17));
+        searchIcon.getStyleClass().add("modrinth-search-icon");
+        HBox searchBar = new HBox(10, searchIcon, searchField, searchButton);
+        searchBar.setAlignment(Pos.CENTER_LEFT);
+        searchBar.getStyleClass().add("modrinth-search-row");
+        searchBar.setMaxWidth(Double.MAX_VALUE);
 
         sortBox = new ComboBox<>();
         sortBox.getItems().setAll("Relevance", "Downloads", "Followers", "Date published", "Date updated");
