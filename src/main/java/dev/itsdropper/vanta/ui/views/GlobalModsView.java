@@ -57,6 +57,8 @@ public class GlobalModsView extends VBox {
     private final TextField versionSearchField;
     private final ComboBox<ModrinthContentType> contentTypeBox;
     private final List<String> allMinecraftVersions = new ArrayList<>();
+    private final List<String> stableMinecraftVersions = new ArrayList<>();
+    private CheckBox showAllVersions;
 
     private final VBox popularResults;
     private final Label popularStatusLabel;
@@ -160,6 +162,11 @@ public class GlobalModsView extends VBox {
         versionSearchField.setPrefWidth(210);
         versionSearchField.setPrefHeight(42);
         versionSearchField.getStyleClass().add("create-field");
+        showAllVersions = new CheckBox("Show all versions");
+        showAllVersions.setSelected(false);
+        showAllVersions.getStyleClass().add("dialog-instance-checkbox");
+        showAllVersions.selectedProperty().addListener((obs, oldValue, newValue) ->
+                filterVersionChoices(versionSearchField.getText()));
 
         categoriesButton = new Button("Categories");
         categoriesButton.getStyleClass().add("secondary-button");
@@ -170,6 +177,7 @@ public class GlobalModsView extends VBox {
                 loaderBox,
                 versionBox,
                 versionSearchField,
+                showAllVersions,
                 categoriesButton
         );
         filters.setAlignment(Pos.CENTER_LEFT);
@@ -206,9 +214,12 @@ public class GlobalModsView extends VBox {
             UiExecutor.shared().execute(() -> {
                 try {
                     List<String> versions = MinecraftVersionResolver.getAllVersions();
+                    List<String> releases = MinecraftVersionResolver.getReleaseVersions();
                     UiExecutor.shared().dispatchToUi(() -> {
                         allMinecraftVersions.clear();
                         allMinecraftVersions.addAll(versions);
+                        stableMinecraftVersions.clear();
+                        stableMinecraftVersions.addAll(releases);
                         filterVersionChoices(versionSearchField.getText());
                     });
                 } catch (Throwable ex) {
@@ -621,7 +632,9 @@ public class GlobalModsView extends VBox {
         String selected = versionBox.getValue();
         String normalizedQuery = query == null ? "" : query.trim().toLowerCase(java.util.Locale.ROOT);
 
-        List<String> filtered = allMinecraftVersions.stream()
+        List<String> sourceVersions = showAllVersions.isSelected()
+                ? allMinecraftVersions : stableMinecraftVersions;
+        List<String> filtered = sourceVersions.stream()
                 .filter(version -> normalizedQuery.isEmpty()
                         || version.toLowerCase(java.util.Locale.ROOT).contains(normalizedQuery))
                 .toList();
