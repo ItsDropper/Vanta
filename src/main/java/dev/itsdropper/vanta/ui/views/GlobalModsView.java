@@ -6,6 +6,8 @@ import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.components.EmptyState;
 import dev.itsdropper.vanta.ui.components.IconView;
+import dev.itsdropper.vanta.ui.components.ModrinthTagIcon;
+import javafx.scene.paint.Color;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import javafx.geometry.Insets;
@@ -83,6 +85,10 @@ public class GlobalModsView extends VBox {
     private List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> loaderTags = List.of();
     private final java.util.Set<String> selectedCategories = new java.util.LinkedHashSet<>();
     private Button categoriesButton;
+    private Button loadersButton;
+    private Button versionsButton;
+    private final java.util.Set<String> selectedLoaders = new java.util.LinkedHashSet<>();
+    private final java.util.Set<String> selectedVersions = new java.util.LinkedHashSet<>();
     private int searchOffset;
     private int searchTotalHits;
     private final ComboBox<String> sortBox;
@@ -151,6 +157,8 @@ public class GlobalModsView extends VBox {
         loaderBox = new ComboBox<>();
         loaderBox.getItems().addAll("Any", "Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric", "NilLoader", "LiteLoader", "Rift", "ModLoader");
         loaderBox.setValue("Any");
+        loaderBox.setVisible(false);
+        loaderBox.setManaged(false);
         loaderBox.setAccessibleText(Localization.text("globalMods.loaderFilter"));
         loaderBox.setPrefWidth(140);
         loaderBox.setPrefHeight(42);
@@ -159,6 +167,8 @@ public class GlobalModsView extends VBox {
         versionBox = new ComboBox<>();
         versionBox.getItems().add("All versions");
         versionBox.setValue("All versions");
+        versionBox.setVisible(false);
+        versionBox.setManaged(false);
         versionBox.setAccessibleText(Localization.text("globalMods.versionFilter"));
         versionBox.setPrefWidth(170);
         versionBox.setPrefHeight(42);
@@ -170,15 +180,23 @@ public class GlobalModsView extends VBox {
         versionSearchField.setPrefWidth(210);
         versionSearchField.setPrefHeight(42);
         versionSearchField.getStyleClass().add("create-field");
-        showAllVersions = new CheckBox("Show all versions");
+        showAllVersions = new CheckBox(Localization.text("modrinth.showAllVersions"));
         showAllVersions.setSelected(false);
         showAllVersions.getStyleClass().add("dialog-instance-checkbox");
         showAllVersions.selectedProperty().addListener((obs, oldValue, newValue) ->
                 filterVersionChoices(versionSearchField.getText()));
 
-        categoriesButton = new Button("Categories");
+        categoriesButton = new Button(Localization.text("modrinth.categories"));
         categoriesButton.getStyleClass().add("secondary-button");
         categoriesButton.setOnAction(event -> showCategoryPicker());
+        loadersButton = new Button(Localization.text("modrinth.anyLoader"));
+        loadersButton.getStyleClass().add("secondary-button");
+        loadersButton.setMaxWidth(Double.MAX_VALUE);
+        loadersButton.setOnAction(event -> showLoaderPicker());
+        versionsButton = new Button(Localization.text("modrinth.allVersions"));
+        versionsButton.getStyleClass().add("secondary-button");
+        versionsButton.setMaxWidth(Double.MAX_VALUE);
+        versionsButton.setOnAction(event -> showVersionPicker());
         contentTypeBox.setVisible(false);
         contentTypeBox.setManaged(false);
         HBox contentTypeSegments = new HBox(6);
@@ -207,8 +225,8 @@ public class GlobalModsView extends VBox {
 
         Label filtersTitle = new Label("Filters");
         filtersTitle.getStyleClass().add("settings-section-title");
-        VBox versionFilters = new VBox(8, versionSearchField, versionBox, showAllVersions);
-        VBox loaderFilters = new VBox(8, loaderBox);
+        VBox versionFilters = new VBox(8, versionSearchField, versionsButton, showAllVersions);
+        VBox loaderFilters = new VBox(8, loadersButton);
         VBox categoryFilters = new VBox(8, categoriesButton);
         TitledPane versionPanel = new TitledPane("Game version", versionFilters);
         TitledPane loaderPanel = new TitledPane("Loader", loaderFilters);
@@ -227,8 +245,11 @@ public class GlobalModsView extends VBox {
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
+            if (newValue != ModrinthContentType.MOD) selectedLoaders.clear();
             searchOffset = 0;
             selectedCategories.clear();
+            updateLoaderButton();
+            updateVersionButton();
             updateCategoriesButton();
             updateContentTypeSegments();
             loadLoaderTags(newValue);
@@ -236,18 +257,8 @@ public class GlobalModsView extends VBox {
             refreshForCurrentFilters();
         });
 
-        loaderBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-            if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
-                searchOffset = 0;
-                refreshForCurrentFilters();
-            }
-        });
-
-        versionBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-            searchOffset = 0;
-            refreshForCurrentFilters();
-        });
-
+        // The hidden legacy combo boxes remain as compatibility adapters for
+        // existing install/popular logic; the visible pickers are multi-select.
         versionSearchField.textProperty().addListener((obs, oldValue, newValue) ->
                 filterVersionChoices(newValue));
 
@@ -597,7 +608,7 @@ public class GlobalModsView extends VBox {
         VBox root = new VBox(10);
         root.getStyleClass().add("modrinth-popup");
         root.setPrefWidth(340);
-        Label title = new Label("Project categories");
+        Label title = new Label(Localization.text("modrinth.projectCategories"));
         title.getStyleClass().add("modrinth-popup-title");
         VBox options = new VBox(6);
         List<CheckBox> boxes = new ArrayList<>();
@@ -610,21 +621,22 @@ public class GlobalModsView extends VBox {
                     .collect(java.util.stream.Collectors.joining(" "));
             CheckBox box = new CheckBox(label);
             box.setSelected(selectedCategories.contains(id));
+            box.setGraphic(new ModrinthTagIcon(tag, Color.web("#9299A6"), 15));
             box.getStyleClass().add("dialog-instance-checkbox");
             box.setUserData(id);
             boxes.add(box);
             options.getChildren().add(box);
         }
         if (boxes.isEmpty()) {
-            options.getChildren().add(new Label("No categories available for this content type."));
+            options.getChildren().add(new Label(Localization.text("modrinth.noCategories")));
         }
         ScrollPane scroll = new ScrollPane(options);
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setPrefViewportHeight(300);
-        Button clear = new Button("Clear");
+        Button clear = new Button(Localization.text("common.clear"));
         clear.getStyleClass().add("secondary-button");
-        Button apply = new Button("Apply filters");
+        Button apply = new Button(Localization.text("modrinth.applyFilters"));
         apply.getStyleClass().add("primary-button");
         HBox actions = new HBox(8, clear, apply);
         actions.setAlignment(Pos.CENTER_RIGHT);
@@ -646,15 +658,140 @@ public class GlobalModsView extends VBox {
         if (bounds != null) popup.show(categoriesButton, bounds.getMinX(), bounds.getMaxY() + 6);
     }
 
+    private void showLoaderPicker() {
+        if (contentTypeBox.getValue() != ModrinthContentType.MOD) return;
+        Popup popup = createFilterPopup(Localization.text("modrinth.selectLoaders"), loadersButton);
+        VBox options = (VBox) popup.getProperties().get("options");
+        List<CheckBox> boxes = new ArrayList<>();
+        for (dev.itsdropper.vanta.launcher.modrinth.ModrinthTag tag : loaderTags) {
+            if (tag == null || tag.getName() == null || tag.getName().isBlank()) continue;
+            String id = dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(tag.getName());
+            CheckBox box = new CheckBox(formatTagName(tag.getName()));
+            box.setSelected(selectedLoaders.contains(id));
+            box.setGraphic(new ModrinthTagIcon(tag,
+                    ModrinthTagIcon.loaderColor(tag.getName()), 17));
+            box.getStyleClass().add("dialog-instance-checkbox");
+            box.setUserData(id);
+            boxes.add(box);
+            options.getChildren().add(box);
+        }
+        if (boxes.isEmpty()) options.getChildren().add(new Label(Localization.text("modrinth.noLoaders")));
+        finishFilterPopup(popup, boxes, selectedLoaders, loadersButton, this::updateLoaderButton);
+    }
+
+    private void showVersionPicker() {
+        Popup popup = createFilterPopup(Localization.text("modrinth.selectVersions"), versionsButton);
+        VBox options = (VBox) popup.getProperties().get("options");
+        List<CheckBox> boxes = new ArrayList<>();
+        List<String> source = showAllVersions.isSelected()
+                ? allMinecraftVersions : stableMinecraftVersions;
+        String query = versionSearchField.getText() == null ? ""
+                : versionSearchField.getText().trim().toLowerCase(java.util.Locale.ROOT);
+        for (String version : source) {
+            if (version == null || !version.toLowerCase(java.util.Locale.ROOT).contains(query)) continue;
+            CheckBox box = new CheckBox(version);
+            box.setSelected(selectedVersions.contains(version));
+            box.getStyleClass().add("dialog-instance-checkbox");
+            box.setUserData(version);
+            boxes.add(box);
+            options.getChildren().add(box);
+        }
+        if (boxes.isEmpty()) options.getChildren().add(new Label(Localization.text("modrinth.noVersions")));
+        finishFilterPopup(popup, boxes, selectedVersions, versionsButton, this::updateVersionButton);
+    }
+
+    private Popup createFilterPopup(String titleText, Button owner) {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.setAutoFix(true);
+        popup.setHideOnEscape(true);
+        VBox root = new VBox(10);
+        root.getStyleClass().add("modrinth-popup");
+        root.setPrefWidth(320);
+        Label title = new Label(titleText);
+        title.getStyleClass().add("modrinth-popup-title");
+        VBox options = new VBox(7);
+        ScrollPane scroll = new ScrollPane(options);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setPrefViewportHeight(280);
+        root.getChildren().addAll(title, scroll);
+        ThemeManager.apply(root, ThemeManager.loadAccent());
+        popup.getContent().add(root);
+        popup.getProperties().put("options", options);
+        javafx.geometry.Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
+        if (bounds != null) popup.show(owner, bounds.getMinX(), bounds.getMaxY() + 6);
+        return popup;
+    }
+
+    private void finishFilterPopup(
+            Popup popup,
+            List<CheckBox> boxes,
+            java.util.Set<String> selected,
+            Button owner,
+            Runnable updateButton
+    ) {
+        VBox root = (VBox) popup.getContent().get(0);
+        Button clear = new Button(Localization.text("common.clear"));
+        clear.getStyleClass().add("secondary-button");
+        Button apply = new Button(Localization.text("modrinth.applyFilters"));
+        apply.getStyleClass().add("primary-button");
+        HBox actions = new HBox(8, clear, apply);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        clear.setOnAction(event -> boxes.forEach(box -> box.setSelected(false)));
+        apply.setOnAction(event -> {
+            selected.clear();
+            for (CheckBox box : boxes) {
+                if (box.isSelected()) selected.add((String) box.getUserData());
+            }
+            updateButton.run();
+            searchOffset = 0;
+            popup.hide();
+            refreshForCurrentFilters();
+        });
+        root.getChildren().add(actions);
+    }
+
+    private String formatTagName(String id) {
+        return java.util.Arrays.stream(id.split("[_-]"))
+                .filter(part -> !part.isBlank())
+                .map(part -> Character.toUpperCase(part.charAt(0)) + part.substring(1))
+                .collect(java.util.stream.Collectors.joining(" "));
+    }
+
+    private void updateLoaderButton() {
+        loadersButton.setText(selectedLoaders.isEmpty()
+                ? Localization.text("modrinth.anyLoader")
+                : Localization.text("modrinth.loadersSelected").replace("{count}", Integer.toString(selectedLoaders.size())));
+    }
+
+    private void updateVersionButton() {
+        versionsButton.setText(selectedVersions.isEmpty()
+                ? Localization.text("modrinth.allVersions")
+                : Localization.text("modrinth.versionsSelected").replace("{count}", Integer.toString(selectedVersions.size())));
+    }
+
+    private List<String> selectedLoaderFacets() {
+        return selectedLoaders.stream().filter(dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds::supportsSearchFacet).toList();
+    }
+
+    private List<String> selectedVersionFacets() {
+        return List.copyOf(selectedVersions);
+    }
+
     private void loadLoaderTags(ModrinthContentType contentType) {
         long requestId = ++loaderTagRequestId;
         if (contentType != ModrinthContentType.MOD) {
             loaderBox.getItems().setAll("Any");
             loaderBox.setValue("Any");
             loaderBox.setDisable(true);
+            loadersButton.setDisable(true);
+            selectedLoaders.clear();
+            updateLoaderButton();
             return;
         }
         loaderBox.setDisable(false);
+        loadersButton.setDisable(false);
         UiExecutor.shared().execute(() -> {
             try {
                 List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> tags =
@@ -662,7 +799,11 @@ public class GlobalModsView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != loaderTagRequestId) return;
                     loaderTags = tags == null ? List.of() : List.copyOf(tags);
-                    String selected = loaderBox.getValue();
+                    selectedLoaders.retainAll(tags.stream()
+                            .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
+                            .filter(java.util.Objects::nonNull)
+                            .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds::normalize)
+                            .collect(java.util.stream.Collectors.toSet()));
                     loaderBox.getItems().setAll("Any");
                     if (tags != null) {
                         tags.stream()
@@ -672,22 +813,15 @@ public class GlobalModsView extends VBox {
                                 .sorted(String.CASE_INSENSITIVE_ORDER)
                                 .forEach(loaderBox.getItems()::add);
                     }
-                    if (selected != null && loaderBox.getItems().contains(selected)) {
-                        loaderBox.setValue(selected);
-                    } else {
-                        loaderBox.setValue("Any");
-                    }
+                    loaderBox.setValue("Any");
+                    updateLoaderButton();
                 });
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != loaderTagRequestId) return;
-                    // Keep the known loader choices as an offline fallback.
-                    if (loaderBox.getItems().isEmpty()) {
-                        loaderBox.getItems().setAll(
-                                "Any", "Fabric", "Quilt", "Forge", "NeoForge",
-                                "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
-                                "LiteLoader", "Rift", "ModLoader"
-                        );
+                    loadersButton.setDisable(false);
+                    if (loaderTags.isEmpty()) {
+                        statusLabel.setText(Localization.text("modrinth.loadersUnavailable"));
                     }
                 });
             }
@@ -731,19 +865,11 @@ public class GlobalModsView extends VBox {
     }
 
     private String selectedVersion() {
-        String value = versionBox.getValue();
-        return value == null || "All versions".equals(value) ? null : value;
+        return selectedVersions.stream().findFirst().orElse(null);
     }
 
     private String selectedLoader() {
-        if (contentTypeBox.getValue() != ModrinthContentType.MOD) {
-            return null;
-        }
-        String selected = loaderBox.getValue();
-        if (selected == null || "Any".equalsIgnoreCase(selected)) {
-            return null;
-        }
-        return dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(selected);
+        return selectedLoaders.stream().findFirst().orElse(null);
     }
 
     private List<Instance> compatibleInstances(
@@ -1333,8 +1459,8 @@ public class GlobalModsView extends VBox {
                                 modrinthClient.searchPage(
                                         query,
                                         contentTypeBox.getValue(),
-                                        loader == null ? List.of() : List.of(loader),
-                                        version == null ? List.of() : List.of(version),
+                                        selectedLoaderFacets(),
+                                        selectedVersionFacets(),
                                         List.copyOf(selectedCategories),
                                         switch (sortBox.getValue()) {
                                             case "Downloads" -> "downloads";
