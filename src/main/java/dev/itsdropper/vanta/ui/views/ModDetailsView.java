@@ -22,6 +22,10 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthClient;
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthContentType;
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthProject;
+import dev.itsdropper.vanta.launcher.modrinth.ModrinthTag;
+import dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds;
+import dev.itsdropper.vanta.ui.components.ModrinthTagIcon;
+import javafx.scene.paint.Color;
 import dev.itsdropper.vanta.launcher.service.ModrinthContentService;
 import dev.itsdropper.vanta.launcher.service.ModrinthService;
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthTeamMember;
@@ -241,12 +245,18 @@ public class ModDetailsView extends VBox {
                                 findAuthor(
                                         teamMembers
                                 );
+                        List<ModrinthTag> loaderTags =
+                                modrinthClient.getLoaderTags(contentType);
+                        List<ModrinthTag> categoryTags =
+                                modrinthClient.getCategoryTags(contentType);
 
                         UiExecutor.shared().dispatchToUi(
                                 () ->
                                         showProject(
                                                 project,
-                                                author
+                                                author,
+                                                loaderTags,
+                                                categoryTags
                                         )
                         );
 
@@ -277,7 +287,9 @@ public class ModDetailsView extends VBox {
 
     private void showProject(
             ModrinthProject project,
-            String author
+            String author,
+            List<ModrinthTag> loaderTags,
+            List<ModrinthTag> categoryTags
     ) {
 
         content.getChildren().clear();
@@ -414,6 +426,12 @@ public class ModDetailsView extends VBox {
         );
 
         // =========================================================
+        // MODRINTH PROJECT TAGS
+        // =========================================================
+
+        FlowPane projectTags = createProjectTags(project, loaderTags, categoryTags);
+
+        // =========================================================
         // META / STATS
         // =========================================================
 
@@ -497,6 +515,7 @@ public class ModDetailsView extends VBox {
                         title,
                         authorLabel,
                         shortDescription,
+                        projectTags,
                         metadata
                 );
 
@@ -651,6 +670,83 @@ public class ModDetailsView extends VBox {
         statusLabel.setText(
                 ""
         );
+    }
+
+    private FlowPane createProjectTags(
+            ModrinthProject project,
+            List<ModrinthTag> loaderTags,
+            List<ModrinthTag> categoryTags
+    ) {
+        FlowPane tags = new FlowPane(6, 6);
+        tags.setAlignment(Pos.CENTER_LEFT);
+        tags.setMaxWidth(Double.MAX_VALUE);
+        tags.getStyleClass().add("mod-details-tags");
+
+        String environment = formatEnvironment(project.getClientSide(), project.getServerSide());
+        if (!environment.isBlank()) {
+            Label chip = new Label(environment);
+            chip.getStyleClass().addAll("modrinth-tag-chip", "modrinth-environment-chip");
+            tags.getChildren().add(chip);
+        }
+
+        java.util.Map<String, ModrinthTag> loadersById = new java.util.LinkedHashMap<>();
+        if (loaderTags != null) {
+            for (ModrinthTag tag : loaderTags) {
+                if (tag != null && tag.getName() != null) {
+                    loadersById.putIfAbsent(ModrinthLoaderIds.normalize(tag.getName()), tag);
+                }
+            }
+        }
+
+        java.util.Map<String, ModrinthTag> categoriesById = new java.util.LinkedHashMap<>();
+        if (categoryTags != null) {
+            for (ModrinthTag tag : categoryTags) {
+                if (tag != null && tag.getName() != null) {
+                    categoriesById.putIfAbsent(tag.getName(), tag);
+                }
+            }
+        }
+
+        for (String value : project.getCategories()) {
+            if (value == null || value.isBlank()) continue;
+            ModrinthTag loader = loadersById.get(ModrinthLoaderIds.normalize(value));
+            Label chip = new Label(formatTagName(value));
+            chip.getStyleClass().add("modrinth-tag-chip");
+            if (loader != null) {
+                Color color = ModrinthTagIcon.loaderColor(value);
+                chip.getStyleClass().add("modrinth-loader-chip");
+                chip.setGraphic(new ModrinthTagIcon(loader, color, 12));
+                chip.setStyle("-fx-text-fill: " + color.toString().replace("0x", "#").substring(0, 7) + ";");
+            } else if (!categoriesById.containsKey(value)) {
+                continue;
+            }
+            tags.getChildren().add(chip);
+        }
+
+        return tags;
+    }
+
+    private String formatEnvironment(String client, String server) {
+        boolean clientSupported = supportsEnvironment(client);
+        boolean serverSupported = supportsEnvironment(server);
+        if (clientSupported && serverSupported) {
+            return "◎  " + Localization.text("modrinth.environmentClientOrServer");
+        }
+        if (clientSupported) return "▣  " + Localization.text("modrinth.environmentClientOnly");
+        if (serverSupported) return "▤  " + Localization.text("modrinth.environmentServerOnly");
+        return "";
+    }
+
+    private boolean supportsEnvironment(String value) {
+        return value != null && !value.isBlank()
+                && !"unknown".equalsIgnoreCase(value)
+                && !"unsupported".equalsIgnoreCase(value);
+    }
+
+    private String formatTagName(String value) {
+        if (value == null || value.isBlank()) return "";
+        String normalized = value.replace('-', ' ').replace('_', ' ');
+        return Character.toUpperCase(normalized.charAt(0)) + normalized.substring(1);
     }
 
     // =============================================================
