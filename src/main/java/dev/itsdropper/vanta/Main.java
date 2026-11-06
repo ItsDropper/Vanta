@@ -14,6 +14,7 @@ import java.util.List;
 import dev.itsdropper.vanta.ui.LauncherView;
 import dev.itsdropper.vanta.ui.LoadingScreen;
 import dev.itsdropper.vanta.ui.ThemeManager;
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
 public class Main extends Application {
@@ -24,6 +25,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+        Localization.initializeFromSettings();
         List<String> arguments = getParameters().getRaw();
         boolean screenshotMode = isScreenshotCapture(arguments);
         if (!screenshotMode) {
