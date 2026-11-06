@@ -300,7 +300,7 @@ public final class InstanceRepairService {
         }
     }
 
-    private static void copyFileIfPresent(Path source, Path destination) throws Exception {
+    static void copyFileIfPresent(Path source, Path destination) throws Exception {
         if (Files.isSymbolicLink(source)) {
             throw new java.io.IOException("Refusing to snapshot a symbolic link during Stein repair: " + source);
         }
@@ -310,7 +310,7 @@ public final class InstanceRepairService {
         }
     }
 
-    private static void copyTreeIfPresent(Path source, Path destination) throws Exception {
+    static void copyTreeIfPresent(Path source, Path destination) throws Exception {
         if (!Files.exists(source, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
             return;
         }
@@ -343,7 +343,7 @@ public final class InstanceRepairService {
         });
     }
 
-    private static void restoreFile(Path backup, Path target, Exception failure) {
+    static void restoreFile(Path backup, Path target, Exception failure) {
         try {
             if (Files.isRegularFile(backup, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
                 Files.createDirectories(target.getParent());
@@ -364,7 +364,7 @@ public final class InstanceRepairService {
         }
     }
 
-    private static void restoreTree(Path backup, Path target, Exception failure) {
+    static void restoreTree(Path backup, Path target, Exception failure) {
         try {
             deleteTree(target);
             if (Files.isDirectory(backup, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
@@ -375,7 +375,7 @@ public final class InstanceRepairService {
         }
     }
 
-    private static void deleteTree(Path root) throws java.io.IOException {
+    static void deleteTree(Path root) throws java.io.IOException {
         if (!Files.exists(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
             return;
         }
