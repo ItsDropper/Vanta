@@ -122,6 +122,11 @@ public final class InstanceRepairService {
 
         ensureInstanceDirectories(instance);
 
+        if (loaderKey.equals("stein")) {
+            repairStein(instance, vanillaMetadata);
+            return;
+        }
+
         /*
          * These operations are checksum-aware. Existing healthy files
          * are kept; missing or corrupted vanilla files are downloaded.
@@ -190,14 +195,6 @@ public final class InstanceRepairService {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             RiftInstaller.install(instance);
-        } else if (loaderKey.equals("stein")) {
-            String repairedVersion = SteinInstaller.install(instance, vanillaMetadata);
-            if (!repairedVersion.equals(instance.getLoaderVersion())) {
-                instance = new Instance(
-                        instance.getId(), instance.getName(), instance.getMinecraftVersion(),
-                        instance.getLoader(), repairedVersion, instance.getDirectory());
-                InstanceManager.saveInstance(instance);
-            }
         } else if (loaderKey.equals("liteloader")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
@@ -226,6 +223,163 @@ public final class InstanceRepairService {
         InstanceManager.markInstallationComplete(
                 instance
         );
+    }
+
+    private static void repairStein(
+            Instance instance,
+            JsonNode vanillaMetadata
+    ) throws Exception {
+        Path instanceDirectory = instance.getDirectory().toAbsolutePath().normalize();
+        Path rollback = Files.createTempDirectory(instanceDirectory, ".stein-repair-rollback-");
+        Path minecraftDirectory = instanceDirectory.resolve("minecraft");
+        Path steinDirectory = instanceDirectory.resolve("stein");
+
+        Path client = minecraftDirectory.resolve("client.jar");
+        Path versionMetadata = minecraftDirectory.resolve("version.json");
+        Path runtime = steinDirectory.resolve("runtime");
+        Path installMetadata = steinDirectory.resolve("install.json");
+        Path natives = instanceDirectory.resolve("natives");
+
+        Path backupClient = rollback.resolve("client.jar");
+        Path backupVersion = rollback.resolve("version.json");
+        Path backupRuntime = rollback.resolve("runtime");
+        Path backupInstall = rollback.resolve("install.json");
+        Path backupNatives = rollback.resolve("natives");
+
+        try {
+            copyFileIfPresent(client, backupClient);
+            copyFileIfPresent(versionMetadata, backupVersion);
+            copyTreeIfPresent(runtime, backupRuntime);
+            copyFileIfPresent(installMetadata, backupInstall);
+            copyTreeIfPresent(natives, backupNatives);
+
+            try {
+                MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+                MinecraftFileInstaller.installLibraries(vanillaMetadata);
+                NativeInstaller.extract(instance, vanillaMetadata);
+                AssetInstaller.install(instance, vanillaMetadata);
+
+                String repairedVersion = SteinInstaller.install(instance, vanillaMetadata);
+                Instance repaired = instance;
+                if (!repairedVersion.equals(instance.getLoaderVersion())) {
+                    repaired = new Instance(
+                            instance.getId(), instance.getName(), instance.getMinecraftVersion(),
+                            instance.getLoader(), repairedVersion, instance.getDirectory());
+                    InstanceManager.saveInstance(repaired);
+                }
+                InstanceManager.markInstallationComplete(repaired);
+            } catch (Exception failure) {
+                restoreFile(backupClient, client, failure);
+                restoreFile(backupVersion, versionMetadata, failure);
+                restoreTree(backupRuntime, runtime, failure);
+                restoreFile(backupInstall, installMetadata, failure);
+                restoreTree(backupNatives, natives, failure);
+                throw failure;
+            }
+        } finally {
+            deleteTree(rollback);
+        }
+    }
+
+    private static void copyFileIfPresent(Path source, Path destination) throws Exception {
+        if (Files.isSymbolicLink(source)) {
+            throw new java.io.IOException("Refusing to snapshot a symbolic link during Stein repair: " + source);
+        }
+        if (Files.isRegularFile(source, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            Files.createDirectories(destination.getParent());
+            Files.copy(source, destination, java.nio.file.StandardCopyOption.COPY_ATTRIBUTES);
+        }
+    }
+
+    private static void copyTreeIfPresent(Path source, Path destination) throws Exception {
+        if (!Files.exists(source, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        if (Files.isSymbolicLink(source)) {
+            throw new java.io.IOException("Refusing to snapshot a symbolic link during Stein repair: " + source);
+        }
+        Files.walkFileTree(source, new java.nio.file.SimpleFileVisitor<>() {
+            @Override
+            public java.nio.file.FileVisitResult preVisitDirectory(
+                    Path directory, java.nio.file.attribute.BasicFileAttributes attributes
+            ) throws java.io.IOException {
+                if (Files.isSymbolicLink(directory)) {
+                    throw new java.io.IOException("Symbolic link found in Stein repair backup: " + directory);
+                }
+                Files.createDirectories(destination.resolve(source.relativize(directory)));
+                return java.nio.file.FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public java.nio.file.FileVisitResult visitFile(
+                    Path file, java.nio.file.attribute.BasicFileAttributes attributes
+            ) throws java.io.IOException {
+                if (Files.isSymbolicLink(file)) {
+                    throw new java.io.IOException("Symbolic link found in Stein repair backup: " + file);
+                }
+                Files.copy(file, destination.resolve(source.relativize(file)),
+                        java.nio.file.StandardCopyOption.COPY_ATTRIBUTES);
+                return java.nio.file.FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
+    private static void restoreFile(Path backup, Path target, Exception failure) {
+        try {
+            if (Files.isRegularFile(backup, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                Files.createDirectories(target.getParent());
+                Path temporary = target.resolveSibling(target.getFileName() + ".stein-restore");
+                Files.copy(backup, temporary, java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.COPY_ATTRIBUTES);
+                try {
+                    Files.move(temporary, target, java.nio.file.StandardCopyOption.ATOMIC_MOVE,
+                            java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                    Files.move(temporary, target, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                }
+            } else {
+                Files.deleteIfExists(target);
+            }
+        } catch (Exception rollbackFailure) {
+            failure.addSuppressed(rollbackFailure);
+        }
+    }
+
+    private static void restoreTree(Path backup, Path target, Exception failure) {
+        try {
+            deleteTree(target);
+            if (Files.isDirectory(backup, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                copyTreeIfPresent(backup, target);
+            }
+        } catch (Exception rollbackFailure) {
+            failure.addSuppressed(rollbackFailure);
+        }
+    }
+
+    private static void deleteTree(Path root) throws java.io.IOException {
+        if (!Files.exists(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            return;
+        }
+        Files.walkFileTree(root, new java.nio.file.SimpleFileVisitor<>() {
+            @Override
+            public java.nio.file.FileVisitResult visitFile(
+                    Path file, java.nio.file.attribute.BasicFileAttributes attributes
+            ) throws java.io.IOException {
+                Files.deleteIfExists(file);
+                return java.nio.file.FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public java.nio.file.FileVisitResult postVisitDirectory(
+                    Path directory, java.io.IOException failure
+            ) throws java.io.IOException {
+                if (failure != null) {
+                    throw failure;
+                }
+                Files.deleteIfExists(directory);
+                return java.nio.file.FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     private static void repairFabric(
