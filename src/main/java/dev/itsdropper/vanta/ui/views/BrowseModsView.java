@@ -4,6 +4,7 @@ import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.components.ModrinthBrowserToolbar;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -42,6 +43,7 @@ public class BrowseModsView extends VBox {
     private final HttpClient httpClient;
 
     private final TextField searchField;
+    private final ModrinthBrowserToolbar browserToolbar;
 
     private final VBox results;
     private final Label statusLabel;
@@ -129,54 +131,16 @@ public class BrowseModsView extends VBox {
         // SEARCH
         // =========================================================
 
-        searchField =
-                new TextField();
-
-        searchField.setPromptText(
-                Localization.text("browseMods.searchPrompt")
+        browserToolbar = new ModrinthBrowserToolbar(
+                Localization.text("browseMods.searchPrompt"),
+                this::search,
+                gridLayout -> {
+                    results.getStyleClass().removeAll("modrinth-grid-results", "modrinth-list-results");
+                    results.getStyleClass().add(gridLayout
+                            ? "modrinth-grid-results" : "modrinth-list-results");
+                }
         );
-        searchField.setMinWidth(0);
-        searchField.setAccessibleText(Localization.text("browseMods.searchAccessible"));
-
-        searchField.getStyleClass().add(
-                "create-field"
-        );
-
-        HBox.setHgrow(
-                searchField,
-                Priority.ALWAYS
-        );
-
-        Button searchButton =
-                new Button(
-                        Localization.text("common.search")
-                );
-
-        searchButton.getStyleClass().add(
-                "primary-button"
-        );
-        searchButton.setAccessibleText(Localization.text("browseMods.searchAccessible"));
-
-        searchButton.setOnAction(
-                event ->
-                        search()
-        );
-
-        searchField.setOnAction(
-                event ->
-                        search()
-        );
-
-        HBox searchBar =
-                new HBox(
-                        10,
-                        searchField,
-                        searchButton
-                );
-
-        searchBar.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        searchField = browserToolbar.getSearchField();
 
         // =========================================================
         // MOST DOWNLOADED TITLE
@@ -300,7 +264,7 @@ public class BrowseModsView extends VBox {
 
         getChildren().addAll(
                 header,
-                searchBar,
+                browserToolbar,
                 popularTitle,
                 popularScrollPane,
                 popularStatusLabel,
@@ -620,13 +584,18 @@ public class BrowseModsView extends VBox {
     // =============================================================
 
     private void search() {
-        String query = searchField.getText().trim();
+        browserToolbar.refresh();
+    }
+
+    private void search(ModrinthBrowserToolbar.SearchState state) {
+        String query = state.query();
         long requestId = ++searchRequestId;
 
         if (query.isBlank()) {
             showPopularSection();
             results.getChildren().clear();
             statusLabel.setText(Localization.text("browseMods.searchPromptHelp"));
+            browserToolbar.setTotalHits(0);
             return;
         }
 
@@ -634,33 +603,30 @@ public class BrowseModsView extends VBox {
         statusLabel.setText(Localization.text("common.searching"));
         results.getChildren().clear();
 
-        // First paint uses the same broad loader-only query as GlobalModsView.
-        // The exact-version query follows in the background and replaces these
-        // provisional results once Modrinth returns compatible projects.
         UiExecutor.shared().execute(() -> {
             try {
-                List<ModrinthProject> broad =
-                        modrinthService.searchModsFastBroad(instance, query);
+                dev.itsdropper.vanta.launcher.modrinth.ModrinthSearchResult response =
+                        modrinthService.searchModsPage(
+                                instance,
+                                query,
+                                state.index(),
+                                state.limit(),
+                                state.offset()
+                        );
+                List<ModrinthProject> projects =
+                        modrinthService.mapSearchHitsToProjects(response.getHits());
 
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
-                    showResults(broad, true);
+                    browserToolbar.setTotalHits(response.getTotalHits());
+                    showResults(projects, false);
                 });
-
-                List<ModrinthProject> compatible =
-                        modrinthService.searchModsFast(instance, query);
-
-                UiExecutor.shared().dispatchToUi(() -> {
-                    if (requestId != searchRequestId) return;
-                    showResults(compatible, false);
-                });
-            } catch (Throwable ex) {
-                ex.printStackTrace();
+            } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
                     if (results.getChildren().isEmpty()) {
-                        statusLabel.setText(ex.getMessage() != null
-                                ? ex.getMessage() : "Failed to search Modrinth.");
+                        statusLabel.setText(failure.getMessage() == null
+                                ? "Failed to search Modrinth." : failure.getMessage());
                     }
                 });
             }
