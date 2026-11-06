@@ -72,6 +72,10 @@ public class GlobalModsView extends VBox {
     private long searchRequestId;
     private long popularRequestId;
     private long loaderTagRequestId;
+    private long categoryTagRequestId;
+    private List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> categoryTags = List.of();
+    private final java.util.Set<String> selectedCategories = new java.util.LinkedHashSet<>();
+    private Button categoriesButton;
     private int searchOffset;
     private int searchTotalHits;
     private final ComboBox<String> sortBox;
@@ -157,12 +161,16 @@ public class GlobalModsView extends VBox {
         versionSearchField.setPrefHeight(42);
         versionSearchField.getStyleClass().add("create-field");
 
+        categoriesButton = new Button("Categories");
+        categoriesButton.getStyleClass().add("secondary-button");
+        categoriesButton.setOnAction(event -> showCategoryPicker());
         FlowPane filters = new FlowPane(
                 10, 8,
                 contentTypeBox,
                 loaderBox,
                 versionBox,
-                versionSearchField
+                versionSearchField,
+                categoriesButton
         );
         filters.setAlignment(Pos.CENTER_LEFT);
         filters.setMaxWidth(Double.MAX_VALUE);
@@ -170,7 +178,10 @@ public class GlobalModsView extends VBox {
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
             searchOffset = 0;
+            selectedCategories.clear();
+            updateCategoriesButton();
             loadLoaderTags(newValue);
+            loadCategoryTags(newValue);
             refreshForCurrentFilters();
         });
 
@@ -191,6 +202,7 @@ public class GlobalModsView extends VBox {
 
         if (!screenshotPreview) {
             loadLoaderTags(ModrinthContentType.MOD);
+            loadCategoryTags(ModrinthContentType.MOD);
             UiExecutor.shared().execute(() -> {
                 try {
                     List<String> versions = MinecraftVersionResolver.getAllVersions();
@@ -473,6 +485,89 @@ public class GlobalModsView extends VBox {
         } else {
             loadMostDownloadedMods();
         }
+    }
+
+    private void loadCategoryTags(ModrinthContentType contentType) {
+        long requestId = ++categoryTagRequestId;
+        UiExecutor.shared().execute(() -> {
+            try {
+                List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> tags =
+                        modrinthClient.getCategoryTags(contentType);
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId != categoryTagRequestId) return;
+                    categoryTags = tags == null ? List.of() : List.copyOf(tags);
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId == categoryTagRequestId) {
+                        statusLabel.setText("Could not load Modrinth categories: "
+                                + (failure.getMessage() == null ? "request failed" : failure.getMessage()));
+                    }
+                });
+            }
+        });
+    }
+
+    private void updateCategoriesButton() {
+        categoriesButton.setText(selectedCategories.isEmpty()
+                ? "Categories" : "Categories (" + selectedCategories.size() + ")");
+    }
+
+    private void showCategoryPicker() {
+        Popup popup = new Popup();
+        popup.setAutoHide(true);
+        popup.setAutoFix(true);
+        popup.setHideOnEscape(true);
+        VBox root = new VBox(10);
+        root.getStyleClass().add("modrinth-popup");
+        root.setPrefWidth(340);
+        Label title = new Label("Project categories");
+        title.getStyleClass().add("modrinth-popup-title");
+        VBox options = new VBox(6);
+        List<CheckBox> boxes = new ArrayList<>();
+        for (dev.itsdropper.vanta.launcher.modrinth.ModrinthTag tag : categoryTags) {
+            if (tag == null || tag.getName() == null || tag.getName().isBlank()) continue;
+            String id = tag.getName();
+            String label = java.util.Arrays.stream(id.split("[_-]"))
+                    .filter(part -> !part.isBlank())
+                    .map(part -> Character.toUpperCase(part.charAt(0)) + part.substring(1))
+                    .collect(java.util.stream.Collectors.joining(" "));
+            CheckBox box = new CheckBox(label);
+            box.setSelected(selectedCategories.contains(id));
+            box.getStyleClass().add("dialog-instance-checkbox");
+            box.setUserData(id);
+            boxes.add(box);
+            options.getChildren().add(box);
+        }
+        if (boxes.isEmpty()) {
+            options.getChildren().add(new Label("No categories available for this content type."));
+        }
+        ScrollPane scroll = new ScrollPane(options);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setPrefViewportHeight(300);
+        Button clear = new Button("Clear");
+        clear.getStyleClass().add("secondary-button");
+        Button apply = new Button("Apply filters");
+        apply.getStyleClass().add("primary-button");
+        HBox actions = new HBox(8, clear, apply);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        clear.setOnAction(event -> boxes.forEach(box -> box.setSelected(false)));
+        apply.setOnAction(event -> {
+            selectedCategories.clear();
+            for (CheckBox box : boxes) {
+                if (box.isSelected()) selectedCategories.add((String) box.getUserData());
+            }
+            updateCategoriesButton();
+            searchOffset = 0;
+            popup.hide();
+            refreshForCurrentFilters();
+        });
+        root.getChildren().addAll(title, scroll, actions);
+        ThemeManager.apply(root, ThemeManager.loadAccent());
+        popup.getContent().add(root);
+        javafx.geometry.Bounds bounds = categoriesButton.localToScreen(categoriesButton.getBoundsInLocal());
+        if (bounds != null) popup.show(categoriesButton, bounds.getMinX(), bounds.getMaxY() + 6);
     }
 
     private void loadLoaderTags(ModrinthContentType contentType) {
@@ -1161,7 +1256,7 @@ public class GlobalModsView extends VBox {
                                         contentTypeBox.getValue(),
                                         loader == null ? List.of() : List.of(loader),
                                         version == null ? List.of() : List.of(version),
-                                        List.of(),
+                                        List.copyOf(selectedCategories),
                                         switch (sortBox.getValue()) {
                                             case "Downloads" -> "downloads";
                                             case "Followers" -> "follows";
