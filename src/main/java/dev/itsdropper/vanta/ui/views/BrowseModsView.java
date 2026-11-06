@@ -111,7 +111,7 @@ public class BrowseModsView extends VBox {
         );
 
         PageHeader headerText = new PageHeader(
-                "Browse Mods",
+                Localization.text("browseMods.title"),
                 instance.getName()
                         + " • Minecraft "
                         + instance.getMinecraftVersion()
@@ -362,7 +362,7 @@ public class BrowseModsView extends VBox {
         popularStatusLabel.setText(
                 projects.size()
                         + (checkingCompatibility
-                            ? " popular mods • checking version compatibility..."
+                            ? " " + Localization.text("modrinth.popularModsChecking")
                             : " compatible popular mods.")
         );
     }
@@ -498,7 +498,7 @@ public class BrowseModsView extends VBox {
                         formatNumber(
                                 project.getDownloads()
                         )
-                                + " downloads"
+                                + " " + Localization.text("modrinth.downloadsLabel").replace("{count}", "")
                 );
 
         downloads.getStyleClass().add(
@@ -625,7 +625,7 @@ public class BrowseModsView extends VBox {
                     if (requestId != searchRequestId) return;
                     if (results.getChildren().isEmpty()) {
                         statusLabel.setText(failure.getMessage() == null
-                                ? "Failed to search Modrinth." : failure.getMessage());
+                                ? Localization.text("modrinth.searchFailed") : failure.getMessage());
                     }
                 });
             }
@@ -753,12 +753,10 @@ public class BrowseModsView extends VBox {
             results.getChildren().add(createSizedProjectCard(project));
         }
 
-        statusLabel.setText(
-                projects.size()
-                        + (checkingCompatibility
-                            ? " results • checking Minecraft version compatibility..."
-                            : " compatible projects found.")
-        );
+        statusLabel.setText(checkingCompatibility
+                ? Localization.text("modrinth.resultsFound").replace("{count}", Integer.toString(projects.size()))
+                        + " • " + Localization.text("modrinth.compatibilityChecking")
+                : Localization.text("modrinth.compatibleProjectsFound").replace("{count}", Integer.toString(projects.size())));
     }
 
     private VBox createSizedProjectCard(ModrinthProject project) {
@@ -885,7 +883,8 @@ public class BrowseModsView extends VBox {
         author.getStyleClass().add("instance-loader");
 
         Label description =
-                new Label(project.getDescription() == null ? "No description." : project.getDescription());
+                new Label(project.getDescription() == null
+                        ? Localization.text("modrinth.noDescription") : project.getDescription());
         description.setWrapText(true);
         description.setMaxWidth(650);
         description.setMaxHeight(42);
@@ -919,9 +918,9 @@ public class BrowseModsView extends VBox {
         }
 
         Label metadata = new Label(
-                formatNumber(project.getDownloads()) + " downloads  •  "
-                        + formatNumber(project.getFollows()) + " followers  •  "
-                        + relativeUpdateTime(project.getDateModified())
+                Localization.text("modrinth.downloadsLabel").replace("{count}", formatNumber(project.getDownloads()))
+                        + "  •  " + Localization.text("modrinth.followersLabel").replace("{count}", formatNumber(project.getFollows()))
+                        + "  •  " + relativeUpdateTime(project.getDateModified())
         );
         metadata.getStyleClass().add("instance-loader");
 
@@ -1120,26 +1119,26 @@ public class BrowseModsView extends VBox {
     private String formatEnvironment(String client, String server) {
         List<String> values = new java.util.ArrayList<>();
         if (client != null && !client.isBlank() && !"unknown".equalsIgnoreCase(client)) {
-            values.add("Client " + client.toLowerCase(java.util.Locale.ROOT));
+            values.add(Localization.text("modrinth.environmentClient").replace("{value}", client.toLowerCase(java.util.Locale.ROOT)));
         }
         if (server != null && !server.isBlank() && !"unknown".equalsIgnoreCase(server)) {
-            values.add("Server " + server.toLowerCase(java.util.Locale.ROOT));
+            values.add(Localization.text("modrinth.environmentServer").replace("{value}", server.toLowerCase(java.util.Locale.ROOT)));
         }
         return String.join(" / ", values);
     }
 
     private String relativeUpdateTime(String value) {
-        if (value == null || value.isBlank()) return "update date unavailable";
+        if (value == null || value.isBlank()) return Localization.text("modrinth.updateUnavailable");
         try {
             long days = Math.max(0, java.time.Duration.between(
                     java.time.Instant.parse(value), java.time.Instant.now()).toDays());
-            if (days == 0) return "updated today";
-            if (days == 1) return "updated yesterday";
-            if (days < 30) return "updated " + days + " days ago";
-            if (days < 365) return "updated " + (days / 30) + " months ago";
-            return "updated " + (days / 365) + " years ago";
+            if (days == 0) return Localization.text("modrinth.updatedToday");
+            if (days == 1) return Localization.text("modrinth.updatedYesterday");
+            if (days < 30) return Localization.text("modrinth.updatedDaysAgo").replace("{count}", Long.toString(days));
+            if (days < 365) return Localization.text("modrinth.updatedMonthsAgo").replace("{count}", Long.toString(days / 30));
+            return Localization.text("modrinth.updatedYearsAgo").replace("{count}", Long.toString(days / 365));
         } catch (java.time.DateTimeException ignored) {
-            return "update date unavailable";
+            return Localization.text("modrinth.updateUnavailable");
         }
     }
 
