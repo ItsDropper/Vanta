@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
+import dev.itsdropper.vanta.launcher.model.Instance;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
