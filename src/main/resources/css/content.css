@@ -543,7 +543,7 @@
     -fx-spacing: 8px;
 }
 .global-mods-page .modrinth-filter-search {
-    -fx-background-color: -vantasurface-raised;
+    -fx-background-color: -vantasurfaceraised;
     -fx-background-radius: 7px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 7px;
