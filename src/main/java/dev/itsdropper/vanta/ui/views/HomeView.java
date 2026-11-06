@@ -40,6 +40,7 @@ import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
+import dev.itsdropper.vanta.ui.components.LanguagePreferenceControl;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -124,6 +125,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 createInstanceButton
         );
 
+        LanguagePreferenceControl languagePreferences = new LanguagePreferenceControl();
         VBox featuredSection = createFeaturedSection();
         VBox recentSection = createRecentInstancesSection();
         VBox serverCard = createRecentServersCard();
@@ -131,6 +133,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         VBox contentBox = new VBox(
                 22,
                 header,
+                languagePreferences,
                 featuredSection,
                 recentSection,
                 serverCard
