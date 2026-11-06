@@ -6,6 +6,7 @@ import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.ui.VantaUI;
+import dev.itsdropper.vanta.ui.Localization;
 
 public class AccountCard extends VBox {
 
@@ -22,13 +23,13 @@ public class AccountCard extends VBox {
         getStyleClass().add("info-card");
         VantaUI.applySurface(this, VantaUI.SurfaceRole.CARD);
 
-        Label title = new Label("PROFILE");
+        Label title = new Label(Localization.text("accountCard.profile"));
         title.getStyleClass().add("card-title");
 
-        nameLabel = new Label("No account connected");
+        nameLabel = new Label(Localization.text("accountCard.none"));
         nameLabel.getStyleClass().add("card-main");
 
-        statusLabel = new Label("● Disconnected");
+        statusLabel = new Label(Localization.text("accountCard.disconnected"));
         statusLabel.getStyleClass().add("disconnected-label");
 
         getChildren().addAll(
@@ -52,7 +53,7 @@ public class AccountCard extends VBox {
         );
 
         statusLabel.setText(
-                "● Connected"
+                Localization.text("accountCard.connected")
         );
 
         statusLabel.getStyleClass().remove(
@@ -72,11 +73,11 @@ public class AccountCard extends VBox {
     public void setDisconnected() {
 
         nameLabel.setText(
-                "No account connected"
+                Localization.text("accountCard.none")
         );
 
         statusLabel.setText(
-                "● Disconnected"
+                Localization.text("accountCard.disconnected")
         );
 
         statusLabel.getStyleClass().remove(
@@ -96,11 +97,11 @@ public class AccountCard extends VBox {
     public void setError() {
 
         nameLabel.setText(
-                "Account unavailable"
+                Localization.text("accountCard.unavailable")
         );
 
         statusLabel.setText(
-                "● Authentication error"
+                Localization.text("accountCard.authError")
         );
 
         statusLabel.getStyleClass().remove(
