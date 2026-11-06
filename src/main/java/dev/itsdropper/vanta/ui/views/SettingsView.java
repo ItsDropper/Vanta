@@ -31,6 +31,7 @@ import dev.itsdropper.vanta.launcher.update.UpdateInfo;
 import dev.itsdropper.vanta.launcher.update.UpdateService;
 import dev.itsdropper.vanta.ui.DebugAccess;
 import dev.itsdropper.vanta.ui.components.NotificationManager;
+import dev.itsdropper.vanta.ui.components.LanguagePreferenceControl;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.ThemeManager;
@@ -714,6 +715,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 "General",
                 "Launcher behavior and interaction preferences."
         );
+
+        LanguagePreferenceControl languagePreferences = new LanguagePreferenceControl();
 
         VBox behavior = card(
                 "Launcher behavior",
