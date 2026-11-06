@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Insets;
@@ -100,7 +101,7 @@ public class LoginPopup {
             closeButton.getStyleClass().add(
                     "login-title-bar-close"
             );
-            closeButton.setAccessibleText("Close Microsoft sign-in window");
+            closeButton.setAccessibleText(Localization.text("login.close"));
 
             closeButton.setOnAction(event ->
                     stage.close()
@@ -159,7 +160,7 @@ public class LoginPopup {
 
             Label title =
                     new Label(
-                            "Connect your Microsoft account"
+                            Localization.text("login.title")
                     );
 
             title.getStyleClass().add(
@@ -168,7 +169,7 @@ public class LoginPopup {
 
             Label subtitle =
                     new Label(
-                            "Sign in with Microsoft to play Minecraft."
+                            Localization.text("login.subtitle")
                     );
 
             subtitle.getStyleClass().add(
@@ -179,12 +180,12 @@ public class LoginPopup {
             // CODE
             // -----------------------------------------------------
 
-            Label step = new Label("STEP 1 OF 2  •  MICROSOFT");
+            Label step = new Label(Localization.text("login.step"));
             step.getStyleClass().add("login-step");
 
             Label instruction =
                     new Label(
-                            "Enter the code below on the Microsoft verification page."
+                            Localization.text("login.instruction")
                     );
 
             instruction.getStyleClass().add(
@@ -195,7 +196,7 @@ public class LoginPopup {
                     new TextField(code);
 
             codeField.setEditable(false);
-            codeField.setAccessibleText("Microsoft verification code. Read only.");
+            codeField.setAccessibleText(Localization.text("login.codeAccessible"));
 
             codeField.setFocusTraversable(false);
 
@@ -212,12 +213,12 @@ public class LoginPopup {
             // -----------------------------------------------------
 
             Button copyButton =
-                    new Button("COPY CODE");
+                    new Button(Localization.text("login.copy"));
 
             copyButton.getStyleClass().add(
                     "secondary-button"
             );
-            copyButton.setAccessibleText("Copy Microsoft verification code");
+            copyButton.setAccessibleText(Localization.text("login.copyAccessible"));
 
             copyButton.setMaxWidth(
                     Double.MAX_VALUE
@@ -236,7 +237,7 @@ public class LoginPopup {
                 clipboard.setContent(content);
 
                 copyButton.setText(
-                        "COPIED"
+                        Localization.text("login.copied")
                 );
 
                 PauseTransition pause =
@@ -246,7 +247,7 @@ public class LoginPopup {
 
                 pause.setOnFinished(
                         e -> copyButton.setText(
-                                "COPY CODE"
+                                Localization.text("login.copy")
                         )
                 );
 
@@ -259,13 +260,13 @@ public class LoginPopup {
 
             Button openButton =
                     new Button(
-                            "OPEN MICROSOFT LOGIN"
+                            Localization.text("login.open")
                     );
 
             openButton.getStyleClass().add(
                     "primary-button"
             );
-            openButton.setAccessibleText("Open the Microsoft device sign-in page in your browser");
+            openButton.setAccessibleText(Localization.text("login.openAccessible"));
 
             openButton.setMaxWidth(
                     Double.MAX_VALUE
@@ -279,13 +280,13 @@ public class LoginPopup {
 
             Label status =
                     new Label(
-                            "Waiting for Microsoft authentication..."
+                            Localization.text("login.waiting")
                     );
 
             status.getStyleClass().add(
                     "login-status"
             );
-            status.setAccessibleText("Microsoft authentication status");
+            status.setAccessibleText(Localization.text("login.statusAccessible"));
 
             // -----------------------------------------------------
             // CONTENT
