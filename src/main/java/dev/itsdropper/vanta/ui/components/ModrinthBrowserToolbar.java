@@ -87,7 +87,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         Label viewLabel = new Label("View:");
         viewLabel.getStyleClass().add("modrinth-control-label");
         limitBox.getItems().setAll(5, 10, 15, 20, 50, 100);
-        limitBox.setValue(10);
+        limitBox.setValue(20);
         limitBox.getStyleClass().addAll("create-combo", "modrinth-small-combo");
         limitBox.setPrefWidth(82);
 
@@ -185,7 +185,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         return new SearchState(
                 searchField.getText() == null ? "" : searchField.getText().trim(),
                 selectedIndex(),
-                limitBox.getValue() == null ? 10 : limitBox.getValue(),
+                limitBox.getValue() == null ? 20 : limitBox.getValue(),
                 offset
         );
     }
@@ -279,8 +279,10 @@ public final class ModrinthBrowserToolbar extends VBox {
         int pages = pageCount();
         currentPageButton.setText(Integer.toString(page));
         nextPageButton.setText(page < pages ? Integer.toString(page + 1) : "›");
+        currentPageButton.setText(Integer.toString(page));
         previousButton.setDisable(page <= 1);
         currentPageButton.setDisable(true);
+        currentPageButton.getStyleClass().add("modrinth-current-page");
         nextPageButton.setDisable(page >= pages);
         ellipsisButton.setDisable(pages <= 3);
         lastPageButton.setText(Integer.toString(pages));
