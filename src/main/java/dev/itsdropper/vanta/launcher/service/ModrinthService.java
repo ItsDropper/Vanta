@@ -17,6 +17,35 @@ public class ModrinthService {
     private final ModrinthRepairService repair = new ModrinthRepairService(client, installedModScanner, catalog, dependencies, installer);
 
     public List<ModrinthProject> searchMods(String query) throws IOException, InterruptedException { return catalog.searchMods(query); }
+
+    public ModrinthSearchResult searchPage(
+            String query,
+            ModrinthContentType contentType,
+            List<String> loaders,
+            List<String> versions,
+            List<String> categories,
+            String index,
+            int limit,
+            int offset
+    ) throws IOException, InterruptedException {
+        return client.searchPage(
+                query, contentType, loaders, versions, categories, index, limit, offset
+        );
+    }
+
+    public List<ModrinthTag> getGameVersionTags() throws IOException, InterruptedException {
+        return client.getGameVersionTags();
+    }
+
+    public List<ModrinthTag> getLoaderTags(ModrinthContentType contentType)
+            throws IOException, InterruptedException {
+        return client.getLoaderTags(contentType);
+    }
+
+    public List<ModrinthTag> getCategoryTags(ModrinthContentType contentType)
+            throws IOException, InterruptedException {
+        return client.getCategoryTags(contentType);
+    }
     public List<ModrinthProject> searchMods(Instance instance, String query) throws IOException, InterruptedException { return catalog.searchMods(instance, query); }
 
     /**
