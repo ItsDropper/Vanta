@@ -269,6 +269,14 @@ public final class LauncherSettings {
     public static void setAutoRepairOnLaunchEnabled(boolean value) { setBoolean("autoRepairOnLaunch", value); }
     public static boolean isShowModrinthDownloadsEnabled() { return getBoolean("showModrinthDownloads", true); }
     public static void setShowModrinthDownloadsEnabled(boolean value) { setBoolean("showModrinthDownloads", value); }
+
+    public static boolean isModrinthGridLayoutEnabled() {
+        return getBoolean("modrinthGridLayout", false);
+    }
+
+    public static void setModrinthGridLayoutEnabled(boolean value) {
+        setBoolean("modrinthGridLayout", value);
+    }
     public static boolean isConfirmInstanceDeletionEnabled() { return getBoolean("confirmInstanceDeletion", true); }
     public static void setConfirmInstanceDeletionEnabled(boolean value) { setBoolean("confirmInstanceDeletion", value); }
     public static int getStateScanWorkers() {
