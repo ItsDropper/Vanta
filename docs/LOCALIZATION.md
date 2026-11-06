@@ -46,8 +46,8 @@ locale suffix convention; for example, `pt-PT` maps to
 2. Add `messages_<locale>.properties` under
    `src/main/resources/dev/itsdropper/vanta/i18n/`.
 3. Add the locale to `LocalizationTest` coverage through the supported-language
-   catalog; the test verifies all required language-preference and Settings-navigation
-   strings, Settings navigation, and the initial Overview dashboard strings exist.
+   catalog; the test verifies all required language-preference, Settings-navigation, and
+   initial Overview dashboard strings exist.
 4. Translate UI strings by stable semantic keys, not by using English UI text as
    a lookup key.
 
