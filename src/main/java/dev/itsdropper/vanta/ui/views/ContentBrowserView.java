@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
@@ -132,13 +133,13 @@ public class ContentBrowserView extends VBox {
 
         Button backButton =
                 new Button(
-                        "← BACK"
+                        Localization.text("common.backArrow")
                 );
 
         backButton.getStyleClass().add(
                 "secondary-button"
         );
-        backButton.setAccessibleText("Return to the previous page");
+        backButton.setAccessibleText(Localization.text("common.returnPrevious"));
 
 
         backButton.setOnAction(
@@ -148,7 +149,7 @@ public class ContentBrowserView extends VBox {
 
         Label title =
                 new Label(
-                        "Browse Content"
+                        Localization.text("contentBrowser.title")
                 );
 
         title.getStyleClass().add(
@@ -181,17 +182,17 @@ public class ContentBrowserView extends VBox {
 
         modsButton =
                 new Button(
-                        "MODS"
+                        Localization.text("contentBrowser.mods")
                 );
 
         packsButton =
                 new Button(
-                        "PACKS"
+                        Localization.text("contentBrowser.packs")
                 );
 
         shadersButton =
                 new Button(
-                        "SHADERS"
+                        Localization.text("contentBrowser.shaders")
                 );
 
         modsButton.setOnAction(
@@ -242,10 +243,10 @@ public class ContentBrowserView extends VBox {
                 new TextField();
 
         searchField.setPromptText(
-                "Search Modrinth projects..."
+                Localization.text("contentBrowser.searchPrompt")
         );
         searchField.setMinWidth(0);
-        searchField.setAccessibleText("Search compatible Modrinth projects");
+        searchField.setAccessibleText(Localization.text("contentBrowser.searchAccessible"));
 
 
         searchField.getStyleClass().add(
@@ -259,13 +260,13 @@ public class ContentBrowserView extends VBox {
 
         Button searchButton =
                 new Button(
-                        "SEARCH"
+                        Localization.text("common.search")
                 );
 
         searchButton.getStyleClass().add(
                 "primary-button"
         );
-        searchButton.setAccessibleText("Search Modrinth");
+        searchButton.setAccessibleText(Localization.text("contentBrowser.searchButton"));
         searchButton.setTooltip(new javafx.scene.control.Tooltip("Search compatible projects"));
 
 
@@ -296,7 +297,7 @@ public class ContentBrowserView extends VBox {
 
         popularTitle =
                 new Label(
-                        "MOST DOWNLOADED"
+                        Localization.text("common.mostDownloaded")
                 );
 
         popularTitle.getStyleClass().add(
@@ -537,7 +538,7 @@ public class ContentBrowserView extends VBox {
         ModrinthContentType requestedType = contentType;
         long requestId = ++popularRequestId;
         popularStatusLabel.setText(
-                "Loading popular " + requestedType.getDisplayName().toLowerCase() + "s..."
+                Localization.text("contentBrowser.loadingPopularPrefix") + requestedType.getDisplayName().toLowerCase() + "s..."
         );
 
         UiExecutor.shared().execute(() -> {
@@ -556,7 +557,7 @@ public class ContentBrowserView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != popularRequestId || requestedType != contentType) return;
                     popularStatusLabel.setText(
-                            "Could not load popular " + requestedType.getDisplayName().toLowerCase()
+                            Localization.text("contentBrowser.popularFailedPrefix") + requestedType.getDisplayName().toLowerCase()
                                     + "s. Check your connection and try again."
                     );
                 });
@@ -580,7 +581,7 @@ public class ContentBrowserView extends VBox {
                 || projects.isEmpty()) {
 
             popularStatusLabel.setText(
-                    "No popular "
+                    Localization.text("contentBrowser.noPopularPrefix")
                             + contentType
                             .getDisplayName()
                             .toLowerCase()
@@ -626,7 +627,7 @@ public class ContentBrowserView extends VBox {
             showPopularSection();
             results.getChildren().clear();
             statusLabel.setText(
-                    "Search Modrinth for compatible " + contentType.getDisplayName().toLowerCase() + "s."
+                    Localization.text("contentBrowser.searchCompatiblePrefix") + contentType.getDisplayName().toLowerCase() + "s."
             );
             return;
         }
@@ -634,7 +635,7 @@ public class ContentBrowserView extends VBox {
         hidePopularSection();
         ModrinthContentType requestedType = contentType;
         long requestId = ++searchRequestId;
-        statusLabel.setText("Searching Modrinth...");
+        statusLabel.setText(Localization.text("common.searching"));
         results.getChildren().clear();
 
         UiExecutor.shared().execute(() -> {
@@ -682,7 +683,7 @@ public class ContentBrowserView extends VBox {
                 || projects.isEmpty()) {
 
             statusLabel.setText(
-                    "No compatible "
+                    Localization.text("contentBrowser.noCompatiblePrefix")
                             + contentType
                             .getDisplayName()
                             .toLowerCase()
@@ -796,7 +797,7 @@ public class ContentBrowserView extends VBox {
 
         Label metadata =
                 new Label(
-                        "Modrinth • "
+                        Localization.text("common.modrinthPrefix")
                                 + formatDownloads(
                                 project.getDownloads()
                         )
@@ -840,7 +841,7 @@ public class ContentBrowserView extends VBox {
 
             Button installButton =
                     new Button(
-                            "INSTALL"
+                            Localization.text("common.install")
                     );
 
             installButton.getStyleClass().add(
@@ -1122,12 +1123,12 @@ public class ContentBrowserView extends VBox {
         );
 
         button.setText(
-                "INSTALLING..."
+                Localization.text("common.installing")
         );
 
         ModrinthContentType installType = contentType;
         statusLabel.setText(
-                "Installing "
+                Localization.text("common.installingPrefix")
                         + project.getTitle()
                         + "..."
         );
@@ -1175,7 +1176,7 @@ public class ContentBrowserView extends VBox {
                         UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setText(
-                                    "INSTALLED"
+                                    Localization.text("common.installed")
                             );
 
                             statusLabel.setText(
@@ -1195,7 +1196,7 @@ public class ContentBrowserView extends VBox {
                             );
 
                             button.setText(
-                                    "INSTALL"
+                                    Localization.text("common.install")
                             );
 
                             statusLabel.setText(
