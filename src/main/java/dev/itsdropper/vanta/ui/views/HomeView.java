@@ -106,7 +106,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         launchStatusLabel = new Label(Localization.text("home.readyToPlay"));
         launchStatusLabel.getStyleClass().addAll("home-launch-indicator", "home-status-ready");
-        launchStatusLabel.setAccessibleText("Minecraft launch status: ready to play");
+        launchStatusLabel.setAccessibleText(Localization.text("home.launchStatusReady"));
 
         Button createInstanceButton = new Button(Localization.text("home.newInstance"));
         createInstanceButton.getStyleClass().add("primary-button");
@@ -439,7 +439,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         description.setMaxWidth(480);
         description.getStyleClass().add("home-load-error-description");
 
-        Button retry = new Button("TRY AGAIN");
+        Button retry = new Button(Localization.text("common.retry"));
         retry.getStyleClass().add("secondary-button");
         retry.setMinHeight(38);
         retry.setAccessibleText(Localization.text("home.retryInstancesAccessible"));
