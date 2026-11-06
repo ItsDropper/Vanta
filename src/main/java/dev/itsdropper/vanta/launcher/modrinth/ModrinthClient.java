@@ -11,6 +11,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.ArrayList;
 
 public class ModrinthClient {
 
@@ -72,62 +73,109 @@ public class ModrinthClient {
             String loader,
             String minecraftVersion
     ) throws IOException, InterruptedException {
-
-        if (query == null || query.isBlank()) {
-
-            throw new IllegalArgumentException(
-                    "Search query cannot be empty."
-            );
-        }
-
-        if (contentType == null) {
-            contentType = ModrinthContentType.MOD;
-        }
-
-        String encodedQuery =
-                encode(query);
-
-        String facets =
-                buildFacets(
-                        contentType,
-                        loader,
-                        minecraftVersion
-                );
-
-        URI uri =
-                URI.create(
-                        API_URL
-                                + "/search?query="
-                                + encodedQuery
-                                + "&facets="
-                                + encode(facets)
-                );
-
-        HttpRequest request =
-                HttpRequest.newBuilder(uri)
-                        .timeout(
-                                Duration.ofSeconds(20)
-                        )
-                        .GET()
-                        .header(
-                                "User-Agent",
-                                "VantaLauncher/1.0"
-                        )
-                        .build();
-
-        HttpResponse<String> response =
-                httpClient.send(
-                        request,
-                        HttpResponse.BodyHandlers.ofString()
-                );
-
-        checkResponse(response);
-
-        ModrinthSearchResult result = mapper.readValue(
-                response.body(),
-                ModrinthSearchResult.class
+        List<String> loaders = loader == null || loader.isBlank()
+                ? List.of() : List.of(ModrinthLoaderIds.normalize(loader));
+        List<String> versions = minecraftVersion == null || minecraftVersion.isBlank()
+                ? List.of() : List.of(minecraftVersion);
+        ModrinthSearchResult result = searchPage(
+                query, contentType, loaders, versions, List.of(),
+                "relevance", 10, 0
         );
         return filterLoaderVersionCompatibility(result, contentType, loader, minecraftVersion);
+    }
+
+    /**
+     * Full Modrinth search endpoint. Each facet group is OR'd internally and
+     * groups are AND'd by Modrinth. Search results retain the server's total_hits
+     * so the UI can calculate real pagination rather than guessing from page size.
+     */
+    public ModrinthSearchResult searchPage(
+            String query,
+            ModrinthContentType contentType,
+            List<String> loaders,
+            List<String> versions,
+            List<String> categories,
+            String index,
+            int limit,
+            int offset
+    ) throws IOException, InterruptedException {
+        if (contentType == null) contentType = ModrinthContentType.MOD;
+        if (limit < 1 || limit > 100) {
+            throw new IllegalArgumentException("Modrinth search limit must be between 1 and 100.");
+        }
+        if (offset < 0) {
+            throw new IllegalArgumentException("Modrinth search offset cannot be negative.");
+        }
+        String normalizedIndex = index == null || index.isBlank() ? "relevance" : index;
+        if (!List.of("relevance", "downloads", "follows", "newest", "updated").contains(normalizedIndex)) {
+            throw new IllegalArgumentException("Unsupported Modrinth search index: " + normalizedIndex);
+        }
+
+        StringBuilder url = new StringBuilder(API_URL).append("/search?");
+        if (query != null && !query.isBlank()) {
+            url.append("query=").append(encode(query.trim())).append('&');
+        }
+        url.append("facets=").append(encode(buildFacets(
+                contentType,
+                loaders == null ? List.of() : loaders,
+                versions == null ? List.of() : versions,
+                categories == null ? List.of() : categories
+        )));
+        url.append("&index=").append(encode(normalizedIndex));
+        url.append("&limit=").append(limit);
+        url.append("&offset=").append(offset);
+
+        HttpRequest request = HttpRequest.newBuilder(URI.create(url.toString()))
+                .timeout(Duration.ofSeconds(20))
+                .GET()
+                .header("User-Agent", "VantaLauncher/1.0")
+                .build();
+        HttpResponse<String> response = httpClient.send(
+                request, HttpResponse.BodyHandlers.ofString()
+        );
+        checkResponse(response);
+        return mapper.readValue(response.body(), ModrinthSearchResult.class);
+    }
+
+    private static final java.util.Map<String, List<ModrinthTag>> TAG_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    public List<ModrinthTag> getGameVersionTags() throws IOException, InterruptedException {
+        return getTags("game_version");
+    }
+
+    public List<ModrinthTag> getLoaderTags() throws IOException, InterruptedException {
+        return getTags("loader");
+    }
+
+    public List<ModrinthTag> getCategoryTags() throws IOException, InterruptedException {
+        return getTags("category");
+    }
+
+    private List<ModrinthTag> getTags(String tagType) throws IOException, InterruptedException {
+        List<ModrinthTag> cached = TAG_CACHE.get(tagType);
+        if (cached != null) return cached;
+        synchronized (TAG_CACHE) {
+            cached = TAG_CACHE.get(tagType);
+            if (cached != null) return cached;
+            URI uri = URI.create(API_URL + "/tag/" + tagType);
+            HttpRequest request = HttpRequest.newBuilder(uri)
+                    .timeout(Duration.ofSeconds(20))
+                    .GET()
+                    .header("User-Agent", "VantaLauncher/1.0")
+                    .build();
+            HttpResponse<String> response = httpClient.send(
+                    request, HttpResponse.BodyHandlers.ofString()
+            );
+            checkResponse(response);
+            List<ModrinthTag> tags = mapper.readValue(
+                    response.body(),
+                    mapper.getTypeFactory().constructCollectionType(List.class, ModrinthTag.class)
+            );
+            cached = List.copyOf(tags);
+            TAG_CACHE.put(tagType, cached);
+            return cached;
+        }
     }
 
     // =============================================================
@@ -156,12 +204,12 @@ public class ModrinthClient {
             contentType = ModrinthContentType.MOD;
         }
 
-        String facets =
-                buildFacets(
-                        contentType,
-                        loader,
-                        minecraftVersion
-                );
+        String facets = buildFacets(
+                contentType,
+                loader == null || loader.isBlank() ? List.of() : List.of(loader),
+                minecraftVersion == null || minecraftVersion.isBlank() ? List.of() : List.of(minecraftVersion),
+                List.of()
+        );
 
         URI uri =
                 URI.create(
@@ -246,59 +294,43 @@ public class ModrinthClient {
 
     private String buildFacets(
             ModrinthContentType contentType,
-            String loader,
-            String minecraftVersion
+            List<String> loaders,
+            List<String> versions,
+            List<String> categories
     ) {
+        List<List<String>> groups = new java.util.ArrayList<>();
+        groups.add(List.of("project_type:" + contentType.getApiValue()));
+        addFacetGroup(groups, "categories", loaders);
+        addFacetGroup(groups, "versions", versions);
+        addFacetGroup(groups, "categories", categories);
 
-        StringBuilder facets =
-                new StringBuilder(
-                        "[[\"project_type:"
-                                + contentType.getApiValue()
-                                + "\"]"
-                );
-
-        if (loader != null
-                && !loader.isBlank()
-                && contentType == ModrinthContentType.MOD
-                && !loader.equalsIgnoreCase("vanilla")
-                && ModrinthLoaderIds.supportsSearchFacet(loader)) {
-
-            facets.append(
-                    ",[\"categories:"
-            );
-
-            facets.append(
-                    escapeFacetValue(ModrinthLoaderIds.normalize(loader))
-            );
-
-            facets.append(
-                    "\"]"
-            );
+        StringBuilder json = new StringBuilder("[");
+        for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
+            if (groupIndex > 0) json.append(',');
+            json.append('[');
+            List<String> group = groups.get(groupIndex);
+            for (int valueIndex = 0; valueIndex < group.size(); valueIndex++) {
+                if (valueIndex > 0) json.append(',');
+                json.append('"').append(escapeFacetValue(group.get(valueIndex))).append('"');
+            }
+            json.append(']');
         }
+        return json.append(']').toString();
+    }
 
-        if (minecraftVersion != null
-                && !minecraftVersion.isBlank()) {
-
-            facets.append(
-                    ",[\"versions:"
-            );
-
-            facets.append(
-                    escapeFacetValue(
-                            minecraftVersion
-                    )
-            );
-
-            facets.append(
-                    "\"]"
-            );
-        }
-
-        facets.append(
-                "]"
-        );
-
-        return facets.toString();
+    private void addFacetGroup(
+            List<List<String>> groups,
+            String facet,
+            List<String> values
+    ) {
+        if (values == null || values.isEmpty()) return;
+        List<String> normalized = values.stream()
+                .filter(value -> value != null && !value.isBlank())
+                .map(value -> facet + ":" + (facet.equals("categories")
+                        ? ModrinthLoaderIds.normalize(value) : value.trim()))
+                .distinct()
+                .toList();
+        if (!normalized.isEmpty()) groups.add(normalized);
     }
 
     private String escapeFacetValue(
