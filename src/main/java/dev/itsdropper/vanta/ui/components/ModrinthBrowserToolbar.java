@@ -203,6 +203,10 @@ public final class ModrinthBrowserToolbar extends VBox {
         return gridLayout;
     }
 
+    public int getTotalHits() {
+        return totalHits;
+    }
+
     public void setTotalHits(int totalHits) {
         this.totalHits = Math.max(0, totalHits);
         int maxOffset = Math.max(0, (pageCount() - 1) * getState().limit());
