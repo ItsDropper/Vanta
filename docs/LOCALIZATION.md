@@ -30,6 +30,8 @@ locale suffix convention; for example, `pt-PT` maps to
   application startup, before launcher views are constructed.
 - `Localization.text(key)` is the single lookup entry point for UI code.
 - `LanguagePreferenceControl` is shared by Overview and Settings → General.
+- The Overview dashboard's primary headings, loading states, and instance-creation
+  affordances are localized.
 - Settings navigation labels, category headings, compact navigation, and search
   affordances use localized resource keys while retaining stable internal section IDs.
 - Changing the preference never mutates the active bundle in a running scene.
@@ -45,7 +47,7 @@ locale suffix convention; for example, `pt-PT` maps to
    `src/main/resources/dev/itsdropper/vanta/i18n/`.
 3. Add the locale to `LocalizationTest` coverage through the supported-language
    catalog; the test verifies all required language-preference and Settings-navigation
-   strings exist.
+   strings, Settings navigation, and the initial Overview dashboard strings exist.
 4. Translate UI strings by stable semantic keys, not by using English UI text as
    a lookup key.
 
@@ -62,7 +64,8 @@ locale suffix convention; for example, `pt-PT` maps to
   officially defined.
 - Avoid machine-translating technical terms without review by a fluent speaker.
 
-The initial increments localize the language preference component and Settings
-navigation, and establish the catalog and persistence lifecycle. Settings page
-content and the remaining launcher surfaces are still English and must be migrated
+The initial increments localize the language preference component, Settings
+navigation, and primary Overview dashboard labels, and establish the catalog and
+persistence lifecycle. Settings page content, secondary Overview states, and the
+remaining launcher surfaces are still English and must be migrated
 in separate, reviewable batches; this is not yet full-launcher localization.
