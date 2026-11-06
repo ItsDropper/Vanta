@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.geometry.Insets;
@@ -73,7 +74,7 @@ public class ModpackBrowserView extends VBox {
         // =========================================================
 
         Label title = new Label(
-                "Browse Modpacks"
+                Localization.text("modpackBrowser.title")
         );
 
         title.getStyleClass().add(
@@ -81,7 +82,7 @@ public class ModpackBrowserView extends VBox {
         );
 
         Label subtitle = new Label(
-                "Modrinth • Minecraft "
+                Localization.text("modpackBrowser.modrinthMinecraftPrefix")
                         + minecraftVersion
         );
 
@@ -96,13 +97,13 @@ public class ModpackBrowserView extends VBox {
         );
 
         Button backButton = new Button(
-                "BACK"
+                Localization.text("common.back")
         );
 
         backButton.getStyleClass().add(
                 "secondary-button"
         );
-        backButton.setAccessibleText("Return to instance creation");
+        backButton.setAccessibleText(Localization.text("modpackBrowser.backAccessible"));
 
         backButton.setOnAction(
                 event -> onBack.run()
@@ -122,7 +123,7 @@ public class ModpackBrowserView extends VBox {
         searchField = new TextField();
 
         searchField.setPromptText(
-                "Search Modrinth modpacks..."
+                Localization.text("modpackBrowser.searchPrompt")
         );
         searchField.setMinWidth(0);
 
@@ -136,15 +137,15 @@ public class ModpackBrowserView extends VBox {
         );
 
         Button searchButton = new Button(
-                "SEARCH"
+                Localization.text("common.search")
         );
 
         searchButton.getStyleClass().add(
                 "primary-button"
         );
-        searchButton.setAccessibleText("Search Modrinth modpacks");
+        searchButton.setAccessibleText(Localization.text("modpackBrowser.searchAccessible"));
         searchButton.setTooltip(new javafx.scene.control.Tooltip("Search modpacks compatible with Minecraft " + minecraftVersion));
-        searchField.setAccessibleText("Search Modrinth modpacks");
+        searchField.setAccessibleText(Localization.text("modpackBrowser.searchAccessible"));
 
         searchButton.setOnAction(
                 event -> search()
@@ -206,7 +207,7 @@ public class ModpackBrowserView extends VBox {
         // =========================================================
 
         statusLabel = new Label(
-                "Loading popular modpacks..."
+                Localization.text("modpackBrowser.loading")
         );
 
         statusLabel.getStyleClass().add(
@@ -234,7 +235,7 @@ public class ModpackBrowserView extends VBox {
     private void loadPopular() {
         long requestId = ++catalogRequestId;
         ++searchRequestId;
-        statusLabel.setText("Loading popular modpacks...");
+        statusLabel.setText(Localization.text("modpackBrowser.loading"));
         resultsList.getChildren().clear();
 
         UiExecutor.shared().execute(() -> {
@@ -250,7 +251,7 @@ public class ModpackBrowserView extends VBox {
                 e.printStackTrace();
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != catalogRequestId) return;
-                    statusLabel.setText("Failed to load modpacks. Check your connection and try again.");
+                    statusLabel.setText(Localization.text("modpackBrowser.loadFailed"));
                 });
             }
         });
@@ -269,7 +270,7 @@ public class ModpackBrowserView extends VBox {
 
         long requestId = ++searchRequestId;
         ++catalogRequestId;
-        statusLabel.setText("Searching Modrinth...");
+        statusLabel.setText(Localization.text("common.searching"));
         resultsList.getChildren().clear();
 
         UiExecutor.shared().execute(() -> {
@@ -288,7 +289,7 @@ public class ModpackBrowserView extends VBox {
                 e.printStackTrace();
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
-                    statusLabel.setText("Search failed. Check your connection and try again.");
+                    statusLabel.setText(Localization.text("modpackBrowser.searchFailed"));
                 });
             }
         });
@@ -309,7 +310,7 @@ public class ModpackBrowserView extends VBox {
         if (projects == null || projects.isEmpty()) {
 
             Label empty = new Label(
-                    "No modpacks found."
+                    Localization.text("modpackBrowser.noResults")
             );
 
             empty.getStyleClass().add(
@@ -321,7 +322,7 @@ public class ModpackBrowserView extends VBox {
                     .add(empty);
 
             statusLabel.setText(
-                    "No results."
+                    Localization.text("common.noResults")
             );
 
             return;
@@ -480,7 +481,7 @@ public class ModpackBrowserView extends VBox {
         // =========================================================
 
         Button importButton = new Button(
-                "IMPORT"
+                Localization.text("common.import")
         );
 
         importButton.getStyleClass().add(
@@ -546,10 +547,10 @@ public class ModpackBrowserView extends VBox {
     ) {
 
         button.setDisable(true);
-        button.setText("IMPORTING...");
+        button.setText(Localization.text("common.importing"));
 
         statusLabel.setText(
-                "Downloading "
+                Localization.text("common.downloadingPrefix")
                         + project.getTitle()
                         + "..."
         );
@@ -565,7 +566,7 @@ public class ModpackBrowserView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
 
                     button.setText(
-                            "IMPORTED"
+                            Localization.text("common.imported")
                     );
 
                     statusLabel.setText(
@@ -585,10 +586,10 @@ public class ModpackBrowserView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
 
                     button.setDisable(false);
-                    button.setText("IMPORT");
+                    button.setText(Localization.text("common.import"));
 
                     statusLabel.setText(
-                            "Failed to import "
+                            Localization.text("modpackBrowser.importFailedPrefix")
                                     + project.getTitle()
                                     + "."
                     );
