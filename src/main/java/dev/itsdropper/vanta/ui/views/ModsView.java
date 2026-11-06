@@ -699,8 +699,6 @@ public class ModsView extends VBox {
         boolean disabled =
                 filename.toLowerCase().endsWith(".jar.disabled")
                         || filename.toLowerCase().endsWith(".steinmod.disabled");
-        boolean steinMod = filename.toLowerCase().endsWith(".steinmod")
-                || filename.toLowerCase().endsWith(".steinmod.disabled");
 
         javafx.scene.control.ToggleButton toggleButton =
                 new javafx.scene.control.ToggleButton();
@@ -828,14 +826,7 @@ public class ModsView extends VBox {
             }
         });
 
-        HBox buttons = steinMod
-                ? new HBox(8, toggleButton, removeButton)
-                : new HBox(8, toggleButton, removeButton);
-        if (steinMod) {
-            toggleButton.setTooltip(new Tooltip(
-                    Localization.text("mods.toggleFailed")
-            ));
-        }
+        HBox buttons = new HBox(8, toggleButton, removeButton);
 
         HBox row =
                 new HBox(
