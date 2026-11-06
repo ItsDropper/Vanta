@@ -88,7 +88,12 @@ public class GlobalModsView extends VBox {
     private Button versionsButton;
     private final java.util.Set<String> selectedLoaders = new java.util.LinkedHashSet<>();
     private final java.util.Set<String> selectedVersions = new java.util.LinkedHashSet<>();
-        private final java.util.Map<ModrinthContentType, Button> contentTypeButtons = new java.util.EnumMap<>(ModrinthContentType.class);
+    private final java.util.Map<ModrinthContentType, Button> contentTypeButtons = new java.util.EnumMap<>(ModrinthContentType.class);
+    private VBox versionFilterOptions;
+    private VBox loaderFilterOptions;
+    private VBox categoryFilterOptions;
+    private TextField loaderSearchField;
+    private TextField categorySearchField;
 
     public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
         this(onModSelected, false);
@@ -215,9 +220,37 @@ public class GlobalModsView extends VBox {
 
         Label filtersTitle = new Label(Localization.text("modrinth.filters"));
         filtersTitle.getStyleClass().add("settings-section-title");
-        VBox versionFilters = new VBox(8, versionSearchField, versionsButton, showAllVersions);
-        VBox loaderFilters = new VBox(8, loadersButton);
-        VBox categoryFilters = new VBox(8, categoriesButton);
+
+        versionFilterOptions = new VBox(4);
+        versionFilterOptions.getStyleClass().add("modrinth-filter-options");
+        ScrollPane versionScroll = createFilterScroll(versionFilterOptions, 224);
+        versionSearchField.setPromptText(Localization.text("modrinth.search"));
+        versionSearchField.setPrefHeight(34);
+        versionSearchField.setMaxWidth(Double.MAX_VALUE);
+        HBox versionSearch = createFilterSearch(versionSearchField);
+        VBox versionFilters = new VBox(8, versionSearch, versionScroll, showAllVersions);
+        versionFilters.getStyleClass().add("modrinth-filter-content");
+
+        loaderFilterOptions = new VBox(4);
+        loaderFilterOptions.getStyleClass().add("modrinth-filter-options");
+        ScrollPane loaderScroll = createFilterScroll(loaderFilterOptions, 224);
+        loaderSearchField = new TextField();
+        loaderSearchField.setPromptText(Localization.text("modrinth.search"));
+        loaderSearchField.setPrefHeight(34);
+        loaderSearchField.setMaxWidth(Double.MAX_VALUE);
+        VBox loaderFilters = new VBox(8, createFilterSearch(loaderSearchField), loaderScroll);
+        loaderFilters.getStyleClass().add("modrinth-filter-content");
+
+        categoryFilterOptions = new VBox(4);
+        categoryFilterOptions.getStyleClass().add("modrinth-filter-options");
+        ScrollPane categoryScroll = createFilterScroll(categoryFilterOptions, 224);
+        categorySearchField = new TextField();
+        categorySearchField.setPromptText(Localization.text("modrinth.search"));
+        categorySearchField.setPrefHeight(34);
+        categorySearchField.setMaxWidth(Double.MAX_VALUE);
+        VBox categoryFilters = new VBox(8, createFilterSearch(categorySearchField), categoryScroll);
+        categoryFilters.getStyleClass().add("modrinth-filter-content");
+
         TitledPane versionPanel = new TitledPane(Localization.text("modrinth.gameVersion"), versionFilters);
         TitledPane loaderPanel = new TitledPane(Localization.text("modrinth.loader"), loaderFilters);
         TitledPane categoryPanel = new TitledPane(Localization.text("modrinth.category"), categoryFilters);
@@ -227,11 +260,14 @@ public class GlobalModsView extends VBox {
         versionPanel.setAnimated(true);
         loaderPanel.setAnimated(true);
         categoryPanel.setAnimated(true);
-        VBox filterSidebar = new VBox(10,
-                filtersTitle, versionPanel, loaderPanel, categoryPanel);
+        VBox filterSidebar = new VBox(9, filtersTitle, versionPanel, loaderPanel, categoryPanel);
         filterSidebar.getStyleClass().add("modrinth-filter-sidebar");
-        filterSidebar.setPrefWidth(230);
-        filterSidebar.setMinWidth(205);
+        filterSidebar.setPrefWidth(250);
+        filterSidebar.setMinWidth(220);
+        filterSidebar.setMaxWidth(280);
+
+        loaderSearchField.textProperty().addListener((obs, oldValue, newValue) -> rebuildLoaderFilterOptions());
+        categorySearchField.textProperty().addListener((obs, oldValue, newValue) -> rebuildCategoryFilterOptions());
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
@@ -249,8 +285,10 @@ public class GlobalModsView extends VBox {
 
         // The hidden legacy combo boxes remain as compatibility adapters for
         // existing install/popular logic; the visible pickers are multi-select.
-        versionSearchField.textProperty().addListener((obs, oldValue, newValue) ->
-                filterVersionChoices(newValue));
+        versionSearchField.textProperty().addListener((obs, oldValue, newValue) -> {
+            filterVersionChoices(newValue);
+            rebuildVersionFilterOptions();
+        });
 
         if (!screenshotPreview) {
             loadLoaderTags(ModrinthContentType.MOD);
@@ -265,6 +303,7 @@ public class GlobalModsView extends VBox {
                         stableMinecraftVersions.clear();
                         stableMinecraftVersions.addAll(releases);
                         filterVersionChoices(versionSearchField.getText());
+                        rebuildVersionFilterOptions();
                     });
                 } catch (Throwable ex) {
                     ex.printStackTrace();
@@ -399,9 +438,7 @@ public class GlobalModsView extends VBox {
         // BUILD
         // =========================================================
 
-        VBox contentPane = new VBox(12,
-                popularTitle, popularScrollPane, popularStatusLabel,
-                resultsScrollPane, statusLabel);
+        VBox contentPane = new VBox(8, resultsScrollPane, statusLabel);
         contentPane.setFillWidth(true);
         HBox browseContent = new HBox(18, filterSidebar, contentPane);
         HBox.setHgrow(contentPane, Priority.ALWAYS);
@@ -449,8 +486,119 @@ public class GlobalModsView extends VBox {
             statusLabel.setVisible(false);
             statusLabel.setManaged(false);
         } else {
-            loadMostDownloadedMods();
+            hidePopularSection();
+            search();
         }
+    }
+
+    private ScrollPane createFilterScroll(VBox content, double height) {
+        ScrollPane scroll = new ScrollPane(content);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.setPrefViewportHeight(height);
+        scroll.setMaxHeight(height);
+        scroll.getStyleClass().add("modrinth-filter-scroll");
+        return scroll;
+    }
+
+    private HBox createFilterSearch(TextField field) {
+        Label icon = new Label();
+        icon.setGraphic(IconView.create(IconView.Type.SEARCH, 14));
+        icon.getStyleClass().add("modrinth-filter-search-icon");
+        HBox row = new HBox(7, icon, field);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.getStyleClass().add("modrinth-filter-search");
+        HBox.setHgrow(field, Priority.ALWAYS);
+        return row;
+    }
+
+    private CheckBox createFilterOption(String label, String id, boolean selected,
+            java.util.function.Consumer<Boolean> selectionChanged) {
+        CheckBox option = new CheckBox(label);
+        option.setSelected(selected);
+        option.setMaxWidth(Double.MAX_VALUE);
+        option.getStyleClass().add("modrinth-filter-option");
+        option.setOnAction(event -> selectionChanged.accept(option.isSelected()));
+        return option;
+    }
+
+    private void rebuildVersionFilterOptions() {
+        if (versionFilterOptions == null) return;
+        versionFilterOptions.getChildren().clear();
+        List<String> source = showAllVersions.isSelected()
+                ? allMinecraftVersions : stableMinecraftVersions;
+        String query = versionSearchField.getText() == null ? ""
+                : versionSearchField.getText().trim().toLowerCase(java.util.Locale.ROOT);
+        source.stream().filter(v -> v != null && v.toLowerCase(java.util.Locale.ROOT).contains(query))
+                .limit(500).forEach(version -> versionFilterOptions.getChildren().add(
+                        createFilterOption(version, version, selectedVersions.contains(version), selected -> {
+                            if (selected) selectedVersions.add(version); else selectedVersions.remove(version);
+                            browserToolbar.refresh();
+                        })));
+        if (versionFilterOptions.getChildren().isEmpty()) {
+            Label empty = new Label(Localization.text("modrinth.noVersions"));
+            empty.getStyleClass().add("modrinth-filter-empty");
+            versionFilterOptions.getChildren().add(empty);
+        }
+    }
+
+    private void rebuildLoaderFilterOptions() {
+        if (loaderFilterOptions == null) return;
+        loaderFilterOptions.getChildren().clear();
+        String query = loaderSearchField.getText() == null ? ""
+                : loaderSearchField.getText().trim().toLowerCase(java.util.Locale.ROOT);
+        loaderTags.stream().filter(tag -> tag != null && tag.getName() != null)
+                .filter(tag -> tag.getName().toLowerCase(java.util.Locale.ROOT).contains(query))
+                .forEach(tag -> {
+                    String name = tag.getName();
+                    String id = dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(name);
+                    CheckBox option = createFilterOption(formatTagName(name), id,
+                            selectedLoaders.contains(id), selected -> {
+                                if (selected) selectedLoaders.add(id); else selectedLoaders.remove(id);
+                                browserToolbar.refresh();
+                            });
+                    option.setGraphic(new ModrinthTagIcon(tag,
+                            ModrinthTagIcon.loaderColor(name), 16));
+                    option.setStyle("-fx-text-fill: " + colorToCss(ModrinthTagIcon.loaderColor(name)) + ";");
+                    loaderFilterOptions.getChildren().add(option);
+                });
+        if (loaderFilterOptions.getChildren().isEmpty()) {
+            Label empty = new Label(Localization.text("modrinth.noLoaders"));
+            empty.getStyleClass().add("modrinth-filter-empty");
+            loaderFilterOptions.getChildren().add(empty);
+        }
+    }
+
+    private void rebuildCategoryFilterOptions() {
+        if (categoryFilterOptions == null) return;
+        categoryFilterOptions.getChildren().clear();
+        String query = categorySearchField.getText() == null ? ""
+                : categorySearchField.getText().trim().toLowerCase(java.util.Locale.ROOT);
+        categoryTags.stream().filter(tag -> tag != null && tag.getName() != null)
+                .filter(tag -> tag.getName().toLowerCase(java.util.Locale.ROOT).contains(query))
+                .forEach(tag -> {
+                    String name = tag.getName();
+                    CheckBox option = createFilterOption(formatTagName(name), name,
+                            selectedCategories.contains(name), selected -> {
+                                if (selected) selectedCategories.add(name); else selectedCategories.remove(name);
+                                browserToolbar.refresh();
+                            });
+                    option.setGraphic(new ModrinthTagIcon(tag, Color.web("#9299A6"), 15));
+                    categoryFilterOptions.getChildren().add(option);
+                });
+        if (categoryFilterOptions.getChildren().isEmpty()) {
+            Label empty = new Label(Localization.text("modrinth.noCategories"));
+            empty.getStyleClass().add("modrinth-filter-empty");
+            categoryFilterOptions.getChildren().add(empty);
+        }
+    }
+
+    private String colorToCss(Color color) {
+        return String.format(java.util.Locale.ROOT, "#%02X%02X%02X",
+                (int) Math.round(color.getRed() * 255),
+                (int) Math.round(color.getGreen() * 255),
+                (int) Math.round(color.getBlue() * 255));
     }
 
     private void updateContentTypeSegments() {
@@ -470,6 +618,7 @@ public class GlobalModsView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != categoryTagRequestId) return;
                     categoryTags = tags == null ? List.of() : List.copyOf(tags);
+                    rebuildCategoryFilterOptions();
                 });
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
@@ -689,6 +838,7 @@ public class GlobalModsView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != loaderTagRequestId) return;
                     loaderTags = tags == null ? List.of() : List.copyOf(tags);
+                    rebuildLoaderFilterOptions();
                     selectedLoaders.retainAll(tags.stream()
                             .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
                             .filter(java.util.Objects::nonNull)
