@@ -2,35 +2,39 @@
 
 **A cross-platform Minecraft launcher built around isolated instances, repairability, and control.**
 
-Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, Vanilla, Fabric, Forge, Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, VantaLoader, LiteLoader, original Rift, and Risugami's ModLoader installations, Modrinth content, installation health, and launcher self-updates. The supported loader integrations and updater have been tested end to end in released builds.
+Vanta is an independently developed JavaFX launcher for Minecraft Java Edition. It manages Minecraft versions, Microsoft account sessions, isolated instances, Modrinth content, installation health, and launcher self-updates. Its loader integration set contains 13 non-vanilla loaders: Fabric, Forge, NeoForge, Quilt, Ornithe, Legacy Fabric, Babric, VantaLoader, NilLoader, LiteLoader, Rift, Stein, and Risugami's ModLoader.
 
-> Vanta is under active development. Features and compatibility can change between releases; do not treat roadmap items as shipped functionality.
+> Vanta is under active development. Implementation, runtime validation, and compatibility are separate things: a loader being selectable or installable does not by itself prove that every game version, mod, repair path, or modpack workflow is production-verified.
 
 ## At a glance
 
 - **Instance isolation** — keep mods, settings, worlds, logs, screenshots, resource packs, and shader packs separated by instance.
 - **Minecraft installation** — resolve version metadata, client files, libraries, assets, natives, and launch arguments.
-- **Modloader support** — end-to-end tested installation and launching for Fabric, Forge, Quilt, NeoForge, Ornithe, Legacy Fabric, Babric, NilLoader, VantaLoader, LiteLoader, original Rift (Minecraft 1.13), and Risugami's ModLoader. Loader-specific version limits and implementation details are documented in [Loader Compatibility](docs/LOADER_COMPATIBILITY.md). Babric is version-gated to Beta 1.7.3; Rift support targets the original 1.13 release, not community forks; legacy ModLoader support is limited to versions with pinned, verified patch archives. NilLoader and VantaLoader use instance-local Java-agent bootstraps; VantaLoader is an experimental independent loader with native mod discovery, dependency-aware loading, a tested ASM transformation pipeline, and a CI-verified Minecraft 1.21.11 title/Mods-screen launch. Its gameplay hooks remain unverified in a live world. VantaLoader includes an experimental Mixin service/bootstrap, but third-party Mixin compatibility is unverified; Fabric/Forge APIs and mod compatibility are not available. LiteLoader and compatible profile overlays use the ordered LaunchWrapper profile-stack system. The vanilla version picker includes Mojang's official old Alpha/Beta catalog entries and their legacy launch arguments and virtual assets. Pre-Classic versions absent from Mojang's manifest are not included.
-- **Modrinth and modpacks** — search projects, install content, resolve dependencies, scan installed mods, repair dependencies, import `.mrpack` modpacks, and export `.vantapack` packs.
+- **13 loader integrations** — version-aware integrations for Fabric, Forge, NeoForge, Quilt, Ornithe, Legacy Fabric, Babric, VantaLoader, NilLoader, LiteLoader, Rift, Stein, and Risugami's ModLoader. Their installation models are not interchangeable: integrations include profile overlays, installer-generated profiles, JVM agents, LaunchWrapper tweakers, and instance-local client-JAR patching. Stein is restricted to Minecraft 1.8.9 and invokes its official installer in an isolated staging layout. See [Loader Compatibility](docs/LOADER_COMPATIBILITY.md) for support boundaries and [Loader Implementations](docs/LOADER_IMPLEMENTATIONS.md) for code-level details.
+- **Modrinth and modpacks** — search projects, install content, resolve dependencies, scan installed mods, repair dependencies, import `.mrpack` modpacks, and export `.vantapack` packs. Format-level support is not a promise that every loader can be represented by the Modrinth pack format.
 - **State Center** — inspect instance and shared-resource health and identify missing or invalid files.
-- **Self-updating releases** — download platform-specific release packages, verify SHA-256 checksums, stage updates through an external updater, replace the application image, and roll back on failure. The updater has been verified end to end in released builds.
+- **Self-updating releases** — download platform-specific release packages, verify SHA-256 checksums, stage updates through an external updater, replace the application image, and roll back on failure.
 - **Local server management** — manage Java server profiles, process lifecycle, live console, basic properties, offline backups/restores, and crash reports. Vanta can provision a private Eclipse Temurin JRE for supported server JARs on supported OS/CPU combinations.
 - **Local-first data** — keep launcher and instance data on the user's device wherever possible.
 - **JavaFX interface** — a native Java desktop application rather than an embedded web application.
+
+## Loader support boundary
+
+Vanta has 13 non-vanilla loader integrations, but they do not all have the same validation status or version coverage. Examples of deliberate limits include Babric on Beta 1.7.3, original Rift 1.0.4-87 on Minecraft 1.13, Stein on Minecraft 1.8.9, LiteLoader stable manifest entries, and Risugami's ModLoader only on versions with pinned archive hashes. VantaLoader is an experimental independent Java-agent loader; its documented CI smoke test reaches the Minecraft 1.21.11 title and Mods screens, not a live-world gameplay test. Experimental Mixin bootstrap code is not a claim of third-party Mixin compatibility. The compatibility document is the source of truth for per-loader status.
 
 ## Status and platform
 
 - **Development status:** Active development
 - **Platform targets:** Windows 10/11 x64 (Windows 11 ARM64 via x64 emulation only), mainstream glibc Linux distributions on x64 and ARM64, and macOS on Intel and Apple Silicon; cross-platform support is validated through a multi-architecture CI matrix
 - **Platform builds:** self-contained jpackage application images for Windows, Linux, and macOS, plus portable ZIP/TAR.GZ distributions; builds are not yet code-signed/notarized and native installers (MSI/DEB/RPM/DMG) are not yet provided
-- **Automatic self-update:** platform-specific application-image archives for supported Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon releases; unsigned packages still require users to trust the release source
+- **Automatic self-update:** platform-specific application-image archives for supported Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon releases
 - **Secure account storage:** Windows DPAPI, macOS Keychain, or Linux Secret Service (requires a Secret Service provider and the secret-tool command from libsecret-tools)
 - **Runtime/toolchain:** Java 21
 - **UI:** JavaFX 21
 - **Build:** Gradle wrapper
 - **License:** See [LICENSE](LICENSE)
 
-Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and validates application-image and update-archive layouts across five OS/architecture targets; Linux x64 and ARM64 also get JavaFX GUI smoke tests, and the x64 image is exercised on Ubuntu, Debian, Fedora, and Arch Linux containers. Platform-specific update archives and all three jpackage layouts are implemented. The updater launches from an isolated copy of the application image and has been verified end to end in a released build. See [Platform Support](docs/PLATFORM_SUPPORT.md) for the exact support boundary. Signed/notarized builds and native installers remain unfinished.
+Windows, Linux, and macOS are active build targets. CI runs the Gradle test suite and validates application-image and update-archive layouts across five OS/architecture targets; Linux x64 and ARM64 also get JavaFX GUI smoke tests, and the x64 image is exercised on Ubuntu, Debian, Fedora, and Arch Linux containers. This matrix validates the tested build and packaging paths, not every loader or every physical-machine update scenario. See [Platform Support](docs/PLATFORM_SUPPORT.md) for the exact support boundary. Signed/notarized builds and native installers remain unfinished.
 
 ## Getting started
 
@@ -58,11 +62,11 @@ On Linux and macOS:
 ./gradlew clean test distZip distTar platformImageChecksum
 ```
 
-Use the checked-in Gradle wrapper rather than installing a separate Gradle version. See the [Development Guide](docs/DEVELOPMENT.md) for setup, packaging, debugging, and validation notes.
+Use the checked-in Gradle wrapper rather than installing a separate Gradle version. See the [Development Guide](docs/DEVELOPMENT.md) for setup, packaging, and validation notes.
 
 The `platformAppImage` task creates a self-contained application image on the host OS. Linux launches from `build/packages/Vanta/bin/Vanta`, macOS from `build/packages/Vanta.app`, and Windows from `build/packages/Vanta/Vanta.exe`. CI uploads each OS build as a separate artifact. For release publishing, run `./gradlew platformImageChecksum -PvantaVersion=1.2.8` (or the Windows wrapper) on each target OS; the `Platform release packages` workflow performs this matrix build and publishes the matching archive and SHA-256 file when a version tag is pushed.
 
-To run from an IDE, use the configured Gradle application task or create a run configuration for the application's main class. A successful build confirms compilation and configured checks only; it does not prove every authentication, download, repair, or packaging path works on every machine.
+To run from an IDE, use the configured Gradle application task or create a run configuration for the application's main class. A successful build confirms compilation and configured checks only; it does not prove every authentication, download, repair, loader, or packaging path works on every machine.
 
 ## How Vanta is organized
 
@@ -71,7 +75,7 @@ To run from an IDE, use the configured Gradle application task or create a run c
 | UI | JavaFX screens, settings, navigation, progress, and user feedback |
 | Accounts and authentication | Microsoft sign-in flow, session lifecycle, account switching, and local account state |
 | Minecraft installation | Version metadata, client files, libraries, assets, natives, and launch configuration |
-| Loader integrations | Version-aware installation, launch, and repair across the supported loader set |
+| Loader integrations | Version-aware installation, launch, repair, and loader-specific bootstrap handling |
 | Modrinth | Catalog search, dependency graph resolution, installation, scanning, and repair |
 | State Center | Instance/shared-resource inspection and health classification |
 | Update system | Release discovery, SHA-256 verification, external replacement, and rollback |
@@ -89,9 +93,9 @@ Downloaded metadata and archives are untrusted input. Installation, extraction, 
 
 ## Privacy and network behavior
 
-Vanta's optional usage statistics and crash diagnostics are disabled by default and require separate, explicit opt-in. Users can change either choice in Settings. Crash diagnostics can include redacted exception messages, stack frames, and a short error excerpt from a newly generated Minecraft crash report. Common credentials, identifiers, IP addresses, and local paths are filtered, but automated redaction cannot guarantee that arbitrary mod-generated text contains no personal information. See PRIVACY.md for details.
+Optional usage statistics and crash diagnostics are disabled by default and require separate, explicit opt-in. Users can change either choice in Settings. Crash diagnostics can include redacted exception messages, stack frames, and a short error excerpt from a newly generated Minecraft crash report. Common credentials, identifiers, IP addresses, and local paths are filtered, but automated redaction cannot guarantee that arbitrary mod-generated text contains no personal information. See [PRIVACY.md](PRIVACY.md) for details.
 
-Depending on the features used, Vanta may contact Microsoft/Xbox/Minecraft services, Modrinth, loader metadata services, configured GitHub release endpoints, and Eclipse Adoptium's API/GitHub releases when a compatible server Java runtime must be provisioned. Those third parties have their own privacy policies and terms.
+Depending on the features used, Vanta may contact Microsoft/Xbox/Minecraft services, Modrinth, loader metadata and artifact repositories, configured GitHub release endpoints (including the official Stein installer release), and Eclipse Adoptium's API/GitHub releases when a compatible server Java runtime must be provisioned. Those third parties have their own privacy policies and terms.
 
 - Read the [Privacy Policy](PRIVACY.md).
 - Never publish account tokens, session credentials, private account data, or unreviewed logs.
@@ -100,10 +104,14 @@ Depending on the features used, Vanta may contact Microsoft/Xbox/Minecraft servi
 ## Documentation
 
 - [Architecture Overview](docs/ARCHITECTURE.md) — subsystem responsibilities and design principles
-- [Loader Compatibility](docs/LOADER_COMPATIBILITY.md) — implemented loaders, legacy candidates, and integration requirements
-- [Product Direction](docs/PRODUCT_DIRECTION.md) — differentiated environment-management subsystems and delivery order
+- [Loader Compatibility](docs/LOADER_COMPATIBILITY.md) — supported loaders, version limits, and validation status
+- [Loader Implementations](docs/LOADER_IMPLEMENTATIONS.md) — per-loader installer, bootstrap, metadata, and launch mechanics
+- [Product Direction](docs/PRODUCT_DIRECTION.md) — environment-management subsystems and delivery order
 - [Development Guide](docs/DEVELOPMENT.md) — setup, build, packaging, and debugging
-- [Contributing](CONTRIBUTING.md) — change expectations, checks, and pull request guidance
+- [Localization](docs/LOCALIZATION.md) — locale architecture and translation workflow
+- [Platform Support](docs/PLATFORM_SUPPORT.md) — OS/architecture targets and limitations
+- [UX System](docs/UX_SYSTEM.md) — JavaFX interaction and visual conventions
+- [Contributing](CONTRIBUTING.md) — change expectations and checks
 - [Security Policy](SECURITY.md) — responsible vulnerability reporting
 - [Privacy Policy](PRIVACY.md) — local data, telemetry intent, and third-party connections
 
@@ -115,7 +123,7 @@ For code changes, include the problem, implementation approach, compatibility im
 
 ## Roadmap
 
-Remaining work is focused on broader edge-case compatibility, deeper loader-specific regression coverage, diagnostics, code signing/notarization, native installers, and platform-specific polish. Core supported-loader launching, modpack workflows, and launcher self-updating are implemented; see the linked compatibility and platform documents for explicit limits. The roadmap is not a guarantee that any particular feature is already implemented or scheduled for a specific release.
+Remaining work is focused on broader edge-case compatibility, deeper loader-specific regression coverage, diagnostics, code signing/notarization, native installers, and platform-specific polish. The roadmap is not a guarantee that any particular feature is already implemented or scheduled for a specific release.
 
 ## Disclaimer
 

@@ -19,30 +19,40 @@ Vanta uses the Java 21 toolchain and JavaFX 21. Use the checked-in wrapper so lo
 On Windows PowerShell:
 
 ```powershell
-.\gradlew.bat clean test distZip distTar platformAppImage
+.\gradlew.bat clean test
+.\gradlew.bat build
 ```
 
 On Linux and macOS:
 
 ```bash
-./gradlew clean test distZip distTar platformImageChecksum
+./gradlew clean test
+./gradlew build
 ```
 
-The first build may download Gradle dependencies. A successful compile is not a substitute for testing the affected runtime behavior.
+For host-specific distribution and application-image checks, use the tasks configured in `build.gradle`:
+
+```bash
+./gradlew distZip distTar platformImageChecksum
+```
+
+On Windows, `platformAppImage` creates the host's jpackage application image; on Linux/macOS use the platform tasks available to that host. Do not assume a cross-OS jpackage image can be produced from a different host. The CI workflow is the source of truth for the current matrix and task invocations.
+
+The first build may download Gradle dependencies. A successful compile is not a substitute for testing the affected runtime behavior. Loader-specific integration status is documented in [Loader Compatibility](LOADER_COMPATIBILITY.md), and implementation paths are mapped in [Loader Implementations](LOADER_IMPLEMENTATIONS.md).
 
 ## UI screenshots
 
-Capture all nine top-level sidebar destinations from the actual JavaFX views:
+Capture the top-level sidebar destinations from the actual JavaFX views:
 
 ```powershell
 .\gradlew.bat run --args="--capture-sidebar-screenshots build/ui-screenshots"
 ```
 
-The UI screenshots GitHub Actions workflow performs the same capture under Xvfb, generates individual PNGs plus a 3×3 overview contact sheet, and uploads build/ui-screenshots as an artifact. Screenshot mode does not require a signed-in account or a pre-existing Minecraft instance. The launcher resolves its Linux data directory through XDG_DATA_HOME (or ~/.local/share) and does not require an APPDATA override.
+The UI screenshots GitHub Actions workflow performs the corresponding capture under Xvfb, generates individual PNGs plus an overview contact sheet, and uploads the output as an artifact. Screenshot mode does not require a signed-in account or a pre-existing Minecraft instance. On Linux, the launcher resolves its data directory through XDG_DATA_HOME (or ~/.local/share).
 
 ## Packaging
 
-The application plugin creates portable distributions through `distZip` and `distTar`. The `platformAppImage` task uses the host JDK's `jpackage` to create a self-contained application image with a private runtime. `platformImageChecksum` additionally creates a platform/architecture-specific ZIP and SHA-256 file. CI validates Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon. The external updater and release asset selection support all those image layouts; actual in-place updates on each host still need end-to-end validation. Signed/notarized packages and native installers (MSI/EXE, DEB/RPM, and DMG) are not yet produced.
+The application plugin creates portable distributions through `distZip` and `distTar`. The platform image task uses the host JDK's `jpackage` to create a self-contained application image with a private runtime. `platformImageChecksum` additionally creates a platform/architecture-specific ZIP and SHA-256 file. CI validates Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon. Signed/notarized packages and native installers (MSI/DEB/RPM/DMG) are not yet produced.
 
 Do not commit build output from `build/`, generated installers, or local runtime data.
 
@@ -62,6 +72,7 @@ See [Architecture](ARCHITECTURE.md) for the major responsibilities and data flow
 - Inspect launcher and game logs before changing repair behavior.
 - Avoid including account tokens or other sensitive values in diagnostic output.
 - For download failures, distinguish metadata lookup, transport, checksum/content validation, and installation errors.
+- For loader failures, distinguish upstream metadata lookup, installer execution, profile validation, artifact resolution, JVM-agent startup, and game bootstrap.
 - For update failures, check package verification, staging, replacement, rollback, and restart as separate steps.
 
 ## Change checklist

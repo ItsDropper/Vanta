@@ -1,6 +1,6 @@
 # Vanta Privacy Policy
 
-**Last updated:** 5 November 2026
+**Last updated:** 6 November 2026
 
 This policy describes the intended privacy behavior of Vanta, an independently developed Minecraft launcher. Vanta is under active development, so behavior may change between versions. Review the release notes and source code for the version you use.
 
@@ -36,10 +36,12 @@ Do not send logs, crash reports, screenshots, or configuration files to anyone w
 To provide its features, Vanta may connect to third-party services, including:
 
 - **Microsoft and Xbox/Minecraft services** for account authentication, profile/session validation, and Minecraft entitlement or game-related functionality.
-- **Modrinth** for supported mod, loader, and project metadata and downloads.
-- **Configured project release/update endpoints** to check for and obtain Vanta updates.
+- **Modrinth** for supported project metadata, search, and downloads.
+- **Loader metadata and artifact hosts** for loader-specific version metadata, installers, Maven libraries, and bootstrap artifacts. Depending on the loader and version, this can include Fabric Meta, Quilt Meta, Ornithe Meta, Legacy Fabric metadata/Maven, NeoForged Maven, Forge installer repositories, LiteLoader's manifest/repository, GitHub release assets (including the official Stein installer and VantaLoader releases), NilLoader's Maven host, and the MCArchive host used for pinned Risugami's ModLoader patches.
+- **Configured Vanta release endpoints** to check for and obtain launcher updates.
+- **Eclipse Adoptium services** when a compatible server Java runtime must be provisioned.
 
-Those services receive the information necessary for the relevant request and operate under their own privacy policies and terms. Vanta does not control their data practices. Network requests, service names, and behavior may change as the project evolves.
+These requests are feature-dependent. The relevant service receives the information necessary to process each request and operates under its own privacy policy and terms. Vanta does not control third-party data practices. Network requests, service names, and behavior may change as the project evolves.
 
 Vanta does not ask you to give your Microsoft password directly to the launcher. Use only authentic builds and the official sign-in flow.
 

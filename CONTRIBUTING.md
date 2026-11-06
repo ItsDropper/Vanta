@@ -16,14 +16,21 @@ For large architectural changes, open an issue or discussion first so the propos
 
 Use the checked-in Gradle wrapper rather than requiring a separately installed Gradle version.
 
-On Windows:
+On Windows PowerShell:
 
 ```powershell
-.gradlew.bat clean test
-.gradlew.bat build
+.\gradlew.bat clean test
+.\gradlew.bat build
 ```
 
-If a task is unavailable or the repository does not yet have tests for the affected behavior, state that limitation explicitly. For packaging changes, also verify the relevant packaging tasks in an environment that has the required Windows tooling.
+On Linux and macOS:
+
+```bash
+./gradlew clean test
+./gradlew build
+```
+
+If a task is unavailable or the repository does not yet have tests for the affected behavior, state that limitation explicitly. For packaging changes, also verify the relevant packaging tasks in an environment that has the required host OS tooling.
 
 ## Pull requests
 
