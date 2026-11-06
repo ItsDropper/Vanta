@@ -56,6 +56,12 @@ public class ModrinthProject {
     @JsonProperty("date_modified")
     private String dateModified;
 
+    @JsonProperty("client_side")
+    private String clientSide;
+
+    @JsonProperty("server_side")
+    private String serverSide;
+
     @JsonProperty("license")
     private ModrinthLicense license;
 
@@ -99,6 +105,8 @@ public class ModrinthProject {
         project.versions = hit.getVersions();
         project.dateCreated = hit.getDateCreated();
         project.dateModified = hit.getDateModified();
+        project.clientSide = hit.getClientSide();
+        project.serverSide = hit.getServerSide();
         return project;
     }
 
@@ -166,6 +174,14 @@ public class ModrinthProject {
 
     public String getDateModified() {
         return dateModified;
+    }
+
+    public String getClientSide() {
+        return clientSide;
+    }
+
+    public String getServerSide() {
+        return serverSide;
     }
 
     public ModrinthLicense getLicense() {
