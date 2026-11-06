@@ -133,8 +133,7 @@ public final class SteinModManager {
         java.util.Map<String, String> owners = new java.util.HashMap<>();
         for (SourceRecord record : records) {
             Index index = readSource(record.url());
-            for (JsonNode mod : index.mods()) {
-                Release release = parseRelease(mod, index.source());
+            for (Release release : index.releases()) {
                 String previousSource = owners.putIfAbsent(release.id(), release.sourceUrl());
                 if (previousSource != null && !previousSource.equals(release.sourceUrl())) {
                     throw new IOException("Stein mod ID '" + release.id()
@@ -324,7 +323,7 @@ public final class SteinModManager {
         }
     }
 
-    private record Index(Source source, List<JsonNode> mods) {
+    private record Index(Source source, List<Release> releases) {
     }
 
     private static Index readSource(String sourceUrl) throws IOException {
@@ -340,34 +339,41 @@ public final class SteinModManager {
                 response.body().close();
                 throw new IOException("Stein source returned HTTP " + response.statusCode() + ": " + normalized);
             }
-            JsonNode root;
+            byte[] bytes;
             try (InputStream input = response.body()) {
-                byte[] bytes = input.readNBytes((int) MAX_INDEX_BYTES + 1);
+                bytes = input.readNBytes((int) MAX_INDEX_BYTES + 1);
                 if (bytes.length > MAX_INDEX_BYTES) {
                     throw new IOException("Stein source index exceeds the 2 MiB size limit.");
                 }
-                root = JSON.readTree(bytes);
             }
-            if (root == null || root.path("format").asInt(-1) != 1
-                    || !root.path("mods").isArray() || root.path("mods").isEmpty()) {
-                throw new IOException("Invalid Stein source index: expected format 1 and a non-empty mods array.");
-            }
-            String name = requiredText(root, "name");
-            String author = requiredText(root, "author");
-            String homepage = optionalHttpsUrl(root.path("homepage").asText(""));
-            String declaredSource = optionalHttpsUrl(root.path("source").asText(""));
-            Source source = new Source(name, author, homepage,
-                    declaredSource.isBlank() ? normalized : declaredSource);
-            List<JsonNode> mods = new ArrayList<>();
-            for (JsonNode mod : root.path("mods")) {
-                parseRelease(mod, source);
-                mods.add(mod.deepCopy());
-            }
-            return new Index(source, List.copyOf(mods));
+            return parseIndexDetails(bytes, normalized);
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             throw new IOException("Interrupted while reading Stein source: " + normalized, interrupted);
         }
+    }
+
+    static List<Release> parseIndex(byte[] bytes, String sourceUrl) throws IOException {
+        return parseIndexDetails(bytes, validateHttpsUrl(sourceUrl)).releases();
+    }
+
+    private static Index parseIndexDetails(byte[] bytes, String normalizedSourceUrl) throws IOException {
+        JsonNode root = JSON.readTree(bytes);
+        if (root == null || root.path("format").asInt(-1) != 1
+                || !root.path("mods").isArray() || root.path("mods").isEmpty()) {
+            throw new IOException("Invalid Stein source index: expected format 1 and a non-empty mods array.");
+        }
+        String name = requiredText(root, "name");
+        String author = requiredText(root, "author");
+        String homepage = optionalHttpsUrl(root.path("homepage").asText(""));
+        String declaredSource = optionalHttpsUrl(root.path("source").asText(""));
+        Source source = new Source(name, author, homepage,
+                declaredSource.isBlank() ? normalizedSourceUrl : declaredSource);
+        List<Release> releases = new ArrayList<>();
+        for (JsonNode mod : root.path("mods")) {
+            releases.add(parseRelease(mod, source));
+        }
+        return new Index(source, List.copyOf(releases));
     }
 
     private static Release parseRelease(JsonNode node, Source source) throws IOException {
@@ -434,7 +440,7 @@ public final class SteinModManager {
         }
     }
 
-    private static void validateArchive(Path archive, Release release) throws IOException {
+    static void validateArchive(Path archive, Release release) throws IOException {
         try (ZipFile zip = new ZipFile(archive.toFile())) {
             ZipEntry metadata = zip.getEntry("steinmod.json");
             if (metadata == null || metadata.isDirectory() || metadata.getSize() > 1024 * 1024) {
@@ -480,7 +486,7 @@ public final class SteinModManager {
         }
     }
 
-    private static int compareVersions(String left, String right) throws IOException {
+    static int compareVersions(String left, String right) throws IOException {
         try {
             String[] a = left.split("\\.");
             String[] b = right.split("\\.");
