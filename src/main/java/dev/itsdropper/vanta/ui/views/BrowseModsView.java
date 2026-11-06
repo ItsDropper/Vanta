@@ -14,6 +14,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -45,7 +46,7 @@ public class BrowseModsView extends VBox {
     private final TextField searchField;
     private final ModrinthBrowserToolbar browserToolbar;
 
-    private final VBox results;
+    private final FlowPane results;
     private final Label statusLabel;
 
     private final VBox popularResults;
@@ -138,6 +139,7 @@ public class BrowseModsView extends VBox {
                     results.getStyleClass().removeAll("modrinth-grid-results", "modrinth-list-results");
                     results.getStyleClass().add(gridLayout
                             ? "modrinth-grid-results" : "modrinth-list-results");
+                    applyResultLayout(gridLayout);
                 }
         );
         searchField = browserToolbar.getSearchField();
@@ -210,23 +212,20 @@ public class BrowseModsView extends VBox {
         // SEARCH RESULTS
         // =========================================================
 
-        results =
-                new VBox(
-                        12
-                );
-
-        results.getStyleClass().add(
-                "instance-list"
-        );
+        results = new FlowPane();
+        results.setHgap(12);
+        results.setVgap(12);
+        results.setAlignment(Pos.TOP_LEFT);
+        results.getStyleClass().add("instance-list");
 
         searchScrollPane =
                 new ScrollPane(
                         results
                 );
 
-        searchScrollPane.setFitToWidth(
-                true
-        );
+        searchScrollPane.setFitToWidth(true);
+        searchScrollPane.viewportBoundsProperty().addListener((obs, oldBounds, newBounds) ->
+                applyResultLayout(browserToolbar.isGridLayout()));
 
         searchScrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
@@ -751,13 +750,7 @@ public class BrowseModsView extends VBox {
                 : projects
         ) {
 
-            results
-                    .getChildren()
-                    .add(
-                            createProjectCard(
-                                    project
-                            )
-                    );
+            results.getChildren().add(createSizedProjectCard(project));
         }
 
         statusLabel.setText(
@@ -766,6 +759,26 @@ public class BrowseModsView extends VBox {
                             ? " results • checking Minecraft version compatibility..."
                             : " compatible projects found.")
         );
+    }
+
+    private VBox createSizedProjectCard(ModrinthProject project) {
+        VBox card = createProjectCard(project);
+        double availableWidth = searchScrollPane.getViewportBounds().getWidth();
+        double width = browserToolbar.isGridLayout()
+                ? 300 : Math.max(420, availableWidth - 28);
+        card.setPrefWidth(width);
+        card.setMinWidth(browserToolbar.isGridLayout() ? 260 : 0);
+        return card;
+    }
+
+    private void applyResultLayout(boolean grid) {
+        double availableWidth = searchScrollPane.getViewportBounds().getWidth();
+        for (javafx.scene.Node node : results.getChildren()) {
+            if (node instanceof VBox card) {
+                card.setPrefWidth(grid ? 300 : Math.max(420, availableWidth - 28));
+                card.setMinWidth(grid ? 260 : 0);
+            }
+        }
     }
 
     // =============================================================
