@@ -48,6 +48,7 @@ public class BrowseModsView extends VBox {
 
     private final FlowPane results;
     private final Label statusLabel;
+    private Button retryButton;
 
     private final VBox popularResults;
     private final Label popularStatusLabel;
@@ -211,7 +212,7 @@ public class BrowseModsView extends VBox {
         results.setHgap(12);
         results.setVgap(12);
         results.setAlignment(Pos.TOP_LEFT);
-        results.getStyleClass().add("instance-list");
+        results.getStyleClass().addAll("instance-list", "modrinth-list-results");
 
         searchScrollPane =
                 new ScrollPane(
@@ -256,30 +257,23 @@ public class BrowseModsView extends VBox {
         // BUILD
         // =========================================================
 
+        retryButton = new Button(Localization.text("common.retry"));
+        retryButton.getStyleClass().add("secondary-button");
+        retryButton.setVisible(false);
+        retryButton.setManaged(false);
+        retryButton.setOnAction(event -> browserToolbar.refresh());
+
         getChildren().addAll(
                 header,
                 browserToolbar,
-                popularTitle,
-                popularScrollPane,
-                popularStatusLabel,
                 searchScrollPane,
-                statusLabel
+                statusLabel,
+                retryButton
         );
 
-        // Search results are hidden initially.
-        searchScrollPane.setVisible(
-                false
-        );
-
-        searchScrollPane.setManaged(
-                false
-        );
-
-        // =========================================================
-        // LOAD POPULAR MODS
-        // =========================================================
-
-        loadMostDownloadedMods();
+        searchScrollPane.setVisible(true);
+        searchScrollPane.setManaged(true);
+        browserToolbar.refresh();
     }
 
     // =============================================================
@@ -585,17 +579,17 @@ public class BrowseModsView extends VBox {
         String query = state.query();
         long requestId = ++searchRequestId;
 
-        if (query.isBlank()) {
-            showPopularSection();
-            results.getChildren().clear();
-            statusLabel.setText(Localization.text("browseMods.searchPromptHelp"));
-            browserToolbar.setTotalHits(0);
-            return;
-        }
-
         hidePopularSection();
+        retryButton.setVisible(false);
+        retryButton.setManaged(false);
         statusLabel.setText(Localization.text("common.searching"));
         results.getChildren().clear();
+        for (int i = 0; i < Math.min(state.limit(), 6); i++) {
+            VBox skeleton = new VBox(8);
+            skeleton.setMinHeight(112);
+            skeleton.getStyleClass().add("modrinth-result-skeleton");
+            results.getChildren().add(skeleton);
+        }
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -618,10 +612,11 @@ public class BrowseModsView extends VBox {
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
-                    if (results.getChildren().isEmpty()) {
-                        statusLabel.setText(failure.getMessage() == null
-                                ? Localization.text("modrinth.searchFailed") : failure.getMessage());
-                    }
+                    results.getChildren().clear();
+                    statusLabel.setText(failure.getMessage() == null
+                            ? Localization.text("modrinth.searchFailed") : failure.getMessage());
+                    retryButton.setVisible(true);
+                    retryButton.setManaged(true);
                 });
             }
         });
@@ -726,17 +721,18 @@ public class BrowseModsView extends VBox {
             boolean checkingCompatibility
     ) {
 
-        results
-                .getChildren()
-                .clear();
-
-        if (projects == null
-                || projects.isEmpty()) {
-
-            statusLabel.setText(
-                    Localization.text("browseMods.noCompatible")
-            );
-
+        results.getChildren().clear();
+        retryButton.setVisible(false);
+        retryButton.setManaged(false);
+        if (projects == null || projects.isEmpty()) {
+            results.getChildren().add(new EmptyState(
+                    "⌕",
+                    Localization.text("modrinth.emptyTitle"),
+                    Localization.text("modrinth.emptyDescription"),
+                    Localization.text("modrinth.emptyHint")
+            ));
+            statusLabel.setText(Localization.text("modrinth.showingResults")
+                    .replace("{start}", "0").replace("{end}", "0").replace("{total}", "0"));
             return;
         }
 
@@ -748,10 +744,11 @@ public class BrowseModsView extends VBox {
             results.getChildren().add(createSizedProjectCard(project));
         }
 
-        statusLabel.setText(checkingCompatibility
-                ? Localization.text("modrinth.resultsFound").replace("{count}", Integer.toString(projects.size()))
-                        + " • " + Localization.text("modrinth.compatibilityChecking")
-                : Localization.text("modrinth.compatibleProjectsFound").replace("{count}", Integer.toString(projects.size())));
+        ModrinthBrowserToolbar.SearchState page = browserToolbar.getState();
+        statusLabel.setText(Localization.text("modrinth.showingResults")
+                .replace("{start}", Integer.toString(page.offset() + 1))
+                .replace("{end}", Integer.toString(page.offset() + projects.size()))
+                .replace("{total}", formatNumber(browserToolbar.getTotalHits())));
     }
 
     private VBox createSizedProjectCard(ModrinthProject project) {
