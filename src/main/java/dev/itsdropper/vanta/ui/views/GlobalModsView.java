@@ -826,6 +826,38 @@ public class GlobalModsView extends VBox {
         return compatible;
     }
 
+    private void handleProjectInstall(String projectId, Button sourceButton) {
+        ModrinthContentType selectedType = contentTypeBox.getValue();
+        if (selectedType == ModrinthContentType.MODPACK) {
+            sourceButton.setDisable(true);
+            sourceButton.setText(Localization.text("common.installing"));
+            UiExecutor.shared().execute(() -> {
+                try {
+                    Instance imported = new ModrinthContentService().installModpack(
+                            modrinthClient.getProject(projectId)
+                    );
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        sourceButton.setDisable(false);
+                        sourceButton.setText(Localization.text("common.install"));
+                        statusLabel.setText(Localization.text("modrinth.modpackImported")
+                                .replace("{name}", imported.getName()));
+                    });
+                } catch (Throwable failure) {
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        sourceButton.setDisable(false);
+                        sourceButton.setText(Localization.text("common.install"));
+                        statusLabel.setText(failure.getMessage() == null
+                                ? Localization.text("modrinth.modpackImportFailed") : failure.getMessage());
+                    });
+                }
+            });
+        } else if (selectedType == ModrinthContentType.DATA_PACK) {
+            chooseDataPackWorld(projectId, sourceButton);
+        } else {
+            loadProjectForInstall(projectId, sourceButton);
+        }
+    }
+
     private void loadProjectForInstall(String projectId, Button sourceButton) {
         UiExecutor.shared().execute(() -> {
             try {
@@ -1193,40 +1225,11 @@ public class GlobalModsView extends VBox {
 
         Button versionsButton = createVersionsButton(project.getProjectId());
 
-        Button installButton =
-                new Button(Localization.text("common.install"));
+        Button installButton = new Button(Localization.text("common.install"));
         installButton.getStyleClass().add("primary-button");
-        installButton.setOnAction(event -> {
-            ModrinthContentType selectedType = contentTypeBox.getValue();
-            if (selectedType == ModrinthContentType.MODPACK) {
-                installButton.setDisable(true);
-                installButton.setText(Localization.text("common.installing"));
-                UiExecutor.shared().execute(() -> {
-                    try {
-                        Instance imported = new ModrinthContentService().installModpack(
-                                modrinthClient.getProject(project.getProjectId())
-                        );
-                        UiExecutor.shared().dispatchToUi(() -> {
-                            installButton.setDisable(false);
-                            installButton.setText(Localization.text("common.install"));
-                            statusLabel.setText(Localization.text("modrinth.modpackImported")
-                                    .replace("{name}", imported.getName()));
-                        });
-                    } catch (Throwable failure) {
-                        UiExecutor.shared().dispatchToUi(() -> {
-                            installButton.setDisable(false);
-                            installButton.setText(Localization.text("common.install"));
-                            statusLabel.setText(failure.getMessage() == null
-                                    ? Localization.text("modrinth.modpackImportFailed") : failure.getMessage());
-                        });
-                    }
-                });
-            } else if (selectedType == ModrinthContentType.DATA_PACK) {
-                chooseDataPackWorld(project.getProjectId(), installButton);
-            } else {
-                loadProjectForInstall(project.getProjectId(), installButton);
-            }
-        });
+        installButton.setOnAction(event ->
+                handleProjectInstall(project.getProjectId(), installButton)
+        );
 
         HBox actions = new HBox(
                 8,
@@ -1823,11 +1826,10 @@ public class GlobalModsView extends VBox {
 
         Button versionsButton = createVersionsButton(project.getProjectId());
 
-        Button installButton =
-                new Button(Localization.text("common.install"));
+        Button installButton = new Button(Localization.text("common.install"));
         installButton.getStyleClass().add("primary-button");
         installButton.setOnAction(event ->
-                loadProjectForInstall(project.getProjectId(), installButton)
+                handleProjectInstall(project.getProjectId(), installButton)
         );
 
         HBox actions = new HBox(
