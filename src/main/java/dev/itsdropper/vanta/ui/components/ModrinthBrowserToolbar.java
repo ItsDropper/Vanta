@@ -37,6 +37,7 @@ public final class ModrinthBrowserToolbar extends VBox {
     private final Button previousButton = new Button("‹");
     private final Button currentPageButton = new Button();
     private final Button nextPageButton = new Button();
+    private final Button nextArrowButton = new Button("›");
     private final Button ellipsisButton = new Button("…");
     private final Button lastPageButton = new Button();
     private final TextField jumpField = new TextField();
@@ -79,9 +80,13 @@ public final class ModrinthBrowserToolbar extends VBox {
         Label sortLabel = new Label(Localization.text("modrinth.sortBy"));
         sortLabel.getStyleClass().add("modrinth-control-label");
         sortBox.getItems().setAll(
-                "Relevance", "Downloads", "Followers", "Date published", "Date updated"
+                Localization.text("modrinth.sortRelevance"),
+                Localization.text("modrinth.sortDownloads"),
+                Localization.text("modrinth.sortFollowers"),
+                Localization.text("modrinth.sortDatePublished"),
+                Localization.text("modrinth.sortDateUpdated")
         );
-        sortBox.setValue("Relevance");
+        sortBox.setValue(Localization.text("modrinth.sortRelevance"));
         sortBox.getStyleClass().addAll("create-combo", "modrinth-small-combo");
         sortBox.setPrefWidth(145);
 
@@ -93,7 +98,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         limitBox.setPrefWidth(82);
 
         layoutButton.getStyleClass().addAll("secondary-button", "modrinth-layout-button");
-        layoutButton.setAccessibleText("Toggle result layout");
+        layoutButton.setAccessibleText(Localization.text("modrinth.layoutAccessible"));
         updateLayoutButton();
 
         jumpField.setPromptText(Localization.text("modrinth.pageNumber"));
@@ -114,7 +119,7 @@ public final class ModrinthBrowserToolbar extends VBox {
 
         for (Button button : new Button[]{
                 previousButton, currentPageButton, nextPageButton,
-                ellipsisButton, lastPageButton
+                ellipsisButton, lastPageButton, nextArrowButton
         }) {
             button.getStyleClass().addAll("secondary-button", "modrinth-page-button");
             button.setMinWidth(30);
@@ -124,13 +129,14 @@ public final class ModrinthBrowserToolbar extends VBox {
         previousButton.setAccessibleText(Localization.text("modrinth.previousPage"));
         currentPageButton.setAccessibleText(Localization.text("modrinth.currentPage"));
         nextPageButton.setAccessibleText(Localization.text("modrinth.nextPage"));
+        nextArrowButton.setAccessibleText(Localization.text("modrinth.nextPage"));
         ellipsisButton.setAccessibleText(Localization.text("modrinth.jumpToPage"));
         lastPageButton.setAccessibleText(Localization.text("modrinth.lastPage"));
 
         pagination.setAlignment(Pos.CENTER_RIGHT);
         pagination.getChildren().setAll(
                 previousButton, currentPageButton, nextPageButton,
-                ellipsisButton, jumpField, lastPageButton
+                ellipsisButton, jumpField, lastPageButton, nextArrowButton
         );
 
         Region spacer = new Region();
@@ -174,6 +180,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         previousButton.setOnAction(event -> moveToPage(currentPage() - 1));
         currentPageButton.setOnAction(event -> moveToPage(currentPage()));
         nextPageButton.setOnAction(event -> moveToPage(currentPage() + 1));
+        nextArrowButton.setOnAction(event -> moveToPage(currentPage() + 1));
         ellipsisButton.setOnAction(event -> showJumpField());
         lastPageButton.setOnAction(event -> moveToPage(pageCount()));
         updatePagination();
@@ -210,13 +217,12 @@ public final class ModrinthBrowserToolbar extends VBox {
     }
 
     private String selectedIndex() {
-        return switch (sortBox.getValue() == null ? "Relevance" : sortBox.getValue()) {
-            case "Downloads" -> "downloads";
-            case "Followers" -> "follows";
-            case "Date published" -> "newest";
-            case "Date updated" -> "updated";
-            default -> "relevance";
-        };
+        String selected = sortBox.getValue();
+        if (Localization.text("modrinth.sortDownloads").equals(selected)) return "downloads";
+        if (Localization.text("modrinth.sortFollowers").equals(selected)) return "follows";
+        if (Localization.text("modrinth.sortDatePublished").equals(selected)) return "newest";
+        if (Localization.text("modrinth.sortDateUpdated").equals(selected)) return "updated";
+        return "relevance";
     }
 
     private int currentPage() {
@@ -285,6 +291,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         previousButton.setDisable(page <= 1);
         currentPageButton.setDisable(true);
         nextPageButton.setDisable(page >= pages);
+        nextArrowButton.setDisable(page >= pages);
         ellipsisButton.setDisable(pages <= 3);
         lastPageButton.setText(Integer.toString(pages));
         lastPageButton.setDisable(page >= pages || pages <= 2);
