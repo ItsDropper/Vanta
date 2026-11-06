@@ -129,6 +129,10 @@ public class MinecraftLauncher {
         command.add("-Djava.net.useSystemProxies=true");
 
         if ("VantaLoader".equalsIgnoreCase(data.loader)) {
+            // Explicitly hand the instance identity to the agent. The process
+            // working directory is still set below, but must not be the only
+            // source of truth for where VantaLoader discovers native mods.
+            command.add("-Dvanta.instance.directory=" + minecraft);
             command.add("-Dvanta.minecraft.version=" + data.version);
             command.add("-Dvanta.environment=client");
             if (data.minecraftMappings == null || !Files.isRegularFile(data.minecraftMappings)) {
