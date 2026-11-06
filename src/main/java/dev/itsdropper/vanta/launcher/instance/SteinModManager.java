@@ -130,10 +130,19 @@ public final class SteinModManager {
         requireSteinInstance(instance);
         List<SourceRecord> records = readSourceRecords(instance);
         List<Release> releases = new ArrayList<>();
+        java.util.Map<String, String> owners = new java.util.HashMap<>();
         for (SourceRecord record : records) {
             Index index = readSource(record.url());
             for (JsonNode mod : index.mods()) {
-                releases.add(parseRelease(mod, index.source()));
+                Release release = parseRelease(mod, index.source());
+                String previousSource = owners.putIfAbsent(release.id(), release.sourceUrl());
+                if (previousSource != null && !previousSource.equals(release.sourceUrl())) {
+                    throw new IOException("Stein mod ID '" + release.id()
+                            + "' is published by more than one configured source.");
+                }
+                if (previousSource == null) {
+                    releases.add(release);
+                }
             }
         }
         releases.sort(Comparator.comparing(Release::name, String.CASE_INSENSITIVE_ORDER));
@@ -202,7 +211,12 @@ public final class SteinModManager {
             writeJsonAtomically(stateFile(instance, INSTALLED_FILE), installed);
 
             if (backup != null) {
-                Files.deleteIfExists(backup);
+                try {
+                    Files.deleteIfExists(backup);
+                } catch (IOException cleanupFailure) {
+                    System.err.println("Could not remove Stein mod rollback file: "
+                            + cleanupFailure.getMessage());
+                }
             }
             return destination;
         } catch (Exception failure) {
@@ -229,9 +243,18 @@ public final class SteinModManager {
             }
             throw new IOException("Could not install Stein mod " + release.id() + ".", failure);
         } finally {
-            Files.deleteIfExists(staged);
+            try {
+                Files.deleteIfExists(staged);
+            } catch (IOException cleanupFailure) {
+                System.err.println("Could not remove staged Stein mod: " + cleanupFailure.getMessage());
+            }
             if (backup != null && Files.exists(backup) && !oldMoved) {
-                Files.deleteIfExists(backup);
+                try {
+                    Files.deleteIfExists(backup);
+                } catch (IOException cleanupFailure) {
+                    System.err.println("Could not remove unused Stein mod backup: "
+                            + cleanupFailure.getMessage());
+                }
             }
         }
     }
@@ -269,9 +292,36 @@ public final class SteinModManager {
         if (Files.isSymbolicLink(file)) {
             throw new IOException("Refusing to remove a symbolic link from the mods directory.");
         }
-        Files.deleteIfExists(file);
-        installed.removeIf(item -> id.equals(item.id()));
-        writeJsonAtomically(stateFile(instance, INSTALLED_FILE), installed);
+        Path backup = modsDirectory.resolve(".stein-remove-" + UUID.randomUUID() + ".backup");
+        boolean moved = false;
+        try {
+            if (Files.exists(file, LinkOption.NOFOLLOW_LINKS)) {
+                move(file, backup, false);
+                moved = true;
+            }
+            installed.removeIf(item -> id.equals(item.id()));
+            writeJsonAtomically(stateFile(instance, INSTALLED_FILE), installed);
+            if (moved) {
+                try {
+                    Files.deleteIfExists(backup);
+                } catch (IOException cleanupFailure) {
+                    System.err.println("Could not remove Stein mod removal backup: "
+                            + cleanupFailure.getMessage());
+                }
+            }
+        } catch (Exception failure) {
+            if (moved && Files.exists(backup)) {
+                try {
+                    move(backup, file, true);
+                } catch (IOException rollbackFailure) {
+                    failure.addSuppressed(rollbackFailure);
+                }
+            }
+            if (failure instanceof IOException io) {
+                throw io;
+            }
+            throw new IOException("Could not remove Stein mod " + id + ".", failure);
+        }
     }
 
     private record Index(Source source, List<JsonNode> mods) {
