@@ -131,7 +131,7 @@ public class GlobalModsView extends VBox {
 
         PageHeader header = new PageHeader(
                 "Modrinth",
-                "Browse mods, resource packs, and shaders on Modrinth.",
+                Localization.text("modrinth.subtitle"),
                 "page-title",
                 "page-subtitle"
         );
@@ -209,11 +209,11 @@ public class GlobalModsView extends VBox {
                 ModrinthContentType.MODPACK
         )) {
             String label = switch (type) {
-                case MOD -> "Mods";
-                case RESOURCE_PACK -> "Resource Packs";
-                case DATA_PACK -> "Data Packs";
-                case SHADER -> "Shaders";
-                case MODPACK -> "Modpacks";
+                case MOD -> Localization.text("modrinth.mods");
+                case RESOURCE_PACK -> Localization.text("modrinth.resourcePacks");
+                case DATA_PACK -> Localization.text("modrinth.dataPacks");
+                case SHADER -> Localization.text("modrinth.shaders");
+                case MODPACK -> Localization.text("modrinth.modpacks");
             };
             Button segment = new Button(label);
             segment.getStyleClass().add("modrinth-content-segment");
@@ -223,14 +223,14 @@ public class GlobalModsView extends VBox {
         }
         updateContentTypeSegments();
 
-        Label filtersTitle = new Label("Filters");
+        Label filtersTitle = new Label(Localization.text("modrinth.filters"));
         filtersTitle.getStyleClass().add("settings-section-title");
         VBox versionFilters = new VBox(8, versionSearchField, versionsButton, showAllVersions);
         VBox loaderFilters = new VBox(8, loadersButton);
         VBox categoryFilters = new VBox(8, categoriesButton);
-        TitledPane versionPanel = new TitledPane("Game version", versionFilters);
-        TitledPane loaderPanel = new TitledPane("Loader", loaderFilters);
-        TitledPane categoryPanel = new TitledPane("Category", categoryFilters);
+        TitledPane versionPanel = new TitledPane(Localization.text("modrinth.gameVersion"), versionFilters);
+        TitledPane loaderPanel = new TitledPane(Localization.text("modrinth.loader"), loaderFilters);
+        TitledPane categoryPanel = new TitledPane(Localization.text("modrinth.category"), categoryFilters);
         versionPanel.setExpanded(true);
         loaderPanel.setExpanded(true);
         categoryPanel.setExpanded(true);
@@ -343,12 +343,12 @@ public class GlobalModsView extends VBox {
         sortBox.getItems().setAll("Relevance", "Downloads", "Followers", "Date published", "Date updated");
         sortBox.setValue("Relevance");
         sortBox.getStyleClass().add("create-combo");
-        sortBox.setAccessibleText("Sort Modrinth results");
+        sortBox.setAccessibleText(Localization.text("modrinth.sortAccessible"));
         resultLimitBox = new ComboBox<>();
         resultLimitBox.getItems().setAll(5, 10, 15, 20, 50, 100);
         resultLimitBox.setValue(20);
         resultLimitBox.getStyleClass().add("create-combo");
-        resultLimitBox.setAccessibleText("Results per page");
+        resultLimitBox.setAccessibleText(Localization.text("modrinth.resultsPerPageAccessible"));
         previousPageButton = new Button("‹");
         nextPageButton = new Button("›");
         pageIndicator = new Label("Page 1");
@@ -1254,7 +1254,7 @@ public class GlobalModsView extends VBox {
                 new Label(
                         safe(
                                 project.getDescription(),
-                                "No description."
+                                Localization.text("modrinth.noDescription")
                         )
                 );
 
@@ -1504,7 +1504,7 @@ public class GlobalModsView extends VBox {
         int pages = Math.max(1, (int) Math.ceil(searchTotalHits / (double) limit));
         previousPageButton.setDisable(searchOffset <= 0);
         nextPageButton.setDisable(searchOffset + limit >= searchTotalHits);
-        pageIndicator.setText("Page " + page + " of " + pages + "  •  " + searchTotalHits + " results");
+        pageIndicator.setText(Localization.text("modrinth.pageStatus").replace("{page}", Integer.toString(page)).replace("{pages}", Integer.toString(pages)).replace("{total}", Integer.toString(searchTotalHits)));
     }
 
     // =============================================================
@@ -1915,11 +1915,11 @@ public class GlobalModsView extends VBox {
                 "instance-name"
         );
 
-        Label author = new Label("by " + safe(project.getAuthor(), "Unknown author"));
+        Label author = new Label("by " + safe(project.getAuthor(), Localization.text("modrinth.unknownAuthor")));
         author.getStyleClass().add("instance-loader");
 
         Label description =
-                new Label(safe(project.getDescription(), "No description."));
+                new Label(safe(project.getDescription(), Localization.text("modrinth.noDescription")));
         description.setWrapText(true);
         description.setMaxWidth(650);
         description.setMaxHeight(42);
