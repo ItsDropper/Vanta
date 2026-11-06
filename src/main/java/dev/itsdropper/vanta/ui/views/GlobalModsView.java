@@ -513,7 +513,8 @@ public class GlobalModsView extends VBox {
 
     private HBox createFilterSearch(TextField field) {
         Label icon = new Label();
-        icon.setGraphic(IconView.create(IconView.Type.SEARCH, 14));
+        icon.setGraphic(dev.itsdropper.vanta.ui.components.IconView.create(
+                dev.itsdropper.vanta.ui.components.IconView.Type.SEARCH, 14));
         icon.getStyleClass().add("modrinth-filter-search-icon");
         HBox row = new HBox(7, icon, field);
         row.setAlignment(Pos.CENTER_LEFT);
@@ -572,7 +573,7 @@ public class GlobalModsView extends VBox {
                 .forEach(tag -> {
                     String name = tag.getName();
                     String id = dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(name);
-                    CheckBox option = createFilterOption(formatTagName(name), id,
+                    Button option = createFilterOption(formatTagName(name), id,
                             selectedLoaders.contains(id), selected -> {
                                 if (selected) selectedLoaders.add(id); else selectedLoaders.remove(id);
                                 browserToolbar.refresh();
@@ -598,7 +599,7 @@ public class GlobalModsView extends VBox {
                 .filter(tag -> tag.getName().toLowerCase(java.util.Locale.ROOT).contains(query))
                 .forEach(tag -> {
                     String name = tag.getName();
-                    CheckBox option = createFilterOption(formatTagName(name), name,
+                    Button option = createFilterOption(formatTagName(name), name,
                             selectedCategories.contains(name), selected -> {
                                 if (selected) selectedCategories.add(name); else selectedCategories.remove(name);
                                 browserToolbar.refresh();
