@@ -294,7 +294,8 @@ public final class InstanceRepairService {
                 if (primaryFailure != null) {
                     primaryFailure.addSuppressed(cleanupFailure);
                 } else {
-                    throw cleanupFailure;
+                    System.err.println("[Vanta Repair] Could not remove Stein rollback snapshot: "
+                            + cleanupFailure.getMessage());
                 }
             }
         }
