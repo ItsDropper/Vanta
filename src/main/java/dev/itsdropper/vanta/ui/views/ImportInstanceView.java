@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.geometry.Insets;
@@ -60,7 +61,7 @@ public class ImportInstanceView extends VBox {
 
         Label title =
                 new Label(
-                        "Import modpack"
+                        Localization.text("importInstance.title")
                 );
 
         title.getStyleClass().add(
@@ -69,7 +70,7 @@ public class ImportInstanceView extends VBox {
 
         Label subtitle =
                 new Label(
-                        "Import a Modrinth .mrpack into a new Vanta instance."
+                        Localization.text("importInstance.subtitle")
                 );
 
         subtitle.getStyleClass().add(
@@ -106,7 +107,7 @@ public class ImportInstanceView extends VBox {
 
         Label panelTitle =
                 new Label(
-                        "MODRINTH MODPACK"
+                        Localization.text("importInstance.eyebrow")
                 );
 
         panelTitle.getStyleClass().add(
@@ -115,7 +116,7 @@ public class ImportInstanceView extends VBox {
 
         Label description =
                 new Label(
-                        "Choose a .mrpack file. Vanta will create a new instance and install the modpack contents automatically."
+                        Localization.text("importInstance.description")
                 );
 
         description.setWrapText(
@@ -132,13 +133,13 @@ public class ImportInstanceView extends VBox {
 
         importButton =
                 new Button(
-                        "CHOOSE .MRPACK"
+                        Localization.text("importInstance.choose")
                 );
 
         importButton.getStyleClass().add(
                 "primary-button"
         );
-        importButton.setAccessibleText("Choose a Modrinth modpack file to import");
+        importButton.setAccessibleText(Localization.text("importInstance.chooseAccessible"));
         importButton.setTooltip(new javafx.scene.control.Tooltip("Select a readable .mrpack file"));
 
         importButton.setPrefHeight(
@@ -195,7 +196,7 @@ public class ImportInstanceView extends VBox {
                 "create-status"
         );
         statusLabel.setWrapText(true);
-        statusLabel.setAccessibleText("Modpack import status");
+        statusLabel.setAccessibleText(Localization.text("importInstance.statusAccessible"));
 
         // =========================================================
         // ACTIONS
@@ -203,7 +204,7 @@ public class ImportInstanceView extends VBox {
 
         backButton =
                 new Button(
-                        "CANCEL"
+                        Localization.text("common.cancel")
                 );
 
         backButton.getStyleClass().add(
@@ -255,7 +256,7 @@ public class ImportInstanceView extends VBox {
                 new FileChooser();
 
         chooser.setTitle(
-                "Import Modrinth Modpack"
+                Localization.text("importInstance.action")
         );
 
         chooser.getExtensionFilters().add(
@@ -294,7 +295,7 @@ public class ImportInstanceView extends VBox {
 
         if (file == null || !file.isFile() || !file.canRead()
                 || !file.getName().toLowerCase(java.util.Locale.ROOT).endsWith(".mrpack")) {
-            statusLabel.setText("Choose an existing, readable .mrpack file and try again.");
+            statusLabel.setText(Localization.text("importInstance.validation"));
             return;
         }
 
@@ -315,7 +316,7 @@ public class ImportInstanceView extends VBox {
         );
 
         statusLabel.setText(
-                "Importing "
+                Localization.text("importInstance.importingPrefix")
                         + file.getName()
                         + "..."
         );
@@ -332,7 +333,7 @@ public class ImportInstanceView extends VBox {
                         UiExecutor.shared().dispatchToUi(() -> {
 
                             statusLabel.setText(
-                                    "Imported "
+                                    Localization.text("importInstance.importedPrefix")
                                             + instance.getName()
                                             + " successfully."
                             );
