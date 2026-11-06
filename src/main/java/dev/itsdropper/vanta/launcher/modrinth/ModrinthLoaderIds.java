@@ -19,9 +19,7 @@ public final class ModrinthLoaderIds {
             "legacyfabric",
             "ornithe",
             "bta-babric",
-            "java-agent",
-            "nilloader",
-            "modloader"
+            "java-agent"
     );
 
     private ModrinthLoaderIds() {
