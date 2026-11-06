@@ -95,6 +95,10 @@ public class ModrinthProject {
         project.iconUrl = hit.getIconUrl();
         project.downloads = hit.getDownloads();
         project.followers = hit.getFollows();
+        project.categories = hit.getCategories();
+        project.versions = hit.getVersions();
+        project.dateCreated = hit.getDateCreated();
+        project.dateModified = hit.getDateModified();
         return project;
     }
 
@@ -145,11 +149,11 @@ public class ModrinthProject {
     }
 
     public List<String> getCategories() {
-        return categories;
+        return categories == null ? List.of() : categories;
     }
 
     public List<String> getVersions() {
-        return versions;
+        return versions == null ? List.of() : versions;
     }
 
     public List<String> getLoaders() {
