@@ -245,8 +245,8 @@ public class ModDetailsView extends VBox {
                                 findAuthor(
                                         teamMembers
                                 );
-                        List<ModrinthTag> loaderTags = List.of();
-                        List<ModrinthTag> categoryTags = List.of();
+                        List<ModrinthTag> loaderTags;
+                        List<ModrinthTag> categoryTags;
                         try {
                             loaderTags = modrinthClient.getLoaderTags(contentType);
                             categoryTags = modrinthClient.getCategoryTags(contentType);
@@ -255,6 +255,8 @@ public class ModDetailsView extends VBox {
                             java.util.logging.Logger.getLogger(ModDetailsView.class.getName())
                                     .log(java.util.logging.Level.WARNING,
                                             "Could not load Modrinth tag metadata", tagLoadFailure);
+                            loaderTags = List.of();
+                            categoryTags = List.of();
                         }
 
                         UiExecutor.shared().dispatchToUi(
