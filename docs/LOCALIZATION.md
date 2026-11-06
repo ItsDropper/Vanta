@@ -40,13 +40,13 @@ locale suffix convention; for example, `pt-PT` maps to
 
 ## Adding a language
 
-1. Add a `Localization.Language` entry with native and English names. 
-3. Add `messages_<locale>.properties` under
+1. Add a `Localization.Language` entry with native and English names.
+2. Add `messages_<locale>.properties` under
    `src/main/resources/dev/itsdropper/vanta/i18n/`.
-4. Add the locale to `LocalizationTest` coverage through the supported-language
+3. Add the locale to `LocalizationTest` coverage through the supported-language
    catalog; the test verifies all required language-preference and Settings-navigation
    strings exist.
-5. Translate UI strings by stable semantic keys, not by using English UI text as
+4. Translate UI strings by stable semantic keys, not by using English UI text as
    a lookup key.
 
 ## Translation rules
