@@ -622,7 +622,7 @@ public class GlobalModsView extends VBox {
             Runnable updateButton
     ) {
         VBox root = (VBox) popup.getContent().get(0);
-        Button clear = new Button(Localization.text("common.clear"));
+        Button clear = new Button(Localization.text("modrinth.clear"));
         clear.getStyleClass().add("secondary-button");
         Button apply = new Button(Localization.text("modrinth.applyFilters"));
         apply.getStyleClass().add("primary-button");
