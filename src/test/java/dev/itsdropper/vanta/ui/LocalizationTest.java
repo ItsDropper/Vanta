@@ -39,10 +39,10 @@ class LocalizationTest {
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
-            ResourceBundle bundle = ResourceBundle.getBundle(
-                    BUNDLE,
-                    Locale.forLanguageTag(language.code())
-            );
+            Locale requestedLocale = Locale.forLanguageTag(language.code());
+            ResourceBundle bundle = ResourceBundle.getBundle(BUNDLE, requestedLocale);
+            assertEquals(requestedLocale, bundle.getLocale(),
+                    language.code() + " unexpectedly fell back to another locale");
             for (String key : requiredKeys) {
                 assertTrue(bundle.containsKey(key), language.code() + " is missing " + key);
                 assertFalse(bundle.getString(key).isBlank(), language.code() + " has blank " + key);
