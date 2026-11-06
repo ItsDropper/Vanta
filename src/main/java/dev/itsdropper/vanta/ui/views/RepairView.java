@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -61,7 +62,7 @@ public class RepairView extends VBox {
 
         Button backButton =
                 new Button(
-                        "← BACK"
+                        Localization.text("common.backArrow")
                 );
 
         backButton.getStyleClass().add(
@@ -103,7 +104,7 @@ public class RepairView extends VBox {
 
             Label empty =
                     new Label(
-                            "No specific issues were detected."
+                            Localization.text("repair.noIssues")
                     );
 
             empty.getStyleClass().add(
@@ -141,7 +142,7 @@ public class RepairView extends VBox {
 
         Label statusLabel =
                 new Label(
-                        "Vanta can attempt to repair these problems automatically."
+                        Localization.text("repair.description")
                 );
 
         statusLabel.setWrapText(
@@ -154,7 +155,7 @@ public class RepairView extends VBox {
 
         Button cancelButton =
                 new Button(
-                        "BACK"
+                        Localization.text("common.back")
                 );
 
         cancelButton.getStyleClass().add(
@@ -167,7 +168,7 @@ public class RepairView extends VBox {
 
         Button repairButton =
                 new Button(
-                        "REPAIR"
+                        Localization.text("repair.action")
                 );
 
         repairButton.getStyleClass().add(
@@ -187,7 +188,7 @@ public class RepairView extends VBox {
 
         if (onRestore != null && instance != null && instance.getDirectory() != null
                 && Files.isDirectory(instance.getDirectory().resolve(".vanta-repair-backups"))) {
-            Button restoreButton = new Button("RESTORE METADATA BACKUP");
+            Button restoreButton = new Button(Localization.text("repair.restoreMetadata"));
             restoreButton.getStyleClass().add("secondary-button");
             restoreButton.setOnAction(event -> onRestore.run());
             actions.getChildren().add(restoreButton);
