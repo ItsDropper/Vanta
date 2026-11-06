@@ -306,7 +306,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             if (selected == null) return;
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle(Localization.text("serverManager.restoreBackupAction"));
-            confirm.setHeaderText("Restore " + selected.getName() + "?");
+            confirm.setHeaderText(Localization.text("serverManager.restorePrefix") + selected.getName() + "?");
             confirm.setContentText(Localization.text("serverManager.restoreWarning"));
             if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
             Path backup = selected.toPath();
@@ -323,7 +323,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             Profile p = service.profile(id).orElseThrow();
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
             confirm.setTitle(Localization.text("serverManager.removeProfile"));
-            confirm.setHeaderText("Remove " + p.name + " from Vanta?");
+            confirm.setHeaderText(Localization.text("serverManager.removePrefix") + p.name + " from Vanta?");
             confirm.setContentText(Localization.text("serverManager.removeWarning"));
             if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
             service.removeProfile(id);
@@ -509,7 +509,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         if (snapshot.state() == State.RUNNING || snapshot.state() == State.STARTING) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
             alert.setTitle(Localization.text("serverManager.restartTitle"));
-            alert.setHeaderText("Restart " + snapshot.profile().name + "?");
+            alert.setHeaderText(Localization.text("serverManager.restartPrefix") + snapshot.profile().name + "?");
             alert.setContentText(Localization.text("serverManager.restartDescription"));
             if (alert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
             try {
