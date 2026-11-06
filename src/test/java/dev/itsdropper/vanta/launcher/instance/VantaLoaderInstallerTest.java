@@ -23,12 +23,28 @@ class VantaLoaderInstallerTest {
         assertTrue(VantaLoaderInstaller.supportsMinecraftVersion("1.20.6"));
         assertTrue(VantaLoaderInstaller.supportsMinecraftVersion("1.21.1"));
         assertTrue(VantaLoaderInstaller.supportsMinecraftVersion("1.21.11"));
+        assertTrue(VantaLoaderInstaller.supportsMinecraftVersion("1.21.11-pre1"));
+        assertTrue(VantaLoaderInstaller.supportsMinecraftVersion("1.21.11+build.1"));
         assertFalse(VantaLoaderInstaller.supportsMinecraftVersion("1.20.4"));
         assertFalse(VantaLoaderInstaller.supportsMinecraftVersion("1.19.4"));
         assertFalse(VantaLoaderInstaller.supportsMinecraftVersion("b1.7.3"));
         assertFalse(VantaLoaderInstaller.supportsMinecraftVersion("26.1"));
         assertFalse(VantaLoaderInstaller.supportsMinecraftVersion("not-a-version"));
         assertFalse(VantaLoaderInstaller.supportsMinecraftVersion(null));
+    }
+
+    @Test
+    void acceptsActualNightlyReleaseTagsAndMigratesLegacyCommitTags() {
+        Instance current = new Instance("test", "Test", "1.21.11",
+                "VantaLoader", "nightly-0.1.0-20261106-feacb71", temporaryDirectory);
+        assertEquals(temporaryDirectory.resolve(
+                        "libraries/dev/itsdropper/vantaloader/nightly-0.1.0-20261106-feacb71/VantaLoader-agent.jar"),
+                VantaLoaderInstaller.agentPath(current));
+
+        Instance legacy = new Instance("test", "Test", "1.21.11",
+                "VantaLoader", "nightly-0123456789abcdef0123456789abcdef01234567", temporaryDirectory);
+        assertTrue(VantaLoaderInstaller.agentPath(legacy).toString().contains(
+                "nightly-0123456789abcdef0123456789abcdef01234567"));
     }
 
     @Test
