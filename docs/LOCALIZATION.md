@@ -30,8 +30,8 @@ locale suffix convention; for example, `pt-PT` maps to
   application startup, before launcher views are constructed.
 - `Localization.text(key)` is the single lookup entry point for UI code.
 - `LanguagePreferenceControl` is shared by Overview and Settings → General.
-- The Overview dashboard's primary headings, loading states, and instance-creation
-  affordances are localized.
+- The Overview dashboard's primary headings, loading states, empty states, launch
+  statuses, and instance/server actions are localized.
 - Settings navigation labels, category headings, compact navigation, and search
   affordances use localized resource keys while retaining stable internal section IDs.
 - Account cards and switching, command palette, login popup, loading screen, and
@@ -39,7 +39,8 @@ locale suffix convention; for example, `pt-PT` maps to
 - Account management, onboarding, instance creation/presets, Modrinth browsing,
   installed/global mod views, download center, repair, screenshots, remote server
   connection dialogs, instance import/settings, instance cards, sidebar, and the
-  environment State center have localized UI resources.
+  environment State center, and the instance library's main actions, scanning states,
+  recovery labels, and backup status messages have localized UI resources.
 - `LocalizationTest` verifies the required keys exist and are nonblank in every
   supported locale; each bundle is checked against its exact requested locale.
 - Changing the preference never mutates the active bundle in a running scene.
@@ -71,8 +72,9 @@ locale suffix convention; for example, `pt-PT` maps to
   officially defined.
 - Avoid machine-translating technical terms without review by a fluent speaker.
 
-The initial increments localize the language preference component, Settings
-navigation, and primary Overview dashboard labels, and establish the catalog and
-persistence lifecycle. Settings page content, secondary Overview states, and the
-remaining launcher surfaces are still English and must be migrated
-in separate, reviewable batches; this is not yet full-launcher localization.
+Localization is still incomplete. Most Settings page content, the detailed instance
+recovery/backup dialogs, Server Manager, and several other views/components still
+contain English UI text. The current test suite guarantees that every key already
+migrated has a nonblank value in every supported locale; it does not yet prove that
+all UI strings in the `ui/` package have been migrated. Do not describe the launcher
+as fully localized until that source-level coverage is complete.
