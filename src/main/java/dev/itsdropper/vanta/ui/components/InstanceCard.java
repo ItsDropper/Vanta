@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.components;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.geometry.Insets;
@@ -188,7 +189,7 @@ public class InstanceCard extends StackPane {
 
         statusLabel =
                 new Label(
-                        "● READY"
+                        Localization.text("instanceCard.ready")
                 );
 
         statusLabel.getStyleClass().add(
@@ -201,14 +202,14 @@ public class InstanceCard extends StackPane {
 
         playButton =
                 new Button(
-                        "PLAY"
+                        Localization.text("common.play")
                 );
 
         playButton.getStyleClass().add(
                 "instance-play-button"
         );
-        playButton.setAccessibleText("Launch Minecraft instance " + instance.getName());
-        playButton.setTooltip(new Tooltip("Launch " + instance.getName()));
+        playButton.setAccessibleText(Localization.text("instanceCard.launchPrefix") + instance.getName());
+        playButton.setTooltip(new Tooltip(Localization.text("instanceCard.launchAccessiblePrefix") + instance.getName()));
 
         playButton.setMinWidth(
                 90
@@ -249,14 +250,14 @@ public class InstanceCard extends StackPane {
 
         settingsButton =
                 new Button(
-                        "OPTIONS"
+                        Localization.text("instanceCard.options")
                 );
 
         settingsButton.getStyleClass().add(
                 "instance-settings-button"
         );
-        settingsButton.setAccessibleText("Options for " + instance.getName());
-        settingsButton.setTooltip(new Tooltip("Instance options"));
+        settingsButton.setAccessibleText(Localization.text("instanceCard.optionsForPrefix") + instance.getName());
+        settingsButton.setTooltip(new Tooltip(Localization.text("instanceCard.optionsAccessible")));
 
         settingsButton.setMinWidth(
                 82
@@ -360,7 +361,7 @@ public class InstanceCard extends StackPane {
                 ));
                 statusLabel.setVisible(true);
                 statusLabel.setManaged(true);
-                settingsButton.setText("OPTIONS");
+                settingsButton.setText(Localization.text("instanceCard.options"));
                 settingsButton.setMinWidth(82);
                 settingsButton.setPrefWidth(82);
                 settingsButton.setMaxWidth(82);
@@ -386,8 +387,8 @@ public class InstanceCard extends StackPane {
         menuButton.getStyleClass().add(
                 "instance-menu-button"
         );
-        menuButton.setAccessibleText("More actions for " + instance.getName());
-        menuButton.setTooltip(new Tooltip("More actions"));
+        menuButton.setAccessibleText(Localization.text("instanceCard.moreActionsForPrefix") + instance.getName());
+        menuButton.setTooltip(new Tooltip(Localization.text("instanceCard.moreActions")));
 
         menuButton.setFocusTraversable(true);
 
@@ -470,18 +471,18 @@ public class InstanceCard extends StackPane {
             Runnable onIcon
     ) {
 
-        MenuItem renameItem = new MenuItem("Rename instance");
-        MenuItem duplicateItem = new MenuItem("Duplicate instance");
-        MenuItem iconItem = new MenuItem("Change icon");
+        MenuItem renameItem = new MenuItem(Localization.text("instanceCard.rename"));
+        MenuItem duplicateItem = new MenuItem(Localization.text("instanceCard.duplicate"));
+        MenuItem iconItem = new MenuItem(Localization.text("instanceCard.changeIcon"));
 
         MenuItem exportItem =
                 new MenuItem(
-                        "Export instance"
+                        Localization.text("instanceCard.export")
                 );
 
         MenuItem deleteItem =
                 new MenuItem(
-                        "Delete instance"
+                        Localization.text("instanceCard.delete")
                 );
 
         deleteItem.getStyleClass().add(
@@ -551,7 +552,7 @@ public class InstanceCard extends StackPane {
 
         Label title =
                 new Label(
-                        "Delete instance?"
+                        Localization.text("instanceCard.deleteQuestion")
                 );
 
         title.getStyleClass().add(
@@ -585,7 +586,7 @@ public class InstanceCard extends StackPane {
 
         Button cancelButton =
                 new Button(
-                        "Cancel"
+                        Localization.text("common.cancelTitleCase")
                 );
 
         cancelButton.getStyleClass().add(
@@ -603,7 +604,7 @@ public class InstanceCard extends StackPane {
 
         Button deleteButton =
                 new Button(
-                        "Delete"
+                        Localization.text("common.deleteTitleCase")
                 );
 
         deleteButton.getStyleClass().add(
@@ -713,7 +714,7 @@ public class InstanceCard extends StackPane {
                 new FileChooser();
 
         chooser.setTitle(
-                "Export Minecraft Instance"
+                Localization.text("instanceCard.exportTitle")
         );
 
         chooser.getExtensionFilters().add(
@@ -818,11 +819,11 @@ public class InstanceCard extends StackPane {
                 );
 
         alert.setTitle(
-                "Export Complete"
+                Localization.text("instanceCard.exportComplete")
         );
 
         alert.setHeaderText(
-                "Instance exported successfully"
+                Localization.text("instanceCard.exportSuccess")
         );
 
         alert.setContentText(
@@ -847,11 +848,11 @@ public class InstanceCard extends StackPane {
                 );
 
         alert.setTitle(
-                "Export Failed"
+                Localization.text("instanceCard.exportFailed")
         );
 
         alert.setHeaderText(
-                "Could not export instance"
+                Localization.text("instanceCard.exportError")
         );
 
         String message =
@@ -1035,7 +1036,7 @@ public class InstanceCard extends StackPane {
                     resetToReady();
 
                     statusLabel.setText(
-                            "● READY"
+                            Localization.text("instanceCard.ready")
                     );
                 }
 
@@ -1057,7 +1058,7 @@ public class InstanceCard extends StackPane {
                     );
 
                     statusLabel.setText(
-                            "● PREPARING"
+                            Localization.text("instanceCard.preparing")
                     );
                 }
 
@@ -1079,7 +1080,7 @@ public class InstanceCard extends StackPane {
                     );
 
                     statusLabel.setText(
-                            "● STARTING"
+                            Localization.text("instanceCard.starting")
                     );
                 }
 
@@ -1101,7 +1102,7 @@ public class InstanceCard extends StackPane {
                     );
 
                     statusLabel.setText(
-                            "● RUNNING"
+                            Localization.text("instanceCard.running")
                     );
                 }
 
@@ -1123,7 +1124,7 @@ public class InstanceCard extends StackPane {
                     );
 
                     statusLabel.setText(
-                            "● CLOSING"
+                            Localization.text("instanceCard.closing")
                     );
                 }
 
@@ -1138,14 +1139,14 @@ public class InstanceCard extends StackPane {
                             false
                     );
 
-                    setPlayButtonAction("PLAY", "Launch Minecraft instance " + instance.getName());
+                    setPlayButtonAction(Localization.text("common.play"), Localization.text("instanceCard.launchPrefix") + instance.getName());
 
                     setPlayingStyle(
                             false
                     );
 
                     statusLabel.setText(
-                            "● ERROR"
+                            Localization.text("instanceCard.error")
                     );
                 }
             }
@@ -1164,14 +1165,14 @@ public class InstanceCard extends StackPane {
                 false
         );
 
-        setPlayButtonAction("PLAY", "Launch Minecraft instance " + instance.getName());
+        setPlayButtonAction(Localization.text("common.play"), Localization.text("instanceCard.launchPrefix") + instance.getName());
 
         setPlayingStyle(
                 false
         );
 
         statusLabel.setText(
-                "● READY"
+                Localization.text("instanceCard.ready")
         );
     }
 
