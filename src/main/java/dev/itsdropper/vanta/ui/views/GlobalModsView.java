@@ -169,17 +169,20 @@ public class GlobalModsView extends VBox {
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
+            searchOffset = 0;
             loadLoaderTags(newValue);
             refreshForCurrentFilters();
         });
 
         loaderBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
+                searchOffset = 0;
                 refreshForCurrentFilters();
             }
         });
 
         versionBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            searchOffset = 0;
             refreshForCurrentFilters();
         });
 
