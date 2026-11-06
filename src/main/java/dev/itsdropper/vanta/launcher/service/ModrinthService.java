@@ -136,6 +136,7 @@ public class ModrinthService {
     public Path repairModDependency(Instance instance, String projectId, List<String> requiredVersions) throws IOException, InterruptedException { return repair.repairModDependency(instance, projectId, requiredVersions); }
     public Path installResourcePack(Instance instance, ModrinthProject project) throws IOException, InterruptedException { return installer.installResourcePack(instance, project); }
     public Path installShader(Instance instance, ModrinthProject project) throws IOException, InterruptedException { return installer.installShader(instance, project); }
+    public Path installDataPack(Instance instance, ModrinthProject project) throws IOException, InterruptedException { return installer.installDataPack(instance, project); }
 
     public record ResolvedMod(String projectId, ModrinthVersion version) {}
 }
