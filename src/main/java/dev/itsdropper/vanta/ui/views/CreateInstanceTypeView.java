@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Insets;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.geometry.Pos;
@@ -49,7 +50,7 @@ public class CreateInstanceTypeView extends VBox {
         // =========================================================
 
         Label eyebrow =
-                new Label("NEW INSTANCE");
+                new Label(Localization.text("createType.title"));
         eyebrow.getStyleClass().add("settings-nav-group");
 
         PageHeader pageHeader = new PageHeader(
@@ -146,7 +147,7 @@ public class CreateInstanceTypeView extends VBox {
 
         Button backButton =
                 new Button(
-                        "Back"
+                        Localization.text("common.back")
                 );
 
         backButton.getStyleClass().add(
