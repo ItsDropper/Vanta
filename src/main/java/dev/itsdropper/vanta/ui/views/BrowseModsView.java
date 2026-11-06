@@ -725,12 +725,12 @@ public class BrowseModsView extends VBox {
         retryButton.setVisible(false);
         retryButton.setManaged(false);
         if (projects == null || projects.isEmpty()) {
-            results.getChildren().add(new EmptyState(
-                    "⌕",
-                    Localization.text("modrinth.emptyTitle"),
-                    Localization.text("modrinth.emptyDescription"),
-                    Localization.text("modrinth.emptyHint")
-            ));
+            VBox emptyState = new VBox(7,
+                    new Label(Localization.text("modrinth.emptyTitle")),
+                    new Label(Localization.text("modrinth.emptyDescription")),
+                    new Label(Localization.text("modrinth.emptyHint")));
+            emptyState.getStyleClass().add("modrinth-empty-state");
+            results.getChildren().add(emptyState);
             statusLabel.setText(Localization.text("modrinth.showingResults")
                     .replace("{start}", "0").replace("{end}", "0").replace("{total}", "0"));
             return;
