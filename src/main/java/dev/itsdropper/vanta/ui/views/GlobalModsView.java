@@ -474,8 +474,9 @@ public class GlobalModsView extends VBox {
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId == categoryTagRequestId) {
-                        statusLabel.setText("Could not load Modrinth categories: "
-                                + (failure.getMessage() == null ? "request failed" : failure.getMessage()));
+                        statusLabel.setText(Localization.text("modrinth.categoriesUnavailable")
+                                .replace("{error}", failure.getMessage() == null
+                                        ? Localization.text("modrinth.requestFailed") : failure.getMessage()));
                     }
                 });
             }
@@ -484,7 +485,9 @@ public class GlobalModsView extends VBox {
 
     private void updateCategoriesButton() {
         categoriesButton.setText(selectedCategories.isEmpty()
-                ? "Categories" : "Categories (" + selectedCategories.size() + ")");
+                ? Localization.text("modrinth.categories")
+                : Localization.text("modrinth.categoriesSelected")
+                        .replace("{count}", Integer.toString(selectedCategories.size())));
     }
 
     private void showCategoryPicker() {
@@ -521,7 +524,7 @@ public class GlobalModsView extends VBox {
         scroll.setFitToWidth(true);
         scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         scroll.setPrefViewportHeight(300);
-        Button clear = new Button(Localization.text("common.clear"));
+        Button clear = new Button(Localization.text("modrinth.clear"));
         clear.getStyleClass().add("secondary-button");
         Button apply = new Button(Localization.text("modrinth.applyFilters"));
         apply.getStyleClass().add("primary-button");
@@ -860,7 +863,7 @@ public class GlobalModsView extends VBox {
                     sourceButton.setDisable(false);
                     sourceButton.setText(Localization.text("common.install"));
                     if (worlds.isEmpty()) {
-                        statusLabel.setText("No Minecraft worlds found in your instances. Create or import a world first.");
+                        statusLabel.setText(Localization.text("modrinth.noWorldsFound"));
                         return;
                     }
                     Popup popup = new Popup();
@@ -870,9 +873,9 @@ public class GlobalModsView extends VBox {
                     VBox root = new VBox(10);
                     root.getStyleClass().add("modrinth-popup");
                     root.setPrefWidth(520);
-                    Label title = new Label("Install data pack into a world");
+                    Label title = new Label(Localization.text("modrinth.dataPackInstallPrompt"));
                     title.getStyleClass().add("modrinth-popup-title");
-                    Label subtitle = new Label("Data packs are stored per-world, not in the instance root.");
+                    Label subtitle = new Label(Localization.text("modrinth.dataPackInstallDescription"));
                     subtitle.getStyleClass().add("modrinth-popup-subtitle");
                     VBox choices = new VBox(7);
                     for (DataPackWorld world : worlds) {
@@ -888,12 +891,13 @@ public class GlobalModsView extends VBox {
                                     new dev.itsdropper.vanta.launcher.service.ModrinthService()
                                             .installDataPack(world.instance(), world.directory(), project);
                                     UiExecutor.shared().dispatchToUi(() ->
-                                            statusLabel.setText("Installed " + project.getTitle()
-                                                    + " into " + world.directory().getFileName() + "."));
+                                            statusLabel.setText(Localization.text("modrinth.dataPackInstalled")
+                                                    .replace("{name}", project.getTitle())
+                                                    .replace("{world}", world.directory().getFileName().toString())));
                                 } catch (Throwable failure) {
                                     UiExecutor.shared().dispatchToUi(() ->
                                             statusLabel.setText(failure.getMessage() == null
-                                                    ? "Data pack installation failed." : failure.getMessage()));
+                                                    ? Localization.text("modrinth.dataPackInstallFailed") : failure.getMessage()));
                                 }
                             });
                         });
@@ -915,7 +919,7 @@ public class GlobalModsView extends VBox {
                     sourceButton.setDisable(false);
                     sourceButton.setText(Localization.text("common.install"));
                     statusLabel.setText(failure.getMessage() == null
-                            ? "Could not load Minecraft worlds." : failure.getMessage());
+                            ? Localization.text("modrinth.worldLoadFailed") : failure.getMessage());
                 });
             }
         });
@@ -1028,9 +1032,10 @@ public class GlobalModsView extends VBox {
             UiExecutor.shared().dispatchToUi(() -> {
                 sourceButton.setDisable(false);
                 sourceButton.setText(Localization.text("common.install"));
-                statusLabel.setText(project.getTitle() + " installed into " + installed
-                        + " instance" + (installed == 1 ? "" : "s")
-                        + (failures == 0 ? "." : "; " + failures + " failed."));
+                statusLabel.setText(Localization.text("modrinth.installedIntoInstances")
+                        .replace("{name}", project.getTitle())
+                        .replace("{count}", Integer.toString(installed))
+                        .replace("{failed}", Integer.toString(failures)));
             });
         });
     }
@@ -1204,14 +1209,15 @@ public class GlobalModsView extends VBox {
                         UiExecutor.shared().dispatchToUi(() -> {
                             installButton.setDisable(false);
                             installButton.setText(Localization.text("common.install"));
-                            statusLabel.setText("Imported " + imported.getName() + ".");
+                            statusLabel.setText(Localization.text("modrinth.modpackImported")
+                                    .replace("{name}", imported.getName()));
                         });
                     } catch (Throwable failure) {
                         UiExecutor.shared().dispatchToUi(() -> {
                             installButton.setDisable(false);
                             installButton.setText(Localization.text("common.install"));
                             statusLabel.setText(failure.getMessage() == null
-                                    ? "Modpack import failed." : failure.getMessage());
+                                    ? Localization.text("modrinth.modpackImportFailed") : failure.getMessage());
                         });
                     }
                 });
@@ -1464,10 +1470,8 @@ public class GlobalModsView extends VBox {
             results.getChildren().add(createSizedGlobalProjectCard(project));
         }
 
-        statusLabel.setText(
-                projects.size()
-                        + " projects found."
-        );
+        statusLabel.setText(Localization.text("modrinth.resultsFound")
+                .replace("{count}", Integer.toString(projects.size())));
     }
 
     private VBox createSizedGlobalProjectCard(ModrinthSearchHit project) {
@@ -1709,9 +1713,10 @@ public class GlobalModsView extends VBox {
             int installed = success;
             int failures = failed;
             UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(
-                    safe(version.getVersionNumber(), "Version") + " installed into " + installed
-                            + " instance" + (installed == 1 ? "" : "s")
-                            + (failures == 0 ? "." : "; " + failures + " failed.")
+                    Localization.text("modrinth.versionInstalledIntoInstances")
+                            .replace("{version}", safe(version.getVersionNumber(), "Version"))
+                            .replace("{count}", Integer.toString(installed))
+                            .replace("{failed}", Integer.toString(failures))
             ));
         });
     }
