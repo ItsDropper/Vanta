@@ -1,9 +1,10 @@
 /*
-
-import dev.itsdropper.vanta.ui.Localization; * Copyright (c) 2026 ItsDropper
+ * Copyright (c) 2026 ItsDropper
  * Licensed under the MIT License.
  */
 package dev.itsdropper.vanta.ui.views;
+
+import dev.itsdropper.vanta.ui.Localization;
 
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
