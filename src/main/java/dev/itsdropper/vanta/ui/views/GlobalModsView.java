@@ -772,7 +772,7 @@ public class GlobalModsView extends VBox {
     }
 
     private List<String> selectedLoaderFacets() {
-        return selectedLoaders.stream().filter(dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds::supportsSearchFacet).toList();
+        return selectedLoaders.stream().map(dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds::normalize).toList();
     }
 
     private List<String> selectedVersionFacets() {
@@ -834,6 +834,8 @@ public class GlobalModsView extends VBox {
 
         List<String> sourceVersions = showAllVersions.isSelected()
                 ? allMinecraftVersions : stableMinecraftVersions;
+        selectedVersions.retainAll(sourceVersions);
+        updateVersionButton();
         List<String> filtered = sourceVersions.stream()
                 .filter(version -> normalizedQuery.isEmpty()
                         || version.toLowerCase(java.util.Locale.ROOT).contains(normalizedQuery))
@@ -1449,28 +1451,32 @@ public class GlobalModsView extends VBox {
                 Localization.text("common.searching")
         );
 
+        ModrinthContentType requestedType = contentTypeBox.getValue();
+        List<String> requestedLoaders = selectedLoaderFacets();
+        List<String> requestedVersions = selectedVersionFacets();
+        List<String> requestedCategories = List.copyOf(selectedCategories);
+        String requestedSort = switch (sortBox.getValue()) {
+            case "Downloads" -> "downloads";
+            case "Followers" -> "follows";
+            case "Date published" -> "newest";
+            case "Date updated" -> "updated";
+            default -> "relevance";
+        };
+        int requestedLimit = resultLimitBox.getValue();
+        int requestedOffset = searchOffset;
+
         UiExecutor.shared().execute(() -> {
-
                     try {
-
-                        String loader = selectedLoader();
-                        String version = selectedVersion();
                         dev.itsdropper.vanta.launcher.modrinth.ModrinthSearchResult response =
                                 modrinthClient.searchPage(
                                         query,
-                                        contentTypeBox.getValue(),
-                                        selectedLoaderFacets(),
-                                        selectedVersionFacets(),
-                                        List.copyOf(selectedCategories),
-                                        switch (sortBox.getValue()) {
-                                            case "Downloads" -> "downloads";
-                                            case "Followers" -> "follows";
-                                            case "Date published" -> "newest";
-                                            case "Date updated" -> "updated";
-                                            default -> "relevance";
-                                        },
-                                        resultLimitBox.getValue(),
-                                        searchOffset
+                                        requestedType,
+                                        requestedLoaders,
+                                        requestedVersions,
+                                        requestedCategories,
+                                        requestedSort,
+                                        requestedLimit,
+                                        requestedOffset
                                 );
                         List<ModrinthSearchHit> projects = response.getHits();
 
