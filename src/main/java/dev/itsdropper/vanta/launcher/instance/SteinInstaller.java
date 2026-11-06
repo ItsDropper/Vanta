@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher.instance;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.launcher.java.JavaLocator;
@@ -22,7 +23,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.util.HexFormat;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -125,6 +125,7 @@ public final class SteinInstaller {
             }
 
             JsonNode generatedMetadata = JSON.readTree(generatedJson.toFile());
+            normalizeNativeLibraries(generatedMetadata);
             validateGeneratedMetadata(generatedMetadata);
 
             Path stagedLibraries = stage.resolve("libraries");
@@ -268,6 +269,57 @@ public final class SteinInstaller {
         }
     }
 
+    /**
+     * Stein's installer writes native archives as ordinary artifact entries with a
+     * platform rule. Vanta's resolver deliberately keeps native archives out of the
+     * classpath and extracts them through the classifiers contract, so normalize
+     * those entries without changing their Maven paths or bytes.
+     */
+    private static void normalizeNativeLibraries(JsonNode metadata) throws IOException {
+        if (metadata == null || !metadata.path("libraries").isArray()) {
+            throw new IOException("Stein version metadata has no library list.");
+        }
+
+        String operatingSystem = switch (Platform.operatingSystem()) {
+            case WINDOWS -> "windows";
+            case LINUX -> "linux";
+            case MACOS -> "osx";
+            case UNKNOWN -> throw new IOException("Stein does not support this operating system.");
+        };
+
+        int normalized = 0;
+        for (JsonNode node : metadata.path("libraries")) {
+            if (!(node instanceof ObjectNode library)
+                    || !library.path("name").asText("").startsWith("dev.xavier.stein.lwjgl:")) {
+                continue;
+            }
+
+            JsonNode downloadsNode = library.get("downloads");
+            if (!(downloadsNode instanceof ObjectNode downloads)) {
+                continue;
+            }
+            JsonNode artifact = downloads.get("artifact");
+            if (artifact == null || !artifact.isObject()
+                    || !artifact.path("path").asText("").contains("-natives-")) {
+                continue;
+            }
+
+            ObjectNode classifiers = JSON.createObjectNode();
+            classifiers.set("stein-natives", artifact.deepCopy());
+            downloads.remove("artifact");
+            downloads.set("classifiers", classifiers);
+
+            ObjectNode natives = JSON.createObjectNode();
+            natives.put(operatingSystem, "stein-natives");
+            library.set("natives", natives);
+            normalized++;
+        }
+
+        if (normalized == 0) {
+            throw new IOException("Stein metadata did not contain any platform native archives.");
+        }
+    }
+
     private static void validateGeneratedMetadata(JsonNode metadata) throws IOException {
         if (metadata == null
                 || !VERSION_ID.equals(metadata.path("id").asText())
@@ -280,13 +332,15 @@ public final class SteinInstaller {
         boolean bridge = false;
         boolean loader = false;
         boolean lwjgl = false;
+        boolean nativeLibraries = false;
         for (JsonNode library : metadata.path("libraries")) {
             String name = library.path("name").asText("");
             bridge |= name.startsWith("dev.xavier.stein:steinbridge:");
             loader |= name.startsWith("dev.xavier.stein:steinloader:");
             lwjgl |= name.startsWith("org.lwjgl:lwjgl:");
+            nativeLibraries |= library.path("natives").isObject();
         }
-        if (!bridge || !loader || !lwjgl) {
+        if (!bridge || !loader || !lwjgl || !nativeLibraries) {
             throw new IOException("Stein version metadata is missing the Bridge, Loader, or LWJGL 3 libraries.");
         }
     }
