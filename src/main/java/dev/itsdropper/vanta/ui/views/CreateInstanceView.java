@@ -313,8 +313,9 @@ public class CreateInstanceView extends VBox {
         availableLoaders.add("Vanilla");
 
         Label loaderHint = new Label(
-                "Experimental preview: VantaLoader supports native Java mods and exact-target ASM transformations. "
-                        + "Minecraft mappings, lifecycle events, Mixin, and Fabric/Forge mod compatibility are not available yet."
+                "Experimental independent loader: Vanta passes the isolated instance directory and official Minecraft mappings to the agent. "
+                        + "Native mods and exact-target ASM transformations are available; in-game behavior, Minecraft lifecycle hooks, "
+                        + "Mixin, and Fabric/Forge mod compatibility are not yet supported."
         );
         loaderHint.getStyleClass().add("create-panel-subtitle");
         loaderHint.setWrapText(true);
