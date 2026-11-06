@@ -23,6 +23,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.instance.SteinModManager;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
@@ -696,7 +697,10 @@ public class ModsView extends VBox {
         );
 
         boolean disabled =
-                filename.toLowerCase().endsWith(".jar.disabled");
+                filename.toLowerCase().endsWith(".jar.disabled")
+                        || filename.toLowerCase().endsWith(".steinmod.disabled");
+        boolean steinMod = filename.toLowerCase().endsWith(".steinmod")
+                || filename.toLowerCase().endsWith(".steinmod.disabled");
 
         javafx.scene.control.ToggleButton toggleButton =
                 new javafx.scene.control.ToggleButton();
@@ -824,12 +828,14 @@ public class ModsView extends VBox {
             }
         });
 
-        HBox buttons =
-                new HBox(
-                        8,
-                        toggleButton,
-                        removeButton
-                );
+        HBox buttons = steinMod
+                ? new HBox(8, toggleButton, removeButton)
+                : new HBox(8, toggleButton, removeButton);
+        if (steinMod) {
+            toggleButton.setTooltip(new Tooltip(
+                    Localization.text("mods.toggleFailed")
+            ));
+        }
 
         HBox row =
                 new HBox(
@@ -1454,22 +1460,25 @@ public class ModsView extends VBox {
     private boolean toggleMod(Path file) {
         try {
             String name = file.getFileName().toString();
-            Path target;
-
-            if (name.toLowerCase().endsWith(".jar.disabled")) {
-                target = file.resolveSibling(
-                        name.substring(0, name.length() - ".disabled".length())
-                );
-            } else {
-                target = file.resolveSibling(name + ".disabled");
-            }
+            String lower = name.toLowerCase();
+            boolean disabled = lower.endsWith(".disabled");
+            Path target = disabled
+                    ? file.resolveSibling(name.substring(0, name.length() - ".disabled".length()))
+                    : file.resolveSibling(name + ".disabled");
 
             Files.move(file, target);
+            if (lower.endsWith(".steinmod") || lower.endsWith(".steinmod.disabled")) {
+                try {
+                    SteinModManager.updateTrackedFilename(instance, name, target.getFileName().toString());
+                } catch (Exception registryFailure) {
+                    Files.move(target, file);
+                    throw registryFailure;
+                }
+            }
             return true;
-        } catch (IOException e) {
-            statusLabel.setText(
-                    Localization.text("mods.toggleFailed")
-            );
+        } catch (Exception e) {
+            statusLabel.setText(Localization.text("mods.toggleFailed") + " "
+                    + (e.getMessage() == null ? "" : e.getMessage()));
             return false;
         }
     }
@@ -1498,14 +1507,17 @@ public class ModsView extends VBox {
     ) {
 
         try {
-
-            Files.deleteIfExists(
-                    file
-            );
+            String filename = file.getFileName().toString().toLowerCase();
+            if ("Stein".equalsIgnoreCase(instance.getLoader())
+                    && (filename.endsWith(".steinmod") || filename.endsWith(".steinmod.disabled"))) {
+                SteinModManager.removeTrackedFile(instance, file.getFileName().toString());
+            } else {
+                Files.deleteIfExists(file);
+            }
 
             loadInstalledContent();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
 
             e.printStackTrace();
 
@@ -1529,10 +1541,13 @@ public class ModsView extends VBox {
                 filename.toLowerCase();
 
         if (lower.endsWith(".jar.disabled")) {
-            return filename.substring(
-                    0,
-                    filename.length() - ".jar.disabled".length()
-            );
+            return filename.substring(0, filename.length() - ".jar.disabled".length());
+        }
+        if (lower.endsWith(".steinmod.disabled")) {
+            return filename.substring(0, filename.length() - ".steinmod.disabled".length());
+        }
+        if (lower.endsWith(".steinmod")) {
+            return filename.substring(0, filename.length() - ".steinmod".length());
         }
 
         if (lower.endsWith(".jar")
