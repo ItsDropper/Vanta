@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.ui.components;
 
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.Localization;
+import dev.itsdropper.vanta.ui.VantaUI;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.ComboBox;
@@ -26,6 +27,7 @@ public final class LanguagePreferenceControl extends VBox {
         super(8);
         getStyleClass().addAll("settings-card", "language-preference-card");
         setPadding(new Insets(16));
+        VantaUI.applySurface(this, VantaUI.SurfaceRole.CARD);
 
         Label title = new Label(Localization.text("language.title"));
         title.getStyleClass().add("settings-card-title");
@@ -37,6 +39,7 @@ public final class LanguagePreferenceControl extends VBox {
         languagePicker.getItems().setAll(Localization.getSupportedLanguages());
         languagePicker.setMaxWidth(320);
         languagePicker.setAccessibleText(Localization.text("language.accessibleLabel"));
+        languagePicker.setAccessibleHelp(Localization.text("language.tooltip"));
         languagePicker.setTooltip(new Tooltip(Localization.text("language.tooltip")));
 
         String selectedCode = LauncherSettings.getPreferredLanguageCode();
