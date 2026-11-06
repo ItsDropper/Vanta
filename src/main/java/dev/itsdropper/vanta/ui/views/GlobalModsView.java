@@ -19,6 +19,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -65,7 +66,7 @@ public class GlobalModsView extends VBox {
     private final Label popularTitle;
     private final ScrollPane popularScrollPane;
 
-    private final VBox results;
+    private final FlowPane results;
     private final Label statusLabel;
     private final ScrollPane resultsScrollPane;
 
@@ -85,6 +86,7 @@ public class GlobalModsView extends VBox {
     private final Button previousPageButton;
     private final Button nextPageButton;
     private final Label pageIndicator;
+    private final Button layoutButton;
 
     public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
         this(onModSelected, false);
@@ -294,12 +296,23 @@ public class GlobalModsView extends VBox {
         previousPageButton = new Button("‹");
         nextPageButton = new Button("›");
         pageIndicator = new Label("Page 1");
+        layoutButton = new Button(LauncherSettings.isModrinthGridLayoutEnabled() ? "▦" : "☷");
+        layoutButton.getStyleClass().add("secondary-button");
+        layoutButton.setAccessibleText("Toggle result layout");
+        layoutButton.setOnAction(event -> {
+            boolean grid = !LauncherSettings.isModrinthGridLayoutEnabled();
+            LauncherSettings.setModrinthGridLayoutEnabled(grid);
+            layoutButton.setText(grid ? "▦" : "☷");
+            layoutButton.setTooltip(new javafx.scene.control.Tooltip(
+                    grid ? "Switch to list layout" : "Switch to grid layout"));
+            applyGlobalResultLayout(grid);
+        });
         previousPageButton.getStyleClass().add("secondary-button");
         nextPageButton.getStyleClass().add("secondary-button");
         pageIndicator.getStyleClass().add("instances-status");
         HBox browseControls = new HBox(8,
                 new Label("Sort"), sortBox,
-                new Label("Per page"), resultLimitBox,
+                new Label("Per page"), resultLimitBox, layoutButton,
                 previousPageButton, pageIndicator, nextPageButton);
         browseControls.setAlignment(Pos.CENTER_LEFT);
         sortBox.valueProperty().addListener((obs, oldValue, newValue) -> {
@@ -393,25 +406,20 @@ public class GlobalModsView extends VBox {
         // SEARCH RESULTS
         // =========================================================
 
-        results =
-                new VBox(
-                        12
-                );
-
-        results.getStyleClass().add(
-                "instance-list"
-        );
-        results.setAlignment(Pos.CENTER);
-        results.setFillWidth(true);
+        results = new FlowPane();
+        results.setHgap(12);
+        results.setVgap(12);
+        results.setAlignment(Pos.TOP_LEFT);
+        results.getStyleClass().add("instance-list");
 
         resultsScrollPane =
                 new ScrollPane(
                         results
                 );
 
-        resultsScrollPane.setFitToWidth(
-                true
-        );
+        resultsScrollPane.setFitToWidth(true);
+        resultsScrollPane.viewportBoundsProperty().addListener((obs, oldBounds, newBounds) ->
+                applyGlobalResultLayout(LauncherSettings.isModrinthGridLayoutEnabled()));
 
         resultsScrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
@@ -1418,19 +1426,32 @@ public class GlobalModsView extends VBox {
                 : projects
         ) {
 
-            results
-                    .getChildren()
-                    .add(
-                            createProjectCard(
-                                    project
-                            )
-                    );
+            results.getChildren().add(createSizedGlobalProjectCard(project));
         }
 
         statusLabel.setText(
                 projects.size()
                         + " projects found."
         );
+    }
+
+    private VBox createSizedGlobalProjectCard(ModrinthSearchHit project) {
+        VBox card = createProjectCard(project);
+        double availableWidth = resultsScrollPane.getViewportBounds().getWidth();
+        boolean grid = LauncherSettings.isModrinthGridLayoutEnabled();
+        card.setPrefWidth(grid ? 300 : Math.max(280, availableWidth - 28));
+        card.setMinWidth(grid ? 260 : 0);
+        return card;
+    }
+
+    private void applyGlobalResultLayout(boolean grid) {
+        double availableWidth = resultsScrollPane.getViewportBounds().getWidth();
+        for (javafx.scene.Node node : results.getChildren()) {
+            if (node instanceof VBox card) {
+                card.setPrefWidth(grid ? 300 : Math.max(280, availableWidth - 28));
+                card.setMinWidth(grid ? 260 : 0);
+            }
+        }
     }
 
     // =============================================================
