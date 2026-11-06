@@ -35,7 +35,25 @@ class LocalizationTest {
                 "language.accessibleLabel",
                 "language.tooltip",
                 "language.restartRequired",
-                "language.restartNotRequired"
+                "language.restartNotRequired",
+                "settings.label",
+                "settings.sectionAccessible",
+                "settings.searchPrompt",
+                "settings.searchAccessible",
+                "settings.searchTooltip",
+                "settings.group.personalization",
+                "settings.group.social",
+                "settings.group.launcher",
+                "settings.group.system",
+                "settings.section.appearance",
+                "settings.section.discord",
+                "settings.section.general",
+                "settings.section.minecraft",
+                "settings.section.downloads",
+                "settings.section.storage",
+                "settings.section.state",
+                "settings.section.diagnostics",
+                "settings.section.about"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
