@@ -69,6 +69,8 @@ public class GlobalModsView extends VBox {
 
     private final BiConsumer<String, ModrinthContentType> onModSelected;
     private final boolean screenshotPreview;
+    private long searchRequestId;
+    private long popularRequestId;
 
     public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
         this(onModSelected, false);
@@ -114,7 +116,9 @@ public class GlobalModsView extends VBox {
         contentTypeBox.getItems().addAll(
                 ModrinthContentType.MOD,
                 ModrinthContentType.RESOURCE_PACK,
-                ModrinthContentType.SHADER
+                ModrinthContentType.DATA_PACK,
+                ModrinthContentType.SHADER,
+                ModrinthContentType.MODPACK
         );
         contentTypeBox.setValue(ModrinthContentType.MOD);
         contentTypeBox.setAccessibleText(Localization.text("globalMods.typeFilter"));
@@ -652,6 +656,7 @@ public class GlobalModsView extends VBox {
     // =============================================================
 
     private void loadMostDownloadedMods() {
+        long requestId = ++popularRequestId;
 
         UiExecutor.shared().execute(() -> {
 
@@ -666,21 +671,19 @@ public class GlobalModsView extends VBox {
                                         )
                                         .getHits();
 
-                        UiExecutor.shared().dispatchToUi(() ->
-                                showMostDownloadedMods(
-                                        projects
-                                )
-                        );
+                        UiExecutor.shared().dispatchToUi(() -> {
+                            if (requestId != popularRequestId) return;
+                            showMostDownloadedMods(projects);
+                        });
 
                     } catch (Throwable ex) {
 
                         ex.printStackTrace();
 
-                        UiExecutor.shared().dispatchToUi(() ->
-                                popularStatusLabel.setText(
-                                        Localization.text("browseMods.popularFailed")
-                                )
-                        );
+                        UiExecutor.shared().dispatchToUi(() -> {
+                            if (requestId != popularRequestId) return;
+                            popularStatusLabel.setText(Localization.text("browseMods.popularFailed"));
+                        });
                     }
         });
 
@@ -804,9 +807,36 @@ public class GlobalModsView extends VBox {
         Button installButton =
                 new Button(Localization.text("common.install"));
         installButton.getStyleClass().add("primary-button");
-        installButton.setOnAction(event ->
-                loadProjectForInstall(project.getProjectId(), installButton)
-        );
+        installButton.setOnAction(event -> {
+            ModrinthContentType selectedType = contentTypeBox.getValue();
+            if (selectedType == ModrinthContentType.MODPACK) {
+                installButton.setDisable(true);
+                installButton.setText(Localization.text("common.installing"));
+                UiExecutor.shared().execute(() -> {
+                    try {
+                        Instance imported = new ModrinthContentService().installModpack(
+                                modrinthClient.getProject(project.getProjectId())
+                        );
+                        UiExecutor.shared().dispatchToUi(() -> {
+                            installButton.setDisable(false);
+                            installButton.setText(Localization.text("common.install"));
+                            statusLabel.setText("Imported " + imported.getName() + ".");
+                        });
+                    } catch (Throwable failure) {
+                        UiExecutor.shared().dispatchToUi(() -> {
+                            installButton.setDisable(false);
+                            installButton.setText(Localization.text("common.install"));
+                            statusLabel.setText(failure.getMessage() == null
+                                    ? "Modpack import failed." : failure.getMessage());
+                        });
+                    }
+                });
+            } else if (selectedType == ModrinthContentType.DATA_PACK) {
+                statusLabel.setText("Datapacks must be installed into a specific Minecraft world's datapacks folder. Select a world before installing.");
+            } else {
+                loadProjectForInstall(project.getProjectId(), installButton);
+            }
+        });
 
         HBox actions = new HBox(
                 8,
@@ -885,6 +915,7 @@ public class GlobalModsView extends VBox {
     // =============================================================
 
     private void search() {
+        long requestId = ++searchRequestId;
 
         String query =
                 searchField
@@ -938,23 +969,20 @@ public class GlobalModsView extends VBox {
                                         )
                                         .getHits();
 
-                        UiExecutor.shared().dispatchToUi(() ->
-                                showResults(
-                                        projects
-                                )
-                        );
+                        UiExecutor.shared().dispatchToUi(() -> {
+                            if (requestId != searchRequestId) return;
+                            showResults(projects);
+                        });
 
                     } catch (Throwable ex) {
 
                         ex.printStackTrace();
 
-                        UiExecutor.shared().dispatchToUi(() ->
-                                statusLabel.setText(
-                                        ex.getMessage() != null
-                                                ? ex.getMessage()
-                                                : "Failed to search Modrinth."
-                                )
-                        );
+                        UiExecutor.shared().dispatchToUi(() -> {
+                            if (requestId != searchRequestId) return;
+                            statusLabel.setText(ex.getMessage() != null
+                                    ? ex.getMessage() : "Failed to search Modrinth.");
+                        });
                     }
         });
 
