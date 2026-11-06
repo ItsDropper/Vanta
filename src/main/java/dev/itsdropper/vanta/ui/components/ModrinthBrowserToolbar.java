@@ -119,6 +119,7 @@ public final class ModrinthBrowserToolbar extends VBox {
             button.setMinWidth(30);
             button.setPrefHeight(30);
         }
+        currentPageButton.getStyleClass().add("modrinth-current-page");
         previousButton.setAccessibleText("Previous page");
         currentPageButton.setAccessibleText("Current page");
         nextPageButton.setAccessibleText("Next page");
@@ -282,7 +283,6 @@ public final class ModrinthBrowserToolbar extends VBox {
         currentPageButton.setText(Integer.toString(page));
         previousButton.setDisable(page <= 1);
         currentPageButton.setDisable(true);
-        currentPageButton.getStyleClass().add("modrinth-current-page");
         nextPageButton.setDisable(page >= pages);
         ellipsisButton.setDisable(pages <= 3);
         lastPageButton.setText(Integer.toString(pages));
