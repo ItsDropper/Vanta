@@ -522,13 +522,23 @@ public class GlobalModsView extends VBox {
         return row;
     }
 
-    private CheckBox createFilterOption(String label, String id, boolean selected,
+    private Button createFilterOption(String label, String id, boolean selected,
             java.util.function.Consumer<Boolean> selectionChanged) {
-        CheckBox option = new CheckBox(label);
-        option.setSelected(selected);
+        Button option = new Button(label);
+        Label checkmark = new Label("✓");
+        checkmark.getStyleClass().add("modrinth-filter-check");
+        option.setGraphic(checkmark);
+        option.setContentDisplay(javafx.scene.control.ContentDisplay.RIGHT);
+        option.setAlignment(Pos.CENTER_LEFT);
         option.setMaxWidth(Double.MAX_VALUE);
         option.getStyleClass().add("modrinth-filter-option");
-        option.setOnAction(event -> selectionChanged.accept(option.isSelected()));
+        if (selected) option.getStyleClass().add("modrinth-filter-option-selected");
+        option.setOnAction(event -> {
+            boolean next = !option.getStyleClass().contains("modrinth-filter-option-selected");
+            option.getStyleClass().remove("modrinth-filter-option-selected");
+            if (next) option.getStyleClass().add("modrinth-filter-option-selected");
+            selectionChanged.accept(next);
+        });
         return option;
     }
 
