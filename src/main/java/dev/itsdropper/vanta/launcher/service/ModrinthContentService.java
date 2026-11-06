@@ -108,6 +108,13 @@ public class ModrinthContentService {
         modrinthService.installShader(instance, project);
     }
 
+    public void installDataPack(
+            Instance instance,
+            ModrinthProject project
+    ) throws IOException, InterruptedException {
+        modrinthService.installDataPack(instance, project);
+    }
+
     public Instance installModpack(
             ModrinthProject project
     ) throws Exception {
