@@ -61,6 +61,35 @@ public class ModrinthService {
     }
 
     /**
+     * Paginated instance search. Loader and game version are implicit instance
+     * constraints, not user-editable filters in BrowseModsView. Using the API
+     * facets directly keeps total_hits and page boundaries accurate.
+     */
+    public ModrinthSearchResult searchModsPage(
+            Instance instance,
+            String query,
+            String index,
+            int limit,
+            int offset
+    ) throws IOException, InterruptedException {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        String loader = ModrinthLoaderIds.normalize(instance.getLoader());
+        List<String> loaders = loader == null || loader.isBlank()
+                || loader.equalsIgnoreCase("vanilla") ? List.of() : List.of(loader);
+        List<String> versions = instance.getMinecraftVersion() == null
+                || instance.getMinecraftVersion().isBlank()
+                ? List.of() : List.of(instance.getMinecraftVersion());
+        return client.searchPage(
+                query, ModrinthContentType.MOD, loaders, versions,
+                List.of(), index, limit, offset
+        );
+    }
+
+    public List<ModrinthProject> mapSearchHitsToProjects(List<ModrinthSearchHit> hits) {
+        return mapSearchHits(hits);
+    }
+
+    /**
      * First-paint query matching the global browser: filter by loader but do not
      * wait for Modrinth's additional exact Minecraft-version facet.
      */
