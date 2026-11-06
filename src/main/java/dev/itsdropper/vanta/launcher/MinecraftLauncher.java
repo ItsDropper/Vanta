@@ -129,16 +129,7 @@ public class MinecraftLauncher {
         command.add("-Djava.net.useSystemProxies=true");
 
         if ("VantaLoader".equalsIgnoreCase(data.loader)) {
-            // Explicitly hand the instance identity to the agent. The process
-            // working directory is still set below, but must not be the only
-            // source of truth for where VantaLoader discovers native mods.
-            command.add("-Dvanta.instance.directory=" + minecraft);
-            command.add("-Dvanta.minecraft.version=" + data.version);
-            command.add("-Dvanta.environment=client");
-            if (data.minecraftMappings == null || !Files.isRegularFile(data.minecraftMappings)) {
-                throw new IllegalStateException("Official Minecraft client mappings are missing for this VantaLoader instance.");
-            }
-            command.add("-Dvanta.minecraft.mappings=" + data.minecraftMappings.toAbsolutePath().normalize());
+            command.addAll(vantaLoaderJvmArguments(minecraft, data.version, data.minecraftMappings));
         }
 
         // =============================================================
@@ -651,6 +642,32 @@ public class MinecraftLauncher {
             throw new IllegalStateException("Rift profile is missing its launch tweaker.");
         }
         return List.copyOf(result);
+    }
+
+    static List<String> vantaLoaderJvmArguments(
+            Path instanceDirectory,
+            String minecraftVersion,
+            Path mappings
+    ) {
+        if (instanceDirectory == null) {
+            throw new IllegalStateException("VantaLoader instance directory is missing.");
+        }
+        if (minecraftVersion == null || minecraftVersion.isBlank()) {
+            throw new IllegalStateException("VantaLoader Minecraft version is missing.");
+        }
+        if (mappings == null || !Files.isRegularFile(mappings)) {
+            throw new IllegalStateException(
+                    "Official Minecraft client mappings are missing for this VantaLoader instance.");
+        }
+
+        Path normalizedInstance = instanceDirectory.toAbsolutePath().normalize();
+        Path normalizedMappings = mappings.toAbsolutePath().normalize();
+        return List.of(
+                "-Dvanta.instance.directory=" + normalizedInstance,
+                "-Dvanta.minecraft.version=" + minecraftVersion,
+                "-Dvanta.environment=client",
+                "-Dvanta.minecraft.mappings=" + normalizedMappings
+        );
     }
 
     static void ensureLaunchWrapperOption(
