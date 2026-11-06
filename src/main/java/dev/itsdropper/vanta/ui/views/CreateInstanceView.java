@@ -31,6 +31,7 @@ import dev.itsdropper.vanta.launcher.instance.QuiltInstaller;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
 import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
 import dev.itsdropper.vanta.launcher.instance.RiftInstaller;
+import dev.itsdropper.vanta.launcher.instance.SteinInstaller;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
@@ -619,7 +620,7 @@ public class CreateInstanceView extends VBox {
             loaderBox.getItems().setAll(
                     "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
                     "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
-                    "LiteLoader", "ModLoader", "Rift", "VantaLoader"
+                    "LiteLoader", "ModLoader", "Rift", "Stein", "VantaLoader"
             );
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
@@ -723,6 +724,7 @@ public class CreateInstanceView extends VBox {
             // unavailable; release lookup happens when the user creates it.
             vantaLoaderAvailable = VantaLoaderInstaller.supportsMinecraftVersion(minecraftVersion);
             final boolean vantaLoader = vantaLoaderAvailable;
+            final boolean stein = SteinInstaller.supportsMinecraftVersion(minecraftVersion);
 
             UiExecutor.shared().dispatchToUi(() -> {
                 if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
@@ -750,6 +752,7 @@ public class CreateInstanceView extends VBox {
                 if (liteLoader) availableLoaders.add("LiteLoader");
                 if (modLoader) availableLoaders.add("ModLoader");
                 if (rift) availableLoaders.add("Rift");
+                if (stein) availableLoaders.add("Stein");
                 if (vantaLoader) availableLoaders.add("VantaLoader");
 
                 fabricCheckRunning = false;
@@ -766,7 +769,7 @@ public class CreateInstanceView extends VBox {
                 loaderBox.getItems().setAll(
                         "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
                         "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
-                        "LiteLoader", "ModLoader", "Rift", "VantaLoader"
+                        "LiteLoader", "ModLoader", "Rift", "Stein", "VantaLoader"
                 );
 
                 // Keep unsupported loaders visible but prevent selecting them.
@@ -779,7 +782,7 @@ public class CreateInstanceView extends VBox {
                     loaderBox.getSelectionModel().select("Vanilla");
                 }
 
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader || rift || vantaLoader) {
+                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader || rift || stein || vantaLoader) {
                     statusLabel.setText(Localization.text("createInstance.loadersCheckedPrefix") + minecraftVersion + ".");
                 } else {
                     statusLabel.setText(Localization.text("createInstance.noLoadersPrefix") + minecraftVersion + Localization.text("createInstance.vanillaOnlySuffix"));
@@ -1012,6 +1015,10 @@ public class CreateInstanceView extends VBox {
                         } else if ("Rift".equals(loader)) {
 
                             InstanceInstaller.installRift(name, version);
+
+                        } else if ("Stein".equals(loader)) {
+
+                            InstanceInstaller.installSteinLoader(name, version);
 
                         } else if ("NeoForge".equals(loader)) {
 
