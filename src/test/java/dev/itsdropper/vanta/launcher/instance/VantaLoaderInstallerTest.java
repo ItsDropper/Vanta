@@ -34,6 +34,59 @@ class VantaLoaderInstallerTest {
     }
 
     @Test
+    void selectsNewestPublishedNightlyWithBothRequiredAssets() throws Exception {
+        com.fasterxml.jackson.databind.JsonNode releases = new com.fasterxml.jackson.databind.ObjectMapper()
+                .readTree("""
+                        [
+                          {
+                            "tag_name":"nightly-0.1.0-20261105-aaaaaaa",
+                            "published_at":"2026-11-05T23:59:00Z",
+                            "draft":false,
+                            "assets":[
+                              {"name":"VantaLoader-agent.jar"},
+                              {"name":"VantaLoader-agent.jar.sha256"}
+                            ]
+                          },
+                          {
+                            "tag_name":"nightly-0.1.0-20261106-bbbbbbb",
+                            "published_at":"2026-11-06T12:00:00Z",
+                            "draft":false,
+                            "assets":[
+                              {"name":"VantaLoader-agent.jar"},
+                              {"name":"VantaLoader-agent.jar.sha256"}
+                            ]
+                          },
+                          {
+                            "tag_name":"nightly-0.1.0-20261106-ccccccc",
+                            "published_at":"2026-11-06T13:00:00Z",
+                            "draft":true,
+                            "assets":[
+                              {"name":"VantaLoader-agent.jar"},
+                              {"name":"VantaLoader-agent.jar.sha256"}
+                            ]
+                          },
+                          {
+                            "tag_name":"nightly-0.1.0-20261106-ddddddd",
+                            "published_at":"2026-11-06T14:00:00Z",
+                            "draft":false,
+                            "assets":[{"name":"VantaLoader-agent.jar"}]
+                          }
+                        ]
+                        """);
+        assertEquals("nightly-0.1.0-20261106-bbbbbbb",
+                VantaLoaderInstaller.selectLatestNightlyReleaseTag(releases));
+    }
+
+    @Test
+    void rejectsReleaseListsWithoutAUsableNightly() throws Exception {
+        com.fasterxml.jackson.databind.JsonNode releases = new com.fasterxml.jackson.databind.ObjectMapper()
+                .readTree("[{\"tag_name\":\"nightly-0123456789abcdef0123456789abcdef01234567\","
+                        + "\"published_at\":\"2026-11-06T12:00:00Z\",\"draft\":false,\"assets\":[]}]");
+        org.junit.jupiter.api.Assertions.assertThrows(java.io.IOException.class,
+                () -> VantaLoaderInstaller.selectLatestNightlyReleaseTag(releases));
+    }
+
+    @Test
     void acceptsActualNightlyReleaseTagsAndMigratesLegacyCommitTags() {
         Instance current = new Instance("test", "Test", "1.21.11",
                 "VantaLoader", "nightly-0.1.0-20261106-feacb71", temporaryDirectory);
