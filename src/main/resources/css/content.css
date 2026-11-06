@@ -688,3 +688,68 @@
     -fx-border-radius: 12px;
     -fx-opacity: .65;
 }
+
+
+.global-mods-page .modrinth-filter-option {
+    -fx-alignment: center-left;
+    -fx-content-display: right;
+    -fx-graphic-text-gap: 8px;
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 9px;
+    -fx-min-height: 29px;
+    -fx-max-width: infinity;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-cursor: hand;
+}
+.global-mods-page .modrinth-filter-option:hover {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
+}
+.global-mods-page .modrinth-filter-option-selected {
+    -fx-background-color: derive(-vantaaccent, -68%);
+    -fx-text-fill: white;
+}
+.global-mods-page .modrinth-filter-check {
+    -fx-text-fill: transparent;
+    -fx-font-size: 12px;
+    -fx-font-weight: 800;
+}
+.global-mods-page .modrinth-filter-option:hover .modrinth-filter-check {
+    -fx-text-fill: -vantaaccent;
+}
+.global-mods-page .modrinth-filter-option-selected .modrinth-filter-check {
+    -fx-text-fill: white;
+}
+.global-mods-page .modrinth-filter-content > .dialog-instance-checkbox {
+    -fx-background-color: transparent;
+    -fx-padding: 4px 1px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+}
+.global-mods-page .modrinth-filter-content > .dialog-instance-checkbox .box {
+    -fx-background-color: transparent;
+    -fx-border-color: -vantasubtle;
+    -fx-border-radius: 4px;
+}
+.global-mods-page .modrinth-filter-content > .dialog-instance-checkbox:selected .box {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
+.global-mods-page .modrinth-filter-content > .dialog-instance-checkbox:selected .mark {
+    -fx-background-color: white;
+}
+.global-mods-page .modrinth-controls-row .modrinth-page-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -vantamuted;
+}
+.global-mods-page .modrinth-controls-row .modrinth-page-button:hover {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
+}
+.global-mods-page .modrinth-controls-row .modrinth-next-page-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
