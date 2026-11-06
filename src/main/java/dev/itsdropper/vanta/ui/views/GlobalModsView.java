@@ -77,6 +77,7 @@ public class GlobalModsView extends VBox {
     private long loaderTagRequestId;
     private long categoryTagRequestId;
     private List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> categoryTags = List.of();
+    private List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> loaderTags = List.of();
     private final java.util.Set<String> selectedCategories = new java.util.LinkedHashSet<>();
     private Button categoriesButton;
     private int searchOffset;
@@ -604,6 +605,7 @@ public class GlobalModsView extends VBox {
                         modrinthClient.getLoaderTags(contentType);
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != loaderTagRequestId) return;
+                    loaderTags = tags == null ? List.of() : List.copyOf(tags);
                     String selected = loaderBox.getValue();
                     loaderBox.getItems().setAll("Any");
                     if (tags != null) {
@@ -1681,6 +1683,33 @@ public class GlobalModsView extends VBox {
         });
     }
 
+    private String formatEnvironment(String client, String server) {
+        List<String> values = new ArrayList<>();
+        if (client != null && !client.isBlank() && !"unknown".equalsIgnoreCase(client)) {
+            values.add("Client " + client.toLowerCase(java.util.Locale.ROOT));
+        }
+        if (server != null && !server.isBlank() && !"unknown".equalsIgnoreCase(server)) {
+            values.add("Server " + server.toLowerCase(java.util.Locale.ROOT));
+        }
+        return String.join(" / ", values);
+    }
+
+    private String relativeUpdateTime(String value) {
+        if (value == null || value.isBlank()) return "update date unavailable";
+        try {
+            java.time.Duration age = java.time.Duration.between(
+                    java.time.Instant.parse(value), java.time.Instant.now());
+            long days = Math.max(0, age.toDays());
+            if (days == 0) return "updated today";
+            if (days == 1) return "updated yesterday";
+            if (days < 30) return "updated " + days + " days ago";
+            if (days < 365) return "updated " + (days / 30) + " months ago";
+            return "updated " + (days / 365) + " years ago";
+        } catch (java.time.DateTimeException ignored) {
+            return "update date unavailable";
+        }
+    }
+
     private VBox createProjectCard(
             ModrinthSearchHit project
     ) {
@@ -1702,46 +1731,51 @@ public class GlobalModsView extends VBox {
                 "instance-name"
         );
 
+        Label author = new Label("by " + safe(project.getAuthor(), "Unknown author"));
+        author.getStyleClass().add("instance-loader");
+
         Label description =
-                new Label(
-                        safe(
-                                project.getDescription(),
-                                "No description."
-                        )
-                );
+                new Label(safe(project.getDescription(), "No description."));
+        description.setWrapText(true);
+        description.setMaxWidth(650);
+        description.setMaxHeight(42);
+        description.getStyleClass().add("global-mod-description");
 
-        description.setWrapText(
-                true
+        FlowPane tags = new FlowPane(6, 4);
+        tags.setAlignment(Pos.CENTER_LEFT);
+        String environment = formatEnvironment(project.getClientSide(), project.getServerSide());
+        if (!environment.isBlank()) {
+            Label environmentTag = new Label(environment);
+            environmentTag.getStyleClass().add("modrinth-tag-chip");
+            tags.getChildren().add(environmentTag);
+        }
+        java.util.Set<String> loaderIds = loaderTags.stream()
+                .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
+                .filter(java.util.Objects::nonNull)
+                .map(value -> value.toLowerCase(java.util.Locale.ROOT))
+                .collect(java.util.stream.Collectors.toSet());
+        for (String category : project.getCategories()) {
+            if (category == null || category.isBlank() || loaderIds.contains(category.toLowerCase(java.util.Locale.ROOT))) continue;
+            Label categoryTag = new Label(category.replace('-', ' ').replace('_', ' '));
+            categoryTag.getStyleClass().add("modrinth-tag-chip");
+            tags.getChildren().add(categoryTag);
+            if (tags.getChildren().size() >= 6) break;
+        }
+        for (String category : project.getCategories()) {
+            if (category == null || !loaderIds.contains(category.toLowerCase(java.util.Locale.ROOT))) continue;
+            Label loaderTag = new Label(category);
+            loaderTag.getStyleClass().add("modrinth-tag-chip");
+            tags.getChildren().add(loaderTag);
+        }
+
+        Label metadata = new Label(
+                formatNumber(project.getDownloads()) + " downloads  •  "
+                        + formatNumber(project.getFollows()) + " followers  •  "
+                        + relativeUpdateTime(project.getDateModified())
         );
+        metadata.getStyleClass().add("instance-loader");
 
-        description.setMaxWidth(
-                650
-        );
-
-        description.getStyleClass().add(
-                "global-mod-description"
-        );
-
-        Label metadata =
-                new Label(
-                        Localization.text("common.modrinthPrefix")
-                                + formatNumber(
-                                project.getDownloads()
-                        )
-                                + " downloads"
-                );
-
-        metadata.getStyleClass().add(
-                "instance-loader"
-        );
-
-        VBox information =
-                new VBox(
-                        6,
-                        title,
-                        description,
-                        metadata
-                );
+        VBox information = new VBox(5, title, author, description, tags, metadata);
 
         HBox.setHgrow(
                 information,
