@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import dev.itsdropper.vanta.ui.components.PageHeader;
@@ -94,7 +95,7 @@ public class BrowseModsView extends VBox {
 
         Button backButton =
                 new Button(
-                        "← BACK"
+                        Localization.text("common.backArrow")
                 );
 
         backButton.getStyleClass().add(
@@ -132,10 +133,10 @@ public class BrowseModsView extends VBox {
                 new TextField();
 
         searchField.setPromptText(
-                "Search Modrinth..."
+                Localization.text("browseMods.searchPrompt")
         );
         searchField.setMinWidth(0);
-        searchField.setAccessibleText("Search mods for this instance");
+        searchField.setAccessibleText(Localization.text("browseMods.searchAccessible"));
 
         searchField.getStyleClass().add(
                 "create-field"
@@ -148,13 +149,13 @@ public class BrowseModsView extends VBox {
 
         Button searchButton =
                 new Button(
-                        "SEARCH"
+                        Localization.text("common.search")
                 );
 
         searchButton.getStyleClass().add(
                 "primary-button"
         );
-        searchButton.setAccessibleText("Search mods for this instance");
+        searchButton.setAccessibleText(Localization.text("browseMods.searchAccessible"));
 
         searchButton.setOnAction(
                 event ->
@@ -183,7 +184,7 @@ public class BrowseModsView extends VBox {
 
         popularTitle =
                 new Label(
-                        "MOST DOWNLOADED"
+                        Localization.text("common.mostDownloaded")
                 );
 
         popularTitle.getStyleClass().add(
@@ -234,7 +235,7 @@ public class BrowseModsView extends VBox {
 
         popularStatusLabel =
                 new Label(
-                        "Loading popular mods..."
+                        Localization.text("browseMods.loadingPopular")
                 );
 
         popularStatusLabel.getStyleClass().add(
@@ -286,7 +287,7 @@ public class BrowseModsView extends VBox {
 
         statusLabel =
                 new Label(
-                        "Search Modrinth for compatible mods."
+                        Localization.text("browseMods.searchPromptHelp")
                 );
 
         statusLabel.getStyleClass().add(
@@ -329,7 +330,7 @@ public class BrowseModsView extends VBox {
 
     private void loadMostDownloadedMods() {
         long requestId = ++popularRequestId;
-        popularStatusLabel.setText("Loading popular mods...");
+        popularStatusLabel.setText(Localization.text("browseMods.loadingPopular"));
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -351,7 +352,7 @@ public class BrowseModsView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != popularRequestId) return;
                     if (popularResults.getChildren().isEmpty()) {
-                        popularStatusLabel.setText("Could not load popular mods.");
+                        popularStatusLabel.setText(Localization.text("browseMods.popularFailed"));
                     }
                 });
             }
@@ -375,7 +376,7 @@ public class BrowseModsView extends VBox {
                 || projects.isEmpty()) {
 
             popularStatusLabel.setText(
-                    "No popular mods found."
+                    Localization.text("browseMods.noPopular")
             );
 
             return;
@@ -625,12 +626,12 @@ public class BrowseModsView extends VBox {
         if (query.isBlank()) {
             showPopularSection();
             results.getChildren().clear();
-            statusLabel.setText("Search Modrinth for compatible mods.");
+            statusLabel.setText(Localization.text("browseMods.searchPromptHelp"));
             return;
         }
 
         hidePopularSection();
-        statusLabel.setText("Searching Modrinth...");
+        statusLabel.setText(Localization.text("common.searching"));
         results.getChildren().clear();
 
         // First paint uses the same broad loader-only query as GlobalModsView.
@@ -773,7 +774,7 @@ public class BrowseModsView extends VBox {
                 || projects.isEmpty()) {
 
             statusLabel.setText(
-                    "No compatible mods found."
+                    Localization.text("browseMods.noCompatible")
             );
 
             return;
@@ -925,7 +926,7 @@ public class BrowseModsView extends VBox {
 
         Label metadata =
                 new Label(
-                        "Modrinth • "
+                        Localization.text("common.modrinthPrefix")
                                 + instance.getMinecraftVersion()
                                 + " • "
                                 + instance.getDisplayLoader()
@@ -946,7 +947,7 @@ public class BrowseModsView extends VBox {
 
         Button installButton =
                 new Button(
-                        "INSTALL"
+                        Localization.text("common.install")
                 );
 
         installButton.getStyleClass().add(
@@ -1159,11 +1160,11 @@ public class BrowseModsView extends VBox {
         );
 
         button.setText(
-                "INSTALLING..."
+                Localization.text("common.installing")
         );
 
         statusLabel.setText(
-                "Installing "
+                Localization.text("common.installingPrefix")
                         + project.getTitle()
                         + "..."
         );
@@ -1180,7 +1181,7 @@ public class BrowseModsView extends VBox {
                         UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setText(
-                                    "INSTALLED"
+                                    Localization.text("common.installed")
                             );
 
                             statusLabel.setText(
@@ -1200,7 +1201,7 @@ public class BrowseModsView extends VBox {
                             );
 
                             button.setText(
-                                    "INSTALL"
+                                    Localization.text("common.install")
                             );
 
                             statusLabel.setText(
