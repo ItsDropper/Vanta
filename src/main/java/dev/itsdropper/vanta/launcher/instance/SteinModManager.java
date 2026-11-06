@@ -469,7 +469,7 @@ public final class SteinModManager {
                 if (name.startsWith("/") || name.startsWith("\\")
                         || name.matches("^[A-Za-z]:.*")
                         || List.of(name.split("/")).contains("..")
-                        || name.contains("\\\\")) {
+                        || name.indexOf('\\\\') >= 0) {
                     throw new IOException("The .steinmod archive contains an unsafe path.");
                 }
                 if (entry.getSize() > 0) {
@@ -481,7 +481,11 @@ public final class SteinModManager {
             }
             JsonNode manifest;
             try (InputStream input = zip.getInputStream(metadata)) {
-                manifest = JSON.readTree(input);
+                byte[] manifestBytes = input.readNBytes(1024 * 1024 + 1);
+                if (manifestBytes.length > 1024 * 1024) {
+                    throw new IOException("The embedded Stein manifest exceeds the 1 MiB size limit.");
+                }
+                manifest = JSON.readTree(manifestBytes);
             }
             if (manifest == null
                     || !release.modId().equals(requiredText(manifest, "id"))
