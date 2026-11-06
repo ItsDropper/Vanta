@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2026 ItsDropper
+
+import dev.itsdropper.vanta.ui.Localization; * Copyright (c) 2026 ItsDropper
  * Licensed under the MIT License.
  */
 package dev.itsdropper.vanta.ui.views;
@@ -24,7 +25,7 @@ public final class RemoteServerConnectionDialog {
 
     public static void open(Window owner) {
         Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.setTitle("Connect to remote server");
+        dialog.setTitle(Localization.text("remoteServer.title"));
         if (owner != null) dialog.initOwner(owner);
         dialog.initModality(Modality.WINDOW_MODAL);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.CANCEL, new ButtonType("Connect", ButtonBar.ButtonData.OK_DONE));
@@ -33,15 +34,15 @@ public final class RemoteServerConnectionDialog {
         host.setPromptText("server.example.com");
         TextField port = new TextField("25575");
         PasswordField password = new PasswordField();
-        password.setPromptText("RCON password");
-        Label help = new Label("Connects through Minecraft Java RCON. The host must enable RCON and expose its RCON port. This is not the normal player port.");
+        password.setPromptText(Localization.text("remoteServer.password"));
+        Label help = new Label(Localization.text("remoteServer.description"));
         help.setWrapText(true);
         help.setMaxWidth(430);
         GridPane fields = new GridPane();
         fields.setHgap(10); fields.setVgap(10); fields.setPadding(new Insets(14));
-        fields.add(new Label("Host / IP"), 0, 0); fields.add(host, 1, 0);
-        fields.add(new Label("RCON port"), 0, 1); fields.add(port, 1, 1);
-        fields.add(new Label("RCON password"), 0, 2); fields.add(password, 1, 2);
+        fields.add(new Label(Localization.text("remoteServer.host")), 0, 0); fields.add(host, 1, 0);
+        fields.add(new Label(Localization.text("remoteServer.port")), 0, 1); fields.add(port, 1, 1);
+        fields.add(new Label(Localization.text("remoteServer.password")), 0, 2); fields.add(password, 1, 2);
         fields.add(help, 0, 3, 2, 1);
         fields.getColumnConstraints().addAll(new ColumnConstraints(), growColumn());
         dialog.getDialogPane().setContent(fields);
@@ -87,7 +88,7 @@ public final class RemoteServerConnectionDialog {
 
     private static void showConsole(Window owner, String host, int port, RemoteRconClient client) {
         Stage stage = new Stage();
-        stage.setTitle("Remote Console — " + host + ":" + port);
+        stage.setTitle(Localization.text("remoteServer.consolePrefix") + host + ":" + port);
         if (owner != null) stage.initOwner(owner);
         TextArea output = new TextArea();
         output.setEditable(false);
@@ -95,9 +96,9 @@ public final class RemoteServerConnectionDialog {
         output.getStyleClass().add("server-console");
         output.appendText("Connected to " + host + ":" + port + " using RCON.\n");
         TextField command = new TextField();
-        command.setPromptText("Enter a remote server command");
-        Button send = new Button("Send");
-        Button close = new Button("Disconnect");
+        command.setPromptText(Localization.text("remoteServer.commandPrompt"));
+        Button send = new Button(Localization.text("common.send"));
+        Button close = new Button(Localization.text("common.disconnect"));
         Runnable sendCommand = () -> {
             String value = command.getText().trim();
             if (value.isEmpty()) return;
@@ -145,7 +146,7 @@ public final class RemoteServerConnectionDialog {
     private static void showError(String message) {
         UiExecutor.shared().dispatchToUi(() -> {
             Alert alert = new Alert(Alert.AlertType.ERROR, message, ButtonType.OK);
-            alert.setHeaderText("Remote server connection");
+            alert.setHeaderText(Localization.text("remoteServer.accessible"));
             alert.showAndWait();
         });
     }
