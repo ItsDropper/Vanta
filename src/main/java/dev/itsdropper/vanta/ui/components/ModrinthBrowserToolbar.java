@@ -210,6 +210,12 @@ public final class ModrinthBrowserToolbar extends VBox {
         return searchField;
     }
 
+    public void setSearchPrompt(String prompt) {
+        String value = prompt == null ? "" : prompt;
+        searchField.setPromptText(value);
+        searchField.setAccessibleText(value);
+    }
+
     public SearchState getState() {
         return new SearchState(
                 searchField.getText() == null ? "" : searchField.getText().trim(),
