@@ -1419,21 +1419,17 @@ public class GlobalModsView extends VBox {
         // EMPTY = MOST DOWNLOADED
         // =========================================================
 
-        if (query.isBlank()) {
+        boolean hasActiveFacets = contentTypeBox.getValue() != ModrinthContentType.MOD
+                || !selectedLoaders.isEmpty()
+                || !selectedVersions.isEmpty()
+                || !selectedCategories.isEmpty();
+        if (query.isBlank() && !hasActiveFacets) {
             searchOffset = 0;
             searchTotalHits = 0;
             updateSearchPagination();
-
-            results
-                    .getChildren()
-                    .clear();
-
+            results.getChildren().clear();
             showPopularSection();
-
-            statusLabel.setText(
-                    Localization.text("globalMods.searchHelp")
-            );
-
+            statusLabel.setText(Localization.text("globalMods.searchHelp"));
             return;
         }
 
