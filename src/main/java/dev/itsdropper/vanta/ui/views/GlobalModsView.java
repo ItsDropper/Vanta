@@ -176,6 +176,16 @@ public class GlobalModsView extends VBox {
         versionSearchField.setPrefWidth(210);
         versionSearchField.setPrefHeight(42);
         versionSearchField.getStyleClass().add("create-field");
+        // Initialize the shared toolbar before registering listeners that capture it.
+        // The listeners run only after construction, but Java's definite-assignment
+        // analysis requires this final field to be assigned first.
+        browserToolbar = new ModrinthBrowserToolbar(
+                searchPromptFor(ModrinthContentType.MOD),
+                this::search,
+                this::applyGlobalResultLayout
+        );
+        searchField = browserToolbar.getSearchField();
+
         showAllVersions = new CheckBox(Localization.text("modrinth.showAllVersions"));
         showAllVersions.setSelected(false);
         showAllVersions.getStyleClass().add("dialog-instance-checkbox");
@@ -318,12 +328,7 @@ public class GlobalModsView extends VBox {
         // SEARCH AND SHARED BROWSE CONTROLS
         // =========================================================
 
-        browserToolbar = new ModrinthBrowserToolbar(
-                searchPromptFor(ModrinthContentType.MOD),
-                this::search,
-                this::applyGlobalResultLayout
-        );
-        searchField = browserToolbar.getSearchField();
+
 
         // =========================================================
 
