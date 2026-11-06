@@ -37,6 +37,7 @@ import dev.itsdropper.vanta.launcher.service.ServerTarget;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.VantaUI;
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
@@ -90,11 +91,11 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         getStyleClass().addAll("page", "home-page");
 
-        Label title = new Label("Home");
+        Label title = new Label(Localization.text("home.title"));
         title.getStyleClass().add("home-title");
         VantaUI.styleText(title, VantaUI.TextRole.PAGE_TITLE);
 
-        accountLabel = new Label("Checking account...");
+        accountLabel = new Label(Localization.text("home.accountChecking"));
         accountLabel.getStyleClass().add("home-account-label");
         VantaUI.styleText(accountLabel, VantaUI.TextRole.MUTED);
 
@@ -103,16 +104,16 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         header.setAlignment(Pos.CENTER_LEFT);
         header.getStyleClass().add("home-header");
 
-        launchStatusLabel = new Label("READY TO PLAY");
+        launchStatusLabel = new Label(Localization.text("home.readyToPlay"));
         launchStatusLabel.getStyleClass().addAll("home-launch-indicator", "home-status-ready");
         launchStatusLabel.setAccessibleText("Minecraft launch status: ready to play");
 
-        Button createInstanceButton = new Button("＋  NEW INSTANCE");
+        Button createInstanceButton = new Button(Localization.text("home.newInstance"));
         createInstanceButton.getStyleClass().add("primary-button");
         AnimationUtils.installInteractiveAnimations(createInstanceButton);
         createInstanceButton.setMinHeight(40);
-        createInstanceButton.setAccessibleText("Create a new Minecraft instance");
-        createInstanceButton.setTooltip(new Tooltip("Create, import, or install a modpack"));
+        createInstanceButton.setAccessibleText(Localization.text("home.createInstanceAccessible"));
+        createInstanceButton.setTooltip(new Tooltip(Localization.text("home.createInstanceTooltip")));
         createInstanceButton.setOnAction(event -> {
             if (this.onCreateInstance != null) this.onCreateInstance.run();
         });
@@ -192,13 +193,13 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private VBox createFeaturedSection() {
-        Label eyebrow = new Label("YOUR WORLD, ONE CLICK AWAY");
+        Label eyebrow = new Label(Localization.text("home.featuredEyebrow"));
         eyebrow.getStyleClass().add("home-featured-section-eyebrow");
 
-        Label subtitle = new Label("Pick up where you left off.");
+        Label subtitle = new Label(Localization.text("home.featuredSubtitle"));
         subtitle.getStyleClass().add("home-featured-section-subtitle");
 
-        Label loading = new Label("Loading your Minecraft library...");
+        Label loading = new Label(Localization.text("home.libraryLoading"));
         loading.getStyleClass().add("home-featured-loading");
         featuredContainer.getStyleClass().add("home-featured-container");
         featuredContainer.getChildren().setAll(loading);
@@ -211,12 +212,10 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private VBox createRecentInstancesSection() {
-        Label recentTitle = new Label("RECENTLY PLAYED");
+        Label recentTitle = new Label(Localization.text("home.recentTitle"));
         recentTitle.getStyleClass().add("home-section-title");
 
-        Label recentSubtitle = new Label(
-                "Jump back into the instances you played most recently."
-        );
+        Label recentSubtitle = new Label(Localization.text("home.recentSubtitle"));
         recentSubtitle.getStyleClass().add("home-section-subtitle");
 
         recentList = new FlowPane();
@@ -227,7 +226,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         recentList.setMinHeight(0);
         recentList.getStyleClass().add("home-recent-list");
 
-        recentStatus = new Label("Loading instances...");
+        recentStatus = new Label(Localization.text("home.instancesLoading"));
         recentStatus.getStyleClass().add("home-recent-status");
 
         VBox section = new VBox(
@@ -246,12 +245,10 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         VBox card = new VBox(10);
         card.getStyleClass().add("home-recent-servers-card");
 
-        Label title = new Label("RECENTLY PLAYED SERVERS");
+        Label title = new Label(Localization.text("home.serversTitle"));
         title.getStyleClass().add("home-section-title");
 
-        Label subtitle = new Label(
-                "Join a server directly with the instance you last used."
-        );
+        Label subtitle = new Label(Localization.text("home.serversSubtitle"));
         subtitle.getStyleClass().add("home-section-subtitle");
 
         recentServersList = new VBox(8);
@@ -260,7 +257,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         recentServersList.setMinHeight(0);
         recentServersList.getStyleClass().add("home-server-list");
 
-        recentServersStatus = new Label("No server history yet.");
+        recentServersStatus = new Label(Localization.text("home.noServerHistory"));
         recentServersStatus.getStyleClass().add("home-recent-status");
 
         card.getChildren().addAll(
