@@ -72,6 +72,7 @@ public class GlobalModsView extends VBox {
 
     private final FlowPane results;
     private final Label statusLabel;
+    private Button retryButton;
     private final ScrollPane resultsScrollPane;
 
     private final BiConsumer<String, ModrinthContentType> onModSelected;
@@ -912,18 +913,7 @@ public class GlobalModsView extends VBox {
             statusLabel.setText(Localization.text("globalMods.previewResultsNotice"));
             return;
         }
-        String query = searchField.getText();
-
-        boolean hasActiveFacets = contentTypeBox.getValue() != ModrinthContentType.MOD
-                || !selectedLoaders.isEmpty()
-                || !selectedVersions.isEmpty()
-                || !selectedCategories.isEmpty();
-        if ((query != null && !query.trim().isBlank()) || hasActiveFacets) {
-            search();
-        } else {
-            showPopularSection();
-            loadMostDownloadedMods();
-        }
+        browserToolbar.refresh();
     }
 
     private String selectedVersion() {
