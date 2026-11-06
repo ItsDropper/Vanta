@@ -15,6 +15,7 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -202,15 +203,20 @@ public class GlobalModsView extends VBox {
 
         Label filtersTitle = new Label("Filters");
         filtersTitle.getStyleClass().add("settings-section-title");
-        Label versionTitle = new Label("Game version");
-        versionTitle.getStyleClass().add("modrinth-filter-title");
-        Label loaderTitle = new Label("Loader");
-        loaderTitle.getStyleClass().add("modrinth-filter-title");
-        Label categoryTitle = new Label("Category");
-        categoryTitle.getStyleClass().add("modrinth-filter-title");
+        VBox versionFilters = new VBox(8, versionSearchField, versionBox, showAllVersions);
+        VBox loaderFilters = new VBox(8, loaderBox);
+        VBox categoryFilters = new VBox(8, categoriesButton);
+        TitledPane versionPanel = new TitledPane("Game version", versionFilters);
+        TitledPane loaderPanel = new TitledPane("Loader", loaderFilters);
+        TitledPane categoryPanel = new TitledPane("Category", categoryFilters);
+        versionPanel.setExpanded(true);
+        loaderPanel.setExpanded(true);
+        categoryPanel.setExpanded(true);
+        versionPanel.setAnimated(true);
+        loaderPanel.setAnimated(true);
+        categoryPanel.setAnimated(true);
         VBox filterSidebar = new VBox(10,
-                filtersTitle, versionTitle, versionSearchField, versionBox, showAllVersions,
-                loaderTitle, loaderBox, categoryTitle, categoriesButton);
+                filtersTitle, versionPanel, loaderPanel, categoryPanel);
         filterSidebar.getStyleClass().add("modrinth-filter-sidebar");
         filterSidebar.setPrefWidth(230);
         filterSidebar.setMinWidth(205);
