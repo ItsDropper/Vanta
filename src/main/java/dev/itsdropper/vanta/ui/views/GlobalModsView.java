@@ -87,6 +87,7 @@ public class GlobalModsView extends VBox {
     private final Button nextPageButton;
     private final Label pageIndicator;
     private final Button layoutButton;
+    private final java.util.Map<ModrinthContentType, Button> contentTypeButtons = new java.util.EnumMap<>(ModrinthContentType.class);
 
     public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
         this(onModSelected, false);
@@ -173,23 +174,53 @@ public class GlobalModsView extends VBox {
         categoriesButton = new Button("Categories");
         categoriesButton.getStyleClass().add("secondary-button");
         categoriesButton.setOnAction(event -> showCategoryPicker());
-        FlowPane filters = new FlowPane(
-                10, 8,
-                contentTypeBox,
-                loaderBox,
-                versionBox,
-                versionSearchField,
-                showAllVersions,
-                categoriesButton
-        );
-        filters.setAlignment(Pos.CENTER_LEFT);
-        filters.setMaxWidth(Double.MAX_VALUE);
+        contentTypeBox.setVisible(false);
+        contentTypeBox.setManaged(false);
+        HBox contentTypeSegments = new HBox(6);
+        contentTypeSegments.getStyleClass().add("modrinth-content-segments");
+        for (ModrinthContentType type : List.of(
+                ModrinthContentType.MOD,
+                ModrinthContentType.RESOURCE_PACK,
+                ModrinthContentType.DATA_PACK,
+                ModrinthContentType.SHADER,
+                ModrinthContentType.MODPACK
+        )) {
+            String label = switch (type) {
+                case MOD -> "Mods";
+                case RESOURCE_PACK -> "Resource Packs";
+                case DATA_PACK -> "Data Packs";
+                case SHADER -> "Shaders";
+                case MODPACK -> "Modpacks";
+            };
+            Button segment = new Button(label);
+            segment.getStyleClass().add("modrinth-content-segment");
+            segment.setOnAction(event -> contentTypeBox.setValue(type));
+            contentTypeButtons.put(type, segment);
+            contentTypeSegments.getChildren().add(segment);
+        }
+        updateContentTypeSegments();
+
+        Label filtersTitle = new Label("Filters");
+        filtersTitle.getStyleClass().add("settings-section-title");
+        Label versionTitle = new Label("Game version");
+        versionTitle.getStyleClass().add("modrinth-filter-title");
+        Label loaderTitle = new Label("Loader");
+        loaderTitle.getStyleClass().add("modrinth-filter-title");
+        Label categoryTitle = new Label("Category");
+        categoryTitle.getStyleClass().add("modrinth-filter-title");
+        VBox filterSidebar = new VBox(10,
+                filtersTitle, versionTitle, versionSearchField, versionBox, showAllVersions,
+                loaderTitle, loaderBox, categoryTitle, categoriesButton);
+        filterSidebar.getStyleClass().add("modrinth-filter-sidebar");
+        filterSidebar.setPrefWidth(230);
+        filterSidebar.setMinWidth(205);
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
             searchOffset = 0;
             selectedCategories.clear();
             updateCategoriesButton();
+            updateContentTypeSegments();
             loadLoaderTags(newValue);
             loadCategoryTags(newValue);
             refreshForCurrentFilters();
@@ -455,16 +486,20 @@ public class GlobalModsView extends VBox {
         // BUILD
         // =========================================================
 
+        VBox contentPane = new VBox(12,
+                popularTitle, popularScrollPane, popularStatusLabel,
+                resultsScrollPane, statusLabel);
+        contentPane.setFillWidth(true);
+        HBox browseContent = new HBox(18, filterSidebar, contentPane);
+        HBox.setHgrow(contentPane, Priority.ALWAYS);
+        VBox.setVgrow(browseContent, Priority.ALWAYS);
+
         getChildren().addAll(
                 header,
-                filters,
+                contentTypeSegments,
                 searchBar,
                 browseControls,
-                popularTitle,
-                popularScrollPane,
-                popularStatusLabel,
-                resultsScrollPane,
-                statusLabel
+                browseContent
         );
 
         // =========================================================
@@ -503,6 +538,14 @@ public class GlobalModsView extends VBox {
             statusLabel.setManaged(false);
         } else {
             loadMostDownloadedMods();
+        }
+    }
+
+    private void updateContentTypeSegments() {
+        for (java.util.Map.Entry<ModrinthContentType, Button> entry : contentTypeButtons.entrySet()) {
+            boolean selected = entry.getKey() == contentTypeBox.getValue();
+            entry.getValue().getStyleClass().remove("modrinth-content-segment-selected");
+            if (selected) entry.getValue().getStyleClass().add("modrinth-content-segment-selected");
         }
     }
 
