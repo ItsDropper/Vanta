@@ -30,6 +30,8 @@ locale suffix convention; for example, `pt-PT` maps to
   application startup, before launcher views are constructed.
 - `Localization.text(key)` is the single lookup entry point for UI code.
 - `LanguagePreferenceControl` is shared by Overview and Settings → General.
+- Settings navigation labels, category headings, compact navigation, and search
+  affordances use localized resource keys while retaining stable internal section IDs.
 - Changing the preference never mutates the active bundle in a running scene.
   The preference is saved immediately and the UI clearly reports that a restart
   is required.
@@ -38,12 +40,12 @@ locale suffix convention; for example, `pt-PT` maps to
 
 ## Adding a language
 
-1. Add its BCP 47 code to the allowlist in `LauncherSettings`.
-2. Add a `Localization.Language` entry with native and English names.
+1. Add a `Localization.Language` entry with native and English names. 
 3. Add `messages_<locale>.properties` under
    `src/main/resources/dev/itsdropper/vanta/i18n/`.
 4. Add the locale to `LocalizationTest` coverage through the supported-language
-   catalog; the test verifies that all required language-preference strings exist.
+   catalog; the test verifies all required language-preference and Settings-navigation
+   strings exist.
 5. Translate UI strings by stable semantic keys, not by using English UI text as
    a lookup key.
 
@@ -60,7 +62,7 @@ locale suffix convention; for example, `pt-PT` maps to
   officially defined.
 - Avoid machine-translating technical terms without review by a fluent speaker.
 
-The first increment localizes the language preference component and establishes
-the catalog and persistence lifecycle. Existing launcher pages are migrated in
-separate, reviewable batches so partially translated screens are not presented
-as complete localization.
+The initial increments localize the language preference component and Settings
+navigation, and establish the catalog and persistence lifecycle. Settings page
+content and the remaining launcher surfaces are still English and must be migrated
+in separate, reviewable batches; this is not yet full-launcher localization.
