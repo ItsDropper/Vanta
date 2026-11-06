@@ -388,7 +388,7 @@ public class InstancesView extends VBox {
         ChoiceDialog<String> instanceChooser = new ChoiceDialog<>(instanceLabels.get(0), instanceLabels);
         instanceChooser.setTitle(Localization.text("instances.recoveryTitle"));
         instanceChooser.setHeaderText(Localization.text("instances.chooseInstance"));
-        instanceChooser.setContentText("Instance:");
+        instanceChooser.setContentText(Localization.text("instances.instanceLabel"));
         String selectedLabel = instanceChooser.showAndWait().orElse(null);
         if (selectedLabel == null) return;
 
@@ -401,7 +401,7 @@ public class InstancesView extends VBox {
                 || launchState == LaunchService.LaunchState.RUNNING
                 || launchState == LaunchService.LaunchState.CLOSING) {
             new Alert(Alert.AlertType.WARNING,
-                    "Wait until this instance has completely stopped before creating or restoring a recovery point.")
+                    Localization.text("instances.waitStopped"))
                     .showAndWait();
             return;
         }
@@ -416,7 +416,7 @@ public class InstancesView extends VBox {
 
         actionButton.setDisable(true);
         if (action.equals("Create recovery point")) {
-            statusLabel.setText("Creating a targeted recovery point for " + selected.getName() + "…");
+            statusLabel.setText(Localization.text("instances.creatingRecoveryPrefix") + selected.getName() + "…");
             UiExecutor.shared().execute(() -> {
                 try {
                     int recoveredTransactions =
@@ -433,7 +433,7 @@ public class InstancesView extends VBox {
                                             + " before creating this point. Any incomplete restore was rolled back.")
                                     .show();
                         }
-                        statusLabel.setText("Recovery point created: " + point.id());
+                        statusLabel.setText(Localization.text("instances.recoveryCreatedPrefix") + point.id());
                         new Alert(Alert.AlertType.INFORMATION,
                                 "Recovery point created.\n\n"
                                         + "Files: " + point.fileCount() + "\n"
@@ -448,7 +448,7 @@ public class InstancesView extends VBox {
                         actionButton.setDisable(false);
                         String message = failure.getMessage() == null
                                 ? failure.getClass().getSimpleName() : failure.getMessage();
-                        statusLabel.setText("Recovery point creation failed: " + message);
+                        statusLabel.setText(Localization.text("instances.recoveryCreateFailedPrefix") + message);
                         new Alert(Alert.AlertType.ERROR, "Could not create recovery point.\n\n" + message).show();
                     });
                 }
@@ -456,7 +456,7 @@ public class InstancesView extends VBox {
             return;
         }
 
-        statusLabel.setText("Loading recovery-point history…");
+        statusLabel.setText(Localization.text("instances.loadingRecoveryHistory"));
         UiExecutor.shared().execute(() -> {
             try {
                 int recoveredTransactions =
@@ -474,7 +474,7 @@ public class InstancesView extends VBox {
                     }
                     if (points.isEmpty()) {
                         actionButton.setDisable(false);
-                        statusLabel.setText("No valid recovery points exist for " + selected.getName() + ".");
+                        statusLabel.setText(Localization.text("instances.noRecoveryPointsPrefix") + selected.getName() + ".");
                         new Alert(Alert.AlertType.INFORMATION,
                                 "This instance has no valid recovery points yet.").show();
                         return;
@@ -486,8 +486,8 @@ public class InstancesView extends VBox {
                             .toList();
                     ChoiceDialog<String> pointChooser = new ChoiceDialog<>(labels.get(0), labels);
                     pointChooser.setTitle(Localization.text("instances.restorePoint"));
-                    pointChooser.setHeaderText("Choose a recovery point for " + selected.getName());
-                    pointChooser.setContentText("Recovery point:");
+                    pointChooser.setHeaderText(Localization.text("instances.chooseRecoveryPointPrefix") + selected.getName());
+                    pointChooser.setContentText(Localization.text("instances.recoveryPointLabel"));
                     String chosen = pointChooser.showAndWait().orElse(null);
                     if (chosen == null) {
                         actionButton.setDisable(false);
@@ -511,7 +511,7 @@ public class InstancesView extends VBox {
                                     + "Worlds, screenshots, options, and instance metadata are not changed.\n\n"
                                     + "Vanta stages the replacement and attempts rollback if publication fails.");
                     confirmation.setTitle(Localization.text("instances.confirmRecovery"));
-                    confirmation.setHeaderText("Restore " + point.id() + "?");
+                    confirmation.setHeaderText(Localization.text("instances.restorePrefix") + point.id() + "?");
                     if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
                         actionButton.setDisable(false);
                         return;
@@ -523,7 +523,7 @@ public class InstancesView extends VBox {
                             InstanceRecoveryService.restoreRecoveryPoint(selected, point.id());
                             UiExecutor.shared().dispatchToUi(() -> {
                                 actionButton.setDisable(false);
-                                statusLabel.setText("Recovery point restored for " + selected.getName() + ".");
+                                statusLabel.setText(Localization.text("instances.recoveryRestoredPrefix") + selected.getName() + ".");
                                 new Alert(Alert.AlertType.INFORMATION,
                                         "Recovery completed.\n\n"
                                                 + "Mods, configs, resource packs, and shader packs were restored. "
@@ -534,7 +534,7 @@ public class InstancesView extends VBox {
                                 actionButton.setDisable(false);
                                 String message = failure.getMessage() == null
                                         ? failure.getClass().getSimpleName() : failure.getMessage();
-                                statusLabel.setText("Recovery failed: " + message);
+                                statusLabel.setText(Localization.text("instances.recoveryFailedPrefix") + message);
                                 new Alert(Alert.AlertType.ERROR,
                                         "Recovery failed. Vanta attempted to roll back any published directories.\n\n"
                                                 + message).show();
@@ -547,7 +547,7 @@ public class InstancesView extends VBox {
                     actionButton.setDisable(false);
                     String message = failure.getMessage() == null
                             ? failure.getClass().getSimpleName() : failure.getMessage();
-                    statusLabel.setText("Could not load recovery history: " + message);
+                    statusLabel.setText(Localization.text("instances.recoveryHistoryFailedPrefix") + message);
                     new Alert(Alert.AlertType.ERROR, "Could not load recovery history.\n\n" + message).show();
                 });
             }
@@ -573,7 +573,7 @@ public class InstancesView extends VBox {
                     backupButton.setDisable(false);
                     String size = String.format(Locale.ROOT, "%.2f GiB",
                             report.expandedBytes() / (1024.0 * 1024.0 * 1024.0));
-                    statusLabel.setText("Backup verified: " + archive.getName()
+                    statusLabel.setText(Localization.text("instances.backupVerifiedPrefix") + archive.getName()
                             + " · " + report.entryCount() + " entries");
                     Alert success = new Alert(Alert.AlertType.INFORMATION,
                             "Archive integrity checks passed.\n\n"
@@ -628,7 +628,7 @@ public class InstancesView extends VBox {
                 InstanceBackupService.restoreBackup(archive.toPath(), name);
                 UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
-                    statusLabel.setText("Backup restored as " + name.trim() + ".");
+                    statusLabel.setText(Localization.text("instances.backupRestoredPrefix") + name.trim() + ".");
                     refresh();
                     new Alert(Alert.AlertType.INFORMATION,
                             "The backup was restored as a separate instance. The original instance and backup file were not changed.")
@@ -658,7 +658,7 @@ public class InstancesView extends VBox {
         ChoiceDialog<String> chooser = new ChoiceDialog<>(instanceLabels.get(0), instanceLabels);
         chooser.setTitle(Localization.text("instances.backupTitle"));
         chooser.setHeaderText(Localization.text("instances.chooseBackup"));
-        chooser.setContentText("Instance:");
+        chooser.setContentText(Localization.text("instances.instanceLabel"));
         String selectedLabel = chooser.showAndWait().orElse(null);
         if (selectedLabel == null) return;
         Instance selected = loadedInstances.get(instanceLabels.indexOf(selectedLabel));
@@ -684,7 +684,7 @@ public class InstancesView extends VBox {
         }
         final java.nio.file.Path output = destination;
         backupButton.setDisable(true);
-        statusLabel.setText("Backing up " + selected.getName() + "… Worlds and settings are included.");
+        statusLabel.setText(Localization.text("instances.backingUpPrefix") + selected.getName() + "… Worlds and settings are included.");
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -692,7 +692,7 @@ public class InstancesView extends VBox {
                 TelemetryService.track("feature_backup_used");
                 UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
-                    statusLabel.setText("Backup created: " + output.getFileName());
+                    statusLabel.setText(Localization.text("instances.backupCreatedPrefix") + output.getFileName());
                     Alert success = new Alert(Alert.AlertType.INFORMATION,
                             "Full instance backup created. Worlds, mods, configs, resource packs, shader packs, screenshots, options, and instance metadata are preserved. Transient logs and extracted native libraries are excluded.");
                     success.setTitle(Localization.text("instances.backupComplete"));
@@ -998,7 +998,7 @@ public class InstancesView extends VBox {
                 || state == LaunchService.LaunchState.CLOSING) {
 
             statusLabel.setText(
-                    "Wait until this instance has finished starting or closing."
+                    Localization.text("instances.waitTransition")
             );
 
             return;
@@ -1110,7 +1110,7 @@ public class InstancesView extends VBox {
 
         Label icon =
                 new Label(
-                        "Settings"
+                        Localization.text("common.settings")
                 );
 
         icon.getStyleClass().add(
