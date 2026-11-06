@@ -60,12 +60,25 @@ public final class SteinInstaller {
     private SteinInstaller() {
     }
 
+    public static boolean supportsCurrentPlatform() {
+        String architecture = System.getProperty("os.arch", "").toLowerCase(Locale.ROOT);
+        boolean x64 = architecture.equals("amd64") || architecture.equals("x86_64")
+                || architecture.equals("x86-64") || architecture.equals("x64");
+        boolean arm64 = architecture.equals("aarch64") || architecture.equals("arm64");
+        return switch (Platform.operatingSystem()) {
+            case WINDOWS, LINUX -> x64;
+            case MACOS -> x64 || arm64;
+            case UNKNOWN -> false;
+        };
+    }
+
     public static boolean supportsMinecraftVersion(String minecraftVersion) {
-        return MINECRAFT_VERSION.equals(minecraftVersion == null ? "" : minecraftVersion.trim());
+        return MINECRAFT_VERSION.equals(minecraftVersion == null ? "" : minecraftVersion.trim())
+                && supportsCurrentPlatform();
     }
 
     public static String findLatestLoaderVersion() {
-        return VERSION;
+        return LOADER_VERSION;
     }
 
     public static Path javaExecutable(Instance instance) {
@@ -79,7 +92,7 @@ public final class SteinInstaller {
                 .resolve(Platform.javaExecutableName());
         if (!Files.isRegularFile(executable)) {
             throw new IllegalStateException(
-                    "Stein's Java 25 runtime is missing. Repair this instance before launching.");
+                    "Stein's Java 25 runtime is missing or invalid. Repair this instance before launching.");
         }
         return executable;
     }
@@ -123,6 +136,7 @@ public final class SteinInstaller {
             if (!Files.isRegularFile(generatedJava)) {
                 throw new IOException("The official Stein installer did not produce a usable Java 25 runtime.");
             }
+            verifyJava25(generatedJava);
 
             JsonNode generatedMetadata = JSON.readTree(generatedJson.toFile());
             normalizeNativeLibraries(generatedMetadata);
@@ -157,9 +171,39 @@ public final class SteinInstaller {
 
             System.out.println("[Vanta Stein] Installed Stein Loader " + LOADER_VERSION
                     + " with Bridge " + BRIDGE_VERSION + " using installer " + VERSION + ".");
-            return VERSION;
+            return LOADER_VERSION;
         } finally {
             deleteTree(stage);
+        }
+    }
+
+    private static void verifyJava25(Path javaExecutable) throws Exception {
+        Path output = Files.createTempFile("stein-java-version-", ".log");
+        try {
+            Process process = new ProcessBuilder(javaExecutable.toString(), "-version")
+                    .redirectErrorStream(true)
+                    .redirectOutput(output.toFile())
+                    .start();
+            boolean finished;
+            try {
+                finished = process.waitFor(15, TimeUnit.SECONDS);
+            } catch (InterruptedException interrupted) {
+                process.destroyForcibly();
+                Thread.currentThread().interrupt();
+                throw interrupted;
+            }
+            String versionOutput = Files.readString(output);
+            if (!finished) {
+                process.destroyForcibly();
+                throw new IOException("Stein's Java 25 runtime is missing or invalid: java -version timed out.");
+            }
+            if (process.exitValue() != 0
+                    || !(versionOutput.contains("version \"25.")
+                    || versionOutput.contains("version \"25\""))) {
+                throw new IOException("Stein's Java 25 runtime is missing or invalid: " + versionOutput.trim());
+            }
+        } finally {
+            Files.deleteIfExists(output);
         }
     }
 
