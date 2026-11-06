@@ -956,22 +956,7 @@ public class BrowseModsView extends VBox {
                 }
         );
 
-        // =========================================================
-        // INFORMATION
-        // =========================================================
-
-        VBox information =
-                new VBox(
-                        6,
-                        title,
-                        description,
-                        metadata
-                );
-
-        HBox.setHgrow(
-                information,
-                Priority.ALWAYS
-        );
+        HBox.setHgrow(information, Priority.ALWAYS);
 
         // =========================================================
         // ROW
