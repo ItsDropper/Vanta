@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -66,7 +67,7 @@ public class ScreenshotsView extends VBox {
 
         Button backButton =
                 new Button(
-                        "← BACK"
+                        Localization.text("common.backArrow")
                 );
 
         backButton.getStyleClass().add(
@@ -97,7 +98,7 @@ public class ScreenshotsView extends VBox {
 
         Button openFolderButton =
                 new Button(
-                        "OPEN FOLDER"
+                        Localization.text("screenshots.openFolder")
                 );
 
         openFolderButton.getStyleClass().add(
@@ -110,7 +111,7 @@ public class ScreenshotsView extends VBox {
 
         Button refreshButton =
                 new Button(
-                        "REFRESH"
+                        Localization.text("common.refresh")
                 );
 
         refreshButton.getStyleClass().add(
@@ -258,7 +259,7 @@ public class ScreenshotsView extends VBox {
                 showEmptyState();
 
                 statusLabel.setText(
-                        "0 screenshots."
+                        Localization.text("screenshots.zero")
                 );
 
                 return;
@@ -292,7 +293,7 @@ public class ScreenshotsView extends VBox {
             e.printStackTrace();
 
             statusLabel.setText(
-                    "Failed to load screenshots."
+                    Localization.text("screenshots.loadFailed")
             );
         }
     }
@@ -545,7 +546,7 @@ public class ScreenshotsView extends VBox {
 
         Button resetZoom =
                 new Button(
-                        "100%"
+                        Localization.text("screenshots.zoom100")
                 );
 
         resetZoom.getStyleClass().add(
@@ -564,7 +565,7 @@ public class ScreenshotsView extends VBox {
 
         Button fitButton =
                 new Button(
-                        "FIT"
+                        Localization.text("screenshots.fit")
                 );
 
         fitButton.getStyleClass().add(
@@ -825,7 +826,7 @@ public class ScreenshotsView extends VBox {
 
         Button copyButton =
                 new Button(
-                        "COPY"
+                        Localization.text("common.copy")
                 );
 
         copyButton.getStyleClass().add(
@@ -842,7 +843,7 @@ public class ScreenshotsView extends VBox {
 
         Button saveButton =
                 new Button(
-                        "SAVE AS"
+                        Localization.text("screenshots.saveAs")
                 );
 
         saveButton.getStyleClass().add(
@@ -859,7 +860,7 @@ public class ScreenshotsView extends VBox {
 
         Button openButton =
                 new Button(
-                        "OPEN"
+                        Localization.text("common.open")
                 );
 
         openButton.getStyleClass().add(
@@ -875,7 +876,7 @@ public class ScreenshotsView extends VBox {
 
         Button deleteButton =
                 new Button(
-                        "DELETE"
+                        Localization.text("common.delete")
                 );
 
         deleteButton.getStyleClass().add(
@@ -896,7 +897,7 @@ public class ScreenshotsView extends VBox {
 
         Button closeButton =
                 new Button(
-                        "CLOSE"
+                        Localization.text("common.close")
                 );
 
         closeButton.getStyleClass().add(
@@ -1084,7 +1085,7 @@ public class ScreenshotsView extends VBox {
                 );
 
         statusLabel.setText(
-                "Screenshot copied to clipboard."
+                Localization.text("screenshots.copied")
         );
     }
 
@@ -1101,7 +1102,7 @@ public class ScreenshotsView extends VBox {
                 new FileChooser();
 
         chooser.setTitle(
-                "Save Screenshot"
+                Localization.text("screenshots.saveTitle")
         );
 
         chooser.setInitialFileName(
@@ -1140,7 +1141,7 @@ public class ScreenshotsView extends VBox {
             );
 
             statusLabel.setText(
-                    "Screenshot saved."
+                    Localization.text("screenshots.saved")
             );
 
         } catch (IOException e) {
@@ -1242,7 +1243,7 @@ public class ScreenshotsView extends VBox {
 
         Label title =
                 new Label(
-                        "Delete screenshot?"
+                        Localization.text("screenshots.deleteQuestion")
                 );
 
         title.getStyleClass().add(
@@ -1251,7 +1252,7 @@ public class ScreenshotsView extends VBox {
 
         Label description =
                 new Label(
-                        "This will permanently delete:"
+                        Localization.text("screenshots.deleteWarning")
                 );
 
         description.getStyleClass().add(
@@ -1282,7 +1283,7 @@ public class ScreenshotsView extends VBox {
 
         Button cancelButton =
                 new Button(
-                        "CANCEL"
+                        Localization.text("common.cancel")
                 );
 
         cancelButton.getStyleClass().add(
@@ -1296,7 +1297,7 @@ public class ScreenshotsView extends VBox {
 
         Button deleteButton =
                 new Button(
-                        "DELETE"
+                        Localization.text("common.delete")
                 );
 
         deleteButton.getStyleClass().add(
@@ -1444,7 +1445,7 @@ public class ScreenshotsView extends VBox {
 
         Label title =
                 new Label(
-                        "No screenshots"
+                        Localization.text("screenshots.emptyTitle")
                 );
 
         title.getStyleClass().add(
@@ -1453,7 +1454,7 @@ public class ScreenshotsView extends VBox {
 
         Label description =
                 new Label(
-                        "Screenshots taken in Minecraft will appear here."
+                        Localization.text("screenshots.emptyDescription")
                 );
 
         description.getStyleClass().add(
