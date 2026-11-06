@@ -937,6 +937,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         );
 
         content.getChildren().addAll(
+                languagePreferences,
                 behavior,
                 workspace,
                 dataCard,
