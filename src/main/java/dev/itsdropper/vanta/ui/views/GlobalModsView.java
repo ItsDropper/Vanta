@@ -72,6 +72,13 @@ public class GlobalModsView extends VBox {
     private long searchRequestId;
     private long popularRequestId;
     private long loaderTagRequestId;
+    private int searchOffset;
+    private int searchTotalHits;
+    private final ComboBox<String> sortBox;
+    private final ComboBox<Integer> resultLimitBox;
+    private final Button previousPageButton;
+    private final Button nextPageButton;
+    private final Label pageIndicator;
 
     public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
         this(onModSelected, false);
@@ -248,6 +255,52 @@ public class GlobalModsView extends VBox {
                 Pos.CENTER_LEFT
         );
 
+        sortBox = new ComboBox<>();
+        sortBox.getItems().setAll("Relevance", "Downloads", "Followers", "Date published", "Date updated");
+        sortBox.setValue("Relevance");
+        sortBox.getStyleClass().add("create-combo");
+        sortBox.setAccessibleText("Sort Modrinth results");
+        resultLimitBox = new ComboBox<>();
+        resultLimitBox.getItems().setAll(5, 10, 15, 20, 50, 100);
+        resultLimitBox.setValue(20);
+        resultLimitBox.getStyleClass().add("create-combo");
+        resultLimitBox.setAccessibleText("Results per page");
+        previousPageButton = new Button("‹");
+        nextPageButton = new Button("›");
+        pageIndicator = new Label("Page 1");
+        previousPageButton.getStyleClass().add("secondary-button");
+        nextPageButton.getStyleClass().add("secondary-button");
+        pageIndicator.getStyleClass().add("instances-status");
+        HBox browseControls = new HBox(8,
+                new Label("Sort"), sortBox,
+                new Label("Per page"), resultLimitBox,
+                previousPageButton, pageIndicator, nextPageButton);
+        browseControls.setAlignment(Pos.CENTER_LEFT);
+        sortBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (oldValue != null && newValue != null && !oldValue.equals(newValue)) {
+                searchOffset = 0;
+                search();
+            }
+        });
+        resultLimitBox.valueProperty().addListener((obs, oldValue, newValue) -> {
+            if (oldValue != null && newValue != null) {
+                searchOffset = 0;
+                search();
+            }
+        });
+        previousPageButton.setOnAction(event -> {
+            if (searchOffset > 0) {
+                searchOffset = Math.max(0, searchOffset - resultLimitBox.getValue());
+                search();
+            }
+        });
+        nextPageButton.setOnAction(event -> {
+            if (searchOffset + resultLimitBox.getValue() < searchTotalHits) {
+                searchOffset += resultLimitBox.getValue();
+                search();
+            }
+        });
+
         // =========================================================
         // MOST DOWNLOADED TITLE
         // =========================================================
@@ -372,6 +425,7 @@ public class GlobalModsView extends VBox {
                 header,
                 filters,
                 searchBar,
+                browseControls,
                 popularTitle,
                 popularScrollPane,
                 popularStatusLabel,
@@ -1061,6 +1115,9 @@ public class GlobalModsView extends VBox {
         // =========================================================
 
         if (query.isBlank()) {
+            searchOffset = 0;
+            searchTotalHits = 0;
+            updateSearchPagination();
 
             results
                     .getChildren()
@@ -1093,18 +1150,31 @@ public class GlobalModsView extends VBox {
 
                     try {
 
-                        List<ModrinthSearchHit> projects =
-                                modrinthClient
-                                        .search(
-                                                query,
-                                                contentTypeBox.getValue(),
-                                                selectedLoader(),
-                                                selectedVersion()
-                                        )
-                                        .getHits();
+                        String loader = selectedLoader();
+                        String version = selectedVersion();
+                        dev.itsdropper.vanta.launcher.modrinth.ModrinthSearchResult response =
+                                modrinthClient.searchPage(
+                                        query,
+                                        contentTypeBox.getValue(),
+                                        loader == null ? List.of() : List.of(loader),
+                                        version == null ? List.of() : List.of(version),
+                                        List.of(),
+                                        switch (sortBox.getValue()) {
+                                            case "Downloads" -> "downloads";
+                                            case "Followers" -> "follows";
+                                            case "Date published" -> "newest";
+                                            case "Date updated" -> "updated";
+                                            default -> "relevance";
+                                        },
+                                        resultLimitBox.getValue(),
+                                        searchOffset
+                                );
+                        List<ModrinthSearchHit> projects = response.getHits();
 
                         UiExecutor.shared().dispatchToUi(() -> {
                             if (requestId != searchRequestId) return;
+                            searchTotalHits = response.getTotalHits();
+                            updateSearchPagination();
                             showResults(projects);
                         });
 
@@ -1121,6 +1191,15 @@ public class GlobalModsView extends VBox {
         });
 
 
+    }
+
+    private void updateSearchPagination() {
+        int limit = resultLimitBox.getValue() == null ? 20 : resultLimitBox.getValue();
+        int page = searchOffset / limit + 1;
+        int pages = Math.max(1, (int) Math.ceil(searchTotalHits / (double) limit));
+        previousPageButton.setDisable(searchOffset <= 0);
+        nextPageButton.setDisable(searchOffset + limit >= searchTotalHits);
+        pageIndicator.setText("Page " + page + " of " + pages + "  •  " + searchTotalHits + " results");
     }
 
     // =============================================================
