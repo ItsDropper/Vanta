@@ -111,7 +111,7 @@ public class BrowseModsView extends VBox {
         );
 
         PageHeader headerText = new PageHeader(
-                Localization.text("browseMods.title"),
+                Localization.text("modrinth.browseModsTitle"),
                 instance.getName()
                         + " • Minecraft "
                         + instance.getMinecraftVersion()
