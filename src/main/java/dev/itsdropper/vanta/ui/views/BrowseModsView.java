@@ -816,7 +816,7 @@ public class BrowseModsView extends VBox {
         projectTags.setAlignment(Pos.CENTER_LEFT);
         String environment = formatEnvironment(project.getClientSide(), project.getServerSide());
         if (!environment.isBlank()) {
-            Label environmentTag = new Label("◉  " + environment);
+            Label environmentTag = new Label(environment);
             environmentTag.getStyleClass().addAll("modrinth-tag-chip", "modrinth-environment-chip");
             projectTags.getChildren().add(environmentTag);
         }
@@ -1027,14 +1027,20 @@ public class BrowseModsView extends VBox {
     }
 
     private String formatEnvironment(String client, String server) {
-        List<String> values = new java.util.ArrayList<>();
-        if (client != null && !client.isBlank() && !"unknown".equalsIgnoreCase(client)) {
-            values.add(Localization.text("modrinth.environmentClient").replace("{value}", client.toLowerCase(java.util.Locale.ROOT)));
+        boolean clientSupported = supportsEnvironment(client);
+        boolean serverSupported = supportsEnvironment(server);
+        if (clientSupported && serverSupported) {
+            return "◎  " + Localization.text("modrinth.environmentClientOrServer");
         }
-        if (server != null && !server.isBlank() && !"unknown".equalsIgnoreCase(server)) {
-            values.add(Localization.text("modrinth.environmentServer").replace("{value}", server.toLowerCase(java.util.Locale.ROOT)));
-        }
-        return String.join(" / ", values);
+        if (clientSupported) return "▣  " + Localization.text("modrinth.environmentClientOnly");
+        if (serverSupported) return "▤  " + Localization.text("modrinth.environmentServerOnly");
+        return "";
+    }
+
+    private boolean supportsEnvironment(String value) {
+        return value != null && !value.isBlank()
+                && !"unknown".equalsIgnoreCase(value)
+                && !"unsupported".equalsIgnoreCase(value);
     }
 
     private String relativeUpdateTime(String value) {
