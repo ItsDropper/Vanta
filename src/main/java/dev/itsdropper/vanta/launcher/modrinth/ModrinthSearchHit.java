@@ -50,6 +50,12 @@ public class ModrinthSearchHit {
     @JsonProperty("date_created")
     private String dateCreated;
 
+    @JsonProperty("client_side")
+    private String clientSide;
+
+    @JsonProperty("server_side")
+    private String serverSide;
+
     public ModrinthSearchHit() {
     }
 
@@ -107,5 +113,13 @@ public class ModrinthSearchHit {
 
     public String getDateCreated() {
         return dateCreated;
+    }
+
+    public String getClientSide() {
+        return clientSide;
+    }
+
+    public String getServerSide() {
+        return serverSide;
     }
 }
