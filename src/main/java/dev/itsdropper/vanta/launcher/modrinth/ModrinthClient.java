@@ -152,6 +152,29 @@ public class ModrinthClient {
         return getTags("category");
     }
 
+    public List<ModrinthTag> getLoaderTags(ModrinthContentType contentType)
+            throws IOException, InterruptedException {
+        return getTags("loader").stream()
+                .filter(tag -> supportsContentType(tag, contentType))
+                .toList();
+    }
+
+    public List<ModrinthTag> getCategoryTags(ModrinthContentType contentType)
+            throws IOException, InterruptedException {
+        return getTags("category").stream()
+                .filter(tag -> supportsContentType(tag, contentType))
+                .toList();
+    }
+
+    private boolean supportsContentType(ModrinthTag tag, ModrinthContentType contentType) {
+        if (tag == null || contentType == null) return false;
+        List<String> supported = tag.getSupportedProjectTypes();
+        if (!supported.isEmpty()) return supported.contains(contentType.getApiValue());
+        return tag.getProjectType() == null
+                || tag.getProjectType().isBlank()
+                || tag.getProjectType().equals(contentType.getApiValue());
+    }
+
     private List<ModrinthTag> getTags(String tagType) throws IOException, InterruptedException {
         List<ModrinthTag> cached = TAG_CACHE.get(tagType);
         if (cached != null) return cached;
