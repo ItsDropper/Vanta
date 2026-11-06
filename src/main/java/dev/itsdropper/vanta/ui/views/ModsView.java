@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.components.PageHeader;
@@ -110,7 +111,7 @@ public class ModsView extends VBox {
         );
 
         searchField = new TextField();
-        searchField.setPromptText("Search installed content...");
+        searchField.setPromptText(Localization.text("mods.searchPrompt"));
         searchField.getStyleClass().add("instances-search");
         searchField.textProperty().addListener(
                 (observable, oldValue, newValue) -> loadInstalledContent()
@@ -121,12 +122,12 @@ public class ModsView extends VBox {
         // =========================================================
 
         Button allButton =
-                new Button("ALL", IconView.create(IconView.Type.PACKAGE, 16));
+                new Button(Localization.text("mods.all"), IconView.create(IconView.Type.PACKAGE, 16));
         allButton.getStyleClass().add("secondary-button");
 
         Button modsButton =
                 new Button(
-                        "MODS",
+                        Localization.text("contentBrowser.mods"),
                         IconView.create(IconView.Type.PACKAGE, 16)
                 );
 
@@ -136,7 +137,7 @@ public class ModsView extends VBox {
 
         Button packsButton =
                 new Button(
-                        "PACKS",
+                        Localization.text("contentBrowser.packs"),
                         IconView.create(IconView.Type.PACKAGE, 16)
                 );
 
@@ -146,7 +147,7 @@ public class ModsView extends VBox {
 
         Button shadersButton =
                 new Button(
-                        "SHADERS",
+                        Localization.text("contentBrowser.shaders"),
                         IconView.create(IconView.Type.SHIELD, 16)
                 );
 
@@ -156,7 +157,7 @@ public class ModsView extends VBox {
 
         Button browseButton =
                 new Button(
-                        "BROWSE CONTENT",
+                        Localization.text("mods.browseContent"),
                         IconView.create(IconView.Type.SEARCH, 16)
                 );
 
@@ -166,7 +167,7 @@ public class ModsView extends VBox {
 
         Button screenshotsButton =
                 new Button(
-                        "SCREENSHOTS",
+                        Localization.text("mods.screenshots"),
                         IconView.create(IconView.Type.PACKAGE, 16)
                 );
 
@@ -176,7 +177,7 @@ public class ModsView extends VBox {
 
         Button settingsButton =
                 new Button(
-                        "INSTANCE SETTINGS",
+                        Localization.text("mods.instanceSettings"),
                         IconView.create(IconView.Type.SETTINGS, 16)
                 );
 
@@ -238,7 +239,7 @@ public class ModsView extends VBox {
 
         Button refreshButton =
                 new Button(
-                        "REFRESH",
+                        Localization.text("common.refresh"),
                         IconView.create(IconView.Type.REFRESH, 16)
                 );
         refreshButton.getStyleClass().add("secondary-button");
@@ -246,7 +247,7 @@ public class ModsView extends VBox {
 
         Button folderButton =
                 new Button(
-                        "OPEN FOLDER",
+                        Localization.text("mods.openFolder"),
                         IconView.create(IconView.Type.FOLDER, 16)
                 );
         folderButton.getStyleClass().add("secondary-button");
@@ -584,7 +585,7 @@ public class ModsView extends VBox {
             e.printStackTrace();
 
             statusLabel.setText(
-                    "Failed to load installed "
+                    Localization.text("mods.loadFailedPrefix")
                             + statusName
                             + "s."
             );
@@ -654,7 +655,7 @@ public class ModsView extends VBox {
 
         Label metadata =
                 new Label(
-                        "JAR • "
+                        Localization.text("mods.jarPrefix")
                                 + formatSize(
                                 getFileSize(mod)
                         )
@@ -743,11 +744,11 @@ public class ModsView extends VBox {
 
         Button removeButton =
                 new Button(
-                        "REMOVE",
+                        Localization.text("common.delete"),
                         IconView.create(IconView.Type.TRASH, 15)
                 );
         removeButton.getStyleClass().add("secondary-button");
-        removeButton.setTooltip(new Tooltip("Remove this mod"));
+        removeButton.setTooltip(new Tooltip(Localization.text("mods.removeTooltip")));
         removeButton.setOnAction(event -> {
             if (!LauncherSettings.isConfirmRemovalsEnabled()) {
                 removeFile(mod);
@@ -766,19 +767,19 @@ public class ModsView extends VBox {
             root.setPrefWidth(popupWidth);
             root.setMaxWidth(popupWidth);
 
-            Label removeTitle = new Label("REMOVE MOD");
+            Label removeTitle = new Label(Localization.text("mods.removeTitle"));
             removeTitle.getStyleClass().add("modrinth-popup-title");
 
             Label message = new Label(
-                    "Remove " + cleanName(filename) + "?\\nThis will permanently remove the mod from this instance."
+                    Localization.text("mods.removePrefix") + cleanName(filename) + "?\\nThis will permanently remove the mod from this instance."
             );
             message.setWrapText(true);
             message.getStyleClass().add("modrinth-popup-subtitle");
 
-            Button cancel = new Button("CANCEL");
+            Button cancel = new Button(Localization.text("common.cancel"));
             cancel.getStyleClass().add("modrinth-popup-secondary");
 
-            Button remove = new Button("REMOVE");
+            Button remove = new Button(Localization.text("common.delete"));
             remove.getStyleClass().add("modrinth-popup-danger");
 
             FlowPane actions = new FlowPane(8, 8, cancel, remove);
@@ -935,7 +936,7 @@ public class ModsView extends VBox {
 
         Button removeButton =
                 new Button(
-                        "REMOVE"
+                        Localization.text("common.delete")
                 );
 
         removeButton.getStyleClass().add(
@@ -1449,7 +1450,7 @@ public class ModsView extends VBox {
             return true;
         } catch (IOException e) {
             statusLabel.setText(
-                    "Could not change mod state."
+                    Localization.text("mods.toggleFailed")
             );
             return false;
         }
@@ -1470,7 +1471,7 @@ public class ModsView extends VBox {
                 Desktop.getDesktop().open(directory.toFile());
             }
         } catch (Exception e) {
-            statusLabel.setText("Could not open content folder.");
+            statusLabel.setText(Localization.text("mods.openFolderFailed"));
         }
     }
 
@@ -1491,7 +1492,7 @@ public class ModsView extends VBox {
             e.printStackTrace();
 
             statusLabel.setText(
-                    "Failed to remove "
+                    Localization.text("mods.removeFailedPrefix")
                             + file.getFileName()
                             + "."
             );
