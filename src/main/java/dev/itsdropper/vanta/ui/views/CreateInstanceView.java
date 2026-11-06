@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -133,7 +134,7 @@ public class CreateInstanceView extends VBox {
         // =========================================================
 
         Label title =
-                new Label("Create instance");
+                new Label(Localization.text("createInstance.title"));
 
         title.getStyleClass().add(
                 "page-title"
@@ -141,7 +142,7 @@ public class CreateInstanceView extends VBox {
 
         Label subtitle =
                 new Label(
-                        "Set up a new Minecraft installation."
+                        Localization.text("createInstance.subtitle")
                 );
 
         subtitle.getStyleClass().add(
@@ -179,14 +180,14 @@ public class CreateInstanceView extends VBox {
         // =========================================================
 
         Label panelTitle =
-                new Label("Instance details");
+                new Label(Localization.text("createInstance.details"));
 
         panelTitle.getStyleClass().add(
                 "create-panel-title"
         );
 
         Label panelSubtitle = new Label(
-                "Choose a name, Minecraft version, and loader. You can change instance settings later."
+                Localization.text("createInstance.detailsHelp")
         );
         panelSubtitle.getStyleClass().add("create-panel-subtitle");
 
@@ -195,13 +196,13 @@ public class CreateInstanceView extends VBox {
         // =========================================================
 
         Label nameLabel =
-                createLabel("Name");
+                createLabel(Localization.text("createInstance.name"));
 
         nameField =
                 new TextField();
 
         nameField.setPromptText(
-                "e.g. Vanta PvP"
+                Localization.text("createInstance.nameExample")
         );
 
         nameField.setPrefHeight(
@@ -217,13 +218,13 @@ public class CreateInstanceView extends VBox {
         // =========================================================
 
         Label versionLabel =
-                createLabel("Minecraft version");
+                createLabel(Localization.text("createInstance.minecraftVersion"));
 
         versionBox =
                 new ComboBox<>();
 
         versionBox.setPromptText(
-                "Loading versions..."
+                Localization.text("createInstance.loadingVersions")
         );
 
         versionBox.setMaxWidth(
@@ -252,7 +253,7 @@ public class CreateInstanceView extends VBox {
         // =========================================================
 
         Label loaderLabel =
-                createLabel("Mod loader");
+                createLabel(Localization.text("createInstance.modLoader"));
 
         loaderBox =
                 new ComboBox<>();
@@ -297,7 +298,7 @@ public class CreateInstanceView extends VBox {
                 } else {
                     boolean available = availableLoaders.contains(item);
                     String label = "ModLoader".equals(item) ? "Risugami's ModLoader" : item;
-                    setText(available ? label : label + "  (not available for this version)");
+                    setText(available ? label : label + Localization.text("createInstance.unavailableSuffix"));
                     setDisable(!available);
                 }
             }
@@ -313,9 +314,9 @@ public class CreateInstanceView extends VBox {
         availableLoaders.add("Vanilla");
 
         Label loaderHint = new Label(
-                "Experimental independent loader: Vanta passes the isolated instance directory and official Minecraft mappings to the agent. "
-                        + "Native mods and exact-target ASM transformations are available; in-game behavior, Minecraft lifecycle hooks, "
-                        + "Mixin, and Fabric/Forge mod compatibility are not yet supported."
+                Localization.text("createInstance.vantaLoaderDescription")
+                        + Localization.text("createInstance.vantaLoaderLimit1")
+                        + Localization.text("createInstance.vantaLoaderLimit2")
         );
         loaderHint.getStyleClass().add("create-panel-subtitle");
         loaderHint.setWrapText(true);
@@ -354,7 +355,7 @@ public class CreateInstanceView extends VBox {
 
         statusLabel =
                 new Label(
-                        "Loading Minecraft versions..."
+                        Localization.text("createInstance.loadingMinecraftVersions")
                 );
 
         statusLabel.getStyleClass().add(
@@ -363,9 +364,9 @@ public class CreateInstanceView extends VBox {
         statusLabel.setWrapText(true);
         HBox.setHgrow(statusLabel, Priority.ALWAYS);
 
-        retryVersionsButton = new Button("RETRY");
+        retryVersionsButton = new Button(Localization.text("common.retry"));
         retryVersionsButton.getStyleClass().add("secondary-button");
-        retryVersionsButton.setAccessibleText("Retry loading Minecraft versions");
+        retryVersionsButton.setAccessibleText(Localization.text("createInstance.retryAccessible"));
         retryVersionsButton.setOnAction(event -> loadVersions());
         retryVersionsButton.setVisible(false);
         retryVersionsButton.setManaged(false);
@@ -381,7 +382,7 @@ public class CreateInstanceView extends VBox {
 
         backButton =
                 new Button(
-                        "Back"
+                        Localization.text("common.back")
                 );
 
         backButton.getStyleClass().add(
@@ -403,7 +404,7 @@ public class CreateInstanceView extends VBox {
 
         createButton =
                 new Button(
-                        "Create instance"
+                        Localization.text("createInstance.title")
                 );
 
         createButton.getStyleClass().add(
@@ -425,7 +426,7 @@ public class CreateInstanceView extends VBox {
 
         Button browseModpacksButton =
                 new Button(
-                        "Browse modpacks"
+                        Localization.text("common.browseModpacks")
                 );
 
         browseModpacksButton.getStyleClass().add(
@@ -495,8 +496,8 @@ public class CreateInstanceView extends VBox {
         int requestId = manifestRequestId.incrementAndGet();
         createButton.setDisable(true);
         versionBox.setDisable(true);
-        versionBox.setPromptText("Loading Minecraft versions...");
-        statusLabel.setText("Loading Minecraft version manifest, including historical versions...");
+        versionBox.setPromptText(Localization.text("createInstance.loadingMinecraftVersions"));
+        statusLabel.setText(Localization.text("createInstance.loadingManifest"));
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -518,7 +519,7 @@ public class CreateInstanceView extends VBox {
                 JsonNode manifest = MAPPER.readTree(response.body());
                 JsonNode versions = manifest.get("versions");
                 if (versions == null || !versions.isArray()) {
-                    throw new IllegalStateException("Invalid Minecraft version manifest.");
+                    throw new IllegalStateException(Localization.text("createInstance.invalidManifest"));
                 }
 
                 java.util.List<String> availableVersions = new java.util.ArrayList<>();
@@ -545,8 +546,8 @@ public class CreateInstanceView extends VBox {
                         versionBox.setDisable(true);
                         loaderBox.setDisable(true);
                         createButton.setDisable(true);
-                        versionBox.setPromptText("No Minecraft versions available");
-                        statusLabel.setText("No Minecraft versions were returned. Check your connection and retry.");
+                        versionBox.setPromptText(Localization.text("createInstance.noVersions"));
+                        statusLabel.setText(Localization.text("createInstance.emptyVersions"));
                         retryVersionsButton.setVisible(true);
                         retryVersionsButton.setManaged(true);
                         return;
@@ -562,7 +563,7 @@ public class CreateInstanceView extends VBox {
                     } else {
                         versionBox.getSelectionModel().selectFirst();
                     }
-                    statusLabel.setText("Minecraft versions loaded, including official Alpha and Beta history. Checking loader compatibility...");
+                    statusLabel.setText(Localization.text("createInstance.versionsLoaded"));
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -572,8 +573,8 @@ public class CreateInstanceView extends VBox {
                     versionBox.setDisable(true);
                     loaderBox.setDisable(true);
                     createButton.setDisable(true);
-                    versionBox.setPromptText("Could not load versions");
-                    statusLabel.setText("Could not load Minecraft versions. Check your connection and retry.");
+                    versionBox.setPromptText(Localization.text("createInstance.loadFailedTitle"));
+                    statusLabel.setText(Localization.text("createInstance.loadFailed"));
                     retryVersionsButton.setVisible(true);
                     retryVersionsButton.setManaged(true);
                 });
@@ -623,7 +624,7 @@ public class CreateInstanceView extends VBox {
             loaderBox.getSelectionModel().select("Vanilla");
             loaderBox.setDisable(true);
             createButton.setDisable(true);
-            statusLabel.setText("Checking available mod loaders for Minecraft " + minecraftVersion + "...");
+            statusLabel.setText(Localization.text("createInstance.checkingLoadersPrefix") + minecraftVersion + "...");
         });
 
         UiExecutor.shared().execute(() -> {
@@ -779,9 +780,9 @@ public class CreateInstanceView extends VBox {
                 }
 
                 if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader || rift || vantaLoader) {
-                    statusLabel.setText("Available loaders checked for Minecraft " + minecraftVersion + ".");
+                    statusLabel.setText(Localization.text("createInstance.loadersCheckedPrefix") + minecraftVersion + ".");
                 } else {
-                    statusLabel.setText("No mod loader is available for Minecraft " + minecraftVersion + ". Vanilla only.");
+                    statusLabel.setText(Localization.text("createInstance.noLoadersPrefix") + minecraftVersion + Localization.text("createInstance.vanillaOnlySuffix"));
                 }
 
                 loaderBox.setDisable(false);
@@ -811,7 +812,7 @@ public class CreateInstanceView extends VBox {
                 || riftCheckRunning || vantaLoaderCheckRunning) {
 
             statusLabel.setText(
-                    "Still checking mod loader support..."
+                    Localization.text("createInstance.checkingLoaders")
             );
 
             return;
@@ -835,7 +836,7 @@ public class CreateInstanceView extends VBox {
         if (name.isBlank()) {
 
             statusLabel.setText(
-                    "Enter an instance name."
+                    Localization.text("createInstance.validationName")
             );
 
             nameField.requestFocus();
@@ -847,7 +848,7 @@ public class CreateInstanceView extends VBox {
                 || version.isBlank()) {
 
             statusLabel.setText(
-                    "Select a Minecraft version."
+                    Localization.text("createInstance.validationVersion")
             );
 
             return;
@@ -857,7 +858,7 @@ public class CreateInstanceView extends VBox {
                 || loader.isBlank()) {
 
             statusLabel.setText(
-                    "Select a loader."
+                    Localization.text("createInstance.validationLoader")
             );
 
             return;
@@ -869,49 +870,49 @@ public class CreateInstanceView extends VBox {
          */
         if ("Babric".equals(loader) && !availableLoaders.contains("Babric")) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("Babric is currently available only for Minecraft b1.7.3.");
+            statusLabel.setText(Localization.text("createInstance.babricUnavailable"));
             return;
         }
 
         if ("LiteLoader".equals(loader) && !availableLoaders.contains("LiteLoader")) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("LiteLoader is not available for Minecraft " + version + ".");
+            statusLabel.setText(Localization.text("createInstance.liteLoaderUnavailablePrefix") + version + ".");
             return;
         }
 
         if ("ModLoader".equals(loader) && !availableLoaders.contains("ModLoader")) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("No verified Risugami ModLoader archive is available for Minecraft " + version + ".");
+            statusLabel.setText(Localization.text("createInstance.risugamiUnavailablePrefix") + version + ".");
             return;
         }
 
         if ("NilLoader".equals(loader) && !availableLoaders.contains("NilLoader")) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("NilLoader is not available for this Minecraft version.");
+            statusLabel.setText(Localization.text("createInstance.nilLoaderUnavailable"));
             return;
         }
 
         if ("Legacy Fabric".equals(loader) && !availableLoaders.contains("Legacy Fabric")) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("Legacy Fabric is not available for Minecraft " + version + ".");
+            statusLabel.setText(Localization.text("createInstance.legacyFabricUnavailablePrefix") + version + ".");
             return;
         }
 
         if ("Ornithe".equals(loader) && !availableLoaders.contains("Ornithe")) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("Ornithe is not available for Minecraft " + version + ".");
+            statusLabel.setText(Localization.text("createInstance.ornitheUnavailablePrefix") + version + ".");
             return;
         }
 
         if ("NeoForge".equals(loader) && !availableLoaders.contains("NeoForge")) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("NeoForge is not available for Minecraft " + version + ".");
+            statusLabel.setText(Localization.text("createInstance.neoForgeUnavailablePrefix") + version + ".");
             return;
         }
 
         if ("Quilt".equals(loader) && !availableLoaders.contains("Quilt")) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("Quilt is not available for Minecraft " + version + ".");
+            statusLabel.setText(Localization.text("createInstance.quiltUnavailablePrefix") + version + ".");
             return;
         }
 
@@ -919,7 +920,7 @@ public class CreateInstanceView extends VBox {
                 && (!availableLoaders.contains("VantaLoader")
                 || !VantaLoaderInstaller.supportsMinecraftVersion(version))) {
             loaderBox.getSelectionModel().select("Vanilla");
-            statusLabel.setText("VantaLoader is not available for Minecraft " + version + ".");
+            statusLabel.setText(Localization.text("createInstance.vantaLoaderUnavailablePrefix") + version + ".");
             return;
         }
 
@@ -932,7 +933,7 @@ public class CreateInstanceView extends VBox {
                         .select("Vanilla");
 
                 statusLabel.setText(
-                        "Fabric is not available for Minecraft "
+                        Localization.text("createInstance.fabricUnavailablePrefix")
                                 + version
                                 + "."
                 );
@@ -952,11 +953,11 @@ public class CreateInstanceView extends VBox {
         loaderBox.setDisable(true);
 
         createButton.setText(
-                "INSTALLING..."
+                Localization.text("common.installing")
         );
 
         statusLabel.setText(
-                "Installing Minecraft "
+                Localization.text("createInstance.installingPrefix")
                         + version
                         + "..."
         );
@@ -1036,7 +1037,7 @@ public class CreateInstanceView extends VBox {
                         UiExecutor.shared().dispatchToUi(() -> {
 
                             statusLabel.setText(
-                                    "Instance created successfully."
+                                    Localization.text("createInstance.created")
                             );
 
                             onCreated.run();
@@ -1055,13 +1056,13 @@ public class CreateInstanceView extends VBox {
                             loaderBox.setDisable(false);
 
                             createButton.setText(
-                                    "CREATE INSTANCE"
+                                    Localization.text("common.createInstance")
                             );
 
                             statusLabel.setText(
                                     ex.getMessage() != null
                                             ? ex.getMessage()
-                                            : "Failed to create instance."
+                                            : Localization.text("createInstance.createFailed")
                             );
                         });
                     }
