@@ -536,6 +536,7 @@ public class GlobalModsView extends VBox {
         if (leadingGraphic != null) row.getChildren().add(leadingGraphic);
         row.getChildren().addAll(name, spacer, checkmark);
         row.setAlignment(Pos.CENTER_LEFT);
+        row.setPrefWidth(205);
         row.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(spacer, Priority.ALWAYS);
         option.setGraphic(row);
@@ -543,11 +544,15 @@ public class GlobalModsView extends VBox {
         option.setAlignment(Pos.CENTER_LEFT);
         option.setMaxWidth(Double.MAX_VALUE);
         option.getStyleClass().add("modrinth-filter-option");
-        if (selected) option.getStyleClass().add("modrinth-filter-option-selected");
+        if (selected) {
+            option.getStyleClass().add("modrinth-filter-option-selected");
+            name.setTextFill(Color.WHITE);
+        }
         option.setOnAction(event -> {
             boolean next = !option.getStyleClass().contains("modrinth-filter-option-selected");
             option.getStyleClass().remove("modrinth-filter-option-selected");
             if (next) option.getStyleClass().add("modrinth-filter-option-selected");
+            if (labelColor != null) name.setTextFill(next ? Color.WHITE : labelColor);
             selectionChanged.accept(next);
         });
         return option;
@@ -830,6 +835,19 @@ public class GlobalModsView extends VBox {
     }
 
     private String formatTagName(String id) {
+        if (id == null || id.isBlank()) return "";
+        String compact = id.toLowerCase(java.util.Locale.ROOT).replaceAll("[^a-z0-9]", "");
+        String known = switch (compact) {
+            case "btababric" -> "BTA (Babric)";
+            case "javaagent" -> "Java Agent";
+            case "legacyfabric" -> "Legacy Fabric";
+            case "liteloader" -> "LiteLoader";
+            case "modloader", "risugamismodloader" -> "Risugami's ModLoader";
+            case "neoforge" -> "NeoForge";
+            case "nilloader" -> "NilLoader";
+            default -> null;
+        };
+        if (known != null) return known;
         return java.util.Arrays.stream(id.split("[_-]"))
                 .filter(part -> !part.isBlank())
                 .map(part -> Character.toUpperCase(part.charAt(0)) + part.substring(1))
