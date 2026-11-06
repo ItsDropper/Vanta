@@ -16,6 +16,24 @@ public final class LauncherSettings {
     private LauncherSettings() {
     }
 
+    private static final java.util.Set<String> SUPPORTED_LANGUAGE_CODES = java.util.Set.of(
+            "en", "fi", "sv", "de", "fr", "es", "it", "nl", "pt-PT"
+    );
+
+    /** Language selected by the user; applied on the next launcher start. */
+    public static String getPreferredLanguageCode() {
+        String code = getString("languageCode", "en").trim();
+        return SUPPORTED_LANGUAGE_CODES.contains(code) ? code : "en";
+    }
+
+    public static void setPreferredLanguageCode(String languageCode) {
+        if (languageCode == null) return;
+        String normalized = languageCode.trim();
+        if (SUPPORTED_LANGUAGE_CODES.contains(normalized)) {
+            setString("languageCode", normalized);
+        }
+    }
+
     public static boolean isAnimationsEnabled() {
         return animationsEnabledCache;
     }
