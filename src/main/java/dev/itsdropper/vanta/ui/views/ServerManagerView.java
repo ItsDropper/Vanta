@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import dev.itsdropper.vanta.launcher.server.ServerManagerService;
@@ -32,20 +33,20 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
     private final ServerManagerService service = new ServerManagerService();
     private final VBox profileList = new VBox(VantaUI.spacing(2));
     private final VBox detail = new VBox(VantaUI.spacing(3));
-    private final Label status = new Label("Select a server");
+    private final Label status = new Label(Localization.text("serverManager.selectServer"));
     private final Label statusDot = new Label("●");
-    private final Label serverTitle = new Label("No server selected");
-    private final Label serverMeta = new Label("Add an existing Java server directory to get started.");
+    private final Label serverTitle = new Label(Localization.text("serverManager.noneSelected"));
+    private final Label serverMeta = new Label(Localization.text("serverManager.emptyDescription"));
     private final TextArea console = new TextArea();
     private final TextField commandInput = new TextField();
     private final TextField javaInput = new TextField();
     private final Spinner<Integer> minRam = new Spinner<>(256, 262144, 1024, 256);
     private final Spinner<Integer> maxRam = new Spinner<>(256, 262144, 4096, 256);
-    private final CheckBox eula = new CheckBox("I have read and agree to the Minecraft EULA");
-    private final Button startButton = actionButton("Start", IconView.Type.PLAY, "server-primary");
-    private final Button stopButton = actionButton("Stop", IconView.Type.PAUSE, "server-secondary");
-    private final Button forceButton = actionButton("Force stop", IconView.Type.CLOSE, "server-danger");
-    private final Button restartButton = actionButton("Restart", IconView.Type.REFRESH, "server-secondary");
+    private final CheckBox eula = new CheckBox(Localization.text("serverManager.eulaCheckbox"));
+    private final Button startButton = actionButton(Localization.text("common.start"), IconView.Type.PLAY, "server-primary");
+    private final Button stopButton = actionButton(Localization.text("common.stop"), IconView.Type.PAUSE, "server-secondary");
+    private final Button forceButton = actionButton(Localization.text("serverManager.forceStop"), IconView.Type.CLOSE, "server-danger");
+    private final Button restartButton = actionButton(Localization.text("common.restart"), IconView.Type.REFRESH, "server-secondary");
     private String selectedId;
     private boolean suppressEulaChange;
 
@@ -54,18 +55,18 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         getStyleClass().add("server-manager");
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
-        Label eyebrow = new Label("LOCAL HOSTING");
+        Label eyebrow = new Label(Localization.text("serverManager.localHosting"));
         eyebrow.getStyleClass().add("server-eyebrow");
         VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
-        Button add = actionButton("Import existing", IconView.Type.FOLDER, "server-secondary");
+        Button add = actionButton(Localization.text("serverManager.importExisting"), IconView.Type.FOLDER, "server-secondary");
         add.setOnAction(event -> addProfile());
-        Button create = actionButton("Create from JAR", IconView.Type.PLUS, "server-primary");
+        Button create = actionButton(Localization.text("serverManager.createFromJar"), IconView.Type.PLUS, "server-primary");
         create.setOnAction(event -> createProfileFromJar());
-        Button connectRemote = actionButton("Connect Remote", IconView.Type.ARROW_RIGHT, "server-secondary");
+        Button connectRemote = actionButton(Localization.text("serverManager.connectRemote"), IconView.Type.ARROW_RIGHT, "server-secondary");
         connectRemote.setOnAction(event -> RemoteServerConnectionDialog.open(getScene() == null ? null : getScene().getWindow()));
         PageHeader pageHeader = new PageHeader(
-                "Server Manager",
-                "Run, inspect and maintain your own Minecraft servers from Vanta.",
+                Localization.text("serverManager.title"),
+                Localization.text("serverManager.subtitle"),
                 "server-heading",
                 "server-subtitle",
                 connectRemote,
@@ -83,7 +84,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         profileScroll.setMinWidth(220);
 
         VBox left = new VBox(VantaUI.spacing(3));
-        HBox listHeader = new HBox(8, new Label("YOUR SERVERS"), spacer(), new Label("LOCAL"));
+        HBox listHeader = new HBox(8, new Label(Localization.text("serverManager.yourServers")), spacer(), new Label(Localization.text("serverManager.local")));
         listHeader.getStyleClass().add("server-list-header");
         left.getChildren().addAll(listHeader, profileScroll);
         VBox.setVgrow(profileScroll, Priority.ALWAYS);
@@ -100,22 +101,22 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         statusRow.setAlignment(Pos.CENTER_LEFT);
         statusRow.getStyleClass().add("server-status-row");
 
-        javaInput.setPromptText("java (or an absolute path to the Java executable)");
+        javaInput.setPromptText(Localization.text("serverManager.javaPrompt"));
         javaInput.getStyleClass().add("server-input");
         minRam.setEditable(true);
         maxRam.setEditable(true);
         minRam.getStyleClass().add("server-spinner");
         maxRam.getStyleClass().add("server-spinner");
         eula.getStyleClass().add("server-eula");
-        Button saveSettings = actionButton("Save runtime settings", IconView.Type.SAVE, "server-secondary");
+        Button saveSettings = actionButton(Localization.text("serverManager.saveRuntime"), IconView.Type.SAVE, "server-secondary");
         saveSettings.setOnAction(event -> saveRuntimeSettings(true));
 
         GridPane runtimeGrid = new GridPane();
         runtimeGrid.setHgap(VantaUI.spacing(3));
         runtimeGrid.setVgap(VantaUI.spacing(2));
-        runtimeGrid.add(field("Java executable", javaInput), 0, 0);
-        runtimeGrid.add(field("Minimum RAM (MB)", minRam), 1, 0);
-        runtimeGrid.add(field("Maximum RAM (MB)", maxRam), 2, 0);
+        runtimeGrid.add(field(Localization.text("serverManager.javaExecutable"), javaInput), 0, 0);
+        runtimeGrid.add(field(Localization.text("serverManager.minRam"), minRam), 1, 0);
+        runtimeGrid.add(field(Localization.text("serverManager.maxRam"), maxRam), 2, 0);
         ColumnConstraints col = new ColumnConstraints();
         col.setHgrow(Priority.ALWAYS); col.setPercentWidth(46);
         ColumnConstraints col2 = new ColumnConstraints();
@@ -123,15 +124,15 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         runtimeGrid.getColumnConstraints().addAll(col, col2, col2);
 
         FlowPane tools = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2));
-        Button properties = actionButton("Server properties", IconView.Type.SETTINGS, "server-secondary");
-        Button backup = actionButton("Create backup", IconView.Type.PACKAGE, "server-secondary");
-        Button restore = actionButton("Restore backup", IconView.Type.REFRESH, "server-secondary");
-        Button players = actionButton("List players", IconView.Type.ACCOUNTS, "server-secondary");
-        Button crashReport = actionButton("Crash diagnostics", IconView.Type.SHIELD, "server-secondary");
-        Button remove = actionButton("Remove profile", IconView.Type.TRASH, "server-danger");
+        Button properties = actionButton(Localization.text("serverManager.properties"), IconView.Type.SETTINGS, "server-secondary");
+        Button backup = actionButton(Localization.text("serverManager.createBackup"), IconView.Type.PACKAGE, "server-secondary");
+        Button restore = actionButton(Localization.text("serverManager.restoreBackup"), IconView.Type.REFRESH, "server-secondary");
+        Button players = actionButton(Localization.text("serverManager.listPlayers"), IconView.Type.ACCOUNTS, "server-secondary");
+        Button crashReport = actionButton(Localization.text("serverManager.crashDiagnostics"), IconView.Type.SHIELD, "server-secondary");
+        Button remove = actionButton(Localization.text("serverManager.removeProfile"), IconView.Type.TRASH, "server-danger");
         properties.setOnAction(event -> editProperties());
-        backup.setOnAction(event -> runBackground("Creating server backup", () -> service.createBackup(requireSelectedId()),
-                path -> info("Backup created", "Consistent offline backup saved to:\n" + path)));
+        backup.setOnAction(event -> runBackground(Localization.text("serverManager.creatingBackup"), () -> service.createBackup(requireSelectedId()),
+                path -> info(Localization.text("serverManager.backupCreated"), "Consistent offline backup saved to:\n" + path)));
         restore.setOnAction(event -> restoreBackupDialog());
         players.setOnAction(event -> runCommand("list"));
         crashReport.setOnAction(event -> showCrashDiagnostics());
@@ -140,19 +141,19 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
         console.setEditable(false);
         console.setWrapText(false);
-        console.setPromptText("Server output will appear here when the process starts.");
+        console.setPromptText(Localization.text("serverManager.outputPlaceholder"));
         console.getStyleClass().add("server-console");
         console.setPrefRowCount(16);
         VBox consolePanel = new VBox(VantaUI.spacing(2),
-                sectionHeader("LIVE CONSOLE", "Process output and server commands"), console);
+                sectionHeader(Localization.text("serverManager.liveConsole"), Localization.text("serverManager.consoleDescription")), console);
         consolePanel.getStyleClass().add("server-panel");
         consolePanel.setPadding(new Insets(VantaUI.spacing(4)));
         VantaUI.applySurface(consolePanel, VantaUI.SurfaceRole.CARD);
         VBox.setVgrow(console, Priority.ALWAYS);
         HBox commandRow = new HBox(VantaUI.spacing(2));
-        commandInput.setPromptText("Enter a command, e.g. say Server restarting in 5 minutes");
+        commandInput.setPromptText(Localization.text("serverManager.commandPrompt"));
         commandInput.getStyleClass().add("server-input");
-        Button send = actionButton("Send", IconView.Type.ARROW_RIGHT, "server-primary");
+        Button send = actionButton(Localization.text("common.send"), IconView.Type.ARROW_RIGHT, "server-primary");
         send.setOnAction(event -> submitCommand());
         commandInput.setOnAction(event -> submitCommand());
         commandRow.getChildren().addAll(commandInput, send);
@@ -160,7 +161,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         consolePanel.getChildren().add(commandRow);
 
         VBox runtimePanel = new VBox(VantaUI.spacing(2),
-                sectionHeader("RUNTIME", "Java process configuration"), runtimeGrid, eula, saveSettings);
+                sectionHeader(Localization.text("serverManager.runtime"), Localization.text("serverManager.javaConfig")), runtimeGrid, eula, saveSettings);
         runtimePanel.getStyleClass().add("server-panel");
         runtimePanel.setPadding(new Insets(VantaUI.spacing(4)));
         VantaUI.applySurface(runtimePanel, VantaUI.SurfaceRole.CARD);
@@ -223,19 +224,19 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
     private void addProfile() {
         Window owner = getScene() == null ? null : getScene().getWindow();
         DirectoryChooser directories = new DirectoryChooser();
-        directories.setTitle("Choose server directory");
+        directories.setTitle(Localization.text("serverManager.chooseDirectory"));
         var directory = directories.showDialog(owner);
         if (directory == null) return;
         FileChooser jars = new FileChooser();
-        jars.setTitle("Choose server JAR");
-        jars.getExtensionFilters().add(new FileChooser.ExtensionFilter("Java server JAR", "*.jar"));
+        jars.setTitle(Localization.text("serverManager.chooseJar"));
+        jars.getExtensionFilters().add(new FileChooser.ExtensionFilter(Localization.text("serverManager.serverJar"), "*.jar"));
         jars.setInitialDirectory(directory);
         var jar = jars.showOpenDialog(owner);
         if (jar == null) return;
         TextInputDialog nameDialog = new TextInputDialog(directory.getName());
-        nameDialog.setTitle("Add server");
-        nameDialog.setHeaderText("Name this server profile");
-        nameDialog.setContentText("Display name:");
+        nameDialog.setTitle(Localization.text("serverManager.addServer"));
+        nameDialog.setHeaderText(Localization.text("serverManager.nameProfile"));
+        nameDialog.setContentText(Localization.text("serverManager.displayName"));
         Optional<String> name = nameDialog.showAndWait();
         if (name.isEmpty() || name.get().isBlank()) return;
         try {
@@ -251,20 +252,20 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
     private void createProfileFromJar() {
         Window owner = getScene() == null ? null : getScene().getWindow();
         TextInputDialog nameDialog = new TextInputDialog("My Minecraft Server");
-        nameDialog.setTitle("Create server");
-        nameDialog.setHeaderText("Create a new server directory");
-        nameDialog.setContentText("Server name:");
+        nameDialog.setTitle(Localization.text("serverManager.createServer"));
+        nameDialog.setHeaderText(Localization.text("serverManager.createDirectory"));
+        nameDialog.setContentText(Localization.text("serverManager.serverName"));
         Optional<String> name = nameDialog.showAndWait();
         if (name.isEmpty() || name.get().isBlank()) return;
 
         DirectoryChooser parentChooser = new DirectoryChooser();
-        parentChooser.setTitle("Choose where the server folder should be created");
+        parentChooser.setTitle(Localization.text("serverManager.chooseParent"));
         var parent = parentChooser.showDialog(owner);
         if (parent == null) return;
 
         FileChooser jarChooser = new FileChooser();
-        jarChooser.setTitle("Choose a server JAR (vanilla, Paper, Fabric, or compatible)");
-        jarChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Java server JAR", "*.jar"));
+        jarChooser.setTitle(Localization.text("serverManager.chooseServerJar"));
+        jarChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(Localization.text("serverManager.serverJar"), "*.jar"));
         var jar = jarChooser.showOpenDialog(owner);
         if (jar == null) return;
 
@@ -298,15 +299,15 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
                 return;
             }
             FileChooser chooser = new FileChooser();
-            chooser.setTitle("Choose a server backup to restore");
+            chooser.setTitle(Localization.text("serverManager.chooseBackup"));
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Vanta server backups", "*.zip"));
             chooser.setInitialDirectory(backupDirectory.toFile());
             var selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
             if (selected == null) return;
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Restore server backup");
+            confirm.setTitle(Localization.text("serverManager.restoreBackupAction"));
             confirm.setHeaderText("Restore " + selected.getName() + "?");
-            confirm.setContentText("The server must be stopped. Vanta will create a safety backup of the current server before replacing files. Existing files not present in the selected backup will be left in place.");
+            confirm.setContentText(Localization.text("serverManager.restoreWarning"));
             if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
             Path backup = selected.toPath();
             runBackground("Restoring server backup", () -> service.restoreBackup(id, backup),
@@ -321,15 +322,15 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             String id = requireSelectedId();
             Profile p = service.profile(id).orElseThrow();
             Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-            confirm.setTitle("Remove server profile");
+            confirm.setTitle(Localization.text("serverManager.removeProfile"));
             confirm.setHeaderText("Remove " + p.name + " from Vanta?");
-            confirm.setContentText("This removes only the saved profile from Vanta. The server directory, world files, JAR and backups will not be deleted.");
+            confirm.setContentText(Localization.text("serverManager.removeWarning"));
             if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
             service.removeProfile(id);
             selectedId = null;
             console.clear();
-            serverTitle.setText("No server selected");
-            serverMeta.setText("Select a profile or create a server.");
+            serverTitle.setText(Localization.text("serverManager.noneSelected"));
+            serverMeta.setText(Localization.text("serverManager.selectProfile"));
             setActionsEnabled(false);
             detail.setDisable(true);
             refreshProfileList();
@@ -446,9 +447,9 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             return;
         }
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Accept Minecraft EULA");
-        confirm.setHeaderText("Confirm that you reviewed the Minecraft EULA");
-        confirm.setContentText("You must review the terms at https://aka.ms/MinecraftEULA before accepting. Confirm only if you agree to them.");
+        confirm.setTitle(Localization.text("serverManager.acceptEula"));
+        confirm.setHeaderText(Localization.text("serverManager.confirmEula"));
+        confirm.setContentText(Localization.text("serverManager.eulaWarning"));
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
             suppressEulaChange = true; eula.setSelected(false); suppressEulaChange = false;
             return;
@@ -497,9 +498,9 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
     private void forceStopServer() {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Force stop server");
-        alert.setHeaderText("Forcefully terminate this Java process?");
-        alert.setContentText("Unsaved world changes may be lost. Use this only if the server does not respond to the normal Stop command.");
+        alert.setTitle(Localization.text("serverManager.forceStopTitle"));
+        alert.setHeaderText(Localization.text("serverManager.forceStopQuestion"));
+        alert.setContentText(Localization.text("serverManager.forceStopWarning"));
         if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) service.forceStop(requireSelectedId());
     }
 
@@ -507,9 +508,9 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         Snapshot snapshot = service.snapshot(requireSelectedId());
         if (snapshot.state() == State.RUNNING || snapshot.state() == State.STARTING) {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("Restart server");
+            alert.setTitle(Localization.text("serverManager.restartTitle"));
             alert.setHeaderText("Restart " + snapshot.profile().name + "?");
-            alert.setContentText("Vanta will send the normal stop command, wait for the process to exit, then start it again.");
+            alert.setContentText(Localization.text("serverManager.restartDescription"));
             if (alert.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
             try {
                 service.stop(selectedId);
@@ -560,8 +561,8 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             VBox form = new VBox(10, field("Server port", port), field("Maximum players", players), field("Message of the day", motd));
             form.setPrefWidth(420);
             Alert dialog = new Alert(Alert.AlertType.CONFIRMATION);
-            dialog.setTitle("Server properties");
-            dialog.setHeaderText("Basic server configuration");
+            dialog.setTitle(Localization.text("serverManager.properties"));
+            dialog.setHeaderText(Localization.text("serverManager.basicConfig"));
             dialog.getDialogPane().setContent(form);
             dialog.getButtonTypes().setAll(ButtonType.OK, ButtonType.CANCEL);
             if (dialog.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
@@ -588,8 +589,8 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             text.setPrefColumnCount(90);
             text.setPrefRowCount(26);
             Alert dialog = new Alert(Alert.AlertType.INFORMATION);
-            dialog.setTitle("Crash diagnostics");
-            dialog.setHeaderText("Latest crash report");
+            dialog.setTitle(Localization.text("serverManager.crashDiagnostics"));
+            dialog.setHeaderText(Localization.text("serverManager.latestCrash"));
             dialog.getDialogPane().setContent(text);
             dialog.getDialogPane().setPrefSize(760, 560);
             dialog.showAndWait();
