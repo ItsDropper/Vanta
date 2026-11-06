@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.components;
 
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -75,7 +76,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         searchRow.setAlignment(Pos.CENTER_LEFT);
         searchRow.getStyleClass().add("modrinth-search-row");
 
-        Label sortLabel = new Label("Sort by:");
+        Label sortLabel = new Label(Localization.text("modrinth.sortBy"));
         sortLabel.getStyleClass().add("modrinth-control-label");
         sortBox.getItems().setAll(
                 "Relevance", "Downloads", "Followers", "Date published", "Date updated"
@@ -84,7 +85,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         sortBox.getStyleClass().addAll("create-combo", "modrinth-small-combo");
         sortBox.setPrefWidth(145);
 
-        Label viewLabel = new Label("View:");
+        Label viewLabel = new Label(Localization.text("modrinth.resultsLabel"));
         viewLabel.getStyleClass().add("modrinth-control-label");
         limitBox.getItems().setAll(5, 10, 15, 20, 50, 100);
         limitBox.setValue(20);
@@ -95,7 +96,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         layoutButton.setAccessibleText("Toggle result layout");
         updateLayoutButton();
 
-        jumpField.setPromptText("Page #");
+        jumpField.setPromptText(Localization.text("modrinth.pageNumber"));
         jumpField.setPrefWidth(76);
         jumpField.setVisible(false);
         jumpField.setManaged(false);
@@ -120,11 +121,11 @@ public final class ModrinthBrowserToolbar extends VBox {
             button.setPrefHeight(30);
         }
         currentPageButton.getStyleClass().add("modrinth-current-page");
-        previousButton.setAccessibleText("Previous page");
-        currentPageButton.setAccessibleText("Current page");
-        nextPageButton.setAccessibleText("Next page");
-        ellipsisButton.setAccessibleText("Jump to page");
-        lastPageButton.setAccessibleText("Last page");
+        previousButton.setAccessibleText(Localization.text("modrinth.previousPage"));
+        currentPageButton.setAccessibleText(Localization.text("modrinth.currentPage"));
+        nextPageButton.setAccessibleText(Localization.text("modrinth.nextPage"));
+        ellipsisButton.setAccessibleText(Localization.text("modrinth.jumpToPage"));
+        lastPageButton.setAccessibleText(Localization.text("modrinth.lastPage"));
 
         pagination.setAlignment(Pos.CENTER_RIGHT);
         pagination.getChildren().setAll(
@@ -271,7 +272,7 @@ public final class ModrinthBrowserToolbar extends VBox {
     private void updateLayoutButton() {
         layoutButton.setText(gridLayout ? "▦" : "☷");
         layoutButton.setTooltip(new javafx.scene.control.Tooltip(
-                gridLayout ? "Switch to list layout" : "Switch to grid layout"
+                gridLayout ? Localization.text("modrinth.switchToList") : Localization.text("modrinth.switchToGrid")
         ));
     }
 
