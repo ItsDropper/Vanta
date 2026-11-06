@@ -523,13 +523,23 @@ public class GlobalModsView extends VBox {
         return row;
     }
 
-    private Button createFilterOption(String label, String id, boolean selected,
-            java.util.function.Consumer<Boolean> selectionChanged) {
-        Button option = new Button(label);
+    private Button createFilterOption(String label, boolean selected, javafx.scene.Node leadingGraphic,
+            Color labelColor, java.util.function.Consumer<Boolean> selectionChanged) {
+        Button option = new Button();
+        Label name = new Label(label);
+        name.getStyleClass().add("modrinth-filter-option-label");
+        if (labelColor != null) name.setTextFill(labelColor);
         Label checkmark = new Label("✓");
         checkmark.getStyleClass().add("modrinth-filter-check");
-        option.setGraphic(checkmark);
-        option.setContentDisplay(javafx.scene.control.ContentDisplay.RIGHT);
+        javafx.scene.layout.Region spacer = new javafx.scene.layout.Region();
+        HBox row = new HBox(8);
+        if (leadingGraphic != null) row.getChildren().add(leadingGraphic);
+        row.getChildren().addAll(name, spacer, checkmark);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        option.setGraphic(row);
+        option.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
         option.setAlignment(Pos.CENTER_LEFT);
         option.setMaxWidth(Double.MAX_VALUE);
         option.getStyleClass().add("modrinth-filter-option");
@@ -552,7 +562,7 @@ public class GlobalModsView extends VBox {
                 : versionSearchField.getText().trim().toLowerCase(java.util.Locale.ROOT);
         source.stream().filter(v -> v != null && v.toLowerCase(java.util.Locale.ROOT).contains(query))
                 .limit(500).forEach(version -> versionFilterOptions.getChildren().add(
-                        createFilterOption(version, version, selectedVersions.contains(version), selected -> {
+                        createFilterOption(version, selectedVersions.contains(version), null, null, selected -> {
                             if (selected) selectedVersions.add(version); else selectedVersions.remove(version);
                             browserToolbar.refresh();
                         })));
@@ -573,15 +583,13 @@ public class GlobalModsView extends VBox {
                 .forEach(tag -> {
                     String name = tag.getName();
                     String id = dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(name);
-                    Button option = createFilterOption(formatTagName(name), id,
-                            selectedLoaders.contains(id), selected -> {
+                    Button option = createFilterOption(formatTagName(name), selectedLoaders.contains(id),
+                            new ModrinthTagIcon(tag, ModrinthTagIcon.loaderColor(name), 16),
+                            ModrinthTagIcon.loaderColor(name), selected -> {
                                 if (selected) selectedLoaders.add(id); else selectedLoaders.remove(id);
                                 browserToolbar.refresh();
                             });
-                    option.setGraphic(new ModrinthTagIcon(tag,
-                            ModrinthTagIcon.loaderColor(name), 16));
-                    option.setStyle("-fx-text-fill: " + colorToCss(ModrinthTagIcon.loaderColor(name)) + ";");
-                    loaderFilterOptions.getChildren().add(option);
+                     loaderFilterOptions.getChildren().add(option);
                 });
         if (loaderFilterOptions.getChildren().isEmpty()) {
             Label empty = new Label(Localization.text("modrinth.noLoaders"));
@@ -599,13 +607,12 @@ public class GlobalModsView extends VBox {
                 .filter(tag -> tag.getName().toLowerCase(java.util.Locale.ROOT).contains(query))
                 .forEach(tag -> {
                     String name = tag.getName();
-                    Button option = createFilterOption(formatTagName(name), name,
-                            selectedCategories.contains(name), selected -> {
+                    Button option = createFilterOption(formatTagName(name), selectedCategories.contains(name),
+                            new ModrinthTagIcon(tag, Color.web("#9299A6"), 15), Color.web("#9299A6"), selected -> {
                                 if (selected) selectedCategories.add(name); else selectedCategories.remove(name);
                                 browserToolbar.refresh();
                             });
-                    option.setGraphic(new ModrinthTagIcon(tag, Color.web("#9299A6"), 15));
-                    categoryFilterOptions.getChildren().add(option);
+                     categoryFilterOptions.getChildren().add(option);
                 });
         if (categoryFilterOptions.getChildren().isEmpty()) {
             Label empty = new Label(Localization.text("modrinth.noCategories"));
