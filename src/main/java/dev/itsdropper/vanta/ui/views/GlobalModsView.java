@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.components.PageHeader;
@@ -116,7 +117,7 @@ public class GlobalModsView extends VBox {
                 ModrinthContentType.SHADER
         );
         contentTypeBox.setValue(ModrinthContentType.MOD);
-        contentTypeBox.setAccessibleText("Modrinth content type filter");
+        contentTypeBox.setAccessibleText(Localization.text("globalMods.typeFilter"));
         contentTypeBox.setPrefWidth(170);
         contentTypeBox.setPrefHeight(42);
         contentTypeBox.getStyleClass().add("create-combo");
@@ -124,7 +125,7 @@ public class GlobalModsView extends VBox {
         loaderBox = new ComboBox<>();
         loaderBox.getItems().addAll("Any", "Fabric", "Quilt", "Forge", "NeoForge", "Ornithe", "Legacy Fabric", "Babric", "NilLoader", "LiteLoader", "Rift", "ModLoader");
         loaderBox.setValue("Any");
-        loaderBox.setAccessibleText("Minecraft mod loader filter");
+        loaderBox.setAccessibleText(Localization.text("globalMods.loaderFilter"));
         loaderBox.setPrefWidth(140);
         loaderBox.setPrefHeight(42);
         loaderBox.getStyleClass().add("create-combo");
@@ -132,14 +133,14 @@ public class GlobalModsView extends VBox {
         versionBox = new ComboBox<>();
         versionBox.getItems().add("All versions");
         versionBox.setValue("All versions");
-        versionBox.setAccessibleText("Minecraft version filter");
+        versionBox.setAccessibleText(Localization.text("globalMods.versionFilter"));
         versionBox.setPrefWidth(170);
         versionBox.setPrefHeight(42);
         versionBox.getStyleClass().add("create-combo");
 
         versionSearchField = new TextField();
-        versionSearchField.setPromptText("Find version (e.g. b1.7.3, 1.12.2)");
-        versionSearchField.setAccessibleText("Search Minecraft versions");
+        versionSearchField.setPromptText(Localization.text("globalMods.versionPrompt"));
+        versionSearchField.setAccessibleText(Localization.text("globalMods.versionSearchAccessible"));
         versionSearchField.setPrefWidth(210);
         versionSearchField.setPrefHeight(42);
         versionSearchField.getStyleClass().add("create-field");
@@ -195,10 +196,10 @@ public class GlobalModsView extends VBox {
                 new TextField();
 
         searchField.setPromptText(
-                "Search Modrinth..."
+                Localization.text("globalMods.searchPrompt")
         );
         searchField.setMinWidth(0);
-        searchField.setAccessibleText("Search Modrinth content");
+        searchField.setAccessibleText(Localization.text("globalMods.searchAccessible"));
 
         searchField.getStyleClass().add(
                 "create-field"
@@ -211,13 +212,13 @@ public class GlobalModsView extends VBox {
 
         Button searchButton =
                 new Button(
-                        "SEARCH"
+                        Localization.text("common.search")
                 );
 
         searchButton.getStyleClass().add(
                 "primary-button"
         );
-        searchButton.setAccessibleText("Search Modrinth content");
+        searchButton.setAccessibleText(Localization.text("globalMods.searchAccessible"));
 
         searchButton.setOnAction(
                 event ->
@@ -246,7 +247,7 @@ public class GlobalModsView extends VBox {
 
         popularTitle =
                 new Label(
-                        "MOST DOWNLOADED"
+                        Localization.text("common.mostDownloaded")
                 );
 
         popularTitle.getStyleClass().add(
@@ -295,7 +296,7 @@ public class GlobalModsView extends VBox {
 
         popularStatusLabel =
                 new Label(
-                        "Loading popular mods..."
+                        Localization.text("browseMods.loadingPopular")
                 );
 
         popularStatusLabel.getStyleClass().add(
@@ -349,7 +350,7 @@ public class GlobalModsView extends VBox {
 
         statusLabel =
                 new Label(
-                        "Search Modrinth for mods."
+                        Localization.text("globalMods.searchHelp")
                 );
 
         statusLabel.getStyleClass().add(
@@ -402,7 +403,7 @@ public class GlobalModsView extends VBox {
                     "Search across Minecraft content",
                     "Filter by content type, loader and Minecraft version to find compatible projects."
             ));
-            statusLabel.setText("Screenshot preview · network requests are disabled.");
+            statusLabel.setText(Localization.text("globalMods.previewNotice"));
             statusLabel.setVisible(false);
             statusLabel.setManaged(false);
         } else {
@@ -431,7 +432,7 @@ public class GlobalModsView extends VBox {
 
     private void refreshForCurrentFilters() {
         if (screenshotPreview) {
-            statusLabel.setText("Search results are omitted from the screenshot preview.");
+            statusLabel.setText(Localization.text("globalMods.previewResultsNotice"));
             return;
         }
         String query = searchField.getText();
@@ -527,7 +528,7 @@ public class GlobalModsView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> chooseInstances(project, versions, sourceButton));
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                UiExecutor.shared().dispatchToUi(() -> statusLabel.setText("Could not load project compatibility information."));
+                UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(Localization.text("globalMods.compatibilityFailed")));
             }
         });
     }
@@ -540,7 +541,7 @@ public class GlobalModsView extends VBox {
         List<Instance> compatible = compatibleInstances(project, versions);
         if (compatible.isEmpty()) {
             statusLabel.setText(
-                    "No compatible instances found for " + project.getTitle()
+                    Localization.text("globalMods.noCompatibleInstancesPrefix") + project.getTitle()
                             + ". Check that you have a matching Minecraft version and loader."
             );
             return;
@@ -555,9 +556,9 @@ public class GlobalModsView extends VBox {
         root.getStyleClass().add("modrinth-popup");
         root.setPrefWidth(560);
 
-        Label title = new Label("INSTALL " + project.getTitle());
+        Label title = new Label(Localization.text("globalMods.installPrefix") + project.getTitle());
         title.getStyleClass().add("modrinth-popup-title");
-        Label subtitle = new Label("Choose compatible instances.");
+        Label subtitle = new Label(Localization.text("globalMods.chooseInstances"));
         subtitle.getStyleClass().add("modrinth-popup-subtitle");
 
         VBox choices = new VBox(8);
@@ -578,9 +579,9 @@ public class GlobalModsView extends VBox {
         scroll.setPrefViewportHeight(Math.min(420, 90 + compatible.size() * 48.0));
         scroll.getStyleClass().add("modrinth-popup-scroll");
 
-        Button cancel = new Button("CANCEL");
+        Button cancel = new Button(Localization.text("common.cancel"));
         cancel.getStyleClass().add("modrinth-popup-secondary");
-        Button install = new Button("INSTALL");
+        Button install = new Button(Localization.text("common.install"));
         install.getStyleClass().add("modrinth-popup-primary");
         install.setDisable(true);
 
@@ -614,7 +615,7 @@ public class GlobalModsView extends VBox {
 
     private void installToInstances(ModrinthProject project, List<Instance> instances, Button sourceButton) {
         sourceButton.setDisable(true);
-        sourceButton.setText("INSTALLING...");
+        sourceButton.setText(Localization.text("common.installing"));
         UiExecutor.shared().execute(() -> {
             int success = 0;
             int failed = 0;
@@ -638,7 +639,7 @@ public class GlobalModsView extends VBox {
             int failures = failed;
             UiExecutor.shared().dispatchToUi(() -> {
                 sourceButton.setDisable(false);
-                sourceButton.setText("INSTALL");
+                sourceButton.setText(Localization.text("common.install"));
                 statusLabel.setText(project.getTitle() + " installed into " + installed
                         + " instance" + (installed == 1 ? "" : "s")
                         + (failures == 0 ? "." : "; " + failures + " failed."));
@@ -677,7 +678,7 @@ public class GlobalModsView extends VBox {
 
                         UiExecutor.shared().dispatchToUi(() ->
                                 popularStatusLabel.setText(
-                                        "Could not load popular mods."
+                                        Localization.text("browseMods.popularFailed")
                                 )
                         );
                     }
@@ -702,7 +703,7 @@ public class GlobalModsView extends VBox {
                 || projects.isEmpty()) {
 
             popularStatusLabel.setText(
-                    "No popular mods found."
+                    Localization.text("browseMods.noPopular")
             );
 
             return;
@@ -801,7 +802,7 @@ public class GlobalModsView extends VBox {
         Button versionsButton = createVersionsButton(project.getProjectId());
 
         Button installButton =
-                new Button("INSTALL");
+                new Button(Localization.text("common.install"));
         installButton.getStyleClass().add("primary-button");
         installButton.setOnAction(event ->
                 loadProjectForInstall(project.getProjectId(), installButton)
@@ -903,7 +904,7 @@ public class GlobalModsView extends VBox {
             showPopularSection();
 
             statusLabel.setText(
-                    "Search Modrinth for mods."
+                    Localization.text("globalMods.searchHelp")
             );
 
             return;
@@ -920,7 +921,7 @@ public class GlobalModsView extends VBox {
                 .clear();
 
         statusLabel.setText(
-                "Searching Modrinth..."
+                Localization.text("common.searching")
         );
 
         UiExecutor.shared().execute(() -> {
@@ -1054,7 +1055,7 @@ public class GlobalModsView extends VBox {
                 || projects.isEmpty()) {
 
             statusLabel.setText(
-                    "No mods found."
+                    Localization.text("globalMods.noMods")
             );
 
             return;
@@ -1087,7 +1088,7 @@ public class GlobalModsView extends VBox {
     private Button createVersionsButton(String projectId) {
         Button button = new Button("⋮");
         button.getStyleClass().add("modrinth-versions-button");
-        button.setAccessibleText("Versions");
+        button.setAccessibleText(Localization.text("globalMods.versions"));
         button.setOnAction(event -> showVersionsPopup(projectId, button));
         return button;
     }
@@ -1102,9 +1103,9 @@ public class GlobalModsView extends VBox {
         root.getStyleClass().add("modrinth-popup");
         root.setPrefWidth(520);
 
-        Label title = new Label("VERSIONS");
+        Label title = new Label(Localization.text("globalMods.versionsUpper"));
         title.getStyleClass().add("modrinth-popup-title");
-        Label subtitle = new Label("Loading project versions...");
+        Label subtitle = new Label(Localization.text("globalMods.loadingVersions"));
         subtitle.getStyleClass().add("modrinth-popup-subtitle");
 
         VBox list = new VBox(7);
@@ -1127,7 +1128,7 @@ public class GlobalModsView extends VBox {
                     list.getChildren().clear();
                     subtitle.setText((versions == null ? 0 : versions.size()) + " versions");
                     if (versions == null || versions.isEmpty()) {
-                        list.getChildren().add(new Label("No versions found."));
+                        list.getChildren().add(new Label(Localization.text("globalMods.noVersions")));
                         return;
                     }
                     for (dev.itsdropper.vanta.launcher.modrinth.ModrinthVersion version : versions) {
@@ -1137,7 +1138,7 @@ public class GlobalModsView extends VBox {
             } catch (Throwable ex) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     list.getChildren().clear();
-                    subtitle.setText("Could not load versions");
+                    subtitle.setText(Localization.text("globalMods.loadVersionsFailed"));
                 });
             }
         });
@@ -1166,7 +1167,7 @@ public class GlobalModsView extends VBox {
         HBox row = new HBox(10, info, type, downloads);
 
         if (contentTypeBox.getValue() == ModrinthContentType.MOD) {
-            Button installButton = new Button("INSTALL");
+            Button installButton = new Button(Localization.text("common.install"));
             installButton.getStyleClass().add("modrinth-version-install");
             installButton.setOnAction(event -> {
                 versionsPopup.hide();
@@ -1207,7 +1208,7 @@ public class GlobalModsView extends VBox {
         }
 
         if (compatible.isEmpty()) {
-            statusLabel.setText("No compatible instances found for this mod version.");
+            statusLabel.setText(Localization.text("globalMods.noCompatibleVersionInstances"));
             return;
         }
 
@@ -1220,9 +1221,9 @@ public class GlobalModsView extends VBox {
         root.getStyleClass().add("modrinth-popup");
         root.setPrefWidth(560);
 
-        Label title = new Label("INSTALL " + safe(version.getVersionNumber(), "VERSION"));
+        Label title = new Label(Localization.text("globalMods.installPrefix") + safe(version.getVersionNumber(), "VERSION"));
         title.getStyleClass().add("modrinth-popup-title");
-        Label subtitle = new Label("Choose compatible instances for this exact version.");
+        Label subtitle = new Label(Localization.text("globalMods.chooseExactVersionInstances"));
         subtitle.getStyleClass().add("modrinth-popup-subtitle");
 
         VBox choices = new VBox(8);
@@ -1241,9 +1242,9 @@ public class GlobalModsView extends VBox {
         scroll.setPrefViewportHeight(Math.min(420, 90 + compatible.size() * 48.0));
         scroll.getStyleClass().add("modrinth-popup-scroll");
 
-        Button cancel = new Button("CANCEL");
+        Button cancel = new Button(Localization.text("common.cancel"));
         cancel.getStyleClass().add("modrinth-popup-secondary");
-        Button install = new Button("INSTALL");
+        Button install = new Button(Localization.text("common.install"));
         install.getStyleClass().add("modrinth-popup-primary");
         install.setDisable(true);
 
@@ -1350,7 +1351,7 @@ public class GlobalModsView extends VBox {
 
         Label metadata =
                 new Label(
-                        "Modrinth • "
+                        Localization.text("common.modrinthPrefix")
                                 + formatNumber(
                                 project.getDownloads()
                         )
@@ -1377,7 +1378,7 @@ public class GlobalModsView extends VBox {
         Button versionsButton = createVersionsButton(project.getProjectId());
 
         Button installButton =
-                new Button("INSTALL");
+                new Button(Localization.text("common.install"));
         installButton.getStyleClass().add("primary-button");
         installButton.setOnAction(event ->
                 loadProjectForInstall(project.getProjectId(), installButton)
