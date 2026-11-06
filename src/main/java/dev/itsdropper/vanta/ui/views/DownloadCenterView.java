@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.launcher.download.DownloadCenterService;
 import dev.itsdropper.vanta.launcher.download.DownloadCenterService.Task;
 import dev.itsdropper.vanta.launcher.download.DownloadCenterService.Status;
@@ -29,7 +30,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
     private final Label activeCount = new Label("0 active");
     private final Label completedCount = new Label("0 completed");
     private final Label failedCount = new Label("0 failed");
-    private final Label summary = new Label("Downloads started by Vanta appear here automatically.");
+    private final Label summary = new Label(Localization.text("downloads.description"));
     private final java.util.function.Consumer<List<Task>> listener = this::renderTasks;
     private boolean listening;
 
@@ -43,7 +44,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         setPadding(new Insets(8, 8, 8, 8));
         setMinWidth(0);
 
-        Label eyebrow = new Label("TRANSFER ACTIVITY");
+        Label eyebrow = new Label(Localization.text("downloads.activity"));
         eyebrow.getStyleClass().add("download-eyebrow");
         VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
         PageHeader pageHeader = new PageHeader(
@@ -63,14 +64,14 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
 
         HBox listHeading = new HBox(10);
         listHeading.setAlignment(Pos.CENTER_LEFT);
-        Label queueTitle = new Label("Recent transfers");
+        Label queueTitle = new Label(Localization.text("downloads.recent"));
         queueTitle.getStyleClass().add("download-section-title");
         VantaUI.styleText(queueTitle, VantaUI.TextRole.SECTION_TITLE);
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button clear = new Button("Clear history", IconView.create(IconView.Type.TRASH, 14));
+        Button clear = new Button(Localization.text("downloads.clearHistory"), IconView.create(IconView.Type.TRASH, 14));
         clear.getStyleClass().add("secondary-button");
-        clear.setAccessibleText("Clear completed and failed download history");
+        clear.setAccessibleText(Localization.text("downloads.clearTooltip"));
         clear.setOnAction(event -> service.clearFinished());
         listHeading.getChildren().addAll(queueTitle, spacer, clear);
 
@@ -134,7 +135,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
             empty.setPadding(new Insets(38, 24, 38, 24));
             Label icon = new Label("↓");
             icon.getStyleClass().add("download-empty-icon");
-            Label title = new Label("Nothing downloading");
+            Label title = new Label(Localization.text("downloads.emptyTitle"));
             title.getStyleClass().add("download-empty-title");
             Label body = new Label("When Vanta installs Minecraft files, mods, assets or updates,\nthe transfer will show up here with its current status.");
             body.setWrapText(true);
