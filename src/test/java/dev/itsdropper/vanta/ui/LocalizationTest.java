@@ -528,7 +528,26 @@ class LocalizationTest {
                 "instances.noRecovery",
                 "instances.recoveryTitle",
                 "instances.chooseInstance",
-                "instances.chooseOperation"
+                "instances.chooseOperation",
+                "instances.instanceLabel",
+                "instances.creatingRecoveryPrefix",
+                "instances.recoveryCreatedPrefix",
+                "instances.recoveryCreateFailedPrefix",
+                "instances.loadingRecoveryHistory",
+                "instances.noRecoveryPointsPrefix",
+                "instances.chooseRecoveryPointPrefix",
+                "instances.recoveryPointLabel",
+                "instances.restorePrefix",
+                "instances.recoveryRestoredPrefix",
+                "instances.recoveryFailedPrefix",
+                "instances.recoveryHistoryFailedPrefix",
+                "instances.backupVerifiedPrefix",
+                "instances.backupRestoredPrefix",
+                "instances.backingUpPrefix",
+                "instances.backupCreatedPrefix",
+                "instances.waitStopped",
+                "instances.waitTransition",
+                "common.settings"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
