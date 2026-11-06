@@ -40,6 +40,7 @@ public final class InstanceRepairService {
                         || text.contains("modloader bootstrap class missing")
                         || text.contains("nilloader agent is missing or invalid")
                         || text.contains("vantaloader agent is missing or invalid")
+                        || text.contains("stein's java 25 runtime is missing")
                         || text.contains("official minecraft client mappings are missing")
                         || text.contains("minecraft mappings") && text.contains("missing")
                         || text.contains("rift library is missing")
