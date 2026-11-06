@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Pos;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
@@ -62,7 +63,7 @@ public class TitleBar extends HBox {
 
         updateButton =
                 new Button(
-                        "Update available"
+                        Localization.text("titleBar.updateAvailable")
                 );
 
         updateButton.getStyleClass().add(
@@ -147,12 +148,12 @@ public class TitleBar extends HBox {
                 closeIcon
         );
 
-        minimize.setAccessibleText("Minimize Vanta");
-        maximize.setAccessibleText("Maximize or restore Vanta");
-        close.setAccessibleText("Exit Vanta");
-        minimize.setTooltip(new Tooltip("Minimize"));
-        maximize.setTooltip(new Tooltip("Maximize / restore"));
-        close.setTooltip(new Tooltip("Exit Vanta"));
+        minimize.setAccessibleText(Localization.text("titleBar.minimizeAccessible"));
+        maximize.setAccessibleText(Localization.text("titleBar.maximizeAccessible"));
+        close.setAccessibleText(Localization.text("titleBar.exitAccessible"));
+        minimize.setTooltip(new Tooltip(Localization.text("titleBar.minimize")));
+        maximize.setTooltip(new Tooltip(Localization.text("titleBar.maximize")));
+        close.setTooltip(new Tooltip(Localization.text("titleBar.exitAccessible")));
 
         minimize.getStyleClass().add(
                 "title-bar-button"
@@ -276,7 +277,7 @@ public class TitleBar extends HBox {
                 updateInfo;
 
         updateButton.setText(
-                "Update"
+                Localization.text("titleBar.update")
         );
 
         updateButton.setVisible(
