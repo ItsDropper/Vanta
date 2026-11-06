@@ -96,13 +96,50 @@ class SteinModManagerTest {
 
     @Test
     void rejectsManifestIdentityVersionAndLoaderMismatches() throws Exception {
-        Path archive = temporaryDirectory.resolve("Mismatch.steinmod");
-        createArchive(archive, """
-                {"id":"othermod","name":"Example Mod","version":"1.2.4","loader":"0.1.99"}
+        Path identityMismatch = temporaryDirectory.resolve("IdentityMismatch.steinmod");
+        createArchive(identityMismatch, """
+                {"id":"othermod","name":"Example Mod","version":"1.2.4","loader":"0.1.28"}
                 """, false);
-
         assertThrows(IOException.class, () -> SteinModManager.validateArchive(
-                archive, release("examplemod", "1.2.3", "0.1.28")));
+                identityMismatch, release("examplemod", "1.2.3", "0.1.28")));
+
+        Path loaderMismatch = temporaryDirectory.resolve("LoaderMismatch.steinmod");
+        createArchive(loaderMismatch, """
+                {"id":"examplemod","name":"Example Mod","version":"1.2.3","loader":"0.1.99"}
+                """, false);
+        assertThrows(IOException.class, () -> SteinModManager.validateArchive(
+                loaderMismatch, release("examplemod", "1.2.3", "0.1.28")));
+    }
+
+    @Test
+    void tracksDisabledFilenameAndRemovesOnlyTheManagedFile() throws Exception {
+        Instance instance = steinInstance();
+        Path mods = temporaryDirectory.resolve("mods");
+        Path stein = temporaryDirectory.resolve("stein");
+        java.nio.file.Files.createDirectories(mods);
+        java.nio.file.Files.createDirectories(stein);
+        Path disabled = mods.resolve("Example.steinmod.disabled");
+        java.nio.file.Files.writeString(disabled, "archive");
+        new com.fasterxml.jackson.databind.ObjectMapper().writeValue(
+                stein.resolve("installed-mods.json").toFile(),
+                List.of(new SteinModManager.Installed(
+                        "example-mod", "examplemod", "Example Mod", "Example.steinmod",
+                        "1.2.3", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                        "https://example.org/steinmods.json")));
+
+        SteinModManager.updateTrackedFilename(instance, "Example.steinmod",
+                "Example.steinmod.disabled");
+        assertEquals("Example.steinmod.disabled",
+                SteinModManager.loadInstalled(instance).getFirst().file());
+
+        SteinModManager.removeInstalled(instance, "example-mod");
+        assertFalse(java.nio.file.Files.exists(disabled));
+        assertTrue(SteinModManager.loadInstalled(instance).isEmpty());
+    }
+
+    private Instance steinInstance() {
+        return new Instance("stein-test", "Stein Test", "1.8.9",
+                "Stein", "0.1.31", temporaryDirectory);
     }
 
     @Test
