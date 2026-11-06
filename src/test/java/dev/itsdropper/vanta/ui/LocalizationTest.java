@@ -608,7 +608,10 @@ class LocalizationTest {
                 "serverManager.restartTitle",
                 "serverManager.restartDescription",
                 "serverManager.basicConfig",
-                "serverManager.latestCrash"
+                "serverManager.latestCrash",
+                "serverManager.restorePrefix",
+                "serverManager.removePrefix",
+                "serverManager.restartPrefix"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
