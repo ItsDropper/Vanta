@@ -176,6 +176,10 @@ public final class SteinModManager {
         Path modsDirectory = instance.getDirectory().resolve("mods").toAbsolutePath().normalize();
         Files.createDirectories(modsDirectory);
         String filename = safeFilename(release.file());
+        if (previous != null && previous.file() != null
+                && previous.file().toLowerCase(Locale.ROOT).endsWith(".steinmod.disabled")) {
+            filename += ".disabled";
+        }
         Path destination = modsDirectory.resolve(filename).normalize();
         if (!destination.startsWith(modsDirectory)) {
             throw new IOException("Stein mod filename escapes the instance mods directory.");
@@ -539,8 +543,8 @@ public final class SteinModManager {
 
     private static String safeFilename(String filename) throws IOException {
         if (filename == null || filename.isBlank() || filename.length() > 180
-                || !filename.matches("[A-Za-z0-9._ -]+\\.steinmod")
-                || filename.equals(".steinmod")) {
+                || !filename.matches("[A-Za-z0-9._ -]+\\.steinmod(?:\\.disabled)?")
+                || filename.equals(".steinmod") || filename.equals(".steinmod.disabled")) {
             throw new IOException("Stein source contains an invalid .steinmod filename.");
         }
         return filename;
@@ -553,6 +557,40 @@ public final class SteinModManager {
             throw new IOException("Stein installed-mod registry contains an unsafe filename.");
         }
         return resolved;
+    }
+
+    public static void updateTrackedFilename(Instance instance, String oldFilename, String newFilename)
+            throws IOException {
+        requireSteinInstance(instance);
+        String oldSafe = safeFilename(oldFilename);
+        String newSafe = safeFilename(newFilename);
+        List<Installed> installed = new ArrayList<>(loadInstalled(instance));
+        for (int i = 0; i < installed.size(); i++) {
+            Installed item = installed.get(i);
+            if (oldSafe.equals(item.file())) {
+                installed.set(i, new Installed(item.id(), item.modId(), item.name(),
+                        newSafe, item.version(), item.sha256(), item.sourceUrl()));
+                writeJsonAtomically(stateFile(instance, INSTALLED_FILE), installed);
+                return;
+            }
+        }
+    }
+
+    public static void removeTrackedFile(Instance instance, String filename) throws IOException {
+        requireSteinInstance(instance);
+        String safe = safeFilename(filename);
+        for (Installed item : loadInstalled(instance)) {
+            if (safe.equals(item.file())) {
+                removeInstalled(instance, item.id());
+                return;
+            }
+        }
+        Path modsDirectory = instance.getDirectory().resolve("mods").toAbsolutePath().normalize();
+        Path file = trackedPath(modsDirectory, safe);
+        if (Files.isSymbolicLink(file)) {
+            throw new IOException("Refusing to remove a symbolic link from the mods directory.");
+        }
+        Files.deleteIfExists(file);
     }
 
     private static List<SourceRecord> readSourceRecords(Instance instance) throws IOException {
