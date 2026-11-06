@@ -513,6 +513,18 @@ public Path installShader(
         );
     }
 
+public Path installDataPack(
+            Instance instance,
+            ModrinthProject project
+    ) throws IOException, InterruptedException {
+        return installContent(
+                instance,
+                project,
+                ModrinthContentType.DATA_PACK,
+                "datapacks"
+        );
+    }
+
 private Path installContent(
             Instance instance,
             ModrinthProject project,
