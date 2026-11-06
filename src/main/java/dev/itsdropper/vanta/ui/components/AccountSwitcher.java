@@ -222,8 +222,8 @@ public class AccountSwitcher extends HBox {
         usernameLabel.setText(
                 account.getUsername()
         );
-        setAccessibleText("Account menu. Signed in as " + account.getUsername()
-                + ". Activate to switch accounts.");
+        setAccessibleText(Localization.text("accountSwitcher.menuSignedIn") + account.getUsername()
+                + Localization.text("accountSwitcher.menuSwitchHint"));
 
         AccountSkinService.loadHead(
                 account,
@@ -416,12 +416,12 @@ public class AccountSwitcher extends HBox {
                 "account-popup-account"
         );
         button.setAccessibleText(
-                (active ? "Current account: " : "Switch to account: ")
+                (active ? Localization.text("accountSwitcher.currentPrefix") : Localization.text("accountSwitcher.switchPrefix"))
                         + account.getUsername()
         );
         button.setTooltip(new Tooltip(
-                active ? account.getUsername() + " (current account)"
-                        : "Switch to " + account.getUsername()
+                active ? account.getUsername() + Localization.text("accountSwitcher.currentSuffix")
+                        : Localization.text("accountSwitcher.switchToPrefix") + account.getUsername()
         ));
 
         if (active) {
