@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.animation.RotateTransition;
@@ -49,11 +50,11 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
     private final EnvironmentLockfileService environmentLockfileService = new EnvironmentLockfileService();
     private final VBox sharedList = new VBox(VantaUI.spacing(2));
     private final ScrollPane instanceScroll = new ScrollPane(instanceList);
-    private final Label overallTitle = new Label("READY");
-    private final Label overallSubtitle = new Label("Vanta will inspect your environments when you open this page.");
+    private final Label overallTitle = new Label(Localization.text("state.ready"));
+    private final Label overallSubtitle = new Label(Localization.text("state.intro"));
     private final ProgressBar progress = new ProgressBar(0);
-    private final Label progressLabel = new Label("HEALTH");
-    private final Button refreshButton = new Button("SCAN NOW", IconView.create(IconView.Type.REFRESH, 15));
+    private final Label progressLabel = new Label(Localization.text("state.health"));
+    private final Button refreshButton = new Button(Localization.text("state.scanNow"), IconView.create(IconView.Type.REFRESH, 15));
     private final AtomicBoolean scanning = new AtomicBoolean(false);
     private volatile long scanGeneration;
     private final Map<Instance, HBox> liveInstanceCards = new IdentityHashMap<>();
@@ -94,10 +95,10 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         VantaUI.applySurface(hero, VantaUI.SurfaceRole.PANEL);
 
         refreshButton.getStyleClass().add("state-refresh-button");
-        refreshButton.setAccessibleText("Scan installed environments now");
+        refreshButton.setAccessibleText(Localization.text("state.scanAccessible"));
         refreshButton.setOnAction(e -> refresh());
 
-        Label sectionTitle = new Label("ENVIRONMENTS");
+        Label sectionTitle = new Label(Localization.text("state.environments"));
         sectionTitle.getStyleClass().add("state-section-title");
         VantaUI.styleText(sectionTitle, VantaUI.TextRole.SECTION_TITLE);
         HBox section = new HBox(VantaUI.spacing(2), sectionTitle, refreshButton);
@@ -121,7 +122,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         VantaUI.applySurface(listCard, VantaUI.SurfaceRole.PANEL);
         VBox.setVgrow(listCard, Priority.ALWAYS);
 
-        Label sharedTitle = new Label("SHARED RESOURCES");
+        Label sharedTitle = new Label(Localization.text("state.sharedResources"));
         sharedTitle.getStyleClass().add("state-section-title");
         VantaUI.styleText(sharedTitle, VantaUI.TextRole.SECTION_TITLE);
         VBox sharedCard = new VBox(VantaUI.spacing(3), sharedTitle, sharedList);
@@ -141,11 +142,11 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
     /** Render a stable preview without scanning any user data or touching disk. */
     public void prepareScreenshotPreview() {
-        overallTitle.setText("READY");
-        overallSubtitle.setText("Scan your environments to see installation health, drift and repair options.");
+        overallTitle.setText(Localization.text("state.ready"));
+        overallSubtitle.setText(Localization.text("state.scanHelp"));
         progress.setProgress(0);
         refreshButton.setDisable(false);
-        refreshButton.setText("SCAN NOW");
+        refreshButton.setText(Localization.text("state.scanNow"));
 
         instanceList.setAlignment(Pos.CENTER);
         instanceList.setFillWidth(true);
@@ -159,7 +160,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         sharedList.setAlignment(Pos.CENTER);
         sharedList.getChildren().setAll(new EmptyState(
                 "◇",
-                "SHARED RESOURCES",
+                Localization.text("state.sharedResources"),
                 "Shared resources are ready to inspect",
                 "Libraries, assets and other shared files appear here after the first environment scan."
         ));
@@ -179,11 +180,11 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         long generation = ++scanGeneration;
         refreshButton.setDisable(true);
-        refreshButton.setText("SCANNING...");
+        refreshButton.setText(Localization.text("state.scanning"));
         animateRefreshButton(true);
-        overallTitle.setText("SCANNING...");
-        overallSubtitle.setText("Parallel scan starting...");
-        progressLabel.setText("SCAN PROGRESS");
+        overallTitle.setText(Localization.text("state.scanning"));
+        overallSubtitle.setText(Localization.text("state.parallelStarting"));
+        progressLabel.setText(Localization.text("state.scanProgress"));
         progress.setProgress(0);
         instanceList.getChildren().clear();
         sharedList.getChildren().clear();
@@ -264,7 +265,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                     ex.printStackTrace();
                     state = new InstanceState(
                             InstanceState.Level.BROKEN,
-                            "SCAN FAILED",
+                            Localization.text("state.scanFailed"),
                             "Vanta could not inspect this environment.",
                             0, 1, 0, 0, ""
                     );
@@ -435,15 +436,15 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         UiExecutor.shared().dispatchToUi(() -> {
             if (generation != scanGeneration) return;
 
-            progressLabel.setText("HEALTH");
+            progressLabel.setText(Localization.text("state.health"));
             progress.setProgress(instances.isEmpty()
                     ? 1.0
                     : (double) healthy.get() / instances.size());
 
             if (instances.isEmpty()) {
-                overallTitle.setText("NO ENVIRONMENTS");
+                overallTitle.setText(Localization.text("state.noEnvironments"));
                 overallSubtitle.setText(
-                        "Shared resources were scanned successfully."
+                        Localization.text("state.sharedScanned")
                 );
             } else {
                 int affected = attention.get() + broken.get();
@@ -474,7 +475,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
             scanning.set(false);
             refreshButton.setDisable(false);
-            refreshButton.setText("SCAN AGAIN");
+            refreshButton.setText(Localization.text("state.scanAgain"));
             animateRefreshButton(false);
         });
     }
@@ -544,13 +545,13 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             return;
         }
 
-        overallTitle.setText("SCAN FAILED");
+        overallTitle.setText(Localization.text("state.scanFailed"));
         overallSubtitle.setText(message);
-        progressLabel.setText("SCAN PROGRESS");
+        progressLabel.setText(Localization.text("state.scanProgress"));
         progress.setProgress(0);
         scanning.set(false);
         refreshButton.setDisable(false);
-        refreshButton.setText("SCAN AGAIN");
+        refreshButton.setText(Localization.text("state.scanAgain"));
         animateRefreshButton(false);
 
         dev.itsdropper.vanta.ui.components.NotificationManager manager =
@@ -579,14 +580,14 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                         + "  •  " + safe(instance.getDisplayLoader(), "Unknown loader")
         );
         detail.getStyleClass().add("state-instance-detail");
-        Label summary = new Label("Scanning...");
+        Label summary = new Label(Localization.text("state.scanningShort"));
         summary.getStyleClass().add("state-instance-summary");
         text.getChildren().addAll(name, detail, summary);
         HBox.setHgrow(text, Priority.ALWAYS);
 
-        Label status = new Label("SCANNING");
+        Label status = new Label(Localization.text("state.scanningUpper"));
         status.getStyleClass().add("state-status-attention");
-        Label stats = new Label("Waiting for a State worker");
+        Label stats = new Label(Localization.text("state.waitingWorker"));
         stats.getStyleClass().add("state-stats");
 
         VBox right = new VBox(5, status, stats);
@@ -662,7 +663,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         count.getStyleClass().add("state-shared-count");
 
         Label status = new Label(
-                state == null ? "SCANNING" : state.getLevel().name()
+                state == null ? Localization.text("state.scanningUpper") : state.getLevel().name()
         );
         status.getStyleClass().add(
                 state == null
@@ -675,7 +676,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         if (state != null
                 && state.getLevel() != SharedState.Level.HEALTHY) {
-            Button repair = new Button("REPAIR");
+            Button repair = new Button(Localization.text("repair.action"));
             repair.getStyleClass().add("state-repair-button");
             repair.setFocusTraversable(false);
             repair.setOnAction(event -> repairSharedResource(name, repair));
@@ -689,7 +690,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
     private void repairSharedResource(String name, Button button) {
         button.setDisable(true);
-        button.setText("REPAIRING...");
+        button.setText(Localization.text("state.repairing"));
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -730,7 +731,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                                         : ex.getMessage()));
                     }
                     button.setDisable(false);
-                    button.setText("REPAIR");
+                    button.setText(Localization.text("repair.action"));
                 });
             }
         });
@@ -738,7 +739,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
     private void repairInstanceManually(Instance instance, Button button) {
         button.setDisable(true);
-        button.setText("REPAIRING...");
+        button.setText(Localization.text("state.repairing"));
 
         markInstanceRepairing(instance);
 
@@ -799,12 +800,12 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         VBox text = new VBox(5);
         Label name = new Label(safe(instance.getName(), "Unnamed instance"));
         name.getStyleClass().add("state-instance-name");
-        Label detail = new Label("Repairing broken installation...");
+        Label detail = new Label(Localization.text("state.repairingDescription"));
         detail.getStyleClass().add("state-instance-summary");
         text.getChildren().addAll(name, detail);
         HBox.setHgrow(text, Priority.ALWAYS);
 
-        Label status = new Label("REPAIRING");
+        Label status = new Label(Localization.text("state.repairingUpper"));
         status.getStyleClass().add("state-status-attention");
         card.getChildren().addAll(icon, text, status);
 
@@ -852,7 +853,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         detail.getStyleClass().add("state-instance-detail");
         Label summary = new Label(safe(state.getSummary(), "No diagnostic summary."));
         summary.getStyleClass().add("state-instance-summary");
-        Label fingerprint = new Label("STATE " + safe(state.getFingerprint(), ""));
+        Label fingerprint = new Label(Localization.text("state.prefix") + safe(state.getFingerprint(), ""));
         fingerprint.getStyleClass().add("state-fingerprint");
 
         text.getChildren().addAll(name, detail, summary, fingerprint);
@@ -868,7 +869,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         right.setAlignment(Pos.CENTER_RIGHT);
 
         if (state.getLevel() != InstanceState.Level.HEALTHY) {
-            Button repair = new Button("REPAIR");
+            Button repair = new Button(Localization.text("repair.action"));
             repair.getStyleClass().add("state-repair-button");
             repair.setFocusTraversable(false);
             repair.setOnAction(event -> repairInstanceManually(instance, repair));
@@ -877,20 +878,20 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         Label baselineState = new Label(
                 environmentLockfileService.hasBaseline(instance)
-                        ? "BASELINE SAVED"
+                        ? Localization.text("state.baselineSaved")
                         : "NO BASELINE"
         );
         baselineState.getStyleClass().add("state-environment-baseline");
 
         Button captureBaseline = new Button(
                 environmentLockfileService.hasBaseline(instance)
-                        ? "UPDATE BASELINE"
+                        ? Localization.text("state.updateBaseline")
                         : "SAVE BASELINE"
         );
         captureBaseline.getStyleClass().add("state-environment-button");
         captureBaseline.setFocusTraversable(false);
 
-        Button compareEnvironment = new Button("CHECK DRIFT");
+        Button compareEnvironment = new Button(Localization.text("state.checkDrift"));
         compareEnvironment.getStyleClass().add("state-environment-button");
         compareEnvironment.setFocusTraversable(false);
         compareEnvironment.setDisable(!environmentLockfileService.hasBaseline(instance));
@@ -917,16 +918,16 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
     ) {
         captureButton.setDisable(true);
         compareButton.setDisable(true);
-        captureButton.setText("SAVING...");
+        captureButton.setText(Localization.text("state.saving"));
 
         UiExecutor.shared().execute(() -> {
             try {
                 environmentLockfileService.write(instance);
                 UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
-                    captureButton.setText("UPDATE BASELINE");
+                    captureButton.setText(Localization.text("state.updateBaseline"));
                     compareButton.setDisable(false);
-                    baselineState.setText("BASELINE SAVED");
+                    baselineState.setText(Localization.text("state.baselineSaved"));
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.success(
@@ -940,7 +941,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     boolean baselineExists = environmentLockfileService.hasBaseline(instance);
-                    captureButton.setText(baselineExists ? "UPDATE BASELINE" : "SAVE BASELINE");
+                    captureButton.setText(baselineExists ? Localization.text("state.updateBaseline") : "SAVE BASELINE");
                     compareButton.setDisable(!baselineExists);
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
@@ -963,7 +964,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
     ) {
         captureButton.setDisable(true);
         compareButton.setDisable(true);
-        compareButton.setText("CHECKING...");
+        compareButton.setText(Localization.text("state.checking"));
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -972,14 +973,14 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     compareButton.setDisable(false);
-                    compareButton.setText("CHECK DRIFT");
+                    compareButton.setText(Localization.text("state.checkDrift"));
                     showEnvironmentDrift(instance, report);
                 });
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     compareButton.setDisable(!environmentLockfileService.hasBaseline(instance));
-                    compareButton.setText("CHECK DRIFT");
+                    compareButton.setText(Localization.text("state.checkDrift"));
                     NotificationManager manager = NotificationManager.getGlobal();
                     if (manager != null) {
                         manager.error(
@@ -998,7 +999,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         Alert alert = new Alert(
                 report.isClean() ? Alert.AlertType.INFORMATION : Alert.AlertType.WARNING
         );
-        alert.setTitle("Environment comparison");
+        alert.setTitle(Localization.text("state.environmentComparison"));
         alert.setHeaderText(
                 report.isClean()
                         ? "Environment matches its saved baseline"
