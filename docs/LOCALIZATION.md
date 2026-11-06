@@ -34,6 +34,13 @@ locale suffix convention; for example, `pt-PT` maps to
   affordances are localized.
 - Settings navigation labels, category headings, compact navigation, and search
   affordances use localized resource keys while retaining stable internal section IDs.
+- Account cards and switching, command palette, login popup, loading screen, and
+  title-bar controls use the selected bundle.
+- Account management, onboarding, instance creation/presets, Modrinth browsing,
+  installed/global mod views, download center, repair, screenshots, and remote
+  server connection dialogs have localized UI resources.
+- `LocalizationTest` verifies the required keys exist and are nonblank in every
+  supported locale; each bundle is checked against its exact requested locale.
 - Changing the preference never mutates the active bundle in a running scene.
   The preference is saved immediately and the UI clearly reports that a restart
   is required.
@@ -46,8 +53,7 @@ locale suffix convention; for example, `pt-PT` maps to
 2. Add `messages_<locale>.properties` under
    `src/main/resources/dev/itsdropper/vanta/i18n/`.
 3. Add the locale to `LocalizationTest` coverage through the supported-language
-   catalog; the test verifies all required language-preference, Settings-navigation, and
-   initial Overview dashboard strings exist.
+   catalog; the test verifies all required strings for the migrated UI surfaces exist.
 4. Translate UI strings by stable semantic keys, not by using English UI text as
    a lookup key.
 
