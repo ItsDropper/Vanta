@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.geometry.Insets;
@@ -32,11 +33,11 @@ public class OnboardingView extends BorderPane {
     private final StackPane pageContainer = new StackPane();
     private final Label stepLabel = new Label();
     private final Label accountStatus = new Label();
-    private final Button backButton = new Button("BACK");
-    private final Button nextButton = new Button("NEXT");
-    private final Button connectButton = new Button("CONNECT MICROSOFT ACCOUNT");
-    private final CheckBox usageTelemetry = new CheckBox("Send anonymous usage statistics");
-    private final CheckBox crashTelemetry = new CheckBox("Send crash diagnostics");
+    private final Button backButton = new Button(Localization.text("common.back"));
+    private final Button nextButton = new Button(Localization.text("onboarding.next"));
+    private final Button connectButton = new Button(Localization.text("onboarding.connectMicrosoft"));
+    private final CheckBox usageTelemetry = new CheckBox(Localization.text("onboarding.usageOptIn"));
+    private final CheckBox crashTelemetry = new CheckBox(Localization.text("onboarding.crashOptIn"));
 
     private int step = 0;
 
@@ -84,7 +85,7 @@ public class OnboardingView extends BorderPane {
         setCenter(onboardingScroll);
 
         Label hint = new Label(
-                "You can change everything later in Settings."
+                Localization.text("onboarding.changeLater")
         );
         hint.getStyleClass().add("onboarding-hint");
 
@@ -113,9 +114,9 @@ public class OnboardingView extends BorderPane {
     }
 
     private void showStep() {
-        stepLabel.setText("STEP " + (step + 1) + " OF 4");
+        stepLabel.setText(Localization.text("onboarding.stepPrefix") + (step + 1) + Localization.text("onboarding.stepSuffix"));
         backButton.setDisable(step == 0);
-        nextButton.setText(step == 3 ? "FINISH" : "NEXT");
+        nextButton.setText(step == 3 ? Localization.text("onboarding.finish") : Localization.text("onboarding.next"));
 
         Node page = switch (step) {
             case 0 -> welcomePage();
@@ -129,11 +130,11 @@ public class OnboardingView extends BorderPane {
     }
 
     private Node welcomePage() {
-        VBox box = page("Welcome to Vanta", 
-                "A focused Minecraft launcher built around clean instances, reliable downloads, and control without unnecessary clutter.");
+        VBox box = page(Localization.text("onboarding.welcomeTitle"), 
+                Localization.text("onboarding.welcomeSubtitle"));
 
         Label line = new Label(
-                "Vanta keeps each Minecraft instance separate, gives you a Modrinth-based content workflow, and keeps launcher configuration local."
+                Localization.text("onboarding.overview")
         );
         line.getStyleClass().add("onboarding-body");
         line.setWrapText(true);
@@ -145,8 +146,8 @@ public class OnboardingView extends BorderPane {
 
     private Node howItWorksPage() {
         VBox box = page(
-                "How Vanta is organized",
-                "An instance is a complete Minecraft environment. Keeping environments separate prevents one setup from accidentally changing another."
+                Localization.text("onboarding.organizationTitle"),
+                Localization.text("onboarding.organizationBody")
         );
 
         addFeature(box, "1", "Instances", "Each instance has its own mods, resource packs, shaders, worlds, screenshots, logs and settings.");
@@ -155,7 +156,7 @@ public class OnboardingView extends BorderPane {
         addFeature(box, "4", "Repair", "If a dependency is missing or damaged, use the instance repair flow instead of manually deleting random files.");
 
         Label path = new Label(
-                "Tip: use one instance for each distinct modded setup. For example, keep a Fabric performance setup separate from a large modpack."
+                Localization.text("onboarding.instanceTip")
         );
         path.getStyleClass().add("onboarding-hint");
         path.setWrapText(true);
@@ -165,15 +166,15 @@ public class OnboardingView extends BorderPane {
     }
 
     private Node accountPage() {
-        VBox box = page("Connect your Minecraft account", 
-                "Vanta uses your Microsoft account for Minecraft authentication. Your password is entered through Microsoft's authentication flow, not stored by this screen.");
+        VBox box = page(Localization.text("onboarding.accountTitle"), 
+                Localization.text("onboarding.accountBody"));
 
         Account account = accountService.getCurrentAccount();
 
         accountStatus.setText(
                 account == null
-                        ? "No Microsoft account connected"
-                        : "Connected as " + account.getUsername()
+                        ? Localization.text("onboarding.noAccount")
+                        : Localization.text("onboarding.connectedAs") + account.getUsername()
         );
         accountStatus.getStyleClass().removeAll("connected-label", "onboarding-account-status");
         accountStatus.getStyleClass().add(
@@ -183,14 +184,14 @@ public class OnboardingView extends BorderPane {
         );
 
         connectButton.getStyleClass().add("primary-button");
-        connectButton.setAccessibleText("Connect a Microsoft account for Minecraft");
+        connectButton.setAccessibleText(Localization.text("onboarding.connectPrompt"));
         connectButton.setGraphic(null);
         connectButton.setDisable(account != null);
-        connectButton.setText(account == null ? "CONNECT MICROSOFT ACCOUNT" : "ACCOUNT CONNECTED");
+        connectButton.setText(account == null ? Localization.text("onboarding.connectMicrosoft") : Localization.text("onboarding.accountConnected"));
         connectButton.setOnAction(event -> connectAccount());
 
         Label note = new Label(
-                "You can skip this and connect an account later from Accounts."
+                Localization.text("onboarding.skipAccount")
         );
         note.getStyleClass().add("onboarding-body");
         note.setWrapText(true);
@@ -206,22 +207,22 @@ public class OnboardingView extends BorderPane {
 
     private Node readyPage() {
         VBox box = page(
-                "You're ready to use Vanta",
-                "The first useful action is to create an instance. You can always change launcher defaults later in Settings."
+                Localization.text("onboarding.readyTitle"),
+                Localization.text("onboarding.readyBody")
         );
 
         addFeature(box, "1", "Create your first instance", "Pick a Minecraft version and loader. Vanta creates the isolated folder structure for you.");
         addFeature(box, "2", "Open Browse Content", "Install compatible mods, resource packs or shaders from Modrinth for that instance.");
         addFeature(box, "3", "Tune it in Settings", "Set RAM, resolution, fullscreen, Java arguments and Minecraft arguments for an individual instance.");
 
-        Label telemetryTitle = new Label("Help improve Vanta (optional)");
+        Label telemetryTitle = new Label(Localization.text("onboarding.privacyTitle"));
         telemetryTitle.getStyleClass().add("onboarding-feature-title");
 
         Label telemetryDetails = new Label(
-                "Choose what Vanta may send. Usage events contain only an event name and launcher version. "
-                        + "Crash diagnostics may include a sanitized exception message, stack trace and a short error excerpt. "
-                        + "Vanta filters common credentials, account identifiers, IP addresses and local paths, but automated redaction is not perfect. "
-                        + "Crash diagnostics and usage statistics are separate opt-ins, off by default, and can be changed later in Settings."
+                Localization.text("onboarding.privacyUsage")
+                        + Localization.text("onboarding.privacyCrash")
+                        + Localization.text("onboarding.privacyWarning")
+                        + Localization.text("onboarding.privacyNote")
         );
         telemetryDetails.getStyleClass().add("onboarding-feature-description");
         telemetryDetails.setWrapText(true);
@@ -233,7 +234,7 @@ public class OnboardingView extends BorderPane {
         HBox actions = new HBox(10);
         actions.setAlignment(Pos.CENTER_LEFT);
 
-        Button create = new Button("CREATE FIRST INSTANCE");
+        Button create = new Button(Localization.text("onboarding.createInstance"));
         create.getStyleClass().add("primary-button");
         create.setOnAction(event -> {
             saveTelemetryConsent();
@@ -242,7 +243,7 @@ public class OnboardingView extends BorderPane {
             onCreateInstance.run();
         });
 
-        Button finish = new Button("EXPLORE VANTA");
+        Button finish = new Button(Localization.text("onboarding.explore"));
         finish.getStyleClass().add("secondary-button");
         finish.setOnAction(event -> {
             saveTelemetryConsent();
@@ -316,7 +317,7 @@ public class OnboardingView extends BorderPane {
 
     private void connectAccount() {
         connectButton.setDisable(true);
-        connectButton.setText("WAITING FOR MICROSOFT SIGN-IN...");
+        connectButton.setText(Localization.text("onboarding.waiting"));
 
         ProgressIndicator progress = new ProgressIndicator();
         progress.setPrefSize(18, 18);
@@ -327,23 +328,23 @@ public class OnboardingView extends BorderPane {
                 Account account = accountService.login();
 
                 UiExecutor.shared().dispatchToUi(() -> {
-                    accountStatus.setText("Connected as " + account.getUsername());
+                    accountStatus.setText(Localization.text("onboarding.connectedAs") + account.getUsername());
                     accountStatus.getStyleClass().remove("onboarding-account-status");
                     accountStatus.getStyleClass().add("connected-label");
                     connectButton.setGraphic(null);
-                    connectButton.setText("ACCOUNT CONNECTED");
+                    connectButton.setText(Localization.text("onboarding.accountConnected"));
                     connectButton.setDisable(false);
                 });
             } catch (Throwable ex) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     accountStatus.setText(
-                            "Could not connect: "
+                            Localization.text("onboarding.connectErrorPrefix")
                                     + (ex.getMessage() == null ? ex.toString() : ex.getMessage())
                     );
                     accountStatus.getStyleClass().remove("connected-label");
                     accountStatus.getStyleClass().add("onboarding-account-status");
                     connectButton.setGraphic(null);
-                    connectButton.setText("TRY AGAIN");
+                    connectButton.setText(Localization.text("common.retry"));
                     connectButton.setDisable(false);
                 });
             }
