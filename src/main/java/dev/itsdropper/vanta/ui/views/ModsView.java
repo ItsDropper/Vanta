@@ -245,6 +245,20 @@ public class ModsView extends VBox {
         refreshButton.getStyleClass().add("secondary-button");
         refreshButton.setOnAction(event -> loadInstalledContent());
 
+        Button steinModsButton = new Button(
+                Localization.text("mods.steinMods"),
+                IconView.create(IconView.Type.PACKAGE, 16)
+        );
+        steinModsButton.getStyleClass().add("secondary-button");
+        boolean steinInstance = "Stein".equalsIgnoreCase(instance.getLoader());
+        steinModsButton.setVisible(steinInstance);
+        steinModsButton.setManaged(steinInstance);
+        steinModsButton.setOnAction(event -> SteinModsDialog.open(
+                getScene() == null ? null : getScene().getWindow(),
+                instance,
+                this::loadInstalledContent
+        ));
+
         Button folderButton =
                 new Button(
                         Localization.text("mods.openFolder"),
@@ -271,6 +285,7 @@ public class ModsView extends VBox {
                         browseButton,
                         folderButton,
                         refreshButton,
+                        steinModsButton,
                         screenshotsButton,
                         settingsButton
                 );
@@ -604,11 +619,14 @@ public class ModsView extends VBox {
         return switch (selectedType) {
 
             case ALL ->
-                    name.endsWith(".jar") || name.endsWith(".jar.disabled") || name.endsWith(".zip");
+                    name.endsWith(".jar") || name.endsWith(".jar.disabled")
+                            || name.endsWith(".steinmod") || name.endsWith(".steinmod.disabled")
+                            || name.endsWith(".zip");
 
             case MODS ->
-                    name.endsWith(".jar")
-                            || name.endsWith(".jar.disabled");
+                    name.endsWith(".jar") || name.endsWith(".jar.disabled")
+                            || ("Stein".equalsIgnoreCase(instance.getLoader())
+                            && (name.endsWith(".steinmod") || name.endsWith(".steinmod.disabled")));
 
             case RESOURCE_PACKS, SHADERS ->
                     name.endsWith(".zip");
