@@ -245,10 +245,17 @@ public class ModDetailsView extends VBox {
                                 findAuthor(
                                         teamMembers
                                 );
-                        List<ModrinthTag> loaderTags =
-                                modrinthClient.getLoaderTags(contentType);
-                        List<ModrinthTag> categoryTags =
-                                modrinthClient.getCategoryTags(contentType);
+                        List<ModrinthTag> loaderTags = List.of();
+                        List<ModrinthTag> categoryTags = List.of();
+                        try {
+                            loaderTags = modrinthClient.getLoaderTags(contentType);
+                            categoryTags = modrinthClient.getCategoryTags(contentType);
+                        } catch (Exception tagLoadFailure) {
+                            // Project details remain useful if the optional tag catalogue is unavailable.
+                            java.util.logging.Logger.getLogger(ModDetailsView.class.getName())
+                                    .log(java.util.logging.Level.WARNING,
+                                            "Could not load Modrinth tag metadata", tagLoadFailure);
+                        }
 
                         UiExecutor.shared().dispatchToUi(
                                 () ->
@@ -707,17 +714,29 @@ public class ModDetailsView extends VBox {
             }
         }
 
-        for (String value : project.getCategories()) {
+        java.util.LinkedHashSet<String> projectTagIds = new java.util.LinkedHashSet<>();
+        projectTagIds.addAll(project.getCategories());
+        if (project.getLoaders() != null) {
+            projectTagIds.addAll(project.getLoaders());
+        }
+
+        for (String value : projectTagIds) {
             if (value == null || value.isBlank()) continue;
             ModrinthTag loader = loadersById.get(ModrinthLoaderIds.normalize(value));
             Label chip = new Label(formatTagName(value));
             chip.getStyleClass().add("modrinth-tag-chip");
-            if (loader != null) {
+            if (loader != null || ModrinthLoaderIds.supportsSearchFacet(value)) {
                 Color color = ModrinthTagIcon.loaderColor(value);
                 chip.getStyleClass().add("modrinth-loader-chip");
-                chip.setGraphic(new ModrinthTagIcon(loader, color, 12));
-                chip.setStyle("-fx-text-fill: " + color.toString().replace("0x", "#").substring(0, 7) + ";");
-            } else if (!categoriesById.containsKey(value)) {
+                if (loader != null) {
+                    chip.setGraphic(new ModrinthTagIcon(loader, color, 12));
+                }
+                String cssColor = String.format(java.util.Locale.ROOT, "#%02x%02x%02x",
+                        (int) Math.round(color.getRed() * 255),
+                        (int) Math.round(color.getGreen() * 255),
+                        (int) Math.round(color.getBlue() * 255));
+                chip.setStyle("-fx-text-fill: " + cssColor + ";");
+            } else if (!categoriesById.isEmpty() && !categoriesById.containsKey(value)) {
                 continue;
             }
             tags.getChildren().add(chip);
