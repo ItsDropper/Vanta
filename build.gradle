@@ -19,7 +19,7 @@ java {
 }
 
 application {
-    mainClass = 'dev.itsdropper.vanta.Main'git
+    mainClass = 'dev.itsdropper.vanta.Main'
 }
 
 processResources {
