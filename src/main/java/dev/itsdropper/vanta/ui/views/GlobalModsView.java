@@ -1901,154 +1901,152 @@ public class GlobalModsView extends VBox {
         }
     }
 
-    private VBox createProjectCard(
-            ModrinthSearchHit project
-    ) {
+    private VBox createProjectCard(ModrinthSearchHit project) {
+        ImageView icon = createIcon(project);
+        VBox iconBox = createIconBox(icon, 58);
 
-        ImageView icon =
-                createIcon(
-                        project
-                );
+        Label title = new Label(safe(project.getTitle(), Localization.text("modrinth.unknownAuthor")));
+        title.getStyleClass().add("modrinth-project-title");
+        Label author = new Label(Localization.text("modrinth.byAuthor")
+                .replace("{author}", safe(project.getAuthor(), Localization.text("modrinth.unknownAuthor"))));
+        author.getStyleClass().add("modrinth-project-author");
 
-        Label title =
-                new Label(
-                        safe(
-                                project.getTitle(),
-                                "Unknown Mod"
-                        )
-                );
+        HBox titleLine = new HBox(7, title, author);
+        titleLine.setAlignment(Pos.CENTER_LEFT);
 
-        title.getStyleClass().add(
-                "instance-name"
-        );
-
-        String authorName = safe(project.getAuthor(), Localization.text("modrinth.unknownAuthor"));
-        Label author = new Label(Localization.text("modrinth.byAuthor").replace("{author}", authorName));
-        author.getStyleClass().add("instance-loader");
-
-        Label description =
-                new Label(safe(project.getDescription(), Localization.text("modrinth.noDescription")));
+        Label description = new Label(safe(project.getDescription(), Localization.text("modrinth.noDescription")));
         description.setWrapText(true);
-        description.setMaxWidth(650);
         description.setMaxHeight(42);
-        description.getStyleClass().add("global-mod-description");
+        description.getStyleClass().add("modrinth-project-description");
 
-        FlowPane tags = new FlowPane(6, 4);
+        FlowPane tags = new FlowPane(5, 4);
         tags.setAlignment(Pos.CENTER_LEFT);
         String environment = formatEnvironment(project.getClientSide(), project.getServerSide());
         if (!environment.isBlank()) {
-            Label environmentTag = new Label(environment);
-            environmentTag.getStyleClass().add("modrinth-tag-chip");
-            tags.getChildren().add(environmentTag);
+            Label env = new Label("◉  " + environment);
+            env.getStyleClass().addAll("modrinth-tag-chip", "modrinth-environment-chip");
+            tags.getChildren().add(env);
         }
-        java.util.Set<String> loaderIds = loaderTags.stream()
+
+        java.util.Map<String, dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> loaderById =
+                loaderTags.stream().filter(tag -> tag != null && tag.getName() != null)
+                        .collect(java.util.stream.Collectors.toMap(
+                                tag -> dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(tag.getName()),
+                                tag -> tag, (first, second) -> first, java.util.LinkedHashMap::new));
+        java.util.Set<String> categoryIds = categoryTags.stream()
                 .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
                 .filter(java.util.Objects::nonNull)
-                .map(value -> value.toLowerCase(java.util.Locale.ROOT))
                 .collect(java.util.stream.Collectors.toSet());
-        for (String category : project.getCategories()) {
-            if (category == null || category.isBlank() || loaderIds.contains(category.toLowerCase(java.util.Locale.ROOT))) continue;
-            Label categoryTag = new Label(category.replace('-', ' ').replace('_', ' '));
-            categoryTag.getStyleClass().add("modrinth-tag-chip");
-            tags.getChildren().add(categoryTag);
-            if (tags.getChildren().size() >= 6) break;
+
+        List<String> cardCategories = project.getCategories() == null ? List.of() : project.getCategories();
+        List<String> orderedTags = new ArrayList<>();
+        for (String value : cardCategories) {
+            if (value != null && !value.isBlank()
+                    && !loaderById.containsKey(dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(value))) {
+                orderedTags.add(value);
+            }
         }
-        for (String category : project.getCategories()) {
-            if (category == null || !loaderIds.contains(category.toLowerCase(java.util.Locale.ROOT))) continue;
-            Label loaderTag = new Label(category);
-            loaderTag.getStyleClass().add("modrinth-tag-chip");
-            tags.getChildren().add(loaderTag);
+        for (String value : cardCategories) {
+            if (value != null && loaderById.containsKey(dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(value))) {
+                orderedTags.add(value);
+            }
+        }
+        int maxVisibleTags = browserToolbar.isGridLayout() ? 3 : 7;
+        int visible = 0;
+        for (String value : orderedTags) {
+            if (visible >= maxVisibleTags) break;
+            String normalized = dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(value);
+            dev.itsdropper.vanta.launcher.modrinth.ModrinthTag loaderTag = loaderById.get(normalized);
+            if (loaderTag != null) {
+                Label loaderChip = new Label(formatTagName(value));
+                loaderChip.setGraphic(new ModrinthTagIcon(loaderTag,
+                        ModrinthTagIcon.loaderColor(value), 12));
+                loaderChip.getStyleClass().addAll("modrinth-tag-chip", "modrinth-loader-chip");
+                loaderChip.setStyle("-fx-text-fill: " + colorToCss(ModrinthTagIcon.loaderColor(value)) + ";");
+                tags.getChildren().add(loaderChip);
+            } else {
+                String display = categoryTags.stream()
+                        .filter(tag -> tag != null && value.equals(tag.getName()))
+                        .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
+                        .findFirst().orElse(value);
+                Label categoryChip = new Label(formatTagName(display));
+                categoryChip.getStyleClass().add("modrinth-tag-chip");
+                tags.getChildren().add(categoryChip);
+            }
+            visible++;
+        }
+        if (orderedTags.size() > visible) {
+            Label more = new Label("+" + (orderedTags.size() - visible));
+            more.getStyleClass().add("modrinth-tag-chip");
+            tags.getChildren().add(more);
         }
 
-        Label metadata = new Label(
-                Localization.text("modrinth.downloadsLabel").replace("{count}", formatNumber(project.getDownloads()))
-                        + "  •  " + Localization.text("modrinth.followersLabel").replace("{count}", formatNumber(project.getFollows()))
-                        + "  •  " + relativeUpdateTime(project.getDateModified())
-        );
-        metadata.getStyleClass().add("instance-loader");
+        VBox information = new VBox(5, titleLine, description, tags);
+        HBox.setHgrow(information, Priority.ALWAYS);
 
-        VBox information = new VBox(5, title, author, description, tags, metadata);
+        VBox stats = new VBox(5,
+                statLine("⇩", compactNumber(project.getDownloads())),
+                statLine("♥", compactNumber(project.getFollows())),
+                statLine("◷", relativeUpdateTime(project.getDateModified())));
+        stats.getStyleClass().add("modrinth-project-stats");
+        stats.setAlignment(Pos.CENTER_RIGHT);
 
-        HBox.setHgrow(
-                information,
-                Priority.ALWAYS
-        );
-
-        Button versionsButton = createVersionsButton(project.getProjectId());
-
+        Button menuButton = createVersionsButton(project.getProjectId());
         Button installButton = new Button(Localization.text("common.install"));
         installButton.getStyleClass().add("primary-button");
-        installButton.setOnAction(event ->
-                handleProjectInstall(project.getProjectId(), installButton)
-        );
+        installButton.setOnAction(event -> handleProjectInstall(project.getProjectId(), installButton));
 
-        HBox actions = new HBox(
-                8,
-                versionsButton,
-                installButton
-        );
-        actions.setAlignment(Pos.CENTER_RIGHT);
+        VBox card = new VBox(10);
+        card.setPadding(new Insets(14, 16, 14, 16));
+        card.getStyleClass().addAll("instance-card", "modrinth-project-card");
+        if (browserToolbar.isGridLayout()) {
+            HBox heading = new HBox(12, iconBox, information, menuButton);
+            heading.setAlignment(Pos.TOP_LEFT);
+            HBox.setHgrow(information, Priority.ALWAYS);
+            HBox footer = new HBox(12, stats, new javafx.scene.layout.Region(), installButton);
+            HBox.setHgrow(footer.getChildren().get(1), Priority.ALWAYS);
+            footer.setAlignment(Pos.CENTER_LEFT);
+            card.getChildren().addAll(heading, footer);
+            card.getStyleClass().add("modrinth-project-grid-card");
+        } else {
+            HBox actions = new HBox(7, menuButton, installButton);
+            actions.setAlignment(Pos.CENTER_RIGHT);
+            VBox right = new VBox(8, stats, actions);
+            right.setAlignment(Pos.CENTER_RIGHT);
+            HBox row = new HBox(14, iconBox, information, right);
+            row.setAlignment(Pos.CENTER_LEFT);
+            HBox.setHgrow(information, Priority.ALWAYS);
+            card.getChildren().add(row);
+        }
 
-        HBox row =
-                new HBox(
-                        16,
-                        createIconBox(
-                                icon,
-                                52
-                        ),
-                        information,
-                        actions
-                );
-
-        row.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        VBox card =
-                new VBox(
-                        row
-                );
-
-        card.setPadding(
-                new Insets(
-                        16,
-                        18,
-                        16,
-                        18
-                )
-        );
-
-        card.getStyleClass().add(
-                "instance-card"
-        );
-
-        card.setCursor(
-                javafx.scene.Cursor.HAND
-        );
-
-        card.setOnMouseClicked(
-                event -> {
-
-                    if (event.getButton() ==
-                            javafx.scene.input.MouseButton.PRIMARY) {
-
-                        String projectId =
-                                project.getProjectId();
-
-                        if (projectId != null
-                                && !projectId.isBlank()) {
-
-                            onModSelected.accept(
-                                    projectId,
-                                    contentTypeBox.getValue()
-                            );
-                        }
-                    }
-                }
-        );
-
+        card.setCursor(javafx.scene.Cursor.HAND);
+        card.setOnMouseClicked(event -> {
+            if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY
+                    && !(event.getTarget() instanceof javafx.scene.control.Button)
+                    && project.getProjectId() != null && !project.getProjectId().isBlank()) {
+                onModSelected.accept(project.getProjectId(), contentTypeBox.getValue());
+            }
+        });
         return card;
     }
+
+    private HBox statLine(String symbol, String value) {
+        Label icon = new Label(symbol);
+        icon.getStyleClass().add("modrinth-stat-icon");
+        Label text = new Label(value);
+        text.getStyleClass().add("modrinth-stat-value");
+        HBox line = new HBox(6, icon, text);
+        line.setAlignment(Pos.CENTER_RIGHT);
+        return line;
+    }
+
+    private String compactNumber(long value) {
+        if (value >= 1_000_000_000L) return String.format(java.util.Locale.ROOT, "%.1fB", value / 1_000_000_000.0);
+        if (value >= 1_000_000L) return String.format(java.util.Locale.ROOT, "%.1fM", value / 1_000_000.0);
+        if (value >= 10_000L) return String.format(java.util.Locale.ROOT, "%.1fK", value / 1_000.0);
+        return String.format(java.util.Locale.ROOT, "%,d", value);
+    }
+
 
     // =============================================================
     // ICON
