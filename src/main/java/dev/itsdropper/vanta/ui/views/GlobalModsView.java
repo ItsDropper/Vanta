@@ -71,6 +71,7 @@ public class GlobalModsView extends VBox {
     private final boolean screenshotPreview;
     private long searchRequestId;
     private long popularRequestId;
+    private long loaderTagRequestId;
 
     public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
         this(onModSelected, false);
@@ -161,6 +162,7 @@ public class GlobalModsView extends VBox {
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
+            loadLoaderTags(newValue);
             refreshForCurrentFilters();
         });
 
@@ -178,6 +180,7 @@ public class GlobalModsView extends VBox {
                 filterVersionChoices(newValue));
 
         if (!screenshotPreview) {
+            loadLoaderTags(ModrinthContentType.MOD);
             UiExecutor.shared().execute(() -> {
                 try {
                     List<String> versions = MinecraftVersionResolver.getAllVersions();
@@ -413,6 +416,53 @@ public class GlobalModsView extends VBox {
         } else {
             loadMostDownloadedMods();
         }
+    }
+
+    private void loadLoaderTags(ModrinthContentType contentType) {
+        long requestId = ++loaderTagRequestId;
+        if (contentType != ModrinthContentType.MOD) {
+            loaderBox.getItems().setAll("Any");
+            loaderBox.setValue("Any");
+            loaderBox.setDisable(true);
+            return;
+        }
+        loaderBox.setDisable(false);
+        UiExecutor.shared().execute(() -> {
+            try {
+                List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> tags =
+                        modrinthClient.getLoaderTags(contentType);
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId != loaderTagRequestId) return;
+                    String selected = loaderBox.getValue();
+                    loaderBox.getItems().setAll("Any");
+                    if (tags != null) {
+                        tags.stream()
+                                .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
+                                .filter(name -> name != null && !name.isBlank())
+                                .distinct()
+                                .sorted(String.CASE_INSENSITIVE_ORDER)
+                                .forEach(loaderBox.getItems()::add);
+                    }
+                    if (selected != null && loaderBox.getItems().contains(selected)) {
+                        loaderBox.setValue(selected);
+                    } else {
+                        loaderBox.setValue("Any");
+                    }
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId != loaderTagRequestId) return;
+                    // Keep the known loader choices as an offline fallback.
+                    if (loaderBox.getItems().isEmpty()) {
+                        loaderBox.getItems().setAll(
+                                "Any", "Fabric", "Quilt", "Forge", "NeoForge",
+                                "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
+                                "LiteLoader", "Rift", "ModLoader"
+                        );
+                    }
+                });
+            }
+        });
     }
 
     private void filterVersionChoices(String query) {
