@@ -179,8 +179,11 @@ public class GlobalModsView extends VBox {
         showAllVersions = new CheckBox(Localization.text("modrinth.showAllVersions"));
         showAllVersions.setSelected(false);
         showAllVersions.getStyleClass().add("dialog-instance-checkbox");
-        showAllVersions.selectedProperty().addListener((obs, oldValue, newValue) ->
-                filterVersionChoices(versionSearchField.getText()));
+        showAllVersions.selectedProperty().addListener((obs, oldValue, newValue) -> {
+            filterVersionChoices(versionSearchField.getText());
+            rebuildVersionFilterOptions();
+            browserToolbar.refresh();
+        });
 
         categoriesButton = new Button(Localization.text("modrinth.categories"));
         categoriesButton.getStyleClass().add("secondary-button");
@@ -393,7 +396,7 @@ public class GlobalModsView extends VBox {
         results.setHgap(12);
         results.setVgap(12);
         results.setAlignment(Pos.TOP_LEFT);
-        results.getStyleClass().add("instance-list");
+        results.getStyleClass().addAll("instance-list", "modrinth-list-results");
 
         resultsScrollPane =
                 new ScrollPane(
@@ -1477,6 +1480,8 @@ public class GlobalModsView extends VBox {
 
         hidePopularSection();
         results.getChildren().clear();
+        retryButton.setVisible(false);
+        retryButton.setManaged(false);
         statusLabel.setText(Localization.text("common.searching"));
         for (int i = 0; i < Math.min(state.limit(), 6); i++) {
             VBox skeleton = new VBox(8);
@@ -1646,16 +1651,18 @@ public class GlobalModsView extends VBox {
         VBox card = createProjectCard(project);
         double availableWidth = resultsScrollPane.getViewportBounds().getWidth();
         boolean grid = browserToolbar.isGridLayout();
-        card.setPrefWidth(grid ? 300 : Math.max(280, availableWidth - 28));
+        card.setPrefWidth(grid ? 340 : Math.max(280, availableWidth - 28));
         card.setMinWidth(grid ? 260 : 0);
         return card;
     }
 
     private void applyGlobalResultLayout(boolean grid) {
+        results.getStyleClass().removeAll("modrinth-grid-results", "modrinth-list-results");
+        results.getStyleClass().add(grid ? "modrinth-grid-results" : "modrinth-list-results");
         double availableWidth = resultsScrollPane.getViewportBounds().getWidth();
         for (javafx.scene.Node node : results.getChildren()) {
             if (node instanceof VBox card) {
-                card.setPrefWidth(grid ? 300 : Math.max(280, availableWidth - 28));
+                card.setPrefWidth(grid ? 340 : Math.max(280, availableWidth - 28));
                 card.setMinWidth(grid ? 260 : 0);
             }
         }
