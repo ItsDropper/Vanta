@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.components;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -111,7 +112,7 @@ public class Sidebar extends VBox {
                 "sidebar-logo"
         );
 
-        subtitle = new Label("MINECRAFT LAUNCHER");
+        subtitle = new Label(Localization.text("sidebar.subtitle"));
 
         subtitle.getStyleClass().add(
                 "sidebar-subtitle"
@@ -169,7 +170,7 @@ public class Sidebar extends VBox {
         addButton(Page.SETTINGS);
 
         build = new Label(
-                        "VANTA "
+                        Localization.text("sidebar.brandPrefix")
                                 + loadVersion()
                                 + "  •  LOCAL"
                 );
@@ -180,9 +181,9 @@ public class Sidebar extends VBox {
         VantaUI.styleText(build, VantaUI.TextRole.METADATA);
 
         build.setWrapText(true);
-        build.setAccessibleText("Vanta version " + loadVersion()
+        build.setAccessibleText(Localization.text("sidebar.versionPrefix") + loadVersion()
                 + ". Navigate with Control plus numbers one through nine.");
-        build.setTooltip(new Tooltip("Ctrl+N New instance · Ctrl+1 Home · Ctrl+2 Instances · "
+        build.setTooltip(new Tooltip(Localization.text("sidebar.shortcutsPrefix")
                 + "Ctrl+3 Mods · Ctrl+4 State · Ctrl+5 Skin · Ctrl+6 Accounts · Ctrl+7 Settings · Ctrl+8 Downloads · Ctrl+9 Server Manager"));
 
         getChildren().add(
