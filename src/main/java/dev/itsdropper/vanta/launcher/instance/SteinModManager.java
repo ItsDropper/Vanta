@@ -83,7 +83,7 @@ public final class SteinModManager {
     ) {
     }
 
-    private record SourceRecord(String url) {
+    private record SourceRecord(String url, String name, String author, String homepage) {
     }
 
     public static List<Source> loadSources(Instance instance) throws IOException {
@@ -98,7 +98,12 @@ public final class SteinModManager {
             if (record == null || record.url() == null || record.url().isBlank()) {
                 continue;
             }
-            sources.add(readSource(record.url()).source());
+            String name = record.name();
+            if (name == null || name.isBlank()) {
+                name = URI.create(record.url()).getHost();
+            }
+            sources.add(new Source(name, record.author() == null ? "" : record.author(),
+                    record.homepage() == null ? "" : record.homepage(), record.url()));
         }
         return List.copyOf(sources);
     }
@@ -110,7 +115,8 @@ public final class SteinModManager {
         Index index = readSource(normalized);
         List<SourceRecord> records = readSourceRecords(instance);
         if (records.stream().noneMatch(record -> normalized.equals(record.url()))) {
-            records.add(new SourceRecord(normalized));
+            Source source = index.source();
+            records.add(new SourceRecord(normalized, source.name(), source.author(), source.homepage()));
             writeJsonAtomically(stateFile(instance, SOURCES_FILE), records);
         }
         return index.source();
@@ -267,8 +273,8 @@ public final class SteinModManager {
             Installed current = installed.stream()
                     .filter(item -> release.id().equals(item.id()))
                     .findFirst().orElse(null);
-            if (current == null || !release.version().equals(current.version())
-                    || !release.sha256().equalsIgnoreCase(current.sha256())) {
+            if (current != null && (!release.version().equals(current.version())
+                    || !release.sha256().equalsIgnoreCase(current.sha256()))) {
                 updated.add(install(instance, release));
             }
         }
