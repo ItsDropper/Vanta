@@ -5,11 +5,9 @@ import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.components.EmptyState;
-import dev.itsdropper.vanta.ui.components.IconView;
+import dev.itsdropper.vanta.ui.components.ModrinthBrowserToolbar;
 import dev.itsdropper.vanta.ui.components.ModrinthTagIcon;
 import javafx.scene.paint.Color;
-import javafx.animation.PauseTransition;
-import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -58,6 +56,7 @@ public class GlobalModsView extends VBox {
     private final HttpClient httpClient;
 
     private final TextField searchField;
+    private final ModrinthBrowserToolbar browserToolbar;
     private final ComboBox<String> loaderBox;
     private final ComboBox<String> versionBox;
     private final TextField versionSearchField;
@@ -89,16 +88,7 @@ public class GlobalModsView extends VBox {
     private Button versionsButton;
     private final java.util.Set<String> selectedLoaders = new java.util.LinkedHashSet<>();
     private final java.util.Set<String> selectedVersions = new java.util.LinkedHashSet<>();
-    private int searchOffset;
-    private int searchTotalHits;
-    private final ComboBox<String> sortBox;
-    private final ComboBox<Integer> resultLimitBox;
-    private final Button previousPageButton;
-    private final Button nextPageButton;
-    private final Label pageIndicator;
-    private final Button layoutButton;
-    private final PauseTransition searchDebounce = new PauseTransition(Duration.millis(350));
-    private final java.util.Map<ModrinthContentType, Button> contentTypeButtons = new java.util.EnumMap<>(ModrinthContentType.class);
+        private final java.util.Map<ModrinthContentType, Button> contentTypeButtons = new java.util.EnumMap<>(ModrinthContentType.class);
 
     public GlobalModsView(BiConsumer<String, ModrinthContentType> onModSelected) {
         this(onModSelected, false);
@@ -246,7 +236,7 @@ public class GlobalModsView extends VBox {
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
             loaderBox.setDisable(newValue != ModrinthContentType.MOD);
             if (newValue != ModrinthContentType.MOD) selectedLoaders.clear();
-            searchOffset = 0;
+
             selectedCategories.clear();
             updateLoaderButton();
             updateVersionButton();
@@ -283,120 +273,18 @@ public class GlobalModsView extends VBox {
         }
 
         // =========================================================
-        // SEARCH
+        // SEARCH AND SHARED BROWSE CONTROLS
         // =========================================================
 
-        searchField =
-                new TextField();
-
-        searchField.setPromptText(
-                Localization.text("globalMods.searchPrompt")
+        browserToolbar = new ModrinthBrowserToolbar(
+                Localization.text("globalMods.searchPrompt"),
+                this::search,
+                this::applyGlobalResultLayout
         );
-        searchField.setMinWidth(0);
-        searchField.setAccessibleText(Localization.text("globalMods.searchAccessible"));
-
-        searchField.getStyleClass().add(
-                "create-field"
-        );
-
-        HBox.setHgrow(
-                searchField,
-                Priority.ALWAYS
-        );
-
-        Button searchButton =
-                new Button(
-                        Localization.text("common.search")
-                );
-
-        searchButton.getStyleClass().add(
-                "primary-button"
-        );
-        searchButton.setAccessibleText(Localization.text("globalMods.searchAccessible"));
-        searchButton.setOnAction(event -> {
-            searchDebounce.stop();
-            search();
-        });
-        searchField.setOnAction(event -> {
-            searchDebounce.stop();
-            search();
-        });
-        searchDebounce.setOnFinished(event -> search());
-        searchField.textProperty().addListener((obs, oldValue, newValue) -> {
-            searchOffset = 0;
-            if (newValue != null && !newValue.isBlank()) {
-                searchDebounce.playFromStart();
-            } else {
-                searchDebounce.stop();
-            }
-        });
-
-        Label searchIcon = new Label();
-        searchIcon.setGraphic(IconView.create(IconView.Type.SEARCH, 17));
-        searchIcon.getStyleClass().add("modrinth-search-icon");
-        HBox searchBar = new HBox(10, searchIcon, searchField, searchButton);
-        searchBar.setAlignment(Pos.CENTER_LEFT);
-        searchBar.getStyleClass().add("modrinth-search-row");
-        searchBar.setMaxWidth(Double.MAX_VALUE);
-
-        sortBox = new ComboBox<>();
-        sortBox.getItems().setAll("Relevance", "Downloads", "Followers", "Date published", "Date updated");
-        sortBox.setValue("Relevance");
-        sortBox.getStyleClass().add("create-combo");
-        sortBox.setAccessibleText(Localization.text("modrinth.sortAccessible"));
-        resultLimitBox = new ComboBox<>();
-        resultLimitBox.getItems().setAll(5, 10, 15, 20, 50, 100);
-        resultLimitBox.setValue(20);
-        resultLimitBox.getStyleClass().add("create-combo");
-        resultLimitBox.setAccessibleText(Localization.text("modrinth.resultsPerPageAccessible"));
-        previousPageButton = new Button("‹");
-        nextPageButton = new Button("›");
-        pageIndicator = new Label("Page 1");
-        layoutButton = new Button(LauncherSettings.isModrinthGridLayoutEnabled() ? "▦" : "☷");
-        layoutButton.getStyleClass().add("secondary-button");
-        layoutButton.setAccessibleText("Toggle result layout");
-        layoutButton.setOnAction(event -> {
-            boolean grid = !LauncherSettings.isModrinthGridLayoutEnabled();
-            LauncherSettings.setModrinthGridLayoutEnabled(grid);
-            layoutButton.setText(grid ? "▦" : "☷");
-            layoutButton.setTooltip(new javafx.scene.control.Tooltip(
-                    grid ? "Switch to list layout" : "Switch to grid layout"));
-            applyGlobalResultLayout(grid);
-        });
-        previousPageButton.getStyleClass().add("secondary-button");
-        nextPageButton.getStyleClass().add("secondary-button");
-        pageIndicator.getStyleClass().add("instances-status");
-        HBox browseControls = new HBox(8,
-                new Label("Sort"), sortBox,
-                new Label("Per page"), resultLimitBox, layoutButton,
-                previousPageButton, pageIndicator, nextPageButton);
-        browseControls.setAlignment(Pos.CENTER_LEFT);
-        sortBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-            if (oldValue != null && newValue != null && !oldValue.equals(newValue)) {
-                searchOffset = 0;
-                search();
-            }
-        });
-        resultLimitBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-            if (oldValue != null && newValue != null) {
-                searchOffset = 0;
-                search();
-            }
-        });
-        previousPageButton.setOnAction(event -> {
-            if (searchOffset > 0) {
-                searchOffset = Math.max(0, searchOffset - resultLimitBox.getValue());
-                search();
-            }
-        });
-        nextPageButton.setOnAction(event -> {
-            if (searchOffset + resultLimitBox.getValue() < searchTotalHits) {
-                searchOffset += resultLimitBox.getValue();
-                search();
-            }
-        });
+        searchField = browserToolbar.getSearchField();
 
         // =========================================================
+
         // MOST DOWNLOADED TITLE
         // =========================================================
 
@@ -475,7 +363,7 @@ public class GlobalModsView extends VBox {
 
         resultsScrollPane.setFitToWidth(true);
         resultsScrollPane.viewportBoundsProperty().addListener((obs, oldBounds, newBounds) ->
-                applyGlobalResultLayout(LauncherSettings.isModrinthGridLayoutEnabled()));
+                applyGlobalResultLayout(browserToolbar.isGridLayout()));
 
         resultsScrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
@@ -522,8 +410,7 @@ public class GlobalModsView extends VBox {
         getChildren().addAll(
                 header,
                 contentTypeSegments,
-                searchBar,
-                browseControls,
+                browserToolbar,
                 browseContent
         );
 
@@ -647,7 +534,7 @@ public class GlobalModsView extends VBox {
                 if (box.isSelected()) selectedCategories.add((String) box.getUserData());
             }
             updateCategoriesButton();
-            searchOffset = 0;
+
             popup.hide();
             refreshForCurrentFilters();
         });
@@ -745,7 +632,7 @@ public class GlobalModsView extends VBox {
                 if (box.isSelected()) selected.add((String) box.getUserData());
             }
             updateButton.run();
-            searchOffset = 0;
+
             popup.hide();
             refreshForCurrentFilters();
         });
@@ -858,7 +745,11 @@ public class GlobalModsView extends VBox {
         }
         String query = searchField.getText();
 
-        if (query != null && !query.trim().isBlank()) {
+        boolean hasActiveFacets = contentTypeBox.getValue() != ModrinthContentType.MOD
+                || !selectedLoaders.isEmpty()
+                || !selectedVersions.isEmpty()
+                || !selectedCategories.isEmpty();
+        if ((query != null && !query.trim().isBlank()) || hasActiveFacets) {
             search();
         } else {
             showPopularSection();
@@ -1408,103 +1299,61 @@ public class GlobalModsView extends VBox {
     // =============================================================
 
     private void search() {
+        browserToolbar.refresh();
+    }
+
+    private void search(ModrinthBrowserToolbar.SearchState state) {
         long requestId = ++searchRequestId;
-
-        String query =
-                searchField
-                        .getText()
-                        .trim();
-
-        // =========================================================
-        // EMPTY = MOST DOWNLOADED
-        // =========================================================
-
+        String query = state.query();
         boolean hasActiveFacets = contentTypeBox.getValue() != ModrinthContentType.MOD
                 || !selectedLoaders.isEmpty()
                 || !selectedVersions.isEmpty()
                 || !selectedCategories.isEmpty();
+
         if (query.isBlank() && !hasActiveFacets) {
-            searchOffset = 0;
-            searchTotalHits = 0;
-            updateSearchPagination();
+            browserToolbar.setTotalHits(0);
             results.getChildren().clear();
             showPopularSection();
             statusLabel.setText(Localization.text("globalMods.searchHelp"));
             return;
         }
 
-        // =========================================================
-        // SEARCH = HIDE POPULAR
-        // =========================================================
-
         hidePopularSection();
-
-        results
-                .getChildren()
-                .clear();
-
-        statusLabel.setText(
-                Localization.text("common.searching")
-        );
+        results.getChildren().clear();
+        statusLabel.setText(Localization.text("common.searching"));
 
         ModrinthContentType requestedType = contentTypeBox.getValue();
         List<String> requestedLoaders = selectedLoaderFacets();
         List<String> requestedVersions = selectedVersionFacets();
         List<String> requestedCategories = List.copyOf(selectedCategories);
-        String requestedSort = switch (sortBox.getValue()) {
-            case "Downloads" -> "downloads";
-            case "Followers" -> "follows";
-            case "Date published" -> "newest";
-            case "Date updated" -> "updated";
-            default -> "relevance";
-        };
-        int requestedLimit = resultLimitBox.getValue();
-        int requestedOffset = searchOffset;
 
         UiExecutor.shared().execute(() -> {
-                    try {
-                        dev.itsdropper.vanta.launcher.modrinth.ModrinthSearchResult response =
-                                modrinthClient.searchPage(
-                                        query,
-                                        requestedType,
-                                        requestedLoaders,
-                                        requestedVersions,
-                                        requestedCategories,
-                                        requestedSort,
-                                        requestedLimit,
-                                        requestedOffset
-                                );
-                        List<ModrinthSearchHit> projects = response.getHits();
-
-                        UiExecutor.shared().dispatchToUi(() -> {
-                            if (requestId != searchRequestId) return;
-                            searchTotalHits = response.getTotalHits();
-                            updateSearchPagination();
-                            showResults(projects);
-                        });
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        UiExecutor.shared().dispatchToUi(() -> {
-                            if (requestId != searchRequestId) return;
-                            statusLabel.setText(ex.getMessage() != null
-                                    ? ex.getMessage() : "Failed to search Modrinth.");
-                        });
-                    }
+            try {
+                dev.itsdropper.vanta.launcher.modrinth.ModrinthSearchResult response =
+                        modrinthClient.searchPage(
+                                query,
+                                requestedType,
+                                requestedLoaders,
+                                requestedVersions,
+                                requestedCategories,
+                                state.index(),
+                                state.limit(),
+                                state.offset()
+                        );
+                List<ModrinthSearchHit> projects = response.getHits();
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId != searchRequestId) return;
+                    browserToolbar.setTotalHits(response.getTotalHits());
+                    showResults(projects);
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId != searchRequestId) return;
+                    statusLabel.setText(failure.getMessage() == null
+                            ? Localization.text("modrinth.searchFailed") : failure.getMessage());
+                });
+            }
         });
-
-
-    }
-
-    private void updateSearchPagination() {
-        int limit = resultLimitBox.getValue() == null ? 20 : resultLimitBox.getValue();
-        int page = searchOffset / limit + 1;
-        int pages = Math.max(1, (int) Math.ceil(searchTotalHits / (double) limit));
-        previousPageButton.setDisable(searchOffset <= 0);
-        nextPageButton.setDisable(searchOffset + limit >= searchTotalHits);
-        pageIndicator.setText(Localization.text("modrinth.pageStatus").replace("{page}", Integer.toString(page)).replace("{pages}", Integer.toString(pages)).replace("{total}", Integer.toString(searchTotalHits)));
     }
 
     // =============================================================
@@ -1624,7 +1473,7 @@ public class GlobalModsView extends VBox {
     private VBox createSizedGlobalProjectCard(ModrinthSearchHit project) {
         VBox card = createProjectCard(project);
         double availableWidth = resultsScrollPane.getViewportBounds().getWidth();
-        boolean grid = LauncherSettings.isModrinthGridLayoutEnabled();
+        boolean grid = browserToolbar.isGridLayout();
         card.setPrefWidth(grid ? 300 : Math.max(280, availableWidth - 28));
         card.setMinWidth(grid ? 260 : 0);
         return card;
