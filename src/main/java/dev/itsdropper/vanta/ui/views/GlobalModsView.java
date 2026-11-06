@@ -1719,27 +1719,27 @@ public class GlobalModsView extends VBox {
     private String formatEnvironment(String client, String server) {
         List<String> values = new ArrayList<>();
         if (client != null && !client.isBlank() && !"unknown".equalsIgnoreCase(client)) {
-            values.add("Client " + client.toLowerCase(java.util.Locale.ROOT));
+            values.add(Localization.text("modrinth.environmentClient").replace("{value}", client.toLowerCase(java.util.Locale.ROOT)));
         }
         if (server != null && !server.isBlank() && !"unknown".equalsIgnoreCase(server)) {
-            values.add("Server " + server.toLowerCase(java.util.Locale.ROOT));
+            values.add(Localization.text("modrinth.environmentServer").replace("{value}", server.toLowerCase(java.util.Locale.ROOT)));
         }
         return String.join(" / ", values);
     }
 
     private String relativeUpdateTime(String value) {
-        if (value == null || value.isBlank()) return "update date unavailable";
+        if (value == null || value.isBlank()) return Localization.text("modrinth.updateUnavailable");
         try {
             java.time.Duration age = java.time.Duration.between(
                     java.time.Instant.parse(value), java.time.Instant.now());
             long days = Math.max(0, age.toDays());
-            if (days == 0) return "updated today";
-            if (days == 1) return "updated yesterday";
-            if (days < 30) return "updated " + days + " days ago";
-            if (days < 365) return "updated " + (days / 30) + " months ago";
-            return "updated " + (days / 365) + " years ago";
+            if (days == 0) return Localization.text("modrinth.updatedToday");
+            if (days == 1) return Localization.text("modrinth.updatedYesterday");
+            if (days < 30) return Localization.text("modrinth.updatedDaysAgo").replace("{count}", Long.toString(days));
+            if (days < 365) return Localization.text("modrinth.updatedMonthsAgo").replace("{count}", Long.toString(days / 30));
+            return Localization.text("modrinth.updatedYearsAgo").replace("{count}", Long.toString(days / 365));
         } catch (java.time.DateTimeException ignored) {
-            return "update date unavailable";
+            return Localization.text("modrinth.updateUnavailable");
         }
     }
 
@@ -1764,7 +1764,8 @@ public class GlobalModsView extends VBox {
                 "instance-name"
         );
 
-        Label author = new Label("by " + safe(project.getAuthor(), Localization.text("modrinth.unknownAuthor")));
+        String authorName = safe(project.getAuthor(), Localization.text("modrinth.unknownAuthor"));
+        Label author = new Label(Localization.text("modrinth.byAuthor").replace("{author}", authorName));
         author.getStyleClass().add("instance-loader");
 
         Label description =
@@ -1802,9 +1803,9 @@ public class GlobalModsView extends VBox {
         }
 
         Label metadata = new Label(
-                formatNumber(project.getDownloads()) + " downloads  •  "
-                        + formatNumber(project.getFollows()) + " followers  •  "
-                        + relativeUpdateTime(project.getDateModified())
+                Localization.text("modrinth.downloadsLabel").replace("{count}", formatNumber(project.getDownloads()))
+                        + "  •  " + Localization.text("modrinth.followersLabel").replace("{count}", formatNumber(project.getFollows()))
+                        + "  •  " + relativeUpdateTime(project.getDateModified())
         );
         metadata.getStyleClass().add("instance-loader");
 
