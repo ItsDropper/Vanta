@@ -196,8 +196,13 @@ public class MinecraftLauncher {
          * Java 8 predates the module system and must not receive this
          * option.
          */
-        if (data.javaVersion >= 9) {
+        if (data.javaVersion >= 9 && !"Stein".equalsIgnoreCase(data.loader)) {
             command.add("--add-modules=jdk.httpserver");
+        }
+
+        if ("Stein".equalsIgnoreCase(data.loader)
+                && Platform.operatingSystem() == Platform.OperatingSystem.MACOS) {
+            command.add("-XstartOnFirstThread");
         }
 
         // =============================================================
