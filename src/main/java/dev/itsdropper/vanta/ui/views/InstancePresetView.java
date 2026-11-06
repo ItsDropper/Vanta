@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -40,7 +41,7 @@ public class InstancePresetView extends VBox {
         // =========================================================
 
         Label title =
-                new Label("Choose a preset");
+                new Label(Localization.text("preset.title"));
 
         title.getStyleClass().add(
                 "page-title"
@@ -48,7 +49,7 @@ public class InstancePresetView extends VBox {
 
         Label subtitle =
                 new Label(
-                        "Start with a predefined Minecraft configuration."
+                        Localization.text("preset.description")
                 );
 
         subtitle.getStyleClass().add(
@@ -122,7 +123,7 @@ public class InstancePresetView extends VBox {
         // =========================================================
 
         Button backButton =
-                new Button("BACK");
+                new Button(Localization.text("common.back"));
 
         backButton.getStyleClass().add(
                 "secondary-button"
