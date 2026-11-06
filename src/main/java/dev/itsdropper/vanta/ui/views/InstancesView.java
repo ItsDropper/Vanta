@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.geometry.Insets;
@@ -103,7 +104,7 @@ public class InstancesView extends VBox {
 
         countLabel =
                 new Label(
-                        "0 INSTANCES"
+                        Localization.text("instances.countZero")
                 );
 
         countLabel.getStyleClass().add(
@@ -113,7 +114,7 @@ public class InstancesView extends VBox {
 
         Button createButton =
                 new Button(
-                        "CREATE"
+                        Localization.text("common.create")
                 );
 
         createButton.getStyleClass().add(
@@ -129,9 +130,9 @@ public class InstancesView extends VBox {
                 new TextField();
 
         searchField.setPromptText(
-                "Search name, version, loader, or instance ID..."
+                Localization.text("instances.searchPrompt")
         );
-        searchField.setAccessibleText("Search installed Minecraft instances");
+        searchField.setAccessibleText(Localization.text("instances.searchAccessible"));
 
         searchField.getStyleClass().add(
                 "instance-search-field"
@@ -146,30 +147,30 @@ public class InstancesView extends VBox {
                         filterInstances(newValue)
         );
 
-        createButton.setAccessibleText("Create a Minecraft instance");
+        createButton.setAccessibleText(Localization.text("instances.createAccessible"));
         createButton.setTooltip(new javafx.scene.control.Tooltip("Create a new Minecraft instance"));
 
-        backupButton = new Button("BACK UP");
+        backupButton = new Button(Localization.text("instances.backup"));
         backupButton.getStyleClass().add("secondary-button");
-        backupButton.setAccessibleText("Create a full backup of an instance including worlds and settings");
+        backupButton.setAccessibleText(Localization.text("instances.backupAccessible"));
         backupButton.setTooltip(new javafx.scene.control.Tooltip(
-                "Create a ZIP backup that preserves saves, mods, configs, screenshots, and instance settings."
+                Localization.text("instances.backupHelp")
         ));
         backupButton.setOnAction(event -> backUpInstance());
 
-        Button restoreButton = new Button("RESTORE");
+        Button restoreButton = new Button(Localization.text("instances.restore"));
         restoreButton.getStyleClass().add("secondary-button");
-        restoreButton.setAccessibleText("Restore a Vanta instance from a ZIP backup");
+        restoreButton.setAccessibleText(Localization.text("instances.restoreAccessible"));
         restoreButton.setTooltip(new javafx.scene.control.Tooltip(
-                "Restore a ZIP backup as a separate instance without overwriting existing instances."
+                Localization.text("instances.restoreHelp")
         ));
         restoreButton.setOnAction(event -> restoreInstanceBackup());
 
-        Button verifyBackupButton = new Button("VERIFY BACKUP");
+        Button verifyBackupButton = new Button(Localization.text("instances.verifyBackup"));
         verifyBackupButton.getStyleClass().add("secondary-button");
-        verifyBackupButton.setAccessibleText("Verify the integrity of a Vanta instance backup");
+        verifyBackupButton.setAccessibleText(Localization.text("instances.verifyAccessible"));
         verifyBackupButton.setTooltip(new javafx.scene.control.Tooltip(
-                "Check archive integrity, entry paths, CRC data, and required instance metadata without extracting files."
+                Localization.text("instances.verifyHelp")
         ));
         verifyBackupButton.setOnAction(event -> verifyInstanceBackup());
 
@@ -185,20 +186,20 @@ public class InstancesView extends VBox {
                 createButton
         );
 
-        Button refreshButton = new Button("REFRESH");
+        Button refreshButton = new Button(Localization.text("common.refresh"));
         refreshButton.getStyleClass().add("secondary-button");
-        refreshButton.setAccessibleText("Refresh installed Minecraft instances");
-        refreshButton.setTooltip(new javafx.scene.control.Tooltip("Rescan installed instances"));
+        refreshButton.setAccessibleText(Localization.text("instances.refreshAccessible"));
+        refreshButton.setTooltip(new javafx.scene.control.Tooltip(Localization.text("instances.rescan")));
         refreshButton.setOnAction(event -> refresh());
 
         searchField.setMinWidth(180);
         searchField.setPrefWidth(360);
         searchField.setMaxWidth(560);
 
-        Button clearSearchButton = new Button("CLEAR");
+        Button clearSearchButton = new Button(Localization.text("instances.clear"));
         clearSearchButton.getStyleClass().add("secondary-button");
-        clearSearchButton.setAccessibleText("Clear the instance search");
-        clearSearchButton.setTooltip(new javafx.scene.control.Tooltip("Clear search"));
+        clearSearchButton.setAccessibleText(Localization.text("instances.clearAccessible"));
+        clearSearchButton.setTooltip(new javafx.scene.control.Tooltip(Localization.text("common.clearSearch")));
         clearSearchButton.visibleProperty().bind(Bindings.isNotEmpty(searchField.textProperty()));
         clearSearchButton.managedProperty().bind(clearSearchButton.visibleProperty());
         clearSearchButton.setOnAction(event -> {
@@ -210,18 +211,18 @@ public class InstancesView extends VBox {
         sortField.getStyleClass().add("instance-sort-field");
         sortField.getItems().setAll("Name (A–Z)", "Name (Z–A)", "Version (newest)", "Loader");
         sortField.setValue("Name (A–Z)");
-        sortField.setPromptText("Sort instances");
-        sortField.setAccessibleText("Sort installed Minecraft instances");
-        sortField.setTooltip(new javafx.scene.control.Tooltip("Choose how instances are ordered"));
+        sortField.setPromptText(Localization.text("instances.sort"));
+        sortField.setAccessibleText(Localization.text("instances.sortAccessible"));
+        sortField.setTooltip(new javafx.scene.control.Tooltip(Localization.text("instances.sortHelp")));
         sortField.setMinWidth(150);
         sortField.setPrefWidth(170);
         sortField.setOnAction(event -> filterInstances(searchField.getText()));
 
-        Button recoveryButton = new Button("RECOVERY");
+        Button recoveryButton = new Button(Localization.text("instances.recovery"));
         recoveryButton.getStyleClass().add("secondary-button");
-        recoveryButton.setAccessibleText("Create or restore an instance recovery point");
+        recoveryButton.setAccessibleText(Localization.text("instances.recoveryAccessible"));
         recoveryButton.setTooltip(new javafx.scene.control.Tooltip(
-                "Snapshot or restore mods, configs, resource packs, and shader packs. Worlds are excluded."
+                Localization.text("instances.recoveryHelp")
         ));
         recoveryButton.setOnAction(event -> manageRecoveryPoints(recoveryButton));
 
@@ -283,7 +284,7 @@ public class InstancesView extends VBox {
 
         statusLabel =
                 new Label(
-                        "Scanning installed instances..."
+                        Localization.text("instances.scanning")
                 );
 
         statusLabel.getStyleClass().add(
@@ -311,15 +312,15 @@ public class InstancesView extends VBox {
 
         if (screenshotPreview) {
             instanceList.setAlignment(Pos.CENTER);
-            countLabel.setText("INSTANCE LIBRARY");
-            statusLabel.setText("Preview mode · your local Minecraft folders were not scanned.");
+            countLabel.setText(Localization.text("instances.library"));
+            statusLabel.setText(Localization.text("instances.previewNotice"));
             statusLabel.setVisible(false);
             statusLabel.setManaged(false);
             instanceList.getChildren().setAll(new EmptyState(
                     "▦",
-                    "YOUR LIBRARY",
-                    "No instances shown in preview",
-                    "Create a new instance or import an existing Minecraft installation. Your installed profiles will appear here."
+                    Localization.text("instances.yourLibrary"),
+                    Localization.text("instances.previewEmptyTitle"),
+                    Localization.text("instances.previewEmptyDescription")
             ));
         } else {
             refresh();
@@ -333,7 +334,7 @@ public class InstancesView extends VBox {
     public void refresh() {
 
         long requestId = ++refreshRequestId;
-        statusLabel.setText("Scanning installed instances...");
+        statusLabel.setText(Localization.text("instances.scanning"));
 
         UiExecutor.shared().execute(() -> {
             List<Instance> instances;
@@ -347,8 +348,8 @@ public class InstancesView extends VBox {
                     // Keep existing cards and the real count visible so a transient filesystem
                     // error cannot make the user's instances appear to have disappeared.
                     statusLabel.setText(loadedInstances.isEmpty()
-                            ? "Failed to scan instances. Check the instance directory and try refreshing again."
-                            : "Refresh failed. Showing the last successfully loaded instances; try again.");
+                            ? Localization.text("instances.scanFailed")
+                            : Localization.text("instances.refreshFailed"));
                 });
                 return;
             }
@@ -361,7 +362,7 @@ public class InstancesView extends VBox {
 
                 if (loadedInstances.isEmpty()) {
                     instanceList.getChildren().setAll(createEmptyState());
-                    statusLabel.setText("No Minecraft instances installed. Create one to get started.");
+                    statusLabel.setText(Localization.text("instances.empty"));
                     return;
                 }
 
@@ -376,7 +377,7 @@ public class InstancesView extends VBox {
 
     private void manageRecoveryPoints(Button actionButton) {
         if (loadedInstances.isEmpty()) {
-            statusLabel.setText("There are no instances to recover.");
+            statusLabel.setText(Localization.text("instances.noRecovery"));
             return;
         }
 
@@ -385,8 +386,8 @@ public class InstancesView extends VBox {
                         + " · " + instance.getDisplayLoader() + " [" + instance.getId() + "]")
                 .toList();
         ChoiceDialog<String> instanceChooser = new ChoiceDialog<>(instanceLabels.get(0), instanceLabels);
-        instanceChooser.setTitle("Instance Recovery Center");
-        instanceChooser.setHeaderText("Choose an instance");
+        instanceChooser.setTitle(Localization.text("instances.recoveryTitle"));
+        instanceChooser.setHeaderText(Localization.text("instances.chooseInstance"));
         instanceChooser.setContentText("Instance:");
         String selectedLabel = instanceChooser.showAndWait().orElse(null);
         if (selectedLabel == null) return;
@@ -407,9 +408,9 @@ public class InstancesView extends VBox {
 
         ChoiceDialog<String> actionChooser = new ChoiceDialog<>(
                 "Create recovery point", List.of("Create recovery point", "Restore a recovery point"));
-        actionChooser.setTitle("Instance Recovery Center");
+        actionChooser.setTitle(Localization.text("instances.recoveryTitle"));
         actionChooser.setHeaderText(selected.getName());
-        actionChooser.setContentText("Choose an operation:");
+        actionChooser.setContentText(Localization.text("instances.chooseOperation"));
         String action = actionChooser.showAndWait().orElse(null);
         if (action == null) return;
 
@@ -484,7 +485,7 @@ public class InstancesView extends VBox {
                                     + " · " + point.reason() + " · " + point.fileCount() + " files")
                             .toList();
                     ChoiceDialog<String> pointChooser = new ChoiceDialog<>(labels.get(0), labels);
-                    pointChooser.setTitle("Restore Recovery Point");
+                    pointChooser.setTitle(Localization.text("instances.restorePoint"));
                     pointChooser.setHeaderText("Choose a recovery point for " + selected.getName());
                     pointChooser.setContentText("Recovery point:");
                     String chosen = pointChooser.showAndWait().orElse(null);
@@ -509,14 +510,14 @@ public class InstancesView extends VBox {
                                     + "with the selected recovery point.\n\n"
                                     + "Worlds, screenshots, options, and instance metadata are not changed.\n\n"
                                     + "Vanta stages the replacement and attempts rollback if publication fails.");
-                    confirmation.setTitle("Confirm Recovery");
+                    confirmation.setTitle(Localization.text("instances.confirmRecovery"));
                     confirmation.setHeaderText("Restore " + point.id() + "?");
                     if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
                         actionButton.setDisable(false);
                         return;
                     }
 
-                    statusLabel.setText("Restoring recovery point…");
+                    statusLabel.setText(Localization.text("instances.restoringPoint"));
                     UiExecutor.shared().execute(() -> {
                         try {
                             InstanceRecoveryService.restoreRecoveryPoint(selected, point.id());
@@ -555,7 +556,7 @@ public class InstancesView extends VBox {
 
     private void verifyInstanceBackup() {
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Verify Vanta Instance Backup");
+        chooser.setTitle(Localization.text("instances.verifyTitle"));
         chooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("ZIP backups (*.zip)", "*.zip"));
         java.io.File archive = chooser.showOpenDialog(
@@ -563,7 +564,7 @@ public class InstancesView extends VBox {
         if (archive == null) return;
 
         backupButton.setDisable(true);
-        statusLabel.setText("Verifying backup integrity… No files will be extracted or modified.");
+        statusLabel.setText(Localization.text("instances.verifyingBackup"));
         UiExecutor.shared().execute(() -> {
             try {
                 InstanceBackupService.BackupVerification report =
@@ -582,7 +583,7 @@ public class InstancesView extends VBox {
                                     + "Entries: " + report.entryCount() + "\n"
                                     + "Expanded size: " + size + "\n\n"
                                     + "This verifies archive structure and CRC integrity; it does not prove that every game dependency is present or that Minecraft will launch.");
-                    success.setTitle("Backup Verified");
+                    success.setTitle(Localization.text("instances.backupVerified"));
                     success.setHeaderText(archive.getName());
                     success.show();
                 });
@@ -591,7 +592,7 @@ public class InstancesView extends VBox {
                     backupButton.setDisable(false);
                     String message = failure.getMessage() == null
                             ? failure.getClass().getSimpleName() : failure.getMessage();
-                    statusLabel.setText("Backup verification failed: " + message);
+                    statusLabel.setText(Localization.text("instances.backupVerifyFailedPrefix") + message);
                     new Alert(Alert.AlertType.ERROR,
                             "Vanta could not verify this backup.\n\n" + message).show();
                 });
@@ -601,7 +602,7 @@ public class InstancesView extends VBox {
 
     private void restoreInstanceBackup() {
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select Vanta Instance Backup");
+        chooser.setTitle(Localization.text("instances.selectBackup"));
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP backups (*.zip)", "*.zip"));
         java.io.File archive = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
         if (archive == null) return;
@@ -610,9 +611,9 @@ public class InstancesView extends VBox {
         String suggestedName = filename.replaceFirst("(?i)-backup\\.zip$", "")
                 .replaceFirst("(?i)\\.zip$", "") + " (Restored)";
         TextInputDialog nameDialog = new TextInputDialog(suggestedName);
-        nameDialog.setTitle("Restore Instance Backup");
-        nameDialog.setHeaderText("Restore as a new instance");
-        nameDialog.setContentText("Instance name:");
+        nameDialog.setTitle(Localization.text("instances.restoreBackup"));
+        nameDialog.setHeaderText(Localization.text("instances.restoreAsNew"));
+        nameDialog.setContentText(Localization.text("instances.instanceName"));
         String name = nameDialog.showAndWait().orElse(null);
         if (name == null) return;
         if (name.isBlank()) {
@@ -621,7 +622,7 @@ public class InstancesView extends VBox {
         }
 
         backupButton.setDisable(true);
-        statusLabel.setText("Restoring backup… Existing instances will not be overwritten.");
+        statusLabel.setText(Localization.text("instances.restoringBackup"));
         UiExecutor.shared().execute(() -> {
             try {
                 InstanceBackupService.restoreBackup(archive.toPath(), name);
@@ -637,7 +638,7 @@ public class InstancesView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
                     String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
-                    statusLabel.setText("Restore failed: " + message);
+                    statusLabel.setText(Localization.text("instances.restoreFailedPrefix") + message);
                     new Alert(Alert.AlertType.ERROR, "Vanta could not restore this backup.\n\n" + message).show();
                 });
             }
@@ -646,7 +647,7 @@ public class InstancesView extends VBox {
 
     private void backUpInstance() {
         if (loadedInstances.isEmpty()) {
-            statusLabel.setText("There are no instances to back up.");
+            statusLabel.setText(Localization.text("instances.noneToBackup"));
             return;
         }
 
@@ -655,8 +656,8 @@ public class InstancesView extends VBox {
                         + " · " + instance.getDisplayLoader() + " [" + instance.getId() + "]")
                 .toList();
         ChoiceDialog<String> chooser = new ChoiceDialog<>(instanceLabels.get(0), instanceLabels);
-        chooser.setTitle("Back Up Instance");
-        chooser.setHeaderText("Choose an instance to back up");
+        chooser.setTitle(Localization.text("instances.backupTitle"));
+        chooser.setHeaderText(Localization.text("instances.chooseBackup"));
         chooser.setContentText("Instance:");
         String selectedLabel = chooser.showAndWait().orElse(null);
         if (selectedLabel == null) return;
@@ -671,7 +672,7 @@ public class InstancesView extends VBox {
         }
 
         FileChooser saveChooser = new FileChooser();
-        saveChooser.setTitle("Save Full Instance Backup");
+        saveChooser.setTitle(Localization.text("instances.saveBackup"));
         saveChooser.setInitialFileName(safeFileName(selected.getName()) + "-backup.zip");
         saveChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("ZIP backup (*.zip)", "*.zip"));
         java.io.File selectedFile = saveChooser.showSaveDialog(getScene() == null ? null : getScene().getWindow());
@@ -694,7 +695,7 @@ public class InstancesView extends VBox {
                     statusLabel.setText("Backup created: " + output.getFileName());
                     Alert success = new Alert(Alert.AlertType.INFORMATION,
                             "Full instance backup created. Worlds, mods, configs, resource packs, shader packs, screenshots, options, and instance metadata are preserved. Transient logs and extracted native libraries are excluded.");
-                    success.setTitle("Backup Complete");
+                    success.setTitle(Localization.text("instances.backupComplete"));
                     success.setHeaderText(selected.getName());
                     success.show();
                 });
@@ -702,7 +703,7 @@ public class InstancesView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
                     String message = ex.getMessage() == null ? ex.getClass().getSimpleName() : ex.getMessage();
-                    statusLabel.setText("Backup failed: " + message);
+                    statusLabel.setText(Localization.text("instances.backupFailedPrefix") + message);
                     new Alert(Alert.AlertType.ERROR, "Vanta could not create the backup.\n\n" + message).show();
                 });
             }
@@ -753,7 +754,7 @@ public class InstancesView extends VBox {
 
         if (filtered.isEmpty()) {
             instanceList.getChildren().setAll(createSearchEmptyState(query));
-            statusLabel.setText("No instances match your search.");
+            statusLabel.setText(Localization.text("instances.noSearchMatches"));
             return;
         }
 
@@ -806,7 +807,7 @@ public class InstancesView extends VBox {
         Label icon = new Label("⌕");
         icon.getStyleClass().add("instance-empty-icon");
 
-        Label title = new Label("No matching instances");
+        Label title = new Label(Localization.text("instances.noMatchesTitle"));
         title.getStyleClass().add("instance-empty-title");
         VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
 
@@ -816,7 +817,7 @@ public class InstancesView extends VBox {
         description.getStyleClass().add("instance-empty-description");
         VantaUI.styleText(description, VantaUI.TextRole.MUTED);
 
-        Button clearButton = new Button("CLEAR SEARCH");
+        Button clearButton = new Button(Localization.text("common.clearSearchUpper"));
         clearButton.getStyleClass().add("secondary-button");
         clearButton.setOnAction(event -> searchField.clear());
 
@@ -887,7 +888,7 @@ public class InstancesView extends VBox {
         field.getStyleClass().add("instance-action-field");
         HBox actions = new HBox(8);
         actions.setAlignment(Pos.CENTER_RIGHT);
-        Button cancel = new Button("CANCEL");
+        Button cancel = new Button(Localization.text("common.cancel"));
         cancel.getStyleClass().add("secondary-button");
         Button apply = new Button(duplicate ? "DUPLICATE" : "SAVE");
         apply.getStyleClass().add("primary-button");
@@ -923,9 +924,9 @@ public class InstancesView extends VBox {
         root.getStyleClass().add("instance-action-popup");
         root.setPadding(new Insets(VantaUI.spacing(4)));
         VantaUI.applySurface(root, VantaUI.SurfaceRole.PANEL);
-        Label title = new Label("INSTANCE ICON");
+        Label title = new Label(Localization.text("instances.iconTitle"));
         title.getStyleClass().add("instance-action-title");
-        Label subtitle = new Label("Choose the identity shown on the Instances page.");
+        Label subtitle = new Label(Localization.text("instances.iconHelp"));
         subtitle.getStyleClass().add("instance-action-subtitle");
         subtitle.setWrapText(true);
         HBox choices = new HBox(8);
@@ -944,11 +945,11 @@ public class InstancesView extends VBox {
             });
             choices.getChildren().add(button);
         }
-        Button upload = new Button("UPLOAD PNG");
+        Button upload = new Button(Localization.text("instances.uploadPng"));
         upload.getStyleClass().add("secondary-button");
         upload.setOnAction(e -> {
             FileChooser chooser = new FileChooser();
-            chooser.setTitle("Choose instance icon");
+            chooser.setTitle(Localization.text("instances.chooseIcon"));
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("PNG images", "*.png"));
             java.io.File selected = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
             if (selected == null) return;
@@ -1005,13 +1006,13 @@ public class InstancesView extends VBox {
 
         if (launchService.isRunning(instance)) {
             statusLabel.setText(
-                    "You cannot delete a running instance."
+                    Localization.text("instances.cannotDeleteRunning")
             );
             return;
         }
 
         statusLabel.setText(
-                "Deleting "
+                Localization.text("instances.deletingPrefix")
                         + instance.getName()
                         + "..."
         );
@@ -1027,7 +1028,7 @@ public class InstancesView extends VBox {
                         UiExecutor.shared().dispatchToUi(() -> {
 
                             statusLabel.setText(
-                                    "Deleted "
+                                    Localization.text("instances.deletedPrefix")
                                             + instance.getName()
                             );
 
@@ -1118,7 +1119,7 @@ public class InstancesView extends VBox {
 
         Label title =
                 new Label(
-                        "No instances"
+                        Localization.text("instances.emptyTitle")
                 );
 
         title.getStyleClass().add(
@@ -1127,16 +1128,16 @@ public class InstancesView extends VBox {
 
         Label description =
                 new Label(
-                        "Create an instance to start playing Minecraft."
+                        Localization.text("instances.emptyDescription")
                 );
 
         description.getStyleClass().add(
                 "instance-empty-description"
         );
 
-        Button createButton = new Button("CREATE INSTANCE");
+        Button createButton = new Button(Localization.text("common.createInstance"));
         createButton.getStyleClass().add("primary-button");
-        createButton.setAccessibleText("Create your first Minecraft instance");
+        createButton.setAccessibleText(Localization.text("instances.createFirstAccessible"));
         createButton.setOnAction(event -> onCreateInstance.run());
 
         VBox empty =
@@ -1189,7 +1190,7 @@ public class InstancesView extends VBox {
         }
 
         statusLabel.setText(
-                "Launching "
+                Localization.text("instances.launchingPrefix")
                         + instance.getName()
                         + "..."
         );
