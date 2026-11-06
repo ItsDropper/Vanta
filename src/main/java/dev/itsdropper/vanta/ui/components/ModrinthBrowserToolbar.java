@@ -77,8 +77,6 @@ public final class ModrinthBrowserToolbar extends VBox {
         searchRow.setAlignment(Pos.CENTER_LEFT);
         searchRow.getStyleClass().add("modrinth-search-row");
 
-        Label sortLabel = new Label(Localization.text("modrinth.sortBy"));
-        sortLabel.getStyleClass().add("modrinth-control-label");
         sortBox.getItems().setAll(
                 Localization.text("modrinth.sortRelevance"),
                 Localization.text("modrinth.sortDownloads"),
@@ -87,15 +85,37 @@ public final class ModrinthBrowserToolbar extends VBox {
                 Localization.text("modrinth.sortDateUpdated")
         );
         sortBox.setValue(Localization.text("modrinth.sortRelevance"));
-        sortBox.getStyleClass().addAll("create-combo", "modrinth-small-combo");
-        sortBox.setPrefWidth(145);
+        sortBox.getStyleClass().addAll("create-combo", "modrinth-small-combo", "modrinth-control-dropdown");
+        sortBox.setPrefWidth(190);
+        sortBox.setButtonCell(new javafx.scene.control.ListCell<>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : Localization.text("modrinth.sortBy") + ": " + item + "  ▾");
+            }
+        });
+        sortBox.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
+            @Override protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty ? null : item);
+            }
+        });
 
-        Label viewLabel = new Label(Localization.text("modrinth.resultsLabel"));
-        viewLabel.getStyleClass().add("modrinth-control-label");
         limitBox.getItems().setAll(5, 10, 15, 20, 50, 100);
         limitBox.setValue(20);
-        limitBox.getStyleClass().addAll("create-combo", "modrinth-small-combo");
-        limitBox.setPrefWidth(82);
+        limitBox.getStyleClass().addAll("create-combo", "modrinth-small-combo", "modrinth-control-dropdown");
+        limitBox.setPrefWidth(105);
+        limitBox.setButtonCell(new javafx.scene.control.ListCell<>() {
+            @Override protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? "" : Localization.text("modrinth.view") + ": " + item + "  ▾");
+            }
+        });
+        limitBox.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
+            @Override protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : Integer.toString(item));
+            }
+        });
 
         layoutButton.getStyleClass().addAll("secondary-button", "modrinth-layout-button");
         layoutButton.setAccessibleText(Localization.text("modrinth.layoutAccessible"));
@@ -142,7 +162,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
         HBox controls = new HBox(8,
-                sortLabel, sortBox, viewLabel, limitBox, layoutButton,
+                sortBox, limitBox, layoutButton,
                 spacer, pagination
         );
         controls.setAlignment(Pos.CENTER_LEFT);
@@ -290,26 +310,24 @@ public final class ModrinthBrowserToolbar extends VBox {
         int page = currentPage();
         int pages = pageCount();
         currentPageButton.setText(Integer.toString(page));
-        nextPageButton.setText(page < pages ? Integer.toString(page + 1) : "›");
-        currentPageButton.setText(Integer.toString(page));
-        previousButton.setDisable(page <= 1);
         currentPageButton.setDisable(true);
+        previousButton.setVisible(page > 1);
+        previousButton.setManaged(page > 1);
+        previousButton.setDisable(page <= 1);
+        nextPageButton.setText(Integer.toString(Math.min(pages, page + 1)));
+        nextPageButton.setVisible(page < pages);
+        nextPageButton.setManaged(page < pages);
         nextPageButton.setDisable(page >= pages);
         nextArrowButton.setDisable(page >= pages);
-        ellipsisButton.setDisable(pages <= 3);
+        boolean showJump = pages > 3 && page < pages - 1;
+        ellipsisButton.setVisible(showJump);
+        ellipsisButton.setManaged(showJump);
+        ellipsisButton.setDisable(!showJump);
         lastPageButton.setText(Integer.toString(pages));
-        lastPageButton.setDisable(page >= pages || pages <= 2);
-        if (pages <= 2) {
-            ellipsisButton.setVisible(false);
-            ellipsisButton.setManaged(false);
-            lastPageButton.setVisible(false);
-            lastPageButton.setManaged(false);
-        } else {
-            ellipsisButton.setVisible(true);
-            ellipsisButton.setManaged(true);
-            lastPageButton.setVisible(true);
-            lastPageButton.setManaged(true);
-        }
+        boolean showLast = pages > 2 && page < pages - 1;
+        lastPageButton.setVisible(showLast);
+        lastPageButton.setManaged(showLast);
+        lastPageButton.setDisable(!showLast);
     }
 
     private void submitSearch(boolean resetTotal) {
