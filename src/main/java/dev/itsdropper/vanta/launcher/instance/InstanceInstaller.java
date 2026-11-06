@@ -631,6 +631,37 @@ public class InstanceInstaller {
         }
     }
 
+    public static Instance installSteinLoader(
+            String name,
+            String minecraftVersion
+    ) throws Exception {
+        if (!SteinInstaller.supportsMinecraftVersion(minecraftVersion)) {
+            throw new IllegalArgumentException("Stein Loader supports Minecraft 1.8.9 only.");
+        }
+
+        String loaderVersion = SteinInstaller.findLatestLoaderVersion();
+        JsonNode vanillaMetadata = MinecraftVersionResolver.downloadMetadata(minecraftVersion);
+        Instance instance = InstanceManager.createInstance(
+                name, minecraftVersion, "Stein", loaderVersion);
+
+        try {
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
+            SteinInstaller.install(instance, vanillaMetadata);
+            InstanceManager.markInstallationComplete(instance);
+            return instance;
+        } catch (Exception failure) {
+            try {
+                InstanceManager.deleteInstance(instance);
+            } catch (Exception cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
+            throw failure;
+        }
+    }
+
     public static Instance installModLoader(
             String name,
             String minecraftVersion
@@ -718,6 +749,11 @@ public class InstanceInstaller {
 
         minecraftVersion =
                 minecraftVersion.trim();
+
+        if ("Stein".equalsIgnoreCase(instance.getLoader())) {
+            throw new IllegalStateException(
+                    "Stein instances are pinned to Minecraft 1.8.9 and cannot change game versions.");
+        }
 
         System.out.println(
                 "[Vanta Repair] Updating Minecraft version: "
