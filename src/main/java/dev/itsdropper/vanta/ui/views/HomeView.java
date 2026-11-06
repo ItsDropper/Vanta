@@ -277,24 +277,24 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
      */
     /** Fills the dashboard with stable explanatory content for CI screenshots. */
     public void prepareScreenshotPreview() {
-        accountLabel.setText("Account information appears here when Vanta loads your profile.");
-        launchStatusLabel.setText("UI PREVIEW");
+        accountLabel.setText(Localization.text("home.accountFallback"));
+        launchStatusLabel.setText(Localization.text("home.preview"));
         recentList.getChildren().clear();
-        recentStatus.setText("Recently played instances appear here after using your library.");
+        recentStatus.setText(Localization.text("home.previewRecentInstances"));
         recentServersList.getChildren().clear();
-        recentServersStatus.setText("Recently joined servers appear here.");
+        recentServersStatus.setText(Localization.text("home.previewRecentServers"));
 
-        Label eyebrow = new Label("YOUR MINECRAFT WORKSPACE");
+        Label eyebrow = new Label(Localization.text("home.workspaceEyebrow"));
         eyebrow.getStyleClass().add("home-empty-eyebrow");
         VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
 
-        Label title = new Label("Your instances, ready when you are.");
+        Label title = new Label(Localization.text("home.workspaceTitle"));
         title.getStyleClass().add("home-empty-title");
         VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
         title.setWrapText(true);
 
         Label description = new Label(
-                "Your installed instances, recent worlds and launch status are shown here."
+                Localization.text("home.workspaceDescription")
         );
         description.setWrapText(true);
         description.getStyleClass().add("home-empty-description");
@@ -359,7 +359,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (request != instanceRefreshSequence.get()) return;
                     recentList.getChildren().clear();
-                    recentStatus.setText("Failed to load recent instances.");
+                    recentStatus.setText(Localization.text("home.recentLoadFailed"));
                     featuredContainer.getChildren().setAll(createInstanceLoadErrorCard());
                 });
             }
@@ -386,7 +386,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         }
 
         if (recent.isEmpty()) {
-            recentStatus.setText("No additional instances yet.");
+            recentStatus.setText(Localization.text("home.noAdditionalInstances"));
             featuredContainer.getChildren().setAll(createFirstInstanceCard());
             return;
         }
@@ -426,14 +426,14 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private VBox createInstanceLoadErrorCard() {
-        Label eyebrow = new Label("LIBRARY UNAVAILABLE");
+        Label eyebrow = new Label(Localization.text("home.libraryUnavailable"));
         eyebrow.getStyleClass().add("home-empty-eyebrow");
 
-        Label title = new Label("Couldn't load your instances.");
+        Label title = new Label(Localization.text("home.libraryLoadFailedTitle"));
         title.getStyleClass().add("home-load-error-title");
 
         Label description = new Label(
-                "Vanta couldn't read the local instance library. Your installations have not been changed."
+                Localization.text("home.libraryLoadFailedBody")
         );
         description.setWrapText(true);
         description.setMaxWidth(480);
@@ -442,7 +442,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         Button retry = new Button("TRY AGAIN");
         retry.getStyleClass().add("secondary-button");
         retry.setMinHeight(38);
-        retry.setAccessibleText("Retry loading Minecraft instances");
+        retry.setAccessibleText(Localization.text("home.retryInstancesAccessible"));
         retry.setOnAction(event -> refreshRecentInstances());
         AnimationUtils.installInteractiveAnimations(retry);
 
@@ -461,26 +461,26 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private VBox createFirstInstanceCard() {
-        Label eyebrow = new Label("YOUR NEXT ADVENTURE");
+        Label eyebrow = new Label(Localization.text("home.nextAdventure"));
         eyebrow.getStyleClass().add("home-empty-eyebrow");
 
-        Label title = new Label("Nothing installed. Yet.");
+        Label title = new Label(Localization.text("home.emptyTitle"));
         title.getStyleClass().add("home-empty-title");
 
         Label description = new Label(
-                "Create a clean Minecraft instance, import an existing profile, or start from a modpack. "
-                        + "Each instance keeps its own mods, settings and worlds."
+                Localization.text("home.emptyDescription")
+                        + Localization.text("home.instanceIsolation")
         );
         description.setWrapText(true);
         description.setMaxWidth(430);
         description.getStyleClass().add("home-empty-description");
 
-        Button create = new Button("CREATE AN INSTANCE");
+        Button create = new Button(Localization.text("common.createInstance"));
         create.getStyleClass().add("primary-button");
         AnimationUtils.installInteractiveAnimations(create);
         create.setMinHeight(40);
-        create.setAccessibleText("Create a Minecraft instance");
-        create.setTooltip(new Tooltip("Create, import, or install a modpack"));
+        create.setAccessibleText(Localization.text("home.createInstanceAccessible"));
+        create.setTooltip(new Tooltip(Localization.text("home.createInstanceTooltip")));
         create.setOnAction(event -> {
             if (onCreateInstance != null) onCreateInstance.run();
         });
@@ -533,7 +533,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         iconFrame.setPrefSize(104, 104);
         iconFrame.setMaxSize(104, 104);
 
-        if ("CUSTOM".equalsIgnoreCase(instance.getIcon())
+        if (Localization.text("home.custom").equalsIgnoreCase(instance.getIcon())
                 && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
             ImageView customIcon = new ImageView(new Image(
                     instance.getDirectory().resolve("icon.png").toUri().toString(),
@@ -552,7 +552,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         information.setMinWidth(0);
         HBox.setHgrow(information, Priority.ALWAYS);
 
-        Label eyebrow = new Label("FEATURED INSTANCE");
+        Label eyebrow = new Label(Localization.text("home.featuredInstance"));
         eyebrow.getStyleClass().add("home-featured-eyebrow");
 
         Label name = new Label(instance.getName());
@@ -581,7 +581,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         information.getChildren().addAll(eyebrow, name, metadata, playtime);
 
         boolean running = launchService.isRunning(instance);
-        Button play = new Button(running ? "CLOSE GAME" : "PLAY NOW");
+        Button play = new Button(running ? Localization.text("home.closeGame") : Localization.text("home.playNow"));
         play.getStyleClass().add("home-featured-play-button");
         play.setMinWidth(142);
         play.setMinHeight(48);
@@ -641,7 +641,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         customIcon.setFitWidth(30);
         customIcon.setFitHeight(30);
         customIcon.setPreserveRatio(true);
-        if ("CUSTOM".equalsIgnoreCase(instance.getIcon())
+        if (Localization.text("home.custom").equalsIgnoreCase(instance.getIcon())
                 && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
             customIcon.setImage(new Image(instance.getDirectory().resolve("icon.png").toUri().toString(), 30, 30, true, true));
             icon.getChildren().add(customIcon);
@@ -724,7 +724,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         // The card is a secondary hit target; the explicit button remains primary.
         card.setAccessibleRole(AccessibleRole.BUTTON);
-        card.setAccessibleText("Launch or close " + instance.getName());
+        card.setAccessibleText(Localization.text("home.launchOrClosePrefix") + instance.getName());
         card.setFocusTraversable(true);
         card.setOnMouseClicked(event -> {
             if (event.getTarget() == play || play.isHover()) {
@@ -766,10 +766,10 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                         onLaunchFailure.accept(failure);
                     } else {
                         onLaunchFailure.accept(new LaunchFailure(
-                                "Minecraft failed to launch",
+                                Localization.text("home.launchFailedTitle"),
                                 ex.getMessage() != null
                                         ? ex.getMessage()
-                                        : "Vanta could not start this instance.",
+                                        : Localization.text("home.launchFailedBody"),
                                 ""
                         ));
                     }
@@ -798,7 +798,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                     if (request != serverRefreshSequence.get()) return;
                     recentServersList.getChildren().clear();
                     recentServersStatus.setText(
-                            "Failed to load recent servers."
+                            Localization.text("home.serversLoadFailed")
                     );
                 });
             }
@@ -818,7 +818,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         if (recent.isEmpty()) {
             recentServersStatus.setText(
-                    "Play on a server from Minecraft and it will appear here."
+                    Localization.text("home.serversEmpty")
             );
             return;
         }
@@ -849,7 +849,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         if (rendered == 0) {
             recentServersStatus.setText(
-                    "Recent server history is unavailable for the installed instances."
+                    Localization.text("home.serversUnavailable")
             );
             return;
         }
@@ -870,7 +870,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         Label metadata = new Label(
                 instance != null
                         ? "Using " + instance.getName()
-                        : "Instance no longer installed"
+                        : Localization.text("home.instanceMissingTitle")
         );
         metadata.getStyleClass().add("home-server-meta");
 
@@ -900,10 +900,10 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         play.setCursor(Cursor.HAND);
         play.setDisable(!instanceAvailable);
         String serverActionDescription = !instanceAvailable
-                ? "Unavailable: the instance for " + server.getDisplayName() + " is not installed"
-                : (serverRunning ? "Close Minecraft on " : "Join ")
+                ? Localization.text("home.instanceMissingPrefix") + server.getDisplayName() + Localization.text("home.instanceMissingSuffix")
+                : (serverRunning ? Localization.text("home.closeMinecraftPrefix") : Localization.text("home.joinPrefix"))
                         + server.getDisplayName()
-                        + (serverRunning ? "" : " using " + instance.getName());
+                        + (serverRunning ? "" : Localization.text("home.usingPrefix") + instance.getName());
         play.setAccessibleText(serverActionDescription);
         play.setTooltip(new Tooltip(serverActionDescription));
 
@@ -922,8 +922,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         card.setMouseTransparent(false);
 
         card.setAccessibleRole(AccessibleRole.BUTTON);
-        card.setAccessibleText("Join " + server.getDisplayName()
-                + (instanceAvailable ? " using " + instance.getName() : ", unavailable"));
+        card.setAccessibleText(Localization.text("home.joinPrefix") + server.getDisplayName()
+                + (instanceAvailable ? Localization.text("home.usingPrefix") + instance.getName() : Localization.text("home.unavailableSuffix")));
         card.setFocusTraversable(instanceAvailable);
         card.setOnMouseClicked(event -> {
             if (event.getTarget() == play || instance == null) {
@@ -974,11 +974,11 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
     public void setAccount(Account account) {
         if (account == null) {
-            accountLabel.setText("No Microsoft account connected");
+            accountLabel.setText(Localization.text("home.noAccount"));
             return;
         }
 
-        accountLabel.setText("Signed in as " + account.getUsername());
+        accountLabel.setText(Localization.text("home.signedInAsPrefix") + account.getUsername());
     }
 
     private void onAccountChanged(Account account) {
@@ -990,19 +990,19 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         String style;
         switch (state) {
             case PREPARING, STARTING -> {
-                label = "STARTING MINECRAFT";
+                label = Localization.text("home.starting");
                 style = "home-status-progress";
             }
             case RUNNING -> {
-                label = "MINECRAFT RUNNING";
+                label = Localization.text("home.running");
                 style = "home-status-running";
             }
             case CLOSING -> {
-                label = "CLOSING MINECRAFT";
+                label = Localization.text("home.closing");
                 style = "home-status-progress";
             }
             case ERROR -> {
-                label = "LAUNCH FAILED";
+                label = Localization.text("home.launchFailed");
                 style = "home-status-error";
             }
             case IDLE -> {
@@ -1010,7 +1010,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 style = "home-status-ready";
             }
             default -> {
-                label = "VANTA READY";
+                label = Localization.text("home.vantaReady");
                 style = "home-status-ready";
             }
         }
@@ -1020,7 +1020,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 "home-status-running", "home-status-error"
         );
         launchStatusLabel.getStyleClass().add(style);
-        launchStatusLabel.setAccessibleText("Minecraft launch status: " + label.toLowerCase());
+        launchStatusLabel.setAccessibleText(Localization.text("home.launchStatusPrefix") + label.toLowerCase());
     }
 
     private void onLaunchStateChanged(LaunchService.LaunchState state) {
