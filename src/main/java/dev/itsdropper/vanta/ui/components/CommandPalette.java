@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.components;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -39,7 +40,7 @@ public final class CommandPalette extends StackPane {
     private final TextField searchField = new TextField();
     private final VBox resultList = new VBox(4);
     private final ScrollPane resultScroll = new ScrollPane(resultList);
-    private final Label emptyState = new Label("No matching commands");
+    private final Label emptyState = new Label(Localization.text("commandPalette.empty"));
     private final List<Command> visibleCommands = new ArrayList<>();
     private int selectedIndex;
     private Node previousFocusOwner;
@@ -59,14 +60,14 @@ public final class CommandPalette extends StackPane {
         scrim.getStyleClass().add("command-palette-scrim");
         scrim.setOnMouseClicked(event -> hide());
 
-        Label eyebrow = new Label("VANTA COMMAND");
+        Label eyebrow = new Label(Localization.text("commandPalette.eyebrow"));
         eyebrow.getStyleClass().add("command-palette-eyebrow");
 
-        Label title = new Label("Where do you want to go?");
+        Label title = new Label(Localization.text("commandPalette.title"));
         title.getStyleClass().add("command-palette-title");
 
-        searchField.setPromptText("Search pages and actions...");
-        searchField.setAccessibleText("Search Vanta commands");
+        searchField.setPromptText(Localization.text("commandPalette.prompt"));
+        searchField.setAccessibleText(Localization.text("commandPalette.accessible"));
         searchField.getStyleClass().add("command-palette-search");
         searchField.textProperty().addListener((observable, oldValue, newValue) -> refreshResults());
         searchField.addEventFilter(KeyEvent.KEY_PRESSED, this::handleSearchKeyPressed);
@@ -81,7 +82,7 @@ public final class CommandPalette extends StackPane {
         resultScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         resultScroll.setMaxHeight(360);
         resultScroll.getStyleClass().add("command-palette-scroll");
-        resultScroll.setAccessibleText("Command search results");
+        resultScroll.setAccessibleText(Localization.text("commandPalette.results"));
 
         HBox footer = new HBox(12,
                 hint("↑↓", "navigate"),
