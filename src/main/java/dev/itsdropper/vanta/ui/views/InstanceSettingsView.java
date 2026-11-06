@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -92,7 +93,7 @@ public class InstanceSettingsView extends VBox {
         // ---------------------------------------------------------
 
         Button backButton =
-                new Button("BACK", IconView.create(IconView.Type.ARROW_LEFT, 16));
+                new Button(Localization.text("common.back"), IconView.create(IconView.Type.ARROW_LEFT, 16));
 
         backButton.getStyleClass().add(
                 "secondary-button"
@@ -206,7 +207,7 @@ public class InstanceSettingsView extends VBox {
                         10,
                         ramValueLabel,
                         ramSlider,
-                        new Label("Quick presets"),
+                        new Label(Localization.text("instanceSettings.presets")),
                         ramPresets
                 );
 
@@ -232,14 +233,14 @@ public class InstanceSettingsView extends VBox {
                 new TextField();
 
         javaPathField.setPromptText(
-                "Automatic"
+                Localization.text("common.automatic")
         );
 
-        Button browseJavaButton = new Button("BROWSE");
+        Button browseJavaButton = new Button(Localization.text("common.browse"));
         browseJavaButton.getStyleClass().add("secondary-button");
         browseJavaButton.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
-            chooser.setTitle("Select Java executable");
+            chooser.setTitle(Localization.text("instanceSettings.selectJava"));
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(
                     Platform.operatingSystem() == Platform.OperatingSystem.WINDOWS
                             ? "Java executable (java.exe)" : "Java executable",
@@ -257,7 +258,7 @@ public class InstanceSettingsView extends VBox {
                 new TextArea();
 
         javaArgumentsArea.setPromptText(
-                "Optional JVM arguments"
+                Localization.text("instanceSettings.jvmArguments")
         );
 
         javaArgumentsArea.setWrapText(
@@ -317,7 +318,7 @@ public class InstanceSettingsView extends VBox {
                 new TextArea();
 
         gameArgumentsArea.setPromptText(
-                "Optional Minecraft arguments"
+                Localization.text("instanceSettings.minecraftArguments")
         );
 
         gameArgumentsArea.setWrapText(
@@ -389,7 +390,7 @@ public class InstanceSettingsView extends VBox {
 
         fullscreenCheck =
                 new CheckBox(
-                        "Fullscreen"
+                        Localization.text("instanceSettings.fullscreen")
                 );
 
         fullscreenCheck.getStyleClass().add(
@@ -416,21 +417,21 @@ public class InstanceSettingsView extends VBox {
         loaderStackProfilesArea.setEditable(false);
         loaderStackProfilesArea.setWrapText(true);
         loaderStackProfilesArea.setPrefRowCount(3);
-        loaderStackProfilesArea.setPromptText("No profile overlays added.");
+        loaderStackProfilesArea.setPromptText(Localization.text("instanceSettings.noOverlays"));
         loaderStackProfilesArea.getStyleClass().add("create-field");
 
         loaderStackTweakersArea = new TextArea();
         loaderStackTweakersArea.setWrapText(true);
         loaderStackTweakersArea.setPrefRowCount(3);
         loaderStackTweakersArea.setPromptText(
-                "Optional LaunchWrapper tweaker class names, one per line.");
+                Localization.text("instanceSettings.tweakersHelp"));
         loaderStackTweakersArea.getStyleClass().add("create-field");
 
-        Button addLoaderProfilesButton = new Button("ADD PROFILE JSON");
+        Button addLoaderProfilesButton = new Button(Localization.text("instanceSettings.addProfile"));
         addLoaderProfilesButton.getStyleClass().add("secondary-button");
         addLoaderProfilesButton.setOnAction(event -> addLoaderProfiles());
 
-        Button removeLastLoaderProfileButton = new Button("REMOVE LAST");
+        Button removeLastLoaderProfileButton = new Button(Localization.text("instanceSettings.removeLast"));
         removeLastLoaderProfileButton.getStyleClass().add("secondary-button");
         removeLastLoaderProfileButton.setOnAction(event -> {
             if (!loaderStackLayers.isEmpty()) {
@@ -440,7 +441,7 @@ public class InstanceSettingsView extends VBox {
         });
 
         VBox loaderStackCard = createCard(
-                new Label("Profile overlays are applied in the order shown. Add only profiles designed to share the same Minecraft bootstrap."),
+                new Label(Localization.text("instanceSettings.overlayHelp")),
                 loaderStackProfilesArea,
                 new HBox(8, addLoaderProfilesButton, removeLastLoaderProfileButton),
                 createInput("LaunchWrapper tweakers (one class per line)", loaderStackTweakersArea)
@@ -487,7 +488,7 @@ public class InstanceSettingsView extends VBox {
 
         Button cancelButton =
                 new Button(
-                        "CLOSE",
+                        Localization.text("common.close"),
                         IconView.create(IconView.Type.CLOSE, 16)
                 );
 
@@ -501,7 +502,7 @@ public class InstanceSettingsView extends VBox {
 
         Button saveButton =
                 new Button(
-                        "SAVE",
+                        Localization.text("common.save"),
                         IconView.create(IconView.Type.SAVE, 16)
                 );
 
@@ -515,7 +516,7 @@ public class InstanceSettingsView extends VBox {
 
         Button saveAndCloseButton =
                 new Button(
-                        "SAVE & CLOSE",
+                        Localization.text("common.saveClose"),
                         IconView.create(IconView.Type.SAVE, 16)
                 );
 
@@ -707,7 +708,7 @@ public class InstanceSettingsView extends VBox {
             refreshLoaderProfileList();
 
             statusLabel.setText(
-                    "Settings loaded."
+                    Localization.text("instanceSettings.loaded")
             );
 
         } catch (Exception e) {
@@ -715,7 +716,7 @@ public class InstanceSettingsView extends VBox {
             e.printStackTrace();
 
             statusLabel.setText(
-                    "Failed to load settings."
+                    Localization.text("instanceSettings.loadFailed")
             );
         }
     }
@@ -802,7 +803,7 @@ public class InstanceSettingsView extends VBox {
             }
 
             statusLabel.setText(
-                    "Settings saved."
+                    Localization.text("instanceSettings.saved")
             );
 
             return true;
@@ -820,7 +821,7 @@ public class InstanceSettingsView extends VBox {
             e.printStackTrace();
 
             statusLabel.setText(
-                    "Failed to save settings."
+                    Localization.text("instanceSettings.saveFailed")
             );
 
             return false;
@@ -829,7 +830,7 @@ public class InstanceSettingsView extends VBox {
 
     private void addLoaderProfiles() {
         FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select launcher profile JSON files");
+        chooser.setTitle(Localization.text("instanceSettings.selectProfileFiles"));
         chooser.getExtensionFilters().add(
                 new FileChooser.ExtensionFilter("Launcher profile JSON", "*.json"));
         List<File> selected = chooser.showOpenMultipleDialog(
@@ -859,9 +860,9 @@ public class InstanceSettingsView extends VBox {
                         loaderStackLayers.size() * 10, List.of(), relativePath));
             }
             refreshLoaderProfileList();
-            statusLabel.setText("Added " + selected.size() + " profile overlay(s). Save to apply.");
+            statusLabel.setText(Localization.text("instanceSettings.addedPrefix") + selected.size() + " profile overlay(s). Save to apply.");
         } catch (Exception e) {
-            statusLabel.setText("Could not add loader profile: " + e.getMessage());
+            statusLabel.setText(Localization.text("instanceSettings.addProfileFailedPrefix") + e.getMessage());
         }
     }
 
