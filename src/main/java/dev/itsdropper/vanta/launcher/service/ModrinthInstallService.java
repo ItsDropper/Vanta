@@ -515,14 +515,43 @@ public Path installShader(
 
 public Path installDataPack(
             Instance instance,
+            Path worldDirectory,
             ModrinthProject project
     ) throws IOException, InterruptedException {
-        return installContent(
-                instance,
-                project,
-                ModrinthContentType.DATA_PACK,
-                "datapacks"
-        );
+        if (instance == null || instance.getDirectory() == null) {
+            throw new IllegalArgumentException("Instance cannot be null.");
+        }
+        if (worldDirectory == null) {
+            throw new IllegalArgumentException("A Minecraft world must be selected.");
+        }
+        Path instanceRoot = instance.getDirectory().toAbsolutePath().normalize();
+        Path world = worldDirectory.toAbsolutePath().normalize();
+        Path saves = instanceRoot.resolve("saves").normalize();
+        if (!world.startsWith(saves) || !Files.isRegularFile(world.resolve("level.dat"))) {
+            throw new IOException("Selected directory is not a valid world belonging to this instance.");
+        }
+        if (project == null || !ModrinthContentType.DATA_PACK.getApiValue().equals(project.getProjectType())) {
+            throw new IOException("Project is not a data pack.");
+        }
+        List<ModrinthVersion> versions = client.getVersions(project.getProjectId());
+        ModrinthVersion compatible = catalog.findContentVersion(versions, instance.getMinecraftVersion());
+        if (compatible == null) {
+            throw new IOException("No compatible data pack version found for Minecraft "
+                    + instance.getMinecraftVersion());
+        }
+        ModrinthFile file = catalog.findPrimaryFile(compatible);
+        if (file == null || file.getUrl() == null || file.getUrl().isBlank()) {
+            throw new IOException("Modrinth data pack version has no downloadable file.");
+        }
+        return installFile(file, world.resolve("datapacks"));
+    }
+
+@Deprecated
+public Path installDataPack(
+            Instance instance,
+            ModrinthProject project
+    ) throws IOException {
+        throw new IOException("Data packs are world-specific. Select a Minecraft world before installing.");
     }
 
 private Path installContent(
