@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.beans.binding.Bindings;
@@ -35,9 +36,9 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
     private final Label heroStatus = new Label();
     private final Label heroUuid = new Label();
 
-    private final Button addAccountButton = new Button("ADD ACCOUNT");
-    private final Button refreshButton = new Button("REFRESH");
-    private final Button signOutButton = new Button("SIGN OUT");
+    private final Button addAccountButton = new Button(Localization.text("accounts.add"));
+    private final Button refreshButton = new Button(Localization.text("accounts.refresh"));
+    private final Button signOutButton = new Button(Localization.text("accounts.signOut"));
 
     private final FlowPane accountList = new FlowPane();
     private final Label accountCount = new Label();
@@ -58,8 +59,8 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         setFillWidth(true);
 
         PageHeader header = new PageHeader(
-                "Accounts",
-                "Manage the Minecraft accounts Vanta uses to launch your game.",
+                Localization.text("accounts.title"),
+                Localization.text("accounts.description"),
                 "accounts-title",
                 "accounts-subtitle"
         );
@@ -147,7 +148,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         identityRow.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(identity, Priority.ALWAYS);
 
-        Label eyebrow = new Label("ACTIVE MINECRAFT ACCOUNT");
+        Label eyebrow = new Label(Localization.text("accounts.activeHeading"));
         eyebrow.getStyleClass().add("accounts-eyebrow");
         VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
 
@@ -218,7 +219,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         VBox titles = new VBox(VantaUI.spacing(1));
 
-        Label title = new Label("Your accounts");
+        Label title = new Label(Localization.text("accounts.listHeading"));
         title.getStyleClass().add("accounts-section-title");
         VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
 
@@ -228,7 +229,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Label privacy = new Label("Stored locally • No account telemetry");
+        Label privacy = new Label(Localization.text("accounts.privacy"));
         privacy.getStyleClass().add("accounts-privacy");
         VantaUI.styleText(privacy, VantaUI.TextRole.METADATA);
 
@@ -290,11 +291,11 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         if (account == null) {
 
-            heroUsername.setText("No account connected");
-            heroStatus.setText("NOT CONNECTED");
+            heroUsername.setText(Localization.text("accounts.none"));
+            heroStatus.setText(Localization.text("accounts.notConnected"));
             heroStatus.getStyleClass().remove("accounts-status-connected");
             heroStatus.getStyleClass().add("accounts-status-disconnected");
-            heroUuid.setText("Connect a Microsoft account to get started.");
+            heroUuid.setText(Localization.text("accounts.connectPrompt"));
 
             heroHead.setImage(null);
             heroHead.setVisible(false);
@@ -308,14 +309,14 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         }
 
         heroUsername.setText(account.getUsername());
-        heroStatus.setText("CONNECTED");
+        heroStatus.setText(Localization.text("accounts.connected"));
         heroStatus.getStyleClass().remove("accounts-status-disconnected");
         heroStatus.getStyleClass().add("accounts-status-connected");
 
         heroUuid.setText(
                 account.getUuid() != null
                         ? "UUID  " + account.getUuid()
-                        : "UUID unavailable"
+                        : Localization.text("accounts.uuidUnavailable")
         );
 
         signOutButton.setDisable(false);
@@ -394,7 +395,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Label state = new Label(active ? "ACTIVE" : "SAVED");
+        Label state = new Label(active ? Localization.text("accounts.active") : Localization.text("accounts.saved"));
         state.getStyleClass().add(
                 active
                         ? "accounts-card-active-label"
@@ -407,12 +408,12 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         actions.setAlignment(Pos.CENTER_RIGHT);
 
         if (!active) {
-            Button use = new Button("USE ACCOUNT");
+            Button use = new Button(Localization.text("accounts.use"));
             use.getStyleClass().add("accounts-card-use");
             use.setOnAction(event -> switchAccount(account));
             actions.getChildren().add(use);
         } else {
-            Label activeHint = new Label("Currently selected for launches");
+            Label activeHint = new Label(Localization.text("accounts.selectedForLaunch"));
             activeHint.getStyleClass().add("accounts-card-hint");
             actions.getChildren().add(activeHint);
         }
@@ -437,15 +438,15 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         Label icon = new Label("+");
         icon.getStyleClass().add("accounts-empty-icon");
 
-        Label title = new Label("No accounts yet");
+        Label title = new Label(Localization.text("accounts.emptyTitle"));
         title.getStyleClass().add("accounts-empty-title");
 
         Label text = new Label(
-                "Connect a Microsoft account to start launching Minecraft."
+                Localization.text("accounts.emptyDescription")
         );
         text.getStyleClass().add("accounts-empty-text");
 
-        Button add = new Button("CONNECT ACCOUNT");
+        Button add = new Button(Localization.text("accounts.connect"));
         add.getStyleClass().add("accounts-primary-button");
         add.setOnAction(event -> login());
 
@@ -455,7 +456,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
     private void login() {
 
-        setBusy(true, "Connecting to Microsoft...");
+        setBusy(true, Localization.text("accounts.connecting"));
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -475,7 +476,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
     public void refresh() {
 
-        setBusy(true, "Refreshing account...");
+        setBusy(true, Localization.text("accounts.refreshing"));
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -515,7 +516,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
     private void logout() {
 
-        setBusy(true, "Signing out...");
+        setBusy(true, Localization.text("accounts.signingOut"));
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -540,7 +541,7 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         signOutButton.setDisable(busy || accountService.getCurrentAccount() == null);
 
         if (busy) {
-            errorLabel.setText(message == null ? "Working..." : message);
+            errorLabel.setText(message == null ? Localization.text("accounts.working") : message);
             errorLabel.getStyleClass().remove("accounts-error");
             if (!errorLabel.getStyleClass().contains("accounts-busy")) {
                 errorLabel.getStyleClass().add("accounts-busy");
