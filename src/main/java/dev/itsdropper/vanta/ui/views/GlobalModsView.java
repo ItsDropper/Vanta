@@ -1878,14 +1878,20 @@ public class GlobalModsView extends VBox {
     }
 
     private String formatEnvironment(String client, String server) {
-        List<String> values = new ArrayList<>();
-        if (client != null && !client.isBlank() && !"unknown".equalsIgnoreCase(client)) {
-            values.add(Localization.text("modrinth.environmentClient").replace("{value}", client.toLowerCase(java.util.Locale.ROOT)));
+        boolean clientSupported = supportsEnvironment(client);
+        boolean serverSupported = supportsEnvironment(server);
+        if (clientSupported && serverSupported) {
+            return "◎  " + Localization.text("modrinth.environmentClientOrServer");
         }
-        if (server != null && !server.isBlank() && !"unknown".equalsIgnoreCase(server)) {
-            values.add(Localization.text("modrinth.environmentServer").replace("{value}", server.toLowerCase(java.util.Locale.ROOT)));
-        }
-        return String.join(" / ", values);
+        if (clientSupported) return "▣  " + Localization.text("modrinth.environmentClientOnly");
+        if (serverSupported) return "▤  " + Localization.text("modrinth.environmentServerOnly");
+        return "";
+    }
+
+    private boolean supportsEnvironment(String value) {
+        return value != null && !value.isBlank()
+                && !"unknown".equalsIgnoreCase(value)
+                && !"unsupported".equalsIgnoreCase(value);
     }
 
     private String relativeUpdateTime(String value) {
@@ -1926,7 +1932,7 @@ public class GlobalModsView extends VBox {
         tags.setAlignment(Pos.CENTER_LEFT);
         String environment = formatEnvironment(project.getClientSide(), project.getServerSide());
         if (!environment.isBlank()) {
-            Label env = new Label("◉  " + environment);
+            Label env = new Label(environment);
             env.getStyleClass().addAll("modrinth-tag-chip", "modrinth-environment-chip");
             tags.getChildren().add(env);
         }
