@@ -840,49 +840,30 @@ public class GlobalModsView extends VBox {
 
     private void loadLoaderTags(ModrinthContentType contentType) {
         long requestId = ++loaderTagRequestId;
-        if (contentType != ModrinthContentType.MOD) {
-            loaderBox.getItems().setAll("Any");
-            loaderBox.setValue("Any");
-            loaderBox.setDisable(true);
-            loadersButton.setDisable(true);
-            selectedLoaders.clear();
-            updateLoaderButton();
-            return;
-        }
-        loaderBox.setDisable(false);
-        loadersButton.setDisable(false);
         UiExecutor.shared().execute(() -> {
             try {
-                List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> tags =
+                List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> response =
                         modrinthClient.getLoaderTags(contentType);
+                List<dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> loadedTags =
+                        response == null ? List.of() : List.copyOf(response);
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != loaderTagRequestId) return;
-                    loaderTags = tags == null ? List.of() : List.copyOf(tags);
-                    rebuildLoaderFilterOptions();
-                    selectedLoaders.retainAll(tags.stream()
+                    loaderTags = loadedTags;
+                    java.util.Set<String> available = loadedTags.stream()
                             .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
                             .filter(java.util.Objects::nonNull)
                             .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds::normalize)
-                            .collect(java.util.stream.Collectors.toSet()));
-                    loaderBox.getItems().setAll("Any");
-                    if (tags != null) {
-                        tags.stream()
-                                .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
-                                .filter(name -> name != null && !name.isBlank())
-                                .distinct()
-                                .sorted(String.CASE_INSENSITIVE_ORDER)
-                                .forEach(loaderBox.getItems()::add);
-                    }
-                    loaderBox.setValue("Any");
+                            .collect(java.util.stream.Collectors.toSet());
+                    selectedLoaders.retainAll(available);
+                    rebuildLoaderFilterOptions();
                     updateLoaderButton();
                 });
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != loaderTagRequestId) return;
-                    loadersButton.setDisable(false);
-                    if (loaderTags.isEmpty()) {
-                        statusLabel.setText(Localization.text("modrinth.loadersUnavailable"));
-                    }
+                    loaderTags = List.of();
+                    rebuildLoaderFilterOptions();
+                    statusLabel.setText(Localization.text("modrinth.loadersUnavailable"));
                 });
             }
         });
