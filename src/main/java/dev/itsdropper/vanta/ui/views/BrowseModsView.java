@@ -878,8 +878,9 @@ public class BrowseModsView extends VBox {
         // DESCRIPTION
         // =========================================================
 
-        Label author = new Label("by " + (project.getTeam() == null || project.getTeam().isBlank()
-                ? "Unknown author" : project.getTeam()));
+        Label author = new Label(Localization.text("modrinth.byAuthor").replace("{author}",
+                project.getTeam() == null || project.getTeam().isBlank()
+                        ? Localization.text("modrinth.unknownAuthor") : project.getTeam()));
         author.getStyleClass().add("instance-loader");
 
         Label description =
