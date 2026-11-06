@@ -880,45 +880,52 @@ public class BrowseModsView extends VBox {
         // DESCRIPTION
         // =========================================================
 
+        Label author = new Label("by " + (project.getTeam() == null || project.getTeam().isBlank()
+                ? "Unknown author" : project.getTeam()));
+        author.getStyleClass().add("instance-loader");
+
         Label description =
-                new Label(
-                        project.getDescription() != null
-                                ? project.getDescription()
-                                : "No description."
-                );
+                new Label(project.getDescription() == null ? "No description." : project.getDescription());
+        description.setWrapText(true);
+        description.setMaxWidth(650);
+        description.setMaxHeight(42);
+        description.getStyleClass().add("instance-version");
 
-        description.setWrapText(
-                true
+        FlowPane projectTags = new FlowPane(6, 4);
+        projectTags.setAlignment(Pos.CENTER_LEFT);
+        String environment = formatEnvironment(project.getClientSide(), project.getServerSide());
+        if (!environment.isBlank()) {
+            Label environmentTag = new Label(environment);
+            environmentTag.getStyleClass().add("modrinth-tag-chip");
+            projectTags.getChildren().add(environmentTag);
+        }
+        if (project.getCategories() != null) {
+            for (String category : project.getCategories()) {
+                if (category == null || category.isBlank()) continue;
+                Label tag = new Label(category.replace('-', ' ').replace('_', ' '));
+                tag.getStyleClass().add("modrinth-tag-chip");
+                projectTags.getChildren().add(tag);
+                if (projectTags.getChildren().size() >= 6) break;
+            }
+        }
+        if (project.getLoaders() != null) {
+            for (String loader : project.getLoaders()) {
+                if (loader == null || loader.isBlank()) continue;
+                Label tag = new Label(loader);
+                tag.getStyleClass().add("modrinth-tag-chip");
+                projectTags.getChildren().add(tag);
+                if (projectTags.getChildren().size() >= 8) break;
+            }
+        }
+
+        Label metadata = new Label(
+                formatNumber(project.getDownloads()) + " downloads  •  "
+                        + formatNumber(project.getFollows()) + " followers  •  "
+                        + relativeUpdateTime(project.getDateModified())
         );
+        metadata.getStyleClass().add("instance-loader");
 
-        description.setMaxWidth(
-                650
-        );
-
-        description.getStyleClass().add(
-                "instance-version"
-        );
-
-        // =========================================================
-        // METADATA
-        // =========================================================
-
-        Label metadata =
-                new Label(
-                        Localization.text("common.modrinthPrefix")
-                                + instance.getMinecraftVersion()
-                                + " • "
-                                + instance.getDisplayLoader()
-                                + " • "
-                                + formatNumber(
-                                project.getDownloads()
-                        )
-                                + " downloads"
-                );
-
-        metadata.getStyleClass().add(
-                "instance-loader"
-        );
+        VBox information = new VBox(5, title, author, description, projectTags, metadata);
 
         // =========================================================
         // INSTALL BUTTON
@@ -1123,6 +1130,32 @@ public class BrowseModsView extends VBox {
         });
 
 
+    }
+
+    private String formatEnvironment(String client, String server) {
+        List<String> values = new java.util.ArrayList<>();
+        if (client != null && !client.isBlank() && !"unknown".equalsIgnoreCase(client)) {
+            values.add("Client " + client.toLowerCase(java.util.Locale.ROOT));
+        }
+        if (server != null && !server.isBlank() && !"unknown".equalsIgnoreCase(server)) {
+            values.add("Server " + server.toLowerCase(java.util.Locale.ROOT));
+        }
+        return String.join(" / ", values);
+    }
+
+    private String relativeUpdateTime(String value) {
+        if (value == null || value.isBlank()) return "update date unavailable";
+        try {
+            long days = Math.max(0, java.time.Duration.between(
+                    java.time.Instant.parse(value), java.time.Instant.now()).toDays());
+            if (days == 0) return "updated today";
+            if (days == 1) return "updated yesterday";
+            if (days < 30) return "updated " + days + " days ago";
+            if (days < 365) return "updated " + (days / 30) + " months ago";
+            return "updated " + (days / 365) + " years ago";
+        } catch (java.time.DateTimeException ignored) {
+            return "update date unavailable";
+        }
     }
 
     // =============================================================
