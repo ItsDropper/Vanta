@@ -135,12 +135,7 @@ public class BrowseModsView extends VBox {
         browserToolbar = new ModrinthBrowserToolbar(
                 Localization.text("browseMods.searchPrompt"),
                 this::search,
-                gridLayout -> {
-                    results.getStyleClass().removeAll("modrinth-grid-results", "modrinth-list-results");
-                    results.getStyleClass().add(gridLayout
-                            ? "modrinth-grid-results" : "modrinth-list-results");
-                    applyResultLayout(gridLayout);
-                }
+                this::applyResultLayout
         );
         searchField = browserToolbar.getSearchField();
 
@@ -770,6 +765,9 @@ public class BrowseModsView extends VBox {
     }
 
     private void applyResultLayout(boolean grid) {
+        results.getStyleClass().removeAll("modrinth-grid-results", "modrinth-list-results");
+        results.getStyleClass().add(grid
+                ? "modrinth-grid-results" : "modrinth-list-results");
         double availableWidth = searchScrollPane.getViewportBounds().getWidth();
         for (javafx.scene.Node node : results.getChildren()) {
             if (node instanceof VBox card) {
