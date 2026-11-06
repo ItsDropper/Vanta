@@ -92,6 +92,10 @@ public final class InstanceRepairService {
         String loaderKey = loader.replaceAll("[^A-Za-z0-9]", "")
                 .toLowerCase(Locale.ROOT);
 
+        if (loaderKey.equals("stein") && !SteinInstaller.supportsMinecraftVersion(minecraftVersion)) {
+            throw new IllegalStateException("Stein instances support Minecraft 1.8.9 only.");
+        }
+
         System.out.println(
                 "[Vanta Repair] Repairing "
                         + loader
@@ -185,6 +189,14 @@ public final class InstanceRepairService {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             RiftInstaller.install(instance);
+        } else if (loaderKey.equals("stein")) {
+            String repairedVersion = SteinInstaller.install(instance, vanillaMetadata);
+            if (!repairedVersion.equals(instance.getLoaderVersion())) {
+                instance = new Instance(
+                        instance.getId(), instance.getName(), instance.getMinecraftVersion(),
+                        instance.getLoader(), repairedVersion, instance.getDirectory());
+                InstanceManager.saveInstance(instance);
+            }
         } else if (loaderKey.equals("liteloader")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
@@ -206,7 +218,7 @@ public final class InstanceRepairService {
             );
         }
 
-        if (!loaderKey.equals("liteloader") && !loaderKey.equals("rift")) {
+        if (!loaderKey.equals("liteloader") && !loaderKey.equals("rift") && !loaderKey.equals("stein")) {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.refreshBaseAndApply(instance);
         }
 
