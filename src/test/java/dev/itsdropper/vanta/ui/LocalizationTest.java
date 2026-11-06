@@ -28,7 +28,7 @@ class LocalizationTest {
     }
 
     @Test
-    void everySupportedLanguageHasTheLanguagePreferenceStrings() {
+    void everySupportedLanguageHasRequiredUiStrings() {
         Set<String> requiredKeys = Set.of(
                 "language.title",
                 "language.description",
@@ -53,7 +53,22 @@ class LocalizationTest {
                 "settings.section.storage",
                 "settings.section.state",
                 "settings.section.diagnostics",
-                "settings.section.about"
+                "settings.section.about",
+                "home.title",
+                "home.accountChecking",
+                "home.readyToPlay",
+                "home.newInstance",
+                "home.createInstanceAccessible",
+                "home.createInstanceTooltip",
+                "home.featuredEyebrow",
+                "home.featuredSubtitle",
+                "home.libraryLoading",
+                "home.recentTitle",
+                "home.recentSubtitle",
+                "home.instancesLoading",
+                "home.serversTitle",
+                "home.serversSubtitle",
+                "home.noServerHistory"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
