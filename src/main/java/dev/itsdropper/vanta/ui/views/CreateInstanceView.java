@@ -717,13 +717,10 @@ public class CreateInstanceView extends VBox {
             final boolean liteLoader = liteLoaderAvailable;
             final boolean modLoader = modLoaderAvailable;
             final boolean rift = riftAvailable;
-            try {
-                if (VantaLoaderInstaller.supportsMinecraftVersion(minecraftVersion)) {
-                    VantaLoaderInstaller.findLatestLoaderVersion();
-                    vantaLoaderAvailable = true;
-                }
-            } catch (Throwable ignored) {
-            }
+            // Compatibility is a local Java/Minecraft baseline check. Do not
+            // hide a compatible loader just because GitHub is temporarily
+            // unavailable; release lookup happens when the user creates it.
+            vantaLoaderAvailable = VantaLoaderInstaller.supportsMinecraftVersion(minecraftVersion);
             final boolean vantaLoader = vantaLoaderAvailable;
 
             UiExecutor.shared().dispatchToUi(() -> {
