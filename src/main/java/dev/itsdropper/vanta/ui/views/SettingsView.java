@@ -34,6 +34,7 @@ import dev.itsdropper.vanta.ui.components.NotificationManager;
 import dev.itsdropper.vanta.ui.components.LanguagePreferenceControl;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
@@ -131,14 +132,28 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private void buildCompactNavigation() {
-        Label label = new Label("SETTINGS");
+        Label label = new Label(Localization.text("settings.label"));
         label.getStyleClass().add("settings-compact-label");
         compactNavigation.getItems().setAll(
                 "Appearance", "Discord", "General", "Minecraft", "Downloads",
                 "Storage & Cache", "State", "Repair & Diagnostics", "About Vanta"
         );
+        compactNavigation.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(String section) {
+                return section == null ? "" : sectionLabel(section);
+            }
+
+            @Override
+            public String fromString(String value) {
+                return compactNavigation.getItems().stream()
+                        .filter(section -> sectionLabel(section).equals(value))
+                        .findFirst()
+                        .orElse(null);
+            }
+        });
         compactNavigation.setMaxWidth(Double.MAX_VALUE);
-        compactNavigation.setAccessibleText("Settings section");
+        compactNavigation.setAccessibleText(Localization.text("settings.sectionAccessible"));
         compactNavigation.setOnAction(event -> {
             if (!updatingNavigation && compactNavigation.getValue() != null) {
                 selectSection(compactNavigation.getValue());
@@ -186,10 +201,10 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         navigation.getStyleClass().add("settings-navigation");
 
         TextField sectionSearch = new TextField();
-        sectionSearch.setPromptText("Find a settings page…");
-        sectionSearch.setAccessibleText("Search settings pages");
+        sectionSearch.setPromptText(Localization.text("settings.searchPrompt"));
+        sectionSearch.setAccessibleText(Localization.text("settings.searchAccessible"));
         sectionSearch.setTooltip(new javafx.scene.control.Tooltip(
-                "Filter settings pages by name. Clear the field to show every page."
+                Localization.text("settings.searchTooltip")
         ));
         sectionSearch.getStyleClass().add("settings-search-field");
         sectionSearch.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -223,13 +238,13 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         });
         navigation.getChildren().add(sectionSearch);
 
-        navigation.getChildren().add(group("PERSONALIZATION"));
+        navigation.getChildren().add(group("settings.group.personalization"));
         navigation.getChildren().add(sectionButton("Appearance", true));
 
-        navigation.getChildren().add(group("SOCIAL"));
+        navigation.getChildren().add(group("settings.group.social"));
         navigation.getChildren().add(sectionButton("Discord", false));
 
-        navigation.getChildren().add(group("LAUNCHER"));
+        navigation.getChildren().add(group("settings.group.launcher"));
         navigation.getChildren().addAll(
                 sectionButton("General", false),
                 sectionButton("Minecraft", false),
@@ -237,7 +252,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 sectionButton("Storage & Cache", false)
         );
 
-        navigation.getChildren().add(group("SYSTEM"));
+        navigation.getChildren().add(group("settings.group.system"));
         navigation.getChildren().addAll(
                 sectionButton("State", false),
                 sectionButton("Repair & Diagnostics", false),
@@ -245,15 +260,17 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         );
     }
 
-    private Label group(String text) {
-        Label label = new Label(text);
+    private Label group(String key) {
+        Label label = new Label(Localization.text(key));
         label.getStyleClass().add("settings-nav-group");
         VantaUI.styleText(label, VantaUI.TextRole.EYEBROW);
         return label;
     }
 
-    private Button sectionButton(String text, boolean selected) {
-        Button button = new Button(text);
+    private Button sectionButton(String section, boolean selected) {
+        Button button = new Button(sectionLabel(section));
+        button.setUserData(section);
+        button.setAccessibleText(sectionLabel(section));
         button.setMaxWidth(Double.MAX_VALUE);
         button.setAlignment(Pos.CENTER_LEFT);
         button.getStyleClass().add("settings-nav-button");
@@ -262,8 +279,24 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             button.getStyleClass().add("selected");
         }
 
-        button.setOnAction(event -> selectSection(text));
+        button.setOnAction(event -> selectSection(section));
         return button;
+    }
+
+    private static String sectionLabel(String section) {
+        String key = switch (section) {
+            case "Appearance" -> "settings.section.appearance";
+            case "Discord" -> "settings.section.discord";
+            case "General" -> "settings.section.general";
+            case "Minecraft" -> "settings.section.minecraft";
+            case "Downloads" -> "settings.section.downloads";
+            case "Storage & Cache" -> "settings.section.storage";
+            case "State" -> "settings.section.state";
+            case "Repair & Diagnostics" -> "settings.section.diagnostics";
+            case "About Vanta" -> "settings.section.about";
+            default -> null;
+        };
+        return key == null ? section : Localization.text(key);
     }
 
     private void selectSection(String section) {
@@ -294,7 +327,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         for (var node : navigation.getChildren()) {
             if (node instanceof Button button) {
                 button.getStyleClass().remove("selected");
-                if (button.getText().equals(section)) {
+                if (section.equals(button.getUserData())) {
                     button.getStyleClass().add("selected");
                 }
             }
