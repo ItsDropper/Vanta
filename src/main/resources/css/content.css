@@ -753,3 +753,103 @@
     -fx-background-color: transparent;
     -fx-border-color: transparent;
 }
+
+
+/* Modrinth project details: current, compact tag and Markdown treatment. */
+.mod-details-tags {
+    -fx-hgap: 6px;
+    -fx-vgap: 6px;
+    -fx-padding: 2px 0 3px 0;
+}
+.mod-details-tags .modrinth-tag-chip {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 5px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 5px;
+    -fx-border-width: 1px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+    -fx-padding: 4px 8px;
+}
+.mod-details-tags .modrinth-environment-chip {
+    -fx-text-fill: -vantatext;
+}
+.mod-details-tags .modrinth-loader-chip {
+    -fx-background-color: derive(-vantaaccent, -88%);
+}
+.mod-details-tags .modrinth-loader-chip .text {
+    -fx-font-weight: 700;
+}
+.mod-details-markdown {
+    -fx-spacing: 12px;
+}
+.mod-details-markdown .mod-description-paragraph {
+    -fx-hgap: 4px;
+    -fx-vgap: 3px;
+    -fx-pref-wrap-length: 900px;
+}
+.mod-details-markdown .mod-description-text {
+    -fx-fill: -vantatext;
+    -fx-font-size: 13px;
+}
+.mod-details-markdown .mod-description-bold {
+    -fx-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 800;
+}
+.mod-details-markdown .mod-description-italic {
+    -fx-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-style: italic;
+}
+.mod-details-markdown .mod-description-h1 {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 25px;
+    -fx-font-weight: 800;
+    -fx-padding: 14px 0 4px 0;
+}
+.mod-details-markdown .mod-description-h2 {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 20px;
+    -fx-font-weight: 800;
+    -fx-padding: 12px 0 3px 0;
+}
+.mod-details-markdown .mod-description-h3,
+.mod-details-markdown .mod-description-heading {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 16px;
+    -fx-font-weight: 750;
+    -fx-padding: 9px 0 2px 0;
+}
+.mod-details-markdown .mod-description-code {
+    -fx-fill: -vantaaccent;
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
+}
+.mod-details-markdown .mod-description-link {
+    -fx-text-fill: -vantaaccent;
+    -fx-underline: true;
+}
+.mod-details-markdown .mod-description-link:hover {
+    -fx-text-fill: -vantaaccenthover;
+}
+.mod-details-markdown .mod-description-list {
+    -fx-spacing: 7px;
+    -fx-padding: 2px 0 2px 18px;
+}
+.mod-details-markdown .mod-description-bullet {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 13px;
+}
+.mod-details-markdown .mod-description-divider {
+    -fx-background-color: -vantaborder;
+    -fx-min-height: 1px;
+    -fx-pref-height: 1px;
+    -fx-max-height: 1px;
+    -fx-opacity: 0.9;
+}
+.mod-details-markdown .label,
+.mod-details-markdown .text {
+    -fx-text-fill: -vantatext;
+    -fx-fill: -vantatext;
+}
