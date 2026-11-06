@@ -12,6 +12,11 @@ public enum ModrinthContentType {
             "Modpack"
     ),
 
+    DATA_PACK(
+            "datapack",
+            "Data Pack"
+    ),
+
     RESOURCE_PACK(
             "resourcepack",
             "Resource Pack"
