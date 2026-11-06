@@ -235,7 +235,27 @@ class LocalizationTest {
                 "createInstance.installingPrefix",
                 "createInstance.created",
                 "createInstance.createFailed",
-                "common.installing"
+                "common.installing",
+                "common.backArrow",
+                "browseMods.searchPrompt",
+                "browseMods.searchAccessible",
+                "common.search",
+                "common.mostDownloaded",
+                "browseMods.loadingPopular",
+                "browseMods.searchPromptHelp",
+                "browseMods.popularFailed",
+                "browseMods.noPopular",
+                "common.searching",
+                "browseMods.noCompatible",
+                "common.modrinthPrefix",
+                "common.install",
+                "common.installing",
+                "common.installingPrefix",
+                "common.installed",
+                "modDetails.downloads",
+                "modDetails.followers",
+                "common.description",
+                "modDetails.projectInfo"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
