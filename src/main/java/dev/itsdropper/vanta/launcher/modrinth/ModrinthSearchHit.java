@@ -36,6 +36,18 @@ public class ModrinthSearchHit {
     @JsonProperty("icon_url")
     private String iconUrl;
 
+    @JsonProperty("categories")
+    private List<String> categories;
+
+    @JsonProperty("versions")
+    private List<String> versions;
+
+    @JsonProperty("date_modified")
+    private String dateModified;
+
+    @JsonProperty("date_created")
+    private String dateCreated;
+
     public ModrinthSearchHit() {
     }
 
@@ -77,5 +89,21 @@ public class ModrinthSearchHit {
 
     public String getIconUrl() {
         return iconUrl;
+    }
+
+    public List<String> getCategories() {
+        return categories == null ? List.of() : categories;
+    }
+
+    public List<String> getVersions() {
+        return versions == null ? List.of() : versions;
+    }
+
+    public String getDateModified() {
+        return dateModified;
+    }
+
+    public String getDateCreated() {
+        return dateCreated;
     }
 }
