@@ -2000,53 +2000,21 @@ public class GlobalModsView extends VBox {
             tags.getChildren().add(more);
         }
 
-        VBox information = new VBox(5, titleLine, description, tags);
-        HBox.setHgrow(information, Priority.ALWAYS);
-
-        VBox stats = new VBox(5,
-                statLine("⇩", compactNumber(project.getDownloads())),
-                statLine("♥", compactNumber(project.getFollows())),
-                statLine("◷", relativeUpdateTime(project.getDateModified())));
-        stats.getStyleClass().add("modrinth-project-stats");
-        stats.setAlignment(Pos.CENTER_RIGHT);
-
         Button menuButton = createVersionsButton(project.getProjectId());
         Button installButton = new Button(Localization.text("common.install"));
         installButton.getStyleClass().add("primary-button");
         installButton.setOnAction(event -> handleProjectInstall(project.getProjectId(), installButton));
 
-        VBox card = new VBox(10);
-        card.setPadding(new Insets(14, 16, 14, 16));
-        card.getStyleClass().addAll("instance-card", "modrinth-project-card");
-        if (browserToolbar.isGridLayout()) {
-            HBox heading = new HBox(12, iconBox, information, menuButton);
-            heading.setAlignment(Pos.TOP_LEFT);
-            HBox.setHgrow(information, Priority.ALWAYS);
-            HBox footer = new HBox(12, stats, new javafx.scene.layout.Region(), installButton);
-            HBox.setHgrow(footer.getChildren().get(1), Priority.ALWAYS);
-            footer.setAlignment(Pos.CENTER_LEFT);
-            card.getChildren().addAll(heading, footer);
-            card.getStyleClass().add("modrinth-project-grid-card");
-        } else {
-            HBox actions = new HBox(7, menuButton, installButton);
-            actions.setAlignment(Pos.CENTER_RIGHT);
-            VBox right = new VBox(8, stats, actions);
-            right.setAlignment(Pos.CENTER_RIGHT);
-            HBox row = new HBox(14, iconBox, information, right);
-            row.setAlignment(Pos.CENTER_LEFT);
-            HBox.setHgrow(information, Priority.ALWAYS);
-            card.getChildren().add(row);
-        }
-
-        card.setCursor(javafx.scene.Cursor.HAND);
-        card.setOnMouseClicked(event -> {
-            if (event.getButton() == javafx.scene.input.MouseButton.PRIMARY
-                    && !(event.getTarget() instanceof javafx.scene.control.Button)
-                    && project.getProjectId() != null && !project.getProjectId().isBlank()) {
-                onModSelected.accept(project.getProjectId(), contentTypeBox.getValue());
-            }
-        });
-        return card;
+        return new dev.itsdropper.vanta.ui.components.ModrinthProjectCard(
+                iconBox, title, author, description, tags,
+                project.getDownloads(), project.getFollows(),
+                relativeUpdateTime(project.getDateModified()),
+                menuButton, installButton, browserToolbar.isGridLayout(),
+                () -> {
+                    if (project.getProjectId() != null && !project.getProjectId().isBlank()) {
+                        onModSelected.accept(project.getProjectId(), contentTypeBox.getValue());
+                    }
+                });
     }
 
     private HBox statLine(String symbol, String value) {
@@ -2065,8 +2033,6 @@ public class GlobalModsView extends VBox {
         if (value >= 10_000L) return String.format(java.util.Locale.ROOT, "%.1fK", value / 1_000.0);
         return String.format(java.util.Locale.ROOT, "%,d", value);
     }
-
-
     // =============================================================
     // ICON
     // =============================================================
