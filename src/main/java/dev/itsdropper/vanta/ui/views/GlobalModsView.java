@@ -270,17 +270,16 @@ public class GlobalModsView extends VBox {
         categorySearchField.textProperty().addListener((obs, oldValue, newValue) -> rebuildCategoryFilterOptions());
 
         contentTypeBox.valueProperty().addListener((obs, oldValue, newValue) -> {
-            loaderBox.setDisable(newValue != ModrinthContentType.MOD);
             if (newValue != ModrinthContentType.MOD) selectedLoaders.clear();
-
             selectedCategories.clear();
             updateLoaderButton();
             updateVersionButton();
             updateCategoriesButton();
             updateContentTypeSegments();
+            browserToolbar.setSearchPrompt(searchPromptFor(newValue));
             loadLoaderTags(newValue);
             loadCategoryTags(newValue);
-            refreshForCurrentFilters();
+            browserToolbar.refresh();
         });
 
         // The hidden legacy combo boxes remain as compatibility adapters for
@@ -316,7 +315,7 @@ public class GlobalModsView extends VBox {
         // =========================================================
 
         browserToolbar = new ModrinthBrowserToolbar(
-                Localization.text("globalMods.searchPrompt"),
+                searchPromptFor(ModrinthContentType.MOD),
                 this::search,
                 this::applyGlobalResultLayout
         );
@@ -438,7 +437,13 @@ public class GlobalModsView extends VBox {
         // BUILD
         // =========================================================
 
-        VBox contentPane = new VBox(8, resultsScrollPane, statusLabel);
+        Button retryButton = new Button(Localization.text("common.retry"));
+        retryButton.getStyleClass().add("secondary-button");
+        retryButton.setVisible(false);
+        retryButton.setManaged(false);
+        retryButton.setOnAction(event -> browserToolbar.refresh());
+        this.retryButton = retryButton;
+        VBox contentPane = new VBox(8, resultsScrollPane, statusLabel, retryButton);
         contentPane.setFillWidth(true);
         HBox browseContent = new HBox(18, filterSidebar, contentPane);
         HBox.setHgrow(contentPane, Priority.ALWAYS);
@@ -599,6 +604,17 @@ public class GlobalModsView extends VBox {
                 (int) Math.round(color.getRed() * 255),
                 (int) Math.round(color.getGreen() * 255),
                 (int) Math.round(color.getBlue() * 255));
+    }
+
+    private String searchPromptFor(ModrinthContentType type) {
+        if (type == null) type = ModrinthContentType.MOD;
+        return switch (type) {
+            case MOD -> Localization.text("modrinth.searchMods");
+            case RESOURCE_PACK -> Localization.text("modrinth.searchResourcePacks");
+            case DATA_PACK -> Localization.text("modrinth.searchDataPacks");
+            case SHADER -> Localization.text("modrinth.searchShaders");
+            case MODPACK -> Localization.text("modrinth.searchModpacks");
+        };
     }
 
     private void updateContentTypeSegments() {
@@ -1469,17 +1485,15 @@ public class GlobalModsView extends VBox {
                 || !selectedVersions.isEmpty()
                 || !selectedCategories.isEmpty();
 
-        if (query.isBlank() && !hasActiveFacets) {
-            browserToolbar.setTotalHits(0);
-            results.getChildren().clear();
-            showPopularSection();
-            statusLabel.setText(Localization.text("globalMods.searchHelp"));
-            return;
-        }
-
         hidePopularSection();
         results.getChildren().clear();
         statusLabel.setText(Localization.text("common.searching"));
+        for (int i = 0; i < Math.min(state.limit(), 6); i++) {
+            VBox skeleton = new VBox(8);
+            skeleton.setMinHeight(112);
+            skeleton.getStyleClass().add("modrinth-result-skeleton");
+            results.getChildren().add(skeleton);
+        }
 
         ModrinthContentType requestedType = contentTypeBox.getValue();
         List<String> requestedLoaders = selectedLoaderFacets();
@@ -1508,8 +1522,11 @@ public class GlobalModsView extends VBox {
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != searchRequestId) return;
+                    results.getChildren().clear();
                     statusLabel.setText(failure.getMessage() == null
                             ? Localization.text("modrinth.searchFailed") : failure.getMessage());
+                    retryButton.setVisible(true);
+                    retryButton.setManaged(true);
                 });
             }
         });
@@ -1601,17 +1618,20 @@ public class GlobalModsView extends VBox {
             List<ModrinthSearchHit> projects
     ) {
 
-        results
-                .getChildren()
-                .clear();
+        results.getChildren().clear();
+        retryButton.setVisible(false);
+        retryButton.setManaged(false);
 
-        if (projects == null
-                || projects.isEmpty()) {
-
-            statusLabel.setText(
-                    Localization.text("globalMods.noMods")
-            );
-
+        if (projects == null || projects.isEmpty()) {
+            results.getChildren().add(new EmptyState(
+                    "⌕",
+                    Localization.text("modrinth.emptyTitle"),
+                    Localization.text("modrinth.emptyDescription"),
+                    Localization.text("modrinth.emptyHint")
+            ));
+            statusLabel.setText(Localization.text("modrinth.showingResults")
+                    .replace("{start}", "0").replace("{end}", "0")
+                    .replace("{total}", "0"));
             return;
         }
 
@@ -1623,8 +1643,13 @@ public class GlobalModsView extends VBox {
             results.getChildren().add(createSizedGlobalProjectCard(project));
         }
 
-        statusLabel.setText(Localization.text("modrinth.resultsFound")
-                .replace("{count}", Integer.toString(projects.size())));
+        ModrinthBrowserToolbar.SearchState page = browserToolbar.getState();
+        int start = page.offset() + 1;
+        int end = page.offset() + projects.size();
+        statusLabel.setText(Localization.text("modrinth.showingResults")
+                .replace("{start}", Integer.toString(start))
+                .replace("{end}", Integer.toString(end))
+                .replace("{total}", formatNumber(browserToolbar.getTotalHits())));
     }
 
     private VBox createSizedGlobalProjectCard(ModrinthSearchHit project) {
