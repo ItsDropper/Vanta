@@ -300,9 +300,9 @@ public class ModrinthClient {
     ) {
         List<List<String>> groups = new java.util.ArrayList<>();
         groups.add(List.of("project_type:" + contentType.getApiValue()));
-        addFacetGroup(groups, "categories", loaders);
-        addFacetGroup(groups, "versions", versions);
-        addFacetGroup(groups, "categories", categories);
+        addFacetGroup(groups, "categories", loaders, true);
+        addFacetGroup(groups, "versions", versions, false);
+        addFacetGroup(groups, "categories", categories, false);
 
         StringBuilder json = new StringBuilder("[");
         for (int groupIndex = 0; groupIndex < groups.size(); groupIndex++) {
@@ -321,12 +321,13 @@ public class ModrinthClient {
     private void addFacetGroup(
             List<List<String>> groups,
             String facet,
-            List<String> values
+            List<String> values,
+            boolean normalizeLoaderIds
     ) {
         if (values == null || values.isEmpty()) return;
         List<String> normalized = values.stream()
                 .filter(value -> value != null && !value.isBlank())
-                .map(value -> facet + ":" + (facet.equals("categories")
+                .map(value -> facet + ":" + (normalizeLoaderIds
                         ? ModrinthLoaderIds.normalize(value) : value.trim()))
                 .distinct()
                 .toList();
