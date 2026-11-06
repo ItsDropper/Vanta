@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
+import dev.itsdropper.vanta.launcher.instance.SteinInstaller;
 import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
 import dev.itsdropper.vanta.launcher.loader.LoaderStackManager;
 import dev.itsdropper.vanta.launcher.model.Instance;
@@ -258,6 +259,14 @@ public class LaunchDataBuilder {
 
         data.javaPath =
                 settings.getJavaPath();
+
+        if ("Stein".equalsIgnoreCase(instance.getLoader())) {
+            if (!SteinInstaller.supportsMinecraftVersion(instance.getMinecraftVersion())) {
+                throw new IllegalStateException("Stein instances support Minecraft 1.8.9 only.");
+            }
+            data.javaVersion = 25;
+            data.javaPath = SteinInstaller.javaExecutable(instance).toString();
+        }
 
         if (server != null) {
             data.serverHost = server.host();
