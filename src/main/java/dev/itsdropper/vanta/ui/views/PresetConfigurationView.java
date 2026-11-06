@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -64,7 +65,7 @@ public class PresetConfigurationView extends VBox {
         // =========================================================
 
         Label title =
-                new Label("Configure preset");
+                new Label(Localization.text("presetConfig.title"));
 
         title.getStyleClass().add(
                 "page-title"
@@ -72,7 +73,7 @@ public class PresetConfigurationView extends VBox {
 
         Label subtitle =
                 new Label(
-                        "Choose the Minecraft version and configure the new instance."
+                        Localization.text("presetConfig.description")
                 );
 
         subtitle.getStyleClass().add(
@@ -159,7 +160,7 @@ public class PresetConfigurationView extends VBox {
 
         Label environmentTitle =
                 new Label(
-                        "Environment"
+                        Localization.text("presetConfig.environment")
                 );
 
         environmentTitle.getStyleClass().add(
@@ -186,7 +187,7 @@ public class PresetConfigurationView extends VBox {
 
         Label versionLabel =
                 new Label(
-                        "Minecraft version"
+                        Localization.text("presetConfig.minecraftVersion")
                 );
 
         versionLabel.getStyleClass().add(
@@ -248,7 +249,7 @@ public class PresetConfigurationView extends VBox {
 
         Label loaderLabel =
                 new Label(
-                        "Loader"
+                        Localization.text("presetConfig.loader")
                 );
 
         loaderLabel.getStyleClass().add(
@@ -288,7 +289,7 @@ public class PresetConfigurationView extends VBox {
 
         Label modsTitle =
                 new Label(
-                        "Included mods"
+                        Localization.text("presetConfig.includedMods")
                 );
 
         modsTitle.getStyleClass().add(
@@ -305,7 +306,7 @@ public class PresetConfigurationView extends VBox {
 
             Label none =
                     new Label(
-                            "No mods included."
+                            Localization.text("presetConfig.noMods")
                     );
 
             none.getStyleClass().add(
@@ -390,7 +391,7 @@ public class PresetConfigurationView extends VBox {
 
         Label nameLabel =
                 new Label(
-                        "Instance name"
+                        Localization.text("presetConfig.instanceName")
                 );
 
         nameLabel.getStyleClass().add(
@@ -409,7 +410,7 @@ public class PresetConfigurationView extends VBox {
         );
 
         nameField.setPromptText(
-                "e.g. Vanta PvP"
+                Localization.text("presetConfig.nameExample")
         );
 
         nameField.getStyleClass().add(
@@ -477,7 +478,7 @@ public class PresetConfigurationView extends VBox {
 
         Button backButton =
                 new Button(
-                        "CANCEL"
+                        Localization.text("common.cancel")
                 );
 
         backButton.getStyleClass().add(
@@ -499,7 +500,7 @@ public class PresetConfigurationView extends VBox {
 
         Button createButton =
                 new Button(
-                        "CREATE INSTANCE"
+                        Localization.text("common.createInstance")
                 );
 
         createButton.getStyleClass().add(
@@ -550,7 +551,7 @@ public class PresetConfigurationView extends VBox {
 
         Button browseModpacksButton =
                 new Button(
-                        "BROWSE MODPACKS"
+                        Localization.text("common.browseModpacks")
                 );
 
         browseModpacksButton.getStyleClass().add(
