@@ -587,6 +587,90 @@ public class GlobalModsView extends VBox {
         });
     }
 
+    private record DataPackWorld(Instance instance, java.nio.file.Path directory) {}
+
+    private void chooseDataPackWorld(String projectId, Button sourceButton) {
+        sourceButton.setDisable(true);
+        sourceButton.setText(Localization.text("common.installing"));
+        UiExecutor.shared().execute(() -> {
+            try {
+                ModrinthProject project = modrinthClient.getProject(projectId);
+                List<DataPackWorld> worlds = new ArrayList<>();
+                for (Instance instance : InstanceManager.discoverInstances()) {
+                    if (instance == null || instance.getDirectory() == null) continue;
+                    java.nio.file.Path saves = instance.getDirectory().resolve("saves");
+                    if (!java.nio.file.Files.isDirectory(saves)) continue;
+                    try (java.util.stream.Stream<java.nio.file.Path> entries = java.nio.file.Files.list(saves)) {
+                        entries.filter(java.nio.file.Files::isDirectory)
+                                .filter(world -> java.nio.file.Files.isRegularFile(world.resolve("level.dat")))
+                                .forEach(world -> worlds.add(new DataPackWorld(instance, world)));
+                    }
+                }
+                UiExecutor.shared().dispatchToUi(() -> {
+                    sourceButton.setDisable(false);
+                    sourceButton.setText(Localization.text("common.install"));
+                    if (worlds.isEmpty()) {
+                        statusLabel.setText("No Minecraft worlds found in your instances. Create or import a world first.");
+                        return;
+                    }
+                    Popup popup = new Popup();
+                    popup.setAutoHide(true);
+                    popup.setAutoFix(true);
+                    popup.setHideOnEscape(true);
+                    VBox root = new VBox(10);
+                    root.getStyleClass().add("modrinth-popup");
+                    root.setPrefWidth(520);
+                    Label title = new Label("Install data pack into a world");
+                    title.getStyleClass().add("modrinth-popup-title");
+                    Label subtitle = new Label("Data packs are stored per-world, not in the instance root.");
+                    subtitle.getStyleClass().add("modrinth-popup-subtitle");
+                    VBox choices = new VBox(7);
+                    for (DataPackWorld world : worlds) {
+                        Button choice = new Button(world.instance().getName() + "  /  "
+                                + world.directory().getFileName());
+                        choice.getStyleClass().add("modrinth-version-row");
+                        choice.setMaxWidth(Double.MAX_VALUE);
+                        choice.setOnAction(event -> {
+                            popup.hide();
+                            choice.setDisable(true);
+                            UiExecutor.shared().execute(() -> {
+                                try {
+                                    new dev.itsdropper.vanta.launcher.service.ModrinthService()
+                                            .installDataPack(world.instance(), world.directory(), project);
+                                    UiExecutor.shared().dispatchToUi(() ->
+                                            statusLabel.setText("Installed " + project.getTitle()
+                                                    + " into " + world.directory().getFileName() + "."));
+                                } catch (Throwable failure) {
+                                    UiExecutor.shared().dispatchToUi(() ->
+                                            statusLabel.setText(failure.getMessage() == null
+                                                    ? "Data pack installation failed." : failure.getMessage()));
+                                }
+                            });
+                        });
+                        choices.getChildren().add(choice);
+                    }
+                    ScrollPane scroll = new ScrollPane(choices);
+                    scroll.setFitToWidth(true);
+                    scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+                    scroll.setPrefViewportHeight(Math.min(420, 80 + worlds.size() * 42.0));
+                    root.getChildren().addAll(title, subtitle, scroll);
+                    ThemeManager.apply(root, ThemeManager.loadAccent());
+                    popup.getContent().add(root);
+                    javafx.geometry.Bounds bounds = sourceButton.localToScreen(sourceButton.getBoundsInLocal());
+                    if (bounds != null) popup.show(sourceButton, bounds.getMinX() - 520 + sourceButton.getWidth(),
+                            bounds.getMaxY() + 8);
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    sourceButton.setDisable(false);
+                    sourceButton.setText(Localization.text("common.install"));
+                    statusLabel.setText(failure.getMessage() == null
+                            ? "Could not load Minecraft worlds." : failure.getMessage());
+                });
+            }
+        });
+    }
+
     private void chooseInstances(
             ModrinthProject project,
             List<dev.itsdropper.vanta.launcher.modrinth.ModrinthVersion> versions,
@@ -882,7 +966,7 @@ public class GlobalModsView extends VBox {
                     }
                 });
             } else if (selectedType == ModrinthContentType.DATA_PACK) {
-                statusLabel.setText("Datapacks must be installed into a specific Minecraft world's datapacks folder. Select a world before installing.");
+                chooseDataPackWorld(project.getProjectId(), installButton);
             } else {
                 loadProjectForInstall(project.getProjectId(), installButton);
             }
