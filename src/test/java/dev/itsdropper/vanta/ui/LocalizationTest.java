@@ -249,7 +249,7 @@ class LocalizationTest {
                 "browseMods.noCompatible",
                 "common.modrinthPrefix",
                 "common.install",
-                "common.installing",
+                ,
                 "common.installingPrefix",
                 "common.installed",
                 "modDetails.downloads",
