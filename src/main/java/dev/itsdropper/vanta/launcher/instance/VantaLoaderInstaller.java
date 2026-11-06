@@ -178,10 +178,13 @@ public final class VantaLoaderInstaller {
             throw new IOException("VantaLoader release lookup returned HTTP " + response.statusCode() + ".");
         }
 
-        JsonNode releases = MAPPER.readTree(response.body());
+        return selectLatestNightlyReleaseTag(MAPPER.readTree(response.body()));
+    }
+
+    static String selectLatestNightlyReleaseTag(JsonNode releases) throws IOException {
         String latestTag = null;
         String latestPublishedAt = "";
-        if (!releases.isArray()) {
+        if (releases == null || !releases.isArray()) {
             throw new IOException("VantaLoader release lookup returned an invalid response.");
         }
         for (JsonNode release : releases) {
