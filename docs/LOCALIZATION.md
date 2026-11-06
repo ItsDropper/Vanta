@@ -37,8 +37,9 @@ locale suffix convention; for example, `pt-PT` maps to
 - Account cards and switching, command palette, login popup, loading screen, and
   title-bar controls use the selected bundle.
 - Account management, onboarding, instance creation/presets, Modrinth browsing,
-  installed/global mod views, download center, repair, screenshots, and remote
-  server connection dialogs have localized UI resources.
+  installed/global mod views, download center, repair, screenshots, remote server
+  connection dialogs, instance import/settings, instance cards, sidebar, and the
+  environment State center have localized UI resources.
 - `LocalizationTest` verifies the required keys exist and are nonblank in every
   supported locale; each bundle is checked against its exact requested locale.
 - Changing the preference never mutates the active bundle in a running scene.
