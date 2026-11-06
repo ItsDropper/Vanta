@@ -39,8 +39,9 @@ locale suffix convention; for example, `pt-PT` maps to
 - Account management, onboarding, instance creation/presets, Modrinth browsing,
   installed/global mod views, download center, repair, screenshots, remote server
   connection dialogs, instance import/settings, instance cards, sidebar, and the
-  environment State center, and the instance library's main actions, scanning states,
-  recovery labels, and backup status messages have localized UI resources.
+  environment State center, the instance library's main actions and recovery labels,
+  and the Server Manager's main controls, EULA flow, backup/restore dialogs, and
+  process actions have localized UI resources.
 - `LocalizationTest` verifies the required keys exist and are nonblank in every
   supported locale; each bundle is checked against its exact requested locale.
 - Changing the preference never mutates the active bundle in a running scene.
@@ -72,8 +73,8 @@ locale suffix convention; for example, `pt-PT` maps to
   officially defined.
 - Avoid machine-translating technical terms without review by a fluent speaker.
 
-Localization is still incomplete. Most Settings page content, the detailed instance
-recovery/backup dialogs, Server Manager, and several other views/components still
+Localization is still incomplete. Most Settings page content, some detailed instance recovery/backup dialog text,
+several Server Manager status/error messages, and other views/components still
 contain English UI text. The current test suite guarantees that every key already
 migrated has a nonblank value in every supported locale; it does not yet prove that
 all UI strings in the `ui/` package have been migrated. Do not describe the launcher
