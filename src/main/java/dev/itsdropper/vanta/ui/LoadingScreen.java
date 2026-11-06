@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui;
 
+import dev.itsdropper.vanta.ui.Localization;
 import javafx.animation.*;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -10,7 +11,7 @@ import javafx.util.Duration;
 public final class LoadingScreen {
 
     private final StackPane root = new StackPane();
-    private final Label status = new Label("INITIALIZING VANTA");
+    private final Label status = new Label(Localization.text("loading.initializing"));
     private final Region progressFill = new Region();
 
     public LoadingScreen() {
@@ -26,12 +27,12 @@ public final class LoadingScreen {
         Circle mark = new Circle(5);
         mark.getStyleClass().add("loading-mark");
 
-        Label logo = new Label("VANTA");
+        Label logo = new Label(Localization.text("loading.brand"));
         logo.getStyleClass().add("loading-logo");
 
         brand.getChildren().addAll(mark, logo);
 
-        Label subtitle = new Label("ENVIRONMENT MANAGER");
+        Label subtitle = new Label(Localization.text("loading.environmentManager"));
         subtitle.getStyleClass().add("loading-subtitle");
 
         status.getStyleClass().add("loading-status");
