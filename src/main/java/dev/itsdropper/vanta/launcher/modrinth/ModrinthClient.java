@@ -137,8 +137,11 @@ public class ModrinthClient {
         return mapper.readValue(response.body(), ModrinthSearchResult.class);
     }
 
-    private static final java.util.Map<String, List<ModrinthTag>> TAG_CACHE =
+    private static final long TAG_CACHE_TTL_MILLIS = java.time.Duration.ofHours(6).toMillis();
+    private static final java.util.Map<String, TagCacheEntry> TAG_CACHE =
             new java.util.concurrent.ConcurrentHashMap<>();
+
+    private record TagCacheEntry(List<ModrinthTag> tags, long fetchedAtMillis) {}
 
     public List<ModrinthTag> getGameVersionTags() throws IOException, InterruptedException {
         return getTags("game_version");
@@ -176,11 +179,17 @@ public class ModrinthClient {
     }
 
     private List<ModrinthTag> getTags(String tagType) throws IOException, InterruptedException {
-        List<ModrinthTag> cached = TAG_CACHE.get(tagType);
-        if (cached != null) return cached;
+        TagCacheEntry cached = TAG_CACHE.get(tagType);
+        long now = System.currentTimeMillis();
+        if (cached != null && now - cached.fetchedAtMillis() < TAG_CACHE_TTL_MILLIS) {
+            return cached.tags();
+        }
         synchronized (TAG_CACHE) {
             cached = TAG_CACHE.get(tagType);
-            if (cached != null) return cached;
+            now = System.currentTimeMillis();
+            if (cached != null && now - cached.fetchedAtMillis() < TAG_CACHE_TTL_MILLIS) {
+                return cached.tags();
+            }
             URI uri = URI.create(API_URL + "/tag/" + tagType);
             HttpRequest request = HttpRequest.newBuilder(uri)
                     .timeout(Duration.ofSeconds(20))
@@ -195,9 +204,9 @@ public class ModrinthClient {
                     response.body(),
                     mapper.getTypeFactory().constructCollectionType(List.class, ModrinthTag.class)
             );
-            cached = List.copyOf(tags);
-            TAG_CACHE.put(tagType, cached);
-            return cached;
+            List<ModrinthTag> immutableTags = tags == null ? List.of() : List.copyOf(tags);
+            TAG_CACHE.put(tagType, new TagCacheEntry(immutableTags, System.currentTimeMillis()));
+            return immutableTags;
         }
     }
 
