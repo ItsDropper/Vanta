@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.geometry.Insets;
@@ -126,7 +127,7 @@ public class ModDetailsView extends VBox {
 
         Button backButton =
                 new Button(
-                        "← BACK"
+                        Localization.text("common.backArrow")
                 );
 
         backButton.getStyleClass().add(
@@ -429,7 +430,7 @@ public class ModDetailsView extends VBox {
 
         Label downloadsLabel =
                 new Label(
-                        "DOWNLOADS"
+                        Localization.text("modDetails.downloads")
                 );
 
         downloadsLabel.getStyleClass().add(
@@ -460,7 +461,7 @@ public class ModDetailsView extends VBox {
 
         Label followersLabel =
                 new Label(
-                        "FOLLOWERS"
+                        Localization.text("modDetails.followers")
                 );
 
         followersLabel.getStyleClass().add(
@@ -534,7 +535,7 @@ public class ModDetailsView extends VBox {
 
         Button installButton =
                 new Button(
-                        "INSTALL"
+                        Localization.text("common.install")
                 );
 
         installButton.getStyleClass().add(
@@ -662,7 +663,7 @@ public class ModDetailsView extends VBox {
 
         Label sectionTitle =
                 new Label(
-                        "DESCRIPTION"
+                        Localization.text("common.description")
                 );
 
         sectionTitle.getStyleClass().add(
@@ -727,7 +728,7 @@ public class ModDetailsView extends VBox {
 
         Label sectionTitle =
                 new Label(
-                        "PROJECT INFORMATION"
+                        Localization.text("modDetails.projectInfo")
                 );
 
         sectionTitle.getStyleClass().add(
@@ -785,7 +786,7 @@ public class ModDetailsView extends VBox {
 
         addInformationRow(
                 information,
-                "DOWNLOADS",
+                Localization.text("modDetails.downloads"),
                 formatNumber(
                         project.getDownloads()
                 )
@@ -793,7 +794,7 @@ public class ModDetailsView extends VBox {
 
         addInformationRow(
                 information,
-                "FOLLOWERS",
+                Localization.text("modDetails.followers"),
                 formatNumber(
                         project.getFollows()
                 )
@@ -884,11 +885,11 @@ public class ModDetailsView extends VBox {
         );
 
         button.setText(
-                "INSTALLING..."
+                Localization.text("common.installing")
         );
 
         statusLabel.setText(
-                "Installing "
+                Localization.text("common.installingPrefix")
                         + project.getTitle()
                         + "..."
         );
@@ -932,7 +933,7 @@ public class ModDetailsView extends VBox {
                         UiExecutor.shared().dispatchToUi(() -> {
 
                             button.setText(
-                                    "INSTALLED"
+                                    Localization.text("common.installed")
                             );
 
                             statusLabel.setText(
@@ -952,7 +953,7 @@ public class ModDetailsView extends VBox {
                             );
 
                             button.setText(
-                                    "INSTALL"
+                                    Localization.text("common.install")
                             );
 
                             statusLabel.setText(
