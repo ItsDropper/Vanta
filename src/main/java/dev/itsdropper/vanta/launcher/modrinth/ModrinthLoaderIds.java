@@ -17,7 +17,11 @@ public final class ModrinthLoaderIds {
             "rift",
             "babric",
             "legacyfabric",
-            "ornithe"
+            "ornithe",
+            "bta-babric",
+            "java-agent",
+            "nilloader",
+            "modloader"
     );
 
     private ModrinthLoaderIds() {
@@ -34,6 +38,8 @@ public final class ModrinthLoaderIds {
                 .replace(" ", "");
 
         return switch (normalized) {
+            case "btababric" -> "bta-babric";
+            case "javaagent" -> "java-agent";
             case "legacyfabric" -> "legacyfabric";
             case "nilloader" -> "nilloader";
             case "risugamimodloader", "risugamismodloader", "modloader" -> "modloader";
