@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.ui.components;
 
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.geometry.Insets;
@@ -45,8 +46,8 @@ public class AccountSwitcher extends HBox {
         );
         setFocusTraversable(true);
         setAccessibleRole(AccessibleRole.BUTTON);
-        setAccessibleText("Choose or add a Microsoft account");
-        Tooltip.install(this, new Tooltip("Switch or add a Microsoft account"));
+        setAccessibleText(Localization.text("accountSwitcher.accessible"));
+        Tooltip.install(this, new Tooltip(Localization.text("accountSwitcher.tooltip")));
 
         setAlignment(
                 Pos.CENTER_LEFT
@@ -90,7 +91,7 @@ public class AccountSwitcher extends HBox {
         // -----------------------------------------------------
 
         usernameLabel =
-                new Label("Not signed in");
+                new Label(Localization.text("accountSwitcher.signedOut"));
 
         usernameLabel.getStyleClass().add(
                 "account-switcher-name"
@@ -209,9 +210,9 @@ public class AccountSwitcher extends HBox {
         if (account == null) {
 
             usernameLabel.setText(
-                    "Not signed in"
+                    Localization.text("accountSwitcher.signedOut")
             );
-            setAccessibleText("Account menu. No account signed in. Activate to add or switch accounts.");
+            setAccessibleText(Localization.text("accountSwitcher.menuSignedOut"));
 
             playerHead.setImage(null);
 
@@ -236,7 +237,7 @@ public class AccountSwitcher extends HBox {
         accountList.getChildren().clear();
 
         Label header =
-                new Label("ACCOUNTS");
+                new Label(Localization.text("accountSwitcher.accounts"));
 
         header.getStyleClass().add(
                 "account-popup-header"
@@ -295,7 +296,7 @@ public class AccountSwitcher extends HBox {
 
         Label text =
                 new Label(
-                        "Add Microsoft account"
+                        Localization.text("accountSwitcher.add")
                 );
 
         text.getStyleClass().add(
@@ -314,8 +315,8 @@ public class AccountSwitcher extends HBox {
         addAccount.getStyleClass().add(
                 "account-popup-add"
         );
-        addAccount.setAccessibleText("Add a Microsoft account");
-        addAccount.setTooltip(new Tooltip("Sign in with another Microsoft account"));
+        addAccount.setAccessibleText(Localization.text("accountSwitcher.addAccessible"));
+        addAccount.setTooltip(new Tooltip(Localization.text("accountSwitcher.addTooltip")));
 
         addAccount.setMaxWidth(
                 Double.MAX_VALUE
@@ -391,7 +392,7 @@ public class AccountSwitcher extends HBox {
         if (active) {
 
             Label activeLabel =
-                    new Label("Active");
+                    new Label(Localization.text("accountSwitcher.active"));
 
             activeLabel.getStyleClass().add(
                     "account-popup-active"
