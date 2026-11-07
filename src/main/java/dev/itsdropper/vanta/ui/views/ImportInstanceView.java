@@ -48,7 +48,8 @@ public class ImportInstanceView extends VBox {
 
         getStyleClass().addAll(
                 "page",
-                "vanta-consistent-page"
+                "vanta-consistent-page",
+                "import-instance-page"
         );
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
@@ -77,8 +78,8 @@ public class ImportInstanceView extends VBox {
                         18
                 );
 
-        panel.getStyleClass().add(
-                "create-instance-panel"
+        panel.getStyleClass().addAll(
+                "create-instance-panel", "import-instance-panel"
         );
 
         panel.setPadding(
@@ -94,8 +95,8 @@ public class ImportInstanceView extends VBox {
                         Localization.text("importInstance.eyebrow")
                 );
 
-        panelTitle.getStyleClass().add(
-                "card-title"
+        panelTitle.getStyleClass().addAll(
+                "card-title", "import-panel-eyebrow"
         );
 
         Label description =
@@ -107,8 +108,8 @@ public class ImportInstanceView extends VBox {
                 true
         );
 
-        description.getStyleClass().add(
-                "create-status"
+        description.getStyleClass().addAll(
+                "create-status", "import-panel-description"
         );
 
         // =========================================================
@@ -120,8 +121,8 @@ public class ImportInstanceView extends VBox {
                         Localization.text("importInstance.choose")
                 );
 
-        importButton.getStyleClass().add(
-                "primary-button"
+        importButton.getStyleClass().addAll(
+                "primary-button", "import-primary-action"
         );
         importButton.setAccessibleText(Localization.text("importInstance.chooseAccessible"));
         importButton.setTooltip(new javafx.scene.control.Tooltip("Select a readable .mrpack file"));
@@ -168,6 +169,7 @@ public class ImportInstanceView extends VBox {
         progressRow.setAlignment(
                 Pos.CENTER_LEFT
         );
+        progressRow.getStyleClass().add("import-progress-row");
 
         // =========================================================
         // STATUS
@@ -176,8 +178,8 @@ public class ImportInstanceView extends VBox {
         statusLabel =
                 new Label();
 
-        statusLabel.getStyleClass().add(
-                "create-status"
+        statusLabel.getStyleClass().addAll(
+                "create-status", "import-status"
         );
         statusLabel.setWrapText(true);
         statusLabel.setAccessibleText(Localization.text("importInstance.statusAccessible"));
@@ -216,13 +218,14 @@ public class ImportInstanceView extends VBox {
         // BUILD
         // =========================================================
 
-        panel.getChildren().addAll(
-                panelTitle,
-                description,
-                progressRow,
-                statusLabel,
-                actions
-        );
+        Label formatBadge = new Label(".MRPACK  /  MODRINTH");
+        formatBadge.getStyleClass().add("import-format-badge");
+        Label dropGlyph = new Label("↥");
+        dropGlyph.getStyleClass().add("import-drop-glyph");
+        VBox intro = new VBox(10, dropGlyph, panelTitle, description, formatBadge);
+        intro.getStyleClass().add("import-intro");
+
+        panel.getChildren().addAll(intro, progressRow, statusLabel, actions);
 
         getChildren().addAll(
                 header,
