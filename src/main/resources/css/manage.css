@@ -691,4 +691,3 @@
 
 .create-instance-page .create-instance-environment-fields { -fx-spacing: 16px; -fx-alignment: top-left; }
 .create-instance-page .create-instance-field-group { -fx-spacing: 7px; }
-.create-instance-page .create-instance-field-group .create-combo { -fx-max-width: infinity; }
