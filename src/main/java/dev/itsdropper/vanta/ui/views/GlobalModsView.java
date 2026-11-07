@@ -1983,10 +1983,11 @@ public class GlobalModsView extends VBox {
                         .collect(java.util.stream.Collectors.toMap(
                                 tag -> dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(tag.getName()),
                                 tag -> tag, (first, second) -> first, java.util.LinkedHashMap::new));
-        java.util.Set<String> categoryIds = categoryTags.stream()
-                .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
-                .filter(java.util.Objects::nonNull)
-                .collect(java.util.stream.Collectors.toSet());
+        java.util.Map<String, dev.itsdropper.vanta.launcher.modrinth.ModrinthTag> categoryById =
+                categoryTags.stream().filter(tag -> tag != null && tag.getName() != null)
+                        .collect(java.util.stream.Collectors.toMap(
+                                tag -> tag.getName().toLowerCase(java.util.Locale.ROOT),
+                                tag -> tag, (first, second) -> first, java.util.LinkedHashMap::new));
 
         List<String> cardCategories = project.getCategories() == null ? List.of() : project.getCategories();
         List<String> orderedTags = new ArrayList<>();
@@ -2007,19 +2008,19 @@ public class GlobalModsView extends VBox {
             if (visible >= maxVisibleTags) break;
             String normalized = dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.normalize(value);
             dev.itsdropper.vanta.launcher.modrinth.ModrinthTag loaderTag = loaderById.get(normalized);
-            if (loaderTag != null) {
+            if (loaderTag != null
+                    || dev.itsdropper.vanta.launcher.modrinth.ModrinthLoaderIds.supportsSearchFacet(value)) {
+                Color loaderColor = ModrinthTagIcon.loaderColor(value);
                 Label loaderChip = new Label(formatTagName(value));
-                loaderChip.setGraphic(new ModrinthTagIcon(loaderTag,
-                        ModrinthTagIcon.loaderColor(value), 12));
+                loaderChip.setGraphic(new ModrinthTagIcon(loaderTag, value, loaderColor, 12));
                 loaderChip.getStyleClass().addAll("modrinth-tag-chip", "modrinth-loader-chip");
-                loaderChip.setStyle("-fx-text-fill: " + colorToCss(ModrinthTagIcon.loaderColor(value)) + ";");
+                loaderChip.setStyle("-fx-text-fill: " + colorToCss(loaderColor) + ";");
                 tags.getChildren().add(loaderChip);
             } else {
-                String display = categoryTags.stream()
-                        .filter(tag -> tag != null && value.equals(tag.getName()))
-                        .map(dev.itsdropper.vanta.launcher.modrinth.ModrinthTag::getName)
-                        .findFirst().orElse(value);
-                Label categoryChip = new Label(formatTagName(display));
+                dev.itsdropper.vanta.launcher.modrinth.ModrinthTag categoryTag =
+                        categoryById.get(value.toLowerCase(java.util.Locale.ROOT));
+                Label categoryChip = new Label(formatTagName(value));
+                categoryChip.setGraphic(new ModrinthTagIcon(categoryTag, value, Color.web("#9299A6"), 12));
                 categoryChip.getStyleClass().add("modrinth-tag-chip");
                 tags.getChildren().add(categoryChip);
             }
