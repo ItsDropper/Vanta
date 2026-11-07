@@ -78,8 +78,9 @@ public class InstanceSettingsView extends VBox {
         this.onMods =
                 onMods;
 
-        getStyleClass().add(
-                "page"
+        getStyleClass().addAll(
+                "page",
+                "vanta-consistent-page"
         );
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);

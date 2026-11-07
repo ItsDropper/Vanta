@@ -83,8 +83,9 @@ public class BrowseModsView extends VBox {
         this.httpClient =
                 HttpClient.newHttpClient();
 
-        getStyleClass().add(
-                "page"
+        getStyleClass().addAll(
+                "page",
+                "vanta-consistent-page"
         );
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
