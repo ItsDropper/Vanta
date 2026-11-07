@@ -42,11 +42,13 @@ The first build may download Gradle dependencies. A successful compile is not a 
 
 ## UI screenshots
 
-Capture the top-level sidebar destinations from the actual JavaFX views:
+Capture all major production JavaFX views, including the nine sidebar destinations and nested instance/content/setup screens:
 
 ```powershell
-.\gradlew.bat run --args="--capture-sidebar-screenshots build/ui-screenshots"
+.\gradlew.bat run --args="--capture-ui-screenshots build/ui-screenshots"
 ```
+
+The output keeps the original nine sidebar PNGs, index and overview at the root. Additional nested views are written under `additional/`, with their own PNGs, index and overview. The original `--capture-sidebar-screenshots` argument remains supported as a compatibility alias.
 
 The UI screenshots GitHub Actions workflow performs the corresponding capture under Xvfb, generates individual PNGs plus an overview contact sheet, and uploads the output as an artifact. Screenshot mode does not require a signed-in account or a pre-existing Minecraft instance. On Linux, the launcher resolves its data directory through XDG_DATA_HOME (or ~/.local/share).
 

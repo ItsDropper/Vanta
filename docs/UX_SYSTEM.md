@@ -64,13 +64,13 @@ Use the shared `EmptyState` component whenever a page has no content to display.
 
 ## Screenshot review
 
-Run the production sidebar capture locally:
+Run the complete production UI capture locally:
 
 ```bash
-./gradlew run --args="--capture-sidebar-screenshots build/ui-screenshots"
+./gradlew run --args="--capture-ui-screenshots build/ui-screenshots"
 ```
 
-This generates one PNG per Sidebar.Page, a 3×3 overview contact sheet, and an index. CI captures the production views under Xvfb and uploads them as the vanta-sidebar-screenshots artifact. Capture mode skips account loading, update checks, onboarding, telemetry handlers/events and active-view lifecycle refreshes. On Linux, the launcher uses XDG_DATA_HOME or ~/.local/share; no Windows APPDATA override is required.
+The capture includes one PNG per sidebar destination plus nested production views such as instance mods, screenshots, content browsing and details, instance creation/import, presets, modpack browsing, instance settings and repair. The original nine sidebar images, index and overview remain at the output root; nested-view PNGs, index and overview are stored in `additional/`. CI captures both sets under Xvfb and uploads them as the `vanta-ui-screenshots` artifact. Capture mode skips account loading, update checks, onboarding, telemetry handlers/events and active-view lifecycle refreshes. A temporary preview instance is used for instance-scoped screens; no user instance is modified. On Linux, the launcher uses XDG_DATA_HOME or ~/.local/share; no Windows APPDATA override is required.
 
 ## Motion and responsiveness
 
