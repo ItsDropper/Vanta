@@ -92,7 +92,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
 
     public SkinChangerView(AccountService accountService, boolean screenshotPreview) {
         this.accountService = accountService;
-        getStyleClass().addAll("page", "skin-changer-page");
+        getStyleClass().addAll("page", "skin-changer-page", "vanta-consistent-page");
         setFillWidth(true);
 
         PageHeader header = new PageHeader(
@@ -101,7 +101,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
                 "accounts-title",
                 "accounts-subtitle"
         );
-        header.getStyleClass().add("accounts-header");
+        header.getStyleClass().addAll("accounts-header", "skin-page-header");
         header.paddingProperty().bind(Bindings.createObjectBinding(() -> {
             double horizontal = header.getWidth() < 600 ? 16
                     : header.getWidth() < 900 ? 24 : 38;
@@ -111,7 +111,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         previewCard = new VBox(VantaUI.spacing(2));
         previewCard.setAlignment(Pos.CENTER);
         previewCard.setPadding(new Insets(VantaUI.spacing(4), VantaUI.spacing(3), VantaUI.spacing(5), VantaUI.spacing(3)));
-        previewCard.getStyleClass().add("accounts-hero");
+        previewCard.getStyleClass().addAll("accounts-hero", "skin-preview-panel");
         VantaUI.applySurface(previewCard, VantaUI.SurfaceRole.PANEL);
         modelPreview.setAccessibleText("Interactive 3D preview of the selected Minecraft skin");
         previewCard.setMinWidth(264);
@@ -126,7 +126,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
 
         VBox controls = new VBox(VantaUI.spacing(3));
         controls.setPadding(new Insets(VantaUI.spacing(6)));
-        controls.getStyleClass().add("accounts-hero");
+        controls.getStyleClass().addAll("accounts-hero", "skin-controls-panel");
         VantaUI.applySurface(controls, VantaUI.SurfaceRole.PANEL);
         controls.setMinWidth(0);
         controls.setPrefWidth(420);
@@ -218,6 +218,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
                 formatHint, actions, statusLabel
         );
         FlowPane body = new FlowPane(VantaUI.spacing(5), VantaUI.spacing(5), previewCard, controls);
+        body.getStyleClass().add("skin-workspace");
         body.setAlignment(Pos.TOP_CENTER);
         body.setMaxWidth(Double.MAX_VALUE);
         body.paddingProperty().bind(Bindings.createObjectBinding(() -> {
