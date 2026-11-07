@@ -691,3 +691,100 @@
 
 .create-instance-page .create-instance-environment-fields { -fx-spacing: 16px; -fx-alignment: top-left; }
 .create-instance-page .create-instance-field-group { -fx-spacing: 7px; }
+
+
+/* Repair: make diagnosis, findings and actions read as one workflow. */
+.repair-page { -fx-spacing: 0; }
+.repair-page .repair-page-header { -fx-spacing: 11px; }
+.repair-page .repair-issue-section {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 14px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 20px;
+    -fx-spacing: 14px;
+}
+.repair-page .repair-issue-card {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 16px;
+}
+.repair-page .repair-issue-card:hover {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: derive(-vantaborder, 16%);
+}
+.repair-page .repair-actions {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 11px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 11px;
+    -fx-border-width: 1px;
+    -fx-padding: 12px;
+    -fx-spacing: 8px;
+}
+.repair-page .repair-status { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
+
+/* Server manager: keep the profile rail distinct from the active workspace. */
+.server-manager { -fx-spacing: 18px; }
+.server-manager .server-page-header { -fx-spacing: 7px; }
+.server-manager .server-sidebar {
+    -fx-background-radius: 13px;
+    -fx-border-radius: 13px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+}
+.server-manager .server-workspace { -fx-spacing: 14px; }
+.server-manager .server-profile-card {
+    -fx-background-radius: 10px;
+    -fx-border-radius: 10px;
+    -fx-padding: 11px 12px;
+}
+.server-manager .server-panel {
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+}
+.server-manager .server-console {
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+}
+
+/* Skin changer: give the model preview visual priority without crowding controls. */
+.skin-changer-page { -fx-spacing: 0; }
+.skin-changer-page .skin-page-header { -fx-padding: 20px 28px 0 28px; }
+.skin-changer-page .skin-workspace {
+    -fx-alignment: top-center;
+    -fx-hgap: 18px;
+    -fx-vgap: 18px;
+}
+.skin-changer-page .skin-preview-panel {
+    -fx-min-width: 270px;
+    -fx-pref-width: 340px;
+    -fx-max-width: 390px;
+    -fx-min-height: 420px;
+    -fx-padding: 22px;
+}
+.skin-changer-page .skin-controls-panel {
+    -fx-spacing: 13px;
+    -fx-padding: 22px;
+    -fx-min-width: 320px;
+    -fx-pref-width: 480px;
+    -fx-max-width: 560px;
+}
+.skin-changer-page .skin-controls-panel .accounts-card-name {
+    -fx-padding: 7px 0 0 0;
+}
+.skin-changer-page .skin-controls-panel .combo-box-base {
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+}
+.skin-changer-page .skin-layer-toggle {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 7px;
+    -fx-padding: 7px 10px;
+}
+.skin-changer-page .skin-layer-toggle:selected { -fx-text-fill: -vantaaccent; }
