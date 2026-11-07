@@ -1,136 +1,134 @@
 package dev.itsdropper.vanta.ui.components;
 
 import dev.itsdropper.vanta.launcher.modrinth.ModrinthTag;
+import javafx.scene.control.Label;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.SVGPath;
+import javafx.scene.shape.Circle;
+import org.apache.batik.transcoder.TranscoderInput;
+import org.apache.batik.transcoder.TranscoderOutput;
+import org.apache.batik.transcoder.image.PNGTranscoder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.StringReader;
 import java.util.Locale;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
- * Bounded renderer for the SVG path data supplied by Modrinth's tag API.
+ * Renders the complete SVG artwork returned by Modrinth's tag API.
  *
- * SVG path elements inside defs, clipPath, masks and other non-rendered
- * containers are not artwork. Treating those paths as visible artwork can
- * turn clipping geometry into large solid shapes. The viewport clip is a
- * second line of defence against malformed or out-of-viewBox path geometry.
+ * SVGPath only supports path data; it silently loses transforms, groups,
+ * strokes, circles, polygons, masks and other valid SVG constructs. Batik
+ * rasterizes the complete document once, and the resulting image is cached
+ * so repeated tags do not repeatedly parse or transcode the same artwork.
  */
 public final class ModrinthTagIcon extends Region {
-    private static final Pattern PATH_PATTERN = Pattern.compile(
-            "<path\\b[^>]*\\bd\\s*=\\s*[\"']([^\"']+)[\"'][^>]*>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
-    private static final Pattern VIEWBOX_PATTERN = Pattern.compile(
-            "viewBox\\s*=\\s*[\"']\\s*([-\\d.]+)[ ,]+([-\\d.]+)[ ,]+([\\d.]+)[ ,]+([\\d.]+)[\"']",
-            Pattern.CASE_INSENSITIVE
-    );
-    private static final Pattern DEFS_PATTERN = Pattern.compile(
-            "<defs\\b[^>]*>.*?</defs\\s*>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
-    private static final Pattern CLIP_PATH_PATTERN = Pattern.compile(
-            "<clipPath\\b[^>]*>.*?</clipPath\\s*>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
-    private static final Pattern MASK_PATTERN = Pattern.compile(
-            "<mask\\b[^>]*>.*?</mask\\s*>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
-    private static final Pattern SYMBOL_PATTERN = Pattern.compile(
-            "<symbol\\b[^>]*>.*?</symbol\\s*>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
-    private static final Pattern MARKER_PATTERN = Pattern.compile(
-            "<marker\\b[^>]*>.*?</marker\\s*>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
-    private static final Pattern PATTERN_PATTERN = Pattern.compile(
-            "<pattern\\b[^>]*>.*?</pattern\\s*>",
-            Pattern.CASE_INSENSITIVE | Pattern.DOTALL
-    );
+    private static final int RASTER_SIZE = 64;
+    private static final ConcurrentMap<String, Image> IMAGE_CACHE = new ConcurrentHashMap<>();
 
-    private final javafx.scene.Group paths = new javafx.scene.Group();
-    private final Rectangle viewportClip = new Rectangle();
+    private final ImageView imageView = new ImageView();
 
     public ModrinthTagIcon(ModrinthTag tag, Color color, double size) {
         setMinSize(size, size);
         setPrefSize(size, size);
         setMaxSize(size, size);
         setMouseTransparent(true);
-        setClip(viewportClip);
 
-        if (tag == null || tag.getIcon() == null || tag.getIcon().isBlank()) return;
+        imageView.setFitWidth(size);
+        imageView.setFitHeight(size);
+        imageView.setPreserveRatio(true);
+        imageView.setSmooth(true);
+        imageView.setMouseTransparent(true);
 
-        String svg = tag.getIcon();
-        // These elements define clipping/masking or reusable artwork. Their
-        // child paths must never be painted as ordinary visible icon paths.
-        svg = DEFS_PATTERN.matcher(svg).replaceAll("");
-        svg = CLIP_PATH_PATTERN.matcher(svg).replaceAll("");
-        svg = MASK_PATTERN.matcher(svg).replaceAll("");
-        svg = SYMBOL_PATTERN.matcher(svg).replaceAll("");
-        svg = MARKER_PATTERN.matcher(svg).replaceAll("");
-        svg = PATTERN_PATTERN.matcher(svg).replaceAll("");
-
-        Matcher matcher = PATH_PATTERN.matcher(svg);
-        while (matcher.find()) {
-            SVGPath path = new SVGPath();
-            path.setContent(matcher.group(1));
-            path.setFill(color == null ? Color.GRAY : color);
-            paths.getChildren().add(path);
+        Image image = tag == null ? null : loadImage(tag.getIcon(), color);
+        if (image != null && !image.isError()) {
+            imageView.setImage(image);
+            getChildren().add(imageView);
+        } else {
+            getChildren().add(createFallback(tag, color, size));
         }
-        if (paths.getChildren().isEmpty()) return;
+    }
 
-        Matcher viewBox = VIEWBOX_PATTERN.matcher(svg);
-        if (viewBox.find()) {
-            try {
-                double minX = Double.parseDouble(viewBox.group(1));
-                double minY = Double.parseDouble(viewBox.group(2));
-                double width = Double.parseDouble(viewBox.group(3));
-                double height = Double.parseDouble(viewBox.group(4));
-                if (width > 0 && height > 0) {
-                    paths.setUserData(new double[]{minX, minY, width, height});
-                }
-            } catch (NumberFormatException ignored) {
-                // Bounds-based scaling below is a safe fallback.
+    private static Image loadImage(String svg, Color color) {
+        if (svg == null || svg.isBlank()) return null;
+        String tint = toHex(color == null ? Color.GRAY : color);
+        String cacheKey = tint + '\\n' + svg;
+        return IMAGE_CACHE.computeIfAbsent(cacheKey, ignored -> transcode(svg, tint));
+    }
+
+    private static Image transcode(String source, String tint) {
+        try {
+            String svg = source.replaceAll("(?i)currentColor", tint);
+            int closingTag = svg.toLowerCase(Locale.ROOT).lastIndexOf("</svg>");
+            if (closingTag >= 0) {
+                String style = "<style>"
+                        + "path:not([fill='none']),circle:not([fill='none']),"
+                        + "rect:not([fill='none']),ellipse:not([fill='none']),"
+                        + "polygon:not([fill='none']),polyline:not([fill='none'])"
+                        + "{fill:" + tint + " !important;}"
+                        + "path[stroke]:not([stroke='none']),circle[stroke]:not([stroke='none']),"
+                        + "rect[stroke]:not([stroke='none']),ellipse[stroke]:not([stroke='none']),"
+                        + "polygon[stroke]:not([stroke='none']),polyline[stroke]:not([stroke='none'])"
+                        + "{stroke:" + tint + " !important;}"
+                        + "</style>";
+                svg = svg.substring(0, closingTag) + style + svg.substring(closingTag);
             }
+
+            PNGTranscoder transcoder = new PNGTranscoder();
+            transcoder.addTranscodingHint(PNGTranscoder.KEY_WIDTH, (float) RASTER_SIZE);
+            transcoder.addTranscodingHint(PNGTranscoder.KEY_HEIGHT, (float) RASTER_SIZE);
+            ByteArrayOutputStream output = new ByteArrayOutputStream();
+            transcoder.transcode(
+                    new TranscoderInput(new StringReader(svg)),
+                    new TranscoderOutput(output)
+            );
+            byte[] bytes = output.toByteArray();
+            if (bytes.length == 0) return null;
+            Image image = new Image(new java.io.ByteArrayInputStream(bytes), 0, 0, true, true);
+            return image.isError() ? null : image;
+        } catch (Exception ignored) {
+            // The tag remains readable and receives a deterministic fallback.
+            return null;
         }
-        getChildren().add(paths);
+    }
+
+    private static StackPane createFallback(ModrinthTag tag, Color color, double size) {
+        Color accent = color == null ? Color.GRAY : color;
+        Circle background = new Circle(size * 0.46, accent.deriveColor(0, 0.65, 1.0, 0.24));
+        Label glyph = new Label(fallbackGlyph(tag));
+        glyph.setTextFill(accent);
+        glyph.setStyle("-fx-font-size: " + Math.max(8, size * 0.62)
+                + "px; -fx-font-weight: bold; -fx-padding: 0;");
+        StackPane fallback = new StackPane(background, glyph);
+        fallback.setMinSize(size, size);
+        fallback.setPrefSize(size, size);
+        fallback.setMaxSize(size, size);
+        fallback.setMouseTransparent(true);
+        return fallback;
+    }
+
+    private static String fallbackGlyph(ModrinthTag tag) {
+        String name = tag == null ? null : tag.getName();
+        if (name == null || name.isBlank()) return "•";
+        String normalized = name.replaceAll("[^\\p{Alnum}]", "");
+        if (normalized.isBlank()) return "•";
+        return normalized.substring(0, 1).toUpperCase(Locale.ROOT);
+    }
+
+    private static String toHex(Color color) {
+        return String.format(Locale.ROOT, "#%02X%02X%02X",
+                (int) Math.round(color.getRed() * 255),
+                (int) Math.round(color.getGreen() * 255),
+                (int) Math.round(color.getBlue() * 255));
     }
 
     @Override
     protected void layoutChildren() {
-        double width = getWidth();
-        double height = getHeight();
-        viewportClip.setWidth(Math.max(0, width));
-        viewportClip.setHeight(Math.max(0, height));
-        if (paths.getChildren().isEmpty() || width <= 0 || height <= 0) return;
-
-        double minX;
-        double minY;
-        double sourceWidth;
-        double sourceHeight;
-        Object viewBox = paths.getUserData();
-        if (viewBox instanceof double[] dimensions) {
-            minX = dimensions[0];
-            minY = dimensions[1];
-            sourceWidth = dimensions[2];
-            sourceHeight = dimensions[3];
-        } else {
-            var bounds = paths.getLayoutBounds();
-            minX = bounds.getMinX();
-            minY = bounds.getMinY();
-            sourceWidth = Math.max(1, bounds.getWidth());
-            sourceHeight = Math.max(1, bounds.getHeight());
-        }
-
-        double scale = Math.min(width / sourceWidth, height / sourceHeight);
-        paths.setScaleX(scale);
-        paths.setScaleY(scale);
-        paths.setTranslateX((width - sourceWidth * scale) / 2 - minX * scale);
-        paths.setTranslateY((height - sourceHeight * scale) / 2 - minY * scale);
+        imageView.relocate(0, 0);
     }
 
     public static Color loaderColor(String loader) {
