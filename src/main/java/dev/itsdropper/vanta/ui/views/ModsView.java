@@ -287,6 +287,8 @@ public class ModsView extends VBox {
                         navigation,
                         actions
                 );
+        header.getStyleClass().add("mods-page-header");
+        actions.getStyleClass().add("mods-toolbar");
 
         // =========================================================
         // CONTENT LIST
