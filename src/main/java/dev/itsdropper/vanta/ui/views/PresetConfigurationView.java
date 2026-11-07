@@ -51,7 +51,7 @@ public class PresetConfigurationView extends VBox {
         this.onBack = onBack;
         this.onBrowseModpacks = onBrowseModpacks;
 
-        getStyleClass().addAll("page", "vanta-consistent-page");
+        getStyleClass().addAll("page", "vanta-consistent-page", "preset-configuration-page");
 
         setPadding(
                 new Insets(28, 36, 28, 36)
@@ -79,9 +79,7 @@ public class PresetConfigurationView extends VBox {
         VBox panel =
                 new VBox();
 
-        panel.getStyleClass().add(
-                "create-instance-panel"
-        );
+        panel.getStyleClass().addAll("create-instance-panel", "preset-configuration-panel");
 
         panel.setPadding(
                 new Insets(24)
@@ -129,12 +127,8 @@ public class PresetConfigurationView extends VBox {
                 true
         );
 
-        VBox presetHeader =
-                new VBox(
-                        6,
-                        presetTitle,
-                        description
-                );
+        VBox presetHeader = new VBox(7, presetTitle, description);
+        presetHeader.getStyleClass().add("preset-config-hero");
 
         // =========================================================
         // ENVIRONMENT
@@ -155,9 +149,8 @@ public class PresetConfigurationView extends VBox {
         HBox environment =
                 new HBox(16);
 
-        environment.getStyleClass().add(
-                "preset-environment"
-        );
+        environment.getStyleClass().add("preset-environment");
+        environmentSection.getStyleClass().add("preset-config-section");
 
         environment.setAlignment(
                 Pos.CENTER_LEFT
@@ -362,10 +355,8 @@ public class PresetConfigurationView extends VBox {
                 true
         );
 
-        modsSection.getChildren().addAll(
-                modsTitle,
-                modsScroll
-        );
+        modsSection.getChildren().addAll(modsTitle, modsScroll);
+        modsSection.getStyleClass().add("preset-config-section");
 
         // =========================================================
         // INSTANCE NAME
@@ -402,21 +393,15 @@ public class PresetConfigurationView extends VBox {
                 "create-field"
         );
 
-        nameSection.getChildren().addAll(
-                nameLabel,
-                nameField
-        );
+        nameSection.getChildren().addAll(nameLabel, nameField);
+        nameSection.getStyleClass().add("preset-config-section");
 
         // =========================================================
         // BUILD CONTENT
         // =========================================================
 
-        content.getChildren().addAll(
-                presetHeader,
-                environmentSection,
-                modsSection,
-                nameSection
-        );
+        content.getChildren().addAll(presetHeader, environmentSection, modsSection, nameSection);
+        content.getStyleClass().add("preset-config-content");
 
         // =========================================================
         // CONTENT SCROLL
