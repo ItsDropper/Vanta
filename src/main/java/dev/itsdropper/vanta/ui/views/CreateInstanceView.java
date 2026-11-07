@@ -120,7 +120,7 @@ public class CreateInstanceView extends VBox {
         // PAGE
         // =========================================================
 
-        getStyleClass().add("page");
+        getStyleClass().addAll("page", "vanta-consistent-page");
 
         setPadding(
                 new Insets(32, 36, 36, 36)

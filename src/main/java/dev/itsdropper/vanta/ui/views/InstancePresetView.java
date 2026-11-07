@@ -28,7 +28,7 @@ public class InstancePresetView extends VBox {
         this.onPresetSelected = onPresetSelected;
         this.onBack = onBack;
 
-        getStyleClass().add("page");
+        getStyleClass().addAll("page", "vanta-consistent-page");
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 

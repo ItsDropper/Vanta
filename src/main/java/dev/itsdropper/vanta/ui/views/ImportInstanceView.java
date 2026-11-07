@@ -45,8 +45,9 @@ public class ImportInstanceView extends VBox {
         // PAGE
         // =========================================================
 
-        getStyleClass().add(
-                "page"
+        getStyleClass().addAll(
+                "page",
+                "vanta-consistent-page"
         );
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);

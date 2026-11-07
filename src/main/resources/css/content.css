@@ -853,3 +853,75 @@
     -fx-text-fill: -vantatext;
     -fx-fill: -vantatext;
 }
+
+/* ============================================================
+   INSTANCE CONTENT + NON-SIDEBAR PAGE CONSISTENCY
+   Deliberately scoped away from .global-mods-page / GlobalModsView.
+   ============================================================ */
+.vanta-consistent-page { -fx-spacing: 20px; }
+.vanta-consistent-page .page-title {
+    -fx-font-size: 28px; -fx-font-weight: 800; -fx-text-fill: -vantatext;
+}
+.vanta-consistent-page .page-subtitle {
+    -fx-font-size: 12px; -fx-text-fill: -vantamuted;
+}
+.vanta-consistent-page .page-action-row {
+    -fx-hgap: 8px; -fx-vgap: 8px; -fx-alignment: center-left;
+}
+.vanta-consistent-page .primary-button,
+.vanta-consistent-page .secondary-button {
+    -fx-min-height: 36px; -fx-background-radius: 9px; -fx-border-radius: 9px;
+    -fx-font-size: 11px; -fx-font-weight: 700; -fx-padding: 8px 13px;
+}
+.vanta-consistent-page .text-field,
+.vanta-consistent-page .combo-box-base,
+.vanta-consistent-page .text-area {
+    -fx-background-color: -vantasurfaceraised; -fx-background-radius: 9px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 9px; -fx-border-width: 1px;
+    -fx-text-fill: -vantatext; -fx-prompt-text-fill: -vantasubtle;
+}
+.vanta-consistent-page .text-field:focused,
+.vanta-consistent-page .combo-box-base:focused,
+.vanta-consistent-page .text-area:focused { -fx-border-color: -vantaaccent; }
+.instance-mods-page { -fx-spacing: 18px; }
+.instance-mods-page .page-header { -fx-padding: 0 0 2px 0; }
+.instance-mods-page .instance-tabs {
+    -fx-background-color: -vantasurface; -fx-background-radius: 11px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-padding: 4px;
+}
+.instance-mods-page .instance-tabs .button {
+    -fx-min-height: 34px; -fx-background-radius: 8px; -fx-border-radius: 8px;
+    -fx-padding: 7px 13px;
+}
+.instance-mods-page .instances-search {
+    -fx-min-height: 36px; -fx-pref-height: 36px; -fx-padding: 0 12px;
+}
+.instance-mods-page .instance-list { -fx-spacing: 9px; -fx-padding: 2px 2px 12px 2px; }
+.instance-mods-page .instance-card {
+    -fx-background-color: -vantasurface; -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 12px;
+    -fx-border-width: 1px; -fx-padding: 14px 16px;
+}
+.instance-mods-page .instance-card:hover {
+    -fx-background-color: -vantasurfaceraised; -fx-border-color: derive(-vantaborder, 18%);
+}
+.instance-mods-page .instances-status,
+.screenshots-page .instances-status { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
+.screenshots-page .page-header { -fx-padding: 0 0 2px 0; }
+.screenshots-page .screenshot-grid {
+    -fx-hgap: 14px; -fx-vgap: 14px; -fx-padding: 2px 2px 14px 2px;
+}
+.screenshots-page .screenshot-card {
+    -fx-background-color: -vantasurface; -fx-background-radius: 13px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 13px;
+    -fx-border-width: 1px; -fx-padding: 9px;
+}
+.screenshots-page .screenshot-card:hover {
+    -fx-background-color: -vantasurfaceraised; -fx-border-color: derive(-vantaborder, 20%);
+}
+.screenshots-page .screenshot-preview {
+    -fx-background-color: -vantabg; -fx-background-radius: 8px;
+}
+.screenshots-page .screenshot-name {
+    -fx-text-fill: -vantatext; -fx-font-size: 11px; -fx-font-weight: 600;
+}

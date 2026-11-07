@@ -51,8 +51,10 @@ public class ScreenshotsView extends VBox {
         this.onBack =
                 onBack;
 
-        getStyleClass().add(
-                "page"
+        getStyleClass().addAll(
+                "page",
+                "screenshots-page",
+                "vanta-consistent-page"
         );
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
@@ -78,18 +80,13 @@ public class ScreenshotsView extends VBox {
                 event -> onBack.run()
         );
 
-        PageHeader headerText = new PageHeader(
-                "Screenshots",
-                instance.getName() + " • Minecraft screenshots",
-                "page-title",
-                "page-subtitle"
-        );
-
-        VBox header =
-                new VBox(
-                        14,
-                        backButton,
-                        headerText
+        PageHeader header =
+                new PageHeader(
+                        "Screenshots",
+                        instance.getName() + " • Minecraft screenshots",
+                        "page-title",
+                        "page-subtitle",
+                        backButton
                 );
 
         // =========================================================

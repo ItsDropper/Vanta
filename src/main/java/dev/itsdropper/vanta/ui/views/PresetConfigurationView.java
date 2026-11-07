@@ -50,7 +50,7 @@ public class PresetConfigurationView extends VBox {
         this.onBack = onBack;
         this.onBrowseModpacks = onBrowseModpacks;
 
-        getStyleClass().add("page");
+        getStyleClass().addAll("page", "vanta-consistent-page");
 
         setPadding(
                 new Insets(28, 36, 28, 36)

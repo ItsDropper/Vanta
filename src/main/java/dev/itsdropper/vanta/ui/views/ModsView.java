@@ -87,7 +87,7 @@ public class ModsView extends VBox {
         this.selectedType =
                 ContentType.MODS;
 
-        getStyleClass().addAll("page", "instance-mods-page");
+        getStyleClass().addAll("page", "instance-mods-page", "vanta-consistent-page");
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
@@ -112,6 +112,8 @@ public class ModsView extends VBox {
 
         searchField = new TextField();
         searchField.setPromptText(Localization.text("mods.searchPrompt"));
+        searchField.setPrefWidth(280);
+        searchField.setMinWidth(180);
         searchField.getStyleClass().add("instances-search");
         searchField.textProperty().addListener(
                 (observable, oldValue, newValue) -> loadInstalledContent()
@@ -264,9 +266,10 @@ public class ModsView extends VBox {
         navigation.setAlignment(Pos.CENTER_LEFT);
         navigation.getStyleClass().add("instance-tabs");
 
-        HBox actions =
-                new HBox(
-                        10,
+        FlowPane actions =
+                new FlowPane(
+                        8,
+                        8,
                         searchField,
                         browseButton,
                         folderButton,
@@ -275,7 +278,7 @@ public class ModsView extends VBox {
                         settingsButton
                 );
         actions.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(searchField, Priority.ALWAYS);
+        actions.getStyleClass().add("page-action-row");
 
         VBox header =
                 new VBox(

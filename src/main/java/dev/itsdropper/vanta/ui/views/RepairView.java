@@ -48,8 +48,9 @@ public class RepairView extends VBox {
         this.onBack = onBack;
         this.onRepair = onRepair;
 
-        getStyleClass().add(
-                "page"
+        getStyleClass().addAll(
+                "page",
+                "vanta-consistent-page"
         );
 
         setFillWidth(
