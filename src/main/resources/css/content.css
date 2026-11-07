@@ -925,3 +925,40 @@
 .screenshots-page .screenshot-name {
     -fx-text-fill: -vantatext; -fx-font-size: 11px; -fx-font-weight: 600;
 }
+ 
+
+/* Instance content and screenshot surfaces: compact, aligned toolbars. */
+.instance-mods-page .mods-page-header { -fx-spacing: 14px; }
+.instance-mods-page .mods-toolbar {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 11px;
+    -fx-hgap: 8px;
+    -fx-vgap: 8px;
+    -fx-alignment: center-left;
+}
+.instance-mods-page .mods-toolbar .instances-search {
+    -fx-pref-width: 300px;
+    -fx-min-width: 190px;
+}
+.instance-mods-page .instance-tabs { -fx-spacing: 4px; }
+.instance-mods-page .instance-tabs .button { -fx-font-size: 10px; }
+.screenshots-page { -fx-spacing: 16px; }
+.screenshots-page .screenshots-toolbar {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 11px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 11px;
+    -fx-border-width: 1px;
+    -fx-padding: 9px 11px;
+    -fx-spacing: 8px;
+}
+.screenshots-page .screenshot-grid { -fx-alignment: top-left; }
+.screenshots-page .screenshot-card {
+    -fx-background-insets: 0;
+    -fx-padding: 10px;
+}
+.screenshots-page .screenshot-name { -fx-padding: 4px 2px 1px 2px; }
