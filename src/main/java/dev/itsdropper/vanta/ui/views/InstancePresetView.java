@@ -29,7 +29,7 @@ public class InstancePresetView extends VBox {
         this.onPresetSelected = onPresetSelected;
         this.onBack = onBack;
 
-        getStyleClass().addAll("page", "vanta-consistent-page");
+        getStyleClass().addAll("page", "vanta-consistent-page", "instance-preset-page");
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
@@ -57,9 +57,8 @@ public class InstancePresetView extends VBox {
                         12
                 );
 
-        presets.setMaxWidth(
-                680
-        );
+        presets.setMaxWidth(920);
+        presets.getStyleClass().add("preset-choice-list");
 
         for (InstancePreset preset :
                 InstancePresets.getBuiltInPresets()) {
@@ -153,17 +152,13 @@ public class InstancePresetView extends VBox {
         Button button =
                 new Button();
 
-        button.getStyleClass().add(
-                "create-option"
-        );
+        button.getStyleClass().addAll("create-option", "preset-choice-card");
 
         button.setMaxWidth(
                 Double.MAX_VALUE
         );
 
-        button.setPrefHeight(
-                92
-        );
+        button.setPrefHeight(132);
 
         Label title =
                 new Label(
@@ -183,35 +178,30 @@ public class InstancePresetView extends VBox {
                 "create-option-description"
         );
 
-        Label details =
-                new Label(
-                        preset.getMinecraftVersions().get(0)
-                                + " • "
-                                + preset.getLoader()
-                                + " • "
-                                + preset.getMods().size()
-                                + " mods"
-                );
+        java.util.List<String> versions = preset.getMinecraftVersions();
+        java.util.List<String> mods = preset.getMods();
+        String versionSummary = versions == null || versions.isEmpty()
+                ? "—" : versions.size() == 1 ? versions.get(0) : versions.get(0) + " + " + (versions.size() - 1);
+        Label details = new Label(versionSummary + " • " + preset.getLoader() + " • "
+                + (mods == null ? 0 : mods.size()) + " mods");
 
-        details.getStyleClass().add(
-                "create-option-description"
-        );
+        details.getStyleClass().add("preset-choice-meta");
 
-        VBox text =
-                new VBox(
-                        5,
-                        title,
-                        description,
-                        details
-                );
+        Label symbol = new Label("✦");
+        symbol.getStyleClass().add("preset-choice-icon");
+        Label arrow = new Label("→");
+        arrow.getStyleClass().add("preset-choice-arrow");
+        VBox text = new VBox(7, title, description, details);
+        HBox card = new HBox(18, symbol, text, arrow);
+        card.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(text, Priority.ALWAYS);
+        card.getStyleClass().add("preset-choice-content");
 
         text.setAlignment(
                 Pos.CENTER_LEFT
         );
 
-        button.setGraphic(
-                text
-        );
+        button.setGraphic(card);
 
         return button;
     }
