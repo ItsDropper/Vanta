@@ -60,7 +60,7 @@ public final class ModrinthTagIcon extends Region {
     private static Image loadImage(String svg, Color color) {
         if (svg == null || svg.isBlank()) return null;
         String tint = toHex(color == null ? Color.GRAY : color);
-        String cacheKey = tint + '\\n' + svg;
+        String cacheKey = tint + "::" + svg;
         return IMAGE_CACHE.computeIfAbsent(cacheKey, ignored -> transcode(svg, tint));
     }
 
