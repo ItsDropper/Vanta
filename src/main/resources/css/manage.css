@@ -573,3 +573,117 @@
 .create-instance-type-page .create-type-option-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 21px; -fx-padding: 0 2px 1px 8px; }
 .create-instance-type-page .create-type-option:hover .create-type-option-arrow { -fx-text-fill: -vantaaccent; }
 .create-instance-type-page .create-type-footer { -fx-padding: 2px 0 0 0; }
+
+
+
+/* Instance creation: focused form surfaces and stronger field hierarchy. */
+.create-instance-page { -fx-spacing: 22px; }
+.create-instance-page .create-instance-panel {
+    -fx-background-color: -vantasurface; -fx-background-radius: 13px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 13px; -fx-border-width: 1px;
+    -fx-padding: 26px; -fx-spacing: 17px;
+}
+.create-instance-page .create-panel-title { -fx-font-size: 17px; -fx-font-weight: 800; -fx-text-fill: -vantatext; }
+.create-instance-page .create-panel-subtitle { -fx-font-size: 11px; -fx-text-fill: -vantamuted; }
+.create-instance-page .create-label { -fx-font-size: 10px; -fx-font-weight: 800; -fx-letter-spacing: .5px; }
+.create-instance-page .create-field, .create-instance-page .create-combo {
+    -fx-min-height: 46px; -fx-pref-height: 46px; -fx-background-color: -vantabg;
+    -fx-background-radius: 8px; -fx-border-color: -vantaborder; -fx-border-radius: 8px;
+    -fx-border-width: 1px; -fx-text-fill: -vantatext; -fx-font-size: 12px;
+}
+.create-instance-page .create-field:focused, .create-instance-page .create-combo:focused {
+    -fx-border-color: -vantaaccent; -fx-background-color: -vantasurfaceraised;
+}
+.create-instance-page .create-status {
+    -fx-background-color: -vantabg; -fx-background-radius: 7px;
+    -fx-padding: 9px 11px; -fx-font-size: 10px;
+}
+.create-instance-page .primary-button { -fx-min-width: 150px; -fx-font-weight: 800; }
+
+/* Import: make the file format and next action unmistakable. */
+.import-instance-page { -fx-spacing: 22px; }
+.import-instance-page .import-instance-panel {
+    -fx-background-color: -vantasurface; -fx-background-radius: 14px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 14px; -fx-border-width: 1px;
+    -fx-spacing: 20px; -fx-padding: 30px;
+}
+.import-instance-page .import-intro { -fx-spacing: 11px; -fx-alignment: center-left; }
+.import-instance-page .import-drop-glyph {
+    -fx-background-color: -vantaaccentsoft; -fx-background-radius: 14px;
+    -fx-text-fill: -vantaaccent; -fx-font-size: 31px; -fx-font-weight: 800;
+    -fx-padding: 7px 18px;
+}
+.import-instance-page .import-panel-eyebrow { -fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: -vantatext; }
+.import-instance-page .import-panel-description { -fx-font-size: 12px; -fx-line-spacing: 3px; -fx-text-fill: -vantamuted; }
+.import-instance-page .import-format-badge {
+    -fx-background-color: -vantabg; -fx-background-radius: 5px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 5px;
+    -fx-text-fill: -vantaaccent; -fx-font-size: 9px; -fx-font-weight: 900;
+    -fx-padding: 6px 9px;
+}
+.import-instance-page .import-primary-action { -fx-min-width: 190px; -fx-min-height: 44px; -fx-font-weight: 800; }
+.import-instance-page .import-progress-row { -fx-min-height: 30px; }
+.import-instance-page .import-status {
+    -fx-background-color: -vantabg; -fx-background-radius: 7px;
+    -fx-padding: 10px 12px; -fx-font-size: 10px;
+}
+
+/* Preset library: each preset is a deliberate selectable product card. */
+.instance-preset-page { -fx-spacing: 20px; }
+.instance-preset-page .preset-choice-list { -fx-spacing: 12px; }
+.instance-preset-page .preset-choice-card {
+    -fx-background-color: -vantasurface; -fx-background-radius: 11px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
+    -fx-padding: 15px 18px; -fx-cursor: hand; -fx-alignment: center-left;
+}
+.instance-preset-page .preset-choice-card:hover {
+    -fx-background-color: -vantasurfaceraised; -fx-border-color: -vantaaccent;
+    -fx-translate-y: -1px;
+}
+.instance-preset-page .preset-choice-card:focused { -fx-border-color: -vantaaccent; }
+.instance-preset-page .preset-choice-content { -fx-spacing: 16px; }
+.instance-preset-page .preset-choice-icon {
+    -fx-background-color: -vantaaccentsoft; -fx-background-radius: 10px;
+    -fx-text-fill: -vantaaccent; -fx-font-size: 20px; -fx-font-weight: 800;
+    -fx-padding: 10px 13px; -fx-min-width: 43px; -fx-alignment: center;
+}
+.instance-preset-page .create-option-title { -fx-text-fill: -vantatext; -fx-font-size: 15px; -fx-font-weight: 800; }
+.instance-preset-page .create-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
+.instance-preset-page .preset-choice-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 9px; -fx-font-weight: 800; }
+.instance-preset-page .preset-choice-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 22px; }
+.instance-preset-page .preset-choice-card:hover .preset-choice-arrow { -fx-text-fill: -vantaaccent; }
+
+/* Preset configuration: distinct overview, environment, contents and naming. */
+.preset-configuration-page { -fx-spacing: 18px; }
+.preset-configuration-page .preset-configuration-panel {
+    -fx-background-color: -vantasurface; -fx-background-radius: 13px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 13px; -fx-border-width: 1px;
+    -fx-spacing: 17px; -fx-padding: 22px;
+}
+.preset-configuration-page .preset-config-content { -fx-spacing: 17px; }
+.preset-configuration-page .preset-config-hero {
+    -fx-background-color: linear-gradient(to right, -vantasurfaceraised, -vantasurface);
+    -fx-background-radius: 9px; -fx-border-color: -vantaborder;
+    -fx-border-radius: 9px; -fx-padding: 17px;
+}
+.preset-configuration-page .preset-config-hero .card-title { -fx-font-size: 19px; -fx-font-weight: 800; }
+.preset-configuration-page .preset-config-section {
+    -fx-background-color: -vantabg; -fx-background-radius: 9px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 9px;
+    -fx-padding: 14px; -fx-spacing: 10px;
+}
+.preset-configuration-page .preset-environment-value {
+    -fx-background-color: -vantasurfaceraised; -fx-background-radius: 7px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 7px;
+    -fx-padding: 11px 13px; -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-weight: 800;
+}
+.preset-configuration-page .create-label { -fx-font-size: 10px; -fx-font-weight: 800; }
+.preset-configuration-page .create-field, .preset-configuration-page .create-combo {
+    -fx-min-height: 44px; -fx-pref-height: 44px; -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder; -fx-border-radius: 7px; -fx-background-radius: 7px;
+}
+.preset-configuration-page .preset-mods-scroll {
+    -fx-background-color: transparent; -fx-background: transparent; -fx-border-color: transparent;
+}
+.preset-configuration-page .preset-mods-scroll > .viewport { -fx-background-color: transparent; }
+.preset-configuration-page .preset-actions { -fx-padding: 10px 0 0 0; }
