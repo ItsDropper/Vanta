@@ -33,6 +33,10 @@ public final class ModrinthTagIcon extends Region {
     private final ImageView imageView = new ImageView();
 
     public ModrinthTagIcon(ModrinthTag tag, Color color, double size) {
+        this(tag, tag == null ? null : tag.getName(), color, size);
+    }
+
+    public ModrinthTagIcon(ModrinthTag tag, String fallbackName, Color color, double size) {
         setMinSize(size, size);
         setPrefSize(size, size);
         setMaxSize(size, size);
@@ -49,7 +53,7 @@ public final class ModrinthTagIcon extends Region {
             imageView.setImage(image);
             getChildren().add(imageView);
         } else {
-            getChildren().add(createFallback(tag, color, size));
+            getChildren().add(createFallback(fallbackName, color, size));
         }
     }
 
@@ -96,10 +100,10 @@ public final class ModrinthTagIcon extends Region {
         }
     }
 
-    private static StackPane createFallback(ModrinthTag tag, Color color, double size) {
+    private static StackPane createFallback(String name, Color color, double size) {
         Color accent = color == null ? Color.GRAY : color;
         Circle background = new Circle(size * 0.46, accent.deriveColor(0, 0.65, 1.0, 0.24));
-        Label glyph = new Label(fallbackGlyph(tag));
+        Label glyph = new Label(fallbackGlyph(name));
         glyph.setTextFill(accent);
         glyph.setStyle("-fx-font-size: " + Math.max(8, size * 0.62)
                 + "px; -fx-font-weight: bold; -fx-padding: 0;");
@@ -111,8 +115,7 @@ public final class ModrinthTagIcon extends Region {
         return fallback;
     }
 
-    private static String fallbackGlyph(ModrinthTag tag) {
-        String name = tag == null ? null : tag.getName();
+    private static String fallbackGlyph(String name) {
         if (name == null || name.isBlank()) return "•";
         String normalized = name.replaceAll("[^\\p{Alnum}]", "");
         if (normalized.isBlank()) return "•";
