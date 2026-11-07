@@ -157,9 +157,7 @@ public class CreateInstanceView extends VBox {
                 new Insets(28)
         );
 
-        panel.setMaxWidth(
-                680
-        );
+        panel.setMaxWidth(820);
 
         // =========================================================
         // PANEL TITLE
@@ -323,16 +321,21 @@ public class CreateInstanceView extends VBox {
                         12
                 );
 
+        VBox versionField = new VBox(7, versionLabel, versionBox);
+        versionField.getStyleClass().add("create-instance-field-group");
+        VBox loaderField = new VBox(7, loaderLabel, loaderBox, loaderHint);
+        loaderField.getStyleClass().add("create-instance-field-group");
+        HBox environmentFields = new HBox(16, versionField, loaderField);
+        environmentFields.getStyleClass().add("create-instance-environment-fields");
+        HBox.setHgrow(versionField, Priority.ALWAYS);
+        HBox.setHgrow(loaderField, Priority.ALWAYS);
+        versionField.setMaxWidth(Double.MAX_VALUE);
+        loaderField.setMaxWidth(Double.MAX_VALUE);
+
         form.getChildren().addAll(
                 nameLabel,
                 nameField,
-
-                versionLabel,
-                versionBox,
-
-                loaderLabel,
-                loaderBox,
-                loaderHint
+                environmentFields
         );
 
         // =========================================================
