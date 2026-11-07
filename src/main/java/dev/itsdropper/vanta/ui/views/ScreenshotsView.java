@@ -129,6 +129,7 @@ public class ScreenshotsView extends VBox {
         actions.setAlignment(
                 Pos.CENTER_LEFT
         );
+        actions.getStyleClass().add("screenshots-toolbar");
 
         // =========================================================
         // GRID
