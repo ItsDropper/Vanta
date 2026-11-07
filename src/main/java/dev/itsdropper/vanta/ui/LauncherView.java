@@ -7,6 +7,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
+import dev.itsdropper.vanta.launcher.instance.InstancePresets;
 import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstancePreset;
@@ -487,8 +488,141 @@ public class LauncherView {
         }
     }
 
+    /** Backwards-compatible entry point for the original sidebar capture command. */
     public void captureSidebarScreenshots(Path outputDirectory, Consumer<Throwable> completion) {
-        SidebarScreenshotCapture.capture(root, this::showPageForCapture, outputDirectory, completion);
+        captureUiScreenshots(outputDirectory, completion);
+    }
+
+    public void captureUiScreenshots(Path outputDirectory, Consumer<Throwable> completion) {
+        SidebarScreenshotCapture.capture(root, this::showPageForCapture, outputDirectory, failure -> {
+            if (failure != null) {
+                completion.accept(failure);
+                return;
+            }
+            try {
+                Path fixtureDirectory = Files.createTempDirectory("vanta-ui-capture-")
+                        .resolve("instance");
+                Files.createDirectories(fixtureDirectory);
+                Instance previewInstance = new Instance(
+                        "ci-preview",
+                        "Vanta Preview",
+                        "1.21.11",
+                        "Fabric",
+                        "0.18.2",
+                        fixtureDirectory
+                );
+                InstancePreset previewPreset = InstancePresets.getBuiltInPresets().get(0);
+
+                List<SidebarScreenshotCapture.CaptureTarget> targets = List.of(
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "instance-mods", "Instance Mods",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new ModsView(
+                                            previewInstance, () -> {}, () -> {}, () -> {}));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "instance-screenshots", "Instance Screenshots",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new ScreenshotsView(previewInstance, () -> {}));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "browse-mods", "Browse Mods",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new ContentBrowserView(
+                                            previewInstance, ModrinthContentType.MOD, () -> {}, project -> {}));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "browse-resource-packs", "Browse Resource Packs",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new ContentBrowserView(
+                                            previewInstance, ModrinthContentType.RESOURCE_PACK, () -> {}, project -> {}));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "content-details", "Content Details",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new ModDetailsView(
+                                            previewInstance, "sodium", ModrinthContentType.MOD, () -> {}));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "create-instance-type", "Create Instance",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(createInstanceTypeView);
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "custom-instance", "Custom Instance Setup",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new CreateInstanceView(
+                                            this::showCreateInstanceView, this::instanceCreated,
+                                            this::showModrinthModpackView));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "import-instance", "Import Instance",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new ImportInstanceView(
+                                            this::showCreateInstanceView, this::instanceCreated));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "instance-presets", "Instance Presets",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new InstancePresetView(
+                                            this::showPresetConfigurationView, this::showCreateInstanceView));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "preset-configuration", "Preset Configuration",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new PresetConfigurationView(
+                                            previewPreset, this::createPresetInstance,
+                                            this::showPresetInstanceView, this::showModrinthModpackView));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "modpack-browser", "Modpack Browser",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new ModpackBrowserView(
+                                            "1.21.11", this::showCreateInstanceView, this::instanceCreated));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "instance-settings", "Instance Settings",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new InstanceSettingsView(
+                                            previewInstance, () -> {}, () -> {}));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "instance-repair", "Instance Repair",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new RepairView(
+                                            previewInstance,
+                                            "Repair Vanta Preview",
+                                            "Review installation health and repair managed Minecraft files.",
+                                            List.of(),
+                                            () -> {},
+                                            () -> {}
+                                    ));
+                                })
+                );
+
+                SidebarScreenshotCapture.captureAdditional(
+                        root,
+                        targets,
+                        outputDirectory.resolve("additional"),
+                        completion
+                );
+            } catch (Throwable captureSetupFailure) {
+                completion.accept(captureSetupFailure);
+            }
+        });
     }
 
     private void showStatePage() {

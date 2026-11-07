@@ -14,9 +14,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  capture-sidebar:
+  capture-ui:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - name: Check out source
         uses: actions/checkout@v4
@@ -34,13 +34,13 @@ jobs:
         run: chmod +x ./gradlew
       - name: Run regression tests
         run: ./gradlew test
-      - name: Capture all sidebar destinations
+      - name: Capture sidebar and additional production views
         env:
           XDG_DATA_HOME: ${{ runner.temp }}/vanta-data
           JAVA_TOOL_OPTIONS: -Dprism.order=sw -Djava.awt.headless=false
         run: |
           mkdir -p "$XDG_DATA_HOME"
-          xvfb-run -a -s "-screen 0 1600x1000x24" ./gradlew run --args="--capture-sidebar-screenshots build/ui-screenshots"
+          xvfb-run -a -s "-screen 0 1600x1000x24" ./gradlew run --args="--capture-ui-screenshots build/ui-screenshots"
           screenshots=(build/ui-screenshots/[0-9][0-9]-*.png)
           test "${#screenshots[@]}" -eq 9
           test -s build/ui-screenshots/index.md
@@ -50,20 +50,36 @@ jobs:
             test "$(stat -c%s "$screenshot")" -gt 12000
           done
           test "$(sha256sum "${screenshots[@]}" | awk '{print $1}' | sort -u | wc -l)" -eq 9
+          additional_screenshots=(build/ui-screenshots/additional/[0-9][0-9]-*.png)
+          test "${#additional_screenshots[@]}" -eq 13
+          test -s build/ui-screenshots/additional/index.md
+          test -s build/ui-screenshots/additional/overview.png
+          for screenshot in "${additional_screenshots[@]}"; do
+            test -s "$screenshot"
+            test "$(stat -c%s "$screenshot")" -gt 12000
+          done
+          test "$(sha256sum "${additional_screenshots[@]}" | awk '{print $1}' | sort -u | wc -l)" -eq 13
           python3 - <<'PY'
           from pathlib import Path
           import struct
 
-          files = sorted(Path("build/ui-screenshots").glob("[0-9][0-9]-*.png"))
-          if len(files) != 9:
-              raise SystemExit(f"Expected 9 page screenshots, found {len(files)}")
-          for path in files:
-              header = path.read_bytes()[:24]
-              if header[:8] != b"\x89PNG\r\n\x1a\n":
-                  raise SystemExit(f"{path.name} is not a PNG")
-              width, height = struct.unpack(">II", header[16:24])
-              if (width, height) != (1440, 900):
-                  raise SystemExit(f"{path.name}: expected 1440x900, got {width}x{height}")
+          groups = [
+              (Path("build/ui-screenshots"), 9),
+              (Path("build/ui-screenshots/additional"), 13),
+          ]
+          for directory, expected_count in groups:
+              files = sorted(directory.glob("[0-9][0-9]-*.png"))
+              if len(files) != expected_count:
+                  raise SystemExit(
+                      f"{directory}: expected {expected_count} screenshots, found {len(files)}"
+                  )
+              for path in files:
+                  header = path.read_bytes()[:24]
+                  if header[:8] != b"\x89PNG\r\n\x1a\n":
+                      raise SystemExit(f"{path.name} is not a PNG")
+                  width, height = struct.unpack(">II", header[16:24])
+                  if (width, height) != (1440, 900):
+                      raise SystemExit(f"{path.name}: expected 1440x900, got {width}x{height}")
           PY
       - name: Publish screenshots and capture diagnostics
         if: always()

@@ -118,6 +118,162 @@ public final class SidebarScreenshotCapture {
         settle.play();
     }
 
+
+    /** A named non-sidebar destination captured from the same production scene. */
+    public record CaptureTarget(String slug, String title, Runnable navigate) {
+        public CaptureTarget {
+            Objects.requireNonNull(slug, "slug");
+            Objects.requireNonNull(title, "title");
+            Objects.requireNonNull(navigate, "navigate");
+            if (!slug.matches("[a-z0-9-]+")) {
+                throw new IllegalArgumentException("Screenshot slug must be lowercase kebab-case");
+            }
+        }
+    }
+
+    /**
+     * Captures nested production views separately from the stable sidebar set.
+     * Keeping these in an additional directory preserves the original nine-page
+     * artifact contract while expanding visual coverage.
+     */
+    public static void captureAdditional(
+            Parent root,
+            List<CaptureTarget> targets,
+            Path outputDirectory,
+            Consumer<Throwable> completion
+    ) {
+        Objects.requireNonNull(root, "root");
+        Objects.requireNonNull(targets, "targets");
+        Objects.requireNonNull(outputDirectory, "outputDirectory");
+        Objects.requireNonNull(completion, "completion");
+        try {
+            Files.createDirectories(outputDirectory);
+            captureAdditionalPage(root, targets, outputDirectory, completion, 0);
+        } catch (Throwable failure) {
+            completion.accept(failure);
+        }
+    }
+
+    private static void captureAdditionalPage(
+            Parent root,
+            List<CaptureTarget> targets,
+            Path outputDirectory,
+            Consumer<Throwable> completion,
+            int index
+    ) {
+        if (index >= targets.size()) {
+            try {
+                writeAdditionalIndex(outputDirectory, targets);
+                writeAdditionalOverview(outputDirectory, targets);
+                completion.accept(null);
+            } catch (Throwable failure) {
+                completion.accept(failure);
+            }
+            return;
+        }
+
+        CaptureTarget target = targets.get(index);
+        try {
+            target.navigate().run();
+        } catch (Throwable failure) {
+            completion.accept(new IOException("Could not navigate to UI view: " + target.title(), failure));
+            return;
+        }
+
+        PauseTransition settle = new PauseTransition(Duration.millis(PAGE_SETTLE_MILLIS));
+        settle.setOnFinished(event -> {
+            try {
+                root.applyCss();
+                root.layout();
+                BufferedImage image = captureVisibleWindow(
+                        root,
+                        outputDirectory.resolve("debug-native.png"),
+                        outputDirectory.resolve("debug-node.png")
+                );
+                writePng(image, outputDirectory.resolve(additionalFileName(index, target)));
+                System.out.println("Captured additional UI view: " + target.title());
+            } catch (Throwable failure) {
+                completion.accept(new IOException("Screenshot failed for UI view: " + target.title(), failure));
+                return;
+            }
+            captureAdditionalPage(root, targets, outputDirectory, completion, index + 1);
+        });
+        settle.play();
+    }
+
+    private static String additionalFileName(int index, CaptureTarget target) {
+        return String.format(Locale.ROOT, "%02d-%s.png", index + 10, target.slug());
+    }
+
+    private static void writeAdditionalIndex(
+            Path outputDirectory,
+            List<CaptureTarget> targets
+    ) throws IOException {
+        List<String> lines = new ArrayList<>();
+        lines.add("# Vanta additional UI screenshots");
+        lines.add("");
+        lines.add("Production JavaFX views not represented by the nine sidebar destinations.");
+        lines.add("");
+        lines.add("![Additional UI views](overview.png)");
+        lines.add("");
+        for (int i = 0; i < targets.size(); i++) {
+            CaptureTarget target = targets.get(i);
+            lines.add(String.format(Locale.ROOT, "%02d. %s — %s",
+                    i + 10, target.title(), additionalFileName(i, target)));
+        }
+        lines.add("");
+        Files.writeString(outputDirectory.resolve("index.md"),
+                String.join(System.lineSeparator(), lines),
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+    }
+
+    private static void writeAdditionalOverview(
+            Path outputDirectory,
+            List<CaptureTarget> targets
+    ) throws IOException {
+        int rows = (int) Math.ceil(targets.size() / (double) OVERVIEW_COLUMNS);
+        int cellHeight = THUMBNAIL_HEIGHT + LABEL_HEIGHT;
+        BufferedImage overview = new BufferedImage(
+                OVERVIEW_COLUMNS * THUMBNAIL_WIDTH,
+                rows * cellHeight,
+                BufferedImage.TYPE_INT_RGB
+        );
+
+        Graphics2D graphics = overview.createGraphics();
+        try {
+            graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+            graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            graphics.setColor(new Color(11, 13, 18));
+            graphics.fillRect(0, 0, overview.getWidth(), overview.getHeight());
+            graphics.setFont(new Font("SansSerif", Font.BOLD, 15));
+
+            for (int i = 0; i < targets.size(); i++) {
+                CaptureTarget target = targets.get(i);
+                BufferedImage screenshot = ImageIO.read(
+                        outputDirectory.resolve(additionalFileName(i, target)).toFile());
+                if (screenshot == null) {
+                    throw new IOException("Could not decode screenshot for " + target.title());
+                }
+                int column = i % OVERVIEW_COLUMNS;
+                int row = i / OVERVIEW_COLUMNS;
+                int x = column * THUMBNAIL_WIDTH;
+                int y = row * cellHeight;
+                graphics.drawImage(screenshot, x, y, THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, null);
+                graphics.setColor(new Color(19, 23, 32));
+                graphics.fillRect(x, y + THUMBNAIL_HEIGHT, THUMBNAIL_WIDTH, LABEL_HEIGHT);
+                graphics.setColor(new Color(235, 239, 247));
+                graphics.drawString(target.title(), x + 16, y + THUMBNAIL_HEIGHT + 24);
+            }
+        } finally {
+            graphics.dispose();
+        }
+
+        if (!ImageIO.write(overview, "png", outputDirectory.resolve("overview.png").toFile())) {
+            throw new IOException("No PNG image writer is available for the additional overview");
+        }
+    }
+
     private static void dumpNodeTree(Node node, int depth, int maxDepth) {
         String indent = "  ".repeat(depth);
         var bounds = node.getBoundsInLocal();

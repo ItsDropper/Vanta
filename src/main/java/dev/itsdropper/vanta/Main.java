@@ -84,7 +84,10 @@ public class Main extends Application {
 
     private void startScreenshotCapture(Stage stage, List<String> arguments) {
         Path outputDirectory = Path.of("build", "ui-screenshots");
-        int captureArgument = arguments.indexOf("--capture-sidebar-screenshots");
+        int captureArgument = arguments.indexOf("--capture-ui-screenshots");
+        if (captureArgument < 0) {
+            captureArgument = arguments.indexOf("--capture-sidebar-screenshots");
+        }
         if (captureArgument >= 0 && captureArgument + 1 < arguments.size()
                 && !arguments.get(captureArgument + 1).startsWith("--")) {
             outputDirectory = Path.of(arguments.get(captureArgument + 1));
@@ -104,14 +107,14 @@ public class Main extends Application {
 
         Path destination = outputDirectory;
         PauseTransition warmup = new PauseTransition(Duration.millis(400));
-        warmup.setOnFinished(event -> launcher.captureSidebarScreenshots(destination, failure -> {
+        warmup.setOnFinished(event -> launcher.captureUiScreenshots(destination, failure -> {
             if (failure != null) {
-                System.err.println("Sidebar screenshot capture failed.");
+                System.err.println("UI screenshot capture failed.");
                 failure.printStackTrace();
                 System.exit(1);
                 return;
             }
-            System.out.println("Captured all sidebar pages to " + destination.toAbsolutePath());
+            System.out.println("Captured all major UI views to " + destination.toAbsolutePath());
             javafx.application.Platform.exit();
         }));
         warmup.play();
@@ -186,12 +189,14 @@ public class Main extends Application {
     }
 
     private static boolean isScreenshotCapture(List<String> arguments) {
-        return arguments.contains("--capture-sidebar-screenshots");
+        return arguments.contains("--capture-ui-screenshots")
+                || arguments.contains("--capture-sidebar-screenshots");
     }
 
     private static boolean isScreenshotCapture(String[] arguments) {
         for (String argument : arguments) {
-            if ("--capture-sidebar-screenshots".equals(argument)) {
+            if ("--capture-ui-screenshots".equals(argument)
+                    || "--capture-sidebar-screenshots".equals(argument)) {
                 return true;
             }
         }
