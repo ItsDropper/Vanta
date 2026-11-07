@@ -714,35 +714,39 @@ public class ModDetailsView extends VBox {
         if (categoryTags != null) {
             for (ModrinthTag tag : categoryTags) {
                 if (tag != null && tag.getName() != null) {
-                    categoriesById.putIfAbsent(tag.getName(), tag);
+                    categoriesById.putIfAbsent(tag.getName().toLowerCase(java.util.Locale.ROOT), tag);
                 }
             }
         }
 
         java.util.LinkedHashSet<String> projectTagIds = new java.util.LinkedHashSet<>();
-        projectTagIds.addAll(project.getCategories());
+        if (project.getCategories() != null) projectTagIds.addAll(project.getCategories());
+        java.util.Set<String> projectLoaderIds = new java.util.HashSet<>();
         if (project.getLoaders() != null) {
             projectTagIds.addAll(project.getLoaders());
+            project.getLoaders().stream().filter(java.util.Objects::nonNull)
+                    .map(ModrinthLoaderIds::normalize).forEach(projectLoaderIds::add);
         }
 
         for (String value : projectTagIds) {
             if (value == null || value.isBlank()) continue;
-            ModrinthTag loader = loadersById.get(ModrinthLoaderIds.normalize(value));
+            String normalized = ModrinthLoaderIds.normalize(value);
+            ModrinthTag loader = loadersById.get(normalized);
             Label chip = new Label(formatTagName(value));
             chip.getStyleClass().add("modrinth-tag-chip");
-            if (loader != null || ModrinthLoaderIds.supportsSearchFacet(value)) {
+            if (loader != null || projectLoaderIds.contains(normalized)
+                    || ModrinthLoaderIds.supportsSearchFacet(value)) {
                 Color color = ModrinthTagIcon.loaderColor(value);
                 chip.getStyleClass().add("modrinth-loader-chip");
-                if (loader != null) {
-                    chip.setGraphic(new ModrinthTagIcon(loader, color, 12));
-                }
+                chip.setGraphic(new ModrinthTagIcon(loader, value, color, 12));
                 String cssColor = String.format(java.util.Locale.ROOT, "#%02x%02x%02x",
                         (int) Math.round(color.getRed() * 255),
                         (int) Math.round(color.getGreen() * 255),
                         (int) Math.round(color.getBlue() * 255));
                 chip.setStyle("-fx-text-fill: " + cssColor + ";");
-            } else if (!categoriesById.isEmpty() && !categoriesById.containsKey(value)) {
-                continue;
+            } else {
+                ModrinthTag category = categoriesById.get(value.toLowerCase(java.util.Locale.ROOT));
+                chip.setGraphic(new ModrinthTagIcon(category, value, Color.web("#9299A6"), 12));
             }
             tags.getChildren().add(chip);
         }
