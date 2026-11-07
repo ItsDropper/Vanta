@@ -50,7 +50,8 @@ public class RepairView extends VBox {
 
         getStyleClass().addAll(
                 "page",
-                "vanta-consistent-page"
+                "vanta-consistent-page",
+                "repair-page"
         );
 
         setFillWidth(
@@ -83,10 +84,11 @@ public class RepairView extends VBox {
 
         VBox header =
                 new VBox(
-                        16,
+                        12,
                         backButton,
                         headerText
                 );
+        header.getStyleClass().add("repair-page-header");
 
         // ---------------------------------------------------------
         // ISSUE LIST
@@ -136,6 +138,7 @@ public class RepairView extends VBox {
                         ),
                         issueList
                 );
+        issueSection.getStyleClass().add("repair-issue-section");
 
         // ---------------------------------------------------------
         // ACTIONS
@@ -199,6 +202,7 @@ public class RepairView extends VBox {
         actions.setAlignment(
                 Pos.CENTER_RIGHT
         );
+        actions.getStyleClass().add("repair-actions");
 
         HBox.setHgrow(
                 statusLabel,
