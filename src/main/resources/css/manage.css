@@ -536,3 +536,40 @@
     -fx-background-radius: 6px;
     -fx-padding: 0 14px;
 }
+
+
+/* Create-instance entry point */
+.create-instance-type-page { -fx-spacing: 23px; }
+.create-instance-type-page .create-type-header { -fx-spacing: 8px; }
+.create-instance-type-page .create-type-eyebrow {
+    -fx-text-fill: -vantaaccent; -fx-font-size: 10px; -fx-font-weight: 800; -fx-letter-spacing: 2px;
+}
+.create-instance-type-page .create-type-content { -fx-spacing: 13px; }
+.create-instance-type-page .create-type-section-label {
+    -fx-text-fill: -vantamuted; -fx-font-size: 10px; -fx-font-weight: 800; -fx-letter-spacing: 1.7px;
+}
+.create-instance-type-page .create-type-grid { -fx-padding: 2px; }
+.create-instance-type-page .create-type-option {
+    -fx-background-color: -vantasurface; -fx-background-radius: 11px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
+    -fx-padding: 0; -fx-alignment: center-left; -fx-cursor: hand; -fx-effect: null;
+}
+.create-instance-type-page .create-type-option:hover {
+    -fx-background-color: -vantasurfaceraised; -fx-border-color: -vantaaccent; -fx-translate-y: -2px;
+}
+.create-instance-type-page .create-type-option:focused { -fx-border-color: -vantaaccent; -fx-border-width: 1.5px; }
+.create-instance-type-page .create-type-option:pressed { -fx-background-color: -vantasurfacehover; -fx-translate-y: 0; }
+.create-instance-type-page .create-type-option-layout { -fx-spacing: 15px; }
+.create-instance-type-page .create-type-number {
+    -fx-text-fill: -vantamuted; -fx-font-size: 10px; -fx-font-weight: 800;
+    -fx-padding: 5px 7px; -fx-background-color: -vantabg; -fx-background-radius: 5px;
+}
+.create-instance-type-page .create-type-icon {
+    -fx-text-fill: -vantaaccent; -fx-font-size: 20px; -fx-font-weight: 700; -fx-min-width: 30px; -fx-alignment: center;
+}
+.create-instance-type-page .create-type-option-title { -fx-text-fill: -vantatext; -fx-font-size: 16px; -fx-font-weight: 800; }
+.create-instance-type-page .create-type-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; -fx-line-spacing: 2px; }
+.create-instance-type-page .create-type-option-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 9px; -fx-font-weight: 700; }
+.create-instance-type-page .create-type-option-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 21px; -fx-padding: 0 2px 1px 8px; }
+.create-instance-type-page .create-type-option:hover .create-type-option-arrow { -fx-text-fill: -vantaaccent; }
+.create-instance-type-page .create-type-footer { -fx-padding: 2px 0 0 0; }
