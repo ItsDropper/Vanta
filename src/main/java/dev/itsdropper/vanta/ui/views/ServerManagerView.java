@@ -52,7 +52,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
     public ServerManagerView() {
         getStyleClass().add("page");
-        getStyleClass().add("server-manager");
+        getStyleClass().addAll("server-manager", "vanta-consistent-page");
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
         Label eyebrow = new Label(Localization.text("serverManager.localHosting"));
@@ -74,6 +74,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
                 create
         );
         VBox headingRow = new VBox(8, eyebrow, pageHeader);
+        headingRow.getStyleClass().add("server-page-header");
 
         profileList.getStyleClass().add("server-profile-list");
         profileList.setPadding(new Insets(VantaUI.spacing(3)));
