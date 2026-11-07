@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.Localization;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -40,28 +41,12 @@ public class InstancePresetView extends VBox {
         // HEADER
         // =========================================================
 
-        Label title =
-                new Label(Localization.text("preset.title"));
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        Localization.text("preset.description")
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader header = new PageHeader(
+                Localization.text("preset.title"),
+                Localization.text("preset.description"),
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox header =
-                new VBox(
-                        6,
-                        title,
-                        subtitle
-                );
 
         // =========================================================
         // PRESETS

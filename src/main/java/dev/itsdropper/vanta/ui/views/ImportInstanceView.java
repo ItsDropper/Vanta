@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.Localization;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.geometry.Insets;
@@ -60,30 +61,12 @@ public class ImportInstanceView extends VBox {
         // HEADER
         // =========================================================
 
-        Label title =
-                new Label(
-                        Localization.text("importInstance.title")
-                );
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        Localization.text("importInstance.subtitle")
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader header = new PageHeader(
+                Localization.text("importInstance.title"),
+                Localization.text("importInstance.subtitle"),
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox header =
-                new VBox(
-                        6,
-                        title,
-                        subtitle
-                );
 
         // =========================================================
         // PANEL

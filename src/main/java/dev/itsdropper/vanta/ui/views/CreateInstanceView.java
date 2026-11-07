@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.Localization;
+import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -134,28 +135,12 @@ public class CreateInstanceView extends VBox {
         // HEADER
         // =========================================================
 
-        Label title =
-                new Label(Localization.text("createInstance.title"));
-
-        title.getStyleClass().add(
-                "page-title"
-        );
-
-        Label subtitle =
-                new Label(
-                        Localization.text("createInstance.subtitle")
-                );
-
-        subtitle.getStyleClass().add(
+        PageHeader header = new PageHeader(
+                Localization.text("createInstance.title"),
+                Localization.text("createInstance.subtitle"),
+                "page-title",
                 "page-subtitle"
         );
-
-        VBox header =
-                new VBox(
-                        6,
-                        title,
-                        subtitle
-                );
 
         // =========================================================
         // INSTANCE PANEL
