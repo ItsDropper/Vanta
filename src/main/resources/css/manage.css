@@ -687,3 +687,8 @@
 }
 .preset-configuration-page .preset-mods-scroll > .viewport { -fx-background-color: transparent; }
 .preset-configuration-page .preset-actions { -fx-padding: 10px 0 0 0; }
+
+
+.create-instance-page .create-instance-environment-fields { -fx-spacing: 16px; -fx-alignment: top-left; }
+.create-instance-page .create-instance-field-group { -fx-spacing: 7px; }
+.create-instance-page .create-instance-field-group .create-combo { -fx-max-width: infinity; }
