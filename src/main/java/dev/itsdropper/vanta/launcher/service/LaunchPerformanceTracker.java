@@ -7,13 +7,16 @@ import java.util.List;
 
 /**
  * In-memory measurements for Vanta's launch-data preparation stage.
- * This intentionally does not claim to measure Minecraft's mod initialization.
+ * Samples are grouped by instance so different loaders and mod sets are never
+ * compared as if they were the same workload.
  */
 public final class LaunchPerformanceTracker {
 
-    public record Sample(String loader, boolean modded, boolean optimized, long durationNanos) { }
+    public record Sample(String instanceId, String instanceName, String loader,
+                         boolean modded, boolean optimized, long durationNanos) { }
 
-    public record Summary(int baselineSamples, int optimizedSamples,
+    public record Summary(String instanceId, String instanceName, String loader,
+                          int baselineSamples, int optimizedSamples,
                           long baselineMedianMillis, long optimizedMedianMillis) { }
 
     private static final int MAX_SAMPLES = 120;
@@ -25,29 +28,57 @@ public final class LaunchPerformanceTracker {
         if (instance == null || durationNanos < 0) return;
         String loader = instance.getLoader() == null ? "Unknown" : instance.getLoader();
         boolean modded = !loader.equalsIgnoreCase("Vanilla");
-        SAMPLES.add(new Sample(loader, modded, optimized, durationNanos));
+        SAMPLES.add(new Sample(
+                instance.getId(),
+                instance.getName() == null ? instance.getId() : instance.getName(),
+                loader,
+                modded,
+                optimized,
+                durationNanos
+        ));
         if (SAMPLES.size() > MAX_SAMPLES) {
             SAMPLES.remove(0);
         }
     }
 
-    public static synchronized Summary summary(boolean modded) {
+    /** Summary for the most recently launched instance in the requested group. */
+    public static synchronized Summary summaryForMostRecent(boolean modded) {
+        for (int i = SAMPLES.size() - 1; i >= 0; i--) {
+            Sample sample = SAMPLES.get(i);
+            if (sample.modded() == modded) {
+                return summaryForInstance(sample.instanceId(), sample.instanceName(), sample.loader());
+            }
+        }
+        return emptySummary();
+    }
+
+    public static synchronized Summary summaryForInstance(String instanceId) {
+        for (int i = SAMPLES.size() - 1; i >= 0; i--) {
+            Sample sample = SAMPLES.get(i);
+            if (java.util.Objects.equals(sample.instanceId(), instanceId)) {
+                return summaryForInstance(sample.instanceId(), sample.instanceName(), sample.loader());
+            }
+        }
+        return emptySummary();
+    }
+
+    private static Summary summaryForInstance(String id, String name, String loader) {
         List<Long> baseline = SAMPLES.stream()
-                .filter(sample -> sample.modded() == modded && !sample.optimized())
+                .filter(sample -> java.util.Objects.equals(sample.instanceId(), id) && !sample.optimized())
                 .map(Sample::durationNanos)
                 .sorted()
                 .toList();
         List<Long> optimized = SAMPLES.stream()
-                .filter(sample -> sample.modded() == modded && sample.optimized())
+                .filter(sample -> java.util.Objects.equals(sample.instanceId(), id) && sample.optimized())
                 .map(Sample::durationNanos)
                 .sorted()
                 .toList();
-        return new Summary(
-                baseline.size(),
-                optimized.size(),
-                medianMillis(baseline),
-                medianMillis(optimized)
-        );
+        return new Summary(id, name, loader, baseline.size(), optimized.size(),
+                medianMillis(baseline), medianMillis(optimized));
+    }
+
+    private static Summary emptySummary() {
+        return new Summary(null, null, null, 0, 0, -1L, -1L);
     }
 
     public static synchronized List<Sample> recentSamples() {
