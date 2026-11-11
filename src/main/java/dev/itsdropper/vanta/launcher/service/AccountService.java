@@ -265,7 +265,12 @@ public class AccountService implements AutoCloseable {
                 setCurrentAccount(refreshed);
                 return refreshed;
             } catch (Exception failure) {
-                maintenancePausedAccountId = account.getUuid();
+                if (AuthManager.isRefreshTokenRejected(failure)) {
+                    maintenancePausedAccountId = account.getUuid();
+                } else {
+                    maintenanceRetryAfterMillis = System.currentTimeMillis()
+                            + TimeUnit.MINUTES.toMillis(5);
+                }
                 throw failure;
             }
         } finally {
