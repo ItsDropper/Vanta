@@ -58,7 +58,14 @@ public class AccountService implements AutoCloseable {
 
         try {
 
-            List<Account> loadedAccounts = AccountManager.loadAccounts();
+            List<Account> loadedAccounts;
+            try {
+                loadedAccounts = AccountManager.loadAccounts();
+            } catch (IOException failure) {
+                setSessionHealth(SessionHealth.ERROR,
+                        "Saved account storage could not be read. Existing account data was preserved.");
+                throw failure;
+            }
             accounts.clear();
             accounts.addAll(loadedAccounts);
 
@@ -218,7 +225,7 @@ public class AccountService implements AutoCloseable {
             try {
                 refreshedAccount = AuthManager.login(account);
             } catch (Exception failure) {
-                updateHealthForFailure(failure);
+                updateHealthForFailure(failure, account.getUuid());
                 throw failure;
             }
 
@@ -318,7 +325,7 @@ public class AccountService implements AutoCloseable {
             return;
         }
         maintenanceTask = sessionMaintenance.scheduleWithFixedDelay(
-                this::refreshSessionIfExpired, 1, 1, TimeUnit.MINUTES
+                this::refreshSessionIfExpired, 30, 30, TimeUnit.SECONDS
         );
     }
 
@@ -426,6 +433,11 @@ public class AccountService implements AutoCloseable {
     }
 
     private void updateHealthForFailure(Throwable failure) {
+        Account account = currentAccount;
+        updateHealthForFailure(failure, account == null ? null : account.getUuid());
+    }
+
+    private void updateHealthForFailure(Throwable failure, String affectedAccountId) {
         if (closed) {
             setSessionHealth(SessionHealth.CLOSED, "Authentication maintenance has stopped.");
             return;
@@ -436,8 +448,7 @@ public class AccountService implements AutoCloseable {
             return;
         }
         if (AuthManager.isRefreshTokenRejected(failure)) {
-            Account account = currentAccount;
-            maintenancePausedAccountId = account == null ? null : account.getUuid();
+            maintenancePausedAccountId = affectedAccountId;
             setSessionHealth(SessionHealth.SIGN_IN_REQUIRED,
                     "Microsoft rejected the saved refresh token. Sign in to restore this account.");
         } else if (AuthManager.isTransientFailure(failure)) {
