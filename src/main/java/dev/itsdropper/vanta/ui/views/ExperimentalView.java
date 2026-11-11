@@ -5,6 +5,7 @@ import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.launcher.service.LaunchPerformanceTracker;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.LauncherViewLifecycle;
+import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -19,6 +20,7 @@ import javafx.util.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public final class ExperimentalView extends VBox implements LauncherViewLifecycle {
 
@@ -30,8 +32,9 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     private final Label baselineStats = new Label();
     private final Label optimizedStats = new Label();
     private final Label vanillaStats = new Label();
-    private final CheckBox cacheEnabled = new CheckBox("Enable experimental launch-preparation cache");
-    private final Button refreshSession = new Button("Refresh Minecraft session");
+    private final Label comparisonStats = new Label();
+    private final CheckBox cacheEnabled = new CheckBox(Localization.text("experimental.performance.enableCache"));
+    private final Button refreshSession = new Button(Localization.text("experimental.auth.refresh"));
     private final Runnable healthListener = () -> UiExecutor.shared().dispatchToUi(this::refreshStatus);
     private final Timeline ticker = new Timeline(new KeyFrame(Duration.seconds(1), event -> refreshMetrics()));
 
@@ -41,15 +44,15 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         setSpacing(18);
         setPadding(new Insets(24));
 
-        Label eyebrow = new Label("EARLY ACCESS");
+        Label eyebrow = new Label(Localization.text("experimental.eyebrow"));
         eyebrow.getStyleClass().add("page-eyebrow");
-        Label title = new Label("Experimental");
+        Label title = new Label(Localization.text("experimental.title"));
         title.getStyleClass().add("page-title");
-        Label intro = new Label("Isolated experiments for launcher performance and reliability. Features here are opt-in and may change.");
+        Label intro = new Label(Localization.text("experimental.intro"));
 
         VBox authCard = new VBox(10);
         authCard.getStyleClass().add("settings-card");
-        Label authTitle = new Label("Authentication health");
+        Label authTitle = new Label(Localization.text("experimental.auth.title"));
         authTitle.getStyleClass().add("section-title");
         authState.getStyleClass().add("experimental-status");
         authDetails.setWrapText(true);
@@ -60,12 +63,10 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
 
         VBox performanceCard = new VBox(12);
         performanceCard.getStyleClass().add("settings-card");
-        Label performanceTitle = new Label("Modded launch preparation");
+        Label performanceTitle = new Label(Localization.text("experimental.performance.title"));
         performanceTitle.getStyleClass().add("section-title");
         Label explanation = new Label(
-                "This experiment caches parsed version metadata and resolved classpath/native paths. "
-                + "It is invalidated when version metadata changes or a required file disappears. "
-                + "It does not change Minecraft, loader or mod initialization inside the game process."
+                Localization.text("experimental.performance.description")
         );
         explanation.setWrapText(true);
         cacheEnabled.setSelected(LauncherSettings.isExperimentalLaunchCacheEnabled());
@@ -74,18 +75,26 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
             ClasspathBuilder.clearCache();
             refreshMetrics();
         });
-        Button clearCache = new Button("Clear experiment cache");
+        Label benchmarkMethod = new Label(Localization.text("experimental.performance.benchmarkMethod"));
+        benchmarkMethod.setWrapText(true);
+        Button clearCache = new Button(Localization.text("experimental.performance.clearCache"));
         clearCache.setOnAction(event -> {
             ClasspathBuilder.clearCache();
+            refreshMetrics();
+        });
+        Button resetSamples = new Button(Localization.text("experimental.performance.resetSamples"));
+        resetSamples.setOnAction(event -> {
+            LaunchPerformanceTracker.clear();
             refreshMetrics();
         });
         cacheStats.getStyleClass().add("muted");
         baselineStats.setWrapText(true);
         optimizedStats.setWrapText(true);
         vanillaStats.setWrapText(true);
+        comparisonStats.setWrapText(true);
         performanceCard.getChildren().addAll(
-                performanceTitle, explanation, cacheEnabled, cacheStats,
-                baselineStats, optimizedStats, vanillaStats, clearCache
+                performanceTitle, explanation, benchmarkMethod, cacheEnabled, cacheStats,
+                baselineStats, optimizedStats, comparisonStats, vanillaStats, clearCache, resetSamples
         );
 
         getChildren().addAll(eyebrow, title, intro, authCard, performanceCard);
@@ -97,7 +106,7 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
 
     private void refreshSession() {
         refreshSession.setDisable(true);
-        authDetails.setText("Refreshing the saved Microsoft session...");
+        authDetails.setText(Localization.text("experimental.auth.refreshing"));
         UiExecutor.shared().execute(() -> {
             Exception failure = null;
             try {
@@ -119,12 +128,14 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
 
     private void refreshStatus() {
         AccountService.SessionHealth health = accountService.getSessionHealth();
-        authState.setText(health.name().replace('_', ' '));
-        authDetails.setText(accountService.getSessionHealthMessage());
+        String healthKey = health.name().toLowerCase(Locale.ROOT);
+        authState.setText(Localization.text("experimental.auth.health." + healthKey));
+        authDetails.setText(Localization.text("experimental.auth.details." + healthKey));
         long refreshedAt = accountService.getLastSuccessfulRefreshAt();
-        lastRefresh.setText(refreshedAt <= 0 ? "No successful refresh recorded."
-                : "Last successful refresh: " + DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-                        .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(refreshedAt)));
+        lastRefresh.setText(refreshedAt <= 0 ? Localization.text("experimental.auth.noRefresh")
+                : Localization.text("experimental.auth.lastRefresh").formatted(
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                                .withZone(ZoneId.systemDefault()).format(Instant.ofEpochMilli(refreshedAt))));
         refreshSession.setDisable(accountService.getCurrentAccount() == null
                 || health == AccountService.SessionHealth.CLOSED
                 || health == AccountService.SessionHealth.AUTHENTICATING
@@ -133,21 +144,39 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
 
     private void refreshMetrics() {
         ClasspathBuilder.CacheStats stats = ClasspathBuilder.getCacheStats();
-        cacheStats.setText("Cache: " + stats.hits() + " hits · " + stats.misses()
-                + " misses · " + stats.entries() + " entries");
+        cacheStats.setText(Localization.text("experimental.performance.cacheStats")
+                .formatted(stats.hits(), stats.misses(), stats.entries()));
         LaunchPerformanceTracker.Summary modded = LaunchPerformanceTracker.summary(true);
         LaunchPerformanceTracker.Summary vanilla = LaunchPerformanceTracker.summary(false);
-        baselineStats.setText("Modded preparation — baseline: "
-                + format(modded.baselineMedianMillis(), modded.baselineSamples()));
-        optimizedStats.setText("Modded preparation — cache enabled: "
-                + format(modded.optimizedMedianMillis(), modded.optimizedSamples()));
-        vanillaStats.setText("Vanilla control — baseline: "
-                + format(vanilla.baselineMedianMillis(), vanilla.baselineSamples())
-                + " · cache enabled: " + format(vanilla.optimizedMedianMillis(), vanilla.optimizedSamples()));
+        baselineStats.setText(Localization.text("experimental.performance.baseline")
+                .formatted(format(modded.baselineMedianMillis(), modded.baselineSamples())));
+        optimizedStats.setText(Localization.text("experimental.performance.optimized")
+                .formatted(format(modded.optimizedMedianMillis(), modded.optimizedSamples())));
+        comparisonStats.setText(compare(modded));
+        vanillaStats.setText(Localization.text("experimental.performance.vanilla")
+                .formatted(format(vanilla.baselineMedianMillis(), vanilla.baselineSamples()),
+                        format(vanilla.optimizedMedianMillis(), vanilla.optimizedSamples())));
     }
 
     private String format(long medianMillis, int samples) {
-        return samples == 0 ? "not measured yet" : medianMillis + " ms median (" + samples + " samples)";
+        return samples == 0 ? Localization.text("experimental.performance.notMeasured")
+                : Localization.text("experimental.performance.median").formatted(medianMillis, samples);
+    }
+
+    private String compare(LaunchPerformanceTracker.Summary summary) {
+        if (summary.baselineSamples() < 3 || summary.optimizedSamples() < 3
+                || summary.baselineMedianMillis() <= 0) {
+            return Localization.text("experimental.performance.comparison.insufficient");
+        }
+        double change = (summary.baselineMedianMillis() - summary.optimizedMedianMillis())
+                * 100.0 / summary.baselineMedianMillis();
+        if (change > 1.0) {
+            return Localization.text("experimental.performance.comparison.faster").formatted(change);
+        }
+        if (change < -1.0) {
+            return Localization.text("experimental.performance.comparison.slower").formatted(Math.abs(change));
+        }
+        return Localization.text("experimental.performance.comparison.similar");
     }
 
     @Override
