@@ -42,7 +42,7 @@ public final class CrashCaseRepository {
 
     private static final Pattern BEARER = Pattern.compile("(?i)\\bBearer\\s+[A-Za-z0-9._~+/-]+=*");
     private static final Pattern SECRET_ASSIGNMENT = Pattern.compile(
-            "(?i)(\\b(?:access[_-]?token|refresh[_-]?token|client[_-]?secret|password|passwd|session[_-]?id|"
+            "(?i)(\\b(?:access[_-]?token|refresh[_-]?token|\\btoken|client[_-]?secret|password|passwd|session[_-]?id|"
                     + "authorization|xuid|user[_-]?properties|proxy[_-]?password)\\b\\s*[:=]\\s*)"
                     + "(?:\"[^\"]*\"|'[^']*'|[^\\s,;]+)");
     private static final Pattern CLI_SECRET = Pattern.compile(
@@ -59,6 +59,8 @@ public final class CrashCaseRepository {
             "(?i)\\b[A-Z]:\\\\(?:[^\\r\\n\\t\\\"<>|]+)");
     private static final Pattern UNIX_HOME = Pattern.compile(
             "(?<![A-Za-z0-9])/(?:home|Users|mnt|private/var)/[^\\r\\n\\t]+");
+    private static final Pattern USER_ASSIGNMENT = Pattern.compile(
+            "(?i)(\\b(?:username|user\\.name|player[_ -]?name)\\b\\s*[:=]\\s*)[^\\s,;]+");
     private static final Pattern PRIVATE_LINE = Pattern.compile(
             "(?im)^\\s*(?:username|player name|player uuid|user uuid|access token|refresh token|"
                     + "server address|server ip|connected to|user home|user\.home)\\s*[:=].*$");
@@ -167,7 +169,13 @@ public final class CrashCaseRepository {
         if (size <= 0 || size > MAX_IMPORT_BYTES) {
             throw new IOException("Crash log must be between 1 byte and 2 MiB.");
         }
-        byte[] bytes = Files.readAllBytes(normalized);
+        byte[] bytes;
+        try (var input = Files.newInputStream(normalized)) {
+            bytes = input.readNBytes((int) MAX_IMPORT_BYTES + 1);
+        }
+        if (bytes.length > MAX_IMPORT_BYTES) {
+            throw new IOException("Crash log exceeded the 2 MiB import limit while being read.");
+        }
         String log = new String(bytes, StandardCharsets.UTF_8);
         return recordForReview(log, null);
     }
@@ -208,6 +216,7 @@ public final class CrashCaseRepository {
         String text = source.replace("\r\n", "\n").replace('\r', '\n');
         text = BEARER.matcher(text).replaceAll("Bearer [REDACTED]");
         text = SECRET_ASSIGNMENT.matcher(text).replaceAll("$1[REDACTED]");
+        text = USER_ASSIGNMENT.matcher(text).replaceAll("$1[REDACTED]");
         text = CLI_SECRET.matcher(text).replaceAll("$1[REDACTED]");
         text = QUERY_SECRET.matcher(text).replaceAll("$1[REDACTED]");
         text = PRIVATE_LINE.matcher(text).replaceAll("[REDACTED_PRIVATE_FIELD]");
