@@ -181,7 +181,11 @@ public final class CrashCaseRepository {
             throw new IOException("Crash log exceeded the 2 MiB import limit while being read.");
         }
         String log = new String(bytes, StandardCharsets.UTF_8);
-        return recordForReview(log, null);
+        FailureCategory proposed = RepairDiagnosticEngine.diagnose(log).stream()
+                .map(RepairDiagnosis::category)
+                .filter(category -> category != FailureCategory.UNKNOWN)
+                .findFirst().orElse(null);
+        return recordForReview(log, proposed);
     }
 
     public CrashCase confirm(String id, FailureCategory category) throws IOException {
