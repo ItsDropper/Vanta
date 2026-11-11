@@ -11,6 +11,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.repair.CrashCaseRepository;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 
 import java.util.List;
@@ -43,7 +44,7 @@ public class RepairView extends VBox {
             Runnable onRepair,
             Runnable onRestore
     ) {
-        this(instance, title, description, issues, onBack, onRepair, onRestore, null, null);
+        this(instance, title, description, issues, onBack, onRepair, onRestore, null, null, List.of());
     }
 
     public RepairView(
@@ -56,6 +57,22 @@ public class RepairView extends VBox {
             Runnable onRestore,
             Runnable onSaveCrashCase,
             Runnable onReviewCrashCases
+    ) {
+        this(instance, title, description, issues, onBack, onRepair, onRestore,
+                onSaveCrashCase, onReviewCrashCases, List.of());
+    }
+
+    public RepairView(
+            Instance instance,
+            String title,
+            String description,
+            List<RepairIssue> issues,
+            Runnable onBack,
+            Runnable onRepair,
+            Runnable onRestore,
+            Runnable onSaveCrashCase,
+            Runnable onReviewCrashCases,
+            List<CrashCaseRepository.VerifiedFix> verifiedFixes
     ) {
 
         this.instance = instance;
@@ -239,13 +256,11 @@ public class RepairView extends VBox {
         // CONTENT
         // ---------------------------------------------------------
 
-        VBox content =
-                new VBox(
-                        28,
-                        header,
-                        issueSection,
-                        actions
-                );
+        VBox content = new VBox(28, header, issueSection);
+        if (verifiedFixes != null && !verifiedFixes.isEmpty()) {
+            content.getChildren().add(createVerifiedFixSection(verifiedFixes));
+        }
+        content.getChildren().add(actions);
 
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(content);
 
@@ -282,6 +297,28 @@ public class RepairView extends VBox {
         getChildren().add(
                 scrollPane
         );
+    }
+
+    private VBox createVerifiedFixSection(List<CrashCaseRepository.VerifiedFix> fixes) {
+        Label title = new Label(Localization.text("repair.verifiedFixesTitle"));
+        title.getStyleClass().add("settings-section-title");
+        Label description = new Label(Localization.text("repair.verifiedFixesDescription"));
+        description.setWrapText(true);
+        VBox cards = new VBox(10);
+        for (CrashCaseRepository.VerifiedFix fix : fixes) {
+            Label category = new Label(fix.category().name());
+            category.getStyleClass().add("repair-issue-type");
+            Label note = new Label(fix.verifiedFix());
+            note.setWrapText(true);
+            Label seen = new Label(Localization.text("repair.verifiedFixesSeen")
+                    .formatted(fix.occurrences()));
+            seen.getStyleClass().add("muted");
+            VBox card = new VBox(8, category, note, seen);
+            card.setPadding(new Insets(16));
+            card.getStyleClass().add("repair-issue-card");
+            cards.getChildren().add(card);
+        }
+        return new VBox(12, title, description, cards);
     }
 
     private VBox createIssueCard(
