@@ -6,19 +6,28 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.function.Consumer;
 
 public final class ModrinthInstallService {
     private final ModrinthClient client;
     private final InstalledModScanner installedModScanner;
     private final ModrinthCatalogService catalog;
     private final ModrinthDependencyResolver dependencies;
+    private final ModrinthArtifactDownloader downloader;
 
     public ModrinthInstallService(ModrinthClient client, InstalledModScanner installedModScanner,
                                   ModrinthCatalogService catalog, ModrinthDependencyResolver dependencies) {
-        this.client = client;
-        this.installedModScanner = installedModScanner;
-        this.catalog = catalog;
-        this.dependencies = dependencies;
+        this(client, installedModScanner, catalog, dependencies, DownloadUtil::downloadFile);
+    }
+
+    ModrinthInstallService(ModrinthClient client, InstalledModScanner installedModScanner,
+                           ModrinthCatalogService catalog, ModrinthDependencyResolver dependencies,
+                           ModrinthArtifactDownloader downloader) {
+        this.client = Objects.requireNonNull(client, "client");
+        this.installedModScanner = Objects.requireNonNull(installedModScanner, "installedModScanner");
+        this.catalog = Objects.requireNonNull(catalog, "catalog");
+        this.dependencies = Objects.requireNonNull(dependencies, "dependencies");
+        this.downloader = Objects.requireNonNull(downloader, "downloader");
     }
 
     /**
@@ -55,22 +64,45 @@ public Path installMod(
             );
         }
 
+        return installMod(instance, project, ignored -> { });
+    }
+
+    public Path installMod(Instance instance, ModrinthProject project, Consumer<String> progress)
+            throws IOException, InterruptedException {
+        if (instance == null || project == null) {
+            throw new IllegalArgumentException("Instance and project are required.");
+        }
+        if (!ModrinthContentType.MOD.getApiValue().equals(project.getProjectType())) {
+            throw new IOException("Project is not a mod.");
+        }
+        Consumer<String> listener = progress == null ? ignored -> { } : progress;
+        listener.accept("Resolving dependencies for " + project.getTitle() + "…");
         return ModrinthGraphInstallTransaction.execute(instance, () ->
-                installModProject(instance, project.getProjectId(), new HashSet<>()));
+                installModProject(instance, project.getProjectId(), new HashSet<>(), listener));
     }
 
 public Path installModVersion(
             Instance instance,
             String projectId,
-            ModrinthVersion version
+            ModrinthVersion version,
+            Consumer<String> progress
     ) throws IOException, InterruptedException {
 
         if (instance == null || projectId == null || projectId.isBlank() || version == null) {
             throw new IllegalArgumentException("Invalid mod version installation request.");
         }
 
+        return installModVersion(instance, projectId, version, ignored -> { });
+    }
+
+    public Path installModVersion(Instance instance, String projectId, ModrinthVersion version,
+                                  Consumer<String> progress) throws IOException, InterruptedException {
+        if (instance == null || projectId == null || projectId.isBlank() || version == null) {
+            throw new IllegalArgumentException("Invalid mod version installation request.");
+        }
+        Consumer<String> listener = progress == null ? ignored -> { } : progress;
         return ModrinthGraphInstallTransaction.execute(instance, () ->
-                installModVersion(instance, projectId, version, new HashSet<>()));
+                installModVersion(instance, projectId, version, new HashSet<>(), listener));
     }
 
 public List<Path> installResolvedGraph(
@@ -95,11 +127,21 @@ public List<Path> installResolvedGraph(
             return List.of();
         }
 
+        return installResolvedGraph(instance, validated, ignored -> { });
+    }
+
+    public List<Path> installResolvedGraph(Instance instance,
+            List<ModrinthService.ResolvedMod> resolvedMods, Consumer<String> progress)
+            throws IOException, InterruptedException {
+        if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        List<ModrinthService.ResolvedMod> validated = validateResolvedGraph(resolvedMods);
+        if (validated.isEmpty()) return List.of();
+        Consumer<String> listener = progress == null ? ignored -> { } : progress;
         return ModrinthGraphInstallTransaction.execute(instance, () -> {
             List<Path> installed = new ArrayList<>(validated.size());
             for (ModrinthService.ResolvedMod resolved : validated) {
                 installed.add(installResolvedVersion(
-                        instance, resolved.projectId(), resolved.version()));
+                        instance, resolved.projectId(), resolved.version(), listener));
             }
             return List.copyOf(installed);
         });
@@ -231,7 +273,11 @@ private Path installResolvedVersion(
 
         try {
             // Download to a unique staging file; never touch the installed version during transfer.
-            DownloadUtil.downloadFile(file.getUrl(), stagedFile);
+            progress.accept("Downloading " + filename + "…");
+            downloader.download(file.getUrl(), stagedFile);
+            if (Thread.currentThread().isInterrupted()) {
+                throw new InterruptedException("Mod installation was cancelled.");
+            }
             if (!Files.isRegularFile(stagedFile) || Files.size(stagedFile) == 0) {
                 throw new IOException("Downloaded mod file is empty or missing.");
             }
@@ -239,6 +285,7 @@ private Path installResolvedVersion(
                 throw new IOException("Downloaded mod size does not match Modrinth metadata.");
             }
 
+            progress.accept("Validating " + filename + "…");
             InstalledMod scanned = installedModScanner.scanFile(stagedFile);
 
             if (rollbackFile != null) {
@@ -266,6 +313,7 @@ private Path installResolvedVersion(
                 try { Files.deleteIfExists(previousFile); }
                 catch (IOException cleanupFailure) { System.err.println("Could not clean up previous mod file: " + cleanupFailure.getMessage()); }
             }
+            progress.accept("Installed " + filename + ".");
             return installedFile;
         } catch (Exception failure) {
             if (newFilePublished) {
@@ -313,7 +361,8 @@ private Path installModVersion(
             Instance instance,
             String projectId,
             ModrinthVersion version,
-            Set<String> resolvingProjects
+            Set<String> resolvingProjects,
+            Consumer<String> progress
     ) throws IOException, InterruptedException {
 
         if (projectId == null
@@ -384,11 +433,13 @@ private Path installModVersion(
                         );
                     }
 
+                    progress.accept("Resolving dependency " + dependencyProjectId + "…");
                     installModVersion(
                             instance,
                             dependencyProjectId,
                             dependencyVersion,
-                            resolvingProjects
+                            resolvingProjects,
+                            progress
                     );
                 }
             }
@@ -396,7 +447,8 @@ private Path installModVersion(
             return installResolvedVersion(
                     instance,
                     projectId,
-                    version
+                    version,
+                    progress
             );
 
         } finally {
@@ -407,7 +459,8 @@ private Path installModVersion(
 private Path installModProject(
             Instance instance,
             String projectId,
-            Set<String> resolvingProjects
+            Set<String> resolvingProjects,
+            Consumer<String> progress
     ) throws IOException, InterruptedException {
 
         if (projectId == null
