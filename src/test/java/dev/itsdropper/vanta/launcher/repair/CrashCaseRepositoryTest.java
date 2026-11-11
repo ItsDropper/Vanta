@@ -70,6 +70,27 @@ class CrashCaseRepositoryTest {
     }
 
     @Test
+    void confirmedLabelsCanBeCorrectedAndRejectedCasesCanBeReopened() throws Exception {
+        CrashCaseRepository repository = new CrashCaseRepository(temporaryDirectory.resolve("cases.json"));
+        var confirmed = repository.recordForReview("java.lang.IllegalStateException: wrong cause", null);
+        repository.confirm(confirmed.id(), FailureCategory.MOD_CRASH, "Initial fix note.");
+        var corrected = repository.correctConfirmed(
+                confirmed.id(), FailureCategory.MOD_DEPENDENCY, "Corrected dependency resolution steps.");
+        assertEquals(FailureCategory.MOD_DEPENDENCY, corrected.confirmedCategory());
+        assertEquals("Corrected dependency resolution steps.", corrected.verifiedFix());
+
+        var rejected = repository.recordForReview("java.lang.IllegalArgumentException: second case", null);
+        repository.reject(rejected.id());
+        var reopened = repository.reopenRejected(rejected.id());
+        assertEquals(CrashCaseRepository.ReviewStatus.PENDING, reopened.status());
+        assertNull(reopened.confirmedCategory());
+        assertThrows(IllegalStateException.class,
+                () -> repository.reopenRejected(reopened.id()));
+        assertThrows(IllegalStateException.class,
+                () -> repository.correctConfirmed(reopened.id(), FailureCategory.MOD_CRASH, ""));
+    }
+
+    @Test
     void verifiedFixLookupIsCategoryScopedAndBounded() throws Exception {
         CrashCaseRepository repository = new CrashCaseRepository(temporaryDirectory.resolve("cases.json"));
         var modCrash = repository.recordForReview("java.lang.IllegalStateException: mod startup crash", null);
