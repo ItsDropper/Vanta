@@ -143,6 +143,72 @@ class ModrinthGraphInstallTransactionTest {
         assertFalse(Files.exists(outside));
     }
 
+
+    @Test
+    void nextInstallRecoversAnInterruptedPublishBeforeRegistryCommit() throws Exception {
+        Instance instance = instance();
+        Path mods = temporaryDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path original = mods.resolve("existing.jar");
+        Path newArtifact = mods.resolve("new-project.jar");
+        Path staged = mods.resolve(".vanta-stage-crashed.jar");
+        Files.writeString(original, "partially replaced bytes");
+        Files.writeString(newArtifact, "published before crash");
+        Files.writeString(staged, "incomplete download");
+
+        List<InstalledModRecord> originalRecords = List.of(
+                new InstalledModRecord("existing", "old-version", "existing", "1.0", "existing.jar"));
+        InstalledModManager.save(instance, originalRecords);
+        String originalRegistry = Files.readString(temporaryDirectory.resolve("vanta-mods.json"));
+
+        Path journalDirectory = Files.createDirectory(
+                temporaryDirectory.resolve(".vanta-graph-transaction-simulated-crash"));
+        Files.writeString(journalDirectory.resolve("tracked-0"), "original bytes");
+        Files.writeString(journalDirectory.resolve("registry-backup.json"), originalRegistry);
+        Properties journal = new Properties();
+        journal.setProperty("registryExisted", "true");
+        journal.setProperty("registryBackup", "registry-backup.json");
+        journal.setProperty("backupCount", "1");
+        journal.setProperty("backup.0.filename", "existing.jar");
+        journal.setProperty("backup.0.file", "tracked-0");
+        journal.setProperty("managedCount", "2");
+        journal.setProperty("managed.0", "new-project.jar");
+        journal.setProperty("managed.1", ".vanta-stage-crashed.jar");
+        try (var output = Files.newOutputStream(journalDirectory.resolve("journal.properties"))) {
+            journal.store(output, "simulated process interruption");
+        }
+
+        // Simulate the crash having happened after a registry update as well.
+        InstalledModManager.add(instance, new InstalledModRecord(
+                "new-project", "new-version", "new-project", "1.0", "new-project.jar"));
+
+        ModrinthGraphInstallTransaction.execute(instance, () -> List.of());
+
+        assertEquals("original bytes", Files.readString(original));
+        assertFalse(Files.exists(newArtifact));
+        assertFalse(Files.exists(staged));
+        assertEquals(originalRegistry, Files.readString(temporaryDirectory.resolve("vanta-mods.json")));
+        assertEquals(1, InstalledModManager.load(instance).size());
+        assertNoTransactionDirectories();
+    }
+
+    @Test
+    void recoveryRefusesAnIncompletePreparedJournalInsteadOfDeletingUserData() throws Exception {
+        Instance instance = instance();
+        Path journalDirectory = Files.createDirectory(
+                temporaryDirectory.resolve(".vanta-graph-transaction-corrupt"));
+        Files.writeString(journalDirectory.resolve("journal.properties"), "registryExisted=true\\n");
+        Path important = temporaryDirectory.resolve("mods");
+        Files.createDirectories(important);
+        Files.writeString(important.resolve("keep.jar"), "user data");
+
+        assertThrows(IOException.class, () ->
+                ModrinthGraphInstallTransaction.execute(instance, () -> List.of()));
+
+        assertEquals("user data", Files.readString(important.resolve("keep.jar")));
+        assertTrue(Files.exists(journalDirectory), "An unreadable prepared journal must remain for manual recovery.");
+    }
+
     private void assertNoTransactionDirectories() throws IOException {
         try (var entries = Files.list(temporaryDirectory)) {
             assertTrue(entries.noneMatch(path ->
