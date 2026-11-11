@@ -25,7 +25,7 @@ class LaunchPerformanceTrackerTest {
         LaunchPerformanceTracker.record(modded, true, 80_000_000L);
         LaunchPerformanceTracker.record(modded, true, 120_000_000L);
 
-        LaunchPerformanceTracker.Summary summary = LaunchPerformanceTracker.summary(true);
+        LaunchPerformanceTracker.Summary summary = LaunchPerformanceTracker.summaryForInstance("fabric-test");
 
         assertEquals(2, summary.baselineSamples());
         assertEquals(2, summary.optimizedSamples());
@@ -43,8 +43,8 @@ class LaunchPerformanceTrackerTest {
         LaunchPerformanceTracker.record(modded, false, 150_000_000L);
         LaunchPerformanceTracker.record(vanilla, true, 50_000_000L);
 
-        assertEquals(1, LaunchPerformanceTracker.summary(true).baselineSamples());
-        assertEquals(1, LaunchPerformanceTracker.summary(false).optimizedSamples());
-        assertEquals(0, LaunchPerformanceTracker.summary(false).baselineSamples());
+        assertEquals(1, LaunchPerformanceTracker.summaryForInstance("fabric-test").baselineSamples());
+        assertEquals(1, LaunchPerformanceTracker.summaryForInstance("vanilla-test").optimizedSamples());
+        assertEquals(0, LaunchPerformanceTracker.summaryForInstance("vanilla-test").baselineSamples());
     }
 }
