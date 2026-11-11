@@ -36,6 +36,7 @@ final class ModrinthGraphInstallTransaction {
     private static final String OWNER_NAME = "OWNER";
     private static final String OWNER_CONTENT = "VANTA_MODRINTH_GRAPH_TRANSACTION_V1";
     private static final String COMMITTED_NAME = "COMMITTED";
+    private static final String ROLLED_BACK_NAME = "ROLLED_BACK";
     private static final Map<Path, LockEntry> INSTANCE_LOCKS = new ConcurrentHashMap<>();
     private static final ThreadLocal<JournalContext> ACTIVE_JOURNAL = new ThreadLocal<>();
 
@@ -158,6 +159,7 @@ final class ModrinthGraphInstallTransaction {
                 transactionFailure = failure;
                 try {
                     rollbackFromJournal(mods, transactionDirectory, journal, registry);
+                    publishStateMarker(transactionDirectory, ROLLED_BACK_NAME);
                 } catch (IOException rollbackFailure) {
                     preserveJournal = true;
                     failure.addSuppressed(rollbackFailure);
@@ -221,7 +223,8 @@ final class ModrinthGraphInstallTransaction {
                     // resembles one of our transaction directories.
                     continue;
                 }
-                if (Files.exists(directory.resolve(COMMITTED_NAME), LinkOption.NOFOLLOW_LINKS)) {
+                if (Files.exists(directory.resolve(COMMITTED_NAME), LinkOption.NOFOLLOW_LINKS)
+                        || Files.exists(directory.resolve(ROLLED_BACK_NAME), LinkOption.NOFOLLOW_LINKS)) {
                     deleteTree(directory);
                     continue;
                 }
@@ -236,6 +239,7 @@ final class ModrinthGraphInstallTransaction {
                 Properties journal = readJournal(journalPath);
                 Path mods = root.resolve("mods").normalize();
                 rollbackFromJournal(mods, directory, journal, root.resolve("vanta-mods.json"));
+                publishStateMarker(directory, ROLLED_BACK_NAME);
                 deleteTree(directory);
             }
         }
@@ -326,13 +330,17 @@ final class ModrinthGraphInstallTransaction {
     }
 
     private static void publishCommittedMarker(Path directory) throws IOException {
-        Path temporary = directory.resolve(COMMITTED_NAME + ".tmp");
+        publishStateMarker(directory, COMMITTED_NAME);
+    }
+
+    private static void publishStateMarker(Path directory, String markerName) throws IOException {
+        Path temporary = directory.resolve(markerName + ".tmp");
         try (FileChannel channel = FileChannel.open(temporary,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-            channel.write(java.nio.ByteBuffer.wrap("committed".getBytes(java.nio.charset.StandardCharsets.UTF_8)));
+            channel.write(java.nio.ByteBuffer.wrap(markerName.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
             channel.force(true);
         }
-        moveReplace(temporary, directory.resolve(COMMITTED_NAME));
+        moveReplace(temporary, directory.resolve(markerName));
     }
 
     private static void moveReplace(Path source, Path destination) throws IOException {
