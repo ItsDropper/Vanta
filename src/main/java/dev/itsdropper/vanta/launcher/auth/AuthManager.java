@@ -95,6 +95,9 @@ public class AuthManager {
         }
 
         StepFullJavaSession.FullJavaSession session;
+        Thread loginThread = Thread.currentThread();
+        Runnable cancelOnPopupClose = loginThread::interrupt;
+        LoginPopup.addOnClosedListener(cancelOnPopupClose);
         try {
             session = LOGIN.getFromInput(
                     HTTP,
@@ -106,7 +109,9 @@ public class AuthManager {
                     })
             );
         } finally {
-            // Also close the popup when the user cancels or authentication fails.
+            // Closing the popup interrupts the polling task. Remove the listener
+            // first so successful completion does not interrupt the executor thread.
+            LoginPopup.removeOnClosedListener(cancelOnPopupClose);
             LoginPopup.close();
         }
 
