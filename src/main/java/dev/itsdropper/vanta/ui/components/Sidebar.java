@@ -32,7 +32,8 @@ public class Sidebar extends VBox {
         ACCOUNTS("Accounts", 6, IconView.Type.ACCOUNTS, "Switch or manage Microsoft accounts"),
         SETTINGS("Settings", 7, IconView.Type.SETTINGS, "Configure Vanta and its runtime"),
         DOWNLOADS("Download Center", 8, IconView.Type.DOWNLOAD, "Review active and completed downloads"),
-        SERVERS("Server Manager", 9, IconView.Type.TERMINAL, "Manage and connect to Minecraft servers");
+        SERVERS("Server Manager", 9, IconView.Type.TERMINAL, "Manage and connect to Minecraft servers"),
+        EXPERIMENTAL("Experimental", 0, IconView.Type.EXPERIMENTAL, "Test opt-in performance and authentication experiments");
 
         private final String title;
         private final int shortcutNumber;
@@ -167,6 +168,7 @@ public class Sidebar extends VBox {
                 spacer
         );
 
+        addButton(Page.EXPERIMENTAL);
         addButton(Page.SETTINGS);
 
         build = new Label(
@@ -246,10 +248,13 @@ public class Sidebar extends VBox {
 
         button.setGraphicTextGap(10);
         int shortcutNumber = page.shortcutNumber();
-        button.setTooltip(new Tooltip(page.title() + "  ·  Ctrl+" + shortcutNumber));
-        button.setAccessibleText(
-                page.title() + " page. Keyboard shortcut Control plus " + shortcutNumber
-        );
+        if (shortcutNumber > 0) {
+            button.setTooltip(new Tooltip(page.title() + "  ·  Ctrl+" + shortcutNumber));
+            button.setAccessibleText(page.title() + " page. Keyboard shortcut Control plus " + shortcutNumber);
+        } else {
+            button.setTooltip(new Tooltip(page.title()));
+            button.setAccessibleText(page.title() + " page.");
+        }
 
         button.setMaxWidth(
                 Double.MAX_VALUE
