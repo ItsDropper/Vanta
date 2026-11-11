@@ -29,6 +29,15 @@ public Path repairModDependency(
             String projectId,
             List<String> requiredVersions
     ) throws IOException, InterruptedException {
+        return ModrinthGraphInstallTransaction.execute(instance,
+                () -> repairModDependencyWithinTransaction(instance, projectId, requiredVersions));
+    }
+
+    private Path repairModDependencyWithinTransaction(
+            Instance instance,
+            String projectId,
+            List<String> requiredVersions
+    ) throws IOException, InterruptedException {
 
         if (instance == null) {
             throw new IllegalArgumentException(
@@ -726,6 +735,7 @@ private void removeInstalledMod(
                             );
 
                     if (Files.isRegularFile(file)) {
+                        ModrinthGraphInstallTransaction.registerManagedPath(instance, file);
 
                         System.out.println(
                                 "[Vanta Repair] Deleting old mod: "
@@ -762,6 +772,7 @@ private void removeInstalledMod(
                         );
 
                 if (Files.isRegularFile(file)) {
+                    ModrinthGraphInstallTransaction.registerManagedPath(instance, file);
 
                     System.out.println(
                             "[Vanta Repair] Deleting tracked mod: "
@@ -896,6 +907,7 @@ private void removeInstalledMod(
                     continue;
                 }
 
+                ModrinthGraphInstallTransaction.registerManagedPath(instance, candidate);
                 Files.createDirectories(backupDirectory);
                 Path backup = backupDirectory.resolve(
                         filename + "." + UUID.randomUUID() + ".bak"
