@@ -22,8 +22,6 @@ public class RepairView extends VBox {
     private final Instance instance;
     private final Runnable onBack;
     private final Runnable onRepair;
-    private final Runnable onSaveCrashCase;
-    private final Runnable onReviewCrashCases;
 
     public RepairView(
             Instance instance,
@@ -63,8 +61,6 @@ public class RepairView extends VBox {
         this.instance = instance;
         this.onBack = onBack;
         this.onRepair = onRepair;
-        this.onSaveCrashCase = onSaveCrashCase;
-        this.onReviewCrashCases = onReviewCrashCases;
 
         getStyleClass().addAll(
                 "page",
