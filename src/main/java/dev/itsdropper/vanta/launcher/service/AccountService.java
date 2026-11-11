@@ -453,12 +453,13 @@ public class AccountService {
 
     private void notifyListeners() {
 
-        for (AccountListener listener :
-                listeners) {
-
-            listener.onAccountChanged(
-                    currentAccount
-            );
+        for (AccountListener listener : listeners) {
+            try {
+                listener.onAccountChanged(currentAccount);
+            } catch (RuntimeException failure) {
+                System.err.println("[Vanta Auth] An account-state listener failed: "
+                        + failure.getClass().getSimpleName());
+            }
         }
     }
 
