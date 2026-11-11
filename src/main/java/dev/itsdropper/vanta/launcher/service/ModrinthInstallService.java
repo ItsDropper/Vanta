@@ -557,11 +557,13 @@ private Path installModProject(
                         );
                     }
 
+                    progress.accept("Resolving dependency " + dependencyProjectId + "…");
                     installModVersion(
                             instance,
                             dependencyProjectId,
                             dependencyVersion,
-                            resolvingProjects
+                            resolvingProjects,
+                            progress
                     );
                 }
             }
@@ -569,7 +571,8 @@ private Path installModProject(
             return installResolvedVersion(
                     instance,
                     projectId,
-                    compatibleVersion
+                    compatibleVersion,
+                    progress
             );
 
         } finally {
