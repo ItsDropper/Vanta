@@ -312,6 +312,9 @@ final class ModrinthGraphInstallTransaction {
             for (int i = 0; i < backupCount; i++) {
                 String filename = required(journal, "backup." + i + ".filename");
                 String backupName = required(journal, "backup." + i + ".file");
+                if (!backupName.matches("tracked-[0-9]+")) {
+                    throw new IOException("Invalid transaction backup filename: " + backupName);
+                }
                 Path backup = transactionDirectory.resolve(backupName).normalize();
                 if (!backup.startsWith(transactionDirectory)
                         || !Files.isRegularFile(backup, LinkOption.NOFOLLOW_LINKS)
@@ -328,6 +331,9 @@ final class ModrinthGraphInstallTransaction {
 
             if (Boolean.parseBoolean(required(journal, "registryExisted"))) {
                 String backupName = required(journal, "registryBackup");
+                if (!"registry-backup.json".equals(backupName)) {
+                    throw new IOException("Invalid installed-mod registry backup filename.");
+                }
                 Path backup = transactionDirectory.resolve(backupName).normalize();
                 if (!backup.startsWith(transactionDirectory)
                         || !Files.isRegularFile(backup, LinkOption.NOFOLLOW_LINKS)
@@ -355,6 +361,9 @@ final class ModrinthGraphInstallTransaction {
     }
 
     private static Properties readJournal(Path path) throws IOException {
+        if (Files.size(path) > 16L * 1024 * 1024) {
+            throw new IOException("Modrinth transaction journal exceeds the maximum supported size.");
+        }
         Properties journal = new Properties();
         try (var input = Files.newInputStream(path)) {
             journal.load(input);
