@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,12 +35,28 @@ class AccountSessionMaintenanceTest {
         assertFalse(AccountService.isSessionRefreshDue(accountWithTokenChain(false)));
     }
 
+    @Test
+    void refreshesMinecraftAccessTokenBeforeHardExpiry() {
+        long now = System.currentTimeMillis();
+        assertTrue(AccountService.isSessionRefreshDue(
+                accountWithTokenChain(false, now + TimeUnit.MINUTES.toMillis(4))));
+        assertFalse(AccountService.isSessionRefreshDue(
+                accountWithTokenChain(false, now + TimeUnit.MINUTES.toMillis(15))));
+    }
+
     private static Account accountWithTokenChain(boolean upstreamExpired) {
+        return accountWithTokenChain(
+                upstreamExpired,
+                System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(15)
+        );
+    }
+
+    private static Account accountWithTokenChain(boolean upstreamExpired, long minecraftExpiry) {
         TestXblXsts xsts = new TestXblXsts(upstreamExpired);
         StepMCToken.MCToken minecraftToken = new StepMCToken.MCToken(
                 "test-access-token",
                 "Bearer",
-                System.currentTimeMillis() + 60_000,
+                minecraftExpiry,
                 xsts
         );
         StepMCProfile.MCProfile profile = new StepMCProfile.MCProfile(
