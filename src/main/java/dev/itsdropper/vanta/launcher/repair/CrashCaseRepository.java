@@ -229,6 +229,51 @@ public final class CrashCaseRepository {
         return updateReview(id, ReviewStatus.REJECTED, null, "");
     }
 
+    public CrashCase correctConfirmed(String id, FailureCategory category, String verifiedFix) throws IOException {
+        Objects.requireNonNull(category, "category");
+        if (category == FailureCategory.UNKNOWN) throw new IllegalArgumentException("UNKNOWN is not a training label.");
+        String safeFix = sanitize(verifiedFix);
+        if (safeFix.length() > 2_000) safeFix = safeFix.substring(0, 2_000);
+        return withLock(() -> {
+            List<CrashCase> cases = new ArrayList<>(readCases());
+            for (int i = 0; i < cases.size(); i++) {
+                CrashCase existing = cases.get(i);
+                if (!existing.id().equals(id)) continue;
+                if (existing.status() != ReviewStatus.CONFIRMED) {
+                    throw new IllegalStateException("Only confirmed crash cases can have their labels corrected.");
+                }
+                CrashCase corrected = new CrashCase(existing.id(), existing.createdAtEpochMillis(),
+                        existing.fingerprint(), ReviewStatus.CONFIRMED, existing.proposedCategory(),
+                        category, existing.occurrences(), existing.sanitizedLog(), safeFix);
+                cases.set(i, corrected);
+                writeCases(cases);
+                return corrected;
+            }
+            throw new IllegalArgumentException("Crash case does not exist.");
+        });
+    }
+
+    public CrashCase reopenRejected(String id) throws IOException {
+        if (id == null || id.isBlank()) throw new IllegalArgumentException("Case id is required.");
+        return withLock(() -> {
+            List<CrashCase> cases = new ArrayList<>(readCases());
+            for (int i = 0; i < cases.size(); i++) {
+                CrashCase existing = cases.get(i);
+                if (!existing.id().equals(id)) continue;
+                if (existing.status() != ReviewStatus.REJECTED) {
+                    throw new IllegalStateException("Only rejected crash cases can be reopened.");
+                }
+                CrashCase reopened = new CrashCase(existing.id(), existing.createdAtEpochMillis(),
+                        existing.fingerprint(), ReviewStatus.PENDING, existing.proposedCategory(),
+                        null, existing.occurrences(), existing.sanitizedLog(), "");
+                cases.set(i, reopened);
+                writeCases(cases);
+                return reopened;
+            }
+            throw new IllegalArgumentException("Crash case does not exist.");
+        });
+    }
+
     public int exportConfirmedCorpus(Path destination) throws IOException {
         Objects.requireNonNull(destination, "destination");
         Path target = destination.toAbsolutePath().normalize();
