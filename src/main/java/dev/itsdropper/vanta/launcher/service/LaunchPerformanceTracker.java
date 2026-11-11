@@ -4,6 +4,9 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.io.IOException;
 
 /**
  * In-memory measurements for Vanta's launch-data preparation stage.
@@ -27,7 +30,7 @@ public final class LaunchPerformanceTracker {
     public static synchronized void record(Instance instance, boolean optimized, long durationNanos) {
         if (instance == null || durationNanos < 0) return;
         String loader = instance.getLoader() == null ? "Unknown" : instance.getLoader();
-        boolean modded = !loader.equalsIgnoreCase("Vanilla");
+        boolean modded = !loader.equalsIgnoreCase("Vanilla") && hasEnabledMods(instance);
         SAMPLES.add(new Sample(
                 instance.getId(),
                 instance.getName() == null ? instance.getId() : instance.getName(),
@@ -38,6 +41,17 @@ public final class LaunchPerformanceTracker {
         ));
         if (SAMPLES.size() > MAX_SAMPLES) {
             SAMPLES.remove(0);
+        }
+    }
+
+    private static boolean hasEnabledMods(Instance instance) {
+        Path modsDirectory = instance.getDirectory().resolve("mods");
+        if (!Files.isDirectory(modsDirectory)) return false;
+        try (var entries = Files.list(modsDirectory)) {
+            return entries.anyMatch(path -> Files.isRegularFile(path)
+                    && path.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar"));
+        } catch (IOException ignored) {
+            return false;
         }
     }
 
