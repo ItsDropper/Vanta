@@ -13,11 +13,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.LongAdder;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
 public class ClasspathBuilder {
 
-    private record CacheKey(Path instanceDirectory, long modified, long size, Object fileKey) { }
+    private record CacheKey(Path instanceDirectory, FileTime modified, long size, Object fileKey) { }
 
     private static final Map<CacheKey, List<Path>> CLASSPATH_CACHE = new ConcurrentHashMap<>();
     private static final Map<CacheKey, List<Path>> NATIVE_CACHE = new ConcurrentHashMap<>();
@@ -44,7 +45,7 @@ public class ClasspathBuilder {
             Path directory = instance.getDirectory().toAbsolutePath().normalize();
             Path metadata = directory.resolve("minecraft").resolve("version.json");
             BasicFileAttributes attributes = Files.readAttributes(metadata, BasicFileAttributes.class);
-            return new CacheKey(directory, attributes.lastModifiedTime().toMillis(),
+            return new CacheKey(directory, attributes.lastModifiedTime(),
                     attributes.size(), attributes.fileKey());
         } catch (Exception ignored) {
             return null;
