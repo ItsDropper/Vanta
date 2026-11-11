@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class AccountManager {
 
@@ -172,19 +173,19 @@ public class AccountManager {
                                 accounts.add(account);
                             }
 
-                        } catch (IOException e) {
-
-                            System.err.println(
-                                    "Failed to load account: "
-                                            + path
-                            );
-
-                            e.printStackTrace();
+                        } catch (RuntimeException | IOException failure) {
+                            throw new AccountLoadFailure(path, failure);
                         }
                     });
         }
 
         return accounts;
+    }
+
+    private static final class AccountLoadFailure extends RuntimeException {
+        private AccountLoadFailure(Path path, Exception cause) {
+            super("Could not load Vanta account file: " + path.getFileName(), cause);
+        }
     }
 
     // =============================================================
@@ -208,28 +209,23 @@ public class AccountManager {
                 ).trim();
 
         if (uuid.isEmpty()) {
-
             return null;
         }
 
-        return uuid;
+        try {
+            return normalizeAccountId(uuid);
+        } catch (IllegalArgumentException invalid) {
+            throw new IOException("The active-account file contains an invalid account identifier.", invalid);
+        }
     }
 
     public static void setActiveAccount(
             String uuid
     ) throws IOException {
 
-        if (uuid == null ||
-                uuid.isBlank()) {
-
-            throw new IllegalArgumentException(
-                    "Account UUID cannot be empty."
-            );
-        }
-
         atomicWrite(
                 ACTIVE_ACCOUNT_FILE,
-                uuid
+                normalizeAccountId(uuid)
         );
     }
 
@@ -476,14 +472,16 @@ public class AccountManager {
     // PATH
     // =============================================================
 
-    private static Path getAccountFile(
-            String uuid
-    ) {
+    static String normalizeAccountId(String uuid) {
+        if (uuid == null || !uuid.matches(
+                "(?i)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")) {
+            throw new IllegalArgumentException("Account identifier must be a canonical UUID.");
+        }
+        return UUID.fromString(uuid).toString();
+    }
 
-        return ACCOUNTS_DIRECTORY
-                .resolve(
-                        uuid + ".json"
-                );
+    private static Path getAccountFile(String uuid) {
+        return ACCOUNTS_DIRECTORY.resolve(normalizeAccountId(uuid) + ".json");
     }
 
     // =============================================================
@@ -499,39 +497,37 @@ public class AccountManager {
                 target.getParent()
         );
 
-        Path temp =
-                target.resolveSibling(
-                        target.getFileName()
-                                + ".tmp"
-                );
-
-        Files.writeString(
-                temp,
-                content,
-                StandardCharsets.UTF_8,
-                StandardOpenOption.CREATE,
-                StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.WRITE
+        Path temp = Files.createTempFile(
+                target.getParent(),
+                target.getFileName().toString() + ".",
+                ".tmp"
         );
 
         try {
-
-            Files.move(
+            Files.writeString(
                     temp,
-                    target,
-                    StandardCopyOption.REPLACE_EXISTING,
-                    StandardCopyOption.ATOMIC_MOVE
+                    content,
+                    StandardCharsets.UTF_8,
+                    StandardOpenOption.TRUNCATE_EXISTING,
+                    StandardOpenOption.WRITE
             );
 
-        } catch (
-                AtomicMoveNotSupportedException ex
-        ) {
-
-            Files.move(
-                    temp,
-                    target,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
+            try {
+                Files.move(
+                        temp,
+                        target,
+                        StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE
+                );
+            } catch (AtomicMoveNotSupportedException unsupported) {
+                Files.move(
+                        temp,
+                        target,
+                        StandardCopyOption.REPLACE_EXISTING
+                );
+            }
+        } finally {
+            Files.deleteIfExists(temp);
         }
     }
 }
