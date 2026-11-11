@@ -51,10 +51,11 @@ public class ClasspathBuilder {
         }
     }
 
-    private static List<Path> cached(Map<CacheKey, List<Path>> cache, CacheKey key) {
+    private static List<Path> cached(Map<CacheKey, List<Path>> cache, CacheKey key, boolean allowDirectories) {
         if (key == null || !LauncherSettings.isExperimentalLaunchCacheEnabled()) return null;
         List<Path> value = cache.get(key);
-        if (value == null || value.stream().anyMatch(path -> !Files.exists(path))) {
+        if (value == null || value.stream().anyMatch(path ->
+                !(Files.isRegularFile(path) || (allowDirectories && Files.isDirectory(path))))) {
             if (value != null) cache.remove(key, value);
             CACHE_MISSES.increment();
             return null;
@@ -80,7 +81,7 @@ public class ClasspathBuilder {
         }
 
         CacheKey key = cacheKey(instance);
-        List<Path> cached = cached(CLASSPATH_CACHE, key);
+        List<Path> cached = cached(CLASSPATH_CACHE, key, true);
         if (cached != null) return cached;
 
         LinkedHashSet<Path> classpath =
@@ -195,7 +196,7 @@ public class ClasspathBuilder {
         }
 
         CacheKey key = cacheKey(instance);
-        List<Path> cached = cached(NATIVE_CACHE, key);
+        List<Path> cached = cached(NATIVE_CACHE, key, false);
         if (cached != null) return cached;
 
         LinkedHashSet<Path> nativeJars =
