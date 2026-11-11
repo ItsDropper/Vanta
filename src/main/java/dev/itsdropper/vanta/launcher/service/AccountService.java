@@ -514,10 +514,16 @@ public class AccountService implements AutoCloseable {
                 setCurrentAccount(
                         nextAccount
                 );
+                maintenancePausedAccountId = null;
+                maintenanceRetryAfterMillis = 0L;
+                setSessionHealth(SessionHealth.READY,
+                        "Another saved account is selected; freshness is checked before launch.");
+                startSessionMaintenance();
 
             } else {
 
                 setCurrentAccount(null);
+                setSessionHealth(SessionHealth.NO_ACCOUNT, "No Minecraft account is selected.");
             }
 
         } finally {
