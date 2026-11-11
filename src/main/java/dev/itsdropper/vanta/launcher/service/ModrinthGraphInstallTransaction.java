@@ -169,7 +169,15 @@ final class ModrinthGraphInstallTransaction {
     }
 
     private static Path resolveTrackedPath(Path modsDirectory, String filename) throws IOException {
-        Path resolved = modsDirectory.resolve(filename).normalize();
+        if (filename.indexOf('/') >= 0 || filename.indexOf('\\\\') >= 0) {
+            throw new IOException("Installed-mod registry must contain a filename, not a path: " + filename);
+        }
+        Path supplied = Path.of(filename);
+        if (supplied.isAbsolute() || supplied.getNameCount() != 1
+                || ".".equals(filename) || "..".equals(filename)) {
+            throw new IOException("Installed-mod registry contains an unsafe filename: " + filename);
+        }
+        Path resolved = modsDirectory.resolve(supplied).normalize();
         if (!resolved.startsWith(modsDirectory) || resolved.equals(modsDirectory)) {
             throw new IOException("Installed-mod registry contains an unsafe filename: " + filename);
         }
