@@ -215,11 +215,7 @@ public class LaunchService {
                 dev.itsdropper.vanta.launcher.instance.InstanceRepairService
                         .repair(instance);
 
-                launchData =
-                        LaunchDataBuilder.build(
-                                instance,
-                                server
-                        );
+                launchData = buildLaunchData(instance, server);
 
                 System.out.println(
                         "[Vanta Repair] Instance repair completed successfully."
