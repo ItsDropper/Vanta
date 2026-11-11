@@ -3,7 +3,6 @@ package dev.itsdropper.vanta.launcher.service;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 /**
