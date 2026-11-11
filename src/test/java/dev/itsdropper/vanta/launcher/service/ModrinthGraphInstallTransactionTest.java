@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -273,7 +274,7 @@ class ModrinthGraphInstallTransactionTest {
         AtomicInteger maximumActive = new AtomicInteger();
 
         try {
-            Future<?> first = workers.submit(() ->
+            Future<?> first = workers.submit((Callable<Void>) () ->
                     ModrinthGraphInstallTransaction.execute(instance, () -> {
                         int now = active.incrementAndGet();
                         maximumActive.accumulateAndGet(now, Math::max);
@@ -289,9 +290,9 @@ class ModrinthGraphInstallTransactionTest {
                     }));
 
             assertTrue(firstEntered.await(5, TimeUnit.SECONDS), "First transaction did not start.");
-            Future<?> second = workers.submit(() -> {
+            Future<?> second = workers.submit((Callable<Void>) () -> {
                 secondAttempting.countDown();
-                return ModrinthGraphInstallTransaction.execute(instance, () -> {
+                ModrinthGraphInstallTransaction.execute(instance, () -> {
                     int now = active.incrementAndGet();
                     maximumActive.accumulateAndGet(now, Math::max);
                     try {
@@ -300,6 +301,7 @@ class ModrinthGraphInstallTransactionTest {
                         active.decrementAndGet();
                     }
                 });
+                return null;
             });
 
             assertTrue(secondAttempting.await(5, TimeUnit.SECONDS), "Second transaction did not start.");
