@@ -1061,11 +1061,14 @@ public class ModDetailsView extends VBox {
                         button.setDisable(false);
                         button.setText(Localization.text("common.install"));
                         button.setOnAction(event -> install(project, button));
-                        statusLabel.setText(cancelled
-                                ? "Installation cancelled. Existing installed files were preserved."
-                                : failure.getMessage() != null
-                                        ? failure.getMessage()
-                                        : "Failed to install " + project.getTitle() + ".");
+                        boolean recoveryRequired = failure.getSuppressed().length > 0;
+                        statusLabel.setText(recoveryRequired
+                                ? "Installation did not finish cleanly. Vanta retained recovery data; restart the launcher before using this instance."
+                                : cancelled
+                                        ? "Installation cancelled. Previous installed files were restored."
+                                        : failure.getMessage() != null
+                                                ? failure.getMessage()
+                                                : "Failed to install " + project.getTitle() + ".");
                     });
                 } finally {
                     installWorker.compareAndSet(worker, null);
