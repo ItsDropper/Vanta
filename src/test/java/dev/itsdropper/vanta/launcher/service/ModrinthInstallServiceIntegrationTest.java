@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -80,14 +81,18 @@ class ModrinthInstallServiceIntegrationTest {
             downloads.incrementAndGet();
         });
 
+        List<String> progress = new ArrayList<>();
         List<Path> installed = installer.installResolvedGraph(instance, List.of(
                 new ModrinthService.ResolvedMod("fabric-api-project",
                         version("fabric-api-project", "api-v1", "api-1.0.jar")),
                 new ModrinthService.ResolvedMod("example-project",
                         version("example-project", "example-v1", "example-1.0.jar"))
-        ));
+        ), progress::add);
 
         assertEquals(2, downloads.get());
+        assertTrue(progress.stream().anyMatch(message -> message.startsWith("Downloading ")));
+        assertTrue(progress.stream().anyMatch(message -> message.startsWith("Validating ")));
+        assertTrue(progress.stream().anyMatch(message -> message.startsWith("Installed ")));
         assertEquals(2, installed.size());
         assertTrue(installed.stream().allMatch(Files::isRegularFile));
         List<InstalledModRecord> registry = InstalledModManager.load(instance);
