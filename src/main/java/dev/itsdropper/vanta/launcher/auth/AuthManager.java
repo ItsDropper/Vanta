@@ -130,22 +130,6 @@ public class AuthManager {
         return "invalid_grant".equalsIgnoreCase(error);
     }
 
-    /**
-     * Refreshes a saved session without ever starting an interactive login.
-     * Used by the session keeper and immediately before launching Minecraft.
-     */
-    public static Account refreshSavedSession(Account savedAccount) throws Exception {
-        if (savedAccount == null || savedAccount.getSession() == null) {
-            throw new IllegalArgumentException("A saved Minecraft session is required.");
-        }
-        StepFullJavaSession.FullJavaSession refreshedSession =
-                LOGIN.refresh(HTTP, savedAccount.getSession());
-        Account refreshedAccount = new Account(refreshedSession);
-        // Persist the rotated refresh token before publishing the new session.
-        AccountManager.saveAccount(refreshedAccount);
-        return refreshedAccount;
-    }
-
     static boolean isTransientFailure(Throwable failure) {
         for (Throwable current = failure; current != null; current = current.getCause()) {
             if (current instanceof InterruptedIOException
