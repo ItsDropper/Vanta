@@ -219,6 +219,42 @@ class ModrinthGraphInstallTransactionTest {
         assertTrue(Files.exists(journalDirectory), "An unreadable prepared journal must remain for manual recovery.");
     }
 
+
+    @Test
+    void recoveryRetainsJournalWhenAnOriginalBackupIsMissing() throws Exception {
+        Instance instance = instance();
+        Path mods = temporaryDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path original = mods.resolve("existing.jar");
+        Files.writeString(original, "partially replaced bytes");
+        InstalledModManager.save(instance, List.of(
+                new InstalledModRecord("existing", "old", "existing", "1.0", "existing.jar")));
+        String registry = Files.readString(temporaryDirectory.resolve("vanta-mods.json"));
+
+        Path journalDirectory = Files.createDirectory(
+                temporaryDirectory.resolve(".vanta-graph-transaction-missing-backup"));
+        Files.writeString(journalDirectory.resolve("OWNER"), "VANTA_MODRINTH_GRAPH_TRANSACTION_V1");
+        Files.writeString(journalDirectory.resolve("registry-backup.json"), registry);
+        Properties journal = new Properties();
+        journal.setProperty("registryExisted", "true");
+        journal.setProperty("registryBackup", "registry-backup.json");
+        journal.setProperty("backupCount", "1");
+        journal.setProperty("backup.0.filename", "existing.jar");
+        journal.setProperty("backup.0.file", "tracked-0");
+        journal.setProperty("managedCount", "1");
+        journal.setProperty("managed.0", "existing.jar");
+        try (var output = Files.newOutputStream(journalDirectory.resolve("journal.properties"))) {
+            journal.store(output, "simulated incomplete backup");
+        }
+
+        assertThrows(IOException.class, () ->
+                ModrinthGraphInstallTransaction.execute(instance, () -> List.of()));
+
+        assertTrue(Files.exists(journalDirectory),
+                "Recovery must preserve the journal when it cannot restore an original artifact.");
+        assertEquals("partially replaced bytes", Files.readString(original));
+    }
+
     private void assertNoTransactionDirectories() throws IOException {
         try (var entries = Files.list(temporaryDirectory)) {
             assertTrue(entries.noneMatch(path ->
