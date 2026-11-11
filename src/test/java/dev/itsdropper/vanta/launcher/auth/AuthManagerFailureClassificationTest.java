@@ -21,6 +21,15 @@ class AuthManagerFailureClassificationTest {
     }
 
     @Test
+    void onlyExplicitInvalidGrantRequiresInteractiveSignIn() {
+        assertTrue(AuthManager.isRefreshTokenRejectedError("invalid_grant"));
+        assertTrue(AuthManager.isRefreshTokenRejectedError("INVALID_GRANT"));
+        assertFalse(AuthManager.isRefreshTokenRejectedError("invalid_client"));
+        assertFalse(AuthManager.isRefreshTokenRejectedError("temporarily_unavailable"));
+        assertFalse(AuthManager.isRefreshTokenRejectedError(null));
+    }
+
+    @Test
     void doesNotTreatAuthenticationRejectionOrGenericIoAsNetworkOutage() {
         assertFalse(AuthManager.isTransientFailure(
                 new IllegalStateException("invalid refresh token")));
