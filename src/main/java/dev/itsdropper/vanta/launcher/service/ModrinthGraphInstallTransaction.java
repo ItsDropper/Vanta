@@ -33,6 +33,8 @@ import java.util.concurrent.locks.ReentrantLock;
 final class ModrinthGraphInstallTransaction {
     private static final String DIRECTORY_PREFIX = ".vanta-graph-transaction-";
     private static final String JOURNAL_NAME = "journal.properties";
+    private static final String OWNER_NAME = "OWNER";
+    private static final String OWNER_CONTENT = "VANTA_MODRINTH_GRAPH_TRANSACTION_V1";
     private static final String COMMITTED_NAME = "COMMITTED";
     private static final Map<Path, LockEntry> INSTANCE_LOCKS = new ConcurrentHashMap<>();
     private static final ThreadLocal<JournalContext> ACTIVE_JOURNAL = new ThreadLocal<>();
@@ -102,6 +104,9 @@ final class ModrinthGraphInstallTransaction {
 
         List<InstalledModRecord> originalRegistry = new ArrayList<>(InstalledModManager.load(instance));
         Path transactionDirectory = Files.createTempDirectory(root, DIRECTORY_PREFIX);
+        Path ownerMarker = transactionDirectory.resolve(OWNER_NAME);
+        Files.writeString(ownerMarker, OWNER_CONTENT, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+        forceFile(ownerMarker);
         Map<Path, Path> backups = new LinkedHashMap<>();
         Properties journal = new Properties();
         journal.setProperty("registryExisted", Boolean.toString(registryExisted));
@@ -207,6 +212,14 @@ final class ModrinthGraphInstallTransaction {
                     path.getFileName().toString().startsWith(DIRECTORY_PREFIX)).toList()) {
                 if (Files.isSymbolicLink(directory) || !Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) {
                     throw new IOException("Unsafe Modrinth transaction journal entry: " + directory.getFileName());
+                }
+                Path ownerMarker = directory.resolve(OWNER_NAME);
+                if (!Files.isRegularFile(ownerMarker, LinkOption.NOFOLLOW_LINKS)
+                        || Files.isSymbolicLink(ownerMarker)
+                        || !OWNER_CONTENT.equals(Files.readString(ownerMarker))) {
+                    // Never delete an arbitrary user directory merely because its name
+                    // resembles one of our transaction directories.
+                    continue;
                 }
                 if (Files.exists(directory.resolve(COMMITTED_NAME), LinkOption.NOFOLLOW_LINKS)) {
                     deleteTree(directory);
