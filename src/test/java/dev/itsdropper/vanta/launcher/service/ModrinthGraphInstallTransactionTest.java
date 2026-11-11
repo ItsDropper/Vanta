@@ -11,6 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -253,6 +259,61 @@ class ModrinthGraphInstallTransactionTest {
         assertTrue(Files.exists(journalDirectory),
                 "Recovery must preserve the journal when it cannot restore an original artifact.");
         assertEquals("partially replaced bytes", Files.readString(original));
+    }
+
+
+    @Test
+    void serializesConcurrentTransactionsForTheSameInstance() throws Exception {
+        Instance instance = instance();
+        ExecutorService workers = Executors.newFixedThreadPool(2);
+        CountDownLatch firstEntered = new CountDownLatch(1);
+        CountDownLatch secondAttempting = new CountDownLatch(1);
+        CountDownLatch releaseFirst = new CountDownLatch(1);
+        AtomicInteger active = new AtomicInteger();
+        AtomicInteger maximumActive = new AtomicInteger();
+
+        try {
+            Future<?> first = workers.submit(() ->
+                    ModrinthGraphInstallTransaction.execute(instance, () -> {
+                        int now = active.incrementAndGet();
+                        maximumActive.accumulateAndGet(now, Math::max);
+                        firstEntered.countDown();
+                        try {
+                            if (!releaseFirst.await(5, TimeUnit.SECONDS)) {
+                                throw new IOException("Timed out waiting to release first transaction.");
+                            }
+                            return null;
+                        } finally {
+                            active.decrementAndGet();
+                        }
+                    }));
+
+            assertTrue(firstEntered.await(5, TimeUnit.SECONDS), "First transaction did not start.");
+            Future<?> second = workers.submit(() -> {
+                secondAttempting.countDown();
+                return ModrinthGraphInstallTransaction.execute(instance, () -> {
+                    int now = active.incrementAndGet();
+                    maximumActive.accumulateAndGet(now, Math::max);
+                    try {
+                        return null;
+                    } finally {
+                        active.decrementAndGet();
+                    }
+                });
+            });
+
+            assertTrue(secondAttempting.await(5, TimeUnit.SECONDS), "Second transaction did not start.");
+            assertEquals(1, active.get(), "Second transaction must wait while the first owns the instance lock.");
+            releaseFirst.countDown();
+            first.get(5, TimeUnit.SECONDS);
+            second.get(5, TimeUnit.SECONDS);
+            assertEquals(1, maximumActive.get(), "Transactions for one instance must never overlap.");
+            assertNoTransactionDirectories();
+        } finally {
+            releaseFirst.countDown();
+            workers.shutdownNow();
+            assertTrue(workers.awaitTermination(5, TimeUnit.SECONDS));
+        }
     }
 
     private void assertNoTransactionDirectories() throws IOException {
