@@ -13,7 +13,7 @@ The model:
 - abstains when the prediction is weak or ambiguous;
 - is advisory only and cannot authorize or execute a repair.
 
-The bundled corpus currently contains 63 synthetic, labelled examples across 21 failure categories. It is a starting dataset, not a claim of broad real-world accuracy. Add new examples only after reviewing their label and checking the case for private data.
+The bundled corpus currently contains 66 synthetic, labelled examples across all 22 actionable failure categories. It is a starting dataset, not a claim of broad real-world accuracy. Add new examples only after reviewing their label and checking the case for private data.
 
 ## Local case collection
 
