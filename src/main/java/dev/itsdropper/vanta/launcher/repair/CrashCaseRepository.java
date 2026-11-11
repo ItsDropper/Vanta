@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
  * examples. Raw source files are never modified or deleted.
  */
 public final class CrashCaseRepository {
-    private static final int SCHEMA_VERSION = 1;
+    private static final int SCHEMA_VERSION = 2;
     private static final int MAX_CASES = 256;
     private static final int MAX_LOG_CHARS = 96 * 1024;
     private static final long MAX_STORE_BYTES = 32L * 1024 * 1024;
@@ -79,13 +79,16 @@ public final class CrashCaseRepository {
             FailureCategory proposedCategory,
             FailureCategory confirmedCategory,
             int occurrences,
-            String sanitizedLog
+            String sanitizedLog,
+            String verifiedFix
     ) {
         public CrashCase {
             Objects.requireNonNull(id, "id");
             Objects.requireNonNull(fingerprint, "fingerprint");
             Objects.requireNonNull(status, "status");
             Objects.requireNonNull(sanitizedLog, "sanitizedLog");
+            verifiedFix = verifiedFix == null ? "" : verifiedFix;
+            if (verifiedFix.length() > 2_000) throw new IllegalArgumentException("Verified fix notes exceed 2,000 characters.");
             if (occurrences < 1) throw new IllegalArgumentException("occurrences must be positive");
             if (status == ReviewStatus.CONFIRMED && confirmedCategory == null) {
                 throw new IllegalArgumentException("Confirmed cases require a category.");
@@ -135,7 +138,7 @@ public final class CrashCaseRepository {
                     CrashCase updated = new CrashCase(existing.id(), existing.createdAtEpochMillis(),
                             existing.fingerprint(), existing.status(), existing.proposedCategory(),
                             existing.confirmedCategory(), Math.addExact(existing.occurrences(), 1),
-                            existing.sanitizedLog());
+                            existing.sanitizedLog(), existing.verifiedFix());
                     cases.set(i, updated);
                     writeCases(cases);
                     return updated;
@@ -155,7 +158,7 @@ public final class CrashCaseRepository {
 
             CrashCase created = new CrashCase(UUID.randomUUID().toString(),
                     System.currentTimeMillis(), fingerprint, ReviewStatus.PENDING,
-                    proposedCategory, null, 1, sanitized);
+                    proposedCategory, null, 1, sanitized, "");
             cases.add(created);
             writeCases(cases);
             return created;
@@ -182,13 +185,19 @@ public final class CrashCaseRepository {
     }
 
     public CrashCase confirm(String id, FailureCategory category) throws IOException {
+        return confirm(id, category, "");
+    }
+
+    public CrashCase confirm(String id, FailureCategory category, String verifiedFix) throws IOException {
         Objects.requireNonNull(category, "category");
         if (category == FailureCategory.UNKNOWN) throw new IllegalArgumentException("UNKNOWN is not a training label.");
-        return updateReview(id, ReviewStatus.CONFIRMED, category);
+        String safeFix = sanitize(verifiedFix);
+        if (safeFix.length() > 2_000) safeFix = safeFix.substring(0, 2_000);
+        return updateReview(id, ReviewStatus.CONFIRMED, category, safeFix);
     }
 
     public CrashCase reject(String id) throws IOException {
-        return updateReview(id, ReviewStatus.REJECTED, null);
+        return updateReview(id, ReviewStatus.REJECTED, null, "");
     }
 
     public int exportConfirmedCorpus(Path destination) throws IOException {
@@ -263,7 +272,36 @@ public final class CrashCaseRepository {
         }
     }
 
-    private CrashCase updateReview(String id, ReviewStatus status, FailureCategory category) throws IOException {
+    public int exportVerifiedFixes(Path destination) throws IOException {
+        Objects.requireNonNull(destination, "destination");
+        Path target = destination.toAbsolutePath().normalize();
+        if (target.equals(storeFile) || target.equals(lockFile)) {
+            throw new IOException("Fix export cannot overwrite the local crash case store.");
+        }
+        return withLock(() -> {
+            List<VerifiedFix> fixes = readCases().stream()
+                    .filter(item -> item.status() == ReviewStatus.CONFIRMED && !item.verifiedFix().isBlank())
+                    .sorted(Comparator.comparing(CrashCase::fingerprint))
+                    .map(item -> new VerifiedFix(item.fingerprint(), item.confirmedCategory(),
+                            item.occurrences(), item.verifiedFix(), item.sanitizedLog()))
+                    .toList();
+            if (fixes.isEmpty()) throw new IOException("There are no confirmed fix notes to export.");
+            Files.createDirectories(target.getParent());
+            atomicWrite(target, JSON.writerWithDefaultPrettyPrinter().writeValueAsBytes(fixes));
+            return fixes.size();
+        });
+    }
+
+    public record VerifiedFix(
+            String fingerprint,
+            FailureCategory category,
+            int occurrences,
+            String verifiedFix,
+            String sanitizedLog
+    ) { }
+
+    private CrashCase updateReview(String id, ReviewStatus status, FailureCategory category,
+                                   String verifiedFix) throws IOException {
         if (id == null || id.isBlank()) throw new IllegalArgumentException("Case id is required.");
         return withLock(() -> {
             List<CrashCase> cases = new ArrayList<>(readCases());
@@ -275,7 +313,7 @@ public final class CrashCaseRepository {
                 }
                 CrashCase reviewed = new CrashCase(existing.id(), existing.createdAtEpochMillis(),
                         existing.fingerprint(), status, existing.proposedCategory(), category,
-                        existing.occurrences(), existing.sanitizedLog());
+                        existing.occurrences(), existing.sanitizedLog(), verifiedFix);
                 cases.set(i, reviewed);
                 writeCases(cases);
                 return reviewed;
@@ -295,12 +333,12 @@ public final class CrashCaseRepository {
         }
         if (stored.length > MAX_STORE_BYTES) throw new IOException("Crash case store exceeds its safety limit.");
         StoreDocument document = JSON.readValue(stored, StoreDocument.class);
-        if (document.schemaVersion() != SCHEMA_VERSION) {
+        if (document.schemaVersion() < 1 || document.schemaVersion() > SCHEMA_VERSION) {
             throw new IOException("Unsupported crash case store schema: " + document.schemaVersion());
         }
         if (document.cases().size() > MAX_CASES) throw new IOException("Crash case store exceeds its record limit.");
         for (CrashCase item : document.cases()) {
-            if (item.sanitizedLog().length() > MAX_LOG_CHARS
+            if (item.sanitizedLog().length() > MAX_LOG_CHARS || item.verifiedFix().length() > 2_000
                     || !item.fingerprint().matches("[a-f0-9]{64}")) {
                 throw new IOException("Crash case store contains an invalid record.");
             }
