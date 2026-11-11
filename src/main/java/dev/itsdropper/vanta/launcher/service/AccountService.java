@@ -244,18 +244,24 @@ public class AccountService {
             if (currentAccount == null) {
                 return null;
             }
+            Account account = currentAccount;
             maintenancePausedAccountId = null;
-            Account refreshed = AuthManager.refresh(currentAccount);
-            replaceAccount(refreshed);
-            setCurrentAccount(refreshed);
-            return refreshed;
+            try {
+                Account refreshed = AuthManager.refresh(account);
+                replaceAccount(refreshed);
+                setCurrentAccount(refreshed);
+                return refreshed;
+            } catch (Exception failure) {
+                maintenancePausedAccountId = account.getUuid();
+                throw failure;
+            }
         } finally {
             accountLock.unlock();
         }
     }
 
     private void startSessionMaintenance() {
-        if (closed || (maintenanceTask != null && !maintenanceTask.isCancelled())) {
+        if (closed || (maintenanceTask != null && !maintenanceTask.isDone() && !maintenanceTask.isCancelled())) {
             return;
         }
         maintenanceTask = sessionMaintenance.scheduleWithFixedDelay(
