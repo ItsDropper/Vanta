@@ -182,9 +182,9 @@ public final class InstanceRepairService {
                     vanillaMetadata
             );
         } else if (loaderKey.equals("ornithe")) {
-            repairOrnithe(instance, vanillaMetadata);
+            instance = repairOrnithe(instance, vanillaMetadata);
         } else if (loaderKey.equals("neoforge")) {
-            repairNeoForge(instance);
+            instance = repairNeoForge(instance);
         } else if (loaderKey.equals("babric")) {
             repairBabric(instance, vanillaMetadata);
         } else if (loaderKey.equals("nilloader")) {
@@ -595,7 +595,7 @@ public final class InstanceRepairService {
         }
     }
 
-    private static void repairOrnithe(
+    private static Instance repairOrnithe(
             Instance instance,
             JsonNode vanillaMetadata
     ) throws Exception {
@@ -611,13 +611,16 @@ public final class InstanceRepairService {
         MinecraftVersionResolver.saveMetadata(instance, merged);
 
         if (!loaderVersion.equals(instance.getLoaderVersion())) {
-            InstanceManager.saveInstance(new Instance(
+            Instance repaired = new Instance(
                     instance.getId(), instance.getName(), instance.getMinecraftVersion(),
-                    instance.getLoader(), loaderVersion, instance.getDirectory()));
+                    instance.getLoader(), loaderVersion, instance.getDirectory());
+            InstanceManager.saveInstance(repaired);
+            return repaired;
         }
+        return instance;
     }
 
-    private static void repairNeoForge(Instance instance) throws Exception {
+    private static Instance repairNeoForge(Instance instance) throws Exception {
         String loaderVersion = instance.getLoaderVersion();
         if (loaderVersion == null || loaderVersion.isBlank()) {
             loaderVersion = NeoForgeInstaller.findLatestLoaderVersion(instance.getMinecraftVersion());
@@ -625,10 +628,13 @@ public final class InstanceRepairService {
 
         NeoForgeInstaller.installNeoForge(instance, loaderVersion);
         if (!loaderVersion.equals(instance.getLoaderVersion())) {
-            InstanceManager.saveInstance(new Instance(
+            Instance repaired = new Instance(
                     instance.getId(), instance.getName(), instance.getMinecraftVersion(),
-                    instance.getLoader(), loaderVersion, instance.getDirectory()));
+                    instance.getLoader(), loaderVersion, instance.getDirectory());
+            InstanceManager.saveInstance(repaired);
+            return repaired;
         }
+        return instance;
     }
 
     private static void repairForge(
