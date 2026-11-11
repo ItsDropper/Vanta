@@ -108,7 +108,7 @@ tasks.register('platformAppImage', Exec) {
     // jpackage accepts only one to three numeric components. Keep the full
     // project version for archives/resources while passing a valid native
     // application version (for example, 1.3.2git -> 1.3.2).
-    def jpackageVersion = project.version.toString().find(/^\\d+(?:\\.\\d+){0,2}/)
+    def jpackageVersion = project.version.toString().find(/^\d+(?:\.\d+){0,2}/)
     if (jpackageVersion == null) {
         throw new GradleException("Vanta version '${project.version}' cannot be represented as a jpackage version.")
     }
