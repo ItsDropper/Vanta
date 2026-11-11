@@ -76,7 +76,7 @@ public Path installMod(
             throw new IOException("Project is not a mod.");
         }
         Consumer<String> listener = progress == null ? ignored -> { } : progress;
-        listener.accept("Resolving dependencies for " + project.getTitle() + "…");
+        reportProgress(listener, "Resolving dependencies for " + project.getTitle() + "…");
         return ModrinthGraphInstallTransaction.execute(instance, () ->
                 installModProject(instance, project.getProjectId(), new HashSet<>(), listener));
     }
@@ -285,14 +285,16 @@ private Path installResolvedVersion(
                 throw new IOException("Downloaded mod size does not match Modrinth metadata.");
             }
 
-            progress.accept("Validating " + filename + "…");
+            reportProgress(progress, "Validating " + filename + "…");
             InstalledMod scanned = installedModScanner.scanFile(stagedFile);
+            throwIfInterrupted();
 
             if (rollbackFile != null) {
                 moveFile(previousFile, rollbackFile);
                 previousMoved = true;
             }
 
+            throwIfInterrupted();
             moveFile(stagedFile, installedFile);
             newFilePublished = true;
 
@@ -313,7 +315,7 @@ private Path installResolvedVersion(
                 try { Files.deleteIfExists(previousFile); }
                 catch (IOException cleanupFailure) { System.err.println("Could not clean up previous mod file: " + cleanupFailure.getMessage()); }
             }
-            progress.accept("Installed " + filename + ".");
+            reportProgress(progress, "Installed " + filename + ".");
             return installedFile;
         } catch (Exception failure) {
             if (newFilePublished) {
@@ -338,6 +340,20 @@ private Path installResolvedVersion(
                     System.err.println("Could not remove unused mod rollback file: " + cleanupFailure.getMessage());
                 }
             }
+        }
+    }
+
+    private static void reportProgress(Consumer<String> progress, String message) {
+        try {
+            progress.accept(message);
+        } catch (RuntimeException listenerFailure) {
+            System.err.println("Modrinth install progress listener failed: " + listenerFailure.getMessage());
+        }
+    }
+
+    private static void throwIfInterrupted() throws InterruptedException {
+        if (Thread.currentThread().isInterrupted()) {
+            throw new InterruptedException("Modrinth mod installation was cancelled.");
         }
     }
 
@@ -433,7 +449,7 @@ private Path installModVersion(
                         );
                     }
 
-                    progress.accept("Resolving dependency " + dependencyProjectId + "…");
+                    reportProgress(progress, "Resolving dependency " + dependencyProjectId + "…");
                     installModVersion(
                             instance,
                             dependencyProjectId,
