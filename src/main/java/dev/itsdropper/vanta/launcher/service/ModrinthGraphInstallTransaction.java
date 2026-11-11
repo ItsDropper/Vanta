@@ -87,6 +87,39 @@ final class ModrinthGraphInstallTransaction {
         }
     }
 
+    static void recover(Instance instance) throws IOException {
+        if (instance == null || instance.getDirectory() == null) {
+            throw new IllegalArgumentException("A valid instance is required.");
+        }
+        Path root = instance.getDirectory().toAbsolutePath().normalize();
+        if (Files.isSymbolicLink(root) || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Instance directory must be an existing, non-symbolic-link directory.");
+        }
+        LockEntry entry = INSTANCE_LOCKS.compute(root, (ignored, existing) -> {
+            LockEntry selected = existing == null ? new LockEntry() : existing;
+            selected.users++;
+            return selected;
+        });
+        entry.lock.lock();
+        try {
+            Path lockPath = root.resolve(".vanta-mod-install.lock");
+            if (Files.isSymbolicLink(lockPath)) {
+                throw new IOException("Refusing to use a symbolic-link Modrinth transaction lock.");
+            }
+            try (FileChannel channel = FileChannel.open(lockPath,
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS);
+                 FileLock ignored = channel.lock()) {
+                recoverPendingTransactions(instance, root);
+            }
+        } finally {
+            entry.lock.unlock();
+            INSTANCE_LOCKS.computeIfPresent(root, (ignored, current) -> {
+                current.users--;
+                return current.users == 0 ? null : current;
+            });
+        }
+    }
+
     private static <T> T executeLocked(
             Instance instance, Operation<T> operation, Path root
     ) throws IOException, InterruptedException {
