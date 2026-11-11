@@ -26,6 +26,7 @@ import java.util.Locale;
 public final class ExperimentalView extends VBox implements LauncherViewLifecycle {
 
     private final AccountService accountService;
+    private final Runnable onReviewCrashCases;
     private final Label authState = new Label();
     private final Label authDetails = new Label();
     private final Label lastRefresh = new Label();
@@ -42,7 +43,12 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     private final Timeline ticker = new Timeline(new KeyFrame(Duration.seconds(1), event -> refreshMetrics()));
 
     public ExperimentalView(AccountService accountService) {
+        this(accountService, null);
+    }
+
+    public ExperimentalView(AccountService accountService, Runnable onReviewCrashCases) {
         this.accountService = accountService;
+        this.onReviewCrashCases = onReviewCrashCases;
         getStyleClass().add("experimental-view");
         setFillWidth(true);
 
@@ -101,7 +107,25 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
                 measuredInstance, baselineStats, optimizedStats, comparisonStats, processStartupStats, vanillaStats, clearCache, resetSamples
         );
 
-        VBox pageContent = new VBox(18, eyebrow, title, intro, authCard, performanceCard);
+        VBox crashCasesCard = new VBox(10);
+        crashCasesCard.getStyleClass().add("settings-card");
+        Label crashCasesTitle = new Label(Localization.text("crashCases.title"));
+        crashCasesTitle.getStyleClass().add("section-title");
+        Label crashCasesDescription = new Label(Localization.text("crashCases.description"));
+        crashCasesDescription.setWrapText(true);
+        Label crashCasesPrivacy = new Label(Localization.text("crashCases.localOnly"));
+        crashCasesPrivacy.setWrapText(true);
+        crashCasesPrivacy.getStyleClass().add("muted");
+        Button reviewCrashCases = new Button(Localization.text("crashCases.review"));
+        reviewCrashCases.getStyleClass().add("secondary-button");
+        reviewCrashCases.setDisable(onReviewCrashCases == null);
+        reviewCrashCases.setOnAction(event -> {
+            if (onReviewCrashCases != null) onReviewCrashCases.run();
+        });
+        crashCasesCard.getChildren().addAll(
+                crashCasesTitle, crashCasesDescription, crashCasesPrivacy, reviewCrashCases);
+
+        VBox pageContent = new VBox(18, eyebrow, title, intro, authCard, performanceCard, crashCasesCard);
         pageContent.setFillWidth(true);
         pageContent.setPadding(new Insets(24));
 
