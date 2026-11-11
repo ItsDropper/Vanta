@@ -108,6 +108,7 @@ final class ModrinthGraphInstallTransaction {
         Path registryBackup = transactionDirectory.resolve("registry-backup.json");
 
         Throwable transactionFailure = null;
+        boolean preserveJournal = false;
         try {
             if (registryExisted) {
                 Files.copy(registry, registryBackup, StandardCopyOption.COPY_ATTRIBUTES);
@@ -150,7 +151,12 @@ final class ModrinthGraphInstallTransaction {
                 return result;
             } catch (IOException | InterruptedException | RuntimeException | Error failure) {
                 transactionFailure = failure;
-                rollbackFromJournal(mods, transactionDirectory, journal, registry, failure);
+                try {
+                    rollbackFromJournal(mods, transactionDirectory, journal, registry);
+                } catch (IOException rollbackFailure) {
+                    preserveJournal = true;
+                    failure.addSuppressed(rollbackFailure);
+                }
                 throw failure;
             } finally {
                 ACTIVE_JOURNAL.remove();
@@ -159,7 +165,7 @@ final class ModrinthGraphInstallTransaction {
             transactionFailure = failure;
             throw failure;
         } finally {
-            try {
+            if (!preserveJournal) try {
                 deleteTree(transactionDirectory);
             } catch (IOException cleanupFailure) {
                 if (transactionFailure != null) {
@@ -168,6 +174,9 @@ final class ModrinthGraphInstallTransaction {
                     System.err.println("Modrinth graph committed, but its journal could not be removed: "
                             + cleanupFailure.getMessage());
                 }
+            } else {
+                System.err.println("Modrinth rollback is incomplete; recovery journal retained at "
+                        + transactionDirectory);
             }
         }
     }
@@ -213,7 +222,7 @@ final class ModrinthGraphInstallTransaction {
                 }
                 Properties journal = readJournal(journalPath);
                 Path mods = root.resolve("mods").normalize();
-                rollbackFromJournal(mods, directory, journal, root.resolve("vanta-mods.json"), null);
+                rollbackFromJournal(mods, directory, journal, root.resolve("vanta-mods.json"));
                 deleteTree(directory);
             }
         }
@@ -221,10 +230,8 @@ final class ModrinthGraphInstallTransaction {
 
     private static void rollbackFromJournal(
             Path mods, Path transactionDirectory, Properties journal,
-            Path registry, Throwable originalFailure
+            Path registry
     ) throws IOException {
-        IOException aggregate = null;
-        try {
             int managedCount = parseCount(journal, "managedCount");
             Set<String> originalNames = new HashSet<>();
             int backupCount = parseCount(journal, "backupCount");
@@ -280,14 +287,7 @@ final class ModrinthGraphInstallTransaction {
                 Files.deleteIfExists(registry);
             }
         } catch (IOException failure) {
-            aggregate = failure;
-        }
-        if (aggregate != null) {
-            if (originalFailure != null) {
-                originalFailure.addSuppressed(aggregate);
-            } else {
-                throw aggregate;
-            }
+            throw failure;
         }
     }
 
@@ -356,7 +356,7 @@ final class ModrinthGraphInstallTransaction {
     }
 
     private static Path resolveTrackedPath(Path mods, String filename) throws IOException {
-        if (filename.indexOf('/') >= 0 || filename.indexOf('\\\\') >= 0) {
+        if (filename.indexOf('/') >= 0 || filename.indexOf('\\') >= 0) {
             throw new IOException("Installed-mod registry must contain a filename, not a path: " + filename);
         }
         Path supplied = Path.of(filename);
