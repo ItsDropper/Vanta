@@ -62,3 +62,6 @@ INSTALLATION	Invalid installation metadata loader profile missing
 MINECRAFT_VERSION	Incompatible Minecraft version unsupported by loader
 MINECRAFT_VERSION	Minecraft version not supported by installed mod
 MINECRAFT_VERSION	Unsupported Minecraft version required by modpack
+MOD_CONFLICT	Mod alpha is incompatible with version two of mod beta conflicting version is present
+MOD_CONFLICT	Conflicting mods have incompatible mod versions installed simultaneously
+MOD_CONFLICT	Mod incompatibility conflicting dependency versions detected during resolution
