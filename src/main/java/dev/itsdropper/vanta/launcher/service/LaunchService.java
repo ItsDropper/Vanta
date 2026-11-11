@@ -257,7 +257,10 @@ public class LaunchService {
                     server;
 
             monitorOutput(
-                    process
+                    process,
+                    instance,
+                    optimizedLaunch,
+                    processCreatedAtNanos
             );
 
             monitorProcess(
@@ -302,7 +305,10 @@ public class LaunchService {
     // =============================================================
 
     private void monitorOutput(
-            Process process
+            Process process,
+            Instance instance,
+            boolean optimizedLaunch,
+            long processCreatedAtNanos
     ) {
 
         Thread outputThread =
@@ -318,11 +324,25 @@ public class LaunchService {
                     ) {
 
                         String line;
+                        boolean firstOutputRecorded = false;
 
                         while (
                                 (line = reader.readLine())
                                         != null
                         ) {
+                            if (!firstOutputRecorded) {
+                                firstOutputRecorded = true;
+                                try {
+                                    LaunchPerformanceTracker.recordProcessStartup(
+                                            instance,
+                                            optimizedLaunch,
+                                            System.nanoTime() - processCreatedAtNanos
+                                    );
+                                } catch (RuntimeException metricsFailure) {
+                                    System.err.println("[Vanta Launch] Could not record process startup metrics: "
+                                            + metricsFailure.getClass().getSimpleName());
+                                }
+                            }
 
                             synchronized (outputBuffer) {
 
