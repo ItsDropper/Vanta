@@ -7,11 +7,16 @@ import dev.itsdropper.vanta.launcher.auth.AuthManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class AccountService {
 
-    private Account currentAccount;
+    private volatile Account currentAccount;
 
     private final List<Account> accounts =
             new ArrayList<>();
@@ -20,7 +25,18 @@ public class AccountService {
             new ReentrantLock();
 
     private final List<AccountListener> listeners =
-            new ArrayList<>();
+            new CopyOnWriteArrayList<>();
+
+    private final ScheduledExecutorService sessionMaintenance =
+            Executors.newSingleThreadScheduledExecutor(task -> {
+                Thread thread = new Thread(task, "Vanta-Session-Maintenance");
+                thread.setDaemon(true);
+                return thread;
+            });
+
+    private ScheduledFuture<?> maintenanceTask;
+    private String maintenancePausedAccountId;
+    private volatile boolean closed;
 
     // =============================================================
     // ACCOUNT LOADING
@@ -32,11 +48,9 @@ public class AccountService {
 
         try {
 
+            List<Account> loadedAccounts = AccountManager.loadAccounts();
             accounts.clear();
-
-            accounts.addAll(
-                    AccountManager.loadAccounts()
-            );
+            accounts.addAll(loadedAccounts);
 
             if (accounts.isEmpty()) {
 
@@ -92,6 +106,7 @@ public class AccountService {
             setCurrentAccount(
                     refreshedAccount
             );
+            startSessionMaintenance();
 
             return refreshedAccount;
 
@@ -119,18 +134,16 @@ public class AccountService {
                     AuthManager.login(null);
 
             /*
-             * Add the new account to the collection.
-             */
-            replaceAccount(account);
-
-            /*
-             * Make the newly-added account active.
+             * Persist the active selection before publishing it in memory.
              */
             AccountManager.setActiveAccount(
                     account.getUuid()
             );
 
+            replaceAccount(account);
+            maintenancePausedAccountId = null;
             setCurrentAccount(account);
+            startSessionMaintenance();
 
             return account;
 
@@ -174,17 +187,16 @@ public class AccountService {
                             account
                     );
 
-            replaceAccount(
-                    refreshedAccount
-            );
-
             AccountManager.setActiveAccount(
                     refreshedAccount.getUuid()
             );
 
+            replaceAccount(refreshedAccount);
+            maintenancePausedAccountId = null;
             setCurrentAccount(
                     refreshedAccount
             );
+            startSessionMaintenance();
 
         } finally {
 
@@ -213,8 +225,93 @@ public class AccountService {
     }
 
     public Account getCurrentAccount() {
+        accountLock.lock();
+        try {
+            return currentAccount;
+        } finally {
+            accountLock.unlock();
+        }
+    }
 
-        return currentAccount;
+    /**
+     * Refreshes the selected session immediately before launching Minecraft.
+     * This is deliberately non-interactive: an invalid/revoked refresh token
+     * is reported to the caller rather than unexpectedly opening device login.
+     */
+    public Account refreshCurrentAccount() throws Exception {
+        accountLock.lock();
+        try {
+            if (currentAccount == null) {
+                return null;
+            }
+            maintenancePausedAccountId = null;
+            Account refreshed = AuthManager.refresh(currentAccount);
+            replaceAccount(refreshed);
+            setCurrentAccount(refreshed);
+            return refreshed;
+        } finally {
+            accountLock.unlock();
+        }
+    }
+
+    private void startSessionMaintenance() {
+        if (closed || (maintenanceTask != null && !maintenanceTask.isCancelled())) {
+            return;
+        }
+        maintenanceTask = sessionMaintenance.scheduleWithFixedDelay(
+                this::refreshSessionIfExpired, 1, 1, TimeUnit.MINUTES
+        );
+    }
+
+    private void refreshSessionIfExpired() {
+        if (closed || !accountLock.tryLock()) {
+            return;
+        }
+        try {
+            Account account = currentAccount;
+            if (account == null
+                    || account.getUuid().equals(maintenancePausedAccountId)
+                    || !isSessionRefreshDue(account, System.currentTimeMillis())) {
+                return;
+            }
+            try {
+                Account refreshed = AuthManager.refresh(account);
+                replaceAccount(refreshed);
+                maintenancePausedAccountId = null;
+                setCurrentAccount(refreshed);
+                System.out.println("[Vanta Auth] Active Minecraft session refreshed.");
+            } catch (Exception failure) {
+                // Avoid repeated requests after a rejected refresh. A launch
+                // or explicit refresh is the next retry point.
+                maintenancePausedAccountId = account.getUuid();
+                System.err.println("[Vanta Auth] Background session refresh failed; "
+                        + "automatic retries paused until the next explicit refresh.");
+            }
+        } finally {
+            accountLock.unlock();
+        }
+    }
+
+    static boolean isSessionRefreshDue(Account account, long nowMillis) {
+        if (account == null || account.getSession() == null
+                || account.getSession().getMcProfile() == null
+                || account.getSession().getMcProfile().getMcToken() == null) {
+            return false;
+        }
+        long minecraftTokenExpiry =
+                account.getSession().getMcProfile().getMcToken().getExpireTimeMs();
+        long certificateExpiry = account.getSession().getPlayerCertificates() == null
+                ? Long.MAX_VALUE
+                : account.getSession().getPlayerCertificates().getExpireTimeMs();
+        return Math.min(minecraftTokenExpiry, certificateExpiry) <= nowMillis;
+    }
+
+    public void close() {
+        closed = true;
+        if (maintenanceTask != null) {
+            maintenanceTask.cancel(true);
+        }
+        sessionMaintenance.shutdownNow();
     }
 
     // =============================================================
@@ -329,6 +426,9 @@ public class AccountService {
             AccountListener listener
     ) {
 
+        if (listener == null) {
+            throw new IllegalArgumentException("Account listener cannot be null.");
+        }
         listeners.add(listener);
 
         listener.onAccountChanged(
