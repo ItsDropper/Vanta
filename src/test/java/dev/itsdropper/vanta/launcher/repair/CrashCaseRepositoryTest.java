@@ -122,6 +122,15 @@ class CrashCaseRepositoryTest {
     }
 
     @Test
+    void importNeverMutatesTheSourceCrashLog() throws Exception {
+        Path source = temporaryDirectory.resolve("latest.log");
+        String original = "java.lang.IllegalStateException: user.name=Alice failed";
+        Files.writeString(source, original);
+        new CrashCaseRepository(temporaryDirectory.resolve("cases.json")).importLog(source);
+        assertEquals(original, Files.readString(source));
+    }
+
+    @Test
     void sanitizerRedactsTokensIpsUuidsPathsAndEmailAddresses() {
         String sanitized = CrashCaseRepository.sanitize(
                 "token=abc123 uuid=123e4567-e89b-12d3-a456-426614174000 "
