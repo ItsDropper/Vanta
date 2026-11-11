@@ -130,6 +130,25 @@ public final class CrashCaseRepository {
         return (int) listCases().stream().filter(item -> item.status() == ReviewStatus.PENDING).count();
     }
 
+    /**
+     * Returns manually confirmed fix notes for the requested failure family.
+     * Results are references only; callers must not execute them automatically.
+     */
+    public List<VerifiedFix> findVerifiedFixes(FailureCategory category, int limit) throws IOException {
+        if (category == null || category == FailureCategory.UNKNOWN || limit <= 0) return List.of();
+        int boundedLimit = Math.min(limit, 25);
+        return listCases().stream()
+                .filter(item -> item.status() == ReviewStatus.CONFIRMED
+                        && item.confirmedCategory() == category
+                        && !item.verifiedFix().isBlank())
+                .sorted(Comparator.comparingInt(CrashCase::occurrences).reversed()
+                        .thenComparing(CrashCase::fingerprint))
+                .limit(boundedLimit)
+                .map(item -> new VerifiedFix(item.fingerprint(), item.confirmedCategory(),
+                        item.occurrences(), item.verifiedFix(), item.sanitizedLog()))
+                .toList();
+    }
+
     public CrashCase recordForReview(String log, FailureCategory proposedCategory) throws IOException {
         String sanitized = sanitize(log);
         if (sanitized.isBlank()) throw new IllegalArgumentException("The crash log contains no usable diagnostic text.");
