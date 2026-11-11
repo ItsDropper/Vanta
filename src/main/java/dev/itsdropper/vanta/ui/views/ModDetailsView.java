@@ -41,6 +41,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ModDetailsView extends VBox {
 
@@ -59,6 +61,9 @@ public class ModDetailsView extends VBox {
 
     private final VBox content;
     private final Label statusLabel;
+    private final AtomicBoolean installRunning = new AtomicBoolean();
+    private final AtomicBoolean installCancellationRequested = new AtomicBoolean();
+    private final AtomicReference<Thread> installWorker = new AtomicReference<>();
 
     public ModDetailsView(
             String projectId,
@@ -999,102 +1004,92 @@ public class ModDetailsView extends VBox {
             ModrinthProject project,
             Button button
     ) {
-
-        if (instance == null) {
+        if (instance == null || !installRunning.compareAndSet(false, true)) {
             return;
         }
 
-        button.setDisable(
-                true
-        );
+        installCancellationRequested.set(false);
+        button.setDisable(false);
+        button.setText(Localization.text("common.cancelTitleCase"));
+        button.setOnAction(event -> cancelInstall(button));
+        statusLabel.setText("Resolving dependencies for " + project.getTitle() + "…");
 
-        button.setText(
-                Localization.text("common.installing")
-        );
+        try {
+            UiExecutor.shared().execute(() -> {
+                Thread worker = Thread.currentThread();
+                installWorker.set(worker);
+                if (installCancellationRequested.get()) {
+                    worker.interrupt();
+                }
 
-        statusLabel.setText(
-                Localization.text("common.installingPrefix")
-                        + project.getTitle()
-                        + "..."
-        );
-
-        UiExecutor.shared().execute(() -> {
-
-                    try {
-
-                        if (contentType ==
-                                ModrinthContentType.MOD) {
-
-                            modrinthService.installMod(
-                                    instance,
-                                    project
-                            );
-
-                        } else if (contentType ==
-                                ModrinthContentType.RESOURCE_PACK) {
-
-                            contentService.installResourcePack(
-                                    instance,
-                                    project
-                            );
-
-                        } else if (contentType ==
-                                ModrinthContentType.SHADER) {
-
-                            contentService.installShader(
-                                    instance,
-                                    project
-                            );
-
-                        } else {
-
-                            throw new IllegalStateException(
-                                    "Unsupported content type: "
-                                            + contentType
-                            );
-                        }
-
-                        UiExecutor.shared().dispatchToUi(() -> {
-
-                            button.setText(
-                                    Localization.text("common.installed")
-                            );
-
-                            statusLabel.setText(
-                                    project.getTitle()
-                                            + " installed successfully."
-                            );
-                        });
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        UiExecutor.shared().dispatchToUi(() -> {
-
-                            button.setDisable(
-                                    false
-                            );
-
-                            button.setText(
-                                    Localization.text("common.install")
-                            );
-
-                            statusLabel.setText(
-                                    ex.getMessage() != null
-                                            ? ex.getMessage()
-                                            : "Failed to install "
-                                              + project.getTitle()
-                                              + "."
-                            );
-                        });
+                try {
+                    if (contentType == ModrinthContentType.MOD) {
+                        modrinthService.installMod(instance, project, progress ->
+                                UiExecutor.shared().dispatchToUi(() -> {
+                                    if (installRunning.get()
+                                            && !installCancellationRequested.get()) {
+                                        statusLabel.setText(progress);
+                                    }
+                                }));
+                    } else if (contentType == ModrinthContentType.RESOURCE_PACK) {
+                        contentService.installResourcePack(instance, project);
+                    } else if (contentType == ModrinthContentType.SHADER) {
+                        contentService.installShader(instance, project);
+                    } else {
+                        throw new IllegalStateException("Unsupported content type: " + contentType);
                     }
-        });
 
-
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        installRunning.set(false);
+                        button.setDisable(true);
+                        button.setText(Localization.text("common.installed"));
+                        button.setOnAction(null);
+                        statusLabel.setText(project.getTitle() + " installed successfully.");
+                    });
+                } catch (Throwable failure) {
+                    boolean cancelled = installCancellationRequested.get()
+                            || failure instanceof InterruptedException
+                            || worker.isInterrupted();
+                    if (cancelled) {
+                        Thread.interrupted();
+                    }
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        installRunning.set(false);
+                        button.setDisable(false);
+                        button.setText(Localization.text("common.install"));
+                        button.setOnAction(event -> install(project, button));
+                        statusLabel.setText(cancelled
+                                ? "Installation cancelled. Existing installed files were preserved."
+                                : failure.getMessage() != null
+                                        ? failure.getMessage()
+                                        : "Failed to install " + project.getTitle() + ".");
+                    });
+                } finally {
+                    installWorker.compareAndSet(worker, null);
+                }
+            });
+        } catch (RuntimeException rejected) {
+            installRunning.set(false);
+            button.setDisable(false);
+            button.setText(Localization.text("common.install"));
+            button.setOnAction(event -> install(project, button));
+            statusLabel.setText("Could not start installation: " + rejected.getMessage());
+        }
     }
 
-    // =============================================================
+    private void cancelInstall(Button button) {
+        if (!installRunning.get() || !installCancellationRequested.compareAndSet(false, true)) {
+            return;
+        }
+        button.setDisable(true);
+        button.setText("Cancelling…");
+        statusLabel.setText("Cancelling installation and restoring the previous state…");
+        Thread worker = installWorker.get();
+        if (worker != null) {
+            worker.interrupt();
+        }
+    }
+
     // LOAD ICON
     // =============================================================
 
