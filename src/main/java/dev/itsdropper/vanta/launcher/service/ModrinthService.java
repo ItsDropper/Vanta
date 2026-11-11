@@ -129,7 +129,15 @@ public class ModrinthService {
     public List<ModrinthProject> searchShaders(String query, String minecraftVersion) throws IOException, InterruptedException { return catalog.searchShaders(query, minecraftVersion); }
     public List<ModrinthProject> searchModpacks(String query, String minecraftVersion) throws IOException, InterruptedException { return catalog.searchModpacks(query, minecraftVersion); }
     public ModrinthProject getProjectBySlug(String slug) throws IOException, InterruptedException { return catalog.getProjectBySlug(slug); }
-    public Path installMod(Instance instance, ModrinthProject project) throws IOException, InterruptedException { return installer.installMod(instance, project); }
+    public Path installMod(Instance instance, ModrinthProject project) throws IOException, InterruptedException {
+        return installer.installMod(instance, project);
+    }
+
+    public Path installMod(Instance instance, ModrinthProject project,
+                           java.util.function.Consumer<String> progress)
+            throws IOException, InterruptedException {
+        return installer.installMod(instance, project, progress);
+    }
     public Path installModVersion(Instance instance, String projectId, ModrinthVersion version) throws IOException, InterruptedException { return installer.installModVersion(instance, projectId, version); }
     public List<ResolvedMod> resolveModGraph(Instance instance, List<ModrinthProject> roots, String requiredProjectId, List<String> requiredVersions) throws IOException, InterruptedException { return dependencies.resolveModGraph(instance, roots, requiredProjectId, requiredVersions); }
     public List<Path> installResolvedGraph(Instance instance, List<ResolvedMod> resolved) throws IOException, InterruptedException { return installer.installResolvedGraph(instance, resolved); }
