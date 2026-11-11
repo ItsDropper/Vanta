@@ -163,9 +163,12 @@ public class LaunchService {
                     accountService.getCurrentAccount();
 
             if (account == null) {
-
-                account =
-                        accountService.login();
+                account = accountService.login();
+            } else {
+                // MinecraftAuth refreshes only expired token-chain steps.
+                // Run it immediately before assembling the game command so
+                // a launcher left open for hours never launches with stale auth.
+                account = accountService.refreshCurrentAccount();
             }
 
             System.out.println(
