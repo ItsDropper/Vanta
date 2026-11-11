@@ -12,6 +12,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -20,7 +21,6 @@ import javafx.stage.Window;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -35,6 +35,7 @@ public final class CrashCaseReviewView extends VBox {
     private final Runnable onBack;
     private final ListView<CrashCaseRepository.CrashCase> cases = new ListView<>();
     private final TextArea details = new TextArea();
+    private final TextArea verifiedFix = new TextArea();
     private final ComboBox<FailureCategory> category = new ComboBox<>();
     private final Label status = new Label();
     private final Button confirm = new Button();
@@ -90,6 +91,7 @@ public final class CrashCaseReviewView extends VBox {
         });
         cases.getSelectionModel().selectedItemProperty().addListener((observable, previous, selected) -> {
             details.setText(selected == null ? "" : selected.sanitizedLog());
+            verifiedFix.setText(selected == null ? "" : selected.verifiedFix());
             updateReviewControls(selected);
         });
         VBox queue = new VBox(8,
@@ -107,6 +109,14 @@ public final class CrashCaseReviewView extends VBox {
                 sectionTitle(Localization.text("crashCases.evidence")),
                 details);
         VBox.setVgrow(details, Priority.ALWAYS);
+
+        verifiedFix.setPromptText(Localization.text("crashCases.fixPrompt"));
+        verifiedFix.setWrapText(true);
+        verifiedFix.setPrefRowCount(4);
+        verifiedFix.getStyleClass().add("diagnostic-log");
+        VBox fixNotes = new VBox(8,
+                sectionTitle(Localization.text("crashCases.fixNotes")),
+                verifiedFix);
 
         HBox reviewRow = new HBox(8);
         category.setItems(FXCollections.observableArrayList(
@@ -137,7 +147,13 @@ public final class CrashCaseReviewView extends VBox {
         status.setWrapText(true);
         status.getStyleClass().add("muted");
 
-        VBox review = new VBox(10, evidence, reviewRow, fileActions, status);
+        Button exportFixes = new Button(Localization.text("crashCases.exportFixes"));
+        exportFixes.getStyleClass().add("secondary-button");
+        exportFixes.setOnAction(event -> exportFixKnowledge(exportFixes.getScene() == null
+                ? null : exportFixes.getScene().getWindow()));
+        fileActions.getChildren().add(exportFixes);
+
+        VBox review = new VBox(10, evidence, fixNotes, reviewRow, fileActions, status);
         review.setMinWidth(0);
         HBox.setHgrow(queue, Priority.ALWAYS);
         HBox.setHgrow(review, Priority.ALWAYS);
@@ -176,7 +192,7 @@ public final class CrashCaseReviewView extends VBox {
             return;
         }
         try {
-            repository.confirm(selected.id(), label);
+            repository.confirm(selected.id(), label, verifiedFix.getText());
             status.setText(Localization.text("crashCases.confirmed"));
             refresh();
         } catch (IOException | RuntimeException failure) {
@@ -209,6 +225,22 @@ public final class CrashCaseReviewView extends VBox {
             status.setText(Localization.text("crashCases.imported")
                     .formatted(imported.occurrences()));
             refresh(imported.id());
+        } catch (IOException | RuntimeException failure) {
+            showFailure(failure);
+        }
+    }
+
+    private void exportFixKnowledge(Window owner) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(Localization.text("crashCases.exportFixesTitle"));
+        chooser.setInitialFileName("vanta-verified-crash-fixes.json");
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Verified fix knowledge (*.json)", "*.json"));
+        File selected = chooser.showSaveDialog(owner);
+        if (selected == null) return;
+        try {
+            int count = repository.exportVerifiedFixes(selected.toPath());
+            status.setText(Localization.text("crashCases.exportFixesDone").formatted(count));
         } catch (IOException | RuntimeException failure) {
             showFailure(failure);
         }
