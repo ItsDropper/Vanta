@@ -70,12 +70,24 @@ final class ModrinthGraphInstallTransaction {
                 instanceDirectory, ".vanta-graph-transaction-" + UUID.randomUUID() + "-");
         Map<Path, Path> backups = new LinkedHashMap<>();
         Set<Path> originalTrackedPaths = new HashSet<>();
+        Path registryPath = instanceDirectory.resolve("vanta-mods.json");
+        boolean registryExisted = Files.exists(registryPath, LinkOption.NOFOLLOW_LINKS);
+        Path registryBackup = null;
 
         Throwable transactionFailure = null;
         try {
             if (Files.exists(modsDirectory, LinkOption.NOFOLLOW_LINKS)
                     && Files.isSymbolicLink(modsDirectory)) {
                 throw new IOException("Refusing to transact through a symbolic-link mods directory.");
+            }
+
+            if (registryExisted) {
+                if (Files.isSymbolicLink(registryPath)
+                        || !Files.isRegularFile(registryPath, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new IOException("Refusing to transact with a non-regular installed-mod registry.");
+                }
+                registryBackup = transactionDirectory.resolve("registry-backup.json");
+                Files.copy(registryPath, registryBackup, StandardCopyOption.COPY_ATTRIBUTES);
             }
 
             int backupIndex = 0;
@@ -104,7 +116,8 @@ final class ModrinthGraphInstallTransaction {
                 return operation.run();
             } catch (IOException | InterruptedException | RuntimeException | Error failure) {
                 transactionFailure = failure;
-                rollback(instance, modsDirectory, originalRegistry, backups, failure);
+                rollback(instance, modsDirectory, originalRegistry, backups,
+                        registryPath, registryExisted, registryBackup, failure);
                 throw failure;
             }
         } catch (IOException | InterruptedException | RuntimeException | Error failure) {
@@ -129,6 +142,9 @@ final class ModrinthGraphInstallTransaction {
             Path modsDirectory,
             List<InstalledModRecord> originalRegistry,
             Map<Path, Path> backups,
+            Path registryPath,
+            boolean registryExisted,
+            Path registryBackup,
             Throwable originalFailure
     ) {
         try {
@@ -163,7 +179,18 @@ final class ModrinthGraphInstallTransaction {
                 Files.copy(backup.getValue(), destination, StandardCopyOption.REPLACE_EXISTING,
                         StandardCopyOption.COPY_ATTRIBUTES);
             }
-            InstalledModManager.save(instance, originalRegistry);
+            if (registryExisted) {
+                if (registryBackup == null || Files.isSymbolicLink(registryPath)) {
+                    throw new IOException("The original installed-mod registry cannot be safely restored.");
+                }
+                Files.copy(registryBackup, registryPath, StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.COPY_ATTRIBUTES);
+            } else {
+                if (Files.isSymbolicLink(registryPath)) {
+                    throw new IOException("Refusing to remove a symbolic-link installed-mod registry.");
+                }
+                Files.deleteIfExists(registryPath);
+            }
         } catch (Exception rollbackFailure) {
             originalFailure.addSuppressed(rollbackFailure);
         }
