@@ -47,6 +47,15 @@ public final class LauncherSettings {
         setBoolean("overengineeredUi", value);
     }
 
+    /** Experimental, opt-in cache for unchanged Minecraft launch metadata. */
+    public static boolean isExperimentalLaunchCacheEnabled() {
+        return getBoolean("experimentalLaunchCache", false);
+    }
+
+    public static void setExperimentalLaunchCacheEnabled(boolean enabled) {
+        setBoolean("experimentalLaunchCache", enabled);
+    }
+
     public static boolean isUpdateChecksEnabled() {
         return getBoolean("updateChecksEnabled", true);
     }
