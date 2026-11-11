@@ -713,12 +713,31 @@ public final class RepairDiagnosticEngine {
         }
 
         if (diagnoses.isEmpty()) {
-
-            diagnoses.add(
-                    unknown(
-                            "No known failure signature was detected."
-                    )
-            );
+            /*
+             * The trained case model is deliberately a fallback: explicit
+             * signatures above remain authoritative. A learned match is
+             * advisory only and never triggers an automatic repair.
+             */
+            DeterministicCrashModel.Prediction prediction =
+                    DeterministicCrashModel.classify(output);
+            if (prediction != null) {
+                FailureCategory category = prediction.category();
+                diagnoses.add(new RepairDiagnosis(
+                        category,
+                        RepairConfidence.AMBIGUOUS,
+                        "Possible " + category.name().toLowerCase(Locale.ROOT).replace('_', ' ') + " problem",
+                        "The deterministic crash-case model found a similarity to labelled historical failure cases. "
+                                + "Treat this as a hypothesis, not a confirmed cause.",
+                        prediction.evidence(),
+                        List.of(
+                                "Compare the evidence with the complete crash report and the active loader/mod versions.",
+                                "Use the category-specific checks before changing the instance.",
+                                "No automatic modification was performed because a learned match is not proof."
+                        )
+                ));
+            } else {
+                diagnoses.add(unknown("No known failure signature or sufficiently strong labelled-case match was detected."));
+            }
         }
 
         return List.copyOf(
