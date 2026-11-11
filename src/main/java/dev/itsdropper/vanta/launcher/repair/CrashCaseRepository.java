@@ -219,13 +219,15 @@ public final class CrashCaseRepository {
         if (source == null || source.isBlank()) return "";
         String bounded = source;
         if (bounded.length() > MAX_LOG_CHARS) {
-            int headLength = MAX_LOG_CHARS * 2 / 3;
-            int tailLength = MAX_LOG_CHARS - headLength - 48;
+            String marker = "\n[TRUNCATED MIDDLE: local crash-case size limit]\n";
+            int contentBudget = MAX_LOG_CHARS - marker.length();
+            int headLength = contentBudget * 2 / 3;
+            int tailLength = contentBudget - headLength;
             bounded = bounded.substring(0, headLength)
-                    + "\\n[TRUNCATED MIDDLE: local crash-case size limit]\\n"
+                    + marker
                     + bounded.substring(bounded.length() - tailLength);
         }
-        String text = bounded.replace("\\r\\n", "\\n").replace('\\r', '\\n');
+        String text = bounded.replace("\r\n", "\n").replace('\r', '\n');
         text = BEARER.matcher(text).replaceAll("Bearer [REDACTED]");
         text = SECRET_ASSIGNMENT.matcher(text).replaceAll("$1[REDACTED]");
         text = USER_ASSIGNMENT.matcher(text).replaceAll("$1[REDACTED]");
