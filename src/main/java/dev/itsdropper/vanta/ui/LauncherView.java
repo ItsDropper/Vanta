@@ -619,6 +619,12 @@ public class LauncherView {
                                             () -> {},
                                             () -> {}
                                     ));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "crash-case-review", "Crash Case Review",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.EXPERIMENTAL);
+                                    viewHost.showForCapture(new CrashCaseReviewView(() -> {}));
                                 })
                 );
 
