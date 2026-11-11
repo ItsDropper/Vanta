@@ -209,6 +209,15 @@ private Path installResolvedVersion(
         boolean previousMoved = false;
         boolean newFilePublished = false;
 
+        // Persist every destination and temporary path before the first filesystem
+        // mutation so startup recovery can clean even a crash between publication
+        // and the installed-mod registry update.
+        ModrinthGraphInstallTransaction.registerManagedPath(instance, installedFile);
+        ModrinthGraphInstallTransaction.registerManagedPath(instance, stagedFile);
+        if (rollbackFile != null) {
+            ModrinthGraphInstallTransaction.registerManagedPath(instance, rollbackFile);
+        }
+
         try {
             // Download to a unique staging file; never touch the installed version during transfer.
             DownloadUtil.downloadFile(file.getUrl(), stagedFile);
