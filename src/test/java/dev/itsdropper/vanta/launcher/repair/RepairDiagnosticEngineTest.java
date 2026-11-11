@@ -55,7 +55,7 @@ class RepairDiagnosticEngineTest {
     @Test
     void labelledCaseModelAddsAdvisoryDiagnosisForUnmatchedSignatures() {
         var diagnoses = RepairDiagnosticEngine.diagnose(
-                "org.spongepowered.asm.mixin.transformer.throwables.MixinApplyError: critical injection failure");
+                "org.spongepowered.asm.mixin.transformer.throwables.MixinApplyError while transforming target method");
         assertTrue(diagnoses.stream().anyMatch(d ->
                 d.category() == FailureCategory.MOD_MIXIN_FAILURE
                         && d.confidence() == RepairConfidence.AMBIGUOUS));
