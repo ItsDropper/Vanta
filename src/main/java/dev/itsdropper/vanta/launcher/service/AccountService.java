@@ -234,17 +234,27 @@ public class AccountService {
     }
 
     /**
-     * Refreshes the selected session immediately before launching Minecraft.
-     * A valid refresh is silent. Only Microsoft's explicit invalid_grant
-     * response falls back to the device-code sign-in flow.
+     * Ensures the selected account is still active and its complete Minecraft
+     * token chain is valid immediately before the game process is created.
+     * A refresh request is made only when MinecraftAuth reports an expired
+     * token in the chain.
      */
-    public Account refreshCurrentAccount() throws Exception {
+    public Account ensureFreshSession(String expectedAccountId) throws Exception {
         accountLock.lock();
         try {
-            if (currentAccount == null) {
-                return null;
-            }
             Account account = currentAccount;
+            if (account == null) {
+                throw new IllegalStateException("No active Minecraft account is available.");
+            }
+            if (!account.getUuid().equals(expectedAccountId)) {
+                throw new IllegalStateException(
+                        "The active Minecraft account changed while the instance was being prepared. Launch again."
+                );
+            }
+            if (!isSessionRefreshDue(account)) {
+                return account;
+            }
+
             maintenancePausedAccountId = null;
             try {
                 Account refreshed = AuthManager.login(account);
