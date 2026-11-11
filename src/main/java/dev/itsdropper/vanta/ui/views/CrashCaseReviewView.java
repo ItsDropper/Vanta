@@ -71,6 +71,7 @@ public final class CrashCaseReviewView extends VBox {
         VBox header = new VBox(8, back, title, description, privacy);
         header.getStyleClass().add("repair-page-header");
 
+        cases.setPrefWidth(420);
         cases.setPlaceholder(new Label(Localization.text("crashCases.empty")));
         cases.setCellFactory(list -> new ListCell<>() {
             @Override
@@ -103,6 +104,7 @@ public final class CrashCaseReviewView extends VBox {
 
         details.setEditable(false);
         details.setWrapText(false);
+        details.setPrefHeight(360);
         details.setPromptText(Localization.text("crashCases.selectPrompt"));
         details.setPrefRowCount(18);
         details.getStyleClass().add("diagnostic-log");
@@ -147,6 +149,10 @@ public final class CrashCaseReviewView extends VBox {
 
         status.setWrapText(true);
         status.getStyleClass().add("muted");
+        confirm.setDisable(true);
+        reject.setDisable(true);
+        category.setDisable(true);
+        verifiedFix.setEditable(false);
 
         exportFixes.setText(Localization.text("crashCases.exportFixes"));
         exportFixes.getStyleClass().add("secondary-button");
@@ -181,7 +187,7 @@ public final class CrashCaseReviewView extends VBox {
         if (pending && selected.proposedCategory() != null
                 && selected.proposedCategory() != FailureCategory.UNKNOWN) {
             category.setValue(selected.proposedCategory());
-        } else if (!pending) {
+        } else {
             category.setValue(null);
         }
     }
