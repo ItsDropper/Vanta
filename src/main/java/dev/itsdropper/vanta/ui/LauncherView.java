@@ -145,6 +145,11 @@ public class LauncherView {
         accountService =
                 new AccountService();
 
+        stage.addEventHandler(
+                javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST,
+                event -> accountService.close()
+        );
+
         launchService =
                 new MultiLaunchService(
                         accountService
