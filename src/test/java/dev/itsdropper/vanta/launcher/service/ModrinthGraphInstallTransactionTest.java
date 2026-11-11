@@ -41,6 +41,7 @@ class ModrinthGraphInstallTransactionTest {
                 ModrinthGraphInstallTransaction.execute(instance, () -> {
                     Files.writeString(originalMod, "partially replaced bytes");
                     Path newlyInstalled = mods.resolve("new-project.jar");
+                    ModrinthGraphInstallTransaction.registerManagedPath(instance, newlyInstalled);
                     Files.writeString(newlyInstalled, "new mod bytes");
                     InstalledModManager.add(instance, new InstalledModRecord(
                             "new-project", "new-version", "new-project", "1.0", "new-project.jar"));
@@ -70,6 +71,7 @@ class ModrinthGraphInstallTransactionTest {
 
         Path installed = ModrinthGraphInstallTransaction.execute(instance, () -> {
             Path file = mods.resolve("installed.jar");
+            ModrinthGraphInstallTransaction.registerManagedPath(instance, file);
             Files.writeString(file, "verified mod bytes");
             InstalledModManager.add(instance, new InstalledModRecord(
                     "project", "version", "mod", "1.0", "installed.jar"));
@@ -91,6 +93,7 @@ class ModrinthGraphInstallTransactionTest {
 
         assertThrows(IOException.class, () ->
                 ModrinthGraphInstallTransaction.execute(instance, () -> {
+                    ModrinthGraphInstallTransaction.registerManagedPath(instance, mods.resolve("new.jar"));
                     Files.writeString(mods.resolve("new.jar"), "new artifact");
                     InstalledModManager.add(instance, new InstalledModRecord(
                             "new", "new-version", "new", "1.0", "new.jar"));
@@ -181,9 +184,9 @@ class ModrinthGraphInstallTransactionTest {
             journal.store(output, "simulated process interruption");
         }
 
-        // Simulate the crash having happened after a registry update as well.
-        InstalledModManager.add(instance, new InstalledModRecord(
-                "new-project", "new-version", "new-project", "1.0", "new-project.jar"));
+        // Simulate interruption during a registry write. The durable intent
+        // journal is sufficient to restore without parsing this damaged file.
+        Files.writeString(temporaryDirectory.resolve("vanta-mods.json"), "{ incomplete registry");
 
         ModrinthGraphInstallTransaction.execute(instance, () -> List.of());
 
