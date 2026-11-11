@@ -18,7 +18,7 @@ public class AccountService implements AutoCloseable {
 
     public enum SessionHealth {
         NO_ACCOUNT, AUTHENTICATING, REFRESHING, READY, RETRY_WAIT, CANCELLED,
-        SIGN_IN_REQUIRED, ERROR, CLOSED
+        SIGN_IN_REQUIRED, ERROR, STORAGE_ERROR, CLOSED
     }
 
     private volatile SessionHealth sessionHealth = SessionHealth.NO_ACCOUNT;
@@ -62,7 +62,7 @@ public class AccountService implements AutoCloseable {
             try {
                 loadedAccounts = AccountManager.loadAccounts();
             } catch (IOException failure) {
-                setSessionHealth(SessionHealth.ERROR,
+                setSessionHealth(SessionHealth.STORAGE_ERROR,
                         "Saved account storage could not be read. Existing account data was preserved.");
                 throw failure;
             }
