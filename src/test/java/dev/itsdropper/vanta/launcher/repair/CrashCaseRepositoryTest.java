@@ -180,8 +180,8 @@ class CrashCaseRepositoryTest {
     void sanitizerRedactsTokensIpsUuidsPathsAndEmailAddresses() {
         String sanitized = CrashCaseRepository.sanitize(
                 "token=abc123 uuid=123e4567-e89b-12d3-a456-426614174000 "
-                        + "192.168.0.1 dev@example.com /home/alice/.minecraft/logs/latest.log "
-                        + "2001:db8:85a3::8a2e:370:7334 00:1A:2B:3C:4D:5E");
+                        + "192.168.0.1 dev@example.com 2001:db8:85a3::8a2e:370:7334 "
+                        + "00:1A:2B:3C:4D:5E /home/alice/.minecraft/logs/latest.log");
         assertFalse(sanitized.contains("abc123"));
         assertFalse(sanitized.contains("123e4567"));
         assertFalse(sanitized.contains("192.168.0.1"));
