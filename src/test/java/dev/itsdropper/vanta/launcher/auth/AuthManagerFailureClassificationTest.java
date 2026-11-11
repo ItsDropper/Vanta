@@ -38,6 +38,12 @@ class AuthManagerFailureClassificationTest {
     }
 
     @Test
+    void recognizesExplicitPopupCancellation() {
+        assertTrue(AuthManager.isInterruptedFailure(
+                new AuthManager.LoginCancelledException(new IOException("interrupted"))));
+    }
+
+    @Test
     void doesNotTreatAuthenticationRejectionOrGenericIoAsNetworkOutage() {
         assertFalse(AuthManager.isTransientFailure(
                 new IllegalStateException("invalid refresh token")));
