@@ -136,6 +136,14 @@ public class AuthManager {
         return "invalid_grant".equalsIgnoreCase(error);
     }
 
+    public static boolean isInterruptedFailure(Throwable failure) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable current = failure; current != null && visited.add(current); current = current.getCause()) {
+            if (current instanceof InterruptedException) return true;
+        }
+        return false;
+    }
+
     public static boolean isTransientFailure(Throwable failure) {
         Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Throwable current = failure; current != null && visited.add(current); current = current.getCause()) {
