@@ -159,8 +159,8 @@ public class LaunchService {
                     LaunchState.PREPARING
             );
 
-            Account account =
-                    accountService.getCurrentAccount();
+            // Refresh-only before launch: never open an unexpected device-code flow.
+            Account account = accountService.refreshCurrentAccount();
 
             if (account == null) {
                 account = accountService.login();
