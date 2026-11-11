@@ -8,12 +8,13 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.util.concurrent.ConcurrentHashMap;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
 public class VersionReader {
 
-    private record CacheEntry(long modified, long size, Object fileKey, VersionManifest manifest) { }
+    private record CacheEntry(FileTime modified, long size, Object fileKey, VersionManifest manifest) { }
 
     private static final ConcurrentHashMap<Path, CacheEntry> CACHE = new ConcurrentHashMap<>();
 
@@ -38,7 +39,7 @@ public class VersionReader {
                 BasicFileAttributes attributes = Files.readAttributes(json, BasicFileAttributes.class);
                 CacheEntry cached = CACHE.get(json.toAbsolutePath().normalize());
                 if (cached != null
-                        && cached.modified() == attributes.lastModifiedTime().toMillis()
+                        && cached.modified().equals(attributes.lastModifiedTime())
                         && cached.size() == attributes.size()
                         && java.util.Objects.equals(cached.fileKey(), attributes.fileKey())) {
                     return cached.manifest();
@@ -86,7 +87,7 @@ public class VersionReader {
                 Path key = json.toAbsolutePath().normalize();
                 if (CACHE.size() > 128) CACHE.clear();
                 CACHE.put(key, new CacheEntry(
-                        attributes.lastModifiedTime().toMillis(),
+                        attributes.lastModifiedTime(),
                         attributes.size(),
                         attributes.fileKey(),
                         manifest
