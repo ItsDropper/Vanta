@@ -196,6 +196,7 @@ public class AccountService implements AutoCloseable {
 
             replaceAccount(refreshedAccount);
             maintenancePausedAccountId = null;
+            maintenanceRetryAfterMillis = 0L;
             setCurrentAccount(
                     refreshedAccount
             );
