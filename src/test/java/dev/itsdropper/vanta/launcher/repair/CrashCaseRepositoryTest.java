@@ -123,13 +123,13 @@ class CrashCaseRepositoryTest {
 
     @Test
     void largeLogsRetainBothBeginningAndRootCauseTail() {
-        String source = "HEADER_MARKER\\n".repeat(12_000)
+        String source = "HEADER_MARKER\n".repeat(12_000)
                 + "Caused by: TailRootCauseMarker";
         String sanitized = CrashCaseRepository.sanitize(source);
         assertTrue(sanitized.length() <= 96 * 1024);
         assertTrue(sanitized.contains("HEADER_MARKER"));
         assertTrue(sanitized.contains("TailRootCauseMarker"));
-        assertTrue(sanitized.contains("\\n"));
+        assertTrue(sanitized.contains("\n"));
     }
 
     @Test
