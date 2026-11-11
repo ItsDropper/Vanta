@@ -648,6 +648,7 @@ class LocalizationTest {
                 "experimental.performance.comparison.faster",
                 "experimental.performance.comparison.slower",
                 "experimental.performance.comparison.similar",
+                "experimental.performance.instance",
                 "sidebar.experimental",
                 "sidebar.experimental.description",
                 "serverManager.restartPrefix"
