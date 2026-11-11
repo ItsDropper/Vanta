@@ -685,7 +685,10 @@ class LocalizationTest {
                 "crashCases.fixPrompt",
                 "crashCases.exportFixes",
                 "crashCases.exportFixesTitle",
-                "crashCases.exportFixesDone"
+                "crashCases.exportFixesDone",
+                "repair.verifiedFixesTitle",
+                "repair.verifiedFixesDescription",
+                "repair.verifiedFixesSeen"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
