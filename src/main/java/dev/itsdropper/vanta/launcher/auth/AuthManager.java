@@ -113,7 +113,7 @@ public class AuthManager {
         return account;
     }
 
-    static boolean isRefreshTokenRejected(Throwable failure) {
+    public static boolean isRefreshTokenRejected(Throwable failure) {
         for (Throwable current = failure; current != null; current = current.getCause()) {
             if (current instanceof MsaRequestException msaFailure
                     && isRefreshTokenRejectedError(msaFailure.getError())) {
@@ -130,7 +130,7 @@ public class AuthManager {
         return "invalid_grant".equalsIgnoreCase(error);
     }
 
-    static boolean isTransientFailure(Throwable failure) {
+    public static boolean isTransientFailure(Throwable failure) {
         for (Throwable current = failure; current != null; current = current.getCause()) {
             if (current instanceof InterruptedIOException
                     || current instanceof ConnectException
