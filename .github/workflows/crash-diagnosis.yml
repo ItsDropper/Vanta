@@ -3,26 +3,18 @@ name: Crash diagnosis model and repair regression
 on:
   pull_request:
     paths:
-      - 'src/main/java/dev/itsdropper/vanta/launcher/repair/**'
-      - 'src/main/java/dev/itsdropper/vanta/launcher/instance/InstanceRepairService.java'
-      - 'src/main/resources/dev/itsdropper/vanta/launcher/repair/crash-cases.tsv'
-      - 'src/test/java/dev/itsdropper/vanta/launcher/repair/**'
-      - 'src/test/java/dev/itsdropper/vanta/launcher/instance/InstanceRepairServiceTest.java'
+      - 'src/main/**'
+      - 'src/test/**'
       - 'build.gradle'
-      - 'gradlew'
-      - 'gradlew.bat'
+      - 'gradlew*'
       - '.github/workflows/crash-diagnosis.yml'
   push:
     branches: [main]
     paths:
-      - 'src/main/java/dev/itsdropper/vanta/launcher/repair/**'
-      - 'src/main/java/dev/itsdropper/vanta/launcher/instance/InstanceRepairService.java'
-      - 'src/main/resources/dev/itsdropper/vanta/launcher/repair/crash-cases.tsv'
-      - 'src/test/java/dev/itsdropper/vanta/launcher/repair/**'
-      - 'src/test/java/dev/itsdropper/vanta/launcher/instance/InstanceRepairServiceTest.java'
+      - 'src/main/**'
+      - 'src/test/**'
       - 'build.gradle'
-      - 'gradlew'
-      - 'gradlew.bat'
+      - 'gradlew*'
       - '.github/workflows/crash-diagnosis.yml'
   workflow_dispatch:
 
@@ -41,6 +33,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -50,6 +43,7 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: gradle
 
       - name: Train and evaluate model through regression suite
         if: runner.os != 'Windows'
