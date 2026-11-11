@@ -163,6 +163,15 @@ private Path installResolvedVersion(
             ModrinthVersion version
     ) throws IOException, InterruptedException {
 
+        if (projectId == null || projectId.isBlank() || version == null
+                || version.getId() == null || version.getId().isBlank()) {
+            throw new IOException("Resolved Modrinth installation has an invalid project or version identity.");
+        }
+        if (version.getProjectId() != null && !version.getProjectId().isBlank()
+                && !projectId.equals(version.getProjectId())) {
+            throw new IOException("Resolved Modrinth version belongs to a different project: " + projectId);
+        }
+
         ModrinthFile file = catalog.findPrimaryFile(version);
         if (file == null || file.getUrl() == null || file.getUrl().isBlank()) {
             throw new IOException("Modrinth version has no downloadable file: " + projectId);
