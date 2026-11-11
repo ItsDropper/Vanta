@@ -16,7 +16,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class AccountService implements AutoCloseable {
 
-    private static final long SESSION_REFRESH_AHEAD_MILLIS = TimeUnit.MINUTES.toMillis(5);
 
     public enum SessionHealth {
         NO_ACCOUNT, AUTHENTICATING, REFRESHING, READY, RETRY_WAIT, CANCELLED,
@@ -385,20 +384,9 @@ public class AccountService implements AutoCloseable {
     }
 
     static boolean isSessionRefreshDue(Account account) {
-        if (account == null || account.getSession() == null) {
-            return false;
-        }
-        if (account.getSession().isExpired()) {
-            return true;
-        }
-
-        // Refresh the Minecraft access token before its hard expiry. The full
-        // session refresh also repairs any already-expired upstream Xbox/MSA step.
-        var profile = account.getSession().getMcProfile();
-        var minecraftToken = profile == null ? null : profile.getMcToken();
-        return minecraftToken != null
-                && minecraftToken.getExpireTimeMs()
-                <= System.currentTimeMillis() + SESSION_REFRESH_AHEAD_MILLIS;
+        return account != null
+                && account.getSession() != null
+                && account.getSession().isExpired();
     }
 
     @Override
