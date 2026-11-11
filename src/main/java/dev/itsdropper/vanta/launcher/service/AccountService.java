@@ -77,8 +77,14 @@ public class AccountService implements AutoCloseable {
                 return null;
             }
 
-            String activeId =
-                    AccountManager.getActiveAccountId();
+            String activeId;
+            try {
+                activeId = AccountManager.getActiveAccountId();
+            } catch (IOException failure) {
+                setSessionHealth(SessionHealth.STORAGE_ERROR,
+                        "The active-account selection could not be read. Saved accounts were preserved.");
+                throw failure;
+            }
 
             Account activeAccount = null;
 
@@ -104,9 +110,13 @@ public class AccountService implements AutoCloseable {
                 activeAccount =
                         accounts.get(0);
 
-                AccountManager.setActiveAccount(
-                        activeAccount.getUuid()
-                );
+                try {
+                    AccountManager.setActiveAccount(activeAccount.getUuid());
+                } catch (IOException failure) {
+                    setSessionHealth(SessionHealth.STORAGE_ERROR,
+                            "The active-account selection could not be saved. Saved accounts were preserved.");
+                    throw failure;
+                }
             }
 
             /*
@@ -171,9 +181,13 @@ public class AccountService implements AutoCloseable {
             /*
              * Persist the active selection before publishing it in memory.
              */
-            AccountManager.setActiveAccount(
-                    account.getUuid()
-            );
+            try {
+                AccountManager.setActiveAccount(account.getUuid());
+            } catch (IOException failure) {
+                setSessionHealth(SessionHealth.STORAGE_ERROR,
+                        "The new account was saved, but its active selection could not be persisted.");
+                throw failure;
+            }
 
             replaceAccount(account);
             maintenancePausedAccountId = null;
@@ -229,11 +243,14 @@ public class AccountService implements AutoCloseable {
                 throw failure;
             }
 
-            AccountManager.setActiveAccount(
-                    refreshedAccount.getUuid()
-            );
-
             replaceAccount(refreshedAccount);
+            try {
+                AccountManager.setActiveAccount(refreshedAccount.getUuid());
+            } catch (IOException failure) {
+                setSessionHealth(SessionHealth.STORAGE_ERROR,
+                        "The account was refreshed, but its active selection could not be saved. The previous account remains active.");
+                throw failure;
+            }
             maintenancePausedAccountId = null;
             maintenanceRetryAfterMillis = 0L;
             setCurrentAccount(
@@ -510,9 +527,13 @@ public class AccountService implements AutoCloseable {
             /*
              * Remove the current account completely.
              */
-            AccountManager.deleteAccount(
-                    uuid
-            );
+            try {
+                AccountManager.deleteAccount(uuid);
+            } catch (IOException failure) {
+                setSessionHealth(SessionHealth.STORAGE_ERROR,
+                        "The account could not be removed safely. Its saved entry was preserved.");
+                throw failure;
+            }
 
             accounts.removeIf(
                     account ->
@@ -528,9 +549,20 @@ public class AccountService implements AutoCloseable {
                 Account nextAccount =
                         accounts.get(0);
 
-                AccountManager.setActiveAccount(
-                        nextAccount.getUuid()
-                );
+                try {
+                    AccountManager.setActiveAccount(nextAccount.getUuid());
+                } catch (IOException failure) {
+                    // The previous account has already been removed. Keep the
+                    // remaining account usable in memory; startup will select
+                    // the first saved account if the preference remains absent.
+                    setCurrentAccount(nextAccount);
+                    maintenancePausedAccountId = null;
+                    maintenanceRetryAfterMillis = 0L;
+                    setSessionHealth(SessionHealth.STORAGE_ERROR,
+                            "The account was removed, but the new selection could not be saved. The remaining account stays active for this session.");
+                    startSessionMaintenance();
+                    return;
+                }
 
                 setCurrentAccount(
                         nextAccount
