@@ -277,7 +277,7 @@ public class AccountService {
             Account account = currentAccount;
             if (account == null
                     || account.getUuid().equals(maintenancePausedAccountId)
-                    || !isSessionRefreshDue(account, System.currentTimeMillis())) {
+                    || !isSessionRefreshDue(account)) {
                 return;
             }
             try {
@@ -298,24 +298,10 @@ public class AccountService {
         }
     }
 
-    static boolean isSessionRefreshDue(Account account, long nowMillis) {
-        if (account == null || account.getSession() == null
-                || account.getSession().getMcProfile() == null
-                || account.getSession().getMcProfile().getMcToken() == null) {
-            return false;
-        }
-        long minecraftTokenExpiry =
-                account.getSession().getMcProfile().getMcToken().getExpireTimeMs();
-        long certificateExpiry = account.getSession().getPlayerCertificates() == null
-                ? Long.MAX_VALUE
-                : account.getSession().getPlayerCertificates().getExpireTimeMs();
-        return isSessionRefreshDue(minecraftTokenExpiry, certificateExpiry, nowMillis);
-    }
-
-    static boolean isSessionRefreshDue(long minecraftTokenExpiry,
-                                       long certificateExpiry,
-                                       long nowMillis) {
-        return Math.min(minecraftTokenExpiry, certificateExpiry) <= nowMillis;
+    static boolean isSessionRefreshDue(Account account) {
+        return account != null
+                && account.getSession() != null
+                && account.getSession().isExpired();
     }
 
     public void close() {
