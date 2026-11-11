@@ -25,7 +25,10 @@ class SidebarNavigationTest {
             }
         }
 
-        assertEquals(Sidebar.Page.values().length, shortcuts.size());
+        long shortcutPages = java.util.Arrays.stream(Sidebar.Page.values())
+                .filter(page -> page.shortcutNumber() > 0)
+                .count();
+        assertEquals(shortcutPages, shortcuts.size());
     }
 
     @Test
