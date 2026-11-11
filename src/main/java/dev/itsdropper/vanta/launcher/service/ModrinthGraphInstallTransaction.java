@@ -161,7 +161,7 @@ final class ModrinthGraphInstallTransaction {
             } catch (IOException | InterruptedException | RuntimeException | Error failure) {
                 transactionFailure = failure;
                 try {
-                    rollbackFromJournal(instance, mods, transactionDirectory, journal, registry);
+                    rollbackFromJournal(mods, transactionDirectory, journal, registry);
                     publishStateMarker(transactionDirectory, ROLLED_BACK_NAME);
                 } catch (IOException rollbackFailure) {
                     preserveJournal = true;
@@ -242,7 +242,7 @@ final class ModrinthGraphInstallTransaction {
                 }
                 Properties journal = readJournal(journalPath);
                 Path mods = root.resolve("mods").normalize();
-                rollbackFromJournal(instance, mods, directory, journal, root.resolve("vanta-mods.json"));
+                rollbackFromJournal(mods, directory, journal, root.resolve("vanta-mods.json"));
                 publishStateMarker(directory, ROLLED_BACK_NAME);
                 deleteTree(directory);
             }
@@ -250,8 +250,7 @@ final class ModrinthGraphInstallTransaction {
     }
 
     private static void rollbackFromJournal(
-            Instance instance, Path mods, Path transactionDirectory, Properties journal,
-            Path registry
+            Path mods, Path transactionDirectory, Properties journal, Path registry
     ) throws IOException {
             int managedCount = parseCount(journal, "managedCount");
             Set<String> originalNames = new HashSet<>();
@@ -330,7 +329,10 @@ final class ModrinthGraphInstallTransaction {
         try (var input = Files.newInputStream(path)) {
             journal.load(input);
         }
-        required(journal, "registryExisted");
+        String registryExisted = required(journal, "registryExisted");
+        if (!"true".equals(registryExisted) && !"false".equals(registryExisted)) {
+            throw new IOException("Invalid transaction journal registry state.");
+        }
         parseCount(journal, "backupCount");
         parseCount(journal, "managedCount");
         return journal;
@@ -397,7 +399,12 @@ final class ModrinthGraphInstallTransaction {
         if (filename.indexOf('/') >= 0 || filename.indexOf('\\') >= 0) {
             throw new IOException("Installed-mod registry must contain a filename, not a path: " + filename);
         }
-        Path supplied = Path.of(filename);
+        Path supplied;
+        try {
+            supplied = Path.of(filename);
+        } catch (java.nio.file.InvalidPathException invalid) {
+            throw new IOException("Installed-mod registry contains an invalid filename: " + filename, invalid);
+        }
         if (supplied.isAbsolute() || supplied.getNameCount() != 1
                 || ".".equals(filename) || "..".equals(filename)) {
             throw new IOException("Installed-mod registry contains an unsafe filename: " + filename);
