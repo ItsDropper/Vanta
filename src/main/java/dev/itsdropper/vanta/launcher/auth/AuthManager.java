@@ -87,7 +87,7 @@ public class AuthManager {
         return account;
     }
 
-    private static boolean isTransientFailure(Throwable failure) {
+    static boolean isTransientFailure(Throwable failure) {
         for (Throwable current = failure; current != null; current = current.getCause()) {
             if (current instanceof InterruptedIOException
                     || current instanceof ConnectException
