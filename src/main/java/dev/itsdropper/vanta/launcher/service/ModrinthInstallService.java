@@ -92,29 +92,47 @@ public List<Path> installResolvedGraph(
             return List.of();
         }
 
-        List<Path> installed =
-                new ArrayList<>();
-
-        for (ModrinthService.ResolvedMod resolved :
-                resolvedMods) {
-
-            if (resolved == null
-                    || resolved.projectId() == null
-                    || resolved.version() == null) {
-
-                continue;
-            }
-
-            installed.add(
-                    installResolvedVersion(
-                            instance,
-                            resolved.projectId(),
-                            resolved.version()
-                    )
-            );
+        List<ModrinthService.ResolvedMod> validated = validateResolvedGraph(resolvedMods);
+        if (validated.isEmpty()) {
+            return List.of();
         }
 
-        return installed;
+        return ModrinthGraphInstallTransaction.execute(instance, () -> {
+            List<Path> installed = new ArrayList<>(validated.size());
+            for (ModrinthService.ResolvedMod resolved : validated) {
+                installed.add(installResolvedVersion(
+                        instance, resolved.projectId(), resolved.version()));
+            }
+            return List.copyOf(installed);
+        });
+    }
+
+
+    private static List<ModrinthService.ResolvedMod> validateResolvedGraph(
+            List<ModrinthService.ResolvedMod> resolvedMods
+    ) throws IOException {
+        Map<String, String> selectedVersions = new LinkedHashMap<>();
+        List<ModrinthService.ResolvedMod> validated = new ArrayList<>(resolvedMods.size());
+
+        for (ModrinthService.ResolvedMod resolved : resolvedMods) {
+            if (resolved == null || resolved.projectId() == null || resolved.projectId().isBlank()
+                    || resolved.version() == null || resolved.version().getId() == null
+                    || resolved.version().getId().isBlank()) {
+                throw new IOException("Resolved mod graph contains an incomplete entry.");
+            }
+
+            String previousVersion = selectedVersions.putIfAbsent(
+                    resolved.projectId(), resolved.version().getId());
+            if (previousVersion != null) {
+                if (!previousVersion.equals(resolved.version().getId())) {
+                    throw new IOException("Resolved mod graph selects conflicting versions for project "
+                            + resolved.projectId() + ".");
+                }
+                continue;
+            }
+            validated.add(resolved);
+        }
+        return List.copyOf(validated);
     }
 
 private void removeInstalledMod(
