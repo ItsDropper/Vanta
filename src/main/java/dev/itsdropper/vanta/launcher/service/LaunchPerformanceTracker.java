@@ -45,12 +45,14 @@ public final class LaunchPerformanceTracker {
     }
 
     private static boolean hasEnabledMods(Instance instance) {
-        Path modsDirectory = instance.getDirectory().resolve("mods");
-        if (!Files.isDirectory(modsDirectory)) return false;
-        try (var entries = Files.list(modsDirectory)) {
-            return entries.anyMatch(path -> Files.isRegularFile(path)
-                    && path.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar"));
-        } catch (IOException ignored) {
+        try {
+            Path modsDirectory = instance.getDirectory().resolve("mods");
+            if (!Files.isDirectory(modsDirectory)) return false;
+            try (var entries = Files.list(modsDirectory)) {
+                return entries.anyMatch(path -> Files.isRegularFile(path)
+                        && path.getFileName().toString().toLowerCase(java.util.Locale.ROOT).endsWith(".jar"));
+            }
+        } catch (IOException | SecurityException ignored) {
             return false;
         }
     }
