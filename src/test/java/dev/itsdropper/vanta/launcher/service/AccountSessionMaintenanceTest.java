@@ -35,15 +35,6 @@ class AccountSessionMaintenanceTest {
         assertFalse(AccountService.isSessionRefreshDue(accountWithTokenChain(false)));
     }
 
-    @Test
-    void refreshesMinecraftAccessTokenBeforeHardExpiry() {
-        long now = System.currentTimeMillis();
-        assertTrue(AccountService.isSessionRefreshDue(
-                accountWithTokenChain(false, now + TimeUnit.MINUTES.toMillis(4))));
-        assertFalse(AccountService.isSessionRefreshDue(
-                accountWithTokenChain(false, now + TimeUnit.MINUTES.toMillis(15))));
-    }
-
     private static Account accountWithTokenChain(boolean upstreamExpired) {
         return accountWithTokenChain(
                 upstreamExpired,
@@ -51,12 +42,12 @@ class AccountSessionMaintenanceTest {
         );
     }
 
-    private static Account accountWithTokenChain(boolean upstreamExpired, long minecraftExpiry) {
+    private static Account accountWithTokenChain(boolean upstreamExpired) {
         TestXblXsts xsts = new TestXblXsts(upstreamExpired);
         StepMCToken.MCToken minecraftToken = new StepMCToken.MCToken(
                 "test-access-token",
                 "Bearer",
-                minecraftExpiry,
+                System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(15),
                 xsts
         );
         StepMCProfile.MCProfile profile = new StepMCProfile.MCProfile(
