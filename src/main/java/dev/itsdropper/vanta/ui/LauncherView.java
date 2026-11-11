@@ -1564,8 +1564,7 @@ public class LauncherView {
                     .map(dev.itsdropper.vanta.launcher.repair.RepairDiagnosis::category)
                     .filter(category -> category != FailureCategory.UNKNOWN)
                     .findFirst().orElse(null);
-            CrashCaseRepository.CrashCase saved =
-                    new CrashCaseRepository().recordForReview(log, proposed);
+            new CrashCaseRepository().recordForReview(log, proposed);
             notifications.success(
                     "Crash report saved locally",
                     "A sanitized copy was saved on this device. Nothing was uploaded."
