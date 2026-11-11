@@ -76,7 +76,15 @@ class ModrinthInstallServiceIntegrationTest {
         Instance instance = instance();
         AtomicInteger downloads = new AtomicInteger();
         ModrinthInstallService installer = installer((url, destination) -> {
-            String modId = url.endsWith("/api-1.0.jar") ? "fabric-api" : "example";
+            String filename = url.substring(url.lastIndexOf('/') + 1);
+            String modId = switch (filename) {
+                case "api-1.0.jar" -> "fabric-api";
+                case "example-1.0.jar" -> "example";
+                case "library-a.jar" -> "library_a";
+                case "library-b.jar" -> "library_b";
+                case "utility.jar" -> "utility";
+                default -> throw new IOException("Unexpected test artifact: " + filename);
+            };
             Files.write(destination, modJar(modId, "1.0.0"));
             downloads.incrementAndGet();
         });
@@ -86,17 +94,23 @@ class ModrinthInstallServiceIntegrationTest {
                 new ModrinthService.ResolvedMod("fabric-api-project",
                         version("fabric-api-project", "api-v1", "api-1.0.jar")),
                 new ModrinthService.ResolvedMod("example-project",
-                        version("example-project", "example-v1", "example-1.0.jar"))
+                        version("example-project", "example-v1", "example-1.0.jar")),
+                new ModrinthService.ResolvedMod("library-a-project",
+                        version("library-a-project", "library-a-v1", "library-a.jar")),
+                new ModrinthService.ResolvedMod("library-b-project",
+                        version("library-b-project", "library-b-v1", "library-b.jar")),
+                new ModrinthService.ResolvedMod("utility-project",
+                        version("utility-project", "utility-v1", "utility.jar"))
         ), progress::add);
 
-        assertEquals(2, downloads.get());
+        assertEquals(5, downloads.get());
         assertTrue(progress.stream().anyMatch(message -> message.startsWith("Downloading ")));
         assertTrue(progress.stream().anyMatch(message -> message.startsWith("Validating ")));
         assertTrue(progress.stream().anyMatch(message -> message.startsWith("Installed ")));
-        assertEquals(2, installed.size());
+        assertEquals(5, installed.size());
         assertTrue(installed.stream().allMatch(Files::isRegularFile));
         List<InstalledModRecord> registry = InstalledModManager.load(instance);
-        assertEquals(2, registry.size());
+        assertEquals(5, registry.size());
         assertTrue(registry.stream().anyMatch(record -> "fabric-api-project".equals(record.getProjectId())));
         assertTrue(registry.stream().anyMatch(record -> "example-project".equals(record.getProjectId())));
         assertTrue(registry.stream().anyMatch(record -> "fabric-api".equals(record.getModId())));
