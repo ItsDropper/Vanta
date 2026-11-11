@@ -42,7 +42,10 @@ public class TitleBar extends HBox {
 
         // The application disables implicit exit while the window is hidden
         // for Minecraft. Explicit window-manager close must still exit Vanta.
-        stage.setOnCloseRequest(event -> Platform.exit());
+        stage.setOnCloseRequest(event -> {
+            accountService.close();
+            Platform.exit();
+        });
 
         setAlignment(
                 Pos.CENTER_RIGHT
@@ -190,12 +193,7 @@ public class TitleBar extends HBox {
             );
         });
 
-        close.setOnAction(event -> {
-            stage.close();
-            // Main disables implicit exit so the launcher can hide while
-            // Minecraft runs. An explicit close must still terminate Vanta.
-            Platform.exit();
-        });
+        close.setOnAction(event -> stage.close());
 
         // =========================================================
         // LAYOUT
