@@ -36,13 +36,6 @@ class AccountSessionMaintenanceTest {
     }
 
     private static Account accountWithTokenChain(boolean upstreamExpired) {
-        return accountWithTokenChain(
-                upstreamExpired,
-                System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(15)
-        );
-    }
-
-    private static Account accountWithTokenChain(boolean upstreamExpired) {
         TestXblXsts xsts = new TestXblXsts(upstreamExpired);
         StepMCToken.MCToken minecraftToken = new StepMCToken.MCToken(
                 "test-access-token",
