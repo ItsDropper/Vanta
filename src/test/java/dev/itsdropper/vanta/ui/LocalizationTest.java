@@ -680,7 +680,12 @@ class LocalizationTest {
                 "crashCases.exported",
                 "crashCases.operationFailed",
                 "crashCases.review",
-                "crashCases.saveCurrent"
+                "crashCases.saveCurrent",
+                "crashCases.fixNotes",
+                "crashCases.fixPrompt",
+                "crashCases.exportFixes",
+                "crashCases.exportFixesTitle",
+                "crashCases.exportFixesDone"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
