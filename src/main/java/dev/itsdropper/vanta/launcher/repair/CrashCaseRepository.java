@@ -217,7 +217,15 @@ public final class CrashCaseRepository {
 
     public static String sanitize(String source) {
         if (source == null || source.isBlank()) return "";
-        String text = source.replace("\r\n", "\n").replace('\r', '\n');
+        String bounded = source;
+        if (bounded.length() > MAX_LOG_CHARS) {
+            int headLength = MAX_LOG_CHARS * 2 / 3;
+            int tailLength = MAX_LOG_CHARS - headLength - 48;
+            bounded = bounded.substring(0, headLength)
+                    + "\\n[TRUNCATED MIDDLE: local crash-case size limit]\\n"
+                    + bounded.substring(bounded.length() - tailLength);
+        }
+        String text = bounded.replace("\\r\\n", "\\n").replace('\\r', '\\n');
         text = BEARER.matcher(text).replaceAll("Bearer [REDACTED]");
         text = SECRET_ASSIGNMENT.matcher(text).replaceAll("$1[REDACTED]");
         text = USER_ASSIGNMENT.matcher(text).replaceAll("$1[REDACTED]");
