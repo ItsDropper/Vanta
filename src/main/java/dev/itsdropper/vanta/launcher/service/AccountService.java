@@ -232,7 +232,9 @@ public class AccountService implements AutoCloseable {
             }
             Account refreshed = AuthManager.refreshSavedSession(currentAccount);
             replaceAccount(refreshed);
-            setCurrentAccount(refreshed);
+            // Token rotation does not change the visible account identity. Avoid
+            // notifying JavaFX listeners from this scheduler/launch worker thread.
+            currentAccount = refreshed;
             return refreshed;
         } finally {
             accountLock.unlock();
