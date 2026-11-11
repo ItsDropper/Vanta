@@ -48,7 +48,7 @@ final class ModrinthGraphInstallTransaction {
             throw new IOException("Instance mods directory resolves outside the instance.");
         }
 
-        List<InstalledModRecord> originalRegistry = List.copyOf(InstalledModManager.load(instance));
+        List<InstalledModRecord> originalRegistry = new ArrayList<>(InstalledModManager.load(instance));
         Path transactionDirectory = Files.createTempDirectory(
                 instanceDirectory, ".vanta-graph-transaction-" + UUID.randomUUID() + "-");
         Map<Path, Path> backups = new LinkedHashMap<>();
