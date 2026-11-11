@@ -34,7 +34,7 @@ public final class DeterministicCrashModel {
             "could", "would", "should", "error", "exception", "failed", "failure",
             "minecraft", "java", "thread", "main", "at", "net", "org", "com"
     );
-    private static final Model MODEL = load();
+    private static final DeterministicCrashModel MODEL = load();
 
     public record Prediction(FailureCategory category, double confidence, String evidence) { }
 
@@ -104,7 +104,7 @@ public final class DeterministicCrashModel {
         return MODEL.documentCount;
     }
 
-    private static Model load() {
+    private static DeterministicCrashModel load() {
         try (InputStream stream = DeterministicCrashModel.class.getResourceAsStream(CORPUS)) {
             if (stream == null) throw new IllegalStateException("Crash diagnosis training corpus is missing.");
             List<Example> examples = new ArrayList<>();
@@ -123,7 +123,7 @@ public final class DeterministicCrashModel {
                 }
             }
             if (examples.isEmpty()) throw new IllegalStateException("Crash diagnosis training corpus is empty.");
-            return new Model(new DeterministicCrashModel(examples));
+            return new DeterministicCrashModel(examples);
         } catch (IOException | IllegalArgumentException failure) {
             throw new ExceptionInInitializerError(failure);
         }
@@ -139,9 +139,4 @@ public final class DeterministicCrashModel {
         return result;
     }
 
-    private record Model(DeterministicCrashModel trained) {
-        private Set<String> vocabulary() { return trained.vocabulary; }
-        private Map<FailureCategory, ClassStats> classes() { return trained.classes; }
-        private int documentCount() { return trained.documentCount; }
-    }
 }
