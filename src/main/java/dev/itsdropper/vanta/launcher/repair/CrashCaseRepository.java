@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.launcher.repair;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 
@@ -17,12 +16,13 @@ import java.nio.file.StandardOpenOption;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Pattern;
 
 /**
@@ -39,6 +39,7 @@ public final class CrashCaseRepository {
     private static final long MAX_STORE_BYTES = 32L * 1024 * 1024;
     private static final long MAX_IMPORT_BYTES = 2L * 1024 * 1024;
     private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ConcurrentHashMap<Path, ReentrantLock> JVM_LOCKS = new ConcurrentHashMap<>();
 
     private static final Pattern BEARER = Pattern.compile("(?i)\\bBearer\\s+[A-Za-z0-9._~+/-]+=*");
     private static final Pattern SECRET_ASSIGNMENT = Pattern.compile(
@@ -63,7 +64,7 @@ public final class CrashCaseRepository {
             "(?i)(\\b(?:username|user\\.name|player[_ -]?name)\\b\\s*[:=]\\s*)[^\\s,;]+");
     private static final Pattern PRIVATE_LINE = Pattern.compile(
             "(?im)^\\s*(?:username|player name|player uuid|user uuid|access token|refresh token|"
-                    + "server address|server ip|connected to|user home|user\.home)\\s*[:=].*$");
+                    + "server address|server ip|connected to|user home|user\\.home)\\s*[:=].*$");
     private static final Pattern TIMESTAMP = Pattern.compile(
             "\\b\\d{4}-\\d{2}-\\d{2}[ T]\\d{2}:\\d{2}:\\d{2}(?:[.,]\\d+)?\\b");
     private static final Pattern THREAD_ID = Pattern.compile("(?i)\\bthread[- ]#?\\d+\\b");
@@ -193,6 +194,9 @@ public final class CrashCaseRepository {
     public int exportConfirmedCorpus(Path destination) throws IOException {
         Objects.requireNonNull(destination, "destination");
         Path target = destination.toAbsolutePath().normalize();
+        if (target.equals(storeFile) || target.equals(lockFile)) {
+            throw new IOException("Training export cannot overwrite the local crash case store.");
+        }
         return withLock(() -> {
             List<CrashCase> cases = readCases();
             List<String> rows = cases.stream()
@@ -299,10 +303,14 @@ public final class CrashCaseRepository {
 
     private <T> T withLock(IoOperation<T> operation) throws IOException {
         Files.createDirectories(lockFile.getParent());
+        ReentrantLock processLock = JVM_LOCKS.computeIfAbsent(lockFile, ignored -> new ReentrantLock());
+        processLock.lock();
         try (FileChannel channel = FileChannel.open(lockFile,
                 StandardOpenOption.CREATE, StandardOpenOption.WRITE);
              FileLock ignored = channel.lock()) {
             return operation.run();
+        } finally {
+            processLock.unlock();
         }
     }
 
