@@ -16,9 +16,13 @@ class SidebarNavigationTest {
         for (Sidebar.Page page : Sidebar.Page.values()) {
             assertFalse(page.title().isBlank());
             assertNotNull(page.iconType());
-            assertTrue(shortcuts.add(page.shortcutNumber()),
-                    "Duplicate shortcut: " + page.shortcutNumber());
-            assertSame(page, Sidebar.Page.fromShortcutNumber(page.shortcutNumber()));
+            if (page.shortcutNumber() > 0) {
+                assertTrue(shortcuts.add(page.shortcutNumber()),
+                        "Duplicate shortcut: " + page.shortcutNumber());
+                assertSame(page, Sidebar.Page.fromShortcutNumber(page.shortcutNumber()));
+            } else {
+                assertNull(Sidebar.Page.fromShortcutNumber(page.shortcutNumber()));
+            }
         }
 
         assertEquals(Sidebar.Page.values().length, shortcuts.size());
