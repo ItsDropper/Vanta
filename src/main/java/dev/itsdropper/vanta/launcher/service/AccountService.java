@@ -17,7 +17,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class AccountService implements AutoCloseable {
 
     public enum SessionHealth {
-        NO_ACCOUNT, AUTHENTICATING, REFRESHING, READY, RETRY_WAIT,
+        NO_ACCOUNT, AUTHENTICATING, REFRESHING, READY, RETRY_WAIT, CANCELLED,
         SIGN_IN_REQUIRED, ERROR, CLOSED
     }
 
@@ -428,6 +428,11 @@ public class AccountService implements AutoCloseable {
     private void updateHealthForFailure(Throwable failure) {
         if (closed) {
             setSessionHealth(SessionHealth.CLOSED, "Authentication maintenance has stopped.");
+            return;
+        }
+        if (Thread.currentThread().isInterrupted() || AuthManager.isInterruptedFailure(failure)) {
+            Thread.currentThread().interrupt();
+            setSessionHealth(SessionHealth.CANCELLED, "Microsoft sign-in was cancelled. The saved account was preserved.");
             return;
         }
         if (AuthManager.isRefreshTokenRejected(failure)) {
