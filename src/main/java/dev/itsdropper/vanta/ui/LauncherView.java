@@ -60,6 +60,7 @@ public class LauncherView {
     private final CreateInstanceTypeView createInstanceTypeView;
     private final DownloadCenterView downloadCenterView;
     private final ServerManagerView serverManagerView;
+    private final ExperimentalView experimentalView;
 
     private final NotificationManager notifications;
     private final CommandPalette commandPalette;
@@ -305,6 +306,7 @@ public class LauncherView {
         stateCenterView = new StateCenterView();
         downloadCenterView = new DownloadCenterView(screenshotMode);
         serverManagerView = new ServerManagerView();
+        experimentalView = new ExperimentalView(accountService);
 
         settingsView =
                 new SettingsView(
@@ -353,7 +355,7 @@ public class LauncherView {
             commands.add(new CommandPalette.Command(
                     page.title(),
                     page.description(),
-                    "Ctrl+" + page.shortcutNumber(),
+                    page.shortcutNumber() > 0 ? "Ctrl+" + page.shortcutNumber() : "",
                     () -> showPage(page)
             ));
         }
@@ -470,6 +472,7 @@ public class LauncherView {
             case SETTINGS -> showAnimatedContent(settingsView);
             case DOWNLOADS -> showAnimatedContent(downloadCenterView);
             case SERVERS -> showAnimatedContent(serverManagerView);
+            case EXPERIMENTAL -> showAnimatedContent(experimentalView);
         }
     }
 
@@ -485,6 +488,7 @@ public class LauncherView {
             case SETTINGS -> viewHost.showForCapture(settingsView);
             case DOWNLOADS -> viewHost.showForCapture(downloadCenterView);
             case SERVERS -> viewHost.showForCapture(serverManagerView);
+            case EXPERIMENTAL -> viewHost.showForCapture(experimentalView);
         }
     }
 
