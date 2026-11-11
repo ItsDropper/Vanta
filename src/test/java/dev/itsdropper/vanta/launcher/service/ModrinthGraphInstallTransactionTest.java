@@ -118,6 +118,7 @@ class ModrinthGraphInstallTransactionTest {
         InterruptedException failure = assertThrows(InterruptedException.class, () ->
                 ModrinthGraphInstallTransaction.execute(instance, () -> {
                     Files.writeString(originalMod, "partially updated");
+                    ModrinthGraphInstallTransaction.registerManagedPath(instance, mods.resolve("new.jar"));
                     Files.writeString(mods.resolve("new.jar"), "new artifact");
                     InstalledModManager.add(instance, new InstalledModRecord(
                             "new", "new-version", "new", "1.0", "new.jar"));
@@ -203,6 +204,7 @@ class ModrinthGraphInstallTransactionTest {
         Instance instance = instance();
         Path journalDirectory = Files.createDirectory(
                 temporaryDirectory.resolve(".vanta-graph-transaction-corrupt"));
+        Files.writeString(journalDirectory.resolve("OWNER"), "VANTA_MODRINTH_GRAPH_TRANSACTION_V1");
         Files.writeString(journalDirectory.resolve("journal.properties"), "registryExisted=true\\n");
         Path important = temporaryDirectory.resolve("mods");
         Files.createDirectories(important);
