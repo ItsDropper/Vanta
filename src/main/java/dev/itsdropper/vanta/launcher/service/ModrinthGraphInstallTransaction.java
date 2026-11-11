@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Provides an instance-scoped rollback boundary around a multi-mod installation.
@@ -25,6 +27,8 @@ import java.util.UUID;
  * failure cannot leave earlier graph entries committed.
  */
 final class ModrinthGraphInstallTransaction {
+    private static final Map<Path, ReentrantLock> INSTANCE_LOCKS = new ConcurrentHashMap<>();
+
     private ModrinthGraphInstallTransaction() {
     }
 
@@ -43,6 +47,19 @@ final class ModrinthGraphInstallTransaction {
         }
 
         Path instanceDirectory = instance.getDirectory().toAbsolutePath().normalize();
+        ReentrantLock instanceLock = INSTANCE_LOCKS.computeIfAbsent(
+                instanceDirectory, ignored -> new ReentrantLock());
+        instanceLock.lock();
+        try {
+            return executeLocked(instance, operation, instanceDirectory);
+        } finally {
+            instanceLock.unlock();
+        }
+    }
+
+    private static <T> T executeLocked(
+            Instance instance, Operation<T> operation, Path instanceDirectory
+    ) throws IOException, InterruptedException {
         Path modsDirectory = instanceDirectory.resolve("mods").normalize();
         if (!modsDirectory.startsWith(instanceDirectory)) {
             throw new IOException("Instance mods directory resolves outside the instance.");
@@ -54,6 +71,7 @@ final class ModrinthGraphInstallTransaction {
         Map<Path, Path> backups = new LinkedHashMap<>();
         Set<Path> originalTrackedPaths = new HashSet<>();
 
+        Throwable transactionFailure = null;
         try {
             if (Files.exists(modsDirectory, LinkOption.NOFOLLOW_LINKS)
                     && Files.isSymbolicLink(modsDirectory)) {
@@ -85,11 +103,23 @@ final class ModrinthGraphInstallTransaction {
             try {
                 return operation.run();
             } catch (IOException | InterruptedException | RuntimeException | Error failure) {
+                transactionFailure = failure;
                 rollback(instance, modsDirectory, originalRegistry, backups, failure);
                 throw failure;
             }
+        } catch (IOException | InterruptedException | RuntimeException | Error failure) {
+            transactionFailure = failure;
+            throw failure;
         } finally {
-            deleteTree(transactionDirectory);
+            try {
+                deleteTree(transactionDirectory);
+            } catch (IOException cleanupFailure) {
+                if (transactionFailure != null) {
+                    transactionFailure.addSuppressed(cleanupFailure);
+                } else {
+                    throw cleanupFailure;
+                }
+            }
         }
     }
 
