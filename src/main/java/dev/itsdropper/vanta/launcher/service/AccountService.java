@@ -102,6 +102,7 @@ public class AccountService implements AutoCloseable {
                     refreshedAccount
             );
 
+            maintenancePausedAccountId = null;
             setCurrentAccount(
                     refreshedAccount
             );
@@ -293,7 +294,9 @@ public class AccountService implements AutoCloseable {
                 Account refreshed = AuthManager.refresh(account);
                 replaceAccount(refreshed);
                 maintenancePausedAccountId = null;
-                setCurrentAccount(refreshed);
+                // Token rotation preserves account identity. Do not notify UI
+                // listeners from the background maintenance thread.
+                currentAccount = refreshed;
                 System.out.println("[Vanta Auth] Active Minecraft session refreshed.");
             } catch (Exception failure) {
                 // Avoid repeated requests after a rejected refresh. A launch
@@ -313,7 +316,11 @@ public class AccountService implements AutoCloseable {
                 && account.getSession().isExpired();
     }
 
+    @Override
     public void close() {
+        if (closed) {
+            return;
+        }
         closed = true;
         if (maintenanceTask != null) {
             maintenanceTask.cancel(true);
