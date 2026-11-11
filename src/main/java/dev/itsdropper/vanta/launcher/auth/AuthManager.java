@@ -54,7 +54,7 @@ public class AuthManager {
 
     public static Account login(Account savedAccount) throws Exception {
         if (savedAccount != null) {
-            final StepFullJavaSession.FullJavaSession refreshedSession;
+            StepFullJavaSession.FullJavaSession refreshedSession;
             try {
                 refreshedSession = LOGIN.refresh(HTTP, savedAccount.getSession());
             } catch (Exception refreshFailure) {
