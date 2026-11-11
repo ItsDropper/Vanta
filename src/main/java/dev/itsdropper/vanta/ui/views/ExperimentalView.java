@@ -13,6 +13,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
@@ -42,8 +43,7 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     public ExperimentalView(AccountService accountService) {
         this.accountService = accountService;
         getStyleClass().add("experimental-view");
-        setSpacing(18);
-        setPadding(new Insets(24));
+        setFillWidth(true);
 
         Label eyebrow = new Label(Localization.text("experimental.eyebrow"));
         eyebrow.getStyleClass().add("page-eyebrow");
@@ -99,8 +99,17 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
                 measuredInstance, baselineStats, optimizedStats, comparisonStats, vanillaStats, clearCache, resetSamples
         );
 
-        getChildren().addAll(eyebrow, title, intro, authCard, performanceCard);
-        VBox.setVgrow(performanceCard, Priority.NEVER);
+        VBox pageContent = new VBox(18, eyebrow, title, intro, authCard, performanceCard);
+        pageContent.setFillWidth(true);
+        pageContent.setPadding(new Insets(24));
+
+        ScrollPane scroll = new ScrollPane(pageContent);
+        scroll.setFitToWidth(true);
+        scroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scroll.getStyleClass().add("experimental-scroll");
+        VBox.setVgrow(scroll, Priority.ALWAYS);
+        getChildren().add(scroll);
         refreshStatus();
         refreshMetrics();
         ticker.setCycleCount(Timeline.INDEFINITE);
