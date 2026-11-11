@@ -170,7 +170,7 @@ public final class CrashCaseReviewView extends VBox {
                 ? null : exportFixes.getScene().getWindow()));
         fileActions.getChildren().add(exportFixes);
 
-        VBox review = new VBox(10, evidence, fixNotes, reviewRow, fileActions, status);
+        VBox review = new VBox(10, evidence, fixNotes, reviewRow, correctionRow, fileActions, status);
         review.setMinWidth(0);
         HBox.setHgrow(queue, Priority.ALWAYS);
         HBox.setHgrow(review, Priority.ALWAYS);
