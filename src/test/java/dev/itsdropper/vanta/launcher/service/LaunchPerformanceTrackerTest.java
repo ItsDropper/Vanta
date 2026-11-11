@@ -33,6 +33,10 @@ class LaunchPerformanceTrackerTest {
         LaunchPerformanceTracker.record(modded, false, 300_000_000L);
         LaunchPerformanceTracker.record(modded, true, 80_000_000L);
         LaunchPerformanceTracker.record(modded, true, 120_000_000L);
+        LaunchPerformanceTracker.recordProcessStartup(modded, false, 4_000_000_000L);
+        LaunchPerformanceTracker.recordProcessStartup(modded, false, 6_000_000_000L);
+        LaunchPerformanceTracker.recordProcessStartup(modded, true, 3_000_000_000L);
+        LaunchPerformanceTracker.recordProcessStartup(modded, true, 5_000_000_000L);
 
         LaunchPerformanceTracker.Summary summary = LaunchPerformanceTracker.summaryForInstance("fabric-test");
 
@@ -40,6 +44,10 @@ class LaunchPerformanceTrackerTest {
         assertEquals(2, summary.optimizedSamples());
         assertEquals(200, summary.baselineMedianMillis());
         assertEquals(100, summary.optimizedMedianMillis());
+        assertEquals(2, summary.baselineStartupSamples());
+        assertEquals(2, summary.optimizedStartupSamples());
+        assertEquals(5_000, summary.baselineStartupMedianMillis());
+        assertEquals(4_000, summary.optimizedStartupMedianMillis());
         assertEquals("fabric-test", LaunchPerformanceTracker.summaryForMostRecent(true).instanceId());
     }
 
