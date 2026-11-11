@@ -22,9 +22,12 @@ class LaunchPerformanceTrackerTest {
     }
 
     @Test
-    void calculatesSeparateMediansForBaselineAndExperimentalModdedLaunches() {
+    void calculatesSeparateMediansForBaselineAndExperimentalModdedLaunches() throws IOException {
+        Path moddedDirectory = temporaryDirectory.resolve("fabric-median");
+        Files.createDirectories(moddedDirectory.resolve("mods"));
+        Files.createFile(moddedDirectory.resolve("mods").resolve("sample-mod.jar"));
         Instance modded = new Instance("fabric-test", "Fabric test", "1.21.11",
-                "Fabric", "0.18.2", Path.of("build/test-instance"));
+                "Fabric", "0.18.2", moddedDirectory);
 
         LaunchPerformanceTracker.record(modded, false, 100_000_000L);
         LaunchPerformanceTracker.record(modded, false, 300_000_000L);
@@ -37,6 +40,7 @@ class LaunchPerformanceTrackerTest {
         assertEquals(2, summary.optimizedSamples());
         assertEquals(200, summary.baselineMedianMillis());
         assertEquals(100, summary.optimizedMedianMillis());
+        assertEquals("fabric-test", LaunchPerformanceTracker.summaryForMostRecent(true).instanceId());
     }
 
     @Test
