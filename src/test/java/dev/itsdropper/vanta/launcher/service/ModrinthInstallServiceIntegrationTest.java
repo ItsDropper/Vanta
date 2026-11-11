@@ -75,8 +75,7 @@ class ModrinthInstallServiceIntegrationTest {
         Instance instance = instance();
         AtomicInteger downloads = new AtomicInteger();
         ModrinthInstallService installer = installer((url, destination) -> {
-            String filename = destination.getFileName().toString();
-            String modId = filename.startsWith("api") ? "fabric-api" : "example";
+            String modId = url.endsWith("/api-1.0.jar") ? "fabric-api" : "example";
             Files.write(destination, modJar(modId, "1.0.0"));
             downloads.incrementAndGet();
         });
