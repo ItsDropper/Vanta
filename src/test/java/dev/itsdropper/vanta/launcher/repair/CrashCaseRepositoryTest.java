@@ -122,6 +122,17 @@ class CrashCaseRepositoryTest {
     }
 
     @Test
+    void largeLogsRetainBothBeginningAndRootCauseTail() {
+        String source = "HEADER_MARKER\\n".repeat(12_000)
+                + "Caused by: TailRootCauseMarker";
+        String sanitized = CrashCaseRepository.sanitize(source);
+        assertTrue(sanitized.length() <= 96 * 1024);
+        assertTrue(sanitized.contains("HEADER_MARKER"));
+        assertTrue(sanitized.contains("TailRootCauseMarker"));
+        assertTrue(sanitized.contains("\\n"));
+    }
+
+    @Test
     void importNeverMutatesTheSourceCrashLog() throws Exception {
         Path source = temporaryDirectory.resolve("latest.log");
         String original = "java.lang.IllegalStateException: user.name=Alice failed";
