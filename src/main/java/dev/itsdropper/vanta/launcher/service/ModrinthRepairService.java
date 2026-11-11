@@ -904,7 +904,6 @@ private void removeInstalledMod(
                     continue;
                 }
 
-                ModrinthGraphInstallTransaction.registerManagedPath(instance, candidate);
                 Files.createDirectories(backupDirectory);
                 Path backup = backupDirectory.resolve(
                         filename + "." + UUID.randomUUID() + ".bak"
