@@ -7,6 +7,9 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
+import dev.itsdropper.vanta.launcher.repair.CrashCaseRepository;
+import dev.itsdropper.vanta.launcher.repair.FailureCategory;
+import dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine;
 import dev.itsdropper.vanta.launcher.instance.InstancePresets;
 import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.launcher.model.Instance;
@@ -1551,6 +1554,31 @@ public class LauncherView {
         );
     }
 
+    private void showCrashCaseReviewView() {
+        viewHost.show(new CrashCaseReviewView(() -> showPage(Sidebar.Page.HOME)));
+    }
+
+    private void saveCrashCaseForReview(String log) {
+        try {
+            FailureCategory proposed = RepairDiagnosticEngine.diagnose(log).stream()
+                    .map(dev.itsdropper.vanta.launcher.repair.RepairDiagnosis::category)
+                    .filter(category -> category != FailureCategory.UNKNOWN)
+                    .findFirst().orElse(null);
+            CrashCaseRepository.CrashCase saved =
+                    new CrashCaseRepository().recordForReview(log, proposed);
+            notifications.success(
+                    "Crash report saved locally",
+                    "A sanitized copy was saved on this device. Nothing was uploaded."
+            );
+            showCrashCaseReviewView();
+        } catch (Exception failure) {
+            notifications.error(
+                    "Could not save crash report",
+                    failure.getMessage() == null ? "The local crash case could not be saved." : failure.getMessage()
+            );
+        }
+    }
+
     private void showRepairView(
             LaunchFailure failure
     ) {
@@ -1647,7 +1675,9 @@ public class LauncherView {
                                 repairInstance,
                                 repairIssues
                         ),
-                        () -> restoreRepairMetadata(repairInstance)
+                        () -> restoreRepairMetadata(repairInstance),
+                        () -> saveCrashCaseForReview(failure.details()),
+                        this::showCrashCaseReviewView
                 );
 
         viewHost.show(
