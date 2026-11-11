@@ -13,8 +13,21 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
-public class AccountService {
+public class AccountService implements AutoCloseable {
+
+    private static final long SESSION_REFRESH_MINUTES = 30;
+    private final ScheduledExecutorService sessionRefresher =
+            Executors.newSingleThreadScheduledExecutor(task -> {
+                Thread thread = new Thread(task, "vanta-minecraft-session-refresh");
+                thread.setDaemon(true);
+                return thread;
+            });
+    private boolean refreshTaskStarted;
+    private volatile boolean closed;
 
     private volatile Account currentAccount;
 
@@ -202,6 +215,55 @@ public class AccountService {
 
             accountLock.unlock();
         }
+    }
+
+    /**
+     * Refresh the active Minecraft session without invoking device-code login.
+     * Called immediately before a game launch as an additional freshness check.
+     */
+    public Account refreshCurrentAccount() throws Exception {
+        accountLock.lock();
+        try {
+            if (closed) {
+                throw new IllegalStateException("Account service is closed.");
+            }
+            if (currentAccount == null) {
+                return null;
+            }
+            Account refreshed = AuthManager.refreshSavedSession(currentAccount);
+            replaceAccount(refreshed);
+            setCurrentAccount(refreshed);
+            return refreshed;
+        } finally {
+            accountLock.unlock();
+        }
+    }
+
+    private synchronized void startSessionRefresh() {
+        if (closed || refreshTaskStarted) {
+            return;
+        }
+        refreshTaskStarted = true;
+        sessionRefresher.scheduleWithFixedDelay(() -> {
+            if (closed || currentAccount == null) {
+                return;
+            }
+            try {
+                refreshCurrentAccount();
+                System.out.println("Minecraft session refreshed in the background.");
+            } catch (Exception failure) {
+                // Background refresh must never launch interactive device-code login.
+                System.err.println("Background Minecraft session refresh failed: "
+                        + failure.getClass().getSimpleName() + ": "
+                        + (failure.getMessage() == null ? "No details" : failure.getMessage()));
+            }
+        }, SESSION_REFRESH_MINUTES, SESSION_REFRESH_MINUTES, TimeUnit.MINUTES);
+    }
+
+    @Override
+    public void close() {
+        closed = true;
+        sessionRefresher.shutdownNow();
     }
 
     // =============================================================
