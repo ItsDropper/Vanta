@@ -58,7 +58,7 @@ public final class CrashCaseRepository {
     private static final Pattern EMAIL = Pattern.compile(
             "(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b");
     private static final Pattern IPV6 = Pattern.compile(
-            "(?i)(?<![A-Za-z0-9])(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}(?![A-Za-z0-9])");
+            "(?i)(?<![A-Za-z0-9])(?=[0-9a-f:]*[a-f])(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}(?![A-Za-z0-9])");
     private static final Pattern MAC_ADDRESS = Pattern.compile(
             "(?i)\\b(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}\\b");
     private static final Pattern WINDOWS_PATH = Pattern.compile(
