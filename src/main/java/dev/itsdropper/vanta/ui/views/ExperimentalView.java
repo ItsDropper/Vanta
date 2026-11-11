@@ -119,21 +119,12 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         refreshSession.setDisable(true);
         authDetails.setText(Localization.text("experimental.auth.refreshing"));
         UiExecutor.shared().execute(() -> {
-            Exception failure = null;
             try {
                 accountService.refreshSessionNow();
-            } catch (Exception ex) {
-                failure = ex;
+            } catch (Exception failure) {
+                // AccountService publishes a typed, localized health state.
             }
-            Exception result = failure;
-            UiExecutor.shared().dispatchToUi(() -> {
-                refreshSession.setDisable(accountService.getCurrentAccount() == null);
-                if (result != null) {
-                    authDetails.setText(result.getMessage() == null
-                            ? result.getClass().getSimpleName() : result.getMessage());
-                }
-                refreshStatus();
-            });
+            UiExecutor.shared().dispatchToUi(this::refreshStatus);
         });
     }
 
