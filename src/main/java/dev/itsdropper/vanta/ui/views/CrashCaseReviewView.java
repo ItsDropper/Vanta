@@ -40,6 +40,8 @@ public final class CrashCaseReviewView extends VBox {
     private final Label status = new Label();
     private final Button confirm = new Button();
     private final Button reject = new Button();
+    private final Button correct = new Button();
+    private final Button reopen = new Button();
     private final Button export = new Button();
     private final Button exportFixes = new Button();
 
@@ -135,7 +137,13 @@ public final class CrashCaseReviewView extends VBox {
         reject.setText(Localization.text("crashCases.reject"));
         reject.getStyleClass().add("secondary-button");
         reject.setOnAction(event -> rejectSelected());
-        reviewRow.getChildren().addAll(category, confirm, reject);
+        correct.setText(Localization.text("crashCases.correct"));
+        correct.getStyleClass().add("secondary-button");
+        correct.setOnAction(event -> correctSelected());
+        reopen.setText(Localization.text("crashCases.reopen"));
+        reopen.getStyleClass().add("secondary-button");
+        reopen.setOnAction(event -> reopenSelected());
+        reviewRow.getChildren().addAll(category, confirm, reject, correct, reopen);
 
         Button importButton = new Button(Localization.text("crashCases.import"));
         importButton.getStyleClass().add("secondary-button");
@@ -151,6 +159,8 @@ public final class CrashCaseReviewView extends VBox {
         status.getStyleClass().add("muted");
         confirm.setDisable(true);
         reject.setDisable(true);
+        correct.setDisable(true);
+        reopen.setDisable(true);
         category.setDisable(true);
         verifiedFix.setEditable(false);
 
@@ -180,16 +190,19 @@ public final class CrashCaseReviewView extends VBox {
     private void updateReviewControls(CrashCaseRepository.CrashCase selected) {
         boolean pending = selected != null
                 && selected.status() == CrashCaseRepository.ReviewStatus.PENDING;
+        boolean confirmed = selected != null
+                && selected.status() == CrashCaseRepository.ReviewStatus.CONFIRMED;
+        boolean rejected = selected != null
+                && selected.status() == CrashCaseRepository.ReviewStatus.REJECTED;
         confirm.setDisable(!pending);
         reject.setDisable(!pending);
-        category.setDisable(!pending);
-        verifiedFix.setEditable(pending);
-        if (pending && selected.proposedCategory() != null
-                && selected.proposedCategory() != FailureCategory.UNKNOWN) {
-            category.setValue(selected.proposedCategory());
-        } else {
-            category.setValue(null);
-        }
+        correct.setDisable(!confirmed);
+        reopen.setDisable(!rejected);
+        category.setDisable(!(pending || confirmed));
+        verifiedFix.setEditable(pending || confirmed);
+        FailureCategory selectedCategory = pending ? selected.proposedCategory()
+                : confirmed ? selected.confirmedCategory() : null;
+        category.setValue(selectedCategory == FailureCategory.UNKNOWN ? null : selectedCategory);
     }
 
     private void confirmSelected() {
@@ -215,6 +228,34 @@ public final class CrashCaseReviewView extends VBox {
             repository.reject(selected.id());
             status.setText(Localization.text("crashCases.rejected"));
             refresh();
+        } catch (IOException | RuntimeException failure) {
+            showFailure(failure);
+        }
+    }
+
+    private void correctSelected() {
+        CrashCaseRepository.CrashCase selected = cases.getSelectionModel().getSelectedItem();
+        FailureCategory label = category.getValue();
+        if (selected == null || label == null) {
+            status.setText(Localization.text("crashCases.chooseCategory"));
+            return;
+        }
+        try {
+            repository.correctConfirmed(selected.id(), label, verifiedFix.getText());
+            status.setText(Localization.text("crashCases.corrected"));
+            refresh(selected.id());
+        } catch (IOException | RuntimeException failure) {
+            showFailure(failure);
+        }
+    }
+
+    private void reopenSelected() {
+        CrashCaseRepository.CrashCase selected = cases.getSelectionModel().getSelectedItem();
+        if (selected == null) return;
+        try {
+            repository.reopenRejected(selected.id());
+            status.setText(Localization.text("crashCases.reopened"));
+            refresh(selected.id());
         } catch (IOException | RuntimeException failure) {
             showFailure(failure);
         }
