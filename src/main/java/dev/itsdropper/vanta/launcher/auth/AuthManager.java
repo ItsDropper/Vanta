@@ -18,6 +18,9 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.net.http.HttpTimeoutException;
 import java.util.concurrent.TimeoutException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 
 public class AuthManager {
 
@@ -114,13 +117,11 @@ public class AuthManager {
     }
 
     public static boolean isRefreshTokenRejected(Throwable failure) {
-        for (Throwable current = failure; current != null; current = current.getCause()) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable current = failure; current != null && visited.add(current); current = current.getCause()) {
             if (current instanceof MsaRequestException msaFailure
                     && isRefreshTokenRejectedError(msaFailure.getError())) {
                 return true;
-            }
-            if (current.getCause() == current) {
-                break;
             }
         }
         return false;
@@ -131,7 +132,8 @@ public class AuthManager {
     }
 
     public static boolean isTransientFailure(Throwable failure) {
-        for (Throwable current = failure; current != null; current = current.getCause()) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable current = failure; current != null && visited.add(current); current = current.getCause()) {
             if (current instanceof InterruptedIOException
                     || current instanceof ConnectException
                     || current instanceof SocketException
@@ -140,8 +142,14 @@ public class AuthManager {
                     || current instanceof TimeoutException) {
                 return true;
             }
-            if (current.getCause() == current) {
-                break;
+            if (current instanceof MsaRequestException msaFailure) {
+                String error = msaFailure.getError();
+                if ("temporarily_unavailable".equalsIgnoreCase(error)
+                        || "server_error".equalsIgnoreCase(error)
+                        || "service_unavailable".equalsIgnoreCase(error)
+                        || "request_timeout".equalsIgnoreCase(error)) {
+                    return true;
+                }
             }
         }
         return false;
