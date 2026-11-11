@@ -157,6 +157,33 @@ class ModrinthInstallServiceIntegrationTest {
         assertNoTransactionArtifacts(instance);
     }
 
+
+    @Test
+    void cancellationDuringSecondArtifactRestoresEarlierGraphChanges() throws Exception {
+        Instance instance = instance();
+        AtomicInteger downloads = new AtomicInteger();
+        ModrinthInstallService installer = installer((url, destination) -> {
+            if (downloads.incrementAndGet() == 2) {
+                throw new InterruptedException("cancelled during dependency graph download");
+            }
+            Files.write(destination, modJar("first-mod", "1.0.0"));
+        });
+
+        assertThrows(InterruptedException.class, () ->
+                installer.installResolvedGraph(instance, List.of(
+                        new ModrinthService.ResolvedMod("first-project",
+                                version("first-project", "first-v1", "first.jar")),
+                        new ModrinthService.ResolvedMod("second-project",
+                                version("second-project", "second-v1", "second.jar"))
+                )));
+
+        assertTrue(InstalledModManager.load(instance).isEmpty());
+        Path mods = instanceDirectory.resolve("mods");
+        assertFalse(Files.exists(mods.resolve("first.jar")));
+        assertFalse(Files.exists(mods.resolve("second.jar")));
+        assertNoTransactionArtifacts(instance);
+    }
+
     private void assertNoTransactionArtifacts(Instance instance) throws IOException {
         try (var root = Files.list(instance.getDirectory())) {
             assertTrue(root.noneMatch(path -> path.getFileName().toString()
