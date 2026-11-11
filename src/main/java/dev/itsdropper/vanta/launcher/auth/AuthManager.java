@@ -4,12 +4,18 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
-
 import net.lenni0451.commons.httpclient.HttpClient;
 
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.account.AccountManager;
 import dev.itsdropper.vanta.ui.LoginPopup;
+
+import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.net.http.HttpTimeoutException;
+import java.util.concurrent.TimeoutException;
 
 public class AuthManager {
 
@@ -19,116 +25,81 @@ public class AuthManager {
                     .withScope("service::user.auth.xboxlive.com::MBI_SSL")
                     .deviceCode()
                     .withDeviceToken("Win32")
-                    .sisuTitleAuthentication(
-                            "rp://api.minecraftservices.com/"
-                    )
+                    .sisuTitleAuthentication("rp://api.minecraftservices.com/")
                     .buildMinecraftJavaProfileStep(true);
 
-    private static final HttpClient HTTP =
-            MinecraftAuth.createHttpClient();
+    private static final HttpClient HTTP = MinecraftAuth.createHttpClient();
 
-    // =============================================================
-    // LOGIN
-    // =============================================================
+    private AuthManager() {
+    }
 
-    public static Account login(
-            Account savedAccount
-    ) throws Exception {
-
-        /*
-         * Try to refresh the already-loaded account.
-         */
+    public static Account login(Account savedAccount) throws Exception {
         if (savedAccount != null) {
-
-            System.out.println(
-                    "Found saved Minecraft account."
-            );
-
-            System.out.println(
-                    "Refreshing authentication..."
-            );
-
+            final StepFullJavaSession.FullJavaSession refreshedSession;
             try {
+                refreshedSession = LOGIN.refresh(HTTP, savedAccount.getSession());
+            } catch (Exception refreshFailure) {
+                if (isTransientFailure(refreshFailure)) {
+                    // Do not turn a temporary outage into a device-code login loop.
+                    // Keep the saved credential untouched so the user can retry later.
+                    throw new IOException(
+                            "Microsoft authentication is temporarily unavailable. "
+                                    + "Check the connection and retry; the saved account was preserved.",
+                            refreshFailure
+                    );
+                }
+                // A non-transient refresh rejection (for example, revoked credentials)
+                // requires the normal interactive sign-in flow below.
+                System.err.println("Saved Minecraft authentication was rejected; interactive sign-in is required.");
+                refreshedSession = null;
+            }
 
-                System.out.println(
-                        "Starting authentication refresh request..."
-                );
-
-                StepFullJavaSession.FullJavaSession session =
-                        LOGIN.refresh(
-                                HTTP,
-                                savedAccount.getSession()
-                        );
-
-                System.out.println(
-                        "Authentication refresh request completed."
-                );
-
-                Account refreshedAccount =
-                        new Account(session);
-
-                AccountManager.saveAccount(
-                        refreshedAccount
-                );
-
-                System.out.println(
-                        "Logged in automatically as: "
-                                + refreshedAccount.getUsername()
-                );
-
+            if (refreshedSession != null) {
+                Account refreshedAccount = new Account(refreshedSession);
+                // Persistence errors are not authentication failures and must never
+                // trigger a second interactive login.
+                AccountManager.saveAccount(refreshedAccount);
+                System.out.println("Authenticated Minecraft account: " + refreshedAccount.getUsername());
                 return refreshedAccount;
-
-            } catch (Exception ex) {
-
-                System.out.println(
-                        "Saved authentication could not be refreshed."
-                );
-
-                System.out.println(
-                        "Starting Microsoft login again."
-                );
-
-                ex.printStackTrace();
             }
         }
 
-        // =========================================================
-        // MICROSOFT LOGIN
-        // =========================================================
+        StepFullJavaSession.FullJavaSession session;
+        try {
+            session = LOGIN.getFromInput(
+                    HTTP,
+                    new StepMsaDeviceCode.MsaDeviceCodeCallback(deviceCode -> {
+                        LoginPopup.show(
+                                deviceCode.getVerificationUri(),
+                                deviceCode.getUserCode()
+                        );
+                    })
+            );
+        } finally {
+            // Also close the popup when the user cancels or authentication fails.
+            LoginPopup.close();
+        }
 
-        StepFullJavaSession.FullJavaSession session =
-                LOGIN.getFromInput(
-                        HTTP,
-                        new StepMsaDeviceCode.MsaDeviceCodeCallback(
-                                deviceCode -> {
-
-                                    System.out.println(
-                                            "Verification URL: "
-                                                    + deviceCode.getVerificationUri()
-                                    );
-
-                                    LoginPopup.show(
-                                            deviceCode.getVerificationUri(),
-                                            deviceCode.getUserCode()
-                                    );
-                                }
-                        )
-                );
-
-        LoginPopup.close();
-
-        Account account =
-                new Account(session);
-
-        AccountManager.saveAccount(
-                account
-        );
-
-        System.out.println(
-                "Logged in as: "
-                        + account.getUsername()
-        );
-
+        Account account = new Account(session);
+        AccountManager.saveAccount(account);
+        System.out.println("Authenticated Minecraft account: " + account.getUsername());
         return account;
+    }
+
+    private static boolean isTransientFailure(Throwable failure) {
+        for (Throwable current = failure; current != null; current = current.getCause()) {
+            if (current instanceof IOException
+                    || current instanceof ConnectException
+                    || current instanceof SocketException
+                    || current instanceof UnknownHostException
+                    || current instanceof HttpTimeoutException
+                    || current instanceof TimeoutException) {
+                return true;
+            }
+            if (current.getCause() == current) {
+                break;
+            }
+        }
+        return false;
     }
 }
