@@ -169,7 +169,7 @@ final class ModrinthGraphInstallTransaction {
     }
 
     private static Path resolveTrackedPath(Path modsDirectory, String filename) throws IOException {
-        if (filename.indexOf('/') >= 0 || filename.indexOf('\\\\') >= 0) {
+        if (filename.indexOf('/') >= 0 || filename.indexOf('\\') >= 0) {
             throw new IOException("Installed-mod registry must contain a filename, not a path: " + filename);
         }
         Path supplied = Path.of(filename);
