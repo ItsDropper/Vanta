@@ -23,6 +23,8 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 
 import java.net.URL;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.List;
 
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
@@ -30,9 +32,38 @@ public class LoginPopup {
 
     private static Stage stage;
     private static Runnable onClosed;
+    private static final List<Runnable> closedListeners = new CopyOnWriteArrayList<>();
 
     public static void setOnClosed(Runnable callback) {
         onClosed = callback;
+    }
+
+    public static void addOnClosedListener(Runnable listener) {
+        if (listener != null) closedListeners.add(listener);
+    }
+
+    public static void removeOnClosedListener(Runnable listener) {
+        closedListeners.remove(listener);
+    }
+
+    private static void notifyClosed() {
+        Runnable callback = onClosed;
+        if (callback != null) {
+            try {
+                callback.run();
+            } catch (RuntimeException failure) {
+                System.err.println("[Vanta Auth] Login popup close listener failed: "
+                        + failure.getClass().getSimpleName());
+            }
+        }
+        for (Runnable listener : closedListeners) {
+            try {
+                listener.run();
+            } catch (RuntimeException failure) {
+                System.err.println("[Vanta Auth] Login cancellation listener failed: "
+                        + failure.getClass().getSimpleName());
+            }
+        }
     }
 
     public static void show(
@@ -398,9 +429,7 @@ public class LoginPopup {
                 if (stage == popupStage) {
                     stage = null;
                 }
-                if (onClosed != null) {
-                    onClosed.run();
-                }
+                notifyClosed();
             });
 
             popupStage.show();
