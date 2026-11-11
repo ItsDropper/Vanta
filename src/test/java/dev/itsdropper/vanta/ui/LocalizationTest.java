@@ -653,6 +653,7 @@ class LocalizationTest {
                 "experimental.performance.comparison.slower",
                 "experimental.performance.comparison.similar",
                 "experimental.performance.instance",
+                "experimental.performance.processStartup",
                 "sidebar.experimental",
                 "sidebar.experimental.description",
                 "serverManager.restartPrefix"
