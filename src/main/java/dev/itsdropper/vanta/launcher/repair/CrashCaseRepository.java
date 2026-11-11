@@ -21,6 +21,7 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -353,6 +354,7 @@ public final class CrashCaseRepository {
     }
 
     private List<CrashCase> readCases() throws IOException {
+        if (Files.isSymbolicLink(storeFile)) throw new IOException("Crash case store cannot be a symbolic link.");
         if (!Files.exists(storeFile)) return List.of();
         long size = Files.size(storeFile);
         if (size > MAX_STORE_BYTES) throw new IOException("Crash case store exceeds its safety limit.");
@@ -377,20 +379,27 @@ public final class CrashCaseRepository {
     }
 
     private void writeCases(List<CrashCase> cases) throws IOException {
+        if (Files.isSymbolicLink(storeFile)) throw new IOException("Crash case store cannot be a symbolic link.");
+        Files.createDirectories(storeFile.getParent());
+        restrictOwnerOnly(storeFile.getParent(), true);
         byte[] bytes = JSON.writerWithDefaultPrettyPrinter()
                 .writeValueAsBytes(new StoreDocument(SCHEMA_VERSION, cases));
         if (bytes.length > MAX_STORE_BYTES) throw new IOException("Crash case store reached its size limit.");
-        Files.createDirectories(storeFile.getParent());
         atomicWrite(storeFile, bytes);
     }
 
     private <T> T withLock(IoOperation<T> operation) throws IOException {
         Files.createDirectories(lockFile.getParent());
+        if (Files.isSymbolicLink(lockFile.getParent()) || Files.isSymbolicLink(lockFile)) {
+            throw new IOException("Crash case storage path cannot contain symbolic links.");
+        }
+        restrictOwnerOnly(lockFile.getParent(), true);
         ReentrantLock processLock = JVM_LOCKS.computeIfAbsent(lockFile, ignored -> new ReentrantLock());
         processLock.lock();
         try (FileChannel channel = FileChannel.open(lockFile,
                 StandardOpenOption.CREATE, StandardOpenOption.WRITE);
              FileLock ignored = channel.lock()) {
+            restrictOwnerOnly(lockFile, false);
             return operation.run();
         } finally {
             processLock.unlock();
@@ -400,6 +409,7 @@ public final class CrashCaseRepository {
     private static void atomicWrite(Path target, byte[] bytes) throws IOException {
         Path temporary = Files.createTempFile(target.getParent(), ".vanta-crash-case-", ".tmp");
         try {
+            restrictOwnerOnly(temporary, false);
             try (FileChannel channel = FileChannel.open(temporary,
                     StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
                 ByteBuffer buffer = ByteBuffer.wrap(bytes);
@@ -413,6 +423,22 @@ public final class CrashCaseRepository {
             }
         } finally {
             Files.deleteIfExists(temporary);
+        }
+    }
+
+    private static void restrictOwnerOnly(Path path, boolean directory) throws IOException {
+        Set<java.nio.file.attribute.PosixFilePermission> permissions = directory
+                ? Set.of(
+                        java.nio.file.attribute.PosixFilePermission.OWNER_READ,
+                        java.nio.file.attribute.PosixFilePermission.OWNER_WRITE,
+                        java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE)
+                : Set.of(
+                        java.nio.file.attribute.PosixFilePermission.OWNER_READ,
+                        java.nio.file.attribute.PosixFilePermission.OWNER_WRITE);
+        try {
+            Files.setPosixFilePermissions(path, permissions);
+        } catch (UnsupportedOperationException unsupported) {
+            // Windows ACLs inherit from the user's Vanta data directory.
         }
     }
 
