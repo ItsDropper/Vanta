@@ -34,7 +34,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import java.util.function.Consumer;
 
@@ -1558,6 +1560,32 @@ public class LauncherView {
         viewHost.show(new CrashCaseReviewView(() -> showPage(Sidebar.Page.HOME)));
     }
 
+    private List<CrashCaseRepository.VerifiedFix> findLocalFixReferences(
+            List<RepairView.RepairIssue> issues
+    ) {
+        try {
+            CrashCaseRepository repository = new CrashCaseRepository();
+            List<CrashCaseRepository.VerifiedFix> references = new ArrayList<>();
+            Set<String> seen = new HashSet<>();
+            for (RepairView.RepairIssue issue : issues) {
+                if (issue == null || issue.type() == null) continue;
+                FailureCategory category;
+                try {
+                    category = FailureCategory.valueOf(issue.type().trim().toUpperCase(java.util.Locale.ROOT));
+                } catch (IllegalArgumentException invalidCategory) {
+                    continue;
+                }
+                for (CrashCaseRepository.VerifiedFix fix : repository.findVerifiedFixes(category, 3)) {
+                    if (seen.add(fix.fingerprint())) references.add(fix);
+                }
+            }
+            return references.stream().limit(6).toList();
+        } catch (IOException failure) {
+            System.err.println("[Vanta Crash Review] Could not load local verified fixes: " + failure.getMessage());
+            return List.of();
+        }
+    }
+
     private void saveCrashCaseForReview(String log) {
         try {
             FailureCategory proposed = RepairDiagnosticEngine.diagnose(log).stream()
@@ -1676,7 +1704,8 @@ public class LauncherView {
                         ),
                         () -> restoreRepairMetadata(repairInstance),
                         () -> saveCrashCaseForReview(failure.details()),
-                        this::showCrashCaseReviewView
+                        this::showCrashCaseReviewView,
+                        findLocalFixReferences(repairIssues)
                 );
 
         viewHost.show(
