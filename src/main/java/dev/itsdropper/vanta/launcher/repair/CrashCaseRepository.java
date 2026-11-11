@@ -57,6 +57,10 @@ public final class CrashCaseRepository {
             "\\b(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)){3}\\b");
     private static final Pattern EMAIL = Pattern.compile(
             "(?i)\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}\\b");
+    private static final Pattern IPV6 = Pattern.compile(
+            "(?i)(?<![A-Za-z0-9])(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}(?![A-Za-z0-9])");
+    private static final Pattern MAC_ADDRESS = Pattern.compile(
+            "(?i)\\b(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}\\b");
     private static final Pattern WINDOWS_PATH = Pattern.compile(
             "(?i)\\b[A-Z]:\\\\(?:[^\\r\\n\\t\\\"<>|]+)");
     private static final Pattern UNIX_HOME = Pattern.compile(
@@ -250,6 +254,8 @@ public final class CrashCaseRepository {
         text = PRIVATE_LINE.matcher(text).replaceAll("[REDACTED_PRIVATE_FIELD]");
         text = UUID_VALUE.matcher(text).replaceAll("[REDACTED_UUID]");
         text = IPV4.matcher(text).replaceAll("[REDACTED_IP]");
+        text = IPV6.matcher(text).replaceAll("[REDACTED_IP]");
+        text = MAC_ADDRESS.matcher(text).replaceAll("[REDACTED_MAC]");
         text = EMAIL.matcher(text).replaceAll("[REDACTED_EMAIL]");
         text = WINDOWS_PATH.matcher(text).replaceAll("[REDACTED_PATH]");
         text = UNIX_HOME.matcher(text).replaceAll("[REDACTED_PATH]");
