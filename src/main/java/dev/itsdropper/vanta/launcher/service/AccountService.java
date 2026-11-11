@@ -263,6 +263,7 @@ public class AccountService implements AutoCloseable {
             try {
                 Account refreshed = AuthManager.login(account);
                 replaceAccount(refreshed);
+                maintenanceRetryAfterMillis = 0L;
                 setCurrentAccount(refreshed);
                 return refreshed;
             } catch (Exception failure) {
@@ -304,6 +305,7 @@ public class AccountService implements AutoCloseable {
                 Account refreshed = AuthManager.refresh(account);
                 replaceAccount(refreshed);
                 maintenancePausedAccountId = null;
+                maintenanceRetryAfterMillis = 0L;
                 // Token rotation preserves account identity. Do not notify UI
                 // listeners from the background maintenance thread.
                 currentAccount = refreshed;
