@@ -58,6 +58,9 @@ final class ModrinthGraphInstallTransaction {
         }
 
         Path root = instance.getDirectory().toAbsolutePath().normalize();
+        if (Files.isSymbolicLink(root) || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Instance directory must be an existing, non-symbolic-link directory.");
+        }
         LockEntry entry = INSTANCE_LOCKS.compute(root, (ignored, existing) -> {
             LockEntry selected = existing == null ? new LockEntry() : existing;
             selected.users++;
@@ -70,7 +73,7 @@ final class ModrinthGraphInstallTransaction {
                 throw new IOException("Refusing to use a symbolic-link Modrinth transaction lock.");
             }
             try (FileChannel channel = FileChannel.open(lockPath,
-                    StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                    StandardOpenOption.CREATE, StandardOpenOption.WRITE, LinkOption.NOFOLLOW_LINKS);
                  FileLock ignored = channel.lock()) {
                 recoverPendingTransactions(instance, root);
                 return executeLocked(instance, operation, root);
@@ -262,14 +265,6 @@ final class ModrinthGraphInstallTransaction {
             Set<String> outputsToRemove = new HashSet<>();
             for (int i = 0; i < managedCount; i++) {
                 outputsToRemove.add(required(journal, "managed." + i));
-            }
-            // The registry is itself atomically replaced. It therefore also
-            // identifies any completed outputs if an older code path or a
-            // failed intent write reached registry publication.
-            for (InstalledModRecord record : InstalledModManager.load(instance)) {
-                if (record != null && record.getFilename() != null && !record.getFilename().isBlank()) {
-                    outputsToRemove.add(record.getFilename());
-                }
             }
             for (String filename : outputsToRemove) {
                 Path managed = resolveTrackedPath(mods, filename);
