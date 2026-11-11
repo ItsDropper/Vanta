@@ -29,6 +29,7 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     private final Label authDetails = new Label();
     private final Label lastRefresh = new Label();
     private final Label cacheStats = new Label();
+    private final Label measuredInstance = new Label();
     private final Label baselineStats = new Label();
     private final Label optimizedStats = new Label();
     private final Label vanillaStats = new Label();
@@ -88,13 +89,14 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
             refreshMetrics();
         });
         cacheStats.getStyleClass().add("muted");
+        measuredInstance.setWrapText(true);
         baselineStats.setWrapText(true);
         optimizedStats.setWrapText(true);
         vanillaStats.setWrapText(true);
         comparisonStats.setWrapText(true);
         performanceCard.getChildren().addAll(
                 performanceTitle, explanation, benchmarkMethod, cacheEnabled, cacheStats,
-                baselineStats, optimizedStats, comparisonStats, vanillaStats, clearCache, resetSamples
+                measuredInstance, baselineStats, optimizedStats, comparisonStats, vanillaStats, clearCache, resetSamples
         );
 
         getChildren().addAll(eyebrow, title, intro, authCard, performanceCard);
@@ -146,8 +148,10 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         ClasspathBuilder.CacheStats stats = ClasspathBuilder.getCacheStats();
         cacheStats.setText(Localization.text("experimental.performance.cacheStats")
                 .formatted(stats.hits(), stats.misses(), stats.entries()));
-        LaunchPerformanceTracker.Summary modded = LaunchPerformanceTracker.summary(true);
-        LaunchPerformanceTracker.Summary vanilla = LaunchPerformanceTracker.summary(false);
+        LaunchPerformanceTracker.Summary modded = LaunchPerformanceTracker.summaryForMostRecent(true);
+        LaunchPerformanceTracker.Summary vanilla = LaunchPerformanceTracker.summaryForMostRecent(false);
+        measuredInstance.setText(modded.instanceName() == null ? "" : Localization.text("experimental.performance.instance")
+                .formatted(modded.instanceName(), modded.loader()));
         baselineStats.setText(Localization.text("experimental.performance.baseline")
                 .formatted(format(modded.baselineMedianMillis(), modded.baselineSamples())));
         optimizedStats.setText(Localization.text("experimental.performance.optimized")
