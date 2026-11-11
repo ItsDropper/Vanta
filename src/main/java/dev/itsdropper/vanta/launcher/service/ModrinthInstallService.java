@@ -47,14 +47,8 @@ public Path installMod(
             );
         }
 
-        Set<String> resolvingProjects =
-                new HashSet<>();
-
-        return installModProject(
-                instance,
-                project.getProjectId(),
-                resolvingProjects
-        );
+        return ModrinthGraphInstallTransaction.execute(instance, () ->
+                installModProject(instance, project.getProjectId(), new HashSet<>()));
     }
 
 public Path installModVersion(
@@ -67,12 +61,8 @@ public Path installModVersion(
             throw new IllegalArgumentException("Invalid mod version installation request.");
         }
 
-        return installModVersion(
-                instance,
-                projectId,
-                version,
-                new HashSet<>()
-        );
+        return ModrinthGraphInstallTransaction.execute(instance, () ->
+                installModVersion(instance, projectId, version, new HashSet<>()));
     }
 
 public List<Path> installResolvedGraph(
