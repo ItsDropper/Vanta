@@ -316,6 +316,29 @@ class ModrinthGraphInstallTransactionTest {
         }
     }
 
+
+    @Test
+    void nestedInstallOperationsJoinTheOuterTransactionAndRollbackTogether() throws Exception {
+        Instance instance = instance();
+        Path mods = temporaryDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path nestedArtifact = mods.resolve("nested.jar");
+
+        assertThrows(IOException.class, () ->
+                ModrinthGraphInstallTransaction.execute(instance, () -> {
+                    ModrinthGraphInstallTransaction.execute(instance, () -> {
+                        ModrinthGraphInstallTransaction.registerManagedPath(instance, nestedArtifact);
+                        Files.writeString(nestedArtifact, "nested install");
+                        return null;
+                    });
+                    throw new IOException("outer repair failed after nested install");
+                }));
+
+        assertFalse(Files.exists(nestedArtifact),
+                "A nested install must be rolled back with its outer repair transaction.");
+        assertNoTransactionDirectories();
+    }
+
     private void assertNoTransactionDirectories() throws IOException {
         try (var entries = Files.list(temporaryDirectory)) {
             assertTrue(entries.noneMatch(path ->
