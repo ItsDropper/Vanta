@@ -34,6 +34,23 @@ public class AuthManager {
     private AuthManager() {
     }
 
+    /**
+     * Refreshes an existing session without opening an interactive login flow.
+     * MinecraftAuth refreshes only expired token-chain steps; the Minecraft
+     * profile is revalidated as part of its full-session refresh.
+     */
+    public static Account refresh(Account account) throws Exception {
+        if (account == null || account.getSession() == null) {
+            throw new IllegalArgumentException("A saved Minecraft session is required to refresh.");
+        }
+
+        StepFullJavaSession.FullJavaSession session =
+                LOGIN.refresh(HTTP, account.getSession());
+        Account refreshedAccount = new Account(session);
+        AccountManager.saveAccount(refreshedAccount);
+        return refreshedAccount;
+    }
+
     public static Account login(Account savedAccount) throws Exception {
         if (savedAccount != null) {
             final StepFullJavaSession.FullJavaSession refreshedSession;
