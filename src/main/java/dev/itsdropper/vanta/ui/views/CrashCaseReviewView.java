@@ -143,7 +143,8 @@ public final class CrashCaseReviewView extends VBox {
         reopen.setText(Localization.text("crashCases.reopen"));
         reopen.getStyleClass().add("secondary-button");
         reopen.setOnAction(event -> reopenSelected());
-        reviewRow.getChildren().addAll(category, confirm, reject, correct, reopen);
+        reviewRow.getChildren().addAll(category, confirm, reject);
+        HBox correctionRow = new HBox(8, correct, reopen);
 
         Button importButton = new Button(Localization.text("crashCases.import"));
         importButton.getStyleClass().add("secondary-button");
