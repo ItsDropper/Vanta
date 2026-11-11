@@ -53,6 +53,15 @@ class RepairDiagnosticEngineTest {
     }
 
     @Test
+    void labelledCaseModelAddsAdvisoryDiagnosisForUnmatchedSignatures() {
+        var diagnoses = RepairDiagnosticEngine.diagnose(
+                "org.spongepowered.asm.mixin.transformer.throwables.MixinApplyError: critical injection failure");
+        assertTrue(diagnoses.stream().anyMatch(d ->
+                d.category() == FailureCategory.MOD_MIXIN_FAILURE
+                        && d.confidence() == RepairConfidence.AMBIGUOUS));
+    }
+
+    @Test
     void normalStartupMessagesDoNotBecomeRepairFailures() {
         var diagnoses = RepairDiagnosticEngine.diagnose(
                 "Loading Minecraft 1.21.11 with Fabric Loader 0.19.5\n"
