@@ -65,7 +65,7 @@ public class Sidebar extends VBox {
 
         public static Page fromShortcutNumber(int shortcutNumber) {
             for (Page page : values()) {
-                if (page.shortcutNumber == shortcutNumber) {
+                if (page.shortcutNumber > 0 && page.shortcutNumber == shortcutNumber) {
                     return page;
                 }
             }
