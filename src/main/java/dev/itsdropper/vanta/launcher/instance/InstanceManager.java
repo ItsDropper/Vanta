@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
+import dev.itsdropper.vanta.launcher.service.ModrinthInstallService;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.io.IOException;
@@ -82,6 +83,9 @@ public class InstanceManager {
                                             Instance.class
                                     );
 
+                            // Recover an interrupted Modrinth graph before the
+                            // instance is made available for launch or browsing.
+                            ModrinthInstallService.recoverPendingTransactions(instance);
                             instances.add(instance);
 
                         } catch (Exception e) {
