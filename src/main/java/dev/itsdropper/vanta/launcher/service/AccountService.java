@@ -16,6 +16,16 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class AccountService implements AutoCloseable {
 
+    public enum SessionHealth {
+        NO_ACCOUNT, AUTHENTICATING, REFRESHING, READY, RETRY_WAIT,
+        SIGN_IN_REQUIRED, ERROR, CLOSED
+    }
+
+    private volatile SessionHealth sessionHealth = SessionHealth.NO_ACCOUNT;
+    private volatile String sessionHealthMessage = "No Minecraft account is selected.";
+    private volatile long lastSuccessfulRefreshAt;
+    private final List<Runnable> sessionHealthListeners = new CopyOnWriteArrayList<>();
+
     private volatile Account currentAccount;
 
     private final List<Account> accounts =
@@ -55,6 +65,7 @@ public class AccountService implements AutoCloseable {
             if (accounts.isEmpty()) {
 
                 setCurrentAccount(null);
+                setSessionHealth(SessionHealth.NO_ACCOUNT, "No Minecraft account is saved.");
 
                 return null;
             }
@@ -94,10 +105,14 @@ public class AccountService implements AutoCloseable {
             /*
              * Refresh only the active account.
              */
-            Account refreshedAccount =
-                    AuthManager.login(
-                            activeAccount
-                    );
+            setSessionHealth(SessionHealth.REFRESHING, "Refreshing the saved Microsoft session.");
+            Account refreshedAccount;
+            try {
+                refreshedAccount = AuthManager.login(activeAccount);
+            } catch (Exception failure) {
+                updateHealthForFailure(failure);
+                throw failure;
+            }
 
             replaceAccount(
                     refreshedAccount
@@ -108,6 +123,8 @@ public class AccountService implements AutoCloseable {
             setCurrentAccount(
                     refreshedAccount
             );
+            lastSuccessfulRefreshAt = System.currentTimeMillis();
+            setSessionHealth(SessionHealth.READY, "Minecraft session is ready.");
             startSessionMaintenance();
 
             return refreshedAccount;
@@ -132,8 +149,14 @@ public class AccountService implements AutoCloseable {
              * AuthManager.login(null) starts
              * Microsoft device-code authentication.
              */
-            Account account =
-                    AuthManager.login(null);
+            setSessionHealth(SessionHealth.AUTHENTICATING, "Waiting for Microsoft sign-in.");
+            Account account;
+            try {
+                account = AuthManager.login(null);
+            } catch (Exception failure) {
+                updateHealthForFailure(failure);
+                throw failure;
+            }
 
             /*
              * Persist the active selection before publishing it in memory.
@@ -146,6 +169,8 @@ public class AccountService implements AutoCloseable {
             maintenancePausedAccountId = null;
             maintenanceRetryAfterMillis = 0L;
             setCurrentAccount(account);
+            lastSuccessfulRefreshAt = System.currentTimeMillis();
+            setSessionHealth(SessionHealth.READY, "Minecraft session is ready.");
             startSessionMaintenance();
 
             return account;
@@ -185,10 +210,14 @@ public class AccountService implements AutoCloseable {
              * Only make the account active after
              * authentication succeeds.
              */
-            Account refreshedAccount =
-                    AuthManager.login(
-                            account
-                    );
+            setSessionHealth(SessionHealth.REFRESHING, "Refreshing the selected Microsoft account.");
+            Account refreshedAccount;
+            try {
+                refreshedAccount = AuthManager.login(account);
+            } catch (Exception failure) {
+                updateHealthForFailure(failure);
+                throw failure;
+            }
 
             AccountManager.setActiveAccount(
                     refreshedAccount.getUuid()
@@ -200,6 +229,8 @@ public class AccountService implements AutoCloseable {
             setCurrentAccount(
                     refreshedAccount
             );
+            lastSuccessfulRefreshAt = System.currentTimeMillis();
+            setSessionHealth(SessionHealth.READY, "Minecraft session is ready.");
             startSessionMaintenance();
 
         } finally {
@@ -256,23 +287,22 @@ public class AccountService implements AutoCloseable {
                 );
             }
             if (!isSessionRefreshDue(account)) {
+                setSessionHealth(SessionHealth.READY, "Minecraft session is valid.");
                 return account;
             }
 
             maintenancePausedAccountId = null;
+            setSessionHealth(SessionHealth.REFRESHING, "Refreshing Minecraft credentials before launch.");
             try {
                 Account refreshed = AuthManager.login(account);
                 replaceAccount(refreshed);
                 maintenanceRetryAfterMillis = 0L;
+                lastSuccessfulRefreshAt = System.currentTimeMillis();
                 setCurrentAccount(refreshed);
+                setSessionHealth(SessionHealth.READY, "Minecraft session refreshed successfully.");
                 return refreshed;
             } catch (Exception failure) {
-                if (AuthManager.isRefreshTokenRejected(failure)) {
-                    maintenancePausedAccountId = account.getUuid();
-                } else {
-                    maintenanceRetryAfterMillis = System.currentTimeMillis()
-                            + TimeUnit.MINUTES.toMillis(5);
-                }
+                updateHealthForFailure(failure);
                 throw failure;
             }
         } finally {
@@ -301,6 +331,7 @@ public class AccountService implements AutoCloseable {
                     || !isSessionRefreshDue(account)) {
                 return;
             }
+            setSessionHealth(SessionHealth.REFRESHING, "Refreshing the active Minecraft session.");
             try {
                 Account refreshed = AuthManager.refresh(account);
                 replaceAccount(refreshed);
@@ -309,21 +340,15 @@ public class AccountService implements AutoCloseable {
                 // Token rotation preserves account identity. Do not notify UI
                 // listeners from the background maintenance thread.
                 currentAccount = refreshed;
+                lastSuccessfulRefreshAt = System.currentTimeMillis();
+                setSessionHealth(SessionHealth.READY, "Minecraft session refreshed successfully.");
                 System.out.println("[Vanta Auth] Active Minecraft session refreshed.");
             } catch (Exception failure) {
                 // Avoid repeated requests after a rejected refresh. A launch
                 // or explicit refresh is the next retry point.
-                if (AuthManager.isRefreshTokenRejected(failure)) {
-                    maintenancePausedAccountId = account.getUuid();
-                    System.err.println("[Vanta Auth] The saved refresh token was rejected; "
-                            + "sign-in is required before this account can refresh again.");
-                } else {
-                    // Transient outages and unknown service failures use bounded
-                    // retry backoff instead of permanently disabling maintenance.
-                    maintenanceRetryAfterMillis = System.currentTimeMillis()
-                            + TimeUnit.MINUTES.toMillis(5);
-                    System.err.println("[Vanta Auth] Background refresh failed; retrying in five minutes.");
-                }
+                updateHealthForFailure(failure);
+                System.err.println("[Vanta Auth] Background refresh failed: "
+                        + failure.getClass().getSimpleName());
             }
         } finally {
             accountLock.unlock();
@@ -346,6 +371,85 @@ public class AccountService implements AutoCloseable {
             maintenanceTask.cancel(true);
         }
         sessionMaintenance.shutdownNow();
+        setSessionHealth(SessionHealth.CLOSED, "Authentication maintenance has stopped.");
+    }
+
+
+    public SessionHealth getSessionHealth() {
+        return sessionHealth;
+    }
+
+    public String getSessionHealthMessage() {
+        return sessionHealthMessage;
+    }
+
+    public long getLastSuccessfulRefreshAt() {
+        return lastSuccessfulRefreshAt;
+    }
+
+    public void addSessionHealthListener(Runnable listener) {
+        if (listener == null) return;
+        sessionHealthListeners.add(listener);
+        listener.run();
+    }
+
+    public void removeSessionHealthListener(Runnable listener) {
+        sessionHealthListeners.remove(listener);
+    }
+
+    public Account refreshSessionNow() throws Exception {
+        accountLock.lock();
+        try {
+            if (closed) throw new IllegalStateException("Account service is closed.");
+            Account account = currentAccount;
+            if (account == null) throw new IllegalStateException("No active Minecraft account is available.");
+            setSessionHealth(SessionHealth.REFRESHING, "Refreshing Minecraft credentials on request.");
+            try {
+                Account refreshed = AuthManager.refresh(account);
+                replaceAccount(refreshed);
+                currentAccount = refreshed;
+                maintenancePausedAccountId = null;
+                maintenanceRetryAfterMillis = 0L;
+                lastSuccessfulRefreshAt = System.currentTimeMillis();
+                setSessionHealth(SessionHealth.READY, "Minecraft session refreshed successfully.");
+                return refreshed;
+            } catch (Exception failure) {
+                updateHealthForFailure(failure);
+                throw failure;
+            }
+        } finally {
+            accountLock.unlock();
+        }
+    }
+
+    private void updateHealthForFailure(Throwable failure) {
+        if (AuthManager.isRefreshTokenRejected(failure)) {
+            Account account = currentAccount;
+            maintenancePausedAccountId = account == null ? null : account.getUuid();
+            setSessionHealth(SessionHealth.SIGN_IN_REQUIRED,
+                    "Microsoft rejected the saved refresh token. Sign in to restore this account.");
+        } else if (AuthManager.isTransientFailure(failure)) {
+            maintenanceRetryAfterMillis = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+            setSessionHealth(SessionHealth.RETRY_WAIT,
+                    "Microsoft authentication is temporarily unavailable. Vanta will retry automatically.");
+        } else {
+            maintenanceRetryAfterMillis = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
+            setSessionHealth(SessionHealth.ERROR,
+                    "Vanta could not refresh this session. The saved account was preserved.");
+        }
+    }
+
+    private void setSessionHealth(SessionHealth health, String message) {
+        sessionHealth = health;
+        sessionHealthMessage = message;
+        for (Runnable listener : sessionHealthListeners) {
+            try {
+                listener.run();
+            } catch (RuntimeException failure) {
+                System.err.println("[Vanta Auth] Session status listener failed: "
+                        + failure.getClass().getSimpleName());
+            }
+        }
     }
 
     // =============================================================
