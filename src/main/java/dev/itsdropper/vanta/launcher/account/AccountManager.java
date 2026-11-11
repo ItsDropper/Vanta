@@ -200,11 +200,12 @@ public class AccountManager {
     public static String getActiveAccountId()
             throws IOException {
 
-        if (!Files.exists(
-                ACTIVE_ACCOUNT_FILE
-        )) {
-
+        if (!Files.exists(ACTIVE_ACCOUNT_FILE, LinkOption.NOFOLLOW_LINKS)) {
             return null;
+        }
+        if (Files.isSymbolicLink(ACTIVE_ACCOUNT_FILE)
+                || !Files.isRegularFile(ACTIVE_ACCOUNT_FILE, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Active-account storage is not a regular file.");
         }
 
         String uuid =
@@ -250,10 +251,9 @@ public class AccountManager {
             return;
         }
 
-        JsonObject storedAccount = JsonParser.parseString(
-                Files.readString(file, StandardCharsets.UTF_8)).getAsJsonObject();
-        if (storedAccount.has("encryptedSession")) {
-            CredentialManager.delete(storedAccount.get("encryptedSession").getAsString());
+        String credentialReference = readCredentialReference(file);
+        if (credentialReference != null) {
+            CredentialManager.delete(credentialReference);
         }
         Files.delete(file);
 
@@ -284,39 +284,48 @@ public class AccountManager {
     public static void clearAccounts()
             throws IOException {
 
-        if (Files.exists(
-                ACCOUNTS_DIRECTORY
-        )) {
+        if (Files.exists(ACCOUNTS_DIRECTORY, LinkOption.NOFOLLOW_LINKS)) {
+            if (Files.isSymbolicLink(ACCOUNTS_DIRECTORY)
+                    || !Files.isDirectory(ACCOUNTS_DIRECTORY, LinkOption.NOFOLLOW_LINKS)) {
+                throw new IOException("Account storage directory is not a real directory.");
+            }
 
-            try (var stream =
-                         Files.list(
-                                 ACCOUNTS_DIRECTORY
-                         )) {
+            List<Path> accountFiles;
+            try (var stream = Files.list(ACCOUNTS_DIRECTORY)) {
+                accountFiles = stream
+                        .filter(path -> path.getFileName().toString().endsWith(".json"))
+                        .toList();
+            }
 
-                stream
-                        .filter(path ->
-                                path.getFileName()
-                                        .toString()
-                                        .endsWith(".json")
-                        )
-                        .forEach(path -> {
-                            try {
-                                JsonObject stored = JsonParser.parseString(
-                                        Files.readString(path, StandardCharsets.UTF_8)).getAsJsonObject();
-                                if (stored.has("encryptedSession")) {
-                                    CredentialManager.delete(stored.get("encryptedSession").getAsString());
-                                }
-                                Files.deleteIfExists(path);
-                            } catch (IOException e) {
-                                throw new RuntimeException(e);
-                            }
-                        });
+            for (Path file : accountFiles) {
+                String credentialReference = readCredentialReference(file);
+                if (credentialReference != null) {
+                    CredentialManager.delete(credentialReference);
+                }
+                Files.deleteIfExists(file);
             }
         }
 
-        Files.deleteIfExists(
-                ACTIVE_ACCOUNT_FILE
-        );
+        Files.deleteIfExists(ACTIVE_ACCOUNT_FILE);
+    }
+
+    private static String readCredentialReference(Path file) throws IOException {
+        if (Files.isSymbolicLink(file)
+                || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Account storage entry is not a regular file: " + file.getFileName());
+        }
+
+        try {
+            JsonObject stored = JsonParser.parseString(
+                    Files.readString(file, StandardCharsets.UTF_8)).getAsJsonObject();
+            if (!stored.has("encryptedSession") || !stored.get("encryptedSession").isJsonPrimitive()
+                    || !stored.getAsJsonPrimitive("encryptedSession").isString()) {
+                throw new IOException("Account file has no valid credential reference: " + file.getFileName());
+            }
+            return stored.get("encryptedSession").getAsString();
+        } catch (com.google.gson.JsonParseException | IllegalStateException malformed) {
+            throw new IOException("Account file is malformed: " + file.getFileName(), malformed);
+        }
     }
 
     // =============================================================
