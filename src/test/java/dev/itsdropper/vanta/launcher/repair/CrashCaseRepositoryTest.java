@@ -6,7 +6,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -76,6 +75,40 @@ class CrashCaseRepositoryTest {
         Path corrupt = temporaryDirectory.resolve("corrupt.json");
         Files.writeString(corrupt, "{not-json");
         assertThrows(IOException.class, () -> new CrashCaseRepository(corrupt).listCases());
+    }
+
+    @Test
+    void concurrentRepositoryInstancesDoNotLoseUpdates() throws Exception {
+        Path store = temporaryDirectory.resolve("concurrent.json");
+        var workers = java.util.concurrent.Executors.newFixedThreadPool(8);
+        try {
+            List<java.util.concurrent.Future<?>> writes = new java.util.ArrayList<>();
+            for (int i = 0; i < 48; i++) {
+                int index = i;
+                writes.add(workers.submit(() -> {
+                    try {
+                        new CrashCaseRepository(store).recordForReview(
+                                "java.lang.IllegalStateException: distinct failure case " + index, null);
+                    } catch (IOException failure) {
+                        throw new java.util.concurrent.CompletionException(failure);
+                    }
+                }));
+            }
+            for (var write : writes) write.get();
+            assertEquals(48, new CrashCaseRepository(store).listCases().size());
+        } finally {
+            workers.shutdownNow();
+        }
+    }
+
+    @Test
+    void exportCannotOverwriteItsOwnReviewDatabase() throws Exception {
+        Path store = temporaryDirectory.resolve("cases.json");
+        CrashCaseRepository repository = new CrashCaseRepository(store);
+        var item = repository.recordForReview("java.lang.IllegalStateException: broken", null);
+        repository.confirm(item.id(), FailureCategory.MOD_CRASH);
+        assertThrows(IOException.class, () -> repository.exportConfirmedCorpus(store));
+        assertEquals(1, repository.listCases().size());
     }
 
     @Test
