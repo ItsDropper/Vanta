@@ -1575,12 +1575,8 @@ public class LauncherView {
             Set<String> seen = new HashSet<>();
             for (RepairView.RepairIssue issue : issues) {
                 if (issue == null || issue.type() == null) continue;
-                FailureCategory category;
-                try {
-                    category = FailureCategory.valueOf(issue.type().trim().toUpperCase(java.util.Locale.ROOT));
-                } catch (IllegalArgumentException invalidCategory) {
-                    continue;
-                }
+                FailureCategory category = FailureCategory.fromRepairType(issue.type());
+                if (category == FailureCategory.UNKNOWN) continue;
                 for (CrashCaseRepository.VerifiedFix fix : repository.findVerifiedFixes(category, 3)) {
                     if (seen.add(fix.fingerprint())) references.add(fix);
                 }
