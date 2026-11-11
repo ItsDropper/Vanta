@@ -33,7 +33,7 @@ public class Sidebar extends VBox {
         SETTINGS("Settings", 7, IconView.Type.SETTINGS, "Configure Vanta and its runtime"),
         DOWNLOADS("Download Center", 8, IconView.Type.DOWNLOAD, "Review active and completed downloads"),
         SERVERS("Server Manager", 9, IconView.Type.TERMINAL, "Manage and connect to Minecraft servers"),
-        EXPERIMENTAL("Experimental", 0, IconView.Type.EXPERIMENTAL, "Test opt-in performance and authentication experiments");
+        EXPERIMENTAL(Localization.text("sidebar.experimental"), 0, IconView.Type.EXPERIMENTAL, Localization.text("sidebar.experimental.description"));
 
         private final String title;
         private final int shortcutNumber;
