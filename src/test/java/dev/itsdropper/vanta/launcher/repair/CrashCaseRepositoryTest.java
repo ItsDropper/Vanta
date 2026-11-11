@@ -70,6 +70,22 @@ class CrashCaseRepositoryTest {
     }
 
     @Test
+    void verifiedFixLookupIsCategoryScopedAndBounded() throws Exception {
+        CrashCaseRepository repository = new CrashCaseRepository(temporaryDirectory.resolve("cases.json"));
+        var modCrash = repository.recordForReview("java.lang.IllegalStateException: mod startup crash", null);
+        var mixin = repository.recordForReview("org.spongepowered.asm.mixin.MixinApplyError: target mismatch", null);
+        repository.confirm(modCrash.id(), FailureCategory.MOD_CRASH, "Remove the incompatible mod.");
+        repository.confirm(mixin.id(), FailureCategory.MOD_MIXIN_FAILURE, "Update the mod targeting the changed method.");
+
+        var results = repository.findVerifiedFixes(FailureCategory.MOD_CRASH, 100);
+        assertEquals(1, results.size());
+        assertEquals(FailureCategory.MOD_CRASH, results.getFirst().category());
+        assertEquals("Remove the incompatible mod.", results.getFirst().verifiedFix());
+        assertTrue(repository.findVerifiedFixes(FailureCategory.UNKNOWN, 10).isEmpty());
+        assertTrue(repository.findVerifiedFixes(FailureCategory.MOD_CRASH, 0).isEmpty());
+    }
+
+    @Test
     void readsPreviousStoreSchemaAndUpgradesOnNextWrite() throws Exception {
         Path store = temporaryDirectory.resolve("cases.json");
         String legacy = """
