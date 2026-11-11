@@ -181,6 +181,7 @@ public class AccountService implements AutoCloseable {
             /*
              * Persist the active selection before publishing it in memory.
              */
+            replaceAccount(account);
             try {
                 AccountManager.setActiveAccount(account.getUuid());
             } catch (IOException failure) {
@@ -189,7 +190,6 @@ public class AccountService implements AutoCloseable {
                 throw failure;
             }
 
-            replaceAccount(account);
             maintenancePausedAccountId = null;
             maintenanceRetryAfterMillis = 0L;
             setCurrentAccount(account);
