@@ -189,6 +189,45 @@ class ModrinthInstallServiceIntegrationTest {
         assertNoTransactionArtifacts(instance);
     }
 
+
+    @Test
+    void registryUpdateFailureAfterArtifactPublishRestoresOldArtifactAndRegistry() throws Exception {
+        Instance instance = instance();
+        Path mods = instanceDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path oldJar = mods.resolve("example-old.jar");
+        Files.write(oldJar, modJar("example", "1.0.0"));
+        InstalledModManager.save(instance, List.of(new InstalledModRecord(
+                "example-project", "v1", "example", "1.0.0", "example-old.jar")));
+        Path registry = instanceDirectory.resolve("vanta-mods.json");
+        String originalRegistry = Files.readString(registry);
+
+        ModrinthInstallService installer = installer((url, destination) ->
+                Files.write(destination, modJar("example", "2.0.0")));
+
+        IOException failure = assertThrows(IOException.class, () ->
+                installer.installResolvedGraph(instance, List.of(
+                        new ModrinthService.ResolvedMod("example-project",
+                                version("example-project", "v2", "example-new.jar"))
+                ), progress -> {
+                    if (progress.startsWith("Validating ")) {
+                        try {
+                            Files.writeString(registry, "{ invalid registry");
+                        } catch (IOException writeFailure) {
+                            throw new IllegalStateException(writeFailure);
+                        }
+                    }
+                }));
+
+        assertNotNull(failure);
+        assertTrue(Files.isRegularFile(oldJar));
+        assertEquals("example", new InstalledModScanner().scanFile(oldJar).getModId());
+        assertFalse(Files.exists(mods.resolve("example-new.jar")));
+        assertEquals(originalRegistry, Files.readString(registry));
+        assertEquals("v1", InstalledModManager.findByProjectId(instance, "example-project").getVersionId());
+        assertNoTransactionArtifacts(instance);
+    }
+
     private void assertNoTransactionArtifacts(Instance instance) throws IOException {
         try (var root = Files.list(instance.getDirectory())) {
             assertTrue(root.noneMatch(path -> path.getFileName().toString()
