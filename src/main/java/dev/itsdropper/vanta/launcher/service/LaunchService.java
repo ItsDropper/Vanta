@@ -10,6 +10,7 @@ import dev.itsdropper.vanta.launcher.repair.RepairDiagnosis;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine;
 import dev.itsdropper.vanta.ui.views.RepairView;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
+import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -192,11 +193,7 @@ public class LaunchService {
             LaunchData launchData;
 
             try {
-                launchData =
-                        LaunchDataBuilder.build(
-                                instance,
-                                server
-                        );
+                launchData = buildLaunchData(instance, server);
             } catch (Exception buildFailure) {
                 /*
                  * A launch can fail before Minecraft even starts when
@@ -752,6 +749,17 @@ public class LaunchService {
     // =============================================================
     // PROCESS MONITOR
     // =============================================================
+
+    private LaunchData buildLaunchData(Instance instance, ServerTarget server) {
+        long started = System.nanoTime();
+        LaunchData data = LaunchDataBuilder.build(instance, server);
+        LaunchPerformanceTracker.record(
+                instance,
+                LauncherSettings.isExperimentalLaunchCacheEnabled(),
+                System.nanoTime() - started
+        );
+        return data;
+    }
 
     private Set<String> snapshotCrashReports(Path instanceDirectory) {
         if (instanceDirectory == null) {
