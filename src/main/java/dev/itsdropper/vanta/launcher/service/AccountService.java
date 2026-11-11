@@ -426,6 +426,10 @@ public class AccountService implements AutoCloseable {
     }
 
     private void updateHealthForFailure(Throwable failure) {
+        if (closed) {
+            setSessionHealth(SessionHealth.CLOSED, "Authentication maintenance has stopped.");
+            return;
+        }
         if (AuthManager.isRefreshTokenRejected(failure)) {
             Account account = currentAccount;
             maintenancePausedAccountId = account == null ? null : account.getUuid();
@@ -443,6 +447,7 @@ public class AccountService implements AutoCloseable {
     }
 
     private void setSessionHealth(SessionHealth health, String message) {
+        if (closed && health != SessionHealth.CLOSED) return;
         sessionHealth = health;
         sessionHealthMessage = message;
         for (Runnable listener : sessionHealthListeners) {
