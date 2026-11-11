@@ -11,6 +11,7 @@ import dev.itsdropper.vanta.launcher.account.AccountManager;
 import dev.itsdropper.vanta.ui.LoginPopup;
 
 import java.io.IOException;
+import java.io.InterruptedIOException;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
@@ -88,7 +89,7 @@ public class AuthManager {
 
     private static boolean isTransientFailure(Throwable failure) {
         for (Throwable current = failure; current != null; current = current.getCause()) {
-            if (current instanceof IOException
+            if (current instanceof InterruptedIOException
                     || current instanceof ConnectException
                     || current instanceof SocketException
                     || current instanceof UnknownHostException
