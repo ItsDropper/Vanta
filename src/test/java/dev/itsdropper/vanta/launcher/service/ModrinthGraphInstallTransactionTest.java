@@ -77,6 +77,27 @@ class ModrinthGraphInstallTransactionTest {
     }
 
     @Test
+    void rollbackRestoresAbsenceOfRegistryWhenInstanceWasPreviouslyUntracked() throws Exception {
+        Instance instance = instance();
+        Path mods = temporaryDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path registry = temporaryDirectory.resolve("vanta-mods.json");
+        assertFalse(Files.exists(registry));
+
+        assertThrows(IOException.class, () ->
+                ModrinthGraphInstallTransaction.execute(instance, () -> {
+                    Files.writeString(mods.resolve("new.jar"), "new artifact");
+                    InstalledModManager.add(instance, new InstalledModRecord(
+                            "new", "new-version", "new", "1.0", "new.jar"));
+                    throw new IOException("simulated install failure");
+                }));
+
+        assertFalse(Files.exists(registry), "Rollback must not create a registry that did not exist before.");
+        assertFalse(Files.exists(mods.resolve("new.jar")));
+        assertNoTransactionDirectories();
+    }
+
+    @Test
     void interruptionRollsBackEarlierGraphChangesAndPropagatesInterruption() throws Exception {
         Instance instance = instance();
         Path mods = temporaryDirectory.resolve("mods");
