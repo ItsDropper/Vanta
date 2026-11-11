@@ -48,6 +48,19 @@ public final class InstanceRepairService {
                         || text.contains("native classifier not found")
                         || text.contains("asset index missing")
                         || text.contains("asset index not found")
+                        || text.contains("asset object is missing")
+                        || text.contains("missing asset object")
+                        || text.contains("asset object not found")
+                        || text.contains("loader profile is missing")
+                        || text.contains("loader profile not found")
+                        || text.contains("fabric profile is missing")
+                        || text.contains("quilt profile is missing")
+                        || text.contains("missing loader metadata")
+                        || text.contains("loader metadata is missing")
+                        || text.contains("failed to extract natives")
+                        || text.contains("native extraction failed")
+                        || text.contains("missing minecraft version manifest")
+                        || text.contains("version json is missing")
                         || text.contains("invalid or corrupt jarfile")
                         || text.contains("zip end header not found")
                         || text.contains("invalid loc header")
@@ -92,7 +105,6 @@ public final class InstanceRepairService {
         // while installer dispatch uses canonical IDs ("legacyfabric").
         String loaderKey = loader.replaceAll("[^A-Za-z0-9]", "")
                 .toLowerCase(Locale.ROOT);
-
         if (loaderKey.equals("stein") && !SteinInstaller.supportsMinecraftVersion(minecraftVersion)) {
             throw new IllegalStateException("Stein instances support Minecraft 1.8.9 only.");
         }
