@@ -34,6 +34,7 @@ class ModrinthGraphInstallTransactionTest {
         List<InstalledModRecord> originalRegistry = List.of(
                 new InstalledModRecord("existing-project", "old-version", "existing", "1.0", "existing.jar"));
         InstalledModManager.save(instance, originalRegistry);
+        String originalRegistryBytes = Files.readString(temporaryDirectory.resolve("vanta-mods.json"));
 
         IOException failure = assertThrows(IOException.class, () ->
                 ModrinthGraphInstallTransaction.execute(instance, () -> {
@@ -53,6 +54,9 @@ class ModrinthGraphInstallTransactionTest {
         assertEquals(1, restored.size());
         assertEquals("existing-project", restored.get(0).getProjectId());
         assertEquals("old-version", restored.get(0).getVersionId());
+        assertEquals(originalRegistryBytes,
+                Files.readString(temporaryDirectory.resolve("vanta-mods.json")),
+                "Rollback must restore the registry byte-for-byte.");
         assertNoTransactionDirectories();
     }
 
