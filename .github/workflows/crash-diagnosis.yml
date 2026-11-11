@@ -1,0 +1,60 @@
+name: Crash diagnosis model and repair regression
+
+on:
+  pull_request:
+    paths:
+      - 'src/main/java/dev/itsdropper/vanta/launcher/repair/**'
+      - 'src/main/java/dev/itsdropper/vanta/launcher/instance/InstanceRepairService.java'
+      - 'src/main/resources/dev/itsdropper/vanta/launcher/repair/crash-cases.tsv'
+      - 'src/test/java/dev/itsdropper/vanta/launcher/repair/**'
+      - 'src/test/java/dev/itsdropper/vanta/launcher/instance/InstanceRepairServiceTest.java'
+      - 'build.gradle'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/crash-diagnosis.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'src/main/java/dev/itsdropper/vanta/launcher/repair/**'
+      - 'src/main/java/dev/itsdropper/vanta/launcher/instance/InstanceRepairService.java'
+      - 'src/main/resources/dev/itsdropper/vanta/launcher/repair/crash-cases.tsv'
+      - 'src/test/java/dev/itsdropper/vanta/launcher/repair/**'
+      - 'src/test/java/dev/itsdropper/vanta/launcher/instance/InstanceRepairServiceTest.java'
+      - 'build.gradle'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - '.github/workflows/crash-diagnosis.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crash-diagnosis-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Train and verify deterministic crash model (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Train and evaluate model through regression suite
+        if: runner.os != 'Windows'
+        run: bash gradlew --no-daemon test
+
+      - name: Train and evaluate model through regression suite
+        if: runner.os == 'Windows'
+        run: .\\gradlew.bat --no-daemon test
