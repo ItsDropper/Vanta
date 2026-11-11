@@ -234,6 +234,7 @@ public final class CrashCaseRepository {
         if (category == FailureCategory.UNKNOWN) throw new IllegalArgumentException("UNKNOWN is not a training label.");
         String safeFix = sanitize(verifiedFix);
         if (safeFix.length() > 2_000) safeFix = safeFix.substring(0, 2_000);
+        final String correctedFix = safeFix;
         return withLock(() -> {
             List<CrashCase> cases = new ArrayList<>(readCases());
             for (int i = 0; i < cases.size(); i++) {
@@ -244,7 +245,7 @@ public final class CrashCaseRepository {
                 }
                 CrashCase corrected = new CrashCase(existing.id(), existing.createdAtEpochMillis(),
                         existing.fingerprint(), ReviewStatus.CONFIRMED, existing.proposedCategory(),
-                        category, existing.occurrences(), existing.sanitizedLog(), safeFix);
+                        category, existing.occurrences(), existing.sanitizedLog(), correctedFix);
                 cases.set(i, corrected);
                 writeCases(cases);
                 return corrected;
