@@ -22,6 +22,8 @@ public class RepairView extends VBox {
     private final Instance instance;
     private final Runnable onBack;
     private final Runnable onRepair;
+    private final Runnable onSaveCrashCase;
+    private final Runnable onReviewCrashCases;
 
     public RepairView(
             Instance instance,
@@ -31,7 +33,7 @@ public class RepairView extends VBox {
             Runnable onBack,
             Runnable onRepair
     ) {
-        this(instance, title, description, issues, onBack, onRepair, null);
+        this(instance, title, description, issues, onBack, onRepair, null, null, null);
     }
 
     public RepairView(
@@ -43,10 +45,26 @@ public class RepairView extends VBox {
             Runnable onRepair,
             Runnable onRestore
     ) {
+        this(instance, title, description, issues, onBack, onRepair, onRestore, null, null);
+    }
+
+    public RepairView(
+            Instance instance,
+            String title,
+            String description,
+            List<RepairIssue> issues,
+            Runnable onBack,
+            Runnable onRepair,
+            Runnable onRestore,
+            Runnable onSaveCrashCase,
+            Runnable onReviewCrashCases
+    ) {
 
         this.instance = instance;
         this.onBack = onBack;
         this.onRepair = onRepair;
+        this.onSaveCrashCase = onSaveCrashCase;
+        this.onReviewCrashCases = onReviewCrashCases;
 
         getStyleClass().addAll(
                 "page",
@@ -196,6 +214,18 @@ public class RepairView extends VBox {
             restoreButton.getStyleClass().add("secondary-button");
             restoreButton.setOnAction(event -> onRestore.run());
             actions.getChildren().add(restoreButton);
+        }
+        if (onReviewCrashCases != null) {
+            Button reviewCasesButton = new Button(Localization.text("crashCases.review"));
+            reviewCasesButton.getStyleClass().add("secondary-button");
+            reviewCasesButton.setOnAction(event -> onReviewCrashCases.run());
+            actions.getChildren().add(reviewCasesButton);
+        }
+        if (onSaveCrashCase != null) {
+            Button saveCaseButton = new Button(Localization.text("crashCases.saveCurrent"));
+            saveCaseButton.getStyleClass().add("secondary-button");
+            saveCaseButton.setOnAction(event -> onSaveCrashCase.run());
+            actions.getChildren().add(saveCaseButton);
         }
         actions.getChildren().add(repairButton);
 
