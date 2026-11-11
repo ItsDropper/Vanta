@@ -55,8 +55,11 @@ public class ClasspathBuilder {
     private static List<Path> cached(Map<CacheKey, List<Path>> cache, CacheKey key, boolean allowDirectories) {
         if (key == null || !LauncherSettings.isExperimentalLaunchCacheEnabled()) return null;
         List<Path> value = cache.get(key);
-        if (value == null || value.stream().anyMatch(path ->
-                !(Files.isRegularFile(path) || (allowDirectories && Files.isDirectory(path))))) {
+        if (value == null || value.stream().anyMatch(path -> {
+            if (Files.isRegularFile(path)) return false;
+            return !allowDirectories || !Files.isDirectory(path)
+                    || !Files.isRegularFile(path.resolve("ModLoader.class"));
+        })) {
             if (value != null) cache.remove(key, value);
             CACHE_MISSES.increment();
             return null;
