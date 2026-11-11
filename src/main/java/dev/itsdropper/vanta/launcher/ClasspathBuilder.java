@@ -18,7 +18,8 @@ import dev.itsdropper.vanta.ui.LauncherSettings;
 
 public class ClasspathBuilder {
 
-    private record CacheKey(Path instanceDirectory, FileTime modified, long size, Object fileKey) { }
+    private record CacheKey(Path instanceDirectory, Path librariesDirectory, String loader,
+                            FileTime modified, long size, Object fileKey) { }
 
     private static final Map<CacheKey, List<Path>> CLASSPATH_CACHE = new ConcurrentHashMap<>();
     private static final Map<CacheKey, List<Path>> NATIVE_CACHE = new ConcurrentHashMap<>();
@@ -45,8 +46,10 @@ public class ClasspathBuilder {
             Path directory = instance.getDirectory().toAbsolutePath().normalize();
             Path metadata = directory.resolve("minecraft").resolve("version.json");
             BasicFileAttributes attributes = Files.readAttributes(metadata, BasicFileAttributes.class);
-            return new CacheKey(directory, attributes.lastModifiedTime(),
-                    attributes.size(), attributes.fileKey());
+            Path librariesDirectory = MinecraftLocator.getLibrariesDirectoryPath()
+                    .toAbsolutePath().normalize();
+            return new CacheKey(directory, librariesDirectory, instance.getLoader(),
+                    attributes.lastModifiedTime(), attributes.size(), attributes.fileKey());
         } catch (Exception ignored) {
             return null;
         }
