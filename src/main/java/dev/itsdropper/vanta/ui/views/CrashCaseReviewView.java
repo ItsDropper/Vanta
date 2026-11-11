@@ -41,6 +41,7 @@ public final class CrashCaseReviewView extends VBox {
     private final Button confirm = new Button();
     private final Button reject = new Button();
     private final Button export = new Button();
+    private final Button exportFixes = new Button();
 
     public CrashCaseReviewView(Runnable onBack) {
         this(new CrashCaseRepository(), onBack);
@@ -147,7 +148,7 @@ public final class CrashCaseReviewView extends VBox {
         status.setWrapText(true);
         status.getStyleClass().add("muted");
 
-        Button exportFixes = new Button(Localization.text("crashCases.exportFixes"));
+        exportFixes.setText(Localization.text("crashCases.exportFixes"));
         exportFixes.getStyleClass().add("secondary-button");
         exportFixes.setOnAction(event -> exportFixKnowledge(exportFixes.getScene() == null
                 ? null : exportFixes.getScene().getWindow()));
@@ -176,6 +177,7 @@ public final class CrashCaseReviewView extends VBox {
         confirm.setDisable(!pending);
         reject.setDisable(!pending);
         category.setDisable(!pending);
+        verifiedFix.setEditable(pending);
         if (pending && selected.proposedCategory() != null
                 && selected.proposedCategory() != FailureCategory.UNKNOWN) {
             category.setValue(selected.proposedCategory());
@@ -281,6 +283,9 @@ public final class CrashCaseReviewView extends VBox {
             }
             export.setDisable(all.stream().noneMatch(item ->
                     item.status() == CrashCaseRepository.ReviewStatus.CONFIRMED));
+            exportFixes.setDisable(all.stream().noneMatch(item ->
+                    item.status() == CrashCaseRepository.ReviewStatus.CONFIRMED
+                            && !item.verifiedFix().isBlank()));
         } catch (IOException | RuntimeException failure) {
             showFailure(failure);
         }
