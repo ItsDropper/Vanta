@@ -52,9 +52,7 @@ public class AccountManager {
             Account account
     ) throws IOException {
 
-        Files.createDirectories(
-                ACCOUNTS_DIRECTORY
-        );
+        ensureAccountsDirectory();
 
         String uuid =
                 account.getUuid();
@@ -144,9 +142,7 @@ public class AccountManager {
 
         migrateLegacyAccount();
 
-        Files.createDirectories(
-                ACCOUNTS_DIRECTORY
-        );
+        ensureAccountsDirectory();
 
         List<Account> accounts =
                 new ArrayList<>();
@@ -185,6 +181,14 @@ public class AccountManager {
         }
 
         return accounts;
+    }
+
+    private static void ensureAccountsDirectory() throws IOException {
+        Files.createDirectories(ACCOUNTS_DIRECTORY);
+        if (Files.isSymbolicLink(ACCOUNTS_DIRECTORY)
+                || !Files.isDirectory(ACCOUNTS_DIRECTORY, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Account storage path is not a real directory.");
+        }
     }
 
     private static final class AccountLoadFailure extends RuntimeException {
@@ -422,6 +426,9 @@ public class AccountManager {
         if (Files.isSymbolicLink(file)
                 || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
             throw new IOException("Account storage entry is not a regular file: " + file.getFileName());
+        }
+        if (Files.size(file) > 1024 * 1024) {
+            throw new IOException("Account file exceeds the 1 MiB safety limit: " + file.getFileName());
         }
 
         String content =
