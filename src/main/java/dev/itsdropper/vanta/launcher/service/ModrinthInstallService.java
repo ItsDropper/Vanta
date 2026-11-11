@@ -133,6 +133,7 @@ public List<Path> installResolvedGraph(
             List<ModrinthService.ResolvedMod> resolvedMods, Consumer<String> progress)
             throws IOException, InterruptedException {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
+        if (resolvedMods == null || resolvedMods.isEmpty()) return List.of();
         List<ModrinthService.ResolvedMod> validated = validateResolvedGraph(resolvedMods);
         if (validated.isEmpty()) return List.of();
         Consumer<String> listener = progress == null ? ignored -> { } : progress;
