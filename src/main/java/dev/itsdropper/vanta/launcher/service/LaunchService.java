@@ -239,6 +239,8 @@ public class LaunchService {
                             account,
                             launchData
                     );
+            long processCreatedAtNanos = System.nanoTime();
+            boolean optimizedLaunch = LauncherSettings.isExperimentalLaunchCacheEnabled();
 
             if (process == null) {
 
