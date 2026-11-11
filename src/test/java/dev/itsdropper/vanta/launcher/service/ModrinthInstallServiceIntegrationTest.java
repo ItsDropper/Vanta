@@ -228,6 +228,30 @@ class ModrinthInstallServiceIntegrationTest {
         assertNoTransactionArtifacts(instance);
     }
 
+
+    @Test
+    void rejectsConflictingVersionsForSameProjectBeforeStartingDownloads() throws Exception {
+        Instance instance = instance();
+        AtomicInteger downloads = new AtomicInteger();
+        ModrinthInstallService installer = installer((url, destination) -> {
+            downloads.incrementAndGet();
+            Files.write(destination, modJar("unexpected", "1.0.0"));
+        });
+
+        IOException failure = assertThrows(IOException.class, () ->
+                installer.installResolvedGraph(instance, List.of(
+                        new ModrinthService.ResolvedMod("same-project",
+                                version("same-project", "v1", "same-v1.jar")),
+                        new ModrinthService.ResolvedMod("same-project",
+                                version("same-project", "v2", "same-v2.jar"))
+                )));
+
+        assertTrue(failure.getMessage().contains("conflicting versions"));
+        assertEquals(0, downloads.get());
+        assertFalse(Files.exists(instanceDirectory.resolve("mods")));
+        assertNoTransactionArtifacts(instance);
+    }
+
     private void assertNoTransactionArtifacts(Instance instance) throws IOException {
         try (var root = Files.list(instance.getDirectory())) {
             assertTrue(root.noneMatch(path -> path.getFileName().toString()
