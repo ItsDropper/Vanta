@@ -95,6 +95,24 @@ class InstanceRepairServiceTest {
     }
 
     @Test
+    void identifiesMissingLoaderProfilesAndNativeExtractionAsRepairable() {
+        assertTrue(InstanceRepairService.isRepairableInstallationFailure(
+                new IllegalStateException("Ornithe loader profile not found.")));
+        assertTrue(InstanceRepairService.isRepairableInstallationFailure(
+                new IllegalStateException("Failed to extract natives for this instance.")));
+        assertTrue(InstanceRepairService.isRepairableInstallationFailure(
+                new IllegalStateException("Missing asset object in the shared asset store.")));
+    }
+
+    @Test
+    void doesNotAutomaticallyRepairTransientNetworkOrUserModFailures() {
+        assertFalse(InstanceRepairService.isRepairableInstallationFailure(
+                new IllegalStateException("UnknownHostException: meta.ornithemc.net")));
+        assertFalse(InstanceRepairService.isRepairableInstallationFailure(
+                new IllegalStateException("Mod examplemod failed to initialize.")));
+    }
+
+    @Test
     void identifiesMissingSteinRuntimeAsRepairable() {
         assertTrue(InstanceRepairService.isRepairableInstallationFailure(
                 new IllegalStateException("Stein's Java 25 runtime is missing or invalid.")));
