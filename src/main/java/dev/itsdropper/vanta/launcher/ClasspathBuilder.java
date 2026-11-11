@@ -54,7 +54,7 @@ public class ClasspathBuilder {
     private static List<Path> cached(Map<CacheKey, List<Path>> cache, CacheKey key) {
         if (key == null || !LauncherSettings.isExperimentalLaunchCacheEnabled()) return null;
         List<Path> value = cache.get(key);
-        if (value == null || value.stream().anyMatch(path -> !Files.isRegularFile(path))) {
+        if (value == null || value.stream().anyMatch(path -> !Files.exists(path))) {
             if (value != null) cache.remove(key, value);
             CACHE_MISSES.increment();
             return null;
