@@ -117,7 +117,8 @@ final class ModrinthGraphInstallTransaction {
                 if (transactionFailure != null) {
                     transactionFailure.addSuppressed(cleanupFailure);
                 } else {
-                    throw cleanupFailure;
+                    System.err.println("Modrinth graph committed, but its backup directory could not be removed: "
+                            + cleanupFailure.getMessage());
                 }
             }
         }
