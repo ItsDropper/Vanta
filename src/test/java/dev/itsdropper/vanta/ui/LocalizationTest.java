@@ -656,7 +656,31 @@ class LocalizationTest {
                 "experimental.performance.processStartup",
                 "sidebar.experimental",
                 "sidebar.experimental.description",
-                "serverManager.restartPrefix"
+                "serverManager.restartPrefix",
+                "crashCases.title",
+                "crashCases.description",
+                "crashCases.localOnly",
+                "crashCases.empty",
+                "crashCases.unlabelled",
+                "crashCases.occurrences",
+                "crashCases.queue",
+                "crashCases.evidence",
+                "crashCases.selectPrompt",
+                "crashCases.categoryPrompt",
+                "crashCases.confirm",
+                "crashCases.reject",
+                "crashCases.import",
+                "crashCases.export",
+                "crashCases.chooseCategory",
+                "crashCases.confirmed",
+                "crashCases.rejected",
+                "crashCases.importTitle",
+                "crashCases.imported",
+                "crashCases.exportTitle",
+                "crashCases.exported",
+                "crashCases.operationFailed",
+                "crashCases.review",
+                "crashCases.saveCurrent"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {
