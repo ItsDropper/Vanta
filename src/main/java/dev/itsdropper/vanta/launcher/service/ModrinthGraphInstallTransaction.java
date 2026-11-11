@@ -65,13 +65,17 @@ final class ModrinthGraphInstallTransaction {
             throw new IOException("Instance mods directory resolves outside the instance.");
         }
 
+        Path registryPath = instanceDirectory.resolve("vanta-mods.json");
+        boolean registryExisted = Files.exists(registryPath, LinkOption.NOFOLLOW_LINKS);
+        if (registryExisted && (Files.isSymbolicLink(registryPath)
+                || !Files.isRegularFile(registryPath, LinkOption.NOFOLLOW_LINKS))) {
+            throw new IOException("Refusing to transact with a non-regular installed-mod registry.");
+        }
         List<InstalledModRecord> originalRegistry = new ArrayList<>(InstalledModManager.load(instance));
         Path transactionDirectory = Files.createTempDirectory(
                 instanceDirectory, ".vanta-graph-transaction-" + UUID.randomUUID() + "-");
         Map<Path, Path> backups = new LinkedHashMap<>();
         Set<Path> originalTrackedPaths = new HashSet<>();
-        Path registryPath = instanceDirectory.resolve("vanta-mods.json");
-        boolean registryExisted = Files.exists(registryPath, LinkOption.NOFOLLOW_LINKS);
         Path registryBackup = null;
 
         Throwable transactionFailure = null;
@@ -82,10 +86,6 @@ final class ModrinthGraphInstallTransaction {
             }
 
             if (registryExisted) {
-                if (Files.isSymbolicLink(registryPath)
-                        || !Files.isRegularFile(registryPath, LinkOption.NOFOLLOW_LINKS)) {
-                    throw new IOException("Refusing to transact with a non-regular installed-mod registry.");
-                }
                 registryBackup = transactionDirectory.resolve("registry-backup.json");
                 Files.copy(registryPath, registryBackup, StandardCopyOption.COPY_ATTRIBUTES);
             }
@@ -116,7 +116,7 @@ final class ModrinthGraphInstallTransaction {
                 return operation.run();
             } catch (IOException | InterruptedException | RuntimeException | Error failure) {
                 transactionFailure = failure;
-                rollback(instance, modsDirectory, originalRegistry, backups,
+                rollback(instance, modsDirectory, backups,
                         registryPath, registryExisted, registryBackup, failure);
                 throw failure;
             }
@@ -140,7 +140,6 @@ final class ModrinthGraphInstallTransaction {
     private static void rollback(
             Instance instance,
             Path modsDirectory,
-            List<InstalledModRecord> originalRegistry,
             Map<Path, Path> backups,
             Path registryPath,
             boolean registryExisted,
