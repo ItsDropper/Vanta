@@ -35,6 +35,7 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     private final Label optimizedStats = new Label();
     private final Label vanillaStats = new Label();
     private final Label comparisonStats = new Label();
+    private final Label processStartupStats = new Label();
     private final CheckBox cacheEnabled = new CheckBox(Localization.text("experimental.performance.enableCache"));
     private final Button refreshSession = new Button(Localization.text("experimental.auth.refresh"));
     private final Runnable healthListener = () -> UiExecutor.shared().dispatchToUi(this::refreshStatus);
@@ -94,9 +95,10 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         optimizedStats.setWrapText(true);
         vanillaStats.setWrapText(true);
         comparisonStats.setWrapText(true);
+        processStartupStats.setWrapText(true);
         performanceCard.getChildren().addAll(
                 performanceTitle, explanation, benchmarkMethod, cacheEnabled, cacheStats,
-                measuredInstance, baselineStats, optimizedStats, comparisonStats, vanillaStats, clearCache, resetSamples
+                measuredInstance, baselineStats, optimizedStats, comparisonStats, processStartupStats, vanillaStats, clearCache, resetSamples
         );
 
         VBox pageContent = new VBox(18, eyebrow, title, intro, authCard, performanceCard);
@@ -157,6 +159,9 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         optimizedStats.setText(Localization.text("experimental.performance.optimized")
                 .formatted(format(modded.optimizedMedianMillis(), modded.optimizedSamples())));
         comparisonStats.setText(compare(modded));
+        processStartupStats.setText(Localization.text("experimental.performance.processStartup")
+                .formatted(format(modded.baselineStartupMedianMillis(), modded.baselineStartupSamples()),
+                        format(modded.optimizedStartupMedianMillis(), modded.optimizedStartupSamples())));
         vanillaStats.setText(Localization.text("experimental.performance.vanilla")
                 .formatted(format(vanilla.baselineMedianMillis(), vanilla.baselineSamples()),
                         format(vanilla.optimizedMedianMillis(), vanilla.optimizedSamples())));
