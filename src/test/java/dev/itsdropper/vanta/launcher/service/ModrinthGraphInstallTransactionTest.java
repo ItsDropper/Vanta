@@ -164,6 +164,8 @@ class ModrinthGraphInstallTransactionTest {
 
         Path journalDirectory = Files.createDirectory(
                 temporaryDirectory.resolve(".vanta-graph-transaction-simulated-crash"));
+        Files.writeString(journalDirectory.resolve("OWNER"),
+                "VANTA_MODRINTH_GRAPH_TRANSACTION_V1");
         Files.writeString(journalDirectory.resolve("tracked-0"), "original bytes");
         Files.writeString(journalDirectory.resolve("registry-backup.json"), originalRegistry);
         Properties journal = new Properties();
