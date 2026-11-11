@@ -77,6 +77,32 @@ class ModrinthGraphInstallTransactionTest {
     }
 
     @Test
+    void interruptionRollsBackEarlierGraphChangesAndPropagatesInterruption() throws Exception {
+        Instance instance = instance();
+        Path mods = temporaryDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path originalMod = mods.resolve("existing.jar");
+        Files.writeString(originalMod, "before interruption");
+        InstalledModManager.save(instance, List.of(
+                new InstalledModRecord("existing", "old", "existing", "1.0", "existing.jar")));
+
+        InterruptedException failure = assertThrows(InterruptedException.class, () ->
+                ModrinthGraphInstallTransaction.execute(instance, () -> {
+                    Files.writeString(originalMod, "partially updated");
+                    Files.writeString(mods.resolve("new.jar"), "new artifact");
+                    InstalledModManager.add(instance, new InstalledModRecord(
+                            "new", "new-version", "new", "1.0", "new.jar"));
+                    throw new InterruptedException("cancelled by caller");
+                }));
+
+        assertEquals("cancelled by caller", failure.getMessage());
+        assertEquals("before interruption", Files.readString(originalMod));
+        assertFalse(Files.exists(mods.resolve("new.jar")));
+        assertEquals("existing", InstalledModManager.load(instance).get(0).getProjectId());
+        assertNoTransactionDirectories();
+    }
+
+    @Test
     void rejectsRegistryPathTraversalBeforeRunningOperation() throws Exception {
         Instance instance = instance();
         InstalledModManager.save(instance, List.of(
