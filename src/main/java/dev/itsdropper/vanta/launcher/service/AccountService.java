@@ -36,6 +36,7 @@ public class AccountService implements AutoCloseable {
 
     private ScheduledFuture<?> maintenanceTask;
     private String maintenancePausedAccountId;
+    private volatile boolean closed;
     // =============================================================
     // ACCOUNT LOADING
     // =============================================================
