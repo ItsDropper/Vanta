@@ -1009,9 +1009,12 @@ public class ModDetailsView extends VBox {
         }
 
         installCancellationRequested.set(false);
-        button.setDisable(false);
-        button.setText(Localization.text("common.cancelTitleCase"));
-        button.setOnAction(event -> cancelInstall(button));
+        boolean cancellable = contentType == ModrinthContentType.MOD;
+        button.setDisable(!cancellable);
+        button.setText(cancellable
+                ? Localization.text("common.cancelTitleCase")
+                : Localization.text("common.installing"));
+        button.setOnAction(cancellable ? event -> cancelInstall(button) : null);
         statusLabel.setText("Resolving dependencies for " + project.getTitle() + "…");
 
         try {
