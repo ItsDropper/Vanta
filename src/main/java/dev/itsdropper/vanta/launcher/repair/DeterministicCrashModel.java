@@ -135,6 +135,14 @@ public final class DeterministicCrashModel {
         while (matcher.find()) {
             String token = matcher.group();
             if (!STOP_WORDS.contains(token)) result.add(token);
+            // Keep the qualified identifier and its semantic components.
+            // This lets a held-out fully-qualified exception class match a
+            // corpus example that records only the simple class name.
+            for (String component : token.split("[.$/_-]+")) {
+                if (component.length() >= 3 && !STOP_WORDS.contains(component)) {
+                    result.add(component);
+                }
+            }
         }
         return result;
     }
