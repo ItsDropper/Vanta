@@ -29,6 +29,18 @@ public Path repairModDependency(
             String projectId,
             List<String> requiredVersions
     ) throws IOException, InterruptedException {
+        if (instance != null
+                && "AANobbMI".equals(projectId)
+                && requiredVersions != null
+                && requiredVersions.contains("0.9.3-beta.1")
+                && instance.getMinecraftVersion() != null
+                && instance.getMinecraftVersion().startsWith("26.3")
+                && "neoforge".equalsIgnoreCase(instance.getLoader())) {
+            // This specialized repair quarantines stale files outside mods/.
+            // Keep its existing quarantine semantics until that directory is
+            // included in the transaction journal's managed-path model.
+            return repairPinnedSodiumForNeoForge263(instance, projectId);
+        }
         return ModrinthGraphInstallTransaction.execute(instance,
                 () -> repairModDependencyWithinTransaction(instance, projectId, requiredVersions));
     }
@@ -79,21 +91,6 @@ public Path repairModDependency(
         }
 
         roots.add(repairedProject);
-
-        /*
-         * Sodium 0.9.2 has a NeoForge 26.3 LevelExtractor mixin failure.
-         * Do not send this known repair through the generic graph resolver:
-         * install the exact compatible release and quarantine stale Sodium
-         * jars that are not represented in Vanta's installed-mod registry.
-         */
-        if ("AANobbMI".equals(projectId)
-                && requiredVersions != null
-                && requiredVersions.contains("0.9.3-beta.1")
-                && instance.getMinecraftVersion() != null
-                && instance.getMinecraftVersion().startsWith("26.3")
-                && "neoforge".equalsIgnoreCase(instance.getLoader())) {
-            return repairPinnedSodiumForNeoForge263(instance, projectId);
-        }
 
         /*
          * Find installed mods whose Modrinth version directly
