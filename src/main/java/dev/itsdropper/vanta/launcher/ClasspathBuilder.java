@@ -9,8 +9,65 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.LongAdder;
+import java.nio.file.attribute.BasicFileAttributes;
+import dev.itsdropper.vanta.ui.LauncherSettings;
 
 public class ClasspathBuilder {
+
+    private record CacheKey(Path instanceDirectory, long modified, long size, Object fileKey) { }
+
+    private static final Map<CacheKey, List<Path>> CLASSPATH_CACHE = new ConcurrentHashMap<>();
+    private static final Map<CacheKey, List<Path>> NATIVE_CACHE = new ConcurrentHashMap<>();
+    private static final LongAdder CACHE_HITS = new LongAdder();
+    private static final LongAdder CACHE_MISSES = new LongAdder();
+
+    public record CacheStats(long hits, long misses, int entries) { }
+
+    public static CacheStats getCacheStats() {
+        return new CacheStats(CACHE_HITS.sum(), CACHE_MISSES.sum(),
+                CLASSPATH_CACHE.size() + NATIVE_CACHE.size());
+    }
+
+    public static void clearCache() {
+        CLASSPATH_CACHE.clear();
+        NATIVE_CACHE.clear();
+        CACHE_HITS.reset();
+        CACHE_MISSES.reset();
+        VersionReader.clearCache();
+    }
+
+    private static CacheKey cacheKey(Instance instance) {
+        try {
+            Path directory = instance.getDirectory().toAbsolutePath().normalize();
+            Path metadata = directory.resolve("minecraft").resolve("version.json");
+            BasicFileAttributes attributes = Files.readAttributes(metadata, BasicFileAttributes.class);
+            return new CacheKey(directory, attributes.lastModifiedTime().toMillis(),
+                    attributes.size(), attributes.fileKey());
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static List<Path> cached(Map<CacheKey, List<Path>> cache, CacheKey key) {
+        if (key == null || !LauncherSettings.isExperimentalLaunchCacheEnabled()) return null;
+        List<Path> value = cache.get(key);
+        if (value == null || value.stream().anyMatch(path -> !Files.isRegularFile(path))) {
+            if (value != null) cache.remove(key, value);
+            CACHE_MISSES.increment();
+            return null;
+        }
+        CACHE_HITS.increment();
+        return new ArrayList<>(value);
+    }
+
+    private static void store(Map<CacheKey, List<Path>> cache, CacheKey key, List<Path> value) {
+        if (key == null || !LauncherSettings.isExperimentalLaunchCacheEnabled()) return;
+        if (cache.size() > 64) cache.clear();
+        cache.put(key, List.copyOf(value));
+    }
 
     public static List<Path> build(
             Instance instance
@@ -21,6 +78,10 @@ public class ClasspathBuilder {
                     "Instance cannot be null."
             );
         }
+
+        CacheKey key = cacheKey(instance);
+        List<Path> cached = cached(CLASSPATH_CACHE, key);
+        if (cached != null) return cached;
 
         LinkedHashSet<Path> classpath =
                 new LinkedHashSet<>();
@@ -118,9 +179,9 @@ public class ClasspathBuilder {
 
         classpath.add(gameJar);
 
-        return new ArrayList<>(
-                classpath
-        );
+        List<Path> result = new ArrayList<>(classpath);
+        store(CLASSPATH_CACHE, key, result);
+        return result;
     }
 
     public static List<Path> buildNativeJars(
@@ -132,6 +193,10 @@ public class ClasspathBuilder {
                     "Instance cannot be null."
             );
         }
+
+        CacheKey key = cacheKey(instance);
+        List<Path> cached = cached(NATIVE_CACHE, key);
+        if (cached != null) return cached;
 
         LinkedHashSet<Path> nativeJars =
                 new LinkedHashSet<>();
@@ -168,9 +233,9 @@ public class ClasspathBuilder {
             }
         }
 
-        return new ArrayList<>(
-                nativeJars
-        );
+        List<Path> result = new ArrayList<>(nativeJars);
+        store(NATIVE_CACHE, key, result);
+        return result;
     }
 }
 
