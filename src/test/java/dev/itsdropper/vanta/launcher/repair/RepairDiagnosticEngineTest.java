@@ -53,6 +53,21 @@ class RepairDiagnosticEngineTest {
     }
 
     @Test
+    void mapsParserLabelsToStableFailureCategories() {
+        assertEquals(FailureCategory.MOD_DEPENDENCY,
+                FailureCategory.fromRepairType("MISSING DEPENDENCY"));
+        assertEquals(FailureCategory.MOD_DEPENDENCY,
+                FailureCategory.fromRepairType("DEPENDENCY CONFLICT"));
+        assertEquals(FailureCategory.MOD_CONFLICT,
+                FailureCategory.fromRepairType("MOD INCOMPATIBILITY"));
+        assertEquals(FailureCategory.MOD_MIXIN_FAILURE,
+                FailureCategory.fromRepairType("SODIUM / NEOFORGE INCOMPATIBILITY"));
+        assertEquals(FailureCategory.MINECRAFT_VERSION,
+                FailureCategory.fromRepairType("MINECRAFT VERSION CONFLICT"));
+        assertEquals(FailureCategory.UNKNOWN, FailureCategory.fromRepairType("unmapped legacy label"));
+    }
+
+    @Test
     void labelledCaseModelAddsAdvisoryDiagnosisForUnmatchedSignatures() {
         var diagnoses = RepairDiagnosticEngine.diagnose(
                 "org.spongepowered.asm.mixin.transformer.throwables.MixinApplyError while transforming target method");
