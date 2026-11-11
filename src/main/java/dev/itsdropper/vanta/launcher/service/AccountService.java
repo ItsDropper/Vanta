@@ -235,8 +235,8 @@ public class AccountService {
 
     /**
      * Refreshes the selected session immediately before launching Minecraft.
-     * This is deliberately non-interactive: an invalid/revoked refresh token
-     * is reported to the caller rather than unexpectedly opening device login.
+     * A valid refresh is silent. Only Microsoft's explicit invalid_grant
+     * response falls back to the device-code sign-in flow.
      */
     public Account refreshCurrentAccount() throws Exception {
         accountLock.lock();
@@ -247,7 +247,7 @@ public class AccountService {
             Account account = currentAccount;
             maintenancePausedAccountId = null;
             try {
-                Account refreshed = AuthManager.refresh(account);
+                Account refreshed = AuthManager.login(account);
                 replaceAccount(refreshed);
                 setCurrentAccount(refreshed);
                 return refreshed;
