@@ -37,6 +37,7 @@ public class AccountService implements AutoCloseable {
     private ScheduledFuture<?> maintenanceTask;
     private String maintenancePausedAccountId;
     private volatile boolean closed;
+    private long maintenanceRetryAfterMillis;
     // =============================================================
     // ACCOUNT LOADING
     // =============================================================
@@ -103,6 +104,7 @@ public class AccountService implements AutoCloseable {
             );
 
             maintenancePausedAccountId = null;
+            maintenanceRetryAfterMillis = 0L;
             setCurrentAccount(
                     refreshedAccount
             );
@@ -142,6 +144,7 @@ public class AccountService implements AutoCloseable {
 
             replaceAccount(account);
             maintenancePausedAccountId = null;
+            maintenanceRetryAfterMillis = 0L;
             setCurrentAccount(account);
             startSessionMaintenance();
 
@@ -287,6 +290,7 @@ public class AccountService implements AutoCloseable {
             Account account = currentAccount;
             if (account == null
                     || account.getUuid().equals(maintenancePausedAccountId)
+                    || System.currentTimeMillis() < maintenanceRetryAfterMillis
                     || !isSessionRefreshDue(account)) {
                 return;
             }
@@ -301,9 +305,17 @@ public class AccountService implements AutoCloseable {
             } catch (Exception failure) {
                 // Avoid repeated requests after a rejected refresh. A launch
                 // or explicit refresh is the next retry point.
-                maintenancePausedAccountId = account.getUuid();
-                System.err.println("[Vanta Auth] Background session refresh failed; "
-                        + "automatic retries paused until the next explicit refresh.");
+                if (AuthManager.isRefreshTokenRejected(failure)) {
+                    maintenancePausedAccountId = account.getUuid();
+                    System.err.println("[Vanta Auth] The saved refresh token was rejected; "
+                            + "sign-in is required before this account can refresh again.");
+                } else {
+                    // Transient outages and unknown service failures use bounded
+                    // retry backoff instead of permanently disabling maintenance.
+                    maintenanceRetryAfterMillis = System.currentTimeMillis()
+                            + TimeUnit.MINUTES.toMillis(5);
+                    System.err.println("[Vanta Auth] Background refresh failed; retrying in five minutes.");
+                }
             }
         } finally {
             accountLock.unlock();
