@@ -217,14 +217,15 @@ final class ModrinthGraphInstallTransaction {
                 }
                 Path ownerMarker = directory.resolve(OWNER_NAME);
                 if (!Files.isRegularFile(ownerMarker, LinkOption.NOFOLLOW_LINKS)
-                        || Files.isSymbolicLink(ownerMarker)
+                        || Files.isSymbolicLink(ownerMarker) || Files.size(ownerMarker) > 64
                         || !OWNER_CONTENT.equals(Files.readString(ownerMarker))) {
                     // Never delete an arbitrary user directory merely because its name
                     // resembles one of our transaction directories.
                     continue;
                 }
-                if (Files.exists(directory.resolve(COMMITTED_NAME), LinkOption.NOFOLLOW_LINKS)
-                        || Files.exists(directory.resolve(ROLLED_BACK_NAME), LinkOption.NOFOLLOW_LINKS)) {
+                boolean committed = hasStateMarker(directory, COMMITTED_NAME);
+                boolean rolledBack = hasStateMarker(directory, ROLLED_BACK_NAME);
+                if (committed || rolledBack) {
                     deleteTree(directory);
                     continue;
                 }
@@ -338,6 +339,16 @@ final class ModrinthGraphInstallTransaction {
         parseCount(journal, "backupCount");
         parseCount(journal, "managedCount");
         return journal;
+    }
+
+    private static boolean hasStateMarker(Path directory, String markerName) throws IOException {
+        Path marker = directory.resolve(markerName);
+        if (!Files.exists(marker, LinkOption.NOFOLLOW_LINKS)) return false;
+        if (Files.isSymbolicLink(marker) || !Files.isRegularFile(marker, LinkOption.NOFOLLOW_LINKS)
+                || Files.size(marker) > 64) {
+            throw new IOException("Unsafe transaction state marker: " + markerName);
+        }
+        return markerName.equals(Files.readString(marker));
     }
 
     private static void publishCommittedMarker(Path directory) throws IOException {
