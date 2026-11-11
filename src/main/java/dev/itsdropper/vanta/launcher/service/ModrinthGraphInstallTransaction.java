@@ -178,6 +178,9 @@ final class ModrinthGraphInstallTransaction {
             ACTIVE_JOURNAL.set(context);
             try {
                 T result = operation.run();
+                if (Thread.currentThread().isInterrupted()) {
+                    throw new InterruptedException("Modrinth graph installation was cancelled before commit.");
+                }
                 publishCommittedMarker(transactionDirectory);
                 return result;
             } catch (IOException | InterruptedException | RuntimeException | Error failure) {
