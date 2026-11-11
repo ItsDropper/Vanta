@@ -158,7 +158,7 @@ final class ModrinthGraphInstallTransaction {
             } catch (IOException | InterruptedException | RuntimeException | Error failure) {
                 transactionFailure = failure;
                 try {
-                    rollbackFromJournal(mods, transactionDirectory, journal, registry);
+                    rollbackFromJournal(instance, mods, transactionDirectory, journal, registry);
                     publishStateMarker(transactionDirectory, ROLLED_BACK_NAME);
                 } catch (IOException rollbackFailure) {
                     preserveJournal = true;
@@ -238,7 +238,7 @@ final class ModrinthGraphInstallTransaction {
                 }
                 Properties journal = readJournal(journalPath);
                 Path mods = root.resolve("mods").normalize();
-                rollbackFromJournal(mods, directory, journal, root.resolve("vanta-mods.json"));
+                rollbackFromJournal(instance, mods, directory, journal, root.resolve("vanta-mods.json"));
                 publishStateMarker(directory, ROLLED_BACK_NAME);
                 deleteTree(directory);
             }
@@ -246,7 +246,7 @@ final class ModrinthGraphInstallTransaction {
     }
 
     private static void rollbackFromJournal(
-            Path mods, Path transactionDirectory, Properties journal,
+            Instance instance, Path mods, Path transactionDirectory, Properties journal,
             Path registry
     ) throws IOException {
             int managedCount = parseCount(journal, "managedCount");
@@ -258,8 +258,19 @@ final class ModrinthGraphInstallTransaction {
                 originalNames.add(filename);
             }
 
+            Set<String> outputsToRemove = new HashSet<>();
             for (int i = 0; i < managedCount; i++) {
-                String filename = required(journal, "managed." + i);
+                outputsToRemove.add(required(journal, "managed." + i));
+            }
+            // The registry is itself atomically replaced. It therefore also
+            // identifies any completed outputs if an older code path or a
+            // failed intent write reached registry publication.
+            for (InstalledModRecord record : InstalledModManager.load(instance)) {
+                if (record != null && record.getFilename() != null && !record.getFilename().isBlank()) {
+                    outputsToRemove.add(record.getFilename());
+                }
+            }
+            for (String filename : outputsToRemove) {
                 Path managed = resolveTrackedPath(mods, filename);
                 if (!originalNames.contains(filename) && Files.exists(managed, LinkOption.NOFOLLOW_LINKS)) {
                     if (Files.isSymbolicLink(managed)
