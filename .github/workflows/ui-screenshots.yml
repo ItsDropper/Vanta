@@ -51,21 +51,21 @@ jobs:
           done
           test "$(sha256sum "${screenshots[@]}" | awk '{print $1}' | sort -u | wc -l)" -eq 10
           additional_screenshots=(build/ui-screenshots/additional/[0-9][0-9]-*.png)
-          test "${#additional_screenshots[@]}" -eq 13
+          test "${#additional_screenshots[@]}" -eq 14
           test -s build/ui-screenshots/additional/index.md
           test -s build/ui-screenshots/additional/overview.png
           for screenshot in "${additional_screenshots[@]}"; do
             test -s "$screenshot"
             test "$(stat -c%s "$screenshot")" -gt 12000
           done
-          test "$(sha256sum "${additional_screenshots[@]}" | awk '{print $1}' | sort -u | wc -l)" -eq 13
+          test "$(sha256sum "${additional_screenshots[@]}" | awk '{print $1}' | sort -u | wc -l)" -eq 14
           python3 - <<'PY'
           from pathlib import Path
           import struct
 
           groups = [
               (Path("build/ui-screenshots"), 10),
-              (Path("build/ui-screenshots/additional"), 13),
+              (Path("build/ui-screenshots/additional"), 14),
           ]
           for directory, expected_count in groups:
               files = sorted(directory.glob("[0-9][0-9]-*.png"))
