@@ -30,6 +30,14 @@ class AuthManagerFailureClassificationTest {
     }
 
     @Test
+    void recognizesInterruptedDeviceCodeLoginAsCancellation() {
+        assertTrue(AuthManager.isInterruptedFailure(new InterruptedException("user closed login")));
+        assertTrue(AuthManager.isInterruptedFailure(
+                new RuntimeException("polling stopped", new InterruptedException("cancelled"))));
+        assertFalse(AuthManager.isInterruptedFailure(new IOException("network unavailable")));
+    }
+
+    @Test
     void doesNotTreatAuthenticationRejectionOrGenericIoAsNetworkOutage() {
         assertFalse(AuthManager.isTransientFailure(
                 new IllegalStateException("invalid refresh token")));
