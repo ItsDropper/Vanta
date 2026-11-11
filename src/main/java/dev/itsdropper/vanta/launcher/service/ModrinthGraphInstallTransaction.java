@@ -140,13 +140,27 @@ final class ModrinthGraphInstallTransaction {
         }
 
         List<InstalledModRecord> originalRegistry = new ArrayList<>(InstalledModManager.load(instance));
+        // Validate every registry path up front, but snapshot only files that
+        // this transaction will actually replace. Large modpacks therefore do
+        // not require duplicating every Vanta-managed JAR for a small install.
+        for (InstalledModRecord record : originalRegistry) {
+            if (record == null || record.getFilename() == null || record.getFilename().isBlank()) continue;
+            Path tracked = resolveTrackedPath(mods, record.getFilename());
+            if (Files.exists(tracked, LinkOption.NOFOLLOW_LINKS)
+                    && (Files.isSymbolicLink(tracked)
+                    || !Files.isRegularFile(tracked, LinkOption.NOFOLLOW_LINKS))) {
+                throw new IOException("Refusing to transact with a non-regular tracked mod file: "
+                        + tracked.getFileName());
+            }
+        }
+
         Path transactionDirectory = Files.createTempDirectory(root, DIRECTORY_PREFIX);
         Path ownerMarker = transactionDirectory.resolve(OWNER_NAME);
         Files.writeString(ownerMarker, OWNER_CONTENT, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
         forceFile(ownerMarker);
-        Map<Path, Path> backups = new LinkedHashMap<>();
         Properties journal = new Properties();
         journal.setProperty("registryExisted", Boolean.toString(registryExisted));
+        journal.setProperty("backupCount", "0");
         Path registryBackup = transactionDirectory.resolve("registry-backup.json");
 
         Throwable transactionFailure = null;
@@ -157,31 +171,6 @@ final class ModrinthGraphInstallTransaction {
                 forceFile(registryBackup);
                 journal.setProperty("registryBackup", registryBackup.getFileName().toString());
             }
-
-            int backupIndex = 0;
-            for (InstalledModRecord record : originalRegistry) {
-                if (record == null || record.getFilename() == null || record.getFilename().isBlank()) {
-                    continue;
-                }
-                Path tracked = resolveTrackedPath(mods, record.getFilename());
-                if (backups.containsKey(tracked) || !Files.exists(tracked, LinkOption.NOFOLLOW_LINKS)) {
-                    continue;
-                }
-                if (Files.isSymbolicLink(tracked)
-                        || !Files.isRegularFile(tracked, LinkOption.NOFOLLOW_LINKS)) {
-                    throw new IOException("Refusing to back up a non-regular tracked mod file: "
-                            + tracked.getFileName());
-                }
-                Path backup = transactionDirectory.resolve("tracked-" + backupIndex++);
-                Files.copy(tracked, backup, StandardCopyOption.COPY_ATTRIBUTES);
-                forceFile(backup);
-                backups.put(tracked, backup);
-                journal.setProperty("backup." + (backupIndex - 1) + ".filename",
-                        tracked.getFileName().toString());
-                journal.setProperty("backup." + (backupIndex - 1) + ".file",
-                        backup.getFileName().toString());
-            }
-            journal.setProperty("backupCount", Integer.toString(backups.size()));
             journal.setProperty("managedCount", "0");
             writeJournal(transactionDirectory, journal);
 
@@ -471,12 +460,37 @@ final class ModrinthGraphInstallTransaction {
         }
 
         private synchronized void addManagedPath(String filename) throws IOException {
-            int count = parseCount(journal, "managedCount");
-            for (int i = 0; i < count; i++) {
+            int managedCount = parseCount(journal, "managedCount");
+            for (int i = 0; i < managedCount; i++) {
                 if (filename.equals(journal.getProperty("managed." + i))) return;
             }
-            journal.setProperty("managed." + count, filename);
-            journal.setProperty("managedCount", Integer.toString(count + 1));
+
+            Path managed = resolveTrackedPath(modsDirectory, filename);
+            if (Files.exists(managed, LinkOption.NOFOLLOW_LINKS)) {
+                if (Files.isSymbolicLink(managed)
+                        || !Files.isRegularFile(managed, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new IOException("Refusing to snapshot a non-regular transaction path: " + filename);
+                }
+                int backupCount = parseCount(journal, "backupCount");
+                boolean alreadyBackedUp = false;
+                for (int i = 0; i < backupCount; i++) {
+                    if (filename.equals(journal.getProperty("backup." + i + ".filename"))) {
+                        alreadyBackedUp = true;
+                        break;
+                    }
+                }
+                if (!alreadyBackedUp) {
+                    Path backup = directory.resolve("tracked-" + backupCount);
+                    Files.copy(managed, backup, StandardCopyOption.COPY_ATTRIBUTES);
+                    forceFile(backup);
+                    journal.setProperty("backup." + backupCount + ".filename", filename);
+                    journal.setProperty("backup." + backupCount + ".file", backup.getFileName().toString());
+                    journal.setProperty("backupCount", Integer.toString(backupCount + 1));
+                }
+            }
+
+            journal.setProperty("managed." + managedCount, filename);
+            journal.setProperty("managedCount", Integer.toString(managedCount + 1));
             writeJournal(directory, journal);
         }
     }
