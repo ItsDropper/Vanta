@@ -241,12 +241,21 @@ final class ModrinthGraphInstallTransaction {
                     throw new IOException("Unsafe Modrinth transaction journal entry: " + directory.getFileName());
                 }
                 Path ownerMarker = directory.resolve(OWNER_NAME);
-                if (!Files.isRegularFile(ownerMarker, LinkOption.NOFOLLOW_LINKS)
-                        || Files.isSymbolicLink(ownerMarker) || Files.size(ownerMarker) > 64
-                        || !OWNER_CONTENT.equals(Files.readString(ownerMarker))) {
+                Path journalPath = directory.resolve(JOURNAL_NAME);
+                if (!Files.exists(ownerMarker, LinkOption.NOFOLLOW_LINKS)) {
+                    if (Files.exists(journalPath, LinkOption.NOFOLLOW_LINKS)) {
+                        throw new IOException("Transaction journal is missing its ownership marker: "
+                                + directory.getFileName());
+                    }
                     // Never delete an arbitrary user directory merely because its name
                     // resembles one of our transaction directories.
                     continue;
+                }
+                if (Files.isSymbolicLink(ownerMarker)
+                        || !Files.isRegularFile(ownerMarker, LinkOption.NOFOLLOW_LINKS)
+                        || Files.size(ownerMarker) > 64
+                        || !OWNER_CONTENT.equals(Files.readString(ownerMarker))) {
+                    throw new IOException("Transaction ownership marker is damaged: " + directory.getFileName());
                 }
                 boolean committed = hasStateMarker(directory, COMMITTED_NAME);
                 boolean rolledBack = hasStateMarker(directory, ROLLED_BACK_NAME);
@@ -254,13 +263,15 @@ final class ModrinthGraphInstallTransaction {
                     deleteTree(directory);
                     continue;
                 }
-                Path journalPath = directory.resolve(JOURNAL_NAME);
-                if (!Files.isRegularFile(journalPath, LinkOption.NOFOLLOW_LINKS)
-                        || Files.isSymbolicLink(journalPath)) {
-                    // A journal is published only after every backup is complete and before
-                    // the operation starts. An unprepared directory is safe to discard.
+                if (!Files.exists(journalPath, LinkOption.NOFOLLOW_LINKS)) {
+                    // The journal is published only after all backups are complete
+                    // and before the operation starts, so this directory is unprepared.
                     deleteTree(directory);
                     continue;
+                }
+                if (Files.isSymbolicLink(journalPath)
+                        || !Files.isRegularFile(journalPath, LinkOption.NOFOLLOW_LINKS)) {
+                    throw new IOException("Transaction journal is not a regular file: " + directory.getFileName());
                 }
                 Properties journal = readJournal(journalPath);
                 Path mods = root.resolve("mods").normalize();
