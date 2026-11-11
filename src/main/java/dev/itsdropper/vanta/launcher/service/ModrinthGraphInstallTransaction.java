@@ -61,6 +61,15 @@ final class ModrinthGraphInstallTransaction {
         if (Files.isSymbolicLink(root) || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
             throw new IOException("Instance directory must be an existing, non-symbolic-link directory.");
         }
+        JournalContext active = ACTIVE_JOURNAL.get();
+        if (active != null) {
+            if (!active.instanceRoot.equals(root)) {
+                throw new IOException("A Modrinth transaction cannot be nested across different instances.");
+            }
+            // Nested installer/repair calls participate in the outer transaction;
+            // acquiring the OS file lock again would trigger OverlappingFileLockException.
+            return operation.run();
+        }
         LockEntry entry = INSTANCE_LOCKS.compute(root, (ignored, existing) -> {
             LockEntry selected = existing == null ? new LockEntry() : existing;
             selected.users++;
@@ -174,7 +183,7 @@ final class ModrinthGraphInstallTransaction {
             journal.setProperty("managedCount", "0");
             writeJournal(transactionDirectory, journal);
 
-            JournalContext context = new JournalContext(mods, transactionDirectory, journal);
+            JournalContext context = new JournalContext(root, mods, transactionDirectory, journal);
             ACTIVE_JOURNAL.set(context);
             try {
                 T result = operation.run();
@@ -469,11 +478,13 @@ final class ModrinthGraphInstallTransaction {
     }
 
     private static final class JournalContext {
+        private final Path instanceRoot;
         private final Path modsDirectory;
         private final Path directory;
         private final Properties journal;
 
-        private JournalContext(Path modsDirectory, Path directory, Properties journal) {
+        private JournalContext(Path instanceRoot, Path modsDirectory, Path directory, Properties journal) {
+            this.instanceRoot = instanceRoot;
             this.modsDirectory = modsDirectory;
             this.directory = directory;
             this.journal = journal;
