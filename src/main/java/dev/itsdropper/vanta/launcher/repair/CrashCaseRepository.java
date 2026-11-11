@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
  */
 public final class CrashCaseRepository {
     private static final int SCHEMA_VERSION = 1;
-    private static final int MAX_CASES = 1_000;
+    private static final int MAX_CASES = 256;
     private static final int MAX_LOG_CHARS = 96 * 1024;
     private static final long MAX_STORE_BYTES = 32L * 1024 * 1024;
     private static final long MAX_IMPORT_BYTES = 2L * 1024 * 1024;
@@ -279,7 +279,12 @@ public final class CrashCaseRepository {
         long size = Files.size(storeFile);
         if (size > MAX_STORE_BYTES) throw new IOException("Crash case store exceeds its safety limit.");
         if (size == 0) return List.of();
-        StoreDocument document = JSON.readValue(Files.readAllBytes(storeFile), StoreDocument.class);
+        byte[] stored;
+        try (var input = Files.newInputStream(storeFile)) {
+            stored = input.readNBytes((int) MAX_STORE_BYTES + 1);
+        }
+        if (stored.length > MAX_STORE_BYTES) throw new IOException("Crash case store exceeds its safety limit.");
+        StoreDocument document = JSON.readValue(stored, StoreDocument.class);
         if (document.schemaVersion() != SCHEMA_VERSION) {
             throw new IOException("Unsupported crash case store schema: " + document.schemaVersion());
         }
