@@ -4,6 +4,7 @@ import net.raphimc.minecraftauth.MinecraftAuth;
 import net.raphimc.minecraftauth.step.AbstractStep;
 import net.raphimc.minecraftauth.step.java.session.StepFullJavaSession;
 import net.raphimc.minecraftauth.step.msa.StepMsaDeviceCode;
+import net.raphimc.minecraftauth.responsehandler.exception.MsaRequestException;
 import net.lenni0451.commons.httpclient.HttpClient;
 
 import dev.itsdropper.vanta.launcher.account.Account;
@@ -57,19 +58,27 @@ public class AuthManager {
             try {
                 refreshedSession = LOGIN.refresh(HTTP, savedAccount.getSession());
             } catch (Exception refreshFailure) {
-                if (isTransientFailure(refreshFailure)) {
-                    // Do not turn a temporary outage into a device-code login loop.
-                    // Keep the saved credential untouched so the user can retry later.
+                if (isRefreshTokenRejected(refreshFailure)) {
+                    // Microsoft explicitly rejected the refresh token. Only this
+                    // known OAuth outcome should start a new interactive sign-in.
+                    System.err.println("Saved Minecraft refresh token was rejected; interactive sign-in is required.");
+                    refreshedSession = null;
+                } else if (isTransientFailure(refreshFailure)) {
+                    // Keep the saved credential untouched so the user can retry.
                     throw new IOException(
                             "Microsoft authentication is temporarily unavailable. "
                                     + "Check the connection and retry; the saved account was preserved.",
                             refreshFailure
                     );
+                } else {
+                    // Unknown HTTP/API failures are not proof that the user's
+                    // refresh token is invalid. Never prompt for login blindly.
+                    throw new IOException(
+                            "Vanta could not refresh the saved Minecraft session. "
+                                    + "The account was preserved; retry before signing in again.",
+                            refreshFailure
+                    );
                 }
-                // A non-transient refresh rejection (for example, revoked credentials)
-                // requires the normal interactive sign-in flow below.
-                System.err.println("Saved Minecraft authentication was rejected; interactive sign-in is required.");
-                refreshedSession = null;
             }
 
             if (refreshedSession != null) {
@@ -102,6 +111,23 @@ public class AuthManager {
         AccountManager.saveAccount(account);
         System.out.println("Authenticated Minecraft account: " + account.getUsername());
         return account;
+    }
+
+    static boolean isRefreshTokenRejected(Throwable failure) {
+        for (Throwable current = failure; current != null; current = current.getCause()) {
+            if (current instanceof MsaRequestException msaFailure
+                    && isRefreshTokenRejectedError(msaFailure.getError())) {
+                return true;
+            }
+            if (current.getCause() == current) {
+                break;
+            }
+        }
+        return false;
+    }
+
+    static boolean isRefreshTokenRejectedError(String error) {
+        return "invalid_grant".equalsIgnoreCase(error);
     }
 
     static boolean isTransientFailure(Throwable failure) {
