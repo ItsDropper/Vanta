@@ -103,8 +103,11 @@ public class AccountService implements AutoCloseable {
             }
 
             /*
-             * Refresh only the active account.
+             * Keep the saved account selected even when Microsoft is temporarily
+             * unreachable. Background maintenance can retry without losing UI state.
              */
+            setCurrentAccount(activeAccount);
+            startSessionMaintenance();
             setSessionHealth(SessionHealth.REFRESHING, "Refreshing the saved Microsoft session.");
             Account refreshedAccount;
             try {
