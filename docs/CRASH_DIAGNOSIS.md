@@ -32,7 +32,7 @@ Redaction is best-effort, not a guarantee of anonymity. Inspect the sanitized ev
 
 ## Human review and verified fixes
 
-A proposed model category is only a suggestion. A reviewer must explicitly confirm a category or reject the case. Confirmed cases may include a short, sanitized note describing the fix that actually resolved the failure.
+A proposed model category is only a suggestion. A reviewer must explicitly confirm a category or reject the case. Confirmed labels and fix notes can be corrected later; rejected cases can be reopened for another review. Confirmed cases may include a short, sanitized note describing the fix that actually resolved the failure.
 
 Previously confirmed notes can appear in repair diagnostics for the same failure category. They are references only: Vanta does not run them, assume they apply to every mod/loader version, or perform destructive actions based on them.
 
