@@ -27,6 +27,10 @@ Telemetry is sent to the Vanta project's Cloudflare Worker and stored in its D1 
 
 Users can withdraw either permission at any time in Settings. Disabling a category stops future events for that category; there is no persistent client-side event queue. Because Vanta does not attach a user or installation identifier, it cannot locate an individual user's previously received rows for selective deletion. The intended server retention periods are 90 days for usage events and 30 days for crash reports, provided the corresponding Cloudflare scheduled cleanup trigger is deployed and enabled.
 
+### Local crash-case review
+
+The separate Local crash-case review tool is local-only and requires an explicit user action to save the current failure or import a crash log. It stores a sanitized copy under the Vanta data directory, groups duplicates, and lets the user manually confirm or reject causes and record verified fix notes. The source log is not modified. The review queue has no network client and is not part of optional telemetry. Confirmed cases and fix notes can be exported to a user-selected local file; Vanta never automatically sends these exports to GitHub or another service. Redaction is best-effort, so inspect the sanitized report and any export before sharing. See [Crash diagnosis and case review](docs/CRASH_DIAGNOSIS.md) for the storage limits and review process.
+
 The Repair & Diagnostics page has separate delivery tests. The usage test sends a synthetic telemetry_test event only when usage statistics are enabled and it must be excluded from usage aggregates. The crash test sends a clearly labelled VantaTelemetryTestException sample through the crash endpoint only when crash diagnostics are enabled; it does not crash Minecraft.
 
 Do not send logs, crash reports, screenshots, or configuration files to anyone without checking them first. They may contain usernames, local file paths, server addresses, or other identifying information.
