@@ -42,7 +42,7 @@ class CrashCaseRepositoryTest {
         var rejected = repository.recordForReview(
                 "java.lang.IllegalStateException: unrelated application text",
                 FailureCategory.UNKNOWN);
-        repository.confirm(pending.id(), FailureCategory.MOD_MIXIN_FAILURE);
+        repository.confirm(pending.id(), FailureCategory.MOD_MIXIN_FAILURE, "Update the incompatible mixin mod and verify the target method exists.");
         repository.reject(rejected.id());
 
         Path export = temporaryDirectory.resolve("reviewed-cases.tsv");
@@ -51,6 +51,41 @@ class CrashCaseRepositoryTest {
         assertTrue(content.startsWith("# Reviewed Vanta crash cases"));
         assertTrue(content.contains("MOD_MIXIN_FAILURE\t"));
         assertFalse(content.contains("UNKNOWN\t"));
+    }
+
+    @Test
+    void verifiedFixesAreSanitizedAndExportedSeparately() throws Exception {
+        CrashCaseRepository repository = new CrashCaseRepository(temporaryDirectory.resolve("cases.json"));
+        var item = repository.recordForReview(
+                "java.lang.IllegalStateException: mod startup failure for user.name=Alice", null);
+        var confirmed = repository.confirm(item.id(), FailureCategory.MOD_CRASH,
+                "Removed the incompatible mod from C:\\Users\\Alice\\AppData\\Vanta\\instances.");
+        assertFalse(confirmed.verifiedFix().contains("Alice"));
+        Path export = temporaryDirectory.resolve("verified-fixes.json");
+        assertEquals(1, repository.exportVerifiedFixes(export));
+        String json = Files.readString(export);
+        assertTrue(json.contains("MOD_CRASH"));
+        assertTrue(json.contains("Removed the incompatible mod"));
+        assertFalse(json.contains("Alice"));
+    }
+
+    @Test
+    void readsPreviousStoreSchemaAndUpgradesOnNextWrite() throws Exception {
+        Path store = temporaryDirectory.resolve("cases.json");
+        String legacy = """
+                {"schemaVersion":1,"cases":[{
+                  "id":"legacy-case","createdAtEpochMillis":1,
+                  "fingerprint":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                  "status":"PENDING","proposedCategory":null,"confirmedCategory":null,
+                  "occurrences":1,"sanitizedLog":"java.lang.IllegalStateException: legacy"
+                }]}
+                """;
+        Files.writeString(store, legacy);
+        CrashCaseRepository repository = new CrashCaseRepository(store);
+        var item = repository.listCases().getFirst();
+        assertEquals("", item.verifiedFix());
+        repository.confirm(item.id(), FailureCategory.MOD_CRASH, "Verified safe fix.");
+        assertTrue(Files.readString(store).contains("\"schemaVersion\" : 2"));
     }
 
     @Test
