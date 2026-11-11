@@ -21,6 +21,14 @@ public final class ModrinthInstallService {
         this.dependencies = dependencies;
     }
 
+    /**
+     * Restores any interrupted Modrinth graph installation before an instance
+     * is exposed to the launcher or used to start Minecraft.
+     */
+    public static void recoverPendingTransactions(Instance instance) throws IOException {
+        ModrinthGraphInstallTransaction.recover(instance);
+    }
+
 public Path installMod(
             Instance instance,
             ModrinthProject project
