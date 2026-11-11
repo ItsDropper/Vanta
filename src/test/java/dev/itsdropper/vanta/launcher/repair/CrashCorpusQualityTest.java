@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,8 +38,11 @@ class CrashCorpusQualityTest {
                 count++;
             }
         }
-        assertEquals(63, count, "Unexpected corpus size; update the reviewed corpus intentionally");
-        assertEquals(21, categories.size(), "Every currently supported diagnosis family needs coverage");
+        assertEquals(66, count, "Unexpected corpus size; update the reviewed corpus intentionally");
+        Set<FailureCategory> expectedCategories = EnumSet.allOf(FailureCategory.class);
+        expectedCategories.remove(FailureCategory.UNKNOWN);
+        assertEquals(expectedCategories, categories,
+                "Every actionable diagnosis category must have labelled training coverage");
     }
 
     @Test
