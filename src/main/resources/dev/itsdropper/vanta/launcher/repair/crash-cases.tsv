@@ -1,0 +1,64 @@
+# Label<TAB>labelled crash-log case. Keep examples factual and independently labelled.
+MOD_DEPENDENCY	ModResolutionException requires dependency cloth config version 15 but none installed
+MOD_DEPENDENCY	Missing mandatory dependency fabric api required by mod sodium
+MOD_DEPENDENCY	Mod depends on another mod which is absent from the mods directory
+JAVA_VERSION	UnsupportedClassVersionError class file version 69 runtime recognizes up to 65
+JAVA_VERSION	Mod requires Java 25 but launcher selected Java 21
+JAVA_VERSION	Minecraft version requires a newer Java runtime than selected executable
+JVM_ARGUMENTS	Unrecognized VM option UseZGCExperimental
+JVM_ARGUMENTS	Invalid maximum heap size could not create Java virtual machine
+JVM_ARGUMENTS	Could not create the Java virtual machine invalid JVM argument
+NATIVE	UnsatisfiedLinkError failed to load native library lwjgl
+NATIVE	Could not load native library glfw dll architecture mismatch
+NATIVE	No natives available for current operating system classifier
+GRAPHICS	GLFW error 65542 WGL driver does not appear to support OpenGL
+GRAPHICS	Failed to create OpenGL context pixel format not accelerated
+GRAPHICS	No OpenGL context found graphics initialization failed
+AUTHENTICATION	Failed to verify username invalid session token expired
+AUTHENTICATION	Not authenticated with minecraft.net invalid token
+AUTHENTICATION	Minecraft services unavailable authentication servers down
+DISK_SPACE	No space left on device while writing libraries
+DISK_SPACE	Insufficient disk space could not extract archive
+DISK_SPACE	There is not enough space on the disk to download assets
+PERMISSION	AccessDeniedException permission denied opening game directory
+PERMISSION	Windows access is denied file is locked by another process
+PERMISSION	Cannot write file access denied security policy
+NETWORK	UnknownHostException resources download host
+NETWORK	Connection timed out while downloading Minecraft metadata
+NETWORK	HTTP 429 too many requests connection refused
+CORRUPT_LIBRARY	ZipException zip end header not found in library jar
+CORRUPT_LIBRARY	Invalid or corrupt jarfile client jar
+CORRUPT_LIBRARY	Unexpected end of zlib input stream corrupt archive
+MOD_MIXIN_FAILURE	MixinApplyError critical injection failure could not find target method
+MOD_MIXIN_FAILURE	InvalidInjectionException failed to apply mixin target missing
+MOD_MIXIN_FAILURE	Mixin apply failed incompatible mod transformation
+DUPLICATE_MOD	Duplicate mod id already exists in loader metadata
+DUPLICATE_MOD	Duplicate mods found duplicate entry jar
+DUPLICATE_MOD	Mod id examplemod already exists in mods folder
+MOD_CRASH	Exception during mod initialization failed to start mod example
+MOD_CRASH	Error during prelaunch entrypoint mod crashed
+MOD_CRASH	Mod failed to initialize caused by runtime exception
+CONFIGURATION	Malformed configuration file failed to parse json
+CONFIGURATION	Invalid config file parser reported syntax error
+CONFIGURATION	Could not read configuration toml parsing failed
+JAVA_RUNTIME	Exec format error selected java executable wrong architecture
+JAVA_RUNTIME	Not a valid Win32 application java binary
+JAVA_RUNTIME	Cannot run executable architecture mismatch
+MISSING_LIBRARY	ClassNotFoundException missing library classpath entry
+MISSING_LIBRARY	No such file or directory required library missing
+MISSING_LIBRARY	Could not find required Minecraft library file
+MISSING_ASSET	Asset index not found missing asset object
+MISSING_ASSET	Missing resource asset object download required
+MISSING_ASSET	Asset index missing from shared assets directory
+CLASSPATH	NoClassDefFoundError class missing from resolved classpath
+CLASSPATH	ClassNotFoundException dependency class unavailable
+CLASSPATH	Could not load main class classpath is incomplete
+LOADER	Loader bootstrap class missing during startup
+LOADER	Failed to initialize modloader bootstrap
+LOADER	Loader metadata missing required launch entrypoint
+INSTALLATION	Minecraft client jar not found installation incomplete
+INSTALLATION	Version metadata not found Minecraft installation damaged
+INSTALLATION	Invalid installation metadata loader profile missing
+MINECRAFT_VERSION	Incompatible Minecraft version unsupported by loader
+MINECRAFT_VERSION	Minecraft version not supported by installed mod
+MINECRAFT_VERSION	Unsupported Minecraft version required by modpack
