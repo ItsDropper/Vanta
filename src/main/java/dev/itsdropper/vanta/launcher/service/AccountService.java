@@ -303,6 +303,12 @@ public class AccountService {
         long certificateExpiry = account.getSession().getPlayerCertificates() == null
                 ? Long.MAX_VALUE
                 : account.getSession().getPlayerCertificates().getExpireTimeMs();
+        return isSessionRefreshDue(minecraftTokenExpiry, certificateExpiry, nowMillis);
+    }
+
+    static boolean isSessionRefreshDue(long minecraftTokenExpiry,
+                                       long certificateExpiry,
+                                       long nowMillis) {
         return Math.min(minecraftTokenExpiry, certificateExpiry) <= nowMillis;
     }
 
