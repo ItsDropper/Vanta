@@ -154,6 +154,25 @@ class CrashCaseRepositoryTest {
     }
 
     @Test
+    void localStoreUsesOwnerOnlyPosixPermissionsWhereSupported() throws Exception {
+        Path store = temporaryDirectory.resolve("private-review").resolve("cases.json");
+        new CrashCaseRepository(store).recordForReview("java.lang.IllegalStateException: private case", null);
+        try {
+            assertEquals(java.util.Set.of(
+                            java.nio.file.attribute.PosixFilePermission.OWNER_READ,
+                            java.nio.file.attribute.PosixFilePermission.OWNER_WRITE),
+                    Files.getPosixFilePermissions(store));
+            assertEquals(java.util.Set.of(
+                            java.nio.file.attribute.PosixFilePermission.OWNER_READ,
+                            java.nio.file.attribute.PosixFilePermission.OWNER_WRITE,
+                            java.nio.file.attribute.PosixFilePermission.OWNER_EXECUTE),
+                    Files.getPosixFilePermissions(store.getParent()));
+        } catch (UnsupportedOperationException unsupported) {
+            // Windows uses inherited NTFS ACLs rather than POSIX mode bits.
+        }
+    }
+
+    @Test
     void exportCannotOverwriteItsOwnReviewDatabase() throws Exception {
         Path store = temporaryDirectory.resolve("cases.json");
         CrashCaseRepository repository = new CrashCaseRepository(store);
