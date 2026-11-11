@@ -84,8 +84,7 @@ public Path installMod(
 public Path installModVersion(
             Instance instance,
             String projectId,
-            ModrinthVersion version,
-            Consumer<String> progress
+            ModrinthVersion version
     ) throws IOException, InterruptedException {
 
         if (instance == null || projectId == null || projectId.isBlank() || version == null) {
@@ -210,7 +209,8 @@ private void removeInstalledMod(
 private Path installResolvedVersion(
             Instance instance,
             String projectId,
-            ModrinthVersion version
+            ModrinthVersion version,
+            Consumer<String> progress
     ) throws IOException, InterruptedException {
 
         if (projectId == null || projectId.isBlank() || version == null
