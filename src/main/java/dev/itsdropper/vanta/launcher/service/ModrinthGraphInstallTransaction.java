@@ -342,9 +342,6 @@ final class ModrinthGraphInstallTransaction {
                 }
                 Files.deleteIfExists(registry);
             }
-        } catch (IOException failure) {
-            throw failure;
-        }
     }
 
     private static void writeJournal(Path directory, Properties journal) throws IOException {
