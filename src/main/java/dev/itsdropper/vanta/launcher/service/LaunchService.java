@@ -164,12 +164,8 @@ public class LaunchService {
 
             if (account == null) {
                 account = accountService.login();
-            } else {
-                // MinecraftAuth refreshes only expired token-chain steps.
-                // Run it immediately before assembling the game command so
-                // a launcher left open for hours never launches with stale auth.
-                account = accountService.refreshCurrentAccount();
             }
+            String launchAccountId = account.getUuid();
 
             System.out.println(
                     "Launching instance: "
@@ -240,6 +236,11 @@ public class LaunchService {
 
             crashReportsBeforeLaunch = snapshotCrashReports(instance.getDirectory());
             launchStartedAtMillis = System.currentTimeMillis();
+
+            // Refresh after instance preparation, immediately before
+            // creating the process. This avoids using a token that expired
+            // while assets, libraries or repairs were being prepared.
+            account = accountService.ensureFreshSession(launchAccountId);
 
             Process process =
                     MinecraftLauncher.launch(
