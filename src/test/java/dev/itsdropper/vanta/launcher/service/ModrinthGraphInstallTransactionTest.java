@@ -39,6 +39,7 @@ class ModrinthGraphInstallTransactionTest {
 
         IOException failure = assertThrows(IOException.class, () ->
                 ModrinthGraphInstallTransaction.execute(instance, () -> {
+                    ModrinthGraphInstallTransaction.registerManagedPath(instance, originalMod);
                     Files.writeString(originalMod, "partially replaced bytes");
                     Path newlyInstalled = mods.resolve("new-project.jar");
                     ModrinthGraphInstallTransaction.registerManagedPath(instance, newlyInstalled);
@@ -117,6 +118,7 @@ class ModrinthGraphInstallTransactionTest {
 
         InterruptedException failure = assertThrows(InterruptedException.class, () ->
                 ModrinthGraphInstallTransaction.execute(instance, () -> {
+                    ModrinthGraphInstallTransaction.registerManagedPath(instance, originalMod);
                     Files.writeString(originalMod, "partially updated");
                     ModrinthGraphInstallTransaction.registerManagedPath(instance, mods.resolve("new.jar"));
                     Files.writeString(mods.resolve("new.jar"), "new artifact");
