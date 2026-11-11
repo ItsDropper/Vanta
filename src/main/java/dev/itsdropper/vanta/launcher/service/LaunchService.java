@@ -749,11 +749,16 @@ public class LaunchService {
     private LaunchData buildLaunchData(Instance instance, ServerTarget server) {
         long started = System.nanoTime();
         LaunchData data = LaunchDataBuilder.build(instance, server);
-        LaunchPerformanceTracker.record(
-                instance,
-                LauncherSettings.isExperimentalLaunchCacheEnabled(),
-                System.nanoTime() - started
-        );
+        try {
+            LaunchPerformanceTracker.record(
+                    instance,
+                    LauncherSettings.isExperimentalLaunchCacheEnabled(),
+                    System.nanoTime() - started
+            );
+        } catch (RuntimeException metricsFailure) {
+            System.err.println("[Vanta Launch] Could not record experimental launch metrics: "
+                    + metricsFailure.getClass().getSimpleName());
+        }
         return data;
     }
 
