@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
@@ -155,7 +156,8 @@ public class AccountManager {
                              ACCOUNTS_DIRECTORY
                      )) {
 
-            stream
+            try {
+                stream
                     .filter(path ->
                             path.getFileName()
                                     .toString()
@@ -177,6 +179,9 @@ public class AccountManager {
                             throw new AccountLoadFailure(path, failure);
                         }
                     });
+            } catch (AccountLoadFailure failure) {
+                throw new IOException(failure.getMessage(), failure.getCause());
+            }
         }
 
         return accounts;
@@ -354,17 +359,14 @@ public class AccountManager {
          * If the account already exists in the new
          * storage, there is nothing to migrate.
          */
-        if (Files.exists(newFile)) {
-
-            System.out.println(
-                    "Legacy account already exists "
-                            + "in new account storage."
-            );
-
-            Files.delete(
-                    LEGACY_FILE
-            );
-
+        if (Files.exists(newFile, LinkOption.NOFOLLOW_LINKS)) {
+            // Never discard the legacy credential until the replacement can
+            // actually be decrypted and parsed successfully.
+            Account verification = loadAccount(uuid);
+            if (verification == null) {
+                throw new IOException("Existing account migration target could not be verified.");
+            }
+            Files.delete(LEGACY_FILE);
             return;
         }
 
@@ -407,6 +409,11 @@ public class AccountManager {
     private static Account loadAccountFile(
             Path file
     ) throws IOException {
+
+        if (Files.isSymbolicLink(file)
+                || !Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Account storage entry is not a regular file: " + file.getFileName());
+        }
 
         String content =
                 Files.readString(
