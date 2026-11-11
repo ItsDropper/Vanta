@@ -273,7 +273,7 @@ private Path installResolvedVersion(
 
         try {
             // Download to a unique staging file; never touch the installed version during transfer.
-            progress.accept("Downloading " + filename + "…");
+            reportProgress(progress, "Downloading " + filename + "…");
             downloader.download(file.getUrl(), stagedFile);
             if (Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException("Mod installation was cancelled.");
@@ -573,7 +573,7 @@ private Path installModProject(
                         );
                     }
 
-                    progress.accept("Resolving dependency " + dependencyProjectId + "…");
+                    reportProgress(progress, "Resolving dependency " + dependencyProjectId + "…");
                     installModVersion(
                             instance,
                             dependencyProjectId,
