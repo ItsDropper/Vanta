@@ -21,8 +21,15 @@ import java.util.concurrent.TimeoutException;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AuthManager {
+
+    public static final class LoginCancelledException extends IOException {
+        public LoginCancelledException(Throwable cause) {
+            super("Microsoft device-code sign-in was cancelled.", cause);
+        }
+    }
 
     private static final AbstractStep<?, StepFullJavaSession.FullJavaSession> LOGIN =
             MinecraftAuth.builder()
@@ -96,7 +103,11 @@ public class AuthManager {
 
         StepFullJavaSession.FullJavaSession session;
         Thread loginThread = Thread.currentThread();
-        Runnable cancelOnPopupClose = loginThread::interrupt;
+        AtomicBoolean popupClosed = new AtomicBoolean();
+        Runnable cancelOnPopupClose = () -> {
+            popupClosed.set(true);
+            loginThread.interrupt();
+        };
         LoginPopup.addOnClosedListener(cancelOnPopupClose);
         try {
             session = LOGIN.getFromInput(
@@ -108,9 +119,13 @@ public class AuthManager {
                         );
                     })
             );
+        } catch (Exception failure) {
+            if (popupClosed.get()) {
+                throw new LoginCancelledException(failure);
+            }
+            throw failure;
         } finally {
-            // Closing the popup interrupts the polling task. Remove the listener
-            // first so successful completion does not interrupt the executor thread.
+            // Remove the listener before programmatically closing the popup.
             LoginPopup.removeOnClosedListener(cancelOnPopupClose);
             LoginPopup.close();
         }
@@ -139,7 +154,7 @@ public class AuthManager {
     public static boolean isInterruptedFailure(Throwable failure) {
         Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
         for (Throwable current = failure; current != null && visited.add(current); current = current.getCause()) {
-            if (current instanceof InterruptedException) return true;
+            if (current instanceof InterruptedException || current instanceof LoginCancelledException) return true;
         }
         return false;
     }
