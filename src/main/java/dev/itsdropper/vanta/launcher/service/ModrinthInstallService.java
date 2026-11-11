@@ -225,6 +225,9 @@ private Path installResolvedVersion(
         if (rollbackFile != null) {
             ModrinthGraphInstallTransaction.registerManagedPath(instance, rollbackFile);
         }
+        if (previousFile != null) {
+            ModrinthGraphInstallTransaction.registerManagedPath(instance, previousFile);
+        }
 
         try {
             // Download to a unique staging file; never touch the installed version during transfer.
