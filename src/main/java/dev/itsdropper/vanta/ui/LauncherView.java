@@ -309,7 +309,7 @@ public class LauncherView {
         stateCenterView = new StateCenterView();
         downloadCenterView = new DownloadCenterView(screenshotMode);
         serverManagerView = new ServerManagerView();
-        experimentalView = new ExperimentalView(accountService);
+        experimentalView = new ExperimentalView(accountService, this::showCrashCaseReviewView);
 
         settingsView =
                 new SettingsView(
