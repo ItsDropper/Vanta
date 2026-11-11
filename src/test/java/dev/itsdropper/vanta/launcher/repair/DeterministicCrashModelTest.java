@@ -11,7 +11,7 @@ class DeterministicCrashModelTest {
         assertCategory("UnsupportedClassVersionError: class file version 69, runtime only recognizes up to 65",
                 FailureCategory.JAVA_VERSION);
         assertCategory("java.net.UnknownHostException: failed to resolve resources download host", FailureCategory.NETWORK);
-        assertCategory("org.spongepowered.asm.mixin.transformer.throwables.MixinApplyError: critical injection failure",
+        assertCategory("org.spongepowered.asm.mixin.transformer.throwables.MixinApplyError while transforming target method",
                 FailureCategory.MOD_MIXIN_FAILURE);
         assertCategory("java.util.zip.ZipException: unexpected end of zlib input stream", FailureCategory.CORRUPT_LIBRARY);
     }
