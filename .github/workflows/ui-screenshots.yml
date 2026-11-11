@@ -42,14 +42,14 @@ jobs:
           mkdir -p "$XDG_DATA_HOME"
           xvfb-run -a -s "-screen 0 1600x1000x24" ./gradlew run --args="--capture-ui-screenshots build/ui-screenshots"
           screenshots=(build/ui-screenshots/[0-9][0-9]-*.png)
-          test "${#screenshots[@]}" -eq 9
+          test "${#screenshots[@]}" -eq 10
           test -s build/ui-screenshots/index.md
           test -s build/ui-screenshots/overview.png
           for screenshot in "${screenshots[@]}"; do
             test -s "$screenshot"
             test "$(stat -c%s "$screenshot")" -gt 12000
           done
-          test "$(sha256sum "${screenshots[@]}" | awk '{print $1}' | sort -u | wc -l)" -eq 9
+          test "$(sha256sum "${screenshots[@]}" | awk '{print $1}' | sort -u | wc -l)" -eq 10
           additional_screenshots=(build/ui-screenshots/additional/[0-9][0-9]-*.png)
           test "${#additional_screenshots[@]}" -eq 13
           test -s build/ui-screenshots/additional/index.md
@@ -64,7 +64,7 @@ jobs:
           import struct
 
           groups = [
-              (Path("build/ui-screenshots"), 9),
+              (Path("build/ui-screenshots"), 10),
               (Path("build/ui-screenshots/additional"), 13),
           ]
           for directory, expected_count in groups:
