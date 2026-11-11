@@ -37,7 +37,8 @@ public final class IconView {
         PACKAGE,
         SHIELD,
         SKIN,
-        TERMINAL
+        TERMINAL,
+        EXPERIMENTAL
     }
 
     private IconView() {
@@ -118,6 +119,8 @@ public final class IconView {
                     "M12 2a3 3 0 0 0-3 3v2H7a3 3 0 0 0-3 3v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a3 3 0 0 0-3-3h-2V5a3 3 0 0 0-3-3m-1 5V5a1 1 0 0 1 2 0v2zm-4 4h2v2H7zm8 0h2v2h-2zM8 16h8v2H8z";
             case TERMINAL ->
                     "M4 4h16v16H4zm3 4 4 4-4 4 1.4 1.4 5.4-5.4-5.4-5.4zM13 16h4v-2h-4z";
+            case EXPERIMENTAL ->
+                    "M9 3h6v2h-1v4.2l5.4 8.1A2.5 2.5 0 0 1 17.3 21H6.7a2.5 2.5 0 0 1-2.1-3.7L10 9.2V5H9zm3 7-5.7 8.5a.5.5 0 0 0 .4.8h10.6a.5.5 0 0 0 .4-.8L12 10z";
         };
     }
 }
