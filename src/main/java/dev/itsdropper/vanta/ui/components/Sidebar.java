@@ -91,17 +91,17 @@ public class Sidebar extends VBox {
         );
 
         setPadding(new Insets(
-                VantaUI.spacing(6),
                 VantaUI.spacing(4),
-                VantaUI.spacing(4),
-                VantaUI.spacing(4)
+                VantaUI.spacing(2),
+                VantaUI.spacing(3),
+                VantaUI.spacing(2)
         ));
 
-        setSpacing(VantaUI.spacing(2));
+        setSpacing(VantaUI.spacing(1));
 
-        setPrefWidth(260);
-        setMinWidth(260);
-        setMaxWidth(260);
+        setPrefWidth(236);
+        setMinWidth(236);
+        setMaxWidth(236);
 
         // ---------------------------------------------------------
         // BRAND
@@ -234,7 +234,7 @@ public class Sidebar extends VBox {
         label.getStyleClass().add("sidebar-section-label");
         VantaUI.styleText(label, VantaUI.TextRole.EYEBROW);
         label.setMaxWidth(Double.MAX_VALUE);
-        VBox.setMargin(label, new Insets(12, 8, 2, 8));
+        VBox.setMargin(label, new Insets(9, 8, 2, 8));
         getChildren().add(label);
     }
 
@@ -306,19 +306,19 @@ public class Sidebar extends VBox {
         if (compact) {
             getStyleClass().add("sidebar-compact");
             setPadding(new Insets(
-                    VantaUI.spacing(4),
-                    VantaUI.spacing(2),
                     VantaUI.spacing(3),
-                    VantaUI.spacing(2)
+                    VantaUI.spacing(1),
+                    VantaUI.spacing(2),
+                    VantaUI.spacing(1)
             ));
-            setPrefWidth(76);
-            setMinWidth(76);
-            setMaxWidth(76);
+            setPrefWidth(68);
+            setMinWidth(68);
+            setMaxWidth(68);
             logo.setText("V");
             subtitle.setVisible(false);
             subtitle.setManaged(false);
             branding.setPadding(new Insets(
-                    VantaUI.spacing(1), 0, VantaUI.spacing(5), 0
+                    VantaUI.spacing(1), 0, VantaUI.spacing(4), 0
             ));
             build.setVisible(false);
             build.setManaged(false);
@@ -329,21 +329,21 @@ public class Sidebar extends VBox {
         } else {
             getStyleClass().remove("sidebar-compact");
             setPadding(new Insets(
-                    VantaUI.spacing(6),
                     VantaUI.spacing(4),
-                    VantaUI.spacing(4),
-                    VantaUI.spacing(4)
+                    VantaUI.spacing(2),
+                    VantaUI.spacing(3),
+                    VantaUI.spacing(2)
             ));
-            setPrefWidth(260);
-            setMinWidth(260);
-            setMaxWidth(260);
+            setPrefWidth(236);
+            setMinWidth(236);
+            setMaxWidth(236);
             logo.setText("VANTA");
             subtitle.setVisible(true);
             subtitle.setManaged(true);
             branding.setPadding(new Insets(
                     VantaUI.spacing(1),
                     VantaUI.spacing(2),
-                    VantaUI.spacing(6),
+                    VantaUI.spacing(4),
                     VantaUI.spacing(2)
             ));
             build.setVisible(true);
