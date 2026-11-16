@@ -129,22 +129,42 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         VBox recentSection = createRecentInstancesSection();
         VBox serverCard = createRecentServersCard();
 
-        FlowPane activityLayout = new FlowPane();
-        activityLayout.setHgap(28);
-        activityLayout.setVgap(22);
-        activityLayout.prefWrapLengthProperty().bind(activityLayout.widthProperty());
+        VBox activityLayout = new VBox(22);
         activityLayout.setMaxWidth(Double.MAX_VALUE);
         activityLayout.getStyleClass().add("home-activity-layout");
+
+        HBox activityRow = new HBox(28, recentSection, serverCard);
+        activityRow.setMaxWidth(Double.MAX_VALUE);
+        activityRow.getStyleClass().add("home-activity-row");
         recentSection.setMinWidth(0);
         serverCard.setMinWidth(0);
-        recentSection.prefWidthProperty().bind(Bindings.createDoubleBinding(
-                () -> responsiveActivityWidth(activityLayout, 0.59),
-                activityLayout.widthProperty()
-        ));
-        serverCard.prefWidthProperty().bind(Bindings.createDoubleBinding(
-                () -> responsiveActivityWidth(activityLayout, 0.41),
-                activityLayout.widthProperty()
-        ));
+        recentSection.setMaxWidth(Double.MAX_VALUE);
+        serverCard.setMaxWidth(Double.MAX_VALUE);
+        HBox.setHgrow(recentSection, Priority.ALWAYS);
+        HBox.setHgrow(serverCard, Priority.ALWAYS);
+
+        boolean[] stackedActivity = {true};
+        Runnable updateActivityLayout = () -> {
+            boolean stack = activityLayout.getWidth() < 860;
+            if (stack == stackedActivity[0]) return;
+            stackedActivity[0] = stack;
+
+            if (stack) {
+                activityRow.getChildren().clear();
+                recentSection.prefWidthProperty().unbind();
+                serverCard.prefWidthProperty().unbind();
+                recentSection.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                serverCard.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                activityLayout.getChildren().setAll(recentSection, serverCard);
+            } else {
+                activityLayout.getChildren().clear();
+                activityRow.getChildren().setAll(recentSection, serverCard);
+                recentSection.prefWidthProperty().bind(activityRow.widthProperty().multiply(0.59).subtract(14));
+                serverCard.prefWidthProperty().bind(activityRow.widthProperty().multiply(0.41).subtract(14));
+                activityLayout.getChildren().setAll(activityRow);
+            }
+        };
+        activityLayout.widthProperty().addListener((observable, previousWidth, nextWidth) -> updateActivityLayout.run());
         activityLayout.getChildren().setAll(recentSection, serverCard);
 
         VBox contentBox = new VBox(
