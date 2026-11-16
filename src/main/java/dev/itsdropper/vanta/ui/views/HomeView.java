@@ -298,14 +298,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         return card;
     }
 
-    private double responsiveActivityWidth(FlowPane layout, double share) {
-        double width = layout.getWidth();
-        if (width <= 1) return 420;
-        if (width < 860) return Math.max(0, width);
-        return Math.max(280, (width - layout.getHgap()) * share);
-    }
-
-
     /**
      * Refresh dashboard data whenever the user returns to Home. Instance
      * creation, imports and repairs can change the library without a launch
