@@ -259,3 +259,47 @@
     -fx-border-color: -vantatext;
     -fx-border-width: 2px;
 }
+
+/* First-run home: let the Minecraft landscape carry the visual identity. */
+.home-page .home-empty-card {
+    -fx-background-color: #101a20;
+    -fx-background-radius: 16px;
+    -fx-border-color: #344b59;
+    -fx-border-width: 1px;
+    -fx-border-radius: 16px;
+}
+
+.home-page .home-empty-backdrop {
+    -fx-background-radius: 16px;
+}
+
+.home-page .home-empty-card .home-empty-eyebrow {
+    -fx-text-fill: #a8c5d1;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.home-page .home-empty-card .home-empty-title {
+    -fx-text-fill: #f3f7f8;
+    -fx-font-size: 32px;
+    -fx-font-weight: 800;
+}
+
+.home-page .home-empty-card .home-empty-description {
+    -fx-text-fill: #c0d0d4;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 3px;
+}
+
+.home-page .home-empty-card .primary-button {
+    -fx-min-height: 46px;
+    -fx-padding: 0 22px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 700;
+}
+
+.home-page .home-empty-card .primary-button:focused {
+    -fx-border-color: #f3f7f8;
+    -fx-border-width: 2px;
+}
