@@ -21,7 +21,7 @@ import java.util.Properties;
 public final class ThemeManager {
 
     public static final String DEFAULT_ACCENT = "#63D39A";
-    public static final String DEFAULT_THEME = "Forest";
+    public static final String DEFAULT_THEME = "Vanta";
 
     public record Theme(
             String name,
@@ -44,8 +44,8 @@ public final class ThemeManager {
     private static final Map<String, Theme> THEMES = new LinkedHashMap<>();
 
     static {
-        register(new Theme("Vanta", "#3978F6", "#0B0D12", "#121620", "#191F2B", "#202838", "#252C39",
-                "#F3F5FA", "#929BAD", "#6E788A", "#E48A94", "#69D99B"));
+        register(new Theme("Vanta", "#6D9BFF", "#0D121A", "#151E29", "#1C2938", "#26374A", "#35485F",
+                "#F0F5FC", "#A0B1C8", "#7A8DA8", "#E48A94", "#69D99B"));
         register(new Theme("Midnight", "#7C9CFF", "#090B12", "#121622", "#181E2C", "#222A3A", "#2B3447",
                 "#F2F5FF", "#8994AA", "#646F84", "#EF8C98", "#69D9A2"));
         register(new Theme("Nord", "#88C0D0", "#0E1419", "#182127", "#202B33", "#293740", "#354651",
