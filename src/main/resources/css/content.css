@@ -1017,3 +1017,10 @@
     -fx-border-width: 0;
     -fx-padding: 0;
 }
+
+.vanta-ui-root .global-mods-page .instance-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
