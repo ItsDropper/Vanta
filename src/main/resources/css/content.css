@@ -649,7 +649,7 @@
 }
 .global-mods-page .modrinth-project-title {
     -fx-font-size: 15px;
-    -fx-font-weight: 750;
+    -fx-font-weight: 700;
     -fx-text-fill: -vantatext;
 }
 .global-mods-page .modrinth-project-author {
@@ -962,3 +962,50 @@
     -fx-padding: 10px;
 }
 .screenshots-page .screenshot-name { -fx-padding: 4px 2px 1px 2px; }
+
+/* Modrinth discovery: keep content navigation readable and the results canvas useful. */
+.global-mods-page .modrinth-content-segments {
+    -fx-max-width: 620px;
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+    -fx-padding: 4px;
+}
+
+.global-mods-page .modrinth-content-segment {
+    -fx-min-width: 92px;
+    -fx-pref-width: 112px;
+    -fx-padding: 8px 10px;
+    -fx-font-size: 11px;
+}
+
+.global-mods-page .instances-scroll,
+.global-mods-page .instances-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.global-mods-page .vanta-empty-state {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 14px;
+    -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
+    -fx-border-width: 1px 1px 1px 3px;
+    -fx-border-radius: 14px;
+    -fx-padding: 32px;
+}
+
+.global-mods-page .vanta-empty-state-icon {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 30px;
+    -fx-font-weight: 800;
+}
+
+.global-mods-page .vanta-empty-state-title {
+    -fx-font-size: 21px;
+    -fx-font-weight: 800;
+}
+
+.global-mods-page .vanta-empty-state-description {
+    -fx-font-size: 13px;
+}
