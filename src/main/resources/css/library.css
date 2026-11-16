@@ -302,17 +302,22 @@
    ============================================================= */
 
 .instance-empty {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: transparent;
+    -fx-padding: 24px 28px;
 }
 
 .instance-empty-icon {
-    -fx-text-fill: -vantaborder;
-    -fx-font-size: 34px;
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 32px;
+}
+
+.instance-empty-copy {
+    -fx-spacing: 7px;
 }
 
 .instance-empty-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 16px;
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
 }
 
