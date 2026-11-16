@@ -41,7 +41,6 @@ import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
-import dev.itsdropper.vanta.ui.components.LanguagePreferenceControl;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -126,18 +125,33 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 createInstanceButton
         );
 
-        LanguagePreferenceControl languagePreferences = new LanguagePreferenceControl();
         VBox featuredSection = createFeaturedSection();
         VBox recentSection = createRecentInstancesSection();
         VBox serverCard = createRecentServersCard();
 
+        FlowPane activityLayout = new FlowPane();
+        activityLayout.setHgap(28);
+        activityLayout.setVgap(22);
+        activityLayout.prefWrapLengthProperty().bind(activityLayout.widthProperty());
+        activityLayout.setMaxWidth(Double.MAX_VALUE);
+        activityLayout.getStyleClass().add("home-activity-layout");
+        recentSection.setMinWidth(0);
+        serverCard.setMinWidth(0);
+        recentSection.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> responsiveActivityWidth(activityLayout, 0.59),
+                activityLayout.widthProperty()
+        ));
+        serverCard.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> responsiveActivityWidth(activityLayout, 0.41),
+                activityLayout.widthProperty()
+        ));
+        activityLayout.getChildren().setAll(recentSection, serverCard);
+
         VBox contentBox = new VBox(
-                22,
+                30,
                 header,
-                languagePreferences,
                 featuredSection,
-                recentSection,
-                serverCard
+                activityLayout
         );
         contentBox.setFillWidth(true);
         contentBox.paddingProperty().bind(
@@ -193,19 +207,13 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private VBox createFeaturedSection() {
-        Label eyebrow = new Label(Localization.text("home.featuredEyebrow"));
-        eyebrow.getStyleClass().add("home-featured-section-eyebrow");
-
-        Label subtitle = new Label(Localization.text("home.featuredSubtitle"));
-        subtitle.getStyleClass().add("home-featured-section-subtitle");
-
         Label loading = new Label(Localization.text("home.libraryLoading"));
         loading.getStyleClass().add("home-featured-loading");
         featuredContainer.getStyleClass().add("home-featured-container");
         featuredContainer.getChildren().setAll(loading);
-        featuredContainer.setMinHeight(220);
+        featuredContainer.setMinHeight(240);
 
-        VBox section = new VBox(10, eyebrow, subtitle, featuredContainer);
+        VBox section = new VBox(featuredContainer);
         section.getStyleClass().add("home-featured-section");
         section.setFillWidth(true);
         return section;
@@ -270,6 +278,14 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         return card;
     }
 
+    private double responsiveActivityWidth(FlowPane layout, double share) {
+        double width = layout.getWidth();
+        if (width <= 1) return 420;
+        if (width < 860) return Math.max(0, width);
+        return Math.max(280, (width - layout.getHgap()) * share);
+    }
+
+
     /**
      * Refresh dashboard data whenever the user returns to Home. Instance
      * creation, imports and repairs can change the library without a launch
@@ -284,28 +300,9 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         recentServersList.getChildren().clear();
         recentServersStatus.setText(Localization.text("home.previewRecentServers"));
 
-        Label eyebrow = new Label(Localization.text("home.workspaceEyebrow"));
-        eyebrow.getStyleClass().add("home-empty-eyebrow");
-        VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
-
-        Label title = new Label(Localization.text("home.workspaceTitle"));
-        title.getStyleClass().add("home-empty-title");
-        VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
-        title.setWrapText(true);
-
-        Label description = new Label(
-                Localization.text("home.workspaceDescription")
-        );
-        description.setWrapText(true);
-        description.getStyleClass().add("home-empty-description");
-        VantaUI.styleText(description, VantaUI.TextRole.MUTED);
-
-        VBox preview = new VBox(VantaUI.spacing(2), eyebrow, title, description);
-        preview.setPadding(new Insets(VantaUI.spacing(6)));
-        preview.setMinHeight(180);
-        preview.setMaxWidth(Double.MAX_VALUE);
-        VantaUI.applySurface(preview, VantaUI.SurfaceRole.PANEL);
-        featuredContainer.getChildren().setAll(preview);
+        // Use the same actionable first-run state shown to a real empty library.
+        // Screenshot mode must not invent a Minecraft installation or imply one exists.
+        featuredContainer.getChildren().setAll(createFirstInstanceCard());
     }
 
     public void onShown() {
@@ -460,33 +457,42 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         return card;
     }
 
-    private VBox createFirstInstanceCard() {
+    private HBox createFirstInstanceCard() {
         Label eyebrow = new Label(Localization.text("home.nextAdventure"));
         eyebrow.getStyleClass().add("home-empty-eyebrow");
 
         Label title = new Label(Localization.text("home.emptyTitle"));
         title.getStyleClass().add("home-empty-title");
+        title.setWrapText(true);
 
         Label description = new Label(
                 Localization.text("home.emptyDescription")
                         + Localization.text("home.instanceIsolation")
         );
         description.setWrapText(true);
-        description.setMaxWidth(430);
+        description.setMaxWidth(560);
         description.getStyleClass().add("home-empty-description");
+
+        VBox copy = new VBox(12, eyebrow, title, description);
+        copy.setAlignment(Pos.CENTER_LEFT);
+        copy.setMaxWidth(620);
+        HBox.setHgrow(copy, Priority.ALWAYS);
 
         Button create = new Button(Localization.text("common.createInstance"));
         create.getStyleClass().add("primary-button");
         AnimationUtils.installInteractiveAnimations(create);
-        create.setMinHeight(40);
+        create.setMinWidth(176);
+        create.setMinHeight(48);
         create.setAccessibleText(Localization.text("home.createInstanceAccessible"));
         create.setTooltip(new Tooltip(Localization.text("home.createInstanceTooltip")));
         create.setOnAction(event -> {
             if (onCreateInstance != null) onCreateInstance.run();
         });
 
-        VBox card = new VBox(12, eyebrow, title, description, create);
-        card.setPadding(new Insets(24));
+        HBox card = new HBox(32, copy, create);
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setPadding(new Insets(36, 40, 36, 40));
+        card.setMinHeight(240);
         card.setMinWidth(0);
         card.setMaxWidth(Double.MAX_VALUE);
         card.prefWidthProperty().bind(
