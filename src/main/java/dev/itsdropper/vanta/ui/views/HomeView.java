@@ -457,7 +457,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         return card;
     }
 
-    private HBox createFirstInstanceCard() {
+    private StackPane createFirstInstanceCard() {
         Label eyebrow = new Label(Localization.text("home.nextAdventure"));
         eyebrow.getStyleClass().add("home-empty-eyebrow");
 
@@ -475,24 +475,29 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         VBox copy = new VBox(12, eyebrow, title, description);
         copy.setAlignment(Pos.CENTER_LEFT);
-        copy.setMaxWidth(620);
-        HBox.setHgrow(copy, Priority.ALWAYS);
+        copy.setMaxWidth(640);
 
         Button create = new Button(Localization.text("common.createInstance"));
         create.getStyleClass().add("primary-button");
         AnimationUtils.installInteractiveAnimations(create);
-        create.setMinWidth(176);
-        create.setMinHeight(48);
+        create.setMinWidth(184);
+        create.setMinHeight(46);
         create.setAccessibleText(Localization.text("home.createInstanceAccessible"));
         create.setTooltip(new Tooltip(Localization.text("home.createInstanceTooltip")));
         create.setOnAction(event -> {
             if (onCreateInstance != null) onCreateInstance.run();
         });
 
-        HBox card = new HBox(32, copy, create);
+        VBox content = new VBox(22, copy, create);
+        content.setAlignment(Pos.CENTER_LEFT);
+        content.setPadding(new Insets(34, 40, 34, 40));
+        content.setMaxWidth(720);
+        content.setMouseTransparent(false);
+
+        StackPane card = new StackPane();
+        card.getStyleClass().add("home-empty-card");
         card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(36, 40, 36, 40));
-        card.setMinHeight(240);
+        card.setMinHeight(286);
         card.setMinWidth(0);
         card.setMaxWidth(Double.MAX_VALUE);
         card.prefWidthProperty().bind(
@@ -501,7 +506,17 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                         featuredContainer.widthProperty()
                 )
         );
-        card.getStyleClass().add("home-empty-card");
+
+        MinecraftBackdrop backdrop = new MinecraftBackdrop();
+        backdrop.getStyleClass().add("home-empty-backdrop");
+        backdrop.setOpacity(0.94);
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+        clip.widthProperty().bind(card.widthProperty());
+        clip.heightProperty().bind(card.heightProperty());
+        clip.setArcWidth(22);
+        clip.setArcHeight(22);
+        card.setClip(clip);
+        card.getChildren().setAll(backdrop, content);
         return card;
     }
 
