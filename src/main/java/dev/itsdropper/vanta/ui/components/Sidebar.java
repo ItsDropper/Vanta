@@ -140,19 +140,19 @@ public class Sidebar extends VBox {
         // NAVIGATION
         // ---------------------------------------------------------
 
-        addSectionLabel("OVERVIEW");
+        addSectionLabel("Play");
         addButton(Page.HOME);
 
-        addSectionLabel("LIBRARY");
+        addSectionLabel("Library");
         addButton(Page.INSTANCES);
         addButton(Page.MODS);
 
-        addSectionLabel("MANAGE");
+        addSectionLabel("Manage");
         addButton(Page.STATE);
         addButton(Page.SERVERS);
         addButton(Page.DOWNLOADS);
 
-        addSectionLabel("PROFILE");
+        addSectionLabel("Profile");
         addButton(Page.SKIN);
         addButton(Page.ACCOUNTS);
 
