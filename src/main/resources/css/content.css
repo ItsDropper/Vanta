@@ -1009,3 +1009,13 @@
 .global-mods-page .vanta-empty-state-description {
     -fx-font-size: 13px;
 }
+
+/* The Modrinth results viewport is a canvas; the result/empty state supplies the surface. */
+.vanta-ui-root .global-mods-page .instances-scroll,
+.vanta-ui-root .global-mods-page .instances-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
