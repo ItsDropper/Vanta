@@ -2742,3 +2742,84 @@
     -fx-text-fill: -vantamuted;
     -fx-text-alignment: center;
 }
+
+/* Vanta navigation: a quiet rail, not a second window inside the window. */
+.vanta-ui-root .sidebar.vanta-surface-sidebar {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+}
+
+.vanta-ui-root .sidebar .sidebar-logo {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 25px;
+    -fx-font-weight: 900;
+}
+
+.vanta-ui-root .sidebar .sidebar-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 10px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .sidebar .sidebar-section-label {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-padding: 0 0 1px 2px;
+}
+
+.vanta-ui-root .sidebar .sidebar-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 3px;
+    -fx-border-radius: 7px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 9px 11px;
+    -fx-min-height: 40px;
+}
+
+.vanta-ui-root .sidebar .sidebar-button:hover {
+    -fx-background-color: -vantasurface;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .sidebar .sidebar-button:pressed {
+    -fx-background-color: -vantasurfaceraised;
+}
+
+.vanta-ui-root .sidebar .sidebar-button.sidebar-button-active,
+.vanta-ui-root .sidebar .sidebar-button.sidebar-button-active:hover {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+    -fx-border-width: 0 0 0 3px;
+    -fx-text-fill: -vantaaccent;
+    -fx-font-weight: 700;
+}
+
+.vanta-ui-root .sidebar .sidebar-button:focused,
+.vanta-ui-root .sidebar .sidebar-button.sidebar-button-active:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+}
+
+.vanta-ui-root .sidebar .sidebar-build {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 9px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .sidebar.sidebar-compact .sidebar-button {
+    -fx-padding: 9px 0;
+    -fx-min-height: 42px;
+    -fx-background-radius: 8px;
+}
+
+.vanta-ui-root .sidebar.sidebar-compact .sidebar-button.sidebar-button-active {
+    -fx-border-width: 0;
+}
