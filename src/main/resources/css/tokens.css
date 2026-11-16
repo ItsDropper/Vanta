@@ -2823,3 +2823,152 @@
 .vanta-ui-root .sidebar.sidebar-compact .sidebar-button.sidebar-button-active {
     -fx-border-width: 0;
 }
+
+/* Settings workspace — a preferences sheet with a few deliberate anchor surfaces. */
+.vanta-ui-root .settings-shell .settings-navigation {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+    -fx-padding: 0 18px 0 0;
+}
+
+.vanta-ui-root .settings-shell .settings-nav-group {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 10px;
+    -fx-font-weight: 700;
+    -fx-letter-spacing: 0px;
+    -fx-padding: 13px 9px 5px 9px;
+}
+
+.vanta-ui-root .settings-shell .settings-nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-border-radius: 7px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 9px 11px;
+}
+
+.vanta-ui-root .settings-shell .settings-nav-button:hover {
+    -fx-background-color: -vantasurface;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .settings-shell .settings-nav-button.selected {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-text-fill: -vantaaccent;
+    -fx-font-weight: 700;
+}
+
+.vanta-ui-root .settings-shell .settings-nav-button:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+}
+
+.vanta-ui-root .settings-shell .settings-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+    -fx-padding: 22px 0;
+}
+
+.vanta-ui-root .settings-shell .settings-card-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 16px;
+    -fx-font-weight: 750;
+}
+
+.vanta-ui-root .settings-shell .settings-card-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .settings-shell .settings-theme-card,
+.vanta-ui-root .settings-shell .settings-custom-palette-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
+    -fx-border-width: 1px 1px 1px 3px;
+    -fx-border-radius: 12px;
+    -fx-padding: 22px;
+}
+
+.vanta-ui-root .settings-shell .settings-accent-card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 22px 0;
+}
+
+.vanta-ui-root .settings-shell .settings-presets-card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 18px 0;
+}
+
+.vanta-ui-root .settings-shell .settings-presentation-card {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 18px 0;
+}
+
+.vanta-ui-root .settings-shell .settings-page-title {
+    -fx-font-size: 29px;
+    -fx-font-weight: 800;
+}
+
+.vanta-ui-root .settings-shell .settings-page-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .settings-shell .accent-preview {
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+}
+
+.vanta-ui-root .settings-shell .accent-preview-label {
+    -fx-text-fill: -vantaaccentforeground;
+    -fx-font-size: 11px;
+    -fx-font-weight: 800;
+}
+
+.vanta-ui-root .settings-shell .accent-preset {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 7px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 7px;
+    -fx-padding: 8px 12px;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .settings-shell .accent-preset:hover {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantaaccent;
+}
+
+.vanta-ui-root .settings-shell .accent-hex-field {
+    -fx-min-height: 40px;
+    -fx-pref-height: 40px;
+}
+
+.vanta-ui-root .settings-shell .accent-picker {
+    -fx-min-height: 40px;
+}
+
+.vanta-ui-root .settings-shell .settings-compact-navigation {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
