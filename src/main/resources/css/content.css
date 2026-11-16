@@ -289,7 +289,6 @@
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
     -fx-font-weight: 900;
-    -fx-letter-spacing: 1px;
 }
 
 .mod-details-markdown,
@@ -358,7 +357,6 @@
 }
 .global-mods-page .settings-section-title {
     -fx-font-size: 12px;
-    -fx-letter-spacing: 1.2px;
     -fx-text-fill: -vantatext;
 }
 .global-mods-page .instance-list, .instance-mods-page .instance-list {
@@ -818,7 +816,7 @@
 .mod-details-markdown .mod-description-heading {
     -fx-text-fill: -vantatext;
     -fx-font-size: 16px;
-    -fx-font-weight: 750;
+    -fx-font-weight: 700;
     -fx-padding: 9px 0 2px 0;
 }
 .mod-details-markdown .mod-description-code {
