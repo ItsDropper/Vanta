@@ -1250,3 +1250,84 @@
     -fx-border-color: -vantaborder;
     -fx-text-fill: -vantatext;
 }
+
+/* Instance library — let the installations own the page, not the scroll frame. */
+.instances-page .instances-header {
+    -fx-spacing: 14px;
+}
+
+.instances-page .instances-count {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.instances-page .instances-toolbar {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.instances-page .instances-toolbar .instance-search-field {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-font-size: 13px;
+    -fx-padding: 10px 14px;
+    -fx-min-height: 44px;
+}
+
+.instances-page .instances-toolbar .instance-sort-field {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-min-height: 44px;
+}
+
+.instances-page .instances-toolbar .button {
+    -fx-min-height: 40px;
+    -fx-padding: 0 14px;
+}
+
+.instances-page .instances-scroll,
+.instances-page .instances-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.instances-page .instance-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.instances-page .instance-empty {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 14px;
+    -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
+    -fx-border-width: 1px 1px 1px 3px;
+    -fx-border-radius: 14px;
+}
+
+.instances-page .instance-empty-icon {
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 32px;
+    -fx-font-weight: 700;
+}
+
+.instances-page .instance-empty-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 21px;
+    -fx-font-weight: 800;
+}
+
+.instances-page .instance-empty-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+}
