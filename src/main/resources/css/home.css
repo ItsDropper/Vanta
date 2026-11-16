@@ -300,8 +300,7 @@
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1px;
-}
+    }
 .home-featured-section-subtitle {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
@@ -334,8 +333,7 @@
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1px;
-}
+    }
 .home-featured-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 25px;
@@ -547,8 +545,7 @@
 .home-featured-card .home-featured-eyebrow {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 9px;
-    -fx-letter-spacing: 1.5px;
-}
+    }
 .home-featured-card .home-featured-title { -fx-font-size: 30px; }
 .home-featured-card .home-featured-meta {
     -fx-text-fill: -vantatext;
@@ -574,8 +571,7 @@
     -fx-text-fill: -vantamuted;
     -fx-font-size: 9px;
     -fx-font-weight: 900;
-    -fx-letter-spacing: 1.8px;
-}
+    }
 .home-page .home-featured-section-subtitle,
 .home-page .home-section-subtitle {
     -fx-text-fill: -vantamuted;
@@ -690,8 +686,7 @@
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1.4px;
-}
+    }
 
 .home-featured-section-subtitle,
 .home-section-subtitle {
@@ -723,8 +718,7 @@
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1.3px;
-}
+    }
 
 .home-featured-card .home-featured-title {
     -fx-text-fill: #FFFFFF;
@@ -872,8 +866,7 @@
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1px;
-}
+    }
 
 .home-empty-title,
 .home-load-error-title {
@@ -977,7 +970,7 @@
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 12px;
-    -fx-effect: none;
+    -fx-effect: null;
 }
 
 .home-page .home-featured-card .home-featured-title {
@@ -1008,7 +1001,7 @@
     -fx-font-weight: 800;
     -fx-padding: 0 22px;
     -fx-cursor: hand;
-    -fx-effect: none;
+    -fx-effect: null;
 }
 
 .home-page .home-featured-card .home-featured-play-button:hover {
