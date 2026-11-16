@@ -931,6 +931,7 @@
     -fx-padding: 8px 12px;
     -fx-font-size: 10px;
     -fx-font-weight: 700;
+    -fx-effect: null;
 }
 
 .home-page .home-featured-section,
@@ -957,11 +958,13 @@
     -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
     -fx-border-width: 1px 1px 1px 3px;
     -fx-border-radius: 12px;
+    -fx-effect: null;
 }
 
 .home-page .home-featured-card:hover {
     -fx-background-color: -vantasurfaceraised;
     -fx-border-color: -vantaaccent -vantaaccent -vantaaccent -vantaaccent;
+    -fx-effect: null;
 }
 
 .home-page .home-featured-card .home-featured-icon-frame {
@@ -1025,12 +1028,14 @@
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
+    -fx-effect: null;
 }
 
 .home-page .home-recent-card:hover,
 .home-page .home-server-card:hover {
     -fx-background-color: -vantasurfaceraised;
     -fx-border-color: derive(-vantaaccent, -32%);
+    -fx-effect: null;
 }
 
 .home-page .home-recent-icon {
@@ -1106,6 +1111,7 @@
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 12px;
+    -fx-effect: null;
 }
 
 .home-page .home-empty-title,
