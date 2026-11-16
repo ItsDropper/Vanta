@@ -788,3 +788,57 @@
     -fx-padding: 7px 10px;
 }
 .skin-changer-page .skin-layer-toggle:selected { -fx-text-fill: -vantaaccent; }
+
+/* Server manager — empty selection is a task invitation, not disabled chrome. */
+.server-manager .server-scroll,
+.server-manager .server-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.server-manager .server-sidebar {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 12px;
+    -fx-border-color: -vantaborder;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.server-manager .server-detail {
+    -fx-spacing: 16px;
+}
+
+.server-manager .server-detail .vanta-empty-state {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 14px;
+    -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
+    -fx-border-width: 1px 1px 1px 3px;
+    -fx-border-radius: 14px;
+    -fx-padding: 36px;
+}
+
+.server-manager .server-detail .vanta-empty-state-icon {
+    -fx-font-size: 34px;
+    -fx-text-fill: -vantaaccent;
+}
+
+.server-manager .server-detail .vanta-empty-state-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: 800;
+}
+
+.server-manager .server-detail .vanta-empty-state-description {
+    -fx-font-size: 13px;
+}
+
+.server-manager .server-detail .vanta-empty-state-actions {
+    -fx-spacing: 10px;
+}
+
+.server-manager .server-empty {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-padding: 14px 10px;
+}
