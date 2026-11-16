@@ -233,29 +233,13 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
     private void showNoServerSelectedState() {
         boolean hasProfiles = !service.profiles().isEmpty();
-        Button importButton = actionButton(
-                Localization.text("serverManager.importExisting"),
-                IconView.Type.FOLDER,
-                "server-secondary"
-        );
-        importButton.setOnAction(event -> addProfile());
-
-        Button createButton = actionButton(
-                Localization.text("serverManager.createFromJar"),
-                IconView.Type.PLUS,
-                "server-primary"
-        );
-        createButton.setOnAction(event -> createProfileFromJar());
-
         EmptyState empty = new EmptyState(
                 "▤",
                 Localization.text("serverManager.localHosting"),
                 Localization.text("serverManager.noneSelected"),
                 hasProfiles
                         ? Localization.text("serverManager.selectServer")
-                        : Localization.text("serverManager.emptyDescription"),
-                importButton,
-                createButton
+                        : Localization.text("serverManager.emptyDescription")
         );
         empty.setMaxWidth(620);
         detail.setAlignment(Pos.CENTER);
