@@ -32,7 +32,6 @@ import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.components.PageHeader;
-import dev.itsdropper.vanta.ui.components.EmptyState;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
@@ -311,17 +310,11 @@ public class InstancesView extends VBox {
         );
 
         if (screenshotPreview) {
-            instanceList.setAlignment(Pos.CENTER);
             countLabel.setText(Localization.text("instances.library"));
             statusLabel.setText(Localization.text("instances.previewNotice"));
             statusLabel.setVisible(false);
             statusLabel.setManaged(false);
-            instanceList.getChildren().setAll(new EmptyState(
-                    "▦",
-                    Localization.text("instances.yourLibrary"),
-                    Localization.text("instances.previewEmptyTitle"),
-                    Localization.text("instances.previewEmptyDescription")
-            ));
+            instanceList.getChildren().setAll(createEmptyState());
         } else {
             refresh();
         }
@@ -1106,62 +1099,40 @@ public class InstancesView extends VBox {
     // EMPTY STATE
     // =============================================================
 
-    private VBox createEmptyState() {
+    private HBox createEmptyState() {
+        Label icon = new Label("▦");
+        icon.getStyleClass().add("instance-empty-icon");
+        icon.setAccessibleText("");
 
-        Label icon =
-                new Label("▦");
+        Label title = new Label(Localization.text("instances.emptyTitle"));
+        title.getStyleClass().add("instance-empty-title");
+        title.setWrapText(true);
 
-        icon.getStyleClass().add(
-                "instance-empty-icon"
-        );
+        Label description = new Label(Localization.text("instances.emptyDescription"));
+        description.getStyleClass().add("instance-empty-description");
+        description.setWrapText(true);
+        description.setMaxWidth(620);
 
-        Label title =
-                new Label(
-                        Localization.text("instances.emptyTitle")
-                );
-
-        title.getStyleClass().add(
-                "instance-empty-title"
-        );
-
-        Label description =
-                new Label(
-                        Localization.text("instances.emptyDescription")
-                );
-
-        description.getStyleClass().add(
-                "instance-empty-description"
-        );
+        VBox copy = new VBox(VantaUI.spacing(2), title, description);
+        copy.getStyleClass().add("instance-empty-copy");
+        copy.setAlignment(Pos.CENTER_LEFT);
+        copy.setMinWidth(0);
+        HBox.setHgrow(copy, Priority.ALWAYS);
 
         Button createButton = new Button(Localization.text("common.createInstance"));
         createButton.getStyleClass().add("primary-button");
         createButton.setAccessibleText(Localization.text("instances.createFirstAccessible"));
         createButton.setOnAction(event -> onCreateInstance.run());
 
-        VBox empty =
-                new VBox(
-                        12,
-                        icon,
-                        title,
-                        description,
-                        createButton
-                );
-
-        empty.setAlignment(
-                Pos.CENTER
-        );
-
-        empty.setPadding(new Insets(36));
-        empty.setMinHeight(220);
-        empty.setMaxWidth(680);
-
-        empty.getStyleClass().add(
-                "instance-empty"
-        );
-
+        HBox empty = new HBox(VantaUI.spacing(5), icon, copy, createButton);
+        empty.setAlignment(Pos.CENTER_LEFT);
+        empty.setPadding(new Insets(VantaUI.spacing(6)));
+        empty.setMinHeight(144);
+        empty.setMaxWidth(Double.MAX_VALUE);
+        empty.getStyleClass().add("instance-empty");
+        empty.setAccessibleText(title.getText() + ". " + description.getText());
         return empty;
     }
-
 
     // =============================================================
     // LAUNCH
