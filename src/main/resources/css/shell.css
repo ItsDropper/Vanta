@@ -77,8 +77,7 @@
     -fx-text-fill: -vantatext;
     -fx-font-size: 17px;
     -fx-font-weight: bold;
-    -fx-letter-spacing: 5px;
-}
+    }
 
 
 /* =========================================================
@@ -204,8 +203,7 @@
     -fx-text-fill: -vantamuted;
     -fx-font-size: 10px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1.2px;
-}
+    }
 
 .login-title-bar-close {
     -fx-background-color: transparent;
@@ -223,8 +221,7 @@
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 13px;
     -fx-font-weight: 900;
-    -fx-letter-spacing: 3px;
-}
+    }
 
 .login-step {
     -fx-background-color: -vantaaccentsoft;
@@ -635,8 +632,7 @@
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 9px;
     -fx-font-weight: 900;
-    -fx-letter-spacing: 1.4px;
-}
+    }
 .command-palette-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 21px;
@@ -774,16 +770,14 @@
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 28px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 5px;
-}
+    }
 
 .loading-subtitle {
     -fx-text-fill: -vantamuted;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 9px;
     -fx-font-weight: 700;
-    -fx-letter-spacing: 2px;
-}
+    }
 
 .loading-status {
     -fx-padding: 14px 0 2px 0;
@@ -791,8 +785,7 @@
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 9px;
     -fx-font-weight: 600;
-    -fx-letter-spacing: 1.4px;
-}
+    }
 
 .loading-progress-track {
     -fx-pref-width: 280px;
@@ -825,19 +818,16 @@
 .sidebar-logo {
     -fx-font-size: 25px;
     -fx-font-weight: 900;
-    -fx-letter-spacing: 1.8px;
-}
+    }
 .sidebar-subtitle {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 8px;
-    -fx-letter-spacing: 1.1px;
-}
+    }
 .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 8px;
     -fx-font-weight: 900;
-    -fx-letter-spacing: 1.5px;
-}
+    }
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-background-radius: 6px;
@@ -861,8 +851,7 @@
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 8px;
     -fx-font-weight: 700;
-    -fx-letter-spacing: .7px;
-}
+    }
 
 /* Navigation rail — fixed-width desktop hierarchy. */
 .sidebar {
@@ -877,22 +866,19 @@
     -fx-text-fill: -vantatext;
     -fx-font-size: 23px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 2px;
-}
+    }
 
 .sidebar-subtitle {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 9px;
     -fx-font-weight: 700;
-    -fx-letter-spacing: 1.2px;
-}
+    }
 
 .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 9px;
     -fx-font-weight: 800;
-    -fx-letter-spacing: 1.3px;
-}
+    }
 
 .sidebar-button {
     -fx-background-color: transparent;
@@ -929,8 +915,7 @@
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 9px;
     -fx-font-weight: 700;
-    -fx-letter-spacing: 0.5px;
-}
+    }
 
 .sidebar-compact {
     -fx-background-radius: 8px;
