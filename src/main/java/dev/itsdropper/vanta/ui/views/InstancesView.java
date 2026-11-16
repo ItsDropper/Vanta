@@ -114,7 +114,7 @@ public class InstancesView extends VBox {
 
         Button createButton =
                 new Button(
-                        Localization.text("common.create")
+                        Localization.text("common.createInstance")
                 );
 
         createButton.getStyleClass().add(
@@ -1109,9 +1109,7 @@ public class InstancesView extends VBox {
     private VBox createEmptyState() {
 
         Label icon =
-                new Label(
-                        Localization.text("common.settings")
-                );
+                new Label("▦");
 
         icon.getStyleClass().add(
                 "instance-empty-icon"
@@ -1153,11 +1151,9 @@ public class InstancesView extends VBox {
                 Pos.CENTER
         );
 
-        empty.setPadding(
-                new Insets(
-                        70
-                )
-        );
+        empty.setPadding(new Insets(36));
+        empty.setMinHeight(220);
+        empty.setMaxWidth(680);
 
         empty.getStyleClass().add(
                 "instance-empty"
