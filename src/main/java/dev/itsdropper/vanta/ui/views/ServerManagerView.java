@@ -8,6 +8,7 @@ import dev.itsdropper.vanta.launcher.server.ServerManagerService.Profile;
 import dev.itsdropper.vanta.launcher.server.ServerManagerService.Snapshot;
 import dev.itsdropper.vanta.launcher.server.ServerManagerService.State;
 import dev.itsdropper.vanta.ui.components.IconView;
+import dev.itsdropper.vanta.ui.components.EmptyState;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.VantaUI;
 import javafx.geometry.Insets;
@@ -48,6 +49,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
     private final Button forceButton = actionButton(Localization.text("serverManager.forceStop"), IconView.Type.CLOSE, "server-danger");
     private final Button restartButton = actionButton(Localization.text("common.restart"), IconView.Type.REFRESH, "server-secondary");
     private String selectedId;
+    private List<Node> selectedServerContent = List.of();
     private boolean suppressEulaChange;
 
     public ServerManagerView() {
@@ -173,9 +175,12 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
                 runtimePanel,
                 consolePanel
         );
+        selectedServerContent = List.copyOf(detail.getChildren());
         detail.getStyleClass().add("server-detail");
+        detail.setMinHeight(420);
         ScrollPane detailScroll = new ScrollPane(detail);
         detailScroll.setFitToWidth(true);
+        detailScroll.setFitToHeight(true);
         detailScroll.getStyleClass().add("server-scroll");
         VBox.setVgrow(detailScroll, Priority.ALWAYS);
 
@@ -207,7 +212,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
         eula.setOnAction(event -> acceptEulaChanged());
         commandInput.setDisable(true);
         setActionsEnabled(false);
-        detail.setDisable(true);
+        detail.setDisable(false);
 
         service.setConsoleListener((id, line) -> UiExecutor.shared().dispatchToUi(() -> {
             if (!id.equals(selectedId)) return;
@@ -219,7 +224,49 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             refreshProfileList();
         }));
         refreshProfileList();
-        if (!service.profiles().isEmpty()) selectProfile(service.profiles().get(0).id);
+        if (!service.profiles().isEmpty()) {
+            selectProfile(service.profiles().get(0).id);
+        } else {
+            showNoServerSelectedState();
+        }
+    }
+
+    private void showNoServerSelectedState() {
+        boolean hasProfiles = !service.profiles().isEmpty();
+        Button importButton = actionButton(
+                Localization.text("serverManager.importExisting"),
+                IconView.Type.FOLDER,
+                "server-secondary"
+        );
+        importButton.setOnAction(event -> addProfile());
+
+        Button createButton = actionButton(
+                Localization.text("serverManager.createFromJar"),
+                IconView.Type.PLUS,
+                "server-primary"
+        );
+        createButton.setOnAction(event -> createProfileFromJar());
+
+        EmptyState empty = new EmptyState(
+                "▤",
+                Localization.text("serverManager.localHosting"),
+                Localization.text("serverManager.noneSelected"),
+                hasProfiles
+                        ? Localization.text("serverManager.selectServer")
+                        : Localization.text("serverManager.emptyDescription"),
+                importButton,
+                createButton
+        );
+        empty.setMaxWidth(620);
+        detail.setAlignment(Pos.CENTER);
+        detail.getChildren().setAll(empty);
+        detail.setDisable(false);
+    }
+
+    private void showSelectedServerContent() {
+        detail.setAlignment(Pos.TOP_LEFT);
+        detail.getChildren().setAll(selectedServerContent);
+        detail.setDisable(false);
     }
 
     private void addProfile() {
@@ -333,7 +380,7 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
             serverTitle.setText(Localization.text("serverManager.noneSelected"));
             serverMeta.setText(Localization.text("serverManager.selectProfile"));
             setActionsEnabled(false);
-            detail.setDisable(true);
+            showNoServerSelectedState();
             refreshProfileList();
         } catch (Exception e) {
             error("Could not remove profile", e.getMessage());
@@ -372,11 +419,12 @@ public final class ServerManagerView extends BorderPane implements AutoCloseable
 
     private void selectProfile(String id) {
         selectedId = id;
-        detail.setDisable(false);
+        showSelectedServerContent();
         console.clear();
         Profile profile = service.profile(id).orElse(null);
         if (profile == null) {
             setActionsEnabled(false);
+            showNoServerSelectedState();
             return;
         }
         javaInput.setText(profile.javaExecutable == null ? "java" : profile.javaExecutable);
