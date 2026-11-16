@@ -226,6 +226,10 @@ public class GlobalModsView extends VBox {
             };
             Button segment = new Button(label);
             segment.getStyleClass().add("modrinth-content-segment");
+            segment.setMinWidth(92);
+            segment.setPrefWidth(112);
+            segment.setMaxWidth(Double.MAX_VALUE);
+            HBox.setHgrow(segment, Priority.ALWAYS);
             segment.setOnAction(event -> contentTypeBox.setValue(type));
             contentTypeButtons.put(type, segment);
             contentTypeSegments.getChildren().add(segment);
@@ -237,7 +241,7 @@ public class GlobalModsView extends VBox {
 
         versionFilterOptions = new VBox(4);
         versionFilterOptions.getStyleClass().add("modrinth-filter-options");
-        ScrollPane versionScroll = createFilterScroll(versionFilterOptions, 224);
+        ScrollPane versionScroll = createFilterScroll(versionFilterOptions, screenshotPreview ? 112 : 224);
         versionSearchField.setPromptText(Localization.text("modrinth.search"));
         versionSearchField.setPrefHeight(34);
         versionSearchField.setMaxWidth(Double.MAX_VALUE);
@@ -269,8 +273,8 @@ public class GlobalModsView extends VBox {
         TitledPane loaderPanel = new TitledPane(Localization.text("modrinth.loader"), loaderFilters);
         TitledPane categoryPanel = new TitledPane(Localization.text("modrinth.category"), categoryFilters);
         versionPanel.setExpanded(true);
-        loaderPanel.setExpanded(true);
-        categoryPanel.setExpanded(true);
+        loaderPanel.setExpanded(!screenshotPreview);
+        categoryPanel.setExpanded(!screenshotPreview);
         versionPanel.setAnimated(true);
         loaderPanel.setAnimated(true);
         categoryPanel.setAnimated(true);
@@ -469,13 +473,8 @@ public class GlobalModsView extends VBox {
         // INITIAL STATE
         // =========================================================
 
-        resultsScrollPane.setVisible(
-                false
-        );
-
-        resultsScrollPane.setManaged(
-                false
-        );
+        resultsScrollPane.setVisible(screenshotPreview);
+        resultsScrollPane.setManaged(screenshotPreview);
 
         // =========================================================
         // LOAD POPULAR MODS
@@ -485,17 +484,20 @@ public class GlobalModsView extends VBox {
             popularStatusLabel.setText("");
             popularStatusLabel.setManaged(false);
             popularResults.getChildren().setAll(new EmptyState(
-                    "✦",
-                    "MODRINTH DISCOVERY",
+                    "M",
+                    "Modrinth discovery",
                     "Find your next favourite project",
-                    "Popular mods, resource packs and shaders appear here when Modrinth browsing is active."
+                    "Explore community-made mods, resource packs and shaders for your Minecraft setup."
             ));
             results.getChildren().setAll(new EmptyState(
                     "⌕",
-                    "SEARCH MODRINTH",
-                    "Search across Minecraft content",
-                    "Filter by content type, loader and Minecraft version to find compatible projects."
+                    "Search projects",
+                    "Find compatible Minecraft content",
+                    "Choose a content type, search by name, then narrow the results by loader and game version."
             ));
+            results.setAlignment(Pos.CENTER);
+            results.setMinHeight(520);
+            resultsScrollPane.setFitToHeight(true);
             statusLabel.setText(Localization.text("globalMods.previewNotice"));
             statusLabel.setVisible(false);
             statusLabel.setManaged(false);
