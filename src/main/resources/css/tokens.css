@@ -2838,8 +2838,7 @@
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 10px;
     -fx-font-weight: 700;
-    -fx-letter-spacing: 0px;
-    -fx-padding: 13px 9px 5px 9px;
+        -fx-padding: 13px 9px 5px 9px;
 }
 
 .vanta-ui-root .settings-shell .settings-nav-button {
@@ -2884,7 +2883,7 @@
 .vanta-ui-root .settings-shell .settings-card-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 16px;
-    -fx-font-weight: 750;
+    -fx-font-weight: 700;
 }
 
 .vanta-ui-root .settings-shell .settings-card-description {
