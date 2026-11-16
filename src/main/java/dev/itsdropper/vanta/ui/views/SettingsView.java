@@ -343,8 +343,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         VBox themeCard = card(
                 "Complete theme",
-                "Themes control the launcher-wide palette: shell, sidebar, cards, controls, text, borders, status colors and overlays."
+                "Themes control Vanta's background, surfaces, controls, text and status colors."
         );
+        themeCard.getStyleClass().add("settings-theme-card");
 
         ComboBox<String> themeBox = new ComboBox<>();
         themeBox.getItems().addAll(ThemeManager.getThemes().keySet());
@@ -378,13 +379,13 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             updateAccentPreview(null);
 
             themePreview.setText(
-                    selected + "  •  " + ThemeManager.getTheme(selected).accent()
+                    selected + " (" + ThemeManager.getTheme(selected).accent() + ")"
             );
         });
 
         themePreview.setText(
-                ThemeManager.loadThemeName() + "  •  " +
-                        ThemeManager.getTheme(ThemeManager.loadThemeName()).accent()
+                ThemeManager.loadThemeName() + " (" +
+                        ThemeManager.getTheme(ThemeManager.loadThemeName()).accent() + ")"
         );
 
         FlowPane themeRow = new FlowPane(12, 8, themeBox, themePreview);
@@ -394,13 +395,14 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         VBox accentCard = card(
                 "Accent color",
-                "Used for active navigation, controls, focus states, selections and progress indicators."
+                "Used for active navigation, focus states, selections and progress indicators."
         );
+        accentCard.getStyleClass().add("settings-accent-card");
 
         accentPreview = new Region();
         accentPreview.getStyleClass().add("accent-preview");
 
-        Label previewText = new Label("LIVE PREVIEW");
+        Label previewText = new Label("Accent preview");
         previewText.getStyleClass().add("accent-preview-label");
 
         StackPaneLike preview = new StackPaneLike(accentPreview, previewText);
@@ -419,7 +421,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         accentHexField.setPrefWidth(110);
         accentHexField.setAccessibleText("Accent color hexadecimal value");
 
-        Button applyHex = new Button("APPLY");
+        Button applyHex = new Button("Apply");
         applyHex.getStyleClass().add("primary-button");
         applyHex.setOnAction(event -> applyHexField());
 
@@ -458,8 +460,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         VBox presetsCard = card(
                 "Presets",
-                "Use a preset as a starting point, then fine-tune it with the picker or HEX field."
+                "Choose a starting color, then adjust it above."
         );
+        presetsCard.getStyleClass().add("settings-presets-card");
 
         FlowPane presets = new FlowPane(8, 8);
         presets.setPrefWrapLength(560);
@@ -478,14 +481,15 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         addPreset(presets, "Silver", "#E5E7EB");
         presetsCard.getChildren().add(presets);
 
-        Button reset = new Button("RESET TO DEFAULT ACCENT");
+        Button reset = new Button("Reset accent to theme default");
         reset.getStyleClass().add("secondary-button");
         reset.setOnAction(event -> setAccent(ThemeManager.loadTheme().accent()));
 
         VBox customColors = card(
                 "Custom interface palette",
-                "Override the theme's core colors independently. These overrides are saved locally and apply across the launcher."
+                "Override individual interface colors. Changes are saved locally."
         );
+        customColors.getStyleClass().add("settings-custom-palette-card");
 
         ColorPicker backgroundColor = customColorPicker("customBackground", ThemeManager.loadTheme().background());
         ColorPicker surfaceColor = customColorPicker("customSurface", ThemeManager.loadTheme().surface());
@@ -511,7 +515,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 colorSettingRow("Success color", "Successful actions and completion states", successColor)
         );
 
-        Button resetPalette = new Button("RESET CUSTOM PALETTE");
+        Button resetPalette = new Button("Reset palette");
         resetPalette.getStyleClass().add("secondary-button");
         resetPalette.setOnAction(event -> {
             ThemeManager.clearCustomColors();
@@ -535,20 +539,21 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         VBox presentationCard = card(
                 "Overengineered UI",
-                "Turn on the deluxe presentation layer across Vanta: richer surfaces, stronger depth, sharper active states and more expressive controls. This is purely visual."
+                "Enable richer surfaces and stronger active states. This changes presentation only."
         );
+        presentationCard.getStyleClass().add("settings-presentation-card");
         CheckBox overengineeredToggle = new CheckBox("Overengineered UI");
         overengineeredToggle.setSelected(LauncherSettings.isOverengineeredUiEnabled());
         overengineeredToggle.setAccessibleText("Enable or disable the overengineered user interface");
         Label presentationState = new Label(
-                overengineeredToggle.isSelected() ? "ON  ·  DELUXE PRESENTATION" : "OFF  ·  STANDARD PRESENTATION"
+                overengineeredToggle.isSelected() ? "Deluxe presentation enabled" : "Standard presentation"
         );
         presentationState.getStyleClass().add("overengineered-state");
         overengineeredToggle.selectedProperty().addListener((observable, wasEnabled, enabled) -> {
             LauncherSettings.setOverengineeredUiEnabled(enabled);
             presentationState.setText(enabled
-                    ? "ON  ·  DELUXE PRESENTATION"
-                    : "OFF  ·  STANDARD PRESENTATION");
+                    ? "Deluxe presentation enabled"
+                    : "Standard presentation");
             applyAccent(accentColor);
             onAccentChanged.accept(accentColor);
             NotificationManager manager = NotificationManager.getGlobal();
@@ -2176,10 +2181,10 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
     private void pageHeader(String title, String subtitle) {
         if (!"About Vanta".equals(currentSection)) {
-            Button reset = new Button("RESET SECTION");
+            Button reset = new Button("Reset section");
             reset.getStyleClass().add("secondary-button");
             reset.setTooltip(new javafx.scene.control.Tooltip(
-                    "Restore this settings section to its recommended defaults."
+                    "Restore the recommended defaults for this section."
             ));
             reset.setOnAction(event -> resetCurrentSection());
             content.getChildren().add(new PageHeader(
