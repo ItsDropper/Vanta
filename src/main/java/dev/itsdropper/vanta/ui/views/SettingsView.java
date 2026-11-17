@@ -338,27 +338,32 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     private void buildAppearancePage() {
         pageHeader(
                 "Appearance",
-                "Control Vanta's visual language. Changes apply immediately and persist across launches."
+                "Set the theme, accent and visual density of Vanta."
         );
 
         VBox themeCard = card(
-                "Complete theme",
-                "Themes control Vanta's background, surfaces, controls, text and status colors."
+                "Theme",
+                "Choose the foundation for Vanta's surfaces, text and status colors."
         );
         themeCard.getStyleClass().add("settings-theme-card");
 
         ComboBox<String> themeBox = new ComboBox<>();
         themeBox.getItems().addAll(ThemeManager.getThemes().keySet());
         themeBox.setValue(ThemeManager.loadThemeName());
-        themeBox.setMaxWidth(Double.MAX_VALUE);
-        themeBox.setPromptText("Choose a theme");
         themeBox.setPrefWidth(260);
         themeBox.setAccessibleText("Launcher theme");
 
         Label themePreview = new Label();
-        themePreview.setWrapText(true);
-        themePreview.setMaxWidth(260);
         themePreview.getStyleClass().add("theme-preview-label");
+        themePreview.setWrapText(true);
+
+        Runnable refreshThemePreview = () -> {
+            String selected = themeBox.getValue();
+            if (selected != null) {
+                themePreview.setText(selected + "  ·  " + ThemeManager.getTheme(selected).accent());
+            }
+        };
+        refreshThemePreview.run();
 
         themeBox.setOnAction(event -> {
             String selected = themeBox.getValue();
@@ -377,34 +382,24 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 accentValue.setText(accentColor);
             }
             updateAccentPreview(null);
-
-            themePreview.setText(
-                    selected + " (" + ThemeManager.getTheme(selected).accent() + ")"
-            );
+            refreshThemePreview.run();
         });
 
-        themePreview.setText(
-                ThemeManager.loadThemeName() + " (" +
-                        ThemeManager.getTheme(ThemeManager.loadThemeName()).accent() + ")"
-        );
-
-        FlowPane themeRow = new FlowPane(12, 8, themeBox, themePreview);
+        HBox themeRow = new HBox(14, themeBox, themePreview);
         themeRow.setAlignment(Pos.CENTER_LEFT);
-
         themeCard.getChildren().add(themeRow);
 
         VBox accentCard = card(
-                "Accent color",
-                "Used for active navigation, focus states, selections and progress indicators."
+                "Accent",
+                "Used for active navigation, focus states, selections and progress."
         );
         accentCard.getStyleClass().add("settings-accent-card");
 
         accentPreview = new Region();
         accentPreview.getStyleClass().add("accent-preview");
-
-        accentPreview.setMinSize(24, 24);
-        accentPreview.setPrefSize(24, 24);
-        accentPreview.setMaxSize(24, 24);
+        accentPreview.setMinSize(14, 14);
+        accentPreview.setPrefSize(14, 14);
+        accentPreview.setMaxSize(14, 14);
 
         accentPicker = new ColorPicker(Color.web(accentColor));
         accentPicker.getStyleClass().add("accent-picker");
@@ -424,42 +419,32 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         accentValue = new Label(accentColor);
         accentValue.getStyleClass().add("accent-value");
 
-        accentPicker.valueProperty().addListener(
-                (observable, oldColor, newColor) -> {
-                    if (newColor != null) {
-                        setAccent(toHex(newColor));
-                    }
-                }
-        );
-
-        FlowPane pickerRow = new FlowPane(
-                10, 8,
-                new Label("Picker"),
-                accentPicker,
-                new Label("HEX"),
-                accentHexField,
-                applyHex
-        );
-        pickerRow.setAlignment(Pos.CENTER_LEFT);
+        accentPicker.valueProperty().addListener((observable, oldColor, newColor) -> {
+            if (newColor != null) setAccent(toHex(newColor));
+        });
 
         Label rgb = new Label();
         rgb.getStyleClass().add("settings-card-description");
 
-        HBox accentMetadata = new HBox(10, accentPreview, accentValue, rgb);
+        HBox accentMetadata = new HBox(9, accentPreview, accentValue, rgb);
         accentMetadata.setAlignment(Pos.CENTER_LEFT);
-        accentCard.getChildren().addAll(pickerRow, accentMetadata);
 
-        updateAccentPreview(rgb);
-
-        VBox presetsCard = card(
-                "Presets",
-                "Choose a starting color, then adjust it above."
+        FlowPane pickerRow = new FlowPane(
+                10, 8,
+                accentPicker,
+                new Label("HEX"),
+                accentHexField,
+                applyHex,
+                new Label("Current"),
+                accentMetadata
         );
-        presetsCard.getStyleClass().add("settings-presets-card");
+        pickerRow.setAlignment(Pos.CENTER_LEFT);
+        accentCard.getChildren().add(pickerRow);
+        updateAccentPreview(rgb);
 
         FlowPane presets = new FlowPane(8, 8);
         presets.setPrefWrapLength(560);
-        addPreset(presets, "Vanta Blue", "#6D9BFF");
+        addPreset(presets, "Blue", "#6D9BFF");
         addPreset(presets, "Cyan", "#42C6E8");
         addPreset(presets, "Emerald", "#4FD18B");
         addPreset(presets, "Violet", "#8B7CFF");
@@ -467,19 +452,45 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         addPreset(presets, "Rose", "#EF7187");
         addPreset(presets, "Arctic", "#7DD3FC");
         addPreset(presets, "Lime", "#A3E635");
-        addPreset(presets, "Coral", "#FB7185");
-        addPreset(presets, "Lavender", "#C4A7FF");
-        addPreset(presets, "Ice", "#A5F3FC");
-        addPreset(presets, "Crimson", "#FF647C");
-        addPreset(presets, "Silver", "#E5E7EB");
-        presetsCard.getChildren().add(presets);
+        accentCard.getChildren().add(presets);
 
         Button reset = new Button("Reset accent to theme default");
         reset.getStyleClass().add("secondary-button");
         reset.setOnAction(event -> setAccent(ThemeManager.loadTheme().accent()));
+        accentCard.getChildren().add(reset);
+
+        VBox presentationCard = card(
+                "Interface style",
+                "Choose the visual treatment used across the launcher."
+        );
+        presentationCard.getStyleClass().add("settings-presentation-card");
+
+        CheckBox overengineeredToggle = new CheckBox("Overengineered UI");
+        overengineeredToggle.setSelected(LauncherSettings.isOverengineeredUiEnabled());
+        overengineeredToggle.setAccessibleText("Enable or disable the overengineered user interface");
+        Label presentationState = new Label(
+                overengineeredToggle.isSelected() ? "Enhanced" : "Standard"
+        );
+        presentationState.getStyleClass().add("overengineered-state");
+        overengineeredToggle.selectedProperty().addListener((observable, wasEnabled, enabled) -> {
+            LauncherSettings.setOverengineeredUiEnabled(enabled);
+            presentationState.setText(enabled ? "Enhanced" : "Standard");
+            applyAccent(accentColor);
+            onAccentChanged.accept(accentColor);
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                manager.success(
+                        enabled ? "Enhanced interface enabled" : "Standard interface restored",
+                        enabled ? "The enhanced visual layer is now active." : "Vanta is using its standard appearance."
+                );
+            }
+        });
+        HBox presentationRow = new HBox(14, overengineeredToggle, presentationState);
+        presentationRow.setAlignment(Pos.CENTER_LEFT);
+        presentationCard.getChildren().add(presentationRow);
 
         VBox customColors = card(
-                "Custom interface palette",
+                "Advanced color overrides",
                 "Override individual interface colors. Changes are saved locally."
         );
         customColors.getStyleClass().add("settings-custom-palette-card");
@@ -529,39 +540,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         });
         customColors.getChildren().add(resetPalette);
 
-
-        VBox presentationCard = card(
-                "Overengineered UI",
-                "Enable richer surfaces and stronger active states. This changes presentation only."
-        );
-        presentationCard.getStyleClass().add("settings-presentation-card");
-        CheckBox overengineeredToggle = new CheckBox("Overengineered UI");
-        overengineeredToggle.setSelected(LauncherSettings.isOverengineeredUiEnabled());
-        overengineeredToggle.setAccessibleText("Enable or disable the overengineered user interface");
-        Label presentationState = new Label(
-                overengineeredToggle.isSelected() ? "Deluxe presentation enabled" : "Standard presentation"
-        );
-        presentationState.getStyleClass().add("overengineered-state");
-        overengineeredToggle.selectedProperty().addListener((observable, wasEnabled, enabled) -> {
-            LauncherSettings.setOverengineeredUiEnabled(enabled);
-            presentationState.setText(enabled
-                    ? "Deluxe presentation enabled"
-                    : "Standard presentation");
-            applyAccent(accentColor);
-            onAccentChanged.accept(accentColor);
-            NotificationManager manager = NotificationManager.getGlobal();
-            if (manager != null) {
-                manager.success(
-                        enabled ? "Deluxe presentation enabled" : "Standard presentation restored",
-                        enabled ? "The overengineered visual layer is now active." : "Vanta is using its standard appearance."
-                );
-            }
-        });
-        FlowPane presentationRow = new FlowPane(14, 8, overengineeredToggle, presentationState);
-        presentationRow.setAlignment(Pos.CENTER_LEFT);
-        presentationCard.getChildren().add(presentationRow);
-
-        content.getChildren().addAll(themeCard, accentCard, presetsCard, presentationCard, customColors, reset);
+        content.getChildren().addAll(themeCard, accentCard, presentationCard, customColors);
     }
 
     private ColorPicker customColorPicker(String key, String fallback) {
