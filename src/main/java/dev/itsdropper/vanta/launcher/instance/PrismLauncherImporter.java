@@ -58,8 +58,9 @@ public final class PrismLauncherImporter {
             candidates.add(home.resolve("Library/Application Support/PrismLauncher"));
         } else {
             String xdg = System.getenv("XDG_DATA_HOME");
-            candidates.add((xdg == null || xdg.isBlank() ? home.resolve(".local/share") : Path.of(xdg))
-                    .resolve("PrismLauncher"));
+            Path dataHome = xdg == null || xdg.isBlank() || !Path.of(xdg).isAbsolute()
+                    ? home.resolve(".local/share") : Path.of(xdg);
+            candidates.add(dataHome.resolve("PrismLauncher"));
             candidates.add(home.resolve(".local/share/PrismLauncher"));
         }
         return candidates.stream().map(Path::toAbsolutePath).map(Path::normalize)
@@ -173,9 +174,9 @@ public final class PrismLauncherImporter {
     }
 
     private static boolean looksLikeLoaderComponent(String uid) {
-        return uid.contains("loader") || uid.contains("forge") || uid.contains("fabric")
-                || uid.contains("quilt") || uid.contains("ornithe") || uid.contains("babric")
-                || uid.contains("rift") || uid.contains("stein") || uid.contains("liteloader");
+        return uid.contains("loader") || uid.contains("forge") || uid.contains("quilt")
+                || uid.contains("ornithe") || uid.contains("babric") || uid.contains("rift")
+                || uid.contains("stein") || uid.contains("liteloader");
     }
 
     private static boolean containsModJars(Path instanceRoot) throws IOException {
@@ -253,7 +254,7 @@ public final class PrismLauncherImporter {
         return id.isBlank() ? "instance" : id;
     }
 
-    private static void copyGameData(Path source, Path target) throws IOException {
+    static void copyGameData(Path source, Path target) throws IOException {
         Path normalizedSource = source.toAbsolutePath().normalize();
         Path normalizedTarget = target.toAbsolutePath().normalize();
         if (Files.isSymbolicLink(source) || !Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
