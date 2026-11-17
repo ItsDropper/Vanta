@@ -16,6 +16,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class InstanceManager {
 
@@ -31,7 +32,7 @@ public class InstanceManager {
     // =============================================================
 
     public static List<Instance> discoverInstances() {
-        return discoverInstances(false);
+        return discoverInstances(false, null);
     }
 
     /**
@@ -41,10 +42,17 @@ public class InstanceManager {
      * never exposed to the normal launcher/library flow.
      */
     public static List<Instance> discoverRepairableInstances() {
-        return discoverInstances(true);
+        return discoverRepairableInstances(null);
     }
 
-    private static List<Instance> discoverInstances(boolean includeInterrupted) {
+    public static List<Instance> discoverRepairableInstances(Consumer<String> skippedInstanceReporter) {
+        return discoverInstances(true, skippedInstanceReporter);
+    }
+
+    private static List<Instance> discoverInstances(
+            boolean includeInterrupted,
+            Consumer<String> skippedInstanceReporter
+    ) {
         Path instancesDirectory = MinecraftLocator.getInstancesDirectory();
         List<Instance> instances = new ArrayList<>();
         if (!Files.isDirectory(instancesDirectory)) return instances;
@@ -86,8 +94,15 @@ public class InstanceManager {
                     }
                     instances.add(instance);
                 } catch (Exception failure) {
-                    System.err.println("Failed to load repairable instance metadata: " + directory);
+                    String message = "Could not automatically repair instance folder '"
+                            + directory.getFileName() + "': "
+                            + (failure.getMessage() == null
+                            ? failure.getClass().getSimpleName() : failure.getMessage());
+                    System.err.println(message);
                     failure.printStackTrace();
+                    if (skippedInstanceReporter != null) {
+                        skippedInstanceReporter.accept(message);
+                    }
                 }
             });
         } catch (IOException failure) {
