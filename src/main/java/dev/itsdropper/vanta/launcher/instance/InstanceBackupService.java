@@ -188,6 +188,12 @@ public final class InstanceBackupService {
 
     static Instance restoreBackup(Path archive, String requestedName, boolean archiveAlreadyVerified)
             throws IOException {
+        return restoreBackup(archive, requestedName, archiveAlreadyVerified, false);
+    }
+
+    static Instance restoreBackup(
+            Path archive, String requestedName, boolean archiveAlreadyVerified, boolean sanitizeJavaPath
+    ) throws IOException {
         if (archive == null || !Files.isRegularFile(archive)) {
             throw new IOException("Select an existing Vanta ZIP backup.");
         }
@@ -275,6 +281,9 @@ public final class InstanceBackupService {
                     || original.getLoader() == null || original.getLoader().isBlank()) {
                 throw new IOException("The backup is missing Minecraft version or loader metadata.");
             }
+            if (sanitizeJavaPath) {
+                sanitizePortableSettings(target.resolve("settings.json"));
+            }
             Instance restored = new Instance(id, requestedName.trim(), original.getMinecraftVersion(),
                     original.getLoader(), original.getLoaderVersion(), target, original.getIcon());
             mapper.writerWithDefaultPrettyPrinter().writeValue(metadata.toFile(), restored);
@@ -289,6 +298,43 @@ public final class InstanceBackupService {
                     });
                 } catch (IOException ignored) { }
             }
+        }
+    }
+
+    /**
+     * Removes machine-specific Java executable paths when restoring a portable VPack.
+     * Full local ZIP backups retain their original per-instance runtime selection.
+     */
+    static void sanitizePortableSettings(Path settingsFile) throws IOException {
+        if (!Files.exists(settingsFile, LinkOption.NOFOLLOW_LINKS)) return;
+        if (Files.isSymbolicLink(settingsFile)
+                || !Files.isRegularFile(settingsFile, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Portable instance settings are not a regular file.");
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        final com.fasterxml.jackson.databind.JsonNode settings;
+        try {
+            settings = mapper.readTree(settingsFile.toFile());
+        } catch (Exception failure) {
+            throw new IOException("Portable instance settings.json is invalid.", failure);
+        }
+        if (settings == null || !settings.isObject()) {
+            throw new IOException("Portable instance settings.json must contain a JSON object.");
+        }
+        ((com.fasterxml.jackson.databind.node.ObjectNode) settings).put("javaPath", "");
+
+        Path temporary = Files.createTempFile(settingsFile.getParent(), "settings-portable-", ".tmp");
+        try {
+            mapper.writerWithDefaultPrettyPrinter().writeValue(temporary.toFile(), settings);
+            try {
+                Files.move(temporary, settingsFile, StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, settingsFile, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporary);
         }
     }
 

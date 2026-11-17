@@ -18,6 +18,25 @@ class InstanceBackupServiceTest {
     Path temporaryDirectory;
 
     @Test
+    void portableRestoreSettingsClearMachineSpecificJavaPath() throws Exception {
+        Path settings = temporaryDirectory.resolve("settings.json");
+        Files.writeString(settings, """
+                {
+                  "ramMb": 6144,
+                  "javaPath": "C:\\Users\\Alice\\jdks\\jdk-21\\bin\\java.exe",
+                  "javaArguments": "-Xmx4G"
+                }
+                """);
+
+        InstanceBackupService.sanitizePortableSettings(settings);
+
+        com.fasterxml.jackson.databind.JsonNode restored = new ObjectMapper().readTree(settings.toFile());
+        assertEquals("", restored.path("javaPath").asText());
+        assertEquals(6144, restored.path("ramMb").asInt());
+        assertEquals("-Xmx4G", restored.path("javaArguments").asText());
+    }
+
+    @Test
     void createdBackupCanBeVerifiedWithoutExtraction() throws Exception {
         Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("instance"));
         Instance instance = new Instance("test-id", "Test Instance", "1.21.1",

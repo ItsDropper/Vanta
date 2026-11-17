@@ -59,6 +59,39 @@ class VPackServiceTest {
     }
 
     @Test
+    void exportsPortableMetadataAndClearsMachineSpecificJavaPath() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("portable-instance"));
+        Instance instance = new Instance("portable", "Portable", "1.21.11",
+                "Fabric", "0.16.0", source);
+        Files.writeString(source.resolve("settings.json"), """
+                {
+                  "ramMb": 8192,
+                  "width": 1920,
+                  "height": 1080,
+                  "fullscreen": false,
+                  "javaArguments": "-Xmx4G",
+                  "gameArguments": "",
+                  "javaPath": "/home/alice/.local/jdk/bin/java"
+                }
+                """);
+        Path archive = temporaryDirectory.resolve("portable.vpack");
+
+        VPackService.createVPack(instance, archive, VPackService.Options.defaults());
+
+        com.fasterxml.jackson.databind.JsonNode metadata =
+                new com.fasterxml.jackson.databind.ObjectMapper().readTree(readEntry(archive, "instance.json"));
+        assertTrue(metadata.path("directory").isNull());
+        assertFalse(new String(readEntry(archive, "instance.json"),
+                java.nio.charset.StandardCharsets.UTF_8).contains(source.toAbsolutePath().toString()));
+
+        com.fasterxml.jackson.databind.JsonNode settings =
+                new com.fasterxml.jackson.databind.ObjectMapper().readTree(readEntry(archive, "settings.json"));
+        assertEquals("", settings.path("javaPath").asText());
+        assertEquals(8192, settings.path("ramMb").asInt());
+        assertEquals("-Xmx4G", settings.path("javaArguments").asText());
+    }
+
+    @Test
     void rejectsAnExportWithNoSelectedContentGroups() throws Exception {
         Path source = Files.createDirectory(temporaryDirectory.resolve("instance"));
         Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
@@ -249,6 +282,19 @@ class VPackServiceTest {
         Path file = root.resolve(relative);
         Files.createDirectories(file.getParent());
         Files.writeString(file, relative);
+    }
+
+    private static byte[] readEntry(Path archive, String requestedName) throws IOException {
+        try (ZipInputStream zip = new ZipInputStream(Files.newInputStream(archive))) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+                zip.transferTo(bytes);
+                zip.closeEntry();
+                if (entry.getName().equals(requestedName)) return bytes.toByteArray();
+            }
+        }
+        throw new IOException("Archive entry not found: " + requestedName);
     }
 
     private static Set<String> readNames(Path archive) throws IOException {

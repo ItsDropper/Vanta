@@ -110,7 +110,11 @@ public final class VPackService {
             included.stream().sorted().forEach(categories::add);
 
             byte[] manifestBytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(manifest);
-            byte[] instanceBytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(instance);
+            // A pack is portable: never serialize the source machine's absolute instance directory.
+            Instance portableInstance = new Instance(
+                    instance.getId(), instance.getName(), instance.getMinecraftVersion(),
+                    instance.getLoader(), instance.getLoaderVersion(), null, instance.getIcon());
+            byte[] instanceBytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(portableInstance);
             long expanded = manifestBytes.length + instanceBytes.length;
             int entries = 2;
             byte[] buffer = new byte[64 * 1024];
@@ -146,18 +150,38 @@ public final class VPackService {
                         throw new IOException("Unsupported filesystem entry in instance: " + relative);
                     }
 
-                    zip.putNextEntry(new ZipEntry(name));
-                    try (InputStream input = Files.newInputStream(file)) {
-                        int read;
-                        while ((read = input.read(buffer)) != -1) {
-                            expanded += read;
-                            if (expanded > MAX_EXPANDED_BYTES) {
-                                throw new IOException("Selected VPack content exceeds the 100 GiB safety limit.");
-                            }
-                            zip.write(buffer, 0, read);
+                    if (lowerName.equals("settings.json")) {
+                        final JsonNode settings;
+                        try {
+                            settings = MAPPER.readTree(file.toFile());
+                        } catch (Exception failure) {
+                            throw new IOException("Instance settings.json is invalid and cannot be safely packaged.", failure);
                         }
+                        if (settings == null || !settings.isObject()) {
+                            throw new IOException("Instance settings.json must contain a JSON object.");
+                        }
+                        ((ObjectNode) settings).put("javaPath", "");
+                        byte[] portableSettings = MAPPER.writerWithDefaultPrettyPrinter()
+                                .writeValueAsBytes(settings);
+                        expanded += portableSettings.length;
+                        if (expanded > MAX_EXPANDED_BYTES) {
+                            throw new IOException("Selected VPack content exceeds the 100 GiB safety limit.");
+                        }
+                        putBytes(zip, name, portableSettings);
+                    } else {
+                        zip.putNextEntry(new ZipEntry(name));
+                        try (InputStream input = Files.newInputStream(file)) {
+                            int read;
+                            while ((read = input.read(buffer)) != -1) {
+                                expanded += read;
+                                if (expanded > MAX_EXPANDED_BYTES) {
+                                    throw new IOException("Selected VPack content exceeds the 100 GiB safety limit.");
+                                }
+                                zip.write(buffer, 0, read);
+                            }
+                        }
+                        zip.closeEntry();
                     }
-                    zip.closeEntry();
                     if (++entries > MAX_ENTRIES) {
                         throw new IOException("Selected VPack content contains too many files.");
                     }
@@ -330,7 +354,7 @@ public final class VPackService {
 
     public static Instance restoreVPack(Path archive, String requestedName) throws IOException {
         verifyVPack(archive);
-        return InstanceBackupService.restoreBackup(archive, requestedName, true);
+        return InstanceBackupService.restoreBackup(archive, requestedName, true, true);
     }
 
     private static void putBytes(ZipOutputStream zip, String name, byte[] bytes) throws IOException {
