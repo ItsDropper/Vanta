@@ -189,7 +189,7 @@ public final class PrismLauncherImporter {
         }
     }
 
-    private static String mapLoader(String uid) {
+    static String mapLoader(String uid) {
         if (uid.contains("fabric-loader")) return "Fabric";
         if (uid.contains("quilt-loader")) return "Quilt";
         if (uid.contains("neoforge")) return "NeoForge";
@@ -326,7 +326,7 @@ public final class PrismLauncherImporter {
         return imported;
     }
 
-    private static Path resolveInstancesDirectory(Path root, Map<String, String> settings) {
+    static Path resolveInstancesDirectory(Path root, Map<String, String> settings) {
         String configured = settings.get("InstanceDir");
         if (configured == null || configured.isBlank()) return root.resolve("instances");
         Path path = Path.of(configured);
@@ -342,7 +342,7 @@ public final class PrismLauncherImporter {
         return null;
     }
 
-    private static Map<String, String> readIni(Path file) throws IOException {
+    static Map<String, String> readIni(Path file) throws IOException {
         Map<String, String> values = new LinkedHashMap<>();
         String section = "";
         for (String raw : Files.readAllLines(file)) {
