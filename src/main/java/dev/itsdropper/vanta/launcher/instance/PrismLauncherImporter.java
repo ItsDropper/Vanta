@@ -102,7 +102,7 @@ public final class PrismLauncherImporter {
             try {
                 Path packFile = source.resolve("mmc-pack.json");
                 Path cfgFile = source.resolve("instance.cfg");
-                if (!Files.isRegularFile(packFile) || !Files.isRegularFile(cfgFile)) {
+                if (!Files.isRegularFile(packFile, LinkOption.NOFOLLOW_LINKS)\n                        || !Files.isRegularFile(cfgFile, LinkOption.NOFOLLOW_LINKS)) {
                     skipped.add(name + ": missing mmc-pack.json or instance.cfg");
                     continue;
                 }
@@ -306,22 +306,38 @@ public final class PrismLauncherImporter {
     private static boolean importGlobalSettings(Map<String, String> settings) {
         if (settings.isEmpty()) return false;
         boolean imported = false;
-        if (settings.containsKey("JavaPath")) LauncherSettings.setDefaultJavaPath(settings.get("JavaPath")); imported = true;
-        if (settings.containsKey("JvmArgs")) LauncherSettings.setDefaultJavaArguments(settings.get("JvmArgs")); imported = true;
+        if (settings.containsKey("JavaPath")) {
+            LauncherSettings.setDefaultJavaPath(settings.get("JavaPath"));
+            imported = true;
+        }
+        if (settings.containsKey("JvmArgs")) {
+            LauncherSettings.setDefaultJavaArguments(settings.get("JvmArgs"));
+            imported = true;
+        }
         if (settings.containsKey("MaxMemAlloc")) {
             LauncherSettings.setDefaultRamMb(parseInt(settings.get("MaxMemAlloc"),
-                    LauncherSettings.getDefaultRamMb(), 1024, 16384)); imported = true;
+                    LauncherSettings.getDefaultRamMb(), 1024, 16384));
+            imported = true;
         }
         if (settings.containsKey("MinecraftWinWidth")) {
             LauncherSettings.setDefaultWidth(parseInt(settings.get("MinecraftWinWidth"),
-                    LauncherSettings.getDefaultWidth(), 640, 7680)); imported = true;
+                    LauncherSettings.getDefaultWidth(), 640, 7680));
+            imported = true;
         }
         if (settings.containsKey("MinecraftWinHeight")) {
             LauncherSettings.setDefaultHeight(parseInt(settings.get("MinecraftWinHeight"),
-                    LauncherSettings.getDefaultHeight(), 480, 4320)); imported = true;
+                    LauncherSettings.getDefaultHeight(), 480, 4320));
+            imported = true;
         }
-        if (settings.containsKey("LaunchMaximized")) {
-            LauncherSettings.setDefaultFullscreen(Boolean.parseBoolean(settings.get("LaunchMaximized"))); imported = true;
+        if (settings.containsKey("NumberOfConcurrentDownloads")) {
+            LauncherSettings.setDownloadThreads(parseInt(settings.get("NumberOfConcurrentDownloads"),
+                    LauncherSettings.getDownloadThreads(), 1, 16));
+            imported = true;
+        }
+        if (settings.containsKey("NumberOfManualRetries")) {
+            LauncherSettings.setDownloadRetries(parseInt(settings.get("NumberOfManualRetries"),
+                    LauncherSettings.getDownloadRetries(), 1, 8));
+            imported = true;
         }
         return imported;
     }
