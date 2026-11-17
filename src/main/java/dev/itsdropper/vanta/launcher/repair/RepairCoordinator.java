@@ -15,7 +15,20 @@ public final class RepairCoordinator {
     private RepairCoordinator() {}
 
     public static boolean shouldRepairManagedInstallation(List<RepairView.RepairIssue> issues) {
-        if (issues == null || issues.isEmpty()) return true;
+        return shouldRepairManagedInstallation(issues, false);
+    }
+
+    /**
+     * An explicit user request authorizes a full managed-installation repair
+     * even when diagnosis points to a non-installation problem. This does not
+     * promise to fix external causes; it guarantees Vanta will perform its
+     * managed-file rebuild attempt rather than silently refusing it.
+     */
+    public static boolean shouldRepairManagedInstallation(
+            List<RepairView.RepairIssue> issues,
+            boolean userRequested
+    ) {
+        if (userRequested || issues == null || issues.isEmpty()) return true;
 
         boolean sawSpecificIssue = false;
         for (RepairView.RepairIssue issue : issues) {
