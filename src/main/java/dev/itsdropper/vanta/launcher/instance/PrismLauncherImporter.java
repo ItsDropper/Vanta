@@ -104,7 +104,8 @@ public final class PrismLauncherImporter {
             try {
                 Path packFile = source.resolve("mmc-pack.json");
                 Path cfgFile = source.resolve("instance.cfg");
-                if (!Files.isRegularFile(packFile, LinkOption.NOFOLLOW_LINKS)\n                        || !Files.isRegularFile(cfgFile, LinkOption.NOFOLLOW_LINKS)) {
+                if (!Files.isRegularFile(packFile, LinkOption.NOFOLLOW_LINKS)
+                        || !Files.isRegularFile(cfgFile, LinkOption.NOFOLLOW_LINKS)) {
                     skipped.add(name + ": missing mmc-pack.json or instance.cfg");
                     continue;
                 }
