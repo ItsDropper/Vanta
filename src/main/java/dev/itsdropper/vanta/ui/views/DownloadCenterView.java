@@ -112,8 +112,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         value.getStyleClass().add("download-stat-value");
         VBox card = new VBox(VantaUI.spacing(2), label, value);
         card.getStyleClass().addAll("download-stat-card", style);
-        card.setPadding(new Insets(VantaUI.spacing(4)));
-        VantaUI.applySurface(card, VantaUI.SurfaceRole.CARD);
+        card.setPadding(new Insets(16, 4, 16, 4));
         return card;
     }
 
@@ -198,8 +197,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
 
         VBox card = new VBox(VantaUI.spacing(2), top, progress, detail);
         card.getStyleClass().addAll("download-task-card", "download-task-" + task.status().name().toLowerCase(Locale.ROOT));
-        card.setPadding(new Insets(VantaUI.spacing(4)));
-        VantaUI.applySurface(card, VantaUI.SurfaceRole.CARD);
+        card.setPadding(new Insets(16, 4, 16, 4));
         if (task.status() == Status.FAILED) {
             boolean retryRequested = service.isRetryRequested(task.id());
             Button retry = new Button(retryRequested ? "Retry queued" : "Retry",
