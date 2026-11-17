@@ -183,6 +183,11 @@ public final class InstanceBackupService {
      * before writing, and an installation marker hides partial restores from discovery.
      */
     public static Instance restoreBackup(Path archive, String requestedName) throws IOException {
+        return restoreBackup(archive, requestedName, false);
+    }
+
+    static Instance restoreBackup(Path archive, String requestedName, boolean archiveAlreadyVerified)
+            throws IOException {
         if (archive == null || !Files.isRegularFile(archive)) {
             throw new IOException("Select an existing Vanta ZIP backup.");
         }
@@ -191,7 +196,7 @@ public final class InstanceBackupService {
         }
 
         // Complete a read-only integrity and safety pass before creating any restore files.
-        verifyBackup(archive);
+        if (!archiveAlreadyVerified) verifyBackup(archive);
 
         Path instancesRoot = MinecraftLocator.getInstancesDirectory().toAbsolutePath().normalize();
         String id = "restored-" + UUID.randomUUID().toString().substring(0, 12);
