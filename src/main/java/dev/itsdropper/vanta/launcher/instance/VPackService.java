@@ -211,6 +211,12 @@ public final class VPackService {
                     throw new IOException("VPack contains an unsafe path: " + rawName);
                 }
                 String name = relative.toString().replace('\\', '/');
+                if (name.equalsIgnoreCase(INSTANCE_METADATA) || name.startsWith(INSTANCE_METADATA + "/")
+                        || name.equalsIgnoreCase(PACK_MANIFEST) || name.startsWith(PACK_MANIFEST + "/")) {
+                    if (!name.equalsIgnoreCase(INSTANCE_METADATA) && !name.equalsIgnoreCase(PACK_MANIFEST)) {
+                        throw new IOException("VPack contains a reserved metadata path: " + name);
+                    }
+                }
                 if (name.isBlank()) {
                     zip.closeEntry();
                     continue;
@@ -317,7 +323,7 @@ public final class VPackService {
     private static boolean isTransient(String name) {
         String first = name.contains("/") ? name.substring(0, name.indexOf('/')) : name;
         return first.equalsIgnoreCase("logs") || first.equalsIgnoreCase("natives")
-                || name.equalsIgnoreCase(".installing");
+                || first.equalsIgnoreCase(".installing");
     }
 
     private static String categoryFor(String name) {
