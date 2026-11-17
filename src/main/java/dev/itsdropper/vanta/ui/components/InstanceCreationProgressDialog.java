@@ -38,7 +38,7 @@ public final class InstanceCreationProgressDialog {
   // the rounded DialogPane surface define the visible window boundary.
   dialog.initStyle(StageStyle.TRANSPARENT);
   if(owner!=null)dialog.initOwner(owner);
-  dialog.setOnShown(event -> {
+  dialog.setOnShowing(event -> {
    Scene scene=dialog.getDialogPane().getScene();
    if(scene!=null)scene.setFill(Color.TRANSPARENT);
   });
