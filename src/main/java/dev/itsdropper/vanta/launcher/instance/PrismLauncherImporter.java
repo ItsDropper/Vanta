@@ -18,7 +18,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -294,14 +293,13 @@ public final class PrismLauncherImporter {
         String memory = overrideMemory ? cfg.get("MaxMemAlloc") : global.get("MaxMemAlloc");
         String width = overrideWindow ? cfg.get("MinecraftWinWidth") : global.get("MinecraftWinWidth");
         String height = overrideWindow ? cfg.get("MinecraftWinHeight") : global.get("MinecraftWinHeight");
-        String fullscreen = overrideWindow ? cfg.get("LaunchMaximized") : global.get("LaunchMaximized");
 
         settings.setJavaPath(javaPath == null ? "" : javaPath);
         settings.setJavaArguments(javaArgs == null ? "" : javaArgs);
         settings.setRamMb(parseInt(memory, LauncherSettings.getDefaultRamMb(), 1024, 16384));
         settings.setWidth(parseInt(width, LauncherSettings.getDefaultWidth(), 640, 7680));
         settings.setHeight(parseInt(height, LauncherSettings.getDefaultHeight(), 480, 4320));
-        settings.setFullscreen(Boolean.parseBoolean(fullscreen));
+        settings.setFullscreen(false);
         InstanceManager.saveSettings(instance, settings);
     }
 
