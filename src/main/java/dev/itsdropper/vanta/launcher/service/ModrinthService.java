@@ -200,6 +200,14 @@ public class ModrinthService {
      */
     public Path installTrackedModUpdate(Instance instance, ModUpdate update)
             throws IOException, InterruptedException {
+        return installTrackedModUpdate(instance, update, ignored -> { });
+    }
+
+    public Path installTrackedModUpdate(
+            Instance instance,
+            ModUpdate update,
+            java.util.function.Consumer<String> progress
+    ) throws IOException, InterruptedException {
         Objects.requireNonNull(update, "update");
         InstalledModRecord previous = update.installed();
         if (previous == null || previous.getProjectId() == null
@@ -209,7 +217,7 @@ public class ModrinthService {
 
         boolean wasDisabled = previous.getFilename() != null
                 && previous.getFilename().toLowerCase(java.util.Locale.ROOT).endsWith(".jar.disabled");
-        Path installed = installModVersion(instance, previous.getProjectId(), update.latest());
+        Path installed = installer.installModVersion(instance, previous.getProjectId(), update.latest(), progress);
         if (!wasDisabled) {
             return installed;
         }
