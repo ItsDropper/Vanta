@@ -191,7 +191,7 @@ public final class MrpackExporter {
                 ? "" : instance.getLoader().trim().toLowerCase(java.util.Locale.ROOT);
         if ("vanilla".equals(loader)) return;
 
-        if (!List.of("fabric", "forge", "neoforge", "quilt", "ornithe", "nilloader").contains(loader)) {
+        if (!List.of("fabric", "forge", "neoforge", "quilt").contains(loader)) {
             throw new IOException("The " + instance.getLoader()
                     + " loader cannot be represented in a standard Modrinth .mrpack. "
                     + "Use Vanta's full instance backup to preserve this loader and its files.");
@@ -273,12 +273,6 @@ public final class MrpackExporter {
                                 loaderVersion
                         );
 
-                case "ornithe" ->
-                        dependencies.put(
-                                "ornithe",
-                                loaderVersion
-                        );
-
                 case "neoforge" ->
                         dependencies.put(
                                 "neoforge",
@@ -288,12 +282,6 @@ public final class MrpackExporter {
                 case "quilt" ->
                         dependencies.put(
                                 "quilt-loader",
-                                loaderVersion
-                        );
-
-                case "nilloader" ->
-                        dependencies.put(
-                                "nilloader",
                                 loaderVersion
                         );
 
