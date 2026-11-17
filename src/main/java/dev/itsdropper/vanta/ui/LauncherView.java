@@ -7,6 +7,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
+import dev.itsdropper.vanta.launcher.instance.InstanceInstallationProgress;
+import dev.itsdropper.vanta.ui.components.InstanceCreationProgressDialog;
 import dev.itsdropper.vanta.launcher.instance.EnvironmentGuardianService;
 import dev.itsdropper.vanta.launcher.repair.CrashCaseRepository;
 import dev.itsdropper.vanta.launcher.repair.FailureCategory;
@@ -591,6 +593,7 @@ public class LauncherView {
                 InstancePreset previewPreset = InstancePresets.getBuiltInPresets().get(0);
 
                 List<SidebarScreenshotCapture.CaptureTarget> targets = List.of(
+                InstanceCreationProgressDialog[] progressDialogCapture = new InstanceCreationProgressDialog[1];
                         new SidebarScreenshotCapture.CaptureTarget(
                                 "instance-mods", "Instance Mods",
                                 () -> {
@@ -693,6 +696,19 @@ public class LauncherView {
                                 () -> {
                                     sidebar.setSelectedPage(Sidebar.Page.EXPERIMENTAL);
                                     viewHost.showForCapture(new CrashCaseReviewView(() -> {}));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
+                                "instance-creation-progress", "Instance Creation Progress",
+                                () -> {
+                                    if (progressDialogCapture[0] != null) {
+                                        progressDialogCapture[0].closeForScreenshot();
+                                    }
+                                    progressDialogCapture[0] = new InstanceCreationProgressDialog(
+                                            "Vanta Preview", "1.21.11", "Fabric", null, stage);
+                                    progressDialogCapture[0].show();
+                                    progressDialogCapture[0].update(new InstanceInstallationProgress.Update(
+                                            InstanceInstallationProgress.Stage.INSTALLING_LOADER,
+                                            "Downloading Fabric loader metadata and preparing its libraries."));
                                 })
                 );
 
@@ -700,7 +716,12 @@ public class LauncherView {
                         root,
                         targets,
                         outputDirectory.resolve("additional"),
-                        completion
+                        failure -> {
+                            if (progressDialogCapture[0] != null) {
+                                progressDialogCapture[0].closeForScreenshot();
+                            }
+                            completion.accept(failure);
+                        }
                 );
             } catch (Throwable captureSetupFailure) {
                 completion.accept(captureSetupFailure);

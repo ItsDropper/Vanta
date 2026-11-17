@@ -13,6 +13,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import javafx.stage.Window;
 import java.util.EnumMap;
 import java.util.List;
 /** GitHub Actions-inspired stage UI driven by actual installer events. */
@@ -26,7 +27,11 @@ public final class InstanceCreationProgressDialog {
  private final String loader;
  private boolean terminal,successful;
  public InstanceCreationProgressDialog(String name,String version,String loader,Runnable onSuccess){
+  this(name,version,loader,onSuccess,null);
+ }
+ public InstanceCreationProgressDialog(String name,String version,String loader,Runnable onSuccess,Window owner){
   this.loader=loader==null?"Vanilla":loader;
+  if(owner!=null)dialog.initOwner(owner);
   dialog.setTitle(Localization.text("instanceProgress.title"));dialog.setHeaderText(null);dialog.setResizable(false);
   dialog.getDialogPane().getStyleClass().add("instance-progress-dialog");
   ButtonType closeType=new ButtonType(Localization.text("common.close"),ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -49,6 +54,8 @@ public final class InstanceCreationProgressDialog {
   update(new InstanceInstallationProgress.Update(Stage.RESOLVING_VERSION,Localization.text("instanceProgress.resolving")));
  }
  public void show(){dialog.show();}
+ /** Closes a screenshot-only dialog after its owning window has been captured. */
+ public void closeForScreenshot(){dialog.close();}
  public void update(InstanceInstallationProgress.Update update){
   if(terminal||update==null)return;int active=ORDER.indexOf(update.stage());if(active<0)return;
   for(int i=0;i<ORDER.size();i++){Stage stage=ORDER.get(i);StageRow row=rows.get(stage);
