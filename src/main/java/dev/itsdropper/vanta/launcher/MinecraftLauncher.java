@@ -183,10 +183,10 @@ public class MinecraftLauncher {
             command.add("-XX:-TieredCompilation");
         }
 
-        // Java4Shell (CVE-2026-114938) affects the optimized Base64 decoder
-        // in vulnerable HotSpot builds on x86-64. Disable that intrinsic for
-        // Java 17+ child runtimes; the option is deliberately omitted for
-        // Java 8 and ARM64, which are outside the reported affected range.
+        // Java4Shell (CVE-2026-114938) affects vulnerable HotSpot builds
+        // on x86-64. Disable the Base64 intrinsic on Java 17+; cap Java 8's
+        // instruction set at AVX2 for the specifically reported 8u511 perf
+        // build. ARM64 is outside the reported affected hardware range.
         command.addAll(java4ShellMitigationArguments(
                 data.javaVersion,
                 System.getProperty("os.arch")
@@ -625,7 +625,7 @@ public class MinecraftLauncher {
     }
 
     static List<String> java4ShellMitigationArguments(int javaVersion, String architecture) {
-        if (javaVersion < 17 || architecture == null) {
+        if (architecture == null) {
             return List.of();
         }
 
@@ -635,7 +635,13 @@ public class MinecraftLauncher {
             return List.of();
         }
 
-        return List.of("-XX:-UseBASE64Intrinsics");
+        if (javaVersion == 8) {
+            return List.of("-XX:UseAVX=2");
+        }
+        if (javaVersion >= 17) {
+            return List.of("-XX:-UseBASE64Intrinsics");
+        }
+        return List.of();
     }
 
     static List<String> riftTweakerArguments(String template) {
