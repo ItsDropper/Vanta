@@ -50,6 +50,23 @@ class MrpackCompatibilityTest {
     }
 
     @Test
+    void rejectsEveryNonStandardVantaLoaderForModrinthExport() throws Exception {
+        for (String loader : java.util.List.of(
+                "Ornithe", "NilLoader", "Rift", "LiteLoader", "Babric",
+                "Legacy Fabric", "VantaLoader", "Stein")) {
+            Path instanceDirectory = Files.createDirectory(
+                    temporaryDirectory.resolve("instance-" + loader.toLowerCase().replace(" ", "-")));
+            Instance instance = new Instance(loader, loader + " Pack", "1.21.11",
+                    loader, "1.0.0", instanceDirectory);
+
+            assertThrows(java.io.IOException.class,
+                    () -> MrpackExporter.exportMrpack(instance,
+                            temporaryDirectory.resolve(loader.toLowerCase().replace(" ", "-") + ".mrpack")),
+                    loader + " must not be exported as a misleading standard .mrpack");
+        }
+    }
+
+    @Test
     void rejectsUnknownLoaderDependencyInsteadOfImportingAsVanilla() throws Exception {
         JsonNode index = MAPPER.readTree("""
                 {
