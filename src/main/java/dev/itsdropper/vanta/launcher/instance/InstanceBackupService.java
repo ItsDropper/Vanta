@@ -224,6 +224,11 @@ public final class InstanceBackupService {
                             || normalizedName.startsWith("/") || normalizedName.matches("^[A-Za-z]:.*")) {
                         throw new IOException("Backup contains an unsafe path: " + rawName);
                     }
+                    // VPack metadata describes the archive and must not become a game file.
+                    if (relative.toString().equalsIgnoreCase("vanta-pack.json")) {
+                        zip.closeEntry();
+                        continue;
+                    }
                     if (relative.toString().isBlank()) {
                         zip.closeEntry();
                         continue;
