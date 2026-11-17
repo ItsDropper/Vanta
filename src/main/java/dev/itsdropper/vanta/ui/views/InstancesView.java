@@ -321,6 +321,10 @@ public class InstancesView extends VBox {
         }
     }
 
+    public List<Instance> getLoadedInstances() {
+        return List.copyOf(loadedInstances);
+    }
+
     // =============================================================
     // REFRESH
     // =============================================================
