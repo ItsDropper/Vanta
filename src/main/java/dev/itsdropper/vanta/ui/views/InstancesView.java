@@ -208,7 +208,7 @@ public class InstancesView extends VBox {
 
         sortField = new ComboBox<>();
         sortField.getStyleClass().add("instance-sort-field");
-        sortField.getItems().setAll("Name (A–Z)", "Name (Z–A)", "Version (newest)", "Loader");
+        sortField.getItems().setAll("Name (A–Z)", "Name (Z–A)", "Recently played", "Most played", "Version (newest)", "Loader");
         sortField.setValue("Name (A–Z)");
         sortField.setPromptText(Localization.text("instances.sort"));
         sortField.setAccessibleText(Localization.text("instances.sortAccessible"));
@@ -725,6 +725,15 @@ public class InstancesView extends VBox {
         Comparator<Instance> selectedOrder = switch (sortField.getValue() == null
                 ? "Name (A–Z)" : sortField.getValue()) {
             case "Name (Z–A)" -> nameOrder.reversed();
+            case "Recently played" -> Comparator
+                    .comparingLong(InstanceUsageManager::getLastPlayed)
+                    .reversed()
+                    .thenComparing(nameOrder);
+            case "Most played" -> Comparator
+                    .comparingLong(instance -> InstanceUsageManager.getPlaytimeSeconds(instance)
+                            + launchService.getSessionPlaytimeSeconds(instance))
+                    .reversed()
+                    .thenComparing(nameOrder);
             case "Version (newest)" -> (left, right) -> {
                 int versionOrder = compareNatural(right.getMinecraftVersion(), left.getMinecraftVersion());
                 return versionOrder != 0 ? versionOrder : nameOrder.compare(left, right);
