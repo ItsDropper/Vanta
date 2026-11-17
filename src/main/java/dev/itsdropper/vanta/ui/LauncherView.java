@@ -383,6 +383,14 @@ public class LauncherView {
                 "",
                 this::repairApplicationInstallation
         ));
+        for (Instance instance : instancesView.getLoadedInstances()) {
+            commands.add(new CommandPalette.Command(
+                    "Launch " + instance.getName(),
+                    "Minecraft " + instance.getMinecraftVersion() + " · " + instance.getDisplayLoader(),
+                    "",
+                    () -> launchFromHome(instance)
+            ));
+        }
         return List.copyOf(commands);
     }
 
@@ -462,6 +470,7 @@ public class LauncherView {
             if (commandPalette.isShowing()) {
                 commandPalette.hide();
             } else {
+                commandPalette.setCommands(createCommands());
                 commandPalette.show();
             }
             event.consume();
