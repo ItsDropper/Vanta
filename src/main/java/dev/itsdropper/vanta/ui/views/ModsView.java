@@ -472,6 +472,9 @@ public class ModsView extends VBox {
 
         selectedType =
                 type;
+        boolean showModUpdates = type == ContentType.ALL || type == ContentType.MODS;
+        updateModsButton.setVisible(showModUpdates);
+        updateModsButton.setManaged(showModUpdates);
 
         setButtonStyle(
                 allButton,
