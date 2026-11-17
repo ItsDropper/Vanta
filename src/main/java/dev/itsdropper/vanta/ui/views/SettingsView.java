@@ -452,6 +452,11 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         addPreset(presets, "Rose", "#EF7187");
         addPreset(presets, "Arctic", "#7DD3FC");
         addPreset(presets, "Lime", "#A3E635");
+        addPreset(presets, "Coral", "#FB7185");
+        addPreset(presets, "Lavender", "#C4A7FF");
+        addPreset(presets, "Ice", "#A5F3FC");
+        addPreset(presets, "Crimson", "#FF647C");
+        addPreset(presets, "Silver", "#E5E7EB");
         accentCard.getChildren().add(presets);
 
         Button reset = new Button("Reset accent to theme default");
