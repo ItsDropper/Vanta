@@ -2040,8 +2040,11 @@ public class LauncherView {
                         }
 
                         if (!repaired) {
+                            // The Repair button is an explicit user request. Do not
+                            // block a full managed-file rebuild because diagnosis
+                            // classified the launch failure as external or unknown.
                             if (!dev.itsdropper.vanta.launcher.repair.RepairCoordinator
-                                    .shouldRepairManagedInstallation(issues)) {
+                                    .shouldRepairManagedInstallation(issues, true)) {
                                 notifications.error(
                                         "Manual steps recommended",
                                         dev.itsdropper.vanta.launcher.repair.RepairCoordinator
