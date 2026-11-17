@@ -162,12 +162,20 @@ public final class MrpackExporter {
             // Atomic-ish replacement:
             // the incomplete .exporting file never becomes
             // the final pack name.
-            Files.move(
-                    temporaryOutput,
-                    output,
-                    java.nio.file.StandardCopyOption.REPLACE_EXISTING,
-                    java.nio.file.StandardCopyOption.ATOMIC_MOVE
-            );
+            try {
+                Files.move(
+                        temporaryOutput,
+                        output,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING,
+                        java.nio.file.StandardCopyOption.ATOMIC_MOVE
+                );
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(
+                        temporaryOutput,
+                        output,
+                        java.nio.file.StandardCopyOption.REPLACE_EXISTING
+                );
+            }
 
         } catch (Exception e) {
 
