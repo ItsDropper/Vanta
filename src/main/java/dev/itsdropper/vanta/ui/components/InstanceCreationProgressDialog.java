@@ -55,7 +55,7 @@ public final class InstanceCreationProgressDialog {
  }
  public void show(){dialog.show();}
  /** Closes a screenshot-only dialog after its owning window has been captured. */
- public void closeForScreenshot(){dialog.close();}
+ public void closeForScreenshot(){terminal=true;dialog.close();}
  public void update(InstanceInstallationProgress.Update update){
   if(terminal||update==null)return;int active=ORDER.indexOf(update.stage());if(active<0)return;
   for(int i=0;i<ORDER.size();i++){Stage stage=ORDER.get(i);StageRow row=rows.get(stage);
