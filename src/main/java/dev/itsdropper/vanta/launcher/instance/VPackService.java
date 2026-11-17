@@ -238,7 +238,7 @@ public final class VPackService {
                 }
                 java.io.ByteArrayOutputStream special = isManifest || isInstance
                         ? new java.io.ByteArrayOutputStream() : null;
-                if (!entry.isDirectory()) fileEntries.add(name);
+                if (!entry.isDirectory()) fileEntries.add(key);
                 int read;
                 while ((read = zip.read(buffer)) != -1) {
                     expandedBytes += read;
