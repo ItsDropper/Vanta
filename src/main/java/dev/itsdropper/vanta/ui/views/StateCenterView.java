@@ -707,9 +707,9 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         confirmation.setTitle("Repair Vanta installations");
         confirmation.setHeaderText("Rebuild all managed installations?");
         confirmation.setContentText(
-                "Vanta will reinstall managed Minecraft and loader files for every instance, "
+                "Vanta will reinstall managed Minecraft and loader files for every recoverable instance, including interrupted installs with intact metadata. "
                         + "then rebuild shared libraries and assets. Mods, configs, saves, "
-                        + "screenshots and resource packs are not intentionally removed. "
+                        + "screenshots and resource packs are not intentionally removed. Directories with missing or unreadable instance metadata will be reported rather than guessed. "
                         + "This requires network access and can take some time."
         );
         if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
@@ -727,7 +727,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             int repaired = 0;
             List<Instance> instances;
             try {
-                instances = InstanceManager.discoverInstances();
+                instances = InstanceManager.discoverRepairableInstances();
             } catch (Throwable discoveryFailure) {
                 failures.add("Instance discovery: " + describeFailure(discoveryFailure));
                 instances = List.of();
