@@ -64,7 +64,13 @@ public class InstanceManager {
                 }
 
                 Path metadata = directory.resolve("instance.json");
-                if (!Files.isRegularFile(metadata)) return;
+                if (!Files.isRegularFile(metadata)) {
+                    if (includeInterrupted && skippedInstanceReporter != null) {
+                        skippedInstanceReporter.accept("Could not automatically repair instance folder '"
+                                + directory.getFileName() + "': instance.json is missing.");
+                    }
+                    return;
+                }
 
                 try {
                     Instance stored = MAPPER.readValue(metadata.toFile(), Instance.class);
