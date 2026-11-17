@@ -1639,14 +1639,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             boolean enabled = automaticBackups.isSelected();
             LauncherSettings.setAutomaticBackupsEnabled(enabled);
             NotificationManager manager = NotificationManager.getGlobal();
-            if (manager != null) {
-                if (enabled) {
-                    manager.success("Automatic backups enabled",
-                            "Vanta will create full backups when instances are idle and due.");
-                } else {
-                    manager.info("Automatic backups disabled",
-                            "Existing automatic backups are retained.");
-                }
+            if (enabled && manager != null) {
+                manager.success("Automatic backups enabled",
+                        "Vanta will create full backups when instances are idle and due.");
             }
         });
 
