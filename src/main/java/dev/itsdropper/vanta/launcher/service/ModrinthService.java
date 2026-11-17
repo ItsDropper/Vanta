@@ -1,10 +1,15 @@
 package dev.itsdropper.vanta.launcher.service;
 
 import dev.itsdropper.vanta.launcher.modrinth.InstalledModScanner;
+import dev.itsdropper.vanta.launcher.instance.InstalledModManager;
+import dev.itsdropper.vanta.launcher.instance.InstalledModRecord;
 import dev.itsdropper.vanta.launcher.modrinth.*;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,6 +152,97 @@ public class ModrinthService {
     @Deprecated
     public Path installDataPack(Instance instance, ModrinthProject project) throws IOException { return installer.installDataPack(instance, project); }
     public Path installDataPack(Instance instance, Path worldDirectory, ModrinthProject project) throws IOException, InterruptedException { return installer.installDataPack(instance, worldDirectory, project); }
+
+    /**
+     * Finds newer Modrinth releases for mods installed through Vanta.
+     * Untracked jars are deliberately left alone because Vanta cannot safely
+     * identify their upstream project.
+     */
+    public List<ModUpdate> checkForModUpdates(Instance instance)
+            throws IOException, InterruptedException {
+        Objects.requireNonNull(instance, "instance");
+        List<ModUpdate> updates = new ArrayList<>();
+        Path modsDirectory = instance.getDirectory().resolve("mods").toAbsolutePath().normalize();
+
+        for (InstalledModRecord installed : InstalledModManager.load(instance)) {
+            if (installed == null || installed.getProjectId() == null
+                    || installed.getProjectId().isBlank()) {
+                continue;
+            }
+
+            String filename = installed.getFilename();
+            if (filename == null || filename.isBlank()) {
+                continue;
+            }
+            Path installedPath = modsDirectory.resolve(filename).normalize();
+            if (!installedPath.startsWith(modsDirectory)) {
+                continue;
+            }
+
+            List<ModrinthVersion> versions = client.getVersions(installed.getProjectId());
+            ModrinthVersion latest = catalog.findCompatibleVersion(
+                    versions, instance.getMinecraftVersion(), instance.getLoader());
+            if (latest == null || latest.getId() == null || latest.getId().isBlank()) {
+                continue;
+            }
+
+            boolean artifactMissing = !Files.isRegularFile(installedPath);
+            if (artifactMissing || !latest.getId().equals(installed.getVersionId())) {
+                updates.add(new ModUpdate(installed, latest, artifactMissing));
+            }
+        }
+        return List.copyOf(updates);
+    }
+
+    /**
+     * Installs one checked update through the normal transactional installer.
+     * Disabled mods remain disabled after replacement.
+     */
+    public Path installTrackedModUpdate(Instance instance, ModUpdate update)
+            throws IOException, InterruptedException {
+        Objects.requireNonNull(update, "update");
+        InstalledModRecord previous = update.installed();
+        if (previous == null || previous.getProjectId() == null
+                || previous.getProjectId().isBlank()) {
+            throw new IOException("The installed mod record has no valid project identity.");
+        }
+
+        boolean wasDisabled = previous.getFilename() != null
+                && previous.getFilename().toLowerCase(java.util.Locale.ROOT).endsWith(".jar.disabled");
+        Path installed = installModVersion(instance, previous.getProjectId(), update.latest());
+        if (!wasDisabled) {
+            return installed;
+        }
+
+        Path disabled = installed.resolveSibling(installed.getFileName() + ".disabled");
+        try {
+            try {
+                Files.move(installed, disabled, StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(installed, disabled);
+            }
+
+            InstalledModRecord replacement = new InstalledModRecord(
+                    previous.getProjectId(),
+                    update.latest().getId(),
+                    previous.getModId(),
+                    update.latest().getVersionNumber(),
+                    disabled.getFileName().toString());
+            InstalledModManager.add(instance, replacement);
+            return disabled;
+        } catch (IOException failure) {
+            if (Files.exists(disabled) && !Files.exists(installed)) {
+                try {
+                    Files.move(disabled, installed, StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException rollbackFailure) {
+                    failure.addSuppressed(rollbackFailure);
+                }
+            }
+            throw failure;
+        }
+    }
+
+    public record ModUpdate(InstalledModRecord installed, ModrinthVersion latest, boolean artifactMissing) {}
 
     public record ResolvedMod(String projectId, ModrinthVersion version) {}
 }
