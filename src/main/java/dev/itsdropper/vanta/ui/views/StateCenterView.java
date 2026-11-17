@@ -727,7 +727,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             int repaired = 0;
             List<Instance> instances;
             try {
-                instances = InstanceManager.discoverRepairableInstances();
+                instances = InstanceManager.discoverRepairableInstances(failures::add);
             } catch (Throwable discoveryFailure) {
                 failures.add("Instance discovery: " + describeFailure(discoveryFailure));
                 instances = List.of();
