@@ -177,53 +177,111 @@ public final class VPackService {
     }
 
     public static Verification verifyVPack(Path archive) throws IOException {
-        InstanceBackupService.BackupVerification backup = InstanceBackupService.verifyBackup(archive);
-        Set<String> included = new HashSet<>();
+        if (archive == null || !Files.isRegularFile(archive, LinkOption.NOFOLLOW_LINKS)
+                || Files.isSymbolicLink(archive)) {
+            throw new IOException("Select an existing regular VPack archive.");
+        }
+
+        Set<String> names = new HashSet<>();
+        Set<String> contentFiles = new HashSet<>();
         byte[] manifestBytes = null;
-        Set<String> seen = new HashSet<>();
+        byte[] instanceBytes = null;
+        long expandedBytes = 0;
+        int entries = 0;
         byte[] buffer = new byte[64 * 1024];
 
         try (InputStream input = Files.newInputStream(archive);
              ZipInputStream zip = new ZipInputStream(input)) {
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
-                String name = entry.getName().replace('\\', '/');
-                String key = name.toLowerCase(Locale.ROOT);
-                if (!seen.add(key)) throw new IOException("VPack contains duplicate paths: " + name);
-                if (key.equals(PACK_MANIFEST)) {
-                    java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
-                    int read;
-                    while ((read = zip.read(buffer)) != -1) {
-                        if (bytes.size() + read > 1024 * 1024) {
-                            throw new IOException("VPack manifest exceeds the 1 MiB safety limit.");
-                        }
-                        bytes.write(buffer, 0, read);
-                    }
-                    manifestBytes = bytes.toByteArray();
-                } else {
-                    while (zip.read(buffer) != -1) { /* CRC and structure already checked by backup verifier. */ }
+                if (++entries > MAX_ENTRIES) {
+                    throw new IOException("VPack contains too many entries.");
                 }
+                String rawName = entry.getName();
+                if (rawName == null || rawName.isBlank() || rawName.indexOf('\\0') >= 0) {
+                    throw new IOException("VPack contains an invalid path.");
+                }
+                String normalized = rawName.replace('\\\\', '/');
+                Path relative;
+                try {
+                    relative = Path.of(normalized).normalize();
+                } catch (java.nio.file.InvalidPathException failure) {
+                    throw new IOException("VPack contains an invalid archive path.", failure);
+                }
+                if (relative.isAbsolute() || relative.startsWith("..") || normalized.startsWith("/")
+                        || normalized.matches("^[A-Za-z]:.*")) {
+                    throw new IOException("VPack contains an unsafe path: " + rawName);
+                }
+                String name = relative.toString().replace('\\\\', '/');
+                if (name.isBlank()) {
+                    zip.closeEntry();
+                    continue;
+                }
+                String key = name.toLowerCase(Locale.ROOT);
+                if (!names.add(key)) {
+                    throw new IOException("VPack contains duplicate paths: " + rawName);
+                }
+                if (isTransient(name)) {
+                    throw new IOException("VPack contains a transient or forbidden file: " + name);
+                }
+
+                boolean isManifest = key.equals(PACK_MANIFEST);
+                boolean isInstance = key.equals(INSTANCE_METADATA);
+                java.io.ByteArrayOutputStream special = isManifest || isInstance
+                        ? new java.io.ByteArrayOutputStream() : null;
+                if (!entry.isDirectory()) contentFiles.add(name);
+                int read;
+                while ((read = zip.read(buffer)) != -1) {
+                    expandedBytes += read;
+                    if (expandedBytes > MAX_EXPANDED_BYTES) {
+                        throw new IOException("VPack expands beyond the 100 GiB safety limit.");
+                    }
+                    if (special != null) {
+                        if (special.size() + read > 1024 * 1024) {
+                            throw new IOException("VPack metadata exceeds the 1 MiB safety limit.");
+                        }
+                        special.write(buffer, 0, read);
+                    }
+                }
+                if (isManifest) manifestBytes = special.toByteArray();
+                if (isInstance) instanceBytes = special.toByteArray();
                 zip.closeEntry();
             }
+        } catch (java.util.zip.ZipException failure) {
+            throw new IOException("VPack is corrupt or failed its CRC integrity check.", failure);
         }
 
-        if (manifestBytes == null) {
-            throw new IOException("This is a ZIP backup, not a Vanta VPack (vanta-pack.json is missing).");
+        if (manifestBytes == null || instanceBytes == null) {
+            throw new IOException("VPack is missing its manifest or instance metadata.");
         }
 
         final JsonNode manifest;
+        final Instance original;
         try {
             manifest = MAPPER.readTree(manifestBytes);
+            original = MAPPER.readValue(instanceBytes, Instance.class);
         } catch (Exception failure) {
-            throw new IOException("VPack manifest is invalid.", failure);
+            throw new IOException("VPack metadata is invalid.", failure);
         }
         if (!"vanta-instance-pack".equals(manifest.path("format").asText())
                 || manifest.path("formatVersion").asInt(-1) != FORMAT_VERSION
                 || !manifest.path("includedCategories").isArray()) {
             throw new IOException("Unsupported or invalid VPack format.");
         }
+        if (original.getMinecraftVersion() == null || original.getMinecraftVersion().isBlank()
+                || original.getLoader() == null || original.getLoader().isBlank()) {
+            throw new IOException("VPack instance metadata is missing Minecraft version or loader.");
+        }
+        String declaredId = manifest.path("instanceId").asText(null);
+        if (declaredId != null && original.getId() != null && !declaredId.equals(original.getId())) {
+            throw new IOException("VPack manifest and instance metadata identify different instances.");
+        }
+
+        Set<String> included = new HashSet<>();
         manifest.path("includedCategories").forEach(node -> {
-            if (node.isTextual()) included.add(node.asText());
+            if (!node.isTextual() || !included.add(node.asText())) {
+                throw new IllegalArgumentException("VPack contains invalid or duplicate content groups.");
+            }
         });
         Set<String> validCategories = Set.of("mods", "worlds", "configs", "resource-packs",
                 "shader-packs", "screenshots", "game-settings", "other");
@@ -231,24 +289,15 @@ public final class VPackService {
             throw new IOException("VPack declares missing or unsupported content groups.");
         }
 
-        // Reject content that is not covered by the pack's own selection manifest.
-        try (InputStream input = Files.newInputStream(archive);
-             ZipInputStream zip = new ZipInputStream(input)) {
-            ZipEntry entry;
-            while ((entry = zip.getNextEntry()) != null) {
-                String name = entry.getName().replace('\\', '/');
-                if (!entry.isDirectory() && !name.equalsIgnoreCase(INSTANCE_METADATA)
-                        && !name.equalsIgnoreCase(PACK_MANIFEST)
-                        && !included.contains(categoryFor(name))) {
-                    throw new IOException("VPack contains content outside its declared selection: " + name);
-                }
-                while (zip.read(buffer) != -1) { }
-                zip.closeEntry();
+        for (String name : contentFiles) {
+            if (name.equalsIgnoreCase(INSTANCE_METADATA) || name.equalsIgnoreCase(PACK_MANIFEST)) continue;
+            if (!included.contains(categoryFor(name))) {
+                throw new IOException("VPack contains content outside its declared selection: " + name);
             }
         }
 
-        return new Verification(backup.entryCount(), backup.expandedBytes(), backup.instanceName(),
-                backup.minecraftVersion(), backup.loader(), Set.copyOf(included));
+        return new Verification(entries, expandedBytes, original.getName(),
+                original.getMinecraftVersion(), original.getLoader(), Set.copyOf(included));
     }
 
     public static Instance restoreVPack(Path archive, String requestedName) throws IOException {
