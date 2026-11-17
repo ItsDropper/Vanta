@@ -184,7 +184,7 @@ public final class VPackService {
         }
 
         Set<String> names = new HashSet<>();
-        Set<String> contentFiles = new HashSet<>();
+        Set<String> fileEntries = new HashSet<>();
         byte[] manifestBytes = null;
         byte[] instanceBytes = null;
         long expandedBytes = 0;
@@ -214,14 +214,14 @@ public final class VPackService {
                     throw new IOException("VPack contains an unsafe path: " + rawName);
                 }
                 String name = relative.toString().replace('\\', '/');
+                String canonicalEntryName = name + (entry.isDirectory() ? "/" : "");
+                if (!normalized.equals(canonicalEntryName) || name.isBlank()) {
+                    throw new IOException("VPack contains a non-canonical archive path: " + rawName);
+                }
                 String lowerName = name.toLowerCase(Locale.ROOT);
                 if (lowerName.startsWith(INSTANCE_METADATA + "/")
                         || lowerName.startsWith(PACK_MANIFEST + "/")) {
                     throw new IOException("VPack contains a reserved metadata path: " + name);
-                }
-                if (name.isBlank()) {
-                    zip.closeEntry();
-                    continue;
                 }
                 String key = name.toLowerCase(Locale.ROOT);
                 if (!names.add(key)) {
@@ -233,9 +233,12 @@ public final class VPackService {
 
                 boolean isManifest = key.equals(PACK_MANIFEST);
                 boolean isInstance = key.equals(INSTANCE_METADATA);
+                if ((isManifest || isInstance) && entry.isDirectory()) {
+                    throw new IOException("VPack metadata entries must be regular files.");
+                }
                 java.io.ByteArrayOutputStream special = isManifest || isInstance
                         ? new java.io.ByteArrayOutputStream() : null;
-                if (!entry.isDirectory()) contentFiles.add(name);
+                if (!entry.isDirectory()) fileEntries.add(name);
                 int read;
                 while ((read = zip.read(buffer)) != -1) {
                     expandedBytes += read;
@@ -299,10 +302,20 @@ public final class VPackService {
             throw new IOException("VPack declares missing or unsupported content groups.");
         }
 
-        for (String name : contentFiles) {
+        for (String name : names) {
             if (name.equalsIgnoreCase(INSTANCE_METADATA) || name.equalsIgnoreCase(PACK_MANIFEST)) continue;
             if (!included.contains(categoryFor(name))) {
                 throw new IOException("VPack contains content outside its declared selection: " + name);
+            }
+
+            // A regular file cannot also be an ancestor directory for another entry.
+            int separator = name.indexOf('/');
+            while (separator >= 0) {
+                String parent = name.substring(0, separator).toLowerCase(Locale.ROOT);
+                if (fileEntries.contains(parent)) {
+                    throw new IOException("VPack contains a file/directory path collision: " + name);
+                }
+                separator = name.indexOf('/', separator + 1);
             }
         }
 

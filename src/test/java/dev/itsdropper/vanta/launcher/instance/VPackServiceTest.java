@@ -152,6 +152,80 @@ class VPackServiceTest {
         assertThrows(IOException.class, () -> VPackService.verifyVPack(rewritten));
     }
 
+    @Test
+    void rejectsNonCanonicalPathsThatNormalizeToAnotherEntry() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("noncanonical-source"));
+        Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
+                "Fabric", "0.16.0", source);
+        write(source, "mods/example.jar");
+        Path archive = temporaryDirectory.resolve("canonical.vpack");
+        VPackService.createVPack(instance, archive,
+                new VPackService.Options(true, false, false, false, false, false, false, false));
+
+        Path rewritten = temporaryDirectory.resolve("noncanonical.vpack");
+        rewriteArchive(archive, rewritten, "mods/example.jar", "mods/../mods/example.jar", null, false);
+
+        assertThrows(IOException.class, () -> VPackService.verifyVPack(rewritten));
+    }
+
+    @Test
+    void rejectsDirectoryEntriesOutsideTheDeclaredSelection() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("directory-source"));
+        Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
+                "Fabric", "0.16.0", source);
+        write(source, "mods/example.jar");
+        Path archive = temporaryDirectory.resolve("mods-only.vpack");
+        VPackService.createVPack(instance, archive,
+                new VPackService.Options(true, false, false, false, false, false, false, false));
+
+        Path rewritten = temporaryDirectory.resolve("unselected-directory.vpack");
+        rewriteArchive(archive, rewritten, null, null, "saves/", true);
+
+        assertThrows(IOException.class, () -> VPackService.verifyVPack(rewritten));
+    }
+
+    @Test
+    void rejectsFileAndDirectoryAncestorCollisionsBeforeRestore() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("collision-source"));
+        Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
+                "Fabric", "0.16.0", source);
+        write(source, "mods/example.jar");
+        Path archive = temporaryDirectory.resolve("valid-for-collision.vpack");
+        VPackService.createVPack(instance, archive,
+                new VPackService.Options(true, false, false, false, false, false, false, false));
+
+        Path rewritten = temporaryDirectory.resolve("file-directory-collision.vpack");
+        rewriteArchive(archive, rewritten, null, null, "mods", false);
+
+        assertThrows(IOException.class, () -> VPackService.verifyVPack(rewritten));
+    }
+
+    private static void rewriteArchive(
+            Path source, Path destination, String oldName, String newName,
+            String additionalEntry, boolean directory
+    ) throws IOException {
+        try (ZipInputStream input = new ZipInputStream(Files.newInputStream(source));
+             java.util.zip.ZipOutputStream output =
+                     new java.util.zip.ZipOutputStream(Files.newOutputStream(destination))) {
+            ZipEntry entry;
+            byte[] buffer = new byte[4096];
+            while ((entry = input.getNextEntry()) != null) {
+                String name = entry.getName();
+                if (oldName != null && name.equals(oldName)) name = newName;
+                output.putNextEntry(new ZipEntry(name));
+                int read;
+                while ((read = input.read(buffer)) != -1) output.write(buffer, 0, read);
+                output.closeEntry();
+                input.closeEntry();
+            }
+            if (additionalEntry != null) {
+                output.putNextEntry(new ZipEntry(additionalEntry));
+                if (!directory) output.write("collision".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+                output.closeEntry();
+            }
+        }
+    }
+
     private static void write(Path root, String relative) throws IOException {
         Path file = root.resolve(relative);
         Files.createDirectories(file.getParent());
