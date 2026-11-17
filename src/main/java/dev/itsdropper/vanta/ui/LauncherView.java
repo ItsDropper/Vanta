@@ -377,7 +377,58 @@ public class LauncherView {
                 "",
                 this::showImportInstanceView
         ));
+        commands.add(new CommandPalette.Command(
+                "Repair Vanta installation",
+                "Reinstall the latest verified launcher package without touching instances or settings",
+                "",
+                this::repairApplicationInstallation
+        ));
         return List.copyOf(commands);
+    }
+
+    /**
+     * Explicit application-level recovery. The normal update path already
+     * verifies the release checksum and delegates replacement to the isolated
+     * updater process, so this reuses that tested transaction instead of
+     * attempting to overwrite the running jpackage image.
+     */
+    private void repairApplicationInstallation() {
+        if (!Platform.supportsDesktop()) {
+            notifications.error("Application repair unavailable",
+                    "No packaged Vanta release is available for this operating system or architecture.");
+            return;
+        }
+
+        javafx.scene.control.Alert confirmation = new javafx.scene.control.Alert(
+                javafx.scene.control.Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Repair Vanta installation");
+        confirmation.setHeaderText("Reinstall the latest Vanta release?");
+        confirmation.setContentText(
+                "Vanta will download the latest compatible application image, verify its SHA-256 checksum, "
+                        + "and replace the current launcher using the external updater. Your instances, worlds, "
+                        + "accounts and launcher settings are stored separately and will not be intentionally changed.");
+        if (confirmation.showAndWait().orElse(javafx.scene.control.ButtonType.CANCEL)
+                != javafx.scene.control.ButtonType.OK) {
+            return;
+        }
+
+        notifications.showProgress("Repairing Vanta", "Checking the latest compatible release...");
+        notifications.setProgress(-1.0);
+        new UpdateChecker().check().thenAccept(updateInfo -> UiExecutor.shared().dispatchToUi(() -> {
+            if (updateInfo.getDownloadUrl() == null || updateInfo.getChecksumUrl() == null) {
+                notifications.error("Application repair unavailable",
+                        updateInfo.getReleaseNotes() == null || updateInfo.getReleaseNotes().isBlank()
+                                ? "No compatible verified Vanta package is published."
+                                : updateInfo.getReleaseNotes());
+                return;
+            }
+            performUpdate(updateInfo);
+        })).exceptionally(failure -> {
+            UiExecutor.shared().dispatchToUi(() -> notifications.error(
+                    "Application repair failed",
+                    getUpdateErrorMessage(failure)));
+            return null;
+        });
     }
 
     private void showOnboarding() {
