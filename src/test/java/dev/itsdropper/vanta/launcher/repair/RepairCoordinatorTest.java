@@ -39,6 +39,27 @@ class RepairCoordinatorTest {
     }
 
     @Test
+    void explicitUserRequestOverridesNonInstallationDiagnosis() {
+        List<RepairView.RepairIssue> issues = List.of(
+                new RepairView.RepairIssue("AUTHENTICATION", "Expired session", "Account token expired"),
+                new RepairView.RepairIssue("GRAPHICS", "OpenGL failure", "Driver initialization failed")
+        );
+
+        assertFalse(RepairCoordinator.shouldRepairManagedInstallation(issues));
+        assertTrue(RepairCoordinator.shouldRepairManagedInstallation(issues, true));
+    }
+
+    @Test
+    void explicitUserRequestAlsoAllowsRepairForUnknownFailures() {
+        assertTrue(RepairCoordinator.shouldRepairManagedInstallation(
+                List.of(new RepairView.RepairIssue(
+                        "UNKNOWN", "Unclassified failure", "No signature matched"
+                )),
+                true
+        ));
+    }
+
+    @Test
     void emptyInputCanStillRunBaselineIntegrityPass() {
         assertTrue(RepairCoordinator.shouldRepairManagedInstallation(List.of()));
     }
