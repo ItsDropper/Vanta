@@ -67,7 +67,11 @@ class EnvironmentGuardianServiceTest {
 
         assertEquals(EnvironmentGuardianService.Status.SKIPPED_RECENT, results.getFirst().status());
         assertEquals(existing, results.getFirst().archive());
-        assertEquals(1, Files.list(directory).count());
+        long archiveCount;
+        try (var stream = Files.list(directory)) {
+            archiveCount = stream.count();
+        }
+        assertEquals(1, archiveCount);
     }
 
     @Test
@@ -122,7 +126,29 @@ class EnvironmentGuardianServiceTest {
 
         assertEquals(EnvironmentGuardianService.Status.FAILED, results.getFirst().status());
         assertTrue(Files.exists(existing));
-        assertEquals(1, Files.list(directory).count());
+        long archiveCount;
+        try (var stream = Files.list(directory)) {
+            archiveCount = stream.count();
+        }
+        assertEquals(1, archiveCount);
+    }
+
+    @Test
+    void doesNothingWhenAutomaticBackupsAreDisabled() throws Exception {
+        Instance instance = createInstance("disabled");
+        Path backupRoot = temporaryDirectory.resolve("disabled-backups");
+        EnvironmentGuardianService service = new EnvironmentGuardianService(
+                backupRoot,
+                () -> List.of(instance),
+                ignored -> false,
+                () -> false,
+                () -> 24,
+                () -> 3,
+                InstanceBackupService::createBackup
+        );
+
+        assertTrue(service.runOnce().isEmpty());
+        assertFalse(Files.exists(backupRoot));
     }
 
     @Test

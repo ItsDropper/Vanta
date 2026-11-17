@@ -1602,7 +1602,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         Path automaticBackupDirectory = vantaDirectory.resolve("automatic-backups");
         VBox guardianPolicy = card(
                 "Automatic full-instance backups",
-                "Create verified ZIP snapshots of each instance, including worlds and user configuration. Vanta skips instances it currently knows are running; no live-world snapshot is attempted."
+                "Create verified ZIP snapshots of each instance, including worlds and user configuration. Vanta skips instances it currently knows are running. Minecraft launched outside Vanta is not detected, so close external game processes before relying on an automatic snapshot."
         );
         addInfoRow(guardianPolicy, "Automatic backup location", automaticBackupDirectory.toString());
 
@@ -1656,7 +1656,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         backupControls.setAlignment(Pos.CENTER_LEFT);
         Label guardianDescription = new Label(
                 "Defaults to off. Backups run locally while Vanta is open, skip instances Vanta knows are running, "
-                        + "and prune older archives only after a new backup has passed integrity verification."
+                        + "and prune older archives only after a new backup has passed integrity verification. "
+                        + "Processes launched outside Vanta are not detected."
         );
         guardianDescription.getStyleClass().add("settings-card-description");
         guardianDescription.setWrapText(true);

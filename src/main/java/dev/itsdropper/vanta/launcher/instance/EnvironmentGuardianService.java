@@ -62,6 +62,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
     private final ScheduledExecutorService scheduler;
     private final AtomicBoolean cycleRunning = new AtomicBoolean(false);
     private final AtomicBoolean started = new AtomicBoolean(false);
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     public EnvironmentGuardianService(MultiLaunchService launchService) {
         this(
@@ -101,7 +102,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
 
     /** Starts a low-frequency scheduler. The enabled setting is checked on every cycle. */
     public void start() {
-        if (!started.compareAndSet(false, true)) return;
+        if (closed.get() || !started.compareAndSet(false, true)) return;
         scheduler.scheduleWithFixedDelay(
                 this::runSafely,
                 INITIAL_DELAY_MINUTES,
@@ -115,7 +116,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
      * exercised deterministically without starting a background scheduler.
      */
     List<BackupResult> runOnce() {
-        if (!enabled.getAsBoolean() || !cycleRunning.compareAndSet(false, true)) {
+        if (closed.get() || !enabled.getAsBoolean() || !cycleRunning.compareAndSet(false, true)) {
             return List.of();
         }
 
@@ -228,6 +229,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
     }
 
     private void runSafely() {
+        if (closed.get()) return;
         try {
             for (BackupResult result : runOnce()) {
                 if (result.status() == Status.CREATED) {
@@ -243,6 +245,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
     /** Stops future cycles without interrupting an archive currently being written. */
     @Override
     public void close() {
+        if (!closed.compareAndSet(false, true)) return;
         scheduler.shutdown();
     }
 }

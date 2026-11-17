@@ -21,6 +21,16 @@ The first Environment Engine foundation is now present in the codebase:
 - SHA-256 tracking for files under `resourcepacks/`, `shaderpacks/`, and `config/`, including nested configuration files.
 - Initial JUnit coverage for capture, persistence, validation, and drift detection.
 
+The Environment Guardian now provides an opt-in full-instance backup workflow:
+
+- Automatic snapshots are disabled by default and can be enabled in Storage & Cache settings.
+- While Vanta is open, a low-frequency local scheduler checks whether each instance is due for a full ZIP backup.
+- Instances Vanta currently knows are running are skipped; Minecraft processes launched outside Vanta are not detectable by this service.
+- Each archive is verified before it is published, and older archives are pruned only after a new verified backup exists.
+- The interval and per-instance retention count are configurable. The scheduler is daemon-backed and stops scheduling on launcher exit.
+
+This is an in-session scheduler, not an operating-system background task. It does not run while Vanta is closed.
+
 The State Center now exposes the first user-facing workflow:
 
 - Each inspected instance shows whether a saved environment baseline exists.
