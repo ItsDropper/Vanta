@@ -9,6 +9,7 @@ import javafx.util.Duration;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.Label;
@@ -55,6 +56,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
     private final ProgressBar progress = new ProgressBar(0);
     private final Label progressLabel = new Label(Localization.text("state.health"));
     private final Button refreshButton = new Button(Localization.text("state.scanNow"), IconView.create(IconView.Type.REFRESH, 15));
+    private final Button repairAllButton = new Button("Repair all");
     private final AtomicBoolean scanning = new AtomicBoolean(false);
     private volatile long scanGeneration;
     private final Map<Instance, HBox> liveInstanceCards = new IdentityHashMap<>();
@@ -101,7 +103,10 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         Label sectionTitle = new Label(Localization.text("state.environments"));
         sectionTitle.getStyleClass().add("state-section-title");
         VantaUI.styleText(sectionTitle, VantaUI.TextRole.SECTION_TITLE);
-        HBox section = new HBox(VantaUI.spacing(2), sectionTitle, refreshButton);
+        repairAllButton.getStyleClass().add("state-repair-button");
+        repairAllButton.setAccessibleText("Rebuild all Vanta-managed installations and shared resources");
+        repairAllButton.setOnAction(event -> repairEverything());
+        HBox section = new HBox(VantaUI.spacing(2), sectionTitle, repairAllButton, refreshButton);
         section.setAlignment(Pos.CENTER_LEFT);
 
         instanceList.setFillWidth(true);
@@ -180,6 +185,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
         long generation = ++scanGeneration;
         refreshButton.setDisable(true);
+        repairAllButton.setDisable(true);
         refreshButton.setText(Localization.text("state.scanning"));
         animateRefreshButton(true);
         overallTitle.setText(Localization.text("state.scanning"));
@@ -475,6 +481,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
 
             scanning.set(false);
             refreshButton.setDisable(false);
+            repairAllButton.setDisable(false);
             refreshButton.setText(Localization.text("state.scanAgain"));
             animateRefreshButton(false);
         });
@@ -551,6 +558,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         progress.setProgress(0);
         scanning.set(false);
         refreshButton.setDisable(false);
+        repairAllButton.setDisable(false);
         refreshButton.setText(Localization.text("state.scanAgain"));
         animateRefreshButton(false);
 
@@ -686,6 +694,90 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         right.getChildren().addAll(count, status);
         row.getChildren().addAll(icon, text, right);
         return row;
+    }
+
+    /**
+     * Explicitly rebuild every Vanta-managed instance and the launcher's
+     * shared libraries/assets, even when the latest scan reports them healthy.
+     */
+    private void repairEverything() {
+        if (scanning.get()) return;
+
+        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmation.setTitle("Repair Vanta installations");
+        confirmation.setHeaderText("Rebuild all managed installations?");
+        confirmation.setContentText(
+                "Vanta will reinstall managed Minecraft and loader files for every instance, "
+                        + "then rebuild shared libraries and assets. Mods, configs, saves, "
+                        + "screenshots and resource packs are not intentionally removed. "
+                        + "This requires network access and can take some time."
+        );
+        if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+        if (!scanning.compareAndSet(false, true)) return;
+
+        long generation = ++scanGeneration;
+        refreshButton.setDisable(true);
+        repairAllButton.setDisable(true);
+        repairAllButton.setText(Localization.text("state.repairing"));
+        overallTitle.setText("REPAIRING VANTA");
+        overallSubtitle.setText("Rebuilding every managed instance and shared resource…");
+
+        UiExecutor.shared().execute(() -> {
+            List<String> failures = new java.util.ArrayList<>();
+            int repaired = 0;
+            List<Instance> instances;
+            try {
+                instances = InstanceManager.discoverInstances();
+            } catch (Throwable discoveryFailure) {
+                failures.add("Instance discovery: " + describeFailure(discoveryFailure));
+                instances = List.of();
+            }
+
+            for (Instance instance : instances) {
+                try {
+                    InstanceRepairService.repair(instance);
+                    repaired++;
+                } catch (Throwable failure) {
+                    failures.add(safe(instance.getName(), "Instance") + ": " + describeFailure(failure));
+                }
+            }
+
+            try {
+                SharedResourceRepairService.repair(instances, true, true);
+            } catch (Throwable failure) {
+                failures.add("Shared libraries/assets: " + describeFailure(failure));
+            }
+
+            final int repairedCount = repaired;
+            final int total = instances.size();
+            final List<String> failed = List.copyOf(failures);
+            UiExecutor.shared().dispatchToUi(() -> {
+                if (generation != scanGeneration) return;
+                scanning.set(false);
+                repairAllButton.setText("Repair all");
+                repairAllButton.setDisable(false);
+                refreshButton.setDisable(false);
+                NotificationManager manager = NotificationManager.getGlobal();
+                if (manager != null) {
+                    if (failed.isEmpty()) {
+                        manager.success("Vanta repair complete",
+                                repairedCount + " instance(s), shared libraries and assets were rebuilt.");
+                    } else {
+                        manager.error("Vanta repair partially completed",
+                                repairedCount + "/" + total + " instances repaired. "
+                                        + String.join(" | ", failed));
+                    }
+                }
+                refresh();
+            });
+        });
+    }
+
+    private static String describeFailure(Throwable failure) {
+        String message = failure.getMessage();
+        return message == null || message.isBlank()
+                ? failure.getClass().getSimpleName()
+                : message;
     }
 
     private void repairSharedResource(String name, Button button) {
