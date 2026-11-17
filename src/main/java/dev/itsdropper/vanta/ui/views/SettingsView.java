@@ -297,7 +297,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             case "About Vanta" -> "settings.section.about";
             default -> null;
         };
-        return key == null ? section : Localization.text(key);    }
+        return key == null ? section : Localization.text(key);
+    }
 
     private void selectSection(String section) {
         currentSection = section;
@@ -888,7 +889,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 (int) Math.round(notificationDuration.getValue()) + " seconds"
         );
         notificationDuration.valueProperty().addListener((o, oldValue, newValue) -> updateNotificationDuration.run());
-        updateNotificationDuration.run();        Button saveNotificationDuration = new Button("SAVE NOTIFICATION DURATION");
+        updateNotificationDuration.run();
+        Button saveNotificationDuration = new Button("SAVE NOTIFICATION DURATION");
         saveNotificationDuration.getStyleClass().add("secondary-button");
         saveNotificationDuration.setOnAction(e -> {
             LauncherSettings.setNotificationDurationSeconds((int) Math.round(notificationDuration.getValue()));
@@ -1187,7 +1189,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                                 new java.io.InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                             output = reader.lines().limit(8).collect(java.util.stream.Collectors.joining(" "));
                         }
-                        success = process.exitValue() == 0;                        result = (success ? "Java check passed: " : "Java returned an error: ")
+                        success = process.exitValue() == 0;
+                        result = (success ? "Java check passed: " : "Java returned an error: ")
                                 + (output.isBlank() ? "No version output." : output);
                     }
                 } catch (Exception ex) {
@@ -1486,7 +1489,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         cacheStatus.setWrapText(true);
 
         Button refresh = new Button("REFRESH SIZE");
-        refresh.getStyleClass().add("secondary-button");        refresh.setOnAction(e -> refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh));
+        refresh.getStyleClass().add("secondary-button");
+        refresh.setOnAction(e -> refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh));
 
         Button open = actionButton("OPEN CACHE FOLDER", () -> {
             try {
@@ -1785,7 +1789,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         CheckBox instanceDeletion = new CheckBox("Confirm instance deletion");
         instanceDeletion.setSelected(LauncherSettings.isConfirmInstanceDeletionEnabled());
-        instanceDeletion.getStyleClass().add("settings-checkbox");        instanceDeletion.setOnAction(e -> LauncherSettings.setConfirmInstanceDeletionEnabled(instanceDeletion.isSelected()));
+        instanceDeletion.getStyleClass().add("settings-checkbox");
+        instanceDeletion.setOnAction(e -> LauncherSettings.setConfirmInstanceDeletionEnabled(instanceDeletion.isSelected()));
 
         health.getChildren().addAll(
                 confirmations,
@@ -2084,7 +2089,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             try {
                 Path javaBinary = Path.of(
                         System.getProperty("java.home"),
-                        "bin",                        Platform.javaExecutableName()
+                        "bin",
+                        Platform.javaExecutableName()
                 );
 
                 if (!Files.isRegularFile(javaBinary)) {
@@ -2383,7 +2389,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 if (version != null && !version.contains("${")) {
                     return version;
                 }
-            }        } catch (IOException ignored) {
+            }
+        } catch (IOException ignored) {
         }
 
         return "1.1.8";
