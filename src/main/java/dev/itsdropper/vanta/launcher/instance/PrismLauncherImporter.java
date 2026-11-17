@@ -63,6 +63,7 @@ public final class PrismLauncherImporter {
                     ? home.resolve(".local/share") : Path.of(xdg);
             candidates.add(dataHome.resolve("PrismLauncher"));
             candidates.add(home.resolve(".local/share/PrismLauncher"));
+            candidates.add(home.resolve(".var/app/org.prismlauncher.PrismLauncher/data/PrismLauncher"));
         }
         return candidates.stream().map(Path::toAbsolutePath).map(Path::normalize)
                 .filter(PrismLauncherImporter::looksLikePrismRoot).findFirst().orElse(null);
@@ -406,7 +407,9 @@ public final class PrismLauncherImporter {
 
     static Path resolveInstancesDirectory(Path root, Map<String, String> settings) {
         String configured = settings.get("InstanceDir");
-        if (configured == null || configured.isBlank()) return root.resolve("instances");
+        if (configured == null || configured.isBlank()
+                || configured.equalsIgnoreCase("@Invalid()")
+                || configured.equalsIgnoreCase("null")) return root.resolve("instances");
         Path path = Path.of(configured);
         if (!path.isAbsolute()) path = root.resolve(path);
         return path.normalize();
@@ -428,6 +431,9 @@ public final class PrismLauncherImporter {
                     : Path.of(xdg);
             for (String name : List.of("PrismLauncher.cfg", "prismlauncher.cfg", "multimc.cfg", "polymc.cfg")) {
                 candidates.add(configHome.resolve("PrismLauncher").resolve(name));
+                candidates.add(Path.of(System.getProperty("user.home", "."))
+                        .resolve(".var/app/org.prismlauncher.PrismLauncher/config/PrismLauncher")
+                        .resolve(name));
             }
         }
 
