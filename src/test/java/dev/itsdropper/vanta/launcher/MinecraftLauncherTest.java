@@ -60,6 +60,23 @@ class MinecraftLauncherTest {
     }
 
     @Test
+    void disablesVulnerableBase64IntrinsicForJava17AndNewerOnX64() {
+        assertEquals(List.of("-XX:-UseBASE64Intrinsics"),
+                MinecraftLauncher.java4ShellMitigationArguments(17, "amd64"));
+        assertEquals(List.of("-XX:-UseBASE64Intrinsics"),
+                MinecraftLauncher.java4ShellMitigationArguments(25, "x86_64"));
+        assertEquals(List.of("-XX:-UseBASE64Intrinsics"),
+                MinecraftLauncher.java4ShellMitigationArguments(21, "x64"));
+    }
+
+    @Test
+    void doesNotPassJava4ShellMitigationToJava8OrArmRuntimes() {
+        assertEquals(List.of(), MinecraftLauncher.java4ShellMitigationArguments(8, "amd64"));
+        assertEquals(List.of(), MinecraftLauncher.java4ShellMitigationArguments(21, "aarch64"));
+        assertEquals(List.of(), MinecraftLauncher.java4ShellMitigationArguments(21, null));
+    }
+
+    @Test
     void rejectsMissingLaunchWrapperOptionValue() {
         List<String> command = new ArrayList<>(List.of(
                 "java", "net.minecraft.launchwrapper.Launch"
