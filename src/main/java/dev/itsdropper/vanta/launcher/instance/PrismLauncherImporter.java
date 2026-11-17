@@ -337,8 +337,11 @@ public final class PrismLauncherImporter {
         if (settings.isEmpty()) return false;
         boolean imported = false;
         if (settings.containsKey("JavaPath")) {
-            LauncherSettings.setDefaultJavaPath(resolveConfiguredPath(prismRoot, settings.get("JavaPath")));
-            imported = true;
+            String javaPath = resolveConfiguredPath(prismRoot, settings.get("JavaPath"));
+            if (!javaPath.isBlank()) {
+                LauncherSettings.setDefaultJavaPath(javaPath);
+                imported = true;
+            }
         }
         if (settings.containsKey("JvmArgs")) {
             LauncherSettings.setDefaultJavaArguments(settings.get("JvmArgs"));
@@ -385,12 +388,19 @@ public final class PrismLauncherImporter {
     }
 
     private static String resolveConfiguredPath(Path prismRoot, String configured) {
-        if (configured == null || configured.isBlank()) return "";
+        if (configured == null || configured.isBlank()
+                || configured.equalsIgnoreCase("@Invalid()")
+                || configured.equalsIgnoreCase("null")) return "";
         try {
             Path path = Path.of(configured);
-            return (path.isAbsolute() ? path : prismRoot.resolve(path)).normalize().toString();
+            // A Java executable path from another OS or an unavailable custom
+            // runtime must not poison Vanta's default Java selection.
+            if (!path.isAbsolute()) path = prismRoot.resolve(path);
+            path = path.normalize();
+            return Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS) && !Files.isSymbolicLink(path)
+                    ? path.toString() : "";
         } catch (RuntimeException invalidPath) {
-            return configured;
+            return "";
         }
     }
 
@@ -403,11 +413,28 @@ public final class PrismLauncherImporter {
     }
 
     private static Path findSettingsFile(Path root) {
+        List<Path> candidates = new ArrayList<>();
         for (String name : List.of("PrismLauncher.cfg", "prismlauncher.cfg", "multimc.cfg", "polymc.cfg")) {
-            Path file = root.resolve(name);
-            if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) return file;
+            candidates.add(root.resolve(name));
         }
-        return null;
+
+        // Linux separates application data (instances) from application
+        // configuration (QSettings INI files) under the XDG directory layout.
+        String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+        if (os.contains("linux")) {
+            String xdg = System.getenv("XDG_CONFIG_HOME");
+            Path configHome = xdg == null || xdg.isBlank() || !Path.of(xdg).isAbsolute()
+                    ? Path.of(System.getProperty("user.home", ".")).resolve(".config")
+                    : Path.of(xdg);
+            for (String name : List.of("PrismLauncher.cfg", "prismlauncher.cfg", "multimc.cfg", "polymc.cfg")) {
+                candidates.add(configHome.resolve("PrismLauncher").resolve(name));
+            }
+        }
+
+        return candidates.stream()
+                .filter(file -> Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS))
+                .filter(file -> !Files.isSymbolicLink(file))
+                .findFirst().orElse(null);
     }
 
     static Map<String, String> readIni(Path file) throws IOException {
