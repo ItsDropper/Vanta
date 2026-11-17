@@ -61,8 +61,6 @@ class MinecraftLauncherTest {
 
     @Test
     void disablesVulnerableBase64IntrinsicForJava17AndNewerOnX64() {
-        assertEquals(List.of("-XX:UseAVX=2"),
-                MinecraftLauncher.java4ShellMitigationArguments(8, "amd64"));
         assertEquals(List.of("-XX:-UseBASE64Intrinsics"),
                 MinecraftLauncher.java4ShellMitigationArguments(17, "amd64"));
         assertEquals(List.of("-XX:-UseBASE64Intrinsics"),
@@ -73,6 +71,7 @@ class MinecraftLauncherTest {
 
     @Test
     void doesNotPassJava4ShellMitigationToJava8OrArmRuntimes() {
+        assertEquals(List.of(), MinecraftLauncher.java4ShellMitigationArguments(8, "amd64"));
         assertEquals(List.of(), MinecraftLauncher.java4ShellMitigationArguments(11, "amd64"));
         assertEquals(List.of(), MinecraftLauncher.java4ShellMitigationArguments(21, "aarch64"));
         assertEquals(List.of(), MinecraftLauncher.java4ShellMitigationArguments(21, null));
