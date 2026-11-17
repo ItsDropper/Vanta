@@ -147,6 +147,7 @@ public class ImportInstanceView extends VBox {
 
         prismImportButton = new Button(Localization.text("prismImport.button"));
         prismImportButton.getStyleClass().addAll("secondary-button", "import-prism-action");
+        prismImportButton.setAccessibleText(Localization.text("prismImport.button"));
         prismImportButton.setPrefHeight(46);
         prismImportButton.setPrefWidth(220);
         prismImportButton.setTooltip(new javafx.scene.control.Tooltip(
