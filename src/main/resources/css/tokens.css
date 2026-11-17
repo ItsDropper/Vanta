@@ -2963,3 +2963,52 @@
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
 }
+
+
+/* Final minimal pass: remove filled selection pills and nested dashboard cards. */
+.vanta-ui-root .sidebar .sidebar-button.sidebar-button-active,
+.vanta-ui-root .sidebar .sidebar-button.sidebar-button-active:hover {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-border-radius: 0;
+    -fx-text-fill: -vantaaccent;
+}
+.vanta-ui-root .settings-shell .settings-nav-button.selected {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-border-radius: 0;
+}
+.vanta-ui-root .instance-empty {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: -vantaborder transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-radius: 0;
+}
+.vanta-ui-root .download-center-page .download-stat-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent -vantaborder transparent transparent;
+    -fx-border-width: 0 1px 0 0;
+    -fx-border-radius: 0;
+    -fx-min-height: 0;
+}
+.vanta-ui-root .download-center-page .download-empty-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: -vantaborder transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+    -fx-border-radius: 0;
+    -fx-effect: none;
+}
+.vanta-ui-root .download-center-page .download-task-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+}
