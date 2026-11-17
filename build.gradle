@@ -18,8 +18,8 @@ java {
     }
 }
 
-def hostIsX64 = System.getProperty('os.arch', '').toLowerCase(java.util.Locale.ROOT)
-        in ['amd64', 'x86_64', 'x86-64', 'x64']
+def hostIsX64 = ['amd64', 'x86_64', 'x86-64', 'x64'].contains(
+        System.getProperty('os.arch', '').toLowerCase(java.util.Locale.ROOT))
 
 application {
     mainClass = 'dev.itsdropper.vanta.Main'
