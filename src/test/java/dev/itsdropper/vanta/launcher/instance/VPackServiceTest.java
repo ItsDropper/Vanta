@@ -88,6 +88,26 @@ class VPackServiceTest {
     }
 
     @Test
+    void ignoresSymlinksInsideContentGroupsThatWereNotSelected() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("instance"));
+        Path outside = Files.writeString(temporaryDirectory.resolve("outside.txt"), "not selected");
+        Files.createDirectories(source.resolve("screenshots"));
+        try {
+            Files.createSymbolicLink(source.resolve("screenshots/external.png"), outside);
+        } catch (UnsupportedOperationException | IOException | SecurityException unavailable) {
+            org.junit.jupiter.api.Assumptions.abort("Symbolic links are unavailable on this test host.");
+        }
+        Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
+                "Fabric", "0.16.0", source);
+
+        Path archive = temporaryDirectory.resolve("without-screenshots.vpack");
+        VPackService.createVPack(instance, archive, VPackService.Options.defaults());
+
+        assertTrue(VPackService.verifyVPack(archive).includedCategories().contains("mods"));
+        assertFalse(readNames(archive).contains("screenshots/external.png"));
+    }
+
+    @Test
     void rejectsZipBackupsThatAreNotVantaPacks() throws Exception {
         Path source = Files.createDirectory(temporaryDirectory.resolve("instance"));
         Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
