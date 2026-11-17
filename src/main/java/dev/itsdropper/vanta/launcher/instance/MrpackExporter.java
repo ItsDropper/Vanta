@@ -69,6 +69,8 @@ public final class MrpackExporter {
             );
         }
 
+        validateLoaderCompatibility(instance);
+
         output = output.toAbsolutePath().normalize();
 
         if (output.getParent() != null) {
@@ -181,6 +183,22 @@ public final class MrpackExporter {
                     "Failed to export instance.",
                     e
             );
+        }
+    }
+
+    private static void validateLoaderCompatibility(Instance instance) throws IOException {
+        String loader = instance.getLoader() == null
+                ? "" : instance.getLoader().trim().toLowerCase(java.util.Locale.ROOT);
+        if ("vanilla".equals(loader)) return;
+
+        if (!List.of("fabric", "forge", "neoforge", "quilt", "ornithe", "nilloader").contains(loader)) {
+            throw new IOException("The " + instance.getLoader()
+                    + " loader cannot be represented in a standard Modrinth .mrpack. "
+                    + "Use Vanta's full instance backup to preserve this loader and its files.");
+        }
+        if (instance.getLoaderVersion() == null || instance.getLoaderVersion().isBlank()) {
+            throw new IOException("The " + instance.getLoader()
+                    + " loader version is missing; Vanta cannot create a reproducible modpack.");
         }
     }
 
