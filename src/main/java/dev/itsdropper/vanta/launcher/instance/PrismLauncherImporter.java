@@ -283,7 +283,7 @@ public final class PrismLauncherImporter {
     }
 
     private static void importInstanceSettings(Map<String, String> cfg, Map<String, String> global,
-                                               Instance instance) throws IOException {
+                                               Instance instance, Path prismRoot) throws IOException {
         InstanceSettings settings = new InstanceSettings();
         boolean overrideJava = bool(cfg, "OverrideJavaLocation", false);
         boolean overrideArgs = bool(cfg, "OverrideJavaArgs", false);
