@@ -362,8 +362,8 @@ public class InstanceInstaller {
             // FABRIC
             // -----------------------------------------------------
 
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Fabric components.");
             JsonNode fabricProfile =
-                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Fabric components.");
                     FabricInstaller.downloadProfile(
                             minecraftVersion,
                             loaderVersion
@@ -557,11 +557,11 @@ public class InstanceInstaller {
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
 
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
             JsonNode fabricProfile =
-                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
                     BabricInstaller.downloadFabricProfile(minecraftVersion, loaderVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
             JsonNode babricOverlay =
-                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
                     BabricInstaller.downloadOverlay(fabricProfile);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Babric components.");
             BabricInstaller.installLibraries(fabricProfile, babricOverlay);
@@ -847,8 +847,8 @@ public class InstanceInstaller {
                             + loaderVersion
             );
 
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Fabric components.");
             JsonNode fabricProfile =
-                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Fabric components.");
                     FabricInstaller.downloadProfile(
                             minecraftVersion,
                             loaderVersion
@@ -881,8 +881,8 @@ public class InstanceInstaller {
                 );
                 loaderVersion = latestQuiltVersion;
             }
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Quilt components.");
             JsonNode quiltProfile =
-                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Quilt components.");
                     QuiltInstaller.downloadProfile(minecraftVersion, loaderVersion);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Quilt components.");
             QuiltInstaller.installLibraries(quiltProfile);
@@ -904,8 +904,8 @@ public class InstanceInstaller {
             if (loaderVersion == null || loaderVersion.isBlank()) {
                 throw new IllegalStateException("Legacy Fabric Loader version is missing.");
             }
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing LegacyFabric components.");
             JsonNode legacyFabricProfile =
-                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing LegacyFabric components.");
                     LegacyFabricInstaller.downloadProfile(minecraftVersion, loaderVersion);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing LegacyFabric components.");
             LegacyFabricInstaller.installLibraries(legacyFabricProfile);
@@ -918,11 +918,11 @@ public class InstanceInstaller {
             if (babricLoaderVersion == null || babricLoaderVersion.isBlank()) {
                 babricLoaderVersion = BabricInstaller.findLatestLoaderVersion(minecraftVersion);
             }
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
             JsonNode babricFabricProfile =
-                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
                     BabricInstaller.downloadFabricProfile(minecraftVersion, babricLoaderVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
             JsonNode babricOverlay =
-                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
                     BabricInstaller.downloadOverlay(babricFabricProfile);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Babric components.");
             BabricInstaller.installLibraries(babricFabricProfile, babricOverlay);
