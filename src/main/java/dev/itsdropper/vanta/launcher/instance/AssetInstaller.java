@@ -18,6 +18,7 @@ public class AssetInstaller {
             Instance instance,
             JsonNode metadata
     ) throws Exception {
+        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_GAME_FILES, "Downloading and indexing Minecraft assets.");
         install(metadata);
     }
 

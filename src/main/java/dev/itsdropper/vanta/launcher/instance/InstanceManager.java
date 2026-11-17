@@ -137,6 +137,7 @@ public class InstanceManager {
             String loader,
             String loaderVersion
     ) throws IOException {
+        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.PREPARING_INSTANCE, "Creating the instance directory and initial configuration.");
 
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException(
@@ -271,6 +272,7 @@ public class InstanceManager {
     public static void markInstallationComplete(
             Instance instance
     ) throws IOException {
+        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.FINALIZING, "Saving installation metadata and verifying the completed instance.");
 
         if (instance == null) {
             throw new IllegalArgumentException(

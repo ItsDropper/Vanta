@@ -30,6 +30,7 @@ public class MinecraftFileInstaller {
             Instance instance,
             JsonNode metadata
     ) throws Exception {
+        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_GAME_FILES, "Downloading and preparing Minecraft client files.");
 
         JsonNode downloads =
                 metadata.get("downloads");
@@ -85,6 +86,7 @@ public class MinecraftFileInstaller {
     public static void installLibraries(
             JsonNode metadata
     ) throws Exception {
+        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_GAME_FILES, "Downloading and preparing Minecraft libraries.");
 
         JsonNode libraries = metadata.get("libraries");
         if (libraries == null || !libraries.isArray()) {

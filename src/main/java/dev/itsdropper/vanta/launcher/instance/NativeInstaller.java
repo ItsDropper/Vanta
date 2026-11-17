@@ -20,6 +20,7 @@ public final class NativeInstaller {
     private NativeInstaller() {}
 
     public static Path extract(Instance instance, JsonNode metadata) throws Exception {
+        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_GAME_FILES, "Extracting platform-specific native libraries.");
         if (instance == null || metadata == null) {
             throw new IllegalArgumentException("Instance and version metadata are required.");
         }

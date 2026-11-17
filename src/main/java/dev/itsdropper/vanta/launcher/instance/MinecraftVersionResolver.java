@@ -25,6 +25,9 @@ public class MinecraftVersionResolver {
             String minecraftVersion
     ) throws Exception {
 
+        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.RESOLVING_VERSION,
+                "Resolving Minecraft version metadata and dependencies.");
+
         JsonNode version =
                 findVersion(
                         minecraftVersion

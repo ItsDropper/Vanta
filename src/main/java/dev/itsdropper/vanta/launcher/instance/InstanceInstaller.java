@@ -121,6 +121,7 @@ public class InstanceInstaller {
             AssetInstaller.install(instance, vanillaMetadata);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             MinecraftMappingsInstaller.install(instance, vanillaMetadata);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing VantaLoader components.");
             VantaLoaderInstaller.install(instance);
             InstanceManager.markInstallationComplete(instance);
             return instance;
@@ -183,6 +184,7 @@ public class InstanceInstaller {
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
 
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Forge components.");
             ForgeInstaller.installForge(instance, loaderVersion);
             InstanceManager.markInstallationComplete(instance);
             System.out.println("Forge installation complete.");
@@ -226,6 +228,7 @@ public class InstanceInstaller {
             MinecraftFileInstaller.installLibraries(vanillaMetadata);
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing NeoForge components.");
             NeoForgeInstaller.installNeoForge(instance, loaderVersion);
             InstanceManager.markInstallationComplete(instance);
             return instance;
@@ -364,6 +367,7 @@ public class InstanceInstaller {
                             loaderVersion
                     );
 
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Fabric components.");
             FabricInstaller.installLibraries(
                     fabricProfile
             );
@@ -438,6 +442,7 @@ public class InstanceInstaller {
             AssetInstaller.install(instance, vanillaMetadata);
 
             JsonNode quiltProfile = QuiltInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Quilt components.");
             QuiltInstaller.installLibraries(quiltProfile);
             JsonNode merged = QuiltInstaller.mergeProfile(vanillaMetadata, quiltProfile);
             MinecraftVersionResolver.saveMetadata(instance, merged);
@@ -480,6 +485,7 @@ public class InstanceInstaller {
             AssetInstaller.install(instance, vanillaMetadata);
 
             JsonNode ornitheProfile = OrnitheInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Ornithe components.");
             OrnitheInstaller.installLibraries(ornitheProfile);
             JsonNode merged = OrnitheInstaller.mergeProfile(vanillaMetadata, ornitheProfile);
             MinecraftVersionResolver.saveMetadata(instance, merged);
@@ -522,6 +528,7 @@ public class InstanceInstaller {
             AssetInstaller.install(instance, vanillaMetadata);
 
             JsonNode profile = LegacyFabricInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing LegacyFabric components.");
             LegacyFabricInstaller.installLibraries(profile);
             JsonNode merged = LegacyFabricInstaller.mergeProfile(vanillaMetadata, profile);
             MinecraftVersionResolver.saveMetadata(instance, merged);
@@ -552,6 +559,7 @@ public class InstanceInstaller {
                     BabricInstaller.downloadFabricProfile(minecraftVersion, loaderVersion);
             JsonNode babricOverlay =
                     BabricInstaller.downloadOverlay(fabricProfile);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Babric components.");
             BabricInstaller.installLibraries(fabricProfile, babricOverlay);
             JsonNode merged =
                     BabricInstaller.mergeProfile(vanillaMetadata, fabricProfile, babricOverlay);
@@ -585,6 +593,7 @@ public class InstanceInstaller {
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing LiteLoader components.");
             LiteLoaderInstaller.install(instance, minecraftVersion);
             InstanceManager.markInstallationComplete(instance);
             return instance;
@@ -611,6 +620,7 @@ public class InstanceInstaller {
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Rift components.");
             RiftInstaller.install(instance);
             InstanceManager.markInstallationComplete(instance);
             return instance;
@@ -641,6 +651,7 @@ public class InstanceInstaller {
             MinecraftFileInstaller.installLibraries(vanillaMetadata);
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Stein components.");
             SteinInstaller.install(instance, vanillaMetadata);
             InstanceManager.markInstallationComplete(instance);
             return instance;
@@ -668,6 +679,7 @@ public class InstanceInstaller {
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing ModLoader components.");
             ModLoaderInstaller.install(instance);
             InstanceManager.markInstallationComplete(instance);
             return instance;
@@ -707,6 +719,7 @@ public class InstanceInstaller {
             NativeInstaller.extract(instance, vanillaMetadata);
             AssetInstaller.install(instance, vanillaMetadata);
 
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing NilLoader components.");
             NilLoaderInstaller.install(instance, loaderVersion);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             InstanceManager.markInstallationComplete(instance);
@@ -836,6 +849,7 @@ public class InstanceInstaller {
                             loaderVersion
                     );
 
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Fabric components.");
             FabricInstaller.installLibraries(
                     fabricProfile
             );
@@ -864,6 +878,7 @@ public class InstanceInstaller {
             }
             JsonNode quiltProfile =
                     QuiltInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Quilt components.");
             QuiltInstaller.installLibraries(quiltProfile);
             finalMetadata =
                     QuiltInstaller.mergeProfile(vanillaMetadata, quiltProfile);
@@ -874,6 +889,7 @@ public class InstanceInstaller {
                 throw new IllegalStateException("Ornithe Loader version is missing.");
             }
             JsonNode ornitheProfile = OrnitheInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Ornithe components.");
             OrnitheInstaller.installLibraries(ornitheProfile);
             finalMetadata = OrnitheInstaller.mergeProfile(vanillaMetadata, ornitheProfile);
         }
@@ -884,6 +900,7 @@ public class InstanceInstaller {
             }
             JsonNode legacyFabricProfile =
                     LegacyFabricInstaller.downloadProfile(minecraftVersion, loaderVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing LegacyFabric components.");
             LegacyFabricInstaller.installLibraries(legacyFabricProfile);
             finalMetadata =
                     LegacyFabricInstaller.mergeProfile(vanillaMetadata, legacyFabricProfile);
@@ -898,6 +915,7 @@ public class InstanceInstaller {
                     BabricInstaller.downloadFabricProfile(minecraftVersion, babricLoaderVersion);
             JsonNode babricOverlay =
                     BabricInstaller.downloadOverlay(babricFabricProfile);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Babric components.");
             BabricInstaller.installLibraries(babricFabricProfile, babricOverlay);
             finalMetadata = BabricInstaller.mergeProfile(
                     vanillaMetadata, babricFabricProfile, babricOverlay);
@@ -909,6 +927,7 @@ public class InstanceInstaller {
             if (loaderVersion == null || loaderVersion.isBlank()) {
                 throw new IllegalStateException("NeoForge version is missing.");
             }
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing NeoForge components.");
             NeoForgeInstaller.installNeoForge(instance, loaderVersion);
             Path neoForgeMetadata = instance.getDirectory()
                     .resolve("minecraft")
@@ -927,6 +946,7 @@ public class InstanceInstaller {
                 throw new IllegalStateException("Forge Loader version is missing.");
             }
 
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Forge components.");
             ForgeInstaller.installForge(instance, loaderVersion);
 
             Path forgeMetadata =
@@ -956,12 +976,14 @@ public class InstanceInstaller {
         );
 
         if ("NilLoader".equalsIgnoreCase(loader)) {
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing NilLoader components.");
             NilLoaderInstaller.install(instance);
         }
 
         if ("ModLoader".equalsIgnoreCase(loader)) {
             loaderVersion = ModLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing ModLoader components.");
             ModLoaderInstaller.install(instance);
         }
 
@@ -977,6 +999,7 @@ public class InstanceInstaller {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             loaderVersion = RiftInstaller.findLatestLoaderVersion(minecraftVersion);
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Rift components.");
             RiftInstaller.install(instance);
             finalMetadata = new com.fasterxml.jackson.databind.ObjectMapper()
                     .readTree(instance.getDirectory().resolve("minecraft").resolve("version.json").toFile());

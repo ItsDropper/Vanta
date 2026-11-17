@@ -3012,3 +3012,26 @@
     -fx-border-width: 0 0 1px 0;
     -fx-border-radius: 0;
 }
+
+/* Instance creation progress surface */
+.instance-progress-dialog { -fx-background-color:#111720; -fx-border-color:#2a3544; -fx-border-radius:14px; -fx-background-radius:14px; }
+.instance-progress-dialog > *.button-bar { -fx-background-color:transparent; -fx-padding:0 22px 18px 22px; }
+.instance-progress-dialog > *.content { -fx-background-color:transparent; }
+.instance-progress-headline { -fx-text-fill:#f1f5fb; -fx-font-size:17px; -fx-font-weight:700; }
+.instance-progress-subtitle,.instance-progress-identity,.instance-progress-detail { -fx-text-fill:#8c9aab; -fx-font-size:11px; }
+.instance-progress-identity { -fx-background-color:#192332; -fx-background-radius:7px; -fx-padding:8px 10px; -fx-text-fill:#b9c9df; }
+.instance-progress-stage-list { -fx-background-color:#0d131b; -fx-background-radius:10px; -fx-border-color:#273342; -fx-border-radius:10px; -fx-padding:7px; }
+.instance-progress-stage { -fx-background-radius:7px; -fx-border-radius:7px; -fx-border-color:transparent; }
+.instance-progress-marker { -fx-font-size:14px; -fx-font-weight:800; }
+.instance-progress-stage-title { -fx-font-size:11px; -fx-font-weight:600; }
+.instance-progress-stage.progress-pending .instance-progress-marker,.instance-progress-stage.progress-pending .instance-progress-stage-title { -fx-text-fill:#647286; }
+.instance-progress-stage.progress-active { -fx-background-color:#17263a; -fx-border-color:#315b91; }
+.instance-progress-stage.progress-active .instance-progress-marker,.instance-progress-stage.progress-active .instance-progress-stage-title { -fx-text-fill:#9bc3ff; }
+.instance-progress-stage.progress-complete .instance-progress-marker { -fx-text-fill:#55c99a; }
+.instance-progress-stage.progress-complete .instance-progress-stage-title { -fx-text-fill:#c3d5cd; }
+.instance-progress-stage.progress-skipped .instance-progress-marker,.instance-progress-stage.progress-skipped .instance-progress-stage-title { -fx-text-fill:#687587; }
+.instance-progress-stage.progress-failed { -fx-background-color:#2a1b21; -fx-border-color:#71404b; }
+.instance-progress-stage.progress-failed .instance-progress-marker,.instance-progress-stage.progress-failed .instance-progress-stage-title,.instance-progress-error { -fx-text-fill:#f0a4ad; }
+.instance-progress-current { -fx-background-color:#171f2a; -fx-background-radius:8px; -fx-padding:11px 13px; }
+.instance-progress-current-label { -fx-text-fill:#91a4bd; -fx-font-size:10px; -fx-font-weight:700; }
+.instance-progress-dialog .progress-indicator { -fx-progress-color:-vantaaccent; }

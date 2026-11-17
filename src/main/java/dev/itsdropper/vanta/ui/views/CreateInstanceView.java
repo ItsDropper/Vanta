@@ -2,6 +2,8 @@ package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.components.InstanceCreationProgressDialog;
+import dev.itsdropper.vanta.launcher.instance.InstanceInstallationProgress;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -957,111 +959,47 @@ public class CreateInstanceView extends VBox {
         // INSTALL
         // ---------------------------------------------------------
 
+        InstanceCreationProgressDialog progressDialog =
+                new InstanceCreationProgressDialog(name, version, loader, onCreated);
+        progressDialog.show();
         UiExecutor.shared().execute(() -> {
-
-                    try {
-
-                        if ("VantaLoader".equals(loader)) {
-
-                            InstanceInstaller.installVantaLoader(name, version);
-
-                        } else if ("Fabric".equals(loader)) {
-
-                            InstanceInstaller.installFabric(
-                                    name,
-                                    version
-                            );
-
-                        } else if ("Quilt".equals(loader)) {
-
-                            InstanceInstaller.installQuilt(name, version);
-
-                        } else if ("Ornithe".equals(loader)) {
-
-                            InstanceInstaller.installOrnithe(name, version);
-
-                        } else if ("Legacy Fabric".equals(loader)) {
-
-                            InstanceInstaller.installLegacyFabric(name, version);
-
-                        } else if ("Babric".equals(loader)) {
-
-                            InstanceInstaller.installBabric(name, version);
-
-                        } else if ("NilLoader".equals(loader)) {
-
-                            InstanceInstaller.installNilLoader(name, version);
-
-                        } else if ("LiteLoader".equals(loader)) {
-
-                            InstanceInstaller.installLiteLoader(name, version);
-
-                        } else if ("ModLoader".equals(loader)) {
-
-                            InstanceInstaller.installModLoader(name, version);
-
-                        } else if ("Rift".equals(loader)) {
-
-                            InstanceInstaller.installRift(name, version);
-
-                        } else if ("Stein".equals(loader)) {
-
-                            InstanceInstaller.installSteinLoader(name, version);
-
-                        } else if ("NeoForge".equals(loader)) {
-
-                            InstanceInstaller.installNeoForge(name, version);
-
-                        } else if ("Forge".equals(loader)) {
-
-                            InstanceInstaller.installForge(
-                                    name,
-                                    version
-                            );
-
-                        } else {
-
-                            InstanceInstaller.installVanilla(
-                                    name,
-                                    version
-                            );
-                        }
-
-                        TelemetryService.track("feature_instance_created");
-
-                        UiExecutor.shared().dispatchToUi(() -> {
-
-                            statusLabel.setText(
-                                    Localization.text("createInstance.created")
-                            );
-
-                            onCreated.run();
-                        });
-
-                    } catch (Throwable ex) {
-
-                        ex.printStackTrace();
-
-                        UiExecutor.shared().dispatchToUi(() -> {
-
-                            createButton.setDisable(false);
-                            backButton.setDisable(false);
-                            nameField.setDisable(false);
-                            versionBox.setDisable(false);
-                            loaderBox.setDisable(false);
-
-                            createButton.setText(
-                                    Localization.text("common.createInstance")
-                            );
-
-                            statusLabel.setText(
-                                    ex.getMessage() != null
-                                            ? ex.getMessage()
-                                            : Localization.text("createInstance.createFailed")
-                            );
-                        });
-                    }
-
+            try {
+                InstanceInstallationProgress.withListener(update ->
+                        UiExecutor.shared().dispatchToUi(() -> progressDialog.update(update)), () -> {
+                    if ("VantaLoader".equals(loader)) InstanceInstaller.installVantaLoader(name, version);
+                    else if ("Fabric".equals(loader)) InstanceInstaller.installFabric(name, version);
+                    else if ("Quilt".equals(loader)) InstanceInstaller.installQuilt(name, version);
+                    else if ("Ornithe".equals(loader)) InstanceInstaller.installOrnithe(name, version);
+                    else if ("Legacy Fabric".equals(loader)) InstanceInstaller.installLegacyFabric(name, version);
+                    else if ("Babric".equals(loader)) InstanceInstaller.installBabric(name, version);
+                    else if ("NilLoader".equals(loader)) InstanceInstaller.installNilLoader(name, version);
+                    else if ("LiteLoader".equals(loader)) InstanceInstaller.installLiteLoader(name, version);
+                    else if ("ModLoader".equals(loader)) InstanceInstaller.installModLoader(name, version);
+                    else if ("Rift".equals(loader)) InstanceInstaller.installRift(name, version);
+                    else if ("Stein".equals(loader)) InstanceInstaller.installSteinLoader(name, version);
+                    else if ("NeoForge".equals(loader)) InstanceInstaller.installNeoForge(name, version);
+                    else if ("Forge".equals(loader)) InstanceInstaller.installForge(name, version);
+                    else InstanceInstaller.installVanilla(name, version);
+                });
+                TelemetryService.track("feature_instance_created");
+                UiExecutor.shared().dispatchToUi(() -> {
+                    progressDialog.complete();
+                    statusLabel.setText(Localization.text("createInstance.created"));
+                });
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+                UiExecutor.shared().dispatchToUi(() -> {
+                    progressDialog.fail(ex.getMessage());
+                    createButton.setDisable(false);
+                    backButton.setDisable(false);
+                    nameField.setDisable(false);
+                    versionBox.setDisable(false);
+                    loaderBox.setDisable(false);
+                    createButton.setText(Localization.text("common.createInstance"));
+                    statusLabel.setText(ex.getMessage() != null ? ex.getMessage()
+                            : Localization.text("createInstance.createFailed"));
+                });
+            }
         });
 
     }
