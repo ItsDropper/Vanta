@@ -1020,3 +1020,29 @@
     -fx-border-width: 0;
     -fx-background-color: -vantaaccentsoft;
 }
+
+
+/* Minimal application chrome: navigation recedes behind the workspace. */
+.sidebar {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+}
+.sidebar-logo { -fx-font-size: 22px; -fx-font-weight: 800; }
+.sidebar-subtitle { -fx-font-size: 8px; -fx-font-weight: 600; }
+.sidebar-button {
+    -fx-background-radius: 6px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 10px 12px;
+}
+.sidebar-button-active,
+.sidebar-button-active:hover {
+    -fx-background-color: -vantasurfacehover;
+    -fx-border-color: transparent transparent transparent -vantaaccent;
+    -fx-border-width: 0 0 0 2px;
+    -fx-border-radius: 0;
+    -fx-text-fill: -vantatext;
+}
