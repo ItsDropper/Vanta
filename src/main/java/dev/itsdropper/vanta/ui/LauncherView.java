@@ -2004,8 +2004,7 @@ public class LauncherView {
                         ModrinthService modrinthService =
                                 new ModrinthService();
 
-                        boolean repaired =
-                                false;
+
 
                         for (RepairView.RepairIssue issue :
                                 issues) {
@@ -2036,41 +2035,20 @@ public class LauncherView {
                                     issue.repairVersions()
                             );
 
-                            repaired = true;
                         }
 
-                        if (!repaired) {
-                            // The Repair button is an explicit user request. Do not
-                            // block a full managed-file rebuild because diagnosis
-                            // classified the launch failure as external or unknown.
-                            if (!dev.itsdropper.vanta.launcher.repair.RepairCoordinator
-                                    .shouldRepairManagedInstallation(issues, true)) {
-                                notifications.error(
-                                        "Manual steps recommended",
-                                        dev.itsdropper.vanta.launcher.repair.RepairCoordinator
-                                                .explainNoAutomaticRepair(issues)
-                                );
-                                return;
-                            }
+                        // This callback is reached only after the user presses Repair.
+                        // Rebuild the complete Vanta-managed installation even if one or
+                        // more Modrinth dependencies were repaired above.
+                        notifications.updateProgress(
+                                "Rebuilding Minecraft metadata, client, libraries, natives, assets and loader..."
+                        );
+                        dev.itsdropper.vanta.launcher.instance.InstanceRepairService.repair(instance);
 
-                            notifications.updateProgress(
-                                    "Verifying Minecraft metadata, libraries, natives and assets..."
-                            );
-
-                            dev.itsdropper.vanta.launcher.instance.InstanceRepairService.repair(instance);
-
-                            notifications.success(
-                                    "Repair complete",
-                                    "Vanta-managed Minecraft files were verified and restored. Your mods, configs, worlds and resource packs were preserved."
-                            );
-
-                            UiExecutor.shared().dispatchToUi(() -> showPage(Sidebar.Page.HOME));
-                            return;
-                        }
 
                         notifications.success(
                                 "Repair complete",
-                                "The required dependencies were installed."
+                                "The instance installation and its managed dependencies were rebuilt. User mods, configs and worlds were preserved."
                         );
 
                         UiExecutor.shared().dispatchToUi(() ->
