@@ -13,9 +13,11 @@ Security fixes are currently considered for the latest code on the `main` branch
 ## Java runtime security
 
 Vanta disables HotSpot's hardware-accelerated Base64 intrinsic for x86-64
-Java 17+ Minecraft child processes and for its own x86-64 packaged runtime.
-This is a defense-in-depth mitigation for the reported Java4Shell
-(CVE-2026-114938) issue. Keep Vanta and its managed Java runtimes updated;
+Java 17+ Minecraft child processes, and caps Java 8 child processes at AVX2
+to cover the specifically reported Oracle 8u511 performance build. Vanta's
+own x86-64 packaged runtime also disables the Base64 intrinsic. These are
+defense-in-depth mitigations for the reported Java4Shell (CVE-2026-114938)
+issue. Keep Vanta and its managed Java runtimes updated;
 the mitigation does not replace vendor security updates and does not protect
 Java processes started outside Vanta.
 
