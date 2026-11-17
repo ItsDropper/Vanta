@@ -93,6 +93,8 @@ class VPackServiceTest {
         Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
                 "Fabric", "0.16.0", source);
         Path archive = temporaryDirectory.resolve("backup.zip");
+        new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter()
+                .writeValue(source.resolve("instance.json").toFile(), instance);
         InstanceBackupService.createBackup(instance, archive);
 
         assertThrows(IOException.class, () -> VPackService.verifyVPack(archive));
