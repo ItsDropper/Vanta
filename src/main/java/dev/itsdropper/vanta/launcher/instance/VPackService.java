@@ -130,10 +130,13 @@ public final class VPackService {
                 for (Path file : files) {
                     Path relative = source.relativize(file);
                     String name = archiveName(relative);
-                    if (name.equalsIgnoreCase(INSTANCE_METADATA) || name.equalsIgnoreCase(PACK_MANIFEST)
-                            || isTransient(name) || !included.contains(categoryFor(name))) {
-                        continue;
+                    String lowerName = name.toLowerCase(Locale.ROOT);
+                    if (lowerName.equals(INSTANCE_METADATA) || lowerName.equals(PACK_MANIFEST)) continue;
+                    if (lowerName.startsWith(INSTANCE_METADATA + "/")
+                            || lowerName.startsWith(PACK_MANIFEST + "/")) {
+                        throw new IOException("Instance contains a reserved VPack metadata path: " + name);
                     }
+                    if (isTransient(name) || !included.contains(categoryFor(name))) continue;
                     if (Files.isSymbolicLink(file)) {
                         throw new IOException("Cannot export selected VPack content containing a symbolic link: "
                                 + relative);
@@ -211,11 +214,10 @@ public final class VPackService {
                     throw new IOException("VPack contains an unsafe path: " + rawName);
                 }
                 String name = relative.toString().replace('\\', '/');
-                if (name.equalsIgnoreCase(INSTANCE_METADATA) || name.startsWith(INSTANCE_METADATA + "/")
-                        || name.equalsIgnoreCase(PACK_MANIFEST) || name.startsWith(PACK_MANIFEST + "/")) {
-                    if (!name.equalsIgnoreCase(INSTANCE_METADATA) && !name.equalsIgnoreCase(PACK_MANIFEST)) {
-                        throw new IOException("VPack contains a reserved metadata path: " + name);
-                    }
+                String lowerName = name.toLowerCase(Locale.ROOT);
+                if (lowerName.startsWith(INSTANCE_METADATA + "/")
+                        || lowerName.startsWith(PACK_MANIFEST + "/")) {
+                    throw new IOException("VPack contains a reserved metadata path: " + name);
                 }
                 if (name.isBlank()) {
                     zip.closeEntry();
