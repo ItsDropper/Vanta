@@ -82,8 +82,10 @@ class VPackServiceTest {
         Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
                 "Fabric", "0.16.0", source);
 
+        VPackService.Options includeOtherFiles =
+                new VPackService.Options(true, true, true, true, true, false, true, true);
         assertThrows(IOException.class, () -> VPackService.createVPack(instance,
-                temporaryDirectory.resolve("linked.vpack"), VPackService.Options.defaults()));
+                temporaryDirectory.resolve("linked.vpack"), includeOtherFiles));
         assertFalse(Files.exists(temporaryDirectory.resolve("linked.vpack")));
     }
 
