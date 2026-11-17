@@ -113,6 +113,60 @@ public class InstalledModManager {
                 .orElse(null);
     }
 
+    /**
+     * Keeps the managed-mod registry aligned when a user enables or disables
+     * a jar by changing its filename.
+     *
+     * @return number of tracked entries updated
+     */
+    public static int renameByFilename(
+            Instance instance,
+            String oldFilename,
+            String newFilename
+    ) throws IOException {
+        if (oldFilename == null || newFilename == null) {
+            throw new IllegalArgumentException("Mod filenames are required.");
+        }
+        List<InstalledModRecord> mods = load(instance);
+        int changed = 0;
+        List<InstalledModRecord> updated = new ArrayList<>(mods.size());
+        for (InstalledModRecord mod : mods) {
+            if (oldFilename.equals(mod.getFilename())) {
+                updated.add(new InstalledModRecord(
+                        mod.getProjectId(), mod.getVersionId(), mod.getModId(),
+                        mod.getVersion(), newFilename));
+                changed++;
+            } else {
+                updated.add(mod);
+            }
+        }
+        if (changed > 0) save(instance, updated);
+        return changed;
+    }
+
+    /**
+     * Removes registry entries for a jar being removed from the instance.
+     * The removed records are returned so callers can restore them if the
+     * corresponding filesystem operation fails.
+     */
+    public static List<InstalledModRecord> removeByFilename(
+            Instance instance,
+            String filename
+    ) throws IOException {
+        if (filename == null || filename.isBlank()) {
+            throw new IllegalArgumentException("A mod filename is required.");
+        }
+        List<InstalledModRecord> mods = load(instance);
+        List<InstalledModRecord> removed = mods.stream()
+                .filter(mod -> filename.equals(mod.getFilename()))
+                .toList();
+        if (!removed.isEmpty()) {
+            mods.removeIf(mod -> filename.equals(mod.getFilename()));
+            save(instance, mods);
+        }
+        return removed;
+    }
+
     public static void removeByProjectId(
             Instance instance,
             String projectId
