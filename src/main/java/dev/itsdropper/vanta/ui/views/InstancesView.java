@@ -722,31 +722,82 @@ public class InstancesView extends VBox {
         java.io.File archive = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
         if (archive == null) return;
 
-        String suggestedName = archive.getName().replaceFirst("(?i)\\.vpack$", "") + " (Imported)";
-        TextInputDialog nameDialog = new TextInputDialog(suggestedName);
-        nameDialog.setTitle(Localization.text("instances.importVPackTitle"));
-        nameDialog.setHeaderText(Localization.text("instances.importVPackHeader"));
-        nameDialog.setContentText(Localization.text("instances.instanceName"));
-        String name = nameDialog.showAndWait().orElse(null);
-        if (name == null) return;
-        if (name.isBlank()) {
-            new Alert(Alert.AlertType.WARNING, Localization.text("instances.vpackNameRequired")).showAndWait();
-            return;
-        }
-
         backupButton.setDisable(true);
-        statusLabel.setText(Localization.text("instances.vpackImporting"));
+        statusLabel.setText(Localization.text("instances.vpackValidating"));
         UiExecutor.shared().execute(() -> {
             try {
-                Instance restored = VPackService.restoreVPack(archive.toPath(), name);
+                VPackService.Verification verification = VPackService.verifyVPack(archive.toPath());
                 UiExecutor.shared().dispatchToUi(() -> {
-                    backupButton.setDisable(false);
-                    statusLabel.setText(Localization.text("instances.vpackImported") + restored.getName());
-                    refresh();
-                    new Alert(Alert.AlertType.INFORMATION,
-                            Localization.text("instances.vpackImportSuccess") + "\n\n"
-                                    + restored.getMinecraftVersion() + " · " + restored.getDisplayLoader())
-                            .show();
+                    String included = verification.includedCategories().stream()
+                            .sorted()
+                            .map(this::vpackCategoryLabel)
+                            .collect(java.util.stream.Collectors.joining(", "));
+                    String expandedSize = verification.expandedBytes() >= 1024L * 1024 * 1024
+                            ? String.format(Locale.ROOT, "%.2f GiB",
+                                    verification.expandedBytes() / (1024.0 * 1024 * 1024))
+                            : String.format(Locale.ROOT, "%.2f MiB",
+                                    verification.expandedBytes() / (1024.0 * 1024));
+                    String details = Localization.text("instances.vpackPreviewDetails")
+                            + "\n\n" + Localization.text("instances.vpackPreviewSource") + verification.instanceName()
+                            + "\nMinecraft: " + verification.minecraftVersion()
+                            + "\nLoader: " + verification.loader()
+                            + "\nFiles: " + verification.entryCount()
+                            + "\nExpanded size: " + expandedSize
+                            + "\nIncluded: " + included;
+                    Alert preview = new Alert(Alert.AlertType.INFORMATION, details,
+                            ButtonType.OK, ButtonType.CANCEL);
+                    preview.setTitle(Localization.text("instances.vpackPreviewTitle"));
+                    preview.setHeaderText(Localization.text("instances.vpackPreviewHeader"));
+                    if (preview.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+                        backupButton.setDisable(false);
+                        statusLabel.setText(Localization.text("instances.vpackImportCancelled"));
+                        return;
+                    }
+
+                    String suggestedName = archive.getName().replaceFirst("(?i)\\.vpack$", "") + " (Imported)";
+                    TextInputDialog nameDialog = new TextInputDialog(suggestedName);
+                    nameDialog.setTitle(Localization.text("instances.importVPackTitle"));
+                    nameDialog.setHeaderText(Localization.text("instances.importVPackHeader"));
+                    nameDialog.setContentText(Localization.text("instances.instanceName"));
+                    String name = nameDialog.showAndWait().orElse(null);
+                    if (name == null) {
+                        backupButton.setDisable(false);
+                        statusLabel.setText(Localization.text("instances.vpackImportCancelled"));
+                        return;
+                    }
+                    if (name.isBlank()) {
+                        backupButton.setDisable(false);
+                        new Alert(Alert.AlertType.WARNING,
+                                Localization.text("instances.vpackNameRequired")).showAndWait();
+                        return;
+                    }
+
+                    String requestedName = name.trim();
+                    statusLabel.setText(Localization.text("instances.vpackImporting"));
+                    UiExecutor.shared().execute(() -> {
+                        try {
+                            // Re-verify during restore so a file changed after the preview is rejected.
+                            Instance restored = VPackService.restoreVPack(archive.toPath(), requestedName);
+                            UiExecutor.shared().dispatchToUi(() -> {
+                                backupButton.setDisable(false);
+                                statusLabel.setText(Localization.text("instances.vpackImported") + restored.getName());
+                                refresh();
+                                new Alert(Alert.AlertType.INFORMATION,
+                                        Localization.text("instances.vpackImportSuccess") + "\n\n"
+                                                + restored.getMinecraftVersion() + " · " + restored.getDisplayLoader())
+                                        .show();
+                            });
+                        } catch (Throwable failure) {
+                            UiExecutor.shared().dispatchToUi(() -> {
+                                backupButton.setDisable(false);
+                                String message = failure.getMessage() == null
+                                        ? failure.getClass().getSimpleName() : failure.getMessage();
+                                statusLabel.setText(Localization.text("instances.vpackFailed") + message);
+                                new Alert(Alert.AlertType.ERROR,
+                                        Localization.text("instances.vpackImportFailed") + "\n\n" + message).show();
+                            });
+                        }
+                    });
                 });
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
@@ -759,6 +810,20 @@ public class InstancesView extends VBox {
                 });
             }
         });
+    }
+
+    private String vpackCategoryLabel(String category) {
+        return switch (category) {
+            case "mods" -> Localization.text("instances.vpackMods");
+            case "worlds" -> Localization.text("instances.vpackWorlds");
+            case "configs" -> Localization.text("instances.vpackConfigs");
+            case "resource-packs" -> Localization.text("instances.vpackResourcePacks");
+            case "shader-packs" -> Localization.text("instances.vpackShaderPacks");
+            case "screenshots" -> Localization.text("instances.vpackScreenshots");
+            case "game-settings" -> Localization.text("instances.vpackGameSettings");
+            case "other" -> Localization.text("instances.vpackOtherFiles");
+            default -> category;
+        };
     }
 
     private void restoreInstanceBackup() {
