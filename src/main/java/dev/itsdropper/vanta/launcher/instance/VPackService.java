@@ -274,12 +274,14 @@ public final class VPackService {
                 || !manifest.path("includedCategories").isArray()) {
             throw new IOException("Unsupported or invalid VPack format.");
         }
-        if (original.getMinecraftVersion() == null || original.getMinecraftVersion().isBlank()
+        if (original.getId() == null || original.getId().isBlank()
+                || original.getName() == null || original.getName().isBlank()
+                || original.getMinecraftVersion() == null || original.getMinecraftVersion().isBlank()
                 || original.getLoader() == null || original.getLoader().isBlank()) {
-            throw new IOException("VPack instance metadata is missing Minecraft version or loader.");
+            throw new IOException("VPack instance metadata is missing its identity, Minecraft version, or loader.");
         }
         String declaredId = manifest.path("instanceId").asText(null);
-        if (declaredId != null && original.getId() != null && !declaredId.equals(original.getId())) {
+        if (declaredId == null || declaredId.isBlank() || !declaredId.equals(original.getId())) {
             throw new IOException("VPack manifest and instance metadata identify different instances.");
         }
 
