@@ -28,6 +28,7 @@ import dev.itsdropper.vanta.launcher.instance.InstanceBackupService;
 import dev.itsdropper.vanta.launcher.instance.InstanceRecoveryService;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
+import dev.itsdropper.vanta.launcher.service.InstanceUsageManager;
 import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.VantaUI;
