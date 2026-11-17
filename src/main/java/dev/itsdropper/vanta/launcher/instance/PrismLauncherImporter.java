@@ -6,6 +6,7 @@ import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.ui.Localization;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -87,7 +88,7 @@ public final class PrismLauncherImporter {
             throw new IOException("Could not find Prism's instances directory. Check the InstanceDir setting.");
         }
 
-        boolean settingsImported = importGlobalSettings(global);
+        boolean settingsImported = importGlobalSettings(global, root);
         List<Path> sourceInstances;
         try (Stream<Path> entries = Files.list(instancesRoot)) {
             sourceInstances = entries.filter(path -> Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS))
@@ -115,7 +116,7 @@ public final class PrismLauncherImporter {
                     Path gameDirectory = Files.isDirectory(source.resolve(".minecraft"), LinkOption.NOFOLLOW_LINKS)
                             ? source.resolve(".minecraft") : source;
                     copyGameData(gameDirectory, target.getDirectory());
-                    importInstanceSettings(instanceConfig, global, target);
+                    importInstanceSettings(instanceConfig, global, target, root);
                 } catch (Exception failure) {
                     try { InstanceManager.deleteInstance(target); } catch (Exception cleanup) {
                         failure.addSuppressed(cleanup);
@@ -295,7 +296,7 @@ public final class PrismLauncherImporter {
         String width = overrideWindow ? cfg.get("MinecraftWinWidth") : global.get("MinecraftWinWidth");
         String height = overrideWindow ? cfg.get("MinecraftWinHeight") : global.get("MinecraftWinHeight");
 
-        settings.setJavaPath(javaPath == null ? "" : javaPath);
+        settings.setJavaPath(resolveConfiguredPath(prismRoot, javaPath));
         settings.setJavaArguments(javaArgs == null ? "" : javaArgs);
         settings.setRamMb(parseInt(memory, LauncherSettings.getDefaultRamMb(), 1024, 16384));
         settings.setWidth(parseInt(width, LauncherSettings.getDefaultWidth(), 640, 7680));
@@ -304,11 +305,11 @@ public final class PrismLauncherImporter {
         InstanceManager.saveSettings(instance, settings);
     }
 
-    private static boolean importGlobalSettings(Map<String, String> settings) {
+    private static boolean importGlobalSettings(Map<String, String> settings, Path prismRoot) {
         if (settings.isEmpty()) return false;
         boolean imported = false;
         if (settings.containsKey("JavaPath")) {
-            LauncherSettings.setDefaultJavaPath(settings.get("JavaPath"));
+            LauncherSettings.setDefaultJavaPath(resolveConfiguredPath(prismRoot, settings.get("JavaPath")));
             imported = true;
         }
         if (settings.containsKey("JvmArgs")) {
@@ -340,7 +341,29 @@ public final class PrismLauncherImporter {
                     LauncherSettings.getDownloadRetries(), 1, 8));
             imported = true;
         }
+        if (settings.containsKey("ShowGameTime")) {
+            LauncherSettings.setShowPlaytimeEnabled(Boolean.parseBoolean(settings.get("ShowGameTime")));
+            imported = true;
+        }
+        if (settings.containsKey("Language")) {
+            String language = java.util.Locale.forLanguageTag(
+                    settings.get("Language").replace('_', '-')).getLanguage();
+            if (Localization.isSupported(language)) {
+                LauncherSettings.setPreferredLanguageCode(language);
+                imported = true;
+            }
+        }
         return imported;
+    }
+
+    private static String resolveConfiguredPath(Path prismRoot, String configured) {
+        if (configured == null || configured.isBlank()) return "";
+        try {
+            Path path = Path.of(configured);
+            return (path.isAbsolute() ? path : prismRoot.resolve(path)).normalize().toString();
+        } catch (RuntimeException invalidPath) {
+            return configured;
+        }
     }
 
     static Path resolveInstancesDirectory(Path root, Map<String, String> settings) {
