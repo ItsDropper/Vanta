@@ -1336,16 +1336,3 @@
     -fx-text-fill: -vantamuted;
     -fx-font-size: 13px;
 }
-
-
-/* The library's first-run state belongs to the page, not inside a nested card. */
-.instances-page .instance-empty {
-    -fx-background-color: transparent;
-    -fx-background-radius: 0;
-    -fx-border-color: -vantaborder transparent transparent transparent;
-    -fx-border-width: 1px 0 0 0;
-    -fx-border-radius: 0;
-    -fx-padding: 28px 24px;
-}
-.instances-page .instance-empty-icon { -fx-font-size: 28px; }
-.instances-page .instance-empty-title { -fx-font-size: 20px; }
