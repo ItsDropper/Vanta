@@ -221,14 +221,41 @@ public final class PrismLauncherImporter {
             case "Ornithe" -> InstanceInstaller.installOrnithe(name, mc, requiredVersion(profile, version));
             case "Legacy Fabric" -> InstanceInstaller.installLegacyFabric(name, mc, requiredVersion(profile, version));
             case "NilLoader" -> InstanceInstaller.installNilLoader(name, mc, requiredVersion(profile, version));
-            case "Babric" -> InstanceInstaller.installBabric(name, mc);
-            case "LiteLoader" -> InstanceInstaller.installLiteLoader(name, mc);
-            case "Rift" -> InstanceInstaller.installRift(name, mc);
-            case "Stein" -> InstanceInstaller.installSteinLoader(name, mc);
-            case "ModLoader" -> InstanceInstaller.installModLoader(name, mc);
-            case "VantaLoader" -> InstanceInstaller.installVantaLoader(name, mc);
+            case "Babric" -> {
+                requireCurrentVersion(profile, BabricInstaller.findLatestLoaderVersion(mc));
+                yield InstanceInstaller.installBabric(name, mc);
+            }
+            case "LiteLoader" -> {
+                requireCurrentVersion(profile, LiteLoaderInstaller.findLatestLoaderVersion(mc));
+                yield InstanceInstaller.installLiteLoader(name, mc);
+            }
+            case "Rift" -> {
+                requireCurrentVersion(profile, RiftInstaller.findLatestLoaderVersion(mc));
+                yield InstanceInstaller.installRift(name, mc);
+            }
+            case "Stein" -> {
+                requireCurrentVersion(profile, SteinInstaller.findLatestLoaderVersion());
+                yield InstanceInstaller.installSteinLoader(name, mc);
+            }
+            case "ModLoader" -> {
+                requireCurrentVersion(profile, ModLoaderInstaller.findLatestLoaderVersion(mc));
+                yield InstanceInstaller.installModLoader(name, mc);
+            }
+            case "VantaLoader" -> {
+                requireCurrentVersion(profile, VantaLoaderInstaller.findLatestLoaderVersion());
+                yield InstanceInstaller.installVantaLoader(name, mc);
+            }
             default -> throw new IOException("Unsupported Prism loader: " + profile.loader());
         };
+    }
+
+    private static void requireCurrentVersion(PrismProfile profile, String currentVersion)
+            throws IOException {
+        if (profile.loaderVersion() == null || !profile.loaderVersion().equals(currentVersion)) {
+            throw new IOException("Prism pins " + profile.loader() + " " + profile.loaderVersion()
+                    + ", but Vanta's verified installer currently provides " + currentVersion
+                    + ". This instance was left untouched rather than silently changing its loader version.");
+        }
     }
 
     private static String requiredVersion(PrismProfile profile, String version) throws IOException {
