@@ -210,7 +210,7 @@ public final class VPackService {
                     throw new IOException("VPack contains an invalid archive path.", failure);
                 }
                 if (relative.isAbsolute() || relative.startsWith("..") || normalized.startsWith("/")
-                        || rawName.indexOf('\\\\') >= 0 || normalized.indexOf(':') >= 0
+                        || rawName.indexOf('\\') >= 0 || normalized.indexOf(':') >= 0
                         || normalized.matches("^[A-Za-z]:.*")) {
                     throw new IOException("VPack contains an unsafe path: " + rawName);
                 }
