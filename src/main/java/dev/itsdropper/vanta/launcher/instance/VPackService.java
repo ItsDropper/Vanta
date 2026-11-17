@@ -210,7 +210,8 @@ public final class VPackService {
                     throw new IOException("VPack contains an invalid archive path.", failure);
                 }
                 if (relative.isAbsolute() || relative.startsWith("..") || normalized.startsWith("/")
-                        || normalized.indexOf(':') >= 0 || normalized.matches("^[A-Za-z]:.*")) {
+                        || rawName.indexOf('\\\\') >= 0 || normalized.indexOf(':') >= 0
+                        || normalized.matches("^[A-Za-z]:.*")) {
                     throw new IOException("VPack contains an unsafe path: " + rawName);
                 }
                 String name = relative.toString().replace('\\', '/');
@@ -233,6 +234,10 @@ public final class VPackService {
 
                 boolean isManifest = key.equals(PACK_MANIFEST);
                 boolean isInstance = key.equals(INSTANCE_METADATA);
+                if ((isManifest && !name.equals(PACK_MANIFEST))
+                        || (isInstance && !name.equals(INSTANCE_METADATA))) {
+                    throw new IOException("VPack metadata paths must use their canonical names.");
+                }
                 if ((isManifest || isInstance) && entry.isDirectory()) {
                     throw new IOException("VPack metadata entries must be regular files.");
                 }

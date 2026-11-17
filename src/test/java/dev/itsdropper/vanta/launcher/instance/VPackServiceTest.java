@@ -169,6 +169,25 @@ class VPackServiceTest {
     }
 
     @Test
+    void rejectsBackslashSeparatorsAndCaseVariantMetadataNames() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("separator-source"));
+        Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
+                "Fabric", "0.16.0", source);
+        write(source, "mods/example.jar");
+        Path archive = temporaryDirectory.resolve("separator-source.vpack");
+        VPackService.createVPack(instance, archive,
+                new VPackService.Options(true, false, false, false, false, false, false, false));
+
+        Path backslashArchive = temporaryDirectory.resolve("backslash-path.vpack");
+        rewriteArchive(archive, backslashArchive, "mods/example.jar", "mods\\\\example.jar", null, false);
+        assertThrows(IOException.class, () -> VPackService.verifyVPack(backslashArchive));
+
+        Path caseVariantArchive = temporaryDirectory.resolve("case-variant-metadata.vpack");
+        rewriteArchive(archive, caseVariantArchive, "instance.json", "INSTANCE.JSON", null, false);
+        assertThrows(IOException.class, () -> VPackService.verifyVPack(caseVariantArchive));
+    }
+
+    @Test
     void rejectsDirectoryEntriesOutsideTheDeclaredSelection() throws Exception {
         Path source = Files.createDirectory(temporaryDirectory.resolve("directory-source"));
         Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
