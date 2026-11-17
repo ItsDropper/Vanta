@@ -48,7 +48,7 @@ public final class VPackService {
             boolean otherFiles
     ) {
         public static Options defaults() {
-            return new Options(true, true, true, true, true, false, true, false);
+            return new Options(true, true, true, true, true, false, true, true);
         }
 
         Set<String> includedCategories() {
