@@ -227,7 +227,7 @@ public class ImportInstanceView extends VBox {
         // BUILD
         // =========================================================
 
-        Label formatBadge = new Label(".MRPACK  /  MODRINTH");
+        Label formatBadge = new Label(Localization.text("importInstance.formats"));
         formatBadge.getStyleClass().add("import-format-badge");
         Label dropGlyph = new Label("↥");
         dropGlyph.getStyleClass().add("import-drop-glyph");
@@ -279,8 +279,8 @@ public class ImportInstanceView extends VBox {
                         summary += " " + Localization.text("prismImport.settingsApplied");
                     }
                     if (!result.skippedInstances().isEmpty()) {
-                        summary += "\\n" + Localization.text("prismImport.skipped")
-                                + "\\n" + String.join("\\n", result.skippedInstances());
+                        summary += "\n" + Localization.text("prismImport.skipped")
+                                + "\n" + String.join("\n", result.skippedInstances());
                     }
                     statusLabel.setText(summary);
                     setImportBusy(false);
