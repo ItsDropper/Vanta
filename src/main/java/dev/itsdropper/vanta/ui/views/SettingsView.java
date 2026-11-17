@@ -297,8 +297,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             case "About Vanta" -> "settings.section.about";
             default -> null;
         };
-        return key == null ? section : Localization.text(key);
-    }
+        return key == null ? section : Localization.text(key);    }
 
     private void selectSection(String section) {
         currentSection = section;
@@ -402,13 +401,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         accentPreview = new Region();
         accentPreview.getStyleClass().add("accent-preview");
 
-        Label previewText = new Label("Accent preview");
-        previewText.getStyleClass().add("accent-preview-label");
-
-        StackPaneLike preview = new StackPaneLike(accentPreview, previewText);
-        preview.setMinHeight(72);
-        preview.setPrefHeight(72);
-        preview.setMaxWidth(Double.MAX_VALUE);
+        accentPreview.setMinSize(24, 24);
+        accentPreview.setPrefSize(24, 24);
+        accentPreview.setMaxSize(24, 24);
 
         accentPicker = new ColorPicker(Color.web(accentColor));
         accentPicker.getStyleClass().add("accent-picker");
@@ -449,12 +444,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         Label rgb = new Label();
         rgb.getStyleClass().add("settings-card-description");
 
-        accentCard.getChildren().addAll(
-                preview,
-                pickerRow,
-                accentValue,
-                rgb
-        );
+        HBox accentMetadata = new HBox(10, accentPreview, accentValue, rgb);
+        accentMetadata.setAlignment(Pos.CENTER_LEFT);
+        accentCard.getChildren().addAll(pickerRow, accentMetadata);
 
         updateAccentPreview(rgb);
 
@@ -568,7 +560,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         presentationRow.setAlignment(Pos.CENTER_LEFT);
         presentationCard.getChildren().add(presentationRow);
 
-        content.getChildren().addAll(themeCard, presentationCard, accentCard, presetsCard, customColors, reset);
+        content.getChildren().addAll(themeCard, accentCard, presetsCard, presentationCard, customColors, reset);
     }
 
     private ColorPicker customColorPicker(String key, String fallback) {
@@ -598,7 +590,6 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         HBox.setHgrow(labels, Priority.ALWAYS);
         return row;
     }
-
     private void applyHexField() {
         String value = accentHexField.getText().trim();
         if (ThemeManager.isValidAccent(value)) {
@@ -613,9 +604,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         if (accentPreview != null) {
             accentPreview.setStyle(
                     "-fx-background-color: " + accentColor + ";"
-                            + "-fx-background-radius: 12px;"
+                            + "-fx-background-radius: 5px;"
                             + "-fx-border-color: rgba(255,255,255,0.18);"
-                            + "-fx-border-radius: 12px;"
+                            + "-fx-border-radius: 5px;"
             );
         }
 
@@ -897,8 +888,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 (int) Math.round(notificationDuration.getValue()) + " seconds"
         );
         notificationDuration.valueProperty().addListener((o, oldValue, newValue) -> updateNotificationDuration.run());
-        updateNotificationDuration.run();
-        Button saveNotificationDuration = new Button("SAVE NOTIFICATION DURATION");
+        updateNotificationDuration.run();        Button saveNotificationDuration = new Button("SAVE NOTIFICATION DURATION");
         saveNotificationDuration.getStyleClass().add("secondary-button");
         saveNotificationDuration.setOnAction(e -> {
             LauncherSettings.setNotificationDurationSeconds((int) Math.round(notificationDuration.getValue()));
@@ -1197,8 +1187,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                                 new java.io.InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8))) {
                             output = reader.lines().limit(8).collect(java.util.stream.Collectors.joining(" "));
                         }
-                        success = process.exitValue() == 0;
-                        result = (success ? "Java check passed: " : "Java returned an error: ")
+                        success = process.exitValue() == 0;                        result = (success ? "Java check passed: " : "Java returned an error: ")
                                 + (output.isBlank() ? "No version output." : output);
                     }
                 } catch (Exception ex) {
@@ -1497,8 +1486,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         cacheStatus.setWrapText(true);
 
         Button refresh = new Button("REFRESH SIZE");
-        refresh.getStyleClass().add("secondary-button");
-        refresh.setOnAction(e -> refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh));
+        refresh.getStyleClass().add("secondary-button");        refresh.setOnAction(e -> refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh));
 
         Button open = actionButton("OPEN CACHE FOLDER", () -> {
             try {
@@ -1797,8 +1785,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         CheckBox instanceDeletion = new CheckBox("Confirm instance deletion");
         instanceDeletion.setSelected(LauncherSettings.isConfirmInstanceDeletionEnabled());
-        instanceDeletion.getStyleClass().add("settings-checkbox");
-        instanceDeletion.setOnAction(e -> LauncherSettings.setConfirmInstanceDeletionEnabled(instanceDeletion.isSelected()));
+        instanceDeletion.getStyleClass().add("settings-checkbox");        instanceDeletion.setOnAction(e -> LauncherSettings.setConfirmInstanceDeletionEnabled(instanceDeletion.isSelected()));
 
         health.getChildren().addAll(
                 confirmations,
@@ -2097,8 +2084,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             try {
                 Path javaBinary = Path.of(
                         System.getProperty("java.home"),
-                        "bin",
-                        Platform.javaExecutableName()
+                        "bin",                        Platform.javaExecutableName()
                 );
 
                 if (!Files.isRegularFile(javaBinary)) {
@@ -2397,8 +2383,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 if (version != null && !version.contains("${")) {
                     return version;
                 }
-            }
-        } catch (IOException ignored) {
+            }        } catch (IOException ignored) {
         }
 
         return "1.1.8";
