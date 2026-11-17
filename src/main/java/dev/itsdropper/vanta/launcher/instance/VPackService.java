@@ -128,21 +128,19 @@ public final class VPackService {
                 }
 
                 for (Path file : files) {
-                    if (Files.isSymbolicLink(file)) {
-                        throw new IOException("Cannot export a VPack containing a symbolic link: "
-                                + source.relativize(file));
-                    }
-                    if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
-                        if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) continue;
-                        throw new IOException("Unsupported filesystem entry in instance: "
-                                + source.relativize(file));
-                    }
-
                     Path relative = source.relativize(file);
                     String name = archiveName(relative);
                     if (name.equalsIgnoreCase(INSTANCE_METADATA) || name.equalsIgnoreCase(PACK_MANIFEST)
                             || isTransient(name) || !included.contains(categoryFor(name))) {
                         continue;
+                    }
+                    if (Files.isSymbolicLink(file)) {
+                        throw new IOException("Cannot export selected VPack content containing a symbolic link: "
+                                + relative);
+                    }
+                    if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
+                        if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) continue;
+                        throw new IOException("Unsupported filesystem entry in instance: " + relative);
                     }
 
                     zip.putNextEntry(new ZipEntry(name));
