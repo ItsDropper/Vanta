@@ -7,6 +7,7 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
+import dev.itsdropper.vanta.launcher.instance.EnvironmentGuardianService;
 import dev.itsdropper.vanta.launcher.repair.CrashCaseRepository;
 import dev.itsdropper.vanta.launcher.repair.FailureCategory;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine;
@@ -49,6 +50,7 @@ public class LauncherView {
 
     private final AccountService accountService;
     private final MultiLaunchService launchService;
+    private final EnvironmentGuardianService environmentGuardianService;
     private final DiscordPresenceService discordPresenceService;
 
     private final Sidebar sidebar;
@@ -156,6 +158,8 @@ public class LauncherView {
                         accountService
                 );
 
+        environmentGuardianService = new EnvironmentGuardianService(launchService);
+
         discordPresenceService =
                 new DiscordPresenceService();
 
@@ -216,6 +220,9 @@ public class LauncherView {
                         stage,
                         accountService
                 );
+
+        stage.addEventHandler(javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST,
+                event -> environmentGuardianService.close());
 
         window.setTop(
                 titleBar
@@ -333,6 +340,7 @@ public class LauncherView {
         AnimationUtils.installInteractiveAnimations(titleBar);
 
         if (!screenshotMode) {
+            environmentGuardianService.start();
             TelemetryService.track("launcher_started");
             showPage(Sidebar.Page.HOME);
             loadAccount();

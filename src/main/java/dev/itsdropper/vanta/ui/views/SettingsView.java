@@ -1599,11 +1599,74 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         retentionRow.setAlignment(Pos.CENTER_LEFT);
         recoveryPolicy.getChildren().addAll(retentionRow, retentionDescription);
 
+        Path automaticBackupDirectory = vantaDirectory.resolve("automatic-backups");
+        VBox guardianPolicy = card(
+                "Automatic full-instance backups",
+                "Create verified ZIP snapshots of each instance, including worlds and user configuration. Vanta skips instances it currently knows are running; no live-world snapshot is attempted."
+        );
+        addInfoRow(guardianPolicy, "Automatic backup location", automaticBackupDirectory.toString());
+
+        CheckBox automaticBackups = new CheckBox("Enable automatic full-instance backups");
+        automaticBackups.setSelected(LauncherSettings.isAutomaticBackupsEnabled());
+        automaticBackups.getStyleClass().add("settings-checkbox");
+        automaticBackups.setTooltip(new javafx.scene.control.Tooltip(
+                "When enabled, Vanta checks periodically and creates a full backup when an instance is due."
+        ));
+
+        ComboBox<Integer> backupInterval = new ComboBox<>();
+        backupInterval.getItems().setAll(6, 12, 24, 48, 72, 168);
+        backupInterval.setValue(LauncherSettings.getAutomaticBackupIntervalHours());
+        backupInterval.setAccessibleText("Automatic backup interval in hours");
+        backupInterval.setMinWidth(120);
+        backupInterval.disableProperty().bind(automaticBackups.selectedProperty().not());
+        backupInterval.setOnAction(event -> {
+            Integer selected = backupInterval.getValue();
+            if (selected != null) LauncherSettings.setAutomaticBackupIntervalHours(selected);
+        });
+
+        ComboBox<Integer> backupRetention = new ComboBox<>();
+        backupRetention.getItems().setAll(1, 2, 3, 5, 10, 20);
+        backupRetention.setValue(LauncherSettings.getAutomaticBackupRetention());
+        backupRetention.setAccessibleText("Automatic full-instance backups to retain");
+        backupRetention.setMinWidth(120);
+        backupRetention.disableProperty().bind(automaticBackups.selectedProperty().not());
+        backupRetention.setOnAction(event -> {
+            Integer selected = backupRetention.getValue();
+            if (selected != null) LauncherSettings.setAutomaticBackupRetention(selected);
+        });
+
+        automaticBackups.setOnAction(event -> {
+            boolean enabled = automaticBackups.isSelected();
+            LauncherSettings.setAutomaticBackupsEnabled(enabled);
+            NotificationManager manager = NotificationManager.getGlobal();
+            if (manager != null) {
+                if (enabled) {
+                    manager.success("Automatic backups enabled",
+                            "Vanta will create full backups when instances are idle and due.");
+                } else {
+                    manager.info("Automatic backups disabled",
+                            "Existing automatic backups are retained.");
+                }
+            }
+        });
+
+        HBox backupControls = new HBox(12,
+                new Label("Back up every"), backupInterval, new Label("hours"),
+                new Label("Keep per instance"), backupRetention);
+        backupControls.setAlignment(Pos.CENTER_LEFT);
+        Label guardianDescription = new Label(
+                "Defaults to off. Backups run locally while Vanta is open, skip instances Vanta knows are running, "
+                        + "and prune older archives only after a new backup has passed integrity verification."
+        );
+        guardianDescription.getStyleClass().add("settings-card-description");
+        guardianDescription.setWrapText(true);
+        guardianPolicy.getChildren().addAll(automaticBackups, backupControls, guardianDescription);
+
         VBox safety = card(
                 "Storage safety",
                 "Cache cleanup is restricted to the dedicated Vanta download-cache directory. It does not scan or delete files from your Windows profile, game saves, screenshots, mods, or instance folders."
         );
-        content.getChildren().addAll(overview, downloadPolicy, recoveryPolicy, safety);
+        content.getChildren().addAll(overview, downloadPolicy, recoveryPolicy, guardianPolicy, safety);
         refreshDownloadCacheSize(cacheDirectory, cacheSize, cacheStatus, refresh);
     }
 

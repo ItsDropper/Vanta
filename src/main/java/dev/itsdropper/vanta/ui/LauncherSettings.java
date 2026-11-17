@@ -270,6 +270,30 @@ public final class LauncherSettings {
         setInt("recoveryPointRetention", clamp(value, 1, 50));
     }
 
+    public static boolean isAutomaticBackupsEnabled() {
+        return getBoolean("automaticBackupsEnabled", false);
+    }
+
+    public static void setAutomaticBackupsEnabled(boolean value) {
+        setBoolean("automaticBackupsEnabled", value);
+    }
+
+    public static int getAutomaticBackupIntervalHours() {
+        return getInt("automaticBackupIntervalHours", 24, 6, 168);
+    }
+
+    public static void setAutomaticBackupIntervalHours(int value) {
+        setInt("automaticBackupIntervalHours", clamp(value, 6, 168));
+    }
+
+    public static int getAutomaticBackupRetention() {
+        return getInt("automaticBackupRetention", 3, 1, 20);
+    }
+
+    public static void setAutomaticBackupRetention(int value) {
+        setInt("automaticBackupRetention", clamp(value, 1, 20));
+    }
+
     public static int getDownloadRetries() { return getInt("downloadRetries", 3, 1, 8); }
     public static void setDownloadRetries(int value) { setInt("downloadRetries", clamp(value, 1, 8)); }
     public static boolean isVerifyDownloadsEnabled() { return getBoolean("verifyDownloads", true); }
