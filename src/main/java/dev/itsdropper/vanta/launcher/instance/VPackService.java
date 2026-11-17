@@ -210,7 +210,7 @@ public final class VPackService {
                     throw new IOException("VPack contains an invalid archive path.", failure);
                 }
                 if (relative.isAbsolute() || relative.startsWith("..") || normalized.startsWith("/")
-                        || normalized.matches("^[A-Za-z]:.*")) {
+                        || normalized.indexOf(':') >= 0 || normalized.matches("^[A-Za-z]:.*")) {
                     throw new IOException("VPack contains an unsafe path: " + rawName);
                 }
                 String name = relative.toString().replace('\\', '/');
@@ -269,7 +269,8 @@ public final class VPackService {
         } catch (Exception failure) {
             throw new IOException("VPack metadata is invalid.", failure);
         }
-        if (!"vanta-instance-pack".equals(manifest.path("format").asText())
+        if (manifest == null || original == null
+                || !"vanta-instance-pack".equals(manifest.path("format").asText())
                 || manifest.path("formatVersion").asInt(-1) != FORMAT_VERSION
                 || !manifest.path("includedCategories").isArray()) {
             throw new IOException("Unsupported or invalid VPack format.");
