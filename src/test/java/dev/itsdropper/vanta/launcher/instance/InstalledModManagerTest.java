@@ -36,6 +36,41 @@ class InstalledModManagerTest {
     }
 
     @Test
+    void renameByFilenameKeepsEnabledStateInRegistry() throws Exception {
+        Instance instance = new Instance("test", "Test", "1.21.1",
+                "fabric", "0.16.0", temporaryDirectory);
+        InstalledModManager.save(instance, List.of(
+                new InstalledModRecord("project-a", "version-a", "mod-a", "1.0.0", "mod-a.jar")
+        ));
+
+        assertEquals(1, InstalledModManager.renameByFilename(
+                instance, "mod-a.jar", "mod-a.jar.disabled"));
+        assertEquals("mod-a.jar.disabled",
+                InstalledModManager.load(instance).get(0).getFilename());
+        assertEquals(0, InstalledModManager.renameByFilename(
+                instance, "unknown.jar", "unknown.jar.disabled"));
+    }
+
+    @Test
+    void removeByFilenameReturnsRecordsForRollbackAndPersistsRemoval() throws Exception {
+        Instance instance = new Instance("test", "Test", "1.21.1",
+                "fabric", "0.16.0", temporaryDirectory);
+        InstalledModRecord record = new InstalledModRecord(
+                "project-a", "version-a", "mod-a", "1.0.0", "mod-a.jar");
+        InstalledModManager.save(instance, List.of(record));
+
+        List<InstalledModRecord> removed =
+                InstalledModManager.removeByFilename(instance, "mod-a.jar");
+
+        assertEquals(1, removed.size());
+        assertEquals("project-a", removed.get(0).getProjectId());
+        assertTrue(InstalledModManager.load(instance).isEmpty());
+
+        InstalledModManager.add(instance, removed.get(0));
+        assertEquals("mod-a.jar", InstalledModManager.load(instance).get(0).getFilename());
+    }
+
+    @Test
     void failedRegistrySerializationDoesNotReplaceExistingRegistry() throws Exception {
         Instance instance = new Instance("test", "Test", "1.21.1",
                 "fabric", "0.16.0", temporaryDirectory);
