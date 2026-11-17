@@ -142,11 +142,19 @@ public class InstanceInstaller {
             String name,
             String minecraftVersion
     ) throws Exception {
+        return installForge(name, minecraftVersion,
+                ForgeInstaller.findLatestLoaderVersion(minecraftVersion));
+    }
 
-        String loaderVersion =
-                ForgeInstaller.findLatestLoaderVersion(
-                        minecraftVersion
-                );
+    /** Installs the exact Forge version pinned by a modpack manifest. */
+    public static Instance installForge(
+            String name,
+            String minecraftVersion,
+            String loaderVersion
+    ) throws Exception {
+        if (loaderVersion == null || loaderVersion.isBlank()) {
+            throw new IllegalArgumentException("Forge version cannot be empty.");
+        }
 
         System.out.println(
                 "Installing Forge "
@@ -156,9 +164,7 @@ public class InstanceInstaller {
         );
 
         JsonNode vanillaMetadata =
-                MinecraftVersionResolver.downloadMetadata(
-                        minecraftVersion
-                );
+                MinecraftVersionResolver.downloadMetadata(minecraftVersion);
 
         Instance instance =
                 InstanceManager.createInstance(
@@ -172,24 +178,10 @@ public class InstanceInstaller {
             // Forge is layered on top of a complete vanilla installation.
             // This also ensures the shared client, libraries, natives and
             // assets required by the Forge version are already present.
-            MinecraftFileInstaller.installClient(
-                    instance,
-                    vanillaMetadata
-            );
-
-            MinecraftFileInstaller.installLibraries(
-                    vanillaMetadata
-            );
-
-            NativeInstaller.extract(
-                    instance,
-                    vanillaMetadata
-            );
-
-            AssetInstaller.install(
-                    instance,
-                    vanillaMetadata
-            );
+            MinecraftFileInstaller.installClient(instance, vanillaMetadata);
+            MinecraftFileInstaller.installLibraries(vanillaMetadata);
+            NativeInstaller.extract(instance, vanillaMetadata);
+            AssetInstaller.install(instance, vanillaMetadata);
 
             ForgeInstaller.installForge(instance, loaderVersion);
             InstanceManager.markInstallationComplete(instance);
