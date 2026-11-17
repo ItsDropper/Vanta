@@ -312,6 +312,9 @@ public final class InstanceBackupService {
             throw new IOException("Portable instance settings are not a regular file.");
         }
 
+        if (Files.size(settingsFile) > 1024L * 1024) {
+            throw new IOException("Portable instance settings.json exceeds the 1 MiB safety limit.");
+        }
         ObjectMapper mapper = new ObjectMapper();
         final com.fasterxml.jackson.databind.JsonNode settings;
         try {

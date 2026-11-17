@@ -34,6 +34,7 @@ public final class VPackService {
     private static final int FORMAT_VERSION = 1;
     private static final long MAX_EXPANDED_BYTES = 100L * 1024 * 1024 * 1024;
     private static final int MAX_ENTRIES = 100_000;
+    private static final long MAX_PORTABLE_SETTINGS_BYTES = 1024L * 1024;
 
     private VPackService() { }
 
@@ -151,6 +152,9 @@ public final class VPackService {
                     }
 
                     if (lowerName.equals("settings.json")) {
+                        if (Files.size(file) > MAX_PORTABLE_SETTINGS_BYTES) {
+                            throw new IOException("Instance settings.json exceeds the 1 MiB portable-settings limit.");
+                        }
                         final JsonNode settings;
                         try {
                             settings = MAPPER.readTree(file.toFile());

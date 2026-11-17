@@ -92,6 +92,19 @@ class VPackServiceTest {
     }
 
     @Test
+    void rejectsOversizedSettingsInsteadOfParsingUnboundedInput() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("oversized-settings"));
+        Instance instance = new Instance("oversized", "Oversized", "1.21.11",
+                "Fabric", "0.16.0", source);
+        Files.writeString(source.resolve("settings.json"), " ".repeat(1024 * 1024 + 1));
+        Path archive = temporaryDirectory.resolve("oversized.vpack");
+
+        assertThrows(IOException.class,
+                () -> VPackService.createVPack(instance, archive, VPackService.Options.defaults()));
+        assertFalse(Files.exists(archive));
+    }
+
+    @Test
     void rejectsAnExportWithNoSelectedContentGroups() throws Exception {
         Path source = Files.createDirectory(temporaryDirectory.resolve("instance"));
         Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
