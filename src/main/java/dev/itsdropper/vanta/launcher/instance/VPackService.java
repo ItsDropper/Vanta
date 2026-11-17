@@ -303,7 +303,7 @@ public final class VPackService {
 
     public static Instance restoreVPack(Path archive, String requestedName) throws IOException {
         verifyVPack(archive);
-        return InstanceBackupService.restoreBackup(archive, requestedName);
+        return InstanceBackupService.restoreBackup(archive, requestedName, true);
     }
 
     private static void putBytes(ZipOutputStream zip, String name, byte[] bytes) throws IOException {
