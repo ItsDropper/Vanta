@@ -60,10 +60,7 @@ public class InstanceManager {
 
                 try {
                     Instance stored = MAPPER.readValue(metadata.toFile(), Instance.class);
-                    if (stored.getId() == null || stored.getId().isBlank()
-                            || stored.getName() == null || stored.getName().isBlank()
-                            || stored.getMinecraftVersion() == null || stored.getMinecraftVersion().isBlank()
-                            || stored.getLoader() == null || stored.getLoader().isBlank()) {
+                    if (!hasRepairMetadata(stored)) {
                         throw new IOException("Instance metadata is missing its ID, name, Minecraft version, or loader.");
                     }
 
@@ -86,6 +83,14 @@ public class InstanceManager {
 
         instances.sort(Comparator.comparing(Instance::getName, String.CASE_INSENSITIVE_ORDER));
         return instances;
+    }
+
+    static boolean hasRepairMetadata(Instance instance) {
+        return instance != null
+                && instance.getId() != null && !instance.getId().isBlank()
+                && instance.getName() != null && !instance.getName().isBlank()
+                && instance.getMinecraftVersion() != null && !instance.getMinecraftVersion().isBlank()
+                && instance.getLoader() != null && !instance.getLoader().isBlank();
     }
 
     // =============================================================
