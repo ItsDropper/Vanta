@@ -8,6 +8,8 @@ import javafx.animation.TranslateTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -32,8 +34,14 @@ public final class InstanceCreationProgressDialog {
  }
  public InstanceCreationProgressDialog(String name,String version,String loader,Runnable onSuccess,Window owner){
   this.loader=loader==null?"Vanilla":loader;
+  // Match Main: transparent native window + transparent JavaFX scene lets
+  // the rounded DialogPane surface define the visible window boundary.
   dialog.initStyle(StageStyle.TRANSPARENT);
   if(owner!=null)dialog.initOwner(owner);
+  dialog.setOnShown(event -> {
+   Scene scene=dialog.getDialogPane().getScene();
+   if(scene!=null)scene.setFill(Color.TRANSPARENT);
+  });
   dialog.setTitle(Localization.text("instanceProgress.title"));dialog.setHeaderText(null);dialog.setResizable(false);
   dialog.getDialogPane().getStyleClass().add("instance-progress-dialog");
   dialog.getDialogPane().getStylesheets().add(
@@ -47,14 +55,25 @@ public final class InstanceCreationProgressDialog {
   Label subtitle=new Label(Localization.text("instanceProgress.subtitle"));subtitle.getStyleClass().add("instance-progress-subtitle");subtitle.setWrapText(true);
   Label identity=new Label(name+" · Minecraft "+version+" · "+this.loader);identity.getStyleClass().add("instance-progress-identity");identity.setWrapText(true);
   activity.setPrefSize(18,18);activity.setMaxSize(18,18);
-  HBox heading=new HBox(10,activity,headline);heading.setAlignment(Pos.CENTER_LEFT);
-  VBox stageList=new VBox(5);stageList.getStyleClass().add("instance-progress-stage-list");
+  HBox heading=new HBox(12,activity,headline);
+  heading.setAlignment(Pos.CENTER_LEFT);
+  heading.getStyleClass().add("instance-progress-heading");
+  Label stagesCaption=new Label("INSTALLATION");
+  stagesCaption.getStyleClass().add("instance-progress-section-label");
+  VBox stageList=new VBox(5);
+  stageList.getStyleClass().add("instance-progress-stage-list");
   for(Stage stage:ORDER){StageRow row=new StageRow(stageTitle(stage));rows.put(stage,row);stageList.getChildren().add(row.root);}
   currentStep.setText(Localization.text("instanceProgress.current"));currentStep.getStyleClass().add("instance-progress-current-label");
   detail.getStyleClass().add("instance-progress-detail");detail.setWrapText(true);
   VBox current=new VBox(6,currentStep,detail);current.getStyleClass().add("instance-progress-current");
-  VBox content=new VBox(18,new VBox(7,heading,subtitle,identity),stageList,current);content.setPadding(new Insets(22));content.setPrefWidth(470);
-  dialog.getDialogPane().setContent(content);dialog.getDialogPane().setPrefWidth(520);
+  VBox header=new VBox(9,heading,subtitle,identity);
+  VBox stages=new VBox(9,stagesCaption,stageList);
+  VBox content=new VBox(18,header,stages,current);
+  content.setPadding(new Insets(24));
+  content.setPrefWidth(480);
+  dialog.getDialogPane().setContent(content);
+  dialog.getDialogPane().setPrefWidth(530);
+  dialog.getDialogPane().setMinWidth(530);
   update(new InstanceInstallationProgress.Update(Stage.RESOLVING_VERSION,Localization.text("instanceProgress.resolving")));
  }
  public void show(){dialog.show();}
