@@ -112,11 +112,11 @@ public class MrpackInstaller {
                 throw new IllegalStateException("Modpack NilLoader version is missing.");
             }
         } else if (dependencies.has("forge")) {
-
-            throw new IllegalStateException(
-                    "This modpack uses a mod loader that Vanta does not support yet."
-            );
-
+            loader = "Forge";
+            loaderVersion = dependencies.path("forge").asText();
+            if (loaderVersion.isBlank() || "null".equalsIgnoreCase(loaderVersion)) {
+                throw new IllegalStateException("Modpack Forge version is missing.");
+            }
         } else {
 
             loader =
@@ -152,6 +152,10 @@ public class MrpackInstaller {
         } else if ("NilLoader".equals(loader)) {
 
             instance = InstanceInstaller.installNilLoader(name, minecraftVersion, loaderVersion);
+
+        } else if ("Forge".equals(loader)) {
+
+            instance = InstanceInstaller.installForge(name, minecraftVersion, loaderVersion);
 
         } else {
 
@@ -298,14 +302,26 @@ public class MrpackInstaller {
         }
 
         if (!dependencies.has("minecraft")
-                || dependencies
-                .get("minecraft")
-                .asText()
-                .isBlank()) {
+                || !dependencies.get("minecraft").isTextual()
+                || dependencies.get("minecraft").asText().isBlank()) {
+            throw new IllegalStateException("Modpack Minecraft version is missing.");
+        }
 
-            throw new IllegalStateException(
-                    "Modpack Minecraft version is missing."
-            );
+        java.util.Set<String> supportedLoaderKeys = java.util.Set.of(
+                "fabric-loader", "quilt-loader", "ornithe", "neoforge", "nilloader", "forge");
+        int loaderCount = 0;
+        var dependencyNames = dependencies.fieldNames();
+        while (dependencyNames.hasNext()) {
+            String dependency = dependencyNames.next();
+            if ("minecraft".equals(dependency)) continue;
+            if (!supportedLoaderKeys.contains(dependency)) {
+                throw new IllegalStateException(
+                        "This modpack declares an unsupported loader dependency: " + dependency);
+            }
+            loaderCount++;
+        }
+        if (loaderCount > 1) {
+            throw new IllegalStateException("Modpack declares multiple competing Minecraft loaders.");
         }
     }
 
