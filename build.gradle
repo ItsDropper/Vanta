@@ -18,8 +18,13 @@ java {
     }
 }
 
+def hostIsX64 = System.getProperty('os.arch', '').toLowerCase(java.util.Locale.ROOT)
+        in ['amd64', 'x86_64', 'x86-64', 'x64']
+
 application {
     mainClass = 'dev.itsdropper.vanta.Main'
+    // Protect Vanta's own bundled JVM as well as Minecraft child processes.
+    applicationDefaultJvmArgs = hostIsX64 ? ['-XX:-UseBASE64Intrinsics'] : []
 }
 
 processResources {
@@ -145,7 +150,7 @@ tasks.register('platformAppImage', Exec) {
                 file("${javaHome}/jmods").absolutePath,
                 javafxModuleDirectory.get().asFile.absolutePath
         ].join(File.pathSeparator)
-        commandLine(
+        def jpackageArguments = [
                 jpackageExecutable.absolutePath,
                 '--type', 'app-image',
                 '--name', packageName,
@@ -156,9 +161,13 @@ tasks.register('platformAppImage', Exec) {
                 '--main-class', application.mainClass.get(),
                 '--module-path', modulePath,
                 '--add-modules', 'ALL-MODULE-PATH',
-                '--java-options', '--add-modules=ALL-MODULE-PATH',
-                '--dest', packageOutput.get().asFile.absolutePath
-        )
+                '--java-options', '--add-modules=ALL-MODULE-PATH'
+        ]
+        if (hostIsX64) {
+            jpackageArguments.addAll(['--java-options', '-XX:-UseBASE64Intrinsics'])
+        }
+        jpackageArguments.addAll(['--dest', packageOutput.get().asFile.absolutePath])
+        commandLine(jpackageArguments)
     }
 
 }
