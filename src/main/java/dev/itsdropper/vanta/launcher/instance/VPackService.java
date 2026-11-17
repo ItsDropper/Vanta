@@ -1,0 +1,290 @@
+package dev.itsdropper.vanta.launcher.instance;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.itsdropper.vanta.launcher.model.Instance;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
+
+/**
+ * Versioned, selectively exportable Vanta instance packs.
+ * The pack always contains instance identity metadata; content groups are optional.
+ */
+public final class VPackService {
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final String PACK_MANIFEST = "vanta-pack.json";
+    private static final String INSTANCE_METADATA = "instance.json";
+    private static final int FORMAT_VERSION = 1;
+    private static final long MAX_EXPANDED_BYTES = 100L * 1024 * 1024 * 1024;
+    private static final int MAX_ENTRIES = 100_000;
+
+    private VPackService() { }
+
+    public record Options(
+            boolean mods,
+            boolean worlds,
+            boolean configs,
+            boolean resourcePacks,
+            boolean shaderPacks,
+            boolean screenshots,
+            boolean gameSettings,
+            boolean otherFiles
+    ) {
+        public static Options defaults() {
+            return new Options(true, true, true, true, true, false, true, false);
+        }
+
+        Set<String> includedCategories() {
+            Set<String> included = new HashSet<>();
+            if (mods) included.add("mods");
+            if (worlds) included.add("worlds");
+            if (configs) included.add("configs");
+            if (resourcePacks) included.add("resource-packs");
+            if (shaderPacks) included.add("shader-packs");
+            if (screenshots) included.add("screenshots");
+            if (gameSettings) included.add("game-settings");
+            if (otherFiles) included.add("other");
+            return Set.copyOf(included);
+        }
+    }
+
+    public record Verification(
+            int entryCount,
+            long expandedBytes,
+            String instanceName,
+            String minecraftVersion,
+            String loader,
+            Set<String> includedCategories
+    ) { }
+
+    public static void createVPack(Instance instance, Path output, Options options) throws IOException {
+        if (instance == null || instance.getDirectory() == null) {
+            throw new IllegalArgumentException("A valid instance is required.");
+        }
+        if (output == null || options == null) {
+            throw new IllegalArgumentException("A destination and export selection are required.");
+        }
+
+        Path source = instance.getDirectory().toAbsolutePath().normalize();
+        if (Files.isSymbolicLink(source)
+                || !Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("The instance directory is missing or is not a regular directory.");
+        }
+        Path destination = output.toAbsolutePath().normalize();
+        if (destination.startsWith(source) || Files.isSymbolicLink(destination)) {
+            throw new IOException("Choose a regular VPack destination outside the instance directory.");
+        }
+        if (destination.getParent() != null) Files.createDirectories(destination.getParent());
+
+        Set<String> included = options.includedCategories();
+        if (included.isEmpty()) {
+            throw new IOException("Select at least one content group to export.");
+        }
+
+        Path temporary = destination.resolveSibling(
+                destination.getFileName() + "." + UUID.randomUUID() + ".tmp");
+        boolean completed = false;
+        try {
+            ObjectNode manifest = MAPPER.createObjectNode();
+            manifest.put("format", "vanta-instance-pack");
+            manifest.put("formatVersion", FORMAT_VERSION);
+            manifest.put("instanceId", instance.getId());
+            ArrayNode categories = manifest.putArray("includedCategories");
+            included.stream().sorted().forEach(categories::add);
+
+            byte[] manifestBytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(manifest);
+            byte[] instanceBytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(instance);
+            long expanded = manifestBytes.length + instanceBytes.length;
+            int entries = 2;
+            byte[] buffer = new byte[64 * 1024];
+
+            try (OutputStream stream = Files.newOutputStream(temporary);
+                 ZipOutputStream zip = new ZipOutputStream(stream)) {
+                putBytes(zip, INSTANCE_METADATA, instanceBytes);
+                putBytes(zip, PACK_MANIFEST, manifestBytes);
+
+                List<Path> files;
+                try (var walk = Files.walk(source)) {
+                    files = walk.filter(path -> !path.equals(source))
+                            .sorted(Comparator.comparing(path -> source.relativize(path).toString()))
+                            .toList();
+                }
+
+                for (Path file : files) {
+                    if (Files.isSymbolicLink(file)) {
+                        throw new IOException("Cannot export a VPack containing a symbolic link: "
+                                + source.relativize(file));
+                    }
+                    if (!Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) {
+                        if (Files.isDirectory(file, LinkOption.NOFOLLOW_LINKS)) continue;
+                        throw new IOException("Unsupported filesystem entry in instance: "
+                                + source.relativize(file));
+                    }
+
+                    Path relative = source.relativize(file);
+                    String name = archiveName(relative);
+                    if (name.equalsIgnoreCase(INSTANCE_METADATA) || name.equalsIgnoreCase(PACK_MANIFEST)
+                            || isTransient(name) || !included.contains(categoryFor(name))) {
+                        continue;
+                    }
+
+                    zip.putNextEntry(new ZipEntry(name));
+                    try (InputStream input = Files.newInputStream(file)) {
+                        int read;
+                        while ((read = input.read(buffer)) != -1) {
+                            expanded += read;
+                            if (expanded > MAX_EXPANDED_BYTES) {
+                                throw new IOException("Selected VPack content exceeds the 100 GiB safety limit.");
+                            }
+                            zip.write(buffer, 0, read);
+                        }
+                    }
+                    zip.closeEntry();
+                    if (++entries > MAX_ENTRIES) {
+                        throw new IOException("Selected VPack content contains too many files.");
+                    }
+                }
+            }
+
+            verifyVPack(temporary);
+            try {
+                Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING);
+            }
+            completed = true;
+        } finally {
+            if (!completed) Files.deleteIfExists(temporary);
+        }
+    }
+
+    public static Verification verifyVPack(Path archive) throws IOException {
+        InstanceBackupService.BackupVerification backup = InstanceBackupService.verifyBackup(archive);
+        Set<String> included = new HashSet<>();
+        byte[] manifestBytes = null;
+        Set<String> seen = new HashSet<>();
+        byte[] buffer = new byte[64 * 1024];
+
+        try (InputStream input = Files.newInputStream(archive);
+             ZipInputStream zip = new ZipInputStream(input)) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                String name = entry.getName().replace('\\', '/');
+                String key = name.toLowerCase(Locale.ROOT);
+                if (!seen.add(key)) throw new IOException("VPack contains duplicate paths: " + name);
+                if (key.equals(PACK_MANIFEST)) {
+                    java.io.ByteArrayOutputStream bytes = new java.io.ByteArrayOutputStream();
+                    int read;
+                    while ((read = zip.read(buffer)) != -1) {
+                        if (bytes.size() + read > 1024 * 1024) {
+                            throw new IOException("VPack manifest exceeds the 1 MiB safety limit.");
+                        }
+                        bytes.write(buffer, 0, read);
+                    }
+                    manifestBytes = bytes.toByteArray();
+                } else {
+                    while (zip.read(buffer) != -1) { /* CRC and structure already checked by backup verifier. */ }
+                }
+                zip.closeEntry();
+            }
+        }
+
+        if (manifestBytes == null) {
+            throw new IOException("This is a ZIP backup, not a Vanta VPack (vanta-pack.json is missing).");
+        }
+
+        final JsonNode manifest;
+        try {
+            manifest = MAPPER.readTree(manifestBytes);
+        } catch (Exception failure) {
+            throw new IOException("VPack manifest is invalid.", failure);
+        }
+        if (!"vanta-instance-pack".equals(manifest.path("format").asText())
+                || manifest.path("formatVersion").asInt(-1) != FORMAT_VERSION
+                || !manifest.path("includedCategories").isArray()) {
+            throw new IOException("Unsupported or invalid VPack format.");
+        }
+        manifest.path("includedCategories").forEach(node -> {
+            if (node.isTextual()) included.add(node.asText());
+        });
+        Set<String> validCategories = Set.of("mods", "worlds", "configs", "resource-packs",
+                "shader-packs", "screenshots", "game-settings", "other");
+        if (included.isEmpty() || !validCategories.containsAll(included)) {
+            throw new IOException("VPack declares missing or unsupported content groups.");
+        }
+
+        // Reject content that is not covered by the pack's own selection manifest.
+        try (InputStream input = Files.newInputStream(archive);
+             ZipInputStream zip = new ZipInputStream(input)) {
+            ZipEntry entry;
+            while ((entry = zip.getNextEntry()) != null) {
+                String name = entry.getName().replace('\\', '/');
+                if (!entry.isDirectory() && !name.equalsIgnoreCase(INSTANCE_METADATA)
+                        && !name.equalsIgnoreCase(PACK_MANIFEST)
+                        && !included.contains(categoryFor(name))) {
+                    throw new IOException("VPack contains content outside its declared selection: " + name);
+                }
+                while (zip.read(buffer) != -1) { }
+                zip.closeEntry();
+            }
+        }
+
+        return new Verification(backup.entryCount(), backup.expandedBytes(), backup.instanceName(),
+                backup.minecraftVersion(), backup.loader(), Set.copyOf(included));
+    }
+
+    public static Instance restoreVPack(Path archive, String requestedName) throws IOException {
+        verifyVPack(archive);
+        return InstanceBackupService.restoreBackup(archive, requestedName);
+    }
+
+    private static void putBytes(ZipOutputStream zip, String name, byte[] bytes) throws IOException {
+        zip.putNextEntry(new ZipEntry(name));
+        zip.write(bytes);
+        zip.closeEntry();
+    }
+
+    private static String archiveName(Path relative) {
+        return relative.toString().replace('\\', '/');
+    }
+
+    private static boolean isTransient(String name) {
+        String first = name.contains("/") ? name.substring(0, name.indexOf('/')) : name;
+        return first.equalsIgnoreCase("logs") || first.equalsIgnoreCase("natives")
+                || name.equalsIgnoreCase(".installing");
+    }
+
+    private static String categoryFor(String name) {
+        String normalized = name.replace('\\', '/');
+        String first = normalized.contains("/") ? normalized.substring(0, normalized.indexOf('/')) : normalized;
+        return switch (first.toLowerCase(Locale.ROOT)) {
+            case "mods" -> "mods";
+            case "saves" -> "worlds";
+            case "config" -> "configs";
+            case "resourcepacks" -> "resource-packs";
+            case "shaderpacks" -> "shader-packs";
+            case "screenshots" -> "screenshots";
+            case "options.txt", "servers.dat", "servers.dat_old", "optionsof.txt",
+                    "optionsshaders.txt", "realms_persistence.json" -> "game-settings";
+            default -> "other";
+        };
+    }
+}
