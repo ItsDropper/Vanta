@@ -36,6 +36,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
     public enum Status {
         CREATED,
         SKIPPED_RUNNING,
+        SKIPPED_BUSY,
         SKIPPED_RECENT,
         FAILED
     }
@@ -68,7 +69,14 @@ public final class EnvironmentGuardianService implements AutoCloseable {
         this(
                 MinecraftLocator.getVantaDirectory().resolve("automatic-backups"),
                 InstanceManager::discoverInstances,
-                launchService::isRunning,
+                instance -> {
+                    dev.itsdropper.vanta.launcher.service.LaunchService.LaunchState state =
+                            launchService.getState(instance);
+                    return state == dev.itsdropper.vanta.launcher.service.LaunchService.LaunchState.PREPARING
+                            || state == dev.itsdropper.vanta.launcher.service.LaunchService.LaunchState.STARTING
+                            || state == dev.itsdropper.vanta.launcher.service.LaunchService.LaunchState.RUNNING
+                            || state == dev.itsdropper.vanta.launcher.service.LaunchService.LaunchState.CLOSING;
+                },
                 LauncherSettings::isAutomaticBackupsEnabled,
                 LauncherSettings::getAutomaticBackupIntervalHours,
                 LauncherSettings::getAutomaticBackupRetention,
@@ -134,7 +142,13 @@ public final class EnvironmentGuardianService implements AutoCloseable {
                 try {
                     if (runningPredicate.test(instance)) {
                         results.add(new BackupResult(instance.getId(), Status.SKIPPED_RUNNING,
-                                null, "Instance is currently running in Vanta."));
+                                null, "Instance is currently active in Vanta."));
+                        continue;
+                    }
+                    if (InstanceManager.isInstallationInProgress(instance)
+                            || InstanceRepairService.isRepairInProgress(instance)) {
+                        results.add(new BackupResult(instance.getId(), Status.SKIPPED_BUSY,
+                                null, "Instance installation or repair is in progress."));
                         continue;
                     }
 

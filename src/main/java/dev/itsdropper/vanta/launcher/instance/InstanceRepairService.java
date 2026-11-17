@@ -6,6 +6,8 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Repairs only Vanta-managed Minecraft installation files.
@@ -14,6 +16,8 @@ import java.util.Locale;
  * shader packs is deliberately left untouched.
  */
 public final class InstanceRepairService {
+
+    private static final Set<String> ACTIVE_REPAIRS = ConcurrentHashMap.newKeySet();
 
     private InstanceRepairService() {
     }
@@ -80,7 +84,31 @@ public final class InstanceRepairService {
         return false;
     }
 
-    public static void repair(
+    public static boolean isRepairInProgress(Instance instance) {
+        return instance != null && instance.getId() != null && ACTIVE_REPAIRS.contains(instance.getId());
+    }
+
+    static boolean beginRepair(Instance instance) {
+        return instance != null && instance.getId() != null && !instance.getId().isBlank()
+                && ACTIVE_REPAIRS.add(instance.getId());
+    }
+
+    static void endRepair(Instance instance) {
+        if (instance != null && instance.getId() != null) ACTIVE_REPAIRS.remove(instance.getId());
+    }
+
+    public static void repair(Instance instance) throws Exception {
+        if (!beginRepair(instance)) {
+            throw new IllegalStateException("This instance is already being repaired or has an invalid identity.");
+        }
+        try {
+            repairInternal(instance);
+        } finally {
+            endRepair(instance);
+        }
+    }
+
+    private static void repairInternal(
             Instance instance
     ) throws Exception {
 

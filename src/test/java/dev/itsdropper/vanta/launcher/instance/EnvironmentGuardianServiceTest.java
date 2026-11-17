@@ -134,6 +134,33 @@ class EnvironmentGuardianServiceTest {
     }
 
     @Test
+    void skipsInstancesThatAreBeingInstalledOrRepaired() throws Exception {
+        Instance installing = createInstance("installing");
+        Instance repairing = createInstance("repairing");
+        Files.writeString(installing.getDirectory().resolve(".installing"), "active");
+        assertTrue(InstanceRepairService.beginRepair(repairing));
+        try {
+            EnvironmentGuardianService service = service(
+                    temporaryDirectory.resolve("busy-backups"),
+                    List.of(installing, repairing),
+                    ignored -> false,
+                    24,
+                    3,
+                    InstanceBackupService::createBackup
+            );
+
+            List<EnvironmentGuardianService.BackupResult> results = service.runOnce();
+
+            assertEquals(2, results.size());
+            assertTrue(results.stream().allMatch(result ->
+                    result.status() == EnvironmentGuardianService.Status.SKIPPED_BUSY));
+            assertFalse(Files.exists(temporaryDirectory.resolve("busy-backups")));
+        } finally {
+            InstanceRepairService.endRepair(repairing);
+        }
+    }
+
+    @Test
     void doesNothingWhenAutomaticBackupsAreDisabled() throws Exception {
         Instance instance = createInstance("disabled");
         Path backupRoot = temporaryDirectory.resolve("disabled-backups");

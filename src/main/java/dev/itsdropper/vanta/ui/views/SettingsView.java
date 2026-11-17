@@ -1656,7 +1656,11 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         );
         guardianDescription.getStyleClass().add("settings-card-description");
         guardianDescription.setWrapText(true);
-        guardianPolicy.getChildren().addAll(automaticBackups, backupControls, guardianDescription);
+        Button openAutomaticBackups = new Button("OPEN BACKUP FOLDER");
+        openAutomaticBackups.getStyleClass().add("secondary-button");
+        openAutomaticBackups.setOnAction(event -> openDirectory(automaticBackupDirectory));
+        guardianPolicy.getChildren().addAll(
+                automaticBackups, backupControls, guardianDescription, openAutomaticBackups);
 
         VBox safety = card(
                 "Storage safety",
