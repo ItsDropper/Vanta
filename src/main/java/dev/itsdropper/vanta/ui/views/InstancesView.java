@@ -708,7 +708,7 @@ public class InstancesView extends VBox {
                             ? failure.getClass().getSimpleName() : failure.getMessage();
                     statusLabel.setText(Localization.text("instances.vpackFailed") + message);
                     new Alert(Alert.AlertType.ERROR,
-                            Localization.text("instances.vpackExportFailed") + "\\n\\n" + message).show();
+                            Localization.text("instances.vpackExportFailed") + "\n\n" + message).show();
                 });
             }
         });
@@ -738,16 +738,14 @@ public class InstancesView extends VBox {
         statusLabel.setText(Localization.text("instances.vpackImporting"));
         UiExecutor.shared().execute(() -> {
             try {
-                VPackService.Verification verification = VPackService.verifyVPack(archive.toPath());
                 Instance restored = VPackService.restoreVPack(archive.toPath(), name);
                 UiExecutor.shared().dispatchToUi(() -> {
                     backupButton.setDisable(false);
                     statusLabel.setText(Localization.text("instances.vpackImported") + restored.getName());
                     refresh();
                     new Alert(Alert.AlertType.INFORMATION,
-                            Localization.text("instances.vpackImportSuccess") + "\\n\\n"
-                                    + verification.minecraftVersion() + " · " + verification.loader()
-                                    + " · " + verification.entryCount() + " files")
+                            Localization.text("instances.vpackImportSuccess") + "\n\n"
+                                    + restored.getMinecraftVersion() + " · " + restored.getDisplayLoader())
                             .show();
                 });
             } catch (Throwable failure) {
@@ -757,7 +755,7 @@ public class InstancesView extends VBox {
                             ? failure.getClass().getSimpleName() : failure.getMessage();
                     statusLabel.setText(Localization.text("instances.vpackFailed") + message);
                     new Alert(Alert.AlertType.ERROR,
-                            Localization.text("instances.vpackImportFailed") + "\\n\\n" + message).show();
+                            Localization.text("instances.vpackImportFailed") + "\n\n" + message).show();
                 });
             }
         });
