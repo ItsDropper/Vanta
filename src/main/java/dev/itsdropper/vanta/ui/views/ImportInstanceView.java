@@ -16,6 +16,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 import dev.itsdropper.vanta.launcher.instance.MrpackInstaller;
 import dev.itsdropper.vanta.launcher.instance.PrismLauncherImporter;
@@ -28,6 +29,7 @@ public class ImportInstanceView extends VBox {
 
     private final Runnable onBack;
     private final Runnable onImported;
+    private final Consumer<String> onPrismImported;
 
     private final Button importButton;
     private final Button prismImportButton;
@@ -35,16 +37,18 @@ public class ImportInstanceView extends VBox {
     private final Label statusLabel;
     private final ProgressIndicator progress;
 
+    public ImportInstanceView(Runnable onBack, Runnable onImported) {
+        this(onBack, onImported, null);
+    }
+
     public ImportInstanceView(
             Runnable onBack,
-            Runnable onImported
+            Runnable onImported,
+            Consumer<String> onPrismImported
     ) {
-
-        this.onBack =
-                onBack;
-
-        this.onImported =
-                onImported;
+        this.onBack = onBack;
+        this.onImported = onImported;
+        this.onPrismImported = onPrismImported;
 
         // =========================================================
         // PAGE
@@ -284,7 +288,8 @@ public class ImportInstanceView extends VBox {
                     }
                     statusLabel.setText(summary);
                     setImportBusy(false);
-                    if (result.importedInstances() > 0) onImported.run();
+                    if (onPrismImported != null) onPrismImported.accept(summary);
+                    else if (result.importedInstances() > 0) onImported.run();
                 });
             } catch (Throwable failure) {
                 UiExecutor.shared().dispatchToUi(() -> {
