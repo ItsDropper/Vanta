@@ -23,6 +23,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.instance.InstalledModManager;
+import dev.itsdropper.vanta.launcher.instance.InstalledModRecord;
 import dev.itsdropper.vanta.launcher.service.ModrinthService;
 import dev.itsdropper.vanta.launcher.service.ModrinthService.ModUpdate;
 import dev.itsdropper.vanta.ui.components.IconView;
@@ -1550,6 +1552,19 @@ public class ModsView extends VBox {
             }
 
             Files.move(file, target);
+            if (isModDirectory(file.getParent())) {
+                try {
+                    InstalledModManager.renameByFilename(
+                            instance, name, target.getFileName().toString());
+                } catch (IOException registryFailure) {
+                    try {
+                        Files.move(target, file);
+                    } catch (IOException rollbackFailure) {
+                        registryFailure.addSuppressed(rollbackFailure);
+                    }
+                    throw registryFailure;
+                }
+            }
             return true;
         } catch (IOException e) {
             statusLabel.setText(
@@ -1557,6 +1572,11 @@ public class ModsView extends VBox {
             );
             return false;
         }
+    }
+
+    private static boolean isModDirectory(Path directory) {
+        return directory != null && directory.getFileName() != null
+                && "mods".equalsIgnoreCase(directory.getFileName().toString());
     }
 
     private void openContentFolder() {
@@ -1582,18 +1602,30 @@ public class ModsView extends VBox {
             Path file
     ) {
 
+        List<InstalledModRecord> removedRecords = List.of();
+        boolean managedMod = isModDirectory(file.getParent());
+
         try {
+            if (managedMod) {
+                removedRecords = InstalledModManager.removeByFilename(
+                        instance, file.getFileName().toString());
+            }
 
-            Files.deleteIfExists(
-                    file
-            );
-
+            Files.deleteIfExists(file);
             loadInstalledContent();
 
         } catch (IOException e) {
+            if (managedMod) {
+                for (InstalledModRecord record : removedRecords) {
+                    try {
+                        InstalledModManager.add(instance, record);
+                    } catch (IOException restoreFailure) {
+                        e.addSuppressed(restoreFailure);
+                    }
+                }
+            }
 
             e.printStackTrace();
-
             statusLabel.setText(
                     Localization.text("mods.removeFailedPrefix")
                             + file.getFileName()
