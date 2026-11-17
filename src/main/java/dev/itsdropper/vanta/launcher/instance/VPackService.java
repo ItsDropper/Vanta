@@ -198,10 +198,10 @@ public final class VPackService {
                     throw new IOException("VPack contains too many entries.");
                 }
                 String rawName = entry.getName();
-                if (rawName == null || rawName.isBlank() || rawName.indexOf('\\0') >= 0) {
+                if (rawName == null || rawName.isBlank() || rawName.indexOf('\0') >= 0) {
                     throw new IOException("VPack contains an invalid path.");
                 }
-                String normalized = rawName.replace('\\\\', '/');
+                String normalized = rawName.replace('\\', '/');
                 Path relative;
                 try {
                     relative = Path.of(normalized).normalize();
@@ -212,7 +212,7 @@ public final class VPackService {
                         || normalized.matches("^[A-Za-z]:.*")) {
                     throw new IOException("VPack contains an unsafe path: " + rawName);
                 }
-                String name = relative.toString().replace('\\\\', '/');
+                String name = relative.toString().replace('\\', '/');
                 if (name.isBlank()) {
                     zip.closeEntry();
                     continue;
@@ -278,11 +278,12 @@ public final class VPackService {
         }
 
         Set<String> included = new HashSet<>();
-        manifest.path("includedCategories").forEach(node -> {
-            if (!node.isTextual() || !included.add(node.asText())) {
-                throw new IllegalArgumentException("VPack contains invalid or duplicate content groups.");
+        for (JsonNode category : manifest.path("includedCategories")) {
+            if (!category.isTextual() || category.asText().isBlank()
+                    || !included.add(category.asText())) {
+                throw new IOException("VPack contains invalid or duplicate content groups.");
             }
-        });
+        }
         Set<String> validCategories = Set.of("mods", "worlds", "configs", "resource-packs",
                 "shader-packs", "screenshots", "game-settings", "other");
         if (included.isEmpty() || !validCategories.containsAll(included)) {
