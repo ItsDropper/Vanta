@@ -58,8 +58,6 @@ public final class InstanceCreationProgressDialog {
   HBox heading=new HBox(12,activity,headline);
   heading.setAlignment(Pos.CENTER_LEFT);
   heading.getStyleClass().add("instance-progress-heading");
-  Label stagesCaption=new Label("INSTALLATION");
-  stagesCaption.getStyleClass().add("instance-progress-section-label");
   VBox stageList=new VBox(5);
   stageList.getStyleClass().add("instance-progress-stage-list");
   for(Stage stage:ORDER){StageRow row=new StageRow(stageTitle(stage));rows.put(stage,row);stageList.getChildren().add(row.root);}
@@ -67,7 +65,7 @@ public final class InstanceCreationProgressDialog {
   detail.getStyleClass().add("instance-progress-detail");detail.setWrapText(true);
   VBox current=new VBox(6,currentStep,detail);current.getStyleClass().add("instance-progress-current");
   VBox header=new VBox(9,heading,subtitle,identity);
-  VBox stages=new VBox(9,stagesCaption,stageList);
+  VBox stages=new VBox(stageList);
   VBox content=new VBox(18,header,stages,current);
   content.setPadding(new Insets(24));
   content.setPrefWidth(480);
