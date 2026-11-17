@@ -23,6 +23,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.service.ModrinthService;
+import dev.itsdropper.vanta.launcher.service.ModrinthService.ModUpdate;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
@@ -43,6 +45,7 @@ import java.util.zip.ZipFile;
 import java.util.jar.JarFile;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ModsView extends VBox {
 
@@ -55,6 +58,10 @@ public class ModsView extends VBox {
     private final VBox contentList;
     private final Label statusLabel;
     private final TextField searchField;
+    private final Button updateModsButton;
+    private final ModrinthService modrinthService = new ModrinthService();
+    private final AtomicBoolean updateOperationRunning = new AtomicBoolean();
+    private List<ModUpdate> pendingModUpdates = List.of();
 
     private ContentType selectedType;
 
@@ -239,6 +246,20 @@ public class ModsView extends VBox {
                         onInstanceSettings.run()
         );
 
+        Button updateButton =
+                new Button("Check for updates", IconView.create(IconView.Type.REFRESH, 16));
+        updateButton.getStyleClass().add("secondary-button");
+        updateButton.setTooltip(new Tooltip(
+                "Check Vanta-managed Modrinth mods for compatible updates. Manually installed jars are not changed."));
+        updateModsButton = updateButton;
+        updateButton.setOnAction(event -> {
+            if (!pendingModUpdates.isEmpty()) {
+                updateTrackedMods();
+            } else {
+                checkForModUpdates();
+            }
+        });
+
         Button refreshButton =
                 new Button(
                         Localization.text("common.refresh"),
@@ -272,6 +293,7 @@ public class ModsView extends VBox {
                         8,
                         searchField,
                         browseButton,
+                        updateButton,
                         folderButton,
                         refreshButton,
                         screenshotsButton,
@@ -351,6 +373,87 @@ public class ModsView extends VBox {
         );
 
         loadInstalledContent();
+    }
+
+    private void checkForModUpdates() {
+        if (!updateOperationRunning.compareAndSet(false, true)) return;
+        updateModsButton.setDisable(true);
+        updateModsButton.setText("Checking…");
+        statusLabel.setText("Checking compatible Modrinth releases for Vanta-managed mods…");
+
+        UiExecutor.shared().execute(() -> {
+            try {
+                List<ModUpdate> updates = modrinthService.checkForModUpdates(instance);
+                UiExecutor.shared().dispatchToUi(() -> {
+                    pendingModUpdates = updates;
+                    updateOperationRunning.set(false);
+                    updateModsButton.setDisable(false);
+                    if (updates.isEmpty()) {
+                        updateModsButton.setText("Check for updates");
+                        statusLabel.setText("All Vanta-managed mods are current. Manually installed mods are not tracked for updates.");
+                    } else {
+                        updateModsButton.setText("Update " + updates.size());
+                        long missing = updates.stream().filter(ModUpdate::artifactMissing).count();
+                        statusLabel.setText(updates.size() + " compatible update"
+                                + (updates.size() == 1 ? "" : "s") + " available"
+                                + (missing == 0 ? "." : "; " + missing + " missing or damaged file(s) will be restored."));
+                    }
+                });
+            } catch (Exception failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    updateOperationRunning.set(false);
+                    updateModsButton.setDisable(false);
+                    updateModsButton.setText("Retry update check");
+                    statusLabel.setText("Could not check mod updates: "
+                            + (failure.getMessage() == null ? failure.getClass().getSimpleName() : failure.getMessage()));
+                });
+            }
+        });
+    }
+
+    private void updateTrackedMods() {
+        if (pendingModUpdates.isEmpty() || !updateOperationRunning.compareAndSet(false, true)) return;
+        List<ModUpdate> updates = pendingModUpdates;
+        updateModsButton.setDisable(true);
+        updateModsButton.setText("Updating…");
+        pendingModUpdates = List.of();
+
+        UiExecutor.shared().execute(() -> {
+            int succeeded = 0;
+            List<String> failures = new ArrayList<>();
+            for (int index = 0; index < updates.size(); index++) {
+                ModUpdate update = updates.get(index);
+                final int current = index + 1;
+                UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(
+                        "Updating " + current + " of " + updates.size() + ": "
+                                + update.installed().getFilename()));
+                try {
+                    modrinthService.installTrackedModUpdate(instance, update, progress ->
+                            UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(progress)));
+                    succeeded++;
+                } catch (Exception failure) {
+                    failures.add(update.installed().getFilename() + ": "
+                            + (failure.getMessage() == null
+                            ? failure.getClass().getSimpleName() : failure.getMessage()));
+                }
+            }
+
+            int completed = succeeded;
+            List<String> failed = List.copyOf(failures);
+            UiExecutor.shared().dispatchToUi(() -> {
+                updateOperationRunning.set(false);
+                updateModsButton.setDisable(false);
+                updateModsButton.setText("Check for updates");
+                loadInstalledContent();
+                if (failed.isEmpty()) {
+                    statusLabel.setText("Updated " + completed + " mod"
+                            + (completed == 1 ? "." : "s."));
+                } else {
+                    statusLabel.setText("Updated " + completed + " of " + updates.size()
+                            + ". " + failed.size() + " failed: " + String.join("; ", failed));
+                }
+            });
+        });
     }
 
     // =============================================================
