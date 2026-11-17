@@ -70,7 +70,20 @@ public class InstanceManager {
                             stored.getId(), stored.getName(), stored.getMinecraftVersion(),
                             stored.getLoader(), stored.getLoaderVersion(), directory.toAbsolutePath().normalize(),
                             stored.getIcon());
-                    ModrinthInstallService.recoverPendingTransactions(instance);
+                    try {
+                        ModrinthInstallService.recoverPendingTransactions(instance);
+                    } catch (Exception transactionFailure) {
+                        if (!includeInterrupted) {
+                            throw transactionFailure;
+                        }
+                        // Explicit repair must still be offered when a Modrinth
+                        // transaction journal is itself damaged. The repair path
+                        // can rebuild managed game files without silently hiding
+                        // the entire instance from the user.
+                        System.err.println("Pending Modrinth transaction recovery failed for "
+                                + directory + "; retaining it in the repair queue.");
+                        transactionFailure.printStackTrace();
+                    }
                     instances.add(instance);
                 } catch (Exception failure) {
                     System.err.println("Failed to load repairable instance metadata: " + directory);
