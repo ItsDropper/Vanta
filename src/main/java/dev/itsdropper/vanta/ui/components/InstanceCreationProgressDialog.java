@@ -14,6 +14,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import javafx.stage.Window;
+import javafx.stage.StageStyle;
 import java.util.EnumMap;
 import java.util.List;
 /** GitHub Actions-inspired stage UI driven by actual installer events. */
@@ -31,9 +32,12 @@ public final class InstanceCreationProgressDialog {
  }
  public InstanceCreationProgressDialog(String name,String version,String loader,Runnable onSuccess,Window owner){
   this.loader=loader==null?"Vanilla":loader;
+  dialog.initStyle(StageStyle.TRANSPARENT);
   if(owner!=null)dialog.initOwner(owner);
   dialog.setTitle(Localization.text("instanceProgress.title"));dialog.setHeaderText(null);dialog.setResizable(false);
   dialog.getDialogPane().getStyleClass().add("instance-progress-dialog");
+  dialog.getDialogPane().getStylesheets().add(
+          InstanceCreationProgressDialog.class.getResource("/css/progress.css").toExternalForm());
   ButtonType closeType=new ButtonType(Localization.text("common.close"),ButtonBar.ButtonData.CANCEL_CLOSE);
   dialog.getDialogPane().getButtonTypes().setAll(closeType);
   actionButton=(Button)dialog.getDialogPane().lookupButton(closeType);actionButton.setDisable(true);
@@ -82,7 +86,9 @@ public final class InstanceCreationProgressDialog {
   case RESOLVING_VERSION->Localization.text("instanceProgress.resolving");
   case PREPARING_INSTANCE->Localization.text("instanceProgress.preparing");
   case INSTALLING_GAME_FILES->Localization.text("instanceProgress.gameFiles");
-  case INSTALLING_LOADER->Localization.text("instanceProgress.loader")+" "+loader;
+  case INSTALLING_LOADER->"Vanilla".equalsIgnoreCase(loader)
+          ?Localization.text("instanceProgress.vanilla")
+          :Localization.text("instanceProgress.loader")+": "+loader;
   case FINALIZING->Localization.text("instanceProgress.finalizing");
  };}
  private static void animate(Node node){

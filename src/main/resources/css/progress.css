@@ -1,0 +1,123 @@
+/* Isolated JavaFX Dialog scene: explicit dark styling prevents default white controls. */
+.instance-progress-dialog {
+    -fx-background-color: #0d121a;
+    -fx-background-insets: 0;
+    -fx-background-radius: 18px;
+    -fx-border-color: #2a3749;
+    -fx-border-width: 1px;
+    -fx-border-radius: 18px;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.48), 28, 0.22, 0, 10);
+}
+.instance-progress-dialog > .content {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+.instance-progress-dialog > .button-bar,
+.instance-progress-dialog > .button-bar > .container {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+.instance-progress-dialog > .button-bar { -fx-padding: 0 22px 20px 22px; }
+.instance-progress-dialog .label {
+    -fx-text-fill: #e8eef8;
+    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+}
+.instance-progress-headline {
+    -fx-text-fill: #f5f8ff;
+    -fx-font-size: 17px;
+    -fx-font-weight: 800;
+}
+.instance-progress-subtitle {
+    -fx-text-fill: #9aa9bd;
+    -fx-font-size: 12px;
+    -fx-line-spacing: 2px;
+}
+.instance-progress-identity {
+    -fx-background-color: #172337;
+    -fx-background-radius: 8px;
+    -fx-border-color: #2b4160;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #a9c7f8;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+    -fx-padding: 7px 11px;
+}
+.instance-progress-stage-list {
+    -fx-background-color: #101720;
+    -fx-background-radius: 12px;
+    -fx-border-color: #293748;
+    -fx-border-radius: 12px;
+    -fx-border-width: 1px;
+    -fx-padding: 7px;
+}
+.instance-progress-stage {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-border-color: transparent;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-padding: 10px 12px;
+}
+.instance-progress-stage-title { -fx-font-size: 12px; -fx-font-weight: 600; }
+.instance-progress-marker { -fx-font-size: 13px; -fx-font-weight: 900; }
+.instance-progress-stage.progress-pending .instance-progress-stage-title,
+.instance-progress-stage.progress-pending .instance-progress-marker { -fx-text-fill: #68788e; }
+.instance-progress-stage.progress-active {
+    -fx-background-color: #172943;
+    -fx-border-color: #3c6da9;
+}
+.instance-progress-stage.progress-active .instance-progress-stage-title { -fx-text-fill: #dceaff; }
+.instance-progress-stage.progress-active .instance-progress-marker { -fx-text-fill: #78adff; }
+.instance-progress-stage.progress-complete .instance-progress-stage-title { -fx-text-fill: #c4d5e9; }
+.instance-progress-stage.progress-complete .instance-progress-marker { -fx-text-fill: #62d6a3; }
+.instance-progress-stage.progress-skipped .instance-progress-stage-title,
+.instance-progress-stage.progress-skipped .instance-progress-marker { -fx-text-fill: #718096; }
+.instance-progress-stage.progress-failed {
+    -fx-background-color: #2b1a22;
+    -fx-border-color: #70404d;
+}
+.instance-progress-stage.progress-failed .instance-progress-stage-title,
+.instance-progress-stage.progress-failed .instance-progress-marker,
+.instance-progress-error { -fx-text-fill: #ff9da8; }
+.instance-progress-current {
+    -fx-background-color: #151f2d;
+    -fx-background-radius: 10px;
+    -fx-border-color: #2a3b52;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 12px 14px;
+}
+.instance-progress-current-label {
+    -fx-text-fill: #8fa8c8;
+    -fx-font-size: 10px;
+    -fx-font-weight: 800;
+}
+.instance-progress-detail {
+    -fx-text-fill: #c2ccda;
+    -fx-font-size: 11px;
+    -fx-line-spacing: 2px;
+}
+.instance-progress-dialog .progress-indicator {
+    -fx-progress-color: #69a5ff;
+    -fx-background-color: transparent;
+}
+.instance-progress-dialog .button {
+    -fx-background-color: #1b2635;
+    -fx-background-radius: 8px;
+    -fx-border-color: #34465d;
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #dce7f7;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+    -fx-padding: 9px 18px;
+    -fx-cursor: hand;
+}
+.instance-progress-dialog .button:hover {
+    -fx-background-color: #24354b;
+    -fx-border-color: #5278a8;
+    -fx-text-fill: #ffffff;
+}
+.instance-progress-dialog .button:disabled { -fx-opacity: 0.42; }
