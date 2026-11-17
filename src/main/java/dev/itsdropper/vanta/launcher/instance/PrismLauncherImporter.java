@@ -1,0 +1,351 @@
+package dev.itsdropper.vanta.launcher.instance;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.launcher.MinecraftLocator;
+import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.model.InstanceSettings;
+import dev.itsdropper.vanta.ui.LauncherSettings;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Properties;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+/**
+ * Read-only Prism Launcher migration. Prism's launcher files are never modified;
+ * each supported instance is recreated through Vanta's own installer and then
+ * receives the original instance's user data.
+ */
+public final class PrismLauncherImporter {
+    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final List<String> GENERATED_GAME_PATHS = List.of(
+            "versions", "libraries", "assets", "natives", "logs",
+            "mmc-pack.json", "instance.cfg", "patches", "libraries"
+    );
+
+    private PrismLauncherImporter() { }
+
+    public record ImportResult(Path prismRoot, int importedInstances,
+                               List<String> skippedInstances, boolean globalSettingsImported) {
+        public ImportResult {
+            skippedInstances = List.copyOf(skippedInstances);
+        }
+    }
+
+    public static Path findDefaultPrismRoot() {
+        String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+        Path home = Path.of(System.getProperty("user.home", "."));
+        List<Path> candidates = new ArrayList<>();
+        if (os.contains("win")) {
+            String appData = System.getenv("APPDATA");
+            if (appData != null && !appData.isBlank()) {
+                candidates.add(Path.of(appData, "PrismLauncher"));
+                candidates.add(Path.of(appData, "prismlauncher"));
+            }
+            String local = System.getenv("LOCALAPPDATA");
+            if (local != null && !local.isBlank()) candidates.add(Path.of(local, "PrismLauncher"));
+        } else if (os.contains("mac")) {
+            candidates.add(home.resolve("Library/Application Support/PrismLauncher"));
+        } else {
+            String xdg = System.getenv("XDG_DATA_HOME");
+            candidates.add((xdg == null || xdg.isBlank() ? home.resolve(".local/share") : Path.of(xdg))
+                    .resolve("PrismLauncher"));
+            candidates.add(home.resolve(".local/share/PrismLauncher"));
+        }
+        return candidates.stream().map(Path::toAbsolutePath).map(Path::normalize)
+                .filter(PrismLauncherImporter::looksLikePrismRoot).findFirst().orElse(null);
+    }
+
+    public static boolean looksLikePrismRoot(Path root) {
+        if (root == null || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) return false;
+        return Files.isDirectory(root.resolve("instances"), LinkOption.NOFOLLOW_LINKS)
+                || findSettingsFile(root) != null;
+    }
+
+    public static ImportResult importAll(Path selectedRoot, Consumer<String> progress) throws Exception {
+        if (selectedRoot == null) throw new IllegalArgumentException("Choose the Prism Launcher data directory.");
+        Path root = selectedRoot.toAbsolutePath().normalize();
+        if (Files.isSymbolicLink(root) || !Files.isDirectory(root, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("The selected Prism Launcher directory is not a regular directory.");
+        }
+
+        Map<String, String> global = findSettingsFile(root) == null
+                ? Map.of() : readIni(findSettingsFile(root));
+        Path instancesRoot = resolveInstancesDirectory(root, global);
+        if (!Files.isDirectory(instancesRoot, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Could not find Prism's instances directory. Check the InstanceDir setting.");
+        }
+
+        boolean settingsImported = importGlobalSettings(global);
+        List<Path> sourceInstances;
+        try (Stream<Path> entries = Files.list(instancesRoot)) {
+            sourceInstances = entries.filter(path -> Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS))
+                    .filter(path -> !Files.isSymbolicLink(path))
+                    .sorted(Comparator.comparing(path -> path.getFileName().toString(),
+                            String.CASE_INSENSITIVE_ORDER)).toList();
+        }
+
+        List<String> skipped = new ArrayList<>();
+        int imported = 0;
+        for (Path source : sourceInstances) {
+            String name = source.getFileName().toString();
+            try {
+                Path packFile = source.resolve("mmc-pack.json");
+                Path cfgFile = source.resolve("instance.cfg");
+                if (!Files.isRegularFile(packFile) || !Files.isRegularFile(cfgFile)) {
+                    skipped.add(name + ": missing mmc-pack.json or instance.cfg");
+                    continue;
+                }
+                Map<String, String> instanceConfig = readIni(cfgFile);
+                PrismProfile profile = readProfile(packFile, instanceConfig, name);
+                if (progress != null) progress.accept("Importing " + profile.name() + "…");
+                Instance target = installProfile(profile);
+                try {
+                    Path gameDirectory = Files.isDirectory(source.resolve(".minecraft"), LinkOption.NOFOLLOW_LINKS)
+                            ? source.resolve(".minecraft") : source;
+                    copyGameData(gameDirectory, target.getDirectory());
+                    importInstanceSettings(instanceConfig, global, target);
+                } catch (Exception failure) {
+                    try { InstanceManager.deleteInstance(target); } catch (Exception cleanup) {
+                        failure.addSuppressed(cleanup);
+                    }
+                    throw failure;
+                }
+                imported++;
+            } catch (Exception failure) {
+                skipped.add(name + ": " + safeMessage(failure));
+            }
+        }
+
+        return new ImportResult(root, imported, skipped, settingsImported);
+    }
+
+    private record PrismProfile(String name, String minecraftVersion, String loader, String loaderVersion) { }
+
+    private static PrismProfile readProfile(Path packFile, Map<String, String> config, String fallbackName)
+            throws IOException {
+        JsonNode root = JSON.readTree(packFile.toFile());
+        JsonNode components = root.path("components");
+        if (!components.isArray()) throw new IOException("mmc-pack.json has no components array.");
+
+        String minecraft = null;
+        String loader = "Vanilla";
+        String loaderVersion = null;
+        for (JsonNode component : components) {
+            String uid = component.path("uid").asText("").toLowerCase(Locale.ROOT);
+            String version = component.path("version").asText("").trim();
+            if (uid.equals("net.minecraft")) minecraft = version;
+            else if (!uid.isBlank() && !version.isBlank()) {
+                String mapped = mapLoader(uid);
+                if (mapped != null) {
+                    loader = mapped;
+                    loaderVersion = version;
+                }
+            }
+        }
+        if (minecraft == null || minecraft.isBlank()) {
+            throw new IOException("Could not determine the Minecraft version from mmc-pack.json.");
+        }
+        String name = config.getOrDefault("name", fallbackName).trim();
+        if (name.isBlank()) name = fallbackName;
+        return new PrismProfile(name, minecraft, loader, loaderVersion);
+    }
+
+    private static String mapLoader(String uid) {
+        if (uid.contains("fabric-loader")) return "Fabric";
+        if (uid.contains("quilt-loader")) return "Quilt";
+        if (uid.contains("neoforge")) return "NeoForge";
+        if (uid.contains("forge")) return "Forge";
+        if (uid.contains("ornithe")) return "Ornithe";
+        if (uid.contains("legacyfabric")) return "Legacy Fabric";
+        if (uid.contains("babric")) return "Babric";
+        if (uid.contains("nilloader")) return "NilLoader";
+        if (uid.contains("liteloader")) return "LiteLoader";
+        if (uid.contains("rift")) return "Rift";
+        if (uid.contains("stein")) return "Stein";
+        if (uid.contains("modloader")) return "ModLoader";
+        if (uid.contains("vanta-loader") || uid.contains("vantaloader")) return "VantaLoader";
+        return null;
+    }
+
+    private static Instance installProfile(PrismProfile profile) throws Exception {
+        String name = uniqueName(profile.name());
+        String mc = profile.minecraftVersion();
+        String version = profile.loaderVersion();
+        return switch (profile.loader()) {
+            case "Vanilla" -> InstanceInstaller.installVanilla(name, mc);
+            case "Fabric" -> InstanceInstaller.installFabric(name, mc, requiredVersion(profile, version));
+            case "Quilt" -> InstanceInstaller.installQuilt(name, mc, requiredVersion(profile, version));
+            case "Forge" -> InstanceInstaller.installForge(name, mc, requiredVersion(profile, version));
+            case "NeoForge" -> InstanceInstaller.installNeoForge(name, mc, requiredVersion(profile, version));
+            case "Ornithe" -> InstanceInstaller.installOrnithe(name, mc, requiredVersion(profile, version));
+            case "Legacy Fabric" -> InstanceInstaller.installLegacyFabric(name, mc, requiredVersion(profile, version));
+            case "NilLoader" -> InstanceInstaller.installNilLoader(name, mc, requiredVersion(profile, version));
+            case "Babric" -> InstanceInstaller.installBabric(name, mc);
+            case "LiteLoader" -> InstanceInstaller.installLiteLoader(name, mc);
+            case "Rift" -> InstanceInstaller.installRift(name, mc);
+            case "Stein" -> InstanceInstaller.installSteinLoader(name, mc);
+            case "ModLoader" -> InstanceInstaller.installModLoader(name, mc);
+            case "VantaLoader" -> InstanceInstaller.installVantaLoader(name, mc);
+            default -> throw new IOException("Unsupported Prism loader: " + profile.loader());
+        };
+    }
+
+    private static String requiredVersion(PrismProfile profile, String version) throws IOException {
+        if (version == null || version.isBlank()) {
+            throw new IOException("Prism profile does not specify the " + profile.loader() + " version.");
+        }
+        return version;
+    }
+
+    private static String uniqueName(String requested) {
+        String base = requested == null || requested.isBlank() ? "Imported instance" : requested.trim();
+        String candidate = base;
+        int suffix = 2;
+        Path instances = MinecraftLocator.getInstancesDirectory();
+        while (Files.exists(instances.resolve(sanitizeId(candidate)))) {
+            candidate = base + " (" + suffix++ + ")";
+        }
+        return candidate;
+    }
+
+    private static String sanitizeId(String name) {
+        return name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9._-]+", "-")
+                .replaceAll("^-+|-+$", "");
+    }
+
+    private static void copyGameData(Path source, Path target) throws IOException {
+        Path normalizedSource = source.toAbsolutePath().normalize();
+        Path normalizedTarget = target.toAbsolutePath().normalize();
+        if (Files.isSymbolicLink(source) || !Files.isDirectory(source, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Prism game directory is not a regular directory.");
+        }
+        try (Stream<Path> walk = Files.walk(normalizedSource)) {
+            for (Path item : walk.sorted().toList()) {
+                if (item.equals(normalizedSource)) continue;
+                Path relative = normalizedSource.relativize(item);
+                String first = relative.getName(0).toString();
+                if (GENERATED_GAME_PATHS.contains(first) || first.startsWith(".") && first.equals(".fabric")) continue;
+                if (Files.isSymbolicLink(item)) throw new IOException("Instance contains a symbolic link: " + relative);
+                Path destination = normalizedTarget.resolve(relative).normalize();
+                if (!destination.startsWith(normalizedTarget)) throw new IOException("Instance path escapes its destination.");
+                if (Files.isDirectory(item, LinkOption.NOFOLLOW_LINKS)) {
+                    Files.createDirectories(destination);
+                } else if (Files.isRegularFile(item, LinkOption.NOFOLLOW_LINKS)) {
+                    Files.createDirectories(destination.getParent());
+                    Files.copy(item, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+                } else {
+                    throw new IOException("Unsupported filesystem entry in Prism instance: " + relative);
+                }
+            }
+        }
+    }
+
+    private static void importInstanceSettings(Map<String, String> cfg, Map<String, String> global,
+                                               Instance instance) throws IOException {
+        InstanceSettings settings = new InstanceSettings();
+        boolean overrideJava = bool(cfg, "OverrideJavaLocation", false);
+        boolean overrideArgs = bool(cfg, "OverrideJavaArgs", false);
+        boolean overrideMemory = bool(cfg, "OverrideMemory", false);
+        boolean overrideWindow = bool(cfg, "OverrideWindow", false);
+
+        String javaPath = overrideJava ? cfg.get("JavaPath") : global.get("JavaPath");
+        String javaArgs = overrideArgs ? cfg.get("JvmArgs") : global.get("JvmArgs");
+        String memory = overrideMemory ? cfg.get("MaxMemAlloc") : global.get("MaxMemAlloc");
+        String width = overrideWindow ? cfg.get("MinecraftWinWidth") : global.get("MinecraftWinWidth");
+        String height = overrideWindow ? cfg.get("MinecraftWinHeight") : global.get("MinecraftWinHeight");
+        String fullscreen = overrideWindow ? cfg.get("LaunchMaximized") : global.get("LaunchMaximized");
+
+        settings.setJavaPath(javaPath == null ? "" : javaPath);
+        settings.setJavaArguments(javaArgs == null ? "" : javaArgs);
+        settings.setRamMb(parseInt(memory, LauncherSettings.getDefaultRamMb(), 1024, 16384));
+        settings.setWidth(parseInt(width, LauncherSettings.getDefaultWidth(), 640, 7680));
+        settings.setHeight(parseInt(height, LauncherSettings.getDefaultHeight(), 480, 4320));
+        settings.setFullscreen(Boolean.parseBoolean(fullscreen));
+        InstanceManager.saveSettings(instance, settings);
+    }
+
+    private static boolean importGlobalSettings(Map<String, String> settings) {
+        if (settings.isEmpty()) return false;
+        if (settings.containsKey("JavaPath")) LauncherSettings.setDefaultJavaPath(settings.get("JavaPath"));
+        if (settings.containsKey("JvmArgs")) LauncherSettings.setDefaultJavaArguments(settings.get("JvmArgs"));
+        if (settings.containsKey("MaxMemAlloc")) {
+            LauncherSettings.setDefaultRamMb(parseInt(settings.get("MaxMemAlloc"),
+                    LauncherSettings.getDefaultRamMb(), 1024, 16384));
+        }
+        if (settings.containsKey("MinecraftWinWidth")) {
+            LauncherSettings.setDefaultWidth(parseInt(settings.get("MinecraftWinWidth"),
+                    LauncherSettings.getDefaultWidth(), 640, 7680));
+        }
+        if (settings.containsKey("MinecraftWinHeight")) {
+            LauncherSettings.setDefaultHeight(parseInt(settings.get("MinecraftWinHeight"),
+                    LauncherSettings.getDefaultHeight(), 480, 4320));
+        }
+        if (settings.containsKey("LaunchMaximized")) {
+            LauncherSettings.setDefaultFullscreen(Boolean.parseBoolean(settings.get("LaunchMaximized")));
+        }
+        return true;
+    }
+
+    private static Path resolveInstancesDirectory(Path root, Map<String, String> settings) {
+        String configured = settings.get("InstanceDir");
+        if (configured == null || configured.isBlank()) return root.resolve("instances");
+        Path path = Path.of(configured);
+        if (!path.isAbsolute()) path = root.resolve(path);
+        return path.normalize();
+    }
+
+    private static Path findSettingsFile(Path root) {
+        for (String name : List.of("PrismLauncher.cfg", "prismlauncher.cfg", "multimc.cfg", "polymc.cfg")) {
+            Path file = root.resolve(name);
+            if (Files.isRegularFile(file, LinkOption.NOFOLLOW_LINKS)) return file;
+        }
+        return null;
+    }
+
+    private static Map<String, String> readIni(Path file) throws IOException {
+        Map<String, String> values = new LinkedHashMap<>();
+        String section = "";
+        for (String raw : Files.readAllLines(file)) {
+            String line = raw.trim();
+            if (line.isEmpty() || line.startsWith("#") || line.startsWith(";")) continue;
+            if (line.startsWith("[") && line.endsWith("]")) {
+                section = line.substring(1, line.length() - 1).trim();
+                continue;
+            }
+            int separator = line.indexOf('=');
+            if (separator <= 0) continue;
+            String key = line.substring(0, separator).trim();
+            String value = line.substring(separator + 1).trim();
+            values.put(key, value);
+            if (!section.isEmpty()) values.put(section + "/" + key, value);
+        }
+        return values;
+    }
+
+    private static boolean bool(Map<String, String> values, String key, boolean fallback) {
+        String value = values.get(key);
+        return value == null ? fallback : Boolean.parseBoolean(value);
+    }
+
+    private static int parseInt(String value, int fallback, int min, int max) {
+        try { return Math.max(min, Math.min(max, Integer.parseInt(value))); }
+        catch (RuntimeException ignored) { return fallback; }
+    }
+
+    private static String safeMessage(Throwable failure) {
+        return failure.getMessage() == null || failure.getMessage().isBlank()
+                ? failure.getClass().getSimpleName() : failure.getMessage();
+    }
+}
