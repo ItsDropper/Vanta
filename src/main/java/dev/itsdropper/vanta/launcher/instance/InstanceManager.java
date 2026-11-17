@@ -485,66 +485,28 @@ public class InstanceManager {
         if (source == null) throw new IllegalArgumentException("Source instance cannot be null.");
         if (requestedName == null || requestedName.isBlank()) throw new IllegalArgumentException("Instance name cannot be empty.");
 
+        Path sourceDirectory = source.getDirectory();
+        if (sourceDirectory == null
+                || Files.isSymbolicLink(sourceDirectory)
+                || !Files.isDirectory(sourceDirectory, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Source instance directory does not exist or is not a regular directory.");
+        }
+
+        Path instancesRoot = MinecraftLocator.getInstancesDirectory().toAbsolutePath().normalize();
         String id = createId(requestedName);
-        Path target = MinecraftLocator.getInstancesDirectory().resolve(id);
-        Files.createDirectories(target);
+        Path target = instancesRoot.resolve(id).normalize();
+        if (!target.startsWith(instancesRoot) || target.equals(sourceDirectory.toAbsolutePath().normalize())) {
+            throw new IOException("Could not allocate a safe duplicate destination.");
+        }
 
-        java.util.concurrent.ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(
-                Math.max(2, Math.min(8, Runtime.getRuntime().availableProcessors()))
-        );
-
+        // createDirectory is intentional: it atomically claims the destination
+        // instead of allowing two concurrent duplicate operations to merge.
+        Files.createDirectory(target);
+        Path marker = target.resolve(INSTALLING_MARKER);
+        boolean completed = false;
         try {
-            List<Path> files = new ArrayList<>();
-            try (var stream = Files.walk(source.getDirectory())) {
-                stream.forEach(path -> {
-                    Path relative = source.getDirectory().relativize(path);
-                    String first = relative.getNameCount() == 0 ? "" : relative.getName(0).toString();
-                    if (relative.toString().equals(INSTALLING_MARKER)
-                            || first.equals("logs")
-                            || first.equals("screenshots")) {
-                        return;
-                    }
-
-                    Path destination = target.resolve(relative);
-                    try {
-                        if (Files.isDirectory(path)) {
-                            Files.createDirectories(destination);
-                        } else {
-                            files.add(path);
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
-            }
-
-            List<java.util.concurrent.Future<?>> tasks = new ArrayList<>(files.size());
-            for (Path path : files) {
-                tasks.add(executor.submit(() -> {
-                    try {
-                        Path relative = source.getDirectory().relativize(path);
-                        Path destination = target.resolve(relative);
-                        Files.copy(path, destination, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                }));
-            }
-
-            for (var task : tasks) {
-                try {
-                    task.get();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    throw new IOException("Instance duplication was interrupted.", e);
-                } catch (java.util.concurrent.ExecutionException e) {
-                    Throwable cause = e.getCause();
-                    if (cause instanceof RuntimeException runtime && runtime.getCause() instanceof IOException io) {
-                        throw io;
-                    }
-                    throw new IOException("Failed to copy instance files.", cause);
-                }
-            }
+            Files.createFile(marker);
+            copyInstanceFiles(sourceDirectory, target);
 
             Instance duplicate = new Instance(
                     id,
@@ -556,16 +518,68 @@ public class InstanceManager {
                     source.getIcon()
             );
             saveInstance(duplicate);
+            Files.delete(marker);
+            completed = true;
             return duplicate;
-        } catch (RuntimeException e) {
-            deleteInstanceQuietly(target);
-            if (e.getCause() instanceof IOException io) throw io;
-            throw e;
-        } catch (IOException e) {
-            deleteInstanceQuietly(target);
-            throw e;
         } finally {
-            executor.shutdownNow();
+            if (!completed) deleteInstanceQuietly(target);
+        }
+    }
+
+    /**
+     * Copies an instance tree without following symbolic links. A symlink may
+     * point outside the instance (including to user data), so cloning it would
+     * either leak unrelated files into the clone or preserve a broken/external
+     * reference. Refuse the clone rather than silently changing its contents.
+     *
+     * Runtime-only logs and screenshots remain excluded as in the original
+     * duplicate workflow. All other regular files, including worlds and configs,
+     * are copied into the independent destination.
+     */
+    static void copyInstanceFiles(Path sourceDirectory, Path targetDirectory) throws IOException {
+        Path source = sourceDirectory.toAbsolutePath().normalize();
+        Path target = targetDirectory.toAbsolutePath().normalize();
+        if (Files.isSymbolicLink(source)
+                || !Files.isDirectory(source, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Source instance directory is not a regular directory.");
+        }
+        if (Files.isSymbolicLink(target)
+                || !Files.isDirectory(target, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+                || target.startsWith(source)) {
+            throw new IOException("Duplicate destination is not a safe independent directory.");
+        }
+
+        try (var walk = Files.walk(source)) {
+            for (Path path : walk.sorted().toList()) {
+                if (path.equals(source)) continue;
+
+                Path relative = source.relativize(path);
+                String first = relative.getName(0).toString();
+                if (relative.toString().equals(INSTALLING_MARKER)
+                        || first.equals("logs")
+                        || first.equals("screenshots")) {
+                    continue;
+                }
+
+                if (Files.isSymbolicLink(path)) {
+                    throw new IOException("Cannot duplicate an instance containing a symbolic link: " + relative);
+                }
+
+                Path destination = target.resolve(relative).normalize();
+                if (!destination.startsWith(target)) {
+                    throw new IOException("Instance path escapes the duplicate destination: " + relative);
+                }
+
+                if (Files.isDirectory(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                    Files.createDirectories(destination);
+                } else if (Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                    Files.createDirectories(destination.getParent());
+                    Files.copy(path, destination, StandardCopyOption.COPY_ATTRIBUTES,
+                            java.nio.file.LinkOption.NOFOLLOW_LINKS);
+                } else {
+                    throw new IOException("Cannot duplicate unsupported filesystem entry: " + relative);
+                }
+            }
         }
     }
 
