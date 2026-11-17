@@ -23,7 +23,7 @@ class InstanceBackupServiceTest {
         Files.writeString(settings, """
                 {
                   "ramMb": 6144,
-                  "javaPath": "C:\\Users\\Alice\\jdks\\jdk-21\\bin\\java.exe",
+                  "javaPath": "C:/Users/Alice/jdks/jdk-21/bin/java.exe",
                   "javaArguments": "-Xmx4G"
                 }
                 """);
