@@ -36,7 +36,7 @@ public final class CommandPalette extends StackPane {
         }
     }
 
-    private final List<Command> commands;
+    private List<Command> commands;
     private final TextField searchField = new TextField();
     private final VBox resultList = new VBox(4);
     private final ScrollPane resultScroll = new ScrollPane(resultList);
@@ -144,6 +144,11 @@ public final class CommandPalette extends StackPane {
         Label textLabel = new Label(label);
         textLabel.getStyleClass().add("command-palette-hint");
         return new HBox(6, keyLabel, textLabel);
+    }
+
+    public void setCommands(List<Command> commands) {
+        this.commands = List.copyOf(Objects.requireNonNull(commands, "commands"));
+        refreshResults();
     }
 
     public void show() {
