@@ -716,11 +716,11 @@ public class LauncherView {
                         root,
                         targets,
                         outputDirectory.resolve("additional"),
-                        failure -> {
+                        captureFailure -> {
                             if (progressDialogCapture[0] != null) {
                                 progressDialogCapture[0].closeForScreenshot();
                             }
-                            completion.accept(failure);
+                            completion.accept(captureFailure);
                         }
                 );
             } catch (Throwable captureSetupFailure) {
