@@ -31,89 +31,60 @@ public class InstanceManager {
     // =============================================================
 
     public static List<Instance> discoverInstances() {
+        return discoverInstances(false);
+    }
 
-        Path instancesDirectory =
-                MinecraftLocator.getInstancesDirectory();
+    /**
+     * Discovers every instance with enough intact metadata to rebuild its
+     * managed installation, including instances left behind by an interrupted
+     * install. This list is for explicit repair only; incomplete instances are
+     * never exposed to the normal launcher/library flow.
+     */
+    public static List<Instance> discoverRepairableInstances() {
+        return discoverInstances(true);
+    }
 
-        List<Instance> instances =
-                new ArrayList<>();
-
-        if (!Files.isDirectory(instancesDirectory)) {
-            return instances;
-        }
+    private static List<Instance> discoverInstances(boolean includeInterrupted) {
+        Path instancesDirectory = MinecraftLocator.getInstancesDirectory();
+        List<Instance> instances = new ArrayList<>();
+        if (!Files.isDirectory(instancesDirectory)) return instances;
 
         try (var stream = Files.list(instancesDirectory)) {
+            stream.filter(Files::isDirectory).forEach(directory -> {
+                if (!includeInterrupted && Files.exists(directory.resolve(INSTALLING_MARKER))) {
+                    return;
+                }
 
-            stream
-                    .filter(Files::isDirectory)
-                    .forEach(directory -> {
+                Path metadata = directory.resolve("instance.json");
+                if (!Files.isRegularFile(metadata)) return;
 
-                        Path installingMarker =
-                                directory.resolve(
-                                        INSTALLING_MARKER
-                                );
+                try {
+                    Instance stored = MAPPER.readValue(metadata.toFile(), Instance.class);
+                    if (stored.getId() == null || stored.getId().isBlank()
+                            || stored.getName() == null || stored.getName().isBlank()
+                            || stored.getMinecraftVersion() == null || stored.getMinecraftVersion().isBlank()
+                            || stored.getLoader() == null || stored.getLoader().isBlank()) {
+                        throw new IOException("Instance metadata is missing its ID, name, Minecraft version, or loader.");
+                    }
 
-                        /*
-                         * An installation was interrupted or is
-                         * still in progress. Do not expose it as
-                         * a usable instance.
-                         */
-                        if (Files.exists(installingMarker)) {
-                            System.out.println(
-                                    "Skipping incomplete instance: "
-                                            + directory
-                            );
-                            return;
-                        }
-
-                        Path metadata =
-                                directory.resolve(
-                                        "instance.json"
-                                );
-
-                        if (!Files.exists(metadata)) {
-                            return;
-                        }
-
-                        try {
-
-                            Instance instance =
-                                    MAPPER.readValue(
-                                            metadata.toFile(),
-                                            Instance.class
-                                    );
-
-                            // Recover an interrupted Modrinth graph before the
-                            // instance is made available for launch or browsing.
-                            ModrinthInstallService.recoverPendingTransactions(instance);
-                            instances.add(instance);
-
-                        } catch (Exception e) {
-
-                            System.err.println(
-                                    "Failed to load instance: "
-                                            + directory
-                            );
-
-                            e.printStackTrace();
-                        }
-                    });
-
-        } catch (IOException e) {
-
-            throw new IllegalStateException(
-                    "Failed to discover Vanta instances.",
-                    e
-            );
+                    // The directory being scanned is authoritative. Never let a
+                    // stale metadata path redirect repair into another instance.
+                    Instance instance = new Instance(
+                            stored.getId(), stored.getName(), stored.getMinecraftVersion(),
+                            stored.getLoader(), stored.getLoaderVersion(), directory.toAbsolutePath().normalize(),
+                            stored.getIcon());
+                    ModrinthInstallService.recoverPendingTransactions(instance);
+                    instances.add(instance);
+                } catch (Exception failure) {
+                    System.err.println("Failed to load repairable instance metadata: " + directory);
+                    failure.printStackTrace();
+                }
+            });
+        } catch (IOException failure) {
+            throw new IllegalStateException("Failed to discover Vanta instances.", failure);
         }
 
-        instances.sort(
-                Comparator.comparing(
-                        Instance::getName,
-                        String.CASE_INSENSITIVE_ORDER
-                )
-        );
-
+        instances.sort(Comparator.comparing(Instance::getName, String.CASE_INSENSITIVE_ORDER));
         return instances;
     }
 
