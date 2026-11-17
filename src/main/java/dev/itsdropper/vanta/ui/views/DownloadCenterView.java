@@ -56,9 +56,9 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         VBox heading = new VBox(8, eyebrow, pageHeader);
 
         FlowPane stats = new FlowPane(10, 10,
-                statCard("IN PROGRESS", activeCount, "download-stat-active"),
-                statCard("COMPLETED", completedCount, "download-stat-complete"),
-                statCard("FAILED", failedCount, "download-stat-failed"));
+                statCard("In progress", activeCount, "download-stat-active"),
+                statCard("Completed", completedCount, "download-stat-complete"),
+                statCard("Failed", failedCount, "download-stat-failed"));
         stats.getStyleClass().add("download-stats");
         stats.setMaxWidth(Double.MAX_VALUE);
 
@@ -159,10 +159,10 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         source.setWrapText(true);
 
         Label state = new Label(switch (task.status()) {
-            case DOWNLOADING -> "DOWNLOADING";
-            case VERIFYING -> "VERIFYING";
-            case COMPLETED -> "COMPLETED";
-            case FAILED -> "FAILED";
+            case DOWNLOADING -> "Downloading";
+            case VERIFYING -> "Verifying";
+            case COMPLETED -> "Completed";
+            case FAILED -> "Failed";
         });
         state.getStyleClass().addAll("download-status", "download-status-" + task.status().name().toLowerCase(Locale.ROOT));
         HBox top = new HBox(12, new VBox(5, file, source), state);
