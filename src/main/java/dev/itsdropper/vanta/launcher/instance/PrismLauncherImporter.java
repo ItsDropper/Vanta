@@ -142,17 +142,28 @@ public final class PrismLauncherImporter {
         String minecraft = null;
         String loader = "Vanilla";
         String loaderVersion = null;
+        List<String> unknownLoaderComponents = new ArrayList<>();
         for (JsonNode component : components) {
             String uid = component.path("uid").asText("").toLowerCase(Locale.ROOT);
             String version = component.path("version").asText("").trim();
-            if (uid.equals("net.minecraft")) minecraft = version;
-            else if (!uid.isBlank() && !version.isBlank()) {
+            if (uid.equals("net.minecraft")) {
+                minecraft = version;
+            } else if (!uid.isBlank() && !version.isBlank()) {
                 String mapped = mapLoader(uid);
                 if (mapped != null) {
                     loader = mapped;
                     loaderVersion = version;
+                } else if (looksLikeLoaderComponent(uid)) {
+                    unknownLoaderComponents.add(uid);
                 }
             }
+        }
+        if (!unknownLoaderComponents.isEmpty()) {
+            throw new IOException("Unsupported Prism loader component(s): "
+                    + String.join(", ", unknownLoaderComponents));
+        }
+        if ("Vanilla".equals(loader) && containsModJars(packFile.getParent())) {
+            throw new IOException("This profile contains mods but no supported loader component was found.");
         }
         if (minecraft == null || minecraft.isBlank()) {
             throw new IOException("Could not determine the Minecraft version from mmc-pack.json.");
@@ -160,6 +171,23 @@ public final class PrismLauncherImporter {
         String name = config.getOrDefault("name", fallbackName).trim();
         if (name.isBlank()) name = fallbackName;
         return new PrismProfile(name, minecraft, loader, loaderVersion);
+    }
+
+    private static boolean looksLikeLoaderComponent(String uid) {
+        return uid.contains("loader") || uid.contains("forge") || uid.contains("fabric")
+                || uid.contains("quilt") || uid.contains("ornithe") || uid.contains("babric")
+                || uid.contains("rift") || uid.contains("stein") || uid.contains("liteloader");
+    }
+
+    private static boolean containsModJars(Path instanceRoot) throws IOException {
+        Path gameDirectory = Files.isDirectory(instanceRoot.resolve(".minecraft"), LinkOption.NOFOLLOW_LINKS)
+                ? instanceRoot.resolve(".minecraft") : instanceRoot;
+        Path mods = gameDirectory.resolve("mods");
+        if (!Files.isDirectory(mods, LinkOption.NOFOLLOW_LINKS)) return false;
+        try (Stream<Path> files = Files.list(mods)) {
+            return files.anyMatch(path -> Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)
+                    && path.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".jar"));
+        }
     }
 
     private static String mapLoader(String uid) {
@@ -221,8 +249,9 @@ public final class PrismLauncherImporter {
     }
 
     private static String sanitizeId(String name) {
-        return name.toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9._-]+", "-")
+        String id = name.trim().toLowerCase(Locale.ROOT).replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("^-+|-+$", "");
+        return id.isBlank() ? "instance" : id;
     }
 
     private static void copyGameData(Path source, Path target) throws IOException {
@@ -278,24 +307,25 @@ public final class PrismLauncherImporter {
 
     private static boolean importGlobalSettings(Map<String, String> settings) {
         if (settings.isEmpty()) return false;
-        if (settings.containsKey("JavaPath")) LauncherSettings.setDefaultJavaPath(settings.get("JavaPath"));
-        if (settings.containsKey("JvmArgs")) LauncherSettings.setDefaultJavaArguments(settings.get("JvmArgs"));
+        boolean imported = false;
+        if (settings.containsKey("JavaPath")) LauncherSettings.setDefaultJavaPath(settings.get("JavaPath")); imported = true;
+        if (settings.containsKey("JvmArgs")) LauncherSettings.setDefaultJavaArguments(settings.get("JvmArgs")); imported = true;
         if (settings.containsKey("MaxMemAlloc")) {
             LauncherSettings.setDefaultRamMb(parseInt(settings.get("MaxMemAlloc"),
-                    LauncherSettings.getDefaultRamMb(), 1024, 16384));
+                    LauncherSettings.getDefaultRamMb(), 1024, 16384)); imported = true;
         }
         if (settings.containsKey("MinecraftWinWidth")) {
             LauncherSettings.setDefaultWidth(parseInt(settings.get("MinecraftWinWidth"),
-                    LauncherSettings.getDefaultWidth(), 640, 7680));
+                    LauncherSettings.getDefaultWidth(), 640, 7680)); imported = true;
         }
         if (settings.containsKey("MinecraftWinHeight")) {
             LauncherSettings.setDefaultHeight(parseInt(settings.get("MinecraftWinHeight"),
-                    LauncherSettings.getDefaultHeight(), 480, 4320));
+                    LauncherSettings.getDefaultHeight(), 480, 4320)); imported = true;
         }
         if (settings.containsKey("LaunchMaximized")) {
-            LauncherSettings.setDefaultFullscreen(Boolean.parseBoolean(settings.get("LaunchMaximized")));
+            LauncherSettings.setDefaultFullscreen(Boolean.parseBoolean(settings.get("LaunchMaximized"))); imported = true;
         }
-        return true;
+        return imported;
     }
 
     private static Path resolveInstancesDirectory(Path root, Map<String, String> settings) {
