@@ -735,7 +735,7 @@ public class InstancesView extends VBox {
                     .reversed()
                     .thenComparing(nameOrder);
             case "Most played" -> Comparator
-                    .comparingLong(instance -> InstanceUsageManager.getPlaytimeSeconds(instance)
+                    .<Instance>comparingLong(instance -> InstanceUsageManager.getPlaytimeSeconds(instance)
                             + launchService.getSessionPlaytimeSeconds(instance))
                     .reversed()
                     .thenComparing(nameOrder);
