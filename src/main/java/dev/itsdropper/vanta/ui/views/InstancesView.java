@@ -9,6 +9,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Dialog;
 import javafx.scene.control.ChoiceDialog;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -25,6 +27,7 @@ import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.instance.InstanceBackupService;
+import dev.itsdropper.vanta.launcher.instance.VPackService;
 import dev.itsdropper.vanta.launcher.instance.InstanceRecoveryService;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
@@ -174,6 +177,20 @@ public class InstancesView extends VBox {
         ));
         verifyBackupButton.setOnAction(event -> verifyInstanceBackup());
 
+        Button exportVPackButton = new Button(Localization.text("instances.exportVPack"));
+        exportVPackButton.getStyleClass().add("secondary-button");
+        exportVPackButton.setAccessibleText(Localization.text("instances.exportVPackAccessible"));
+        exportVPackButton.setTooltip(new javafx.scene.control.Tooltip(
+                Localization.text("instances.exportVPackHelp")));
+        exportVPackButton.setOnAction(event -> exportVPack());
+
+        Button importVPackButton = new Button(Localization.text("instances.importVPack"));
+        importVPackButton.getStyleClass().add("secondary-button");
+        importVPackButton.setAccessibleText(Localization.text("instances.importVPackAccessible"));
+        importVPackButton.setTooltip(new javafx.scene.control.Tooltip(
+                Localization.text("instances.importVPackHelp")));
+        importVPackButton.setOnAction(event -> importVPack());
+
         PageHeader headerTop = new PageHeader(
                 "Instances",
                 "Manage your Minecraft installations.",
@@ -183,6 +200,8 @@ public class InstancesView extends VBox {
                 backupButton,
                 restoreButton,
                 verifyBackupButton,
+                exportVPackButton,
+                importVPackButton,
                 createButton
         );
 
@@ -593,6 +612,152 @@ public class InstancesView extends VBox {
                     statusLabel.setText(Localization.text("instances.backupVerifyFailedPrefix") + message);
                     new Alert(Alert.AlertType.ERROR,
                             "Vanta could not verify this backup.\n\n" + message).show();
+                });
+            }
+        });
+    }
+
+    private void exportVPack() {
+        if (loadedInstances.isEmpty()) {
+            statusLabel.setText(Localization.text("instances.noneToBackup"));
+            return;
+        }
+
+        List<String> labels = loadedInstances.stream()
+                .map(instance -> instance.getName() + " · Minecraft " + instance.getMinecraftVersion()
+                        + " · " + instance.getDisplayLoader() + " [" + instance.getId() + "]")
+                .toList();
+        ChoiceDialog<String> chooser = new ChoiceDialog<>(labels.get(0), labels);
+        chooser.setTitle(Localization.text("instances.exportVPackTitle"));
+        chooser.setHeaderText(Localization.text("instances.chooseVPackInstance"));
+        chooser.setContentText(Localization.text("instances.instanceLabel"));
+        String selectedLabel = chooser.showAndWait().orElse(null);
+        if (selectedLabel == null) return;
+        int selectedIndex = labels.indexOf(selectedLabel);
+        if (selectedIndex < 0 || selectedIndex >= loadedInstances.size()) return;
+        Instance selected = loadedInstances.get(selectedIndex);
+
+        if (launchService.isRunning(selected)) {
+            new Alert(Alert.AlertType.WARNING, Localization.text("instances.vpackStopFirst")).showAndWait();
+            return;
+        }
+
+        VPackService.Options defaults = VPackService.Options.defaults();
+        CheckBox mods = new CheckBox(Localization.text("instances.vpackMods"));
+        CheckBox worlds = new CheckBox(Localization.text("instances.vpackWorlds"));
+        CheckBox configs = new CheckBox(Localization.text("instances.vpackConfigs"));
+        CheckBox resourcePacks = new CheckBox(Localization.text("instances.vpackResourcePacks"));
+        CheckBox shaderPacks = new CheckBox(Localization.text("instances.vpackShaderPacks"));
+        CheckBox screenshots = new CheckBox(Localization.text("instances.vpackScreenshots"));
+        CheckBox gameSettings = new CheckBox(Localization.text("instances.vpackGameSettings"));
+        CheckBox otherFiles = new CheckBox(Localization.text("instances.vpackOtherFiles"));
+        mods.setSelected(defaults.mods());
+        worlds.setSelected(defaults.worlds());
+        configs.setSelected(defaults.configs());
+        resourcePacks.setSelected(defaults.resourcePacks());
+        shaderPacks.setSelected(defaults.shaderPacks());
+        screenshots.setSelected(defaults.screenshots());
+        gameSettings.setSelected(defaults.gameSettings());
+        otherFiles.setSelected(defaults.otherFiles());
+
+        VBox selection = new VBox(10,
+                new Label(Localization.text("instances.vpackSelectionDescription")),
+                mods, worlds, configs, resourcePacks, shaderPacks, screenshots, gameSettings, otherFiles);
+        selection.setPrefWidth(360);
+        Dialog<ButtonType> selectionDialog = new Dialog<>();
+        selectionDialog.setTitle(Localization.text("instances.exportVPackTitle"));
+        selectionDialog.setHeaderText(Localization.text("instances.vpackChooseContent"));
+        selectionDialog.getDialogPane().setContent(selection);
+        selectionDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        if (selectionDialog.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+        VPackService.Options options = new VPackService.Options(
+                mods.isSelected(), worlds.isSelected(), configs.isSelected(),
+                resourcePacks.isSelected(), shaderPacks.isSelected(), screenshots.isSelected(),
+                gameSettings.isSelected(), otherFiles.isSelected());
+
+        FileChooser saveChooser = new FileChooser();
+        saveChooser.setTitle(Localization.text("instances.saveVPack"));
+        saveChooser.setInitialFileName(safeFileName(selected.getName()) + ".vpack");
+        saveChooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Vanta instance pack (*.vpack)", "*.vpack"));
+        java.io.File selectedFile = saveChooser.showSaveDialog(getScene() == null ? null : getScene().getWindow());
+        if (selectedFile == null) return;
+        java.nio.file.Path output = selectedFile.toPath();
+        if (!output.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".vpack")) {
+            output = output.resolveSibling(output.getFileName() + ".vpack");
+        }
+        final java.nio.file.Path destination = output;
+
+        backupButton.setDisable(true);
+        statusLabel.setText(Localization.text("instances.vpackExporting") + selected.getName() + "…");
+        UiExecutor.shared().execute(() -> {
+            try {
+                VPackService.createVPack(selected, destination, options);
+                UiExecutor.shared().dispatchToUi(() -> {
+                    backupButton.setDisable(false);
+                    statusLabel.setText(Localization.text("instances.vpackExported") + destination.getFileName());
+                    new Alert(Alert.AlertType.INFORMATION,
+                            Localization.text("instances.vpackExportSuccess"))
+                            .show();
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    backupButton.setDisable(false);
+                    String message = failure.getMessage() == null
+                            ? failure.getClass().getSimpleName() : failure.getMessage();
+                    statusLabel.setText(Localization.text("instances.vpackFailed") + message);
+                    new Alert(Alert.AlertType.ERROR,
+                            Localization.text("instances.vpackExportFailed") + "\\n\\n" + message).show();
+                });
+            }
+        });
+    }
+
+    private void importVPack() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(Localization.text("instances.importVPackTitle"));
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Vanta instance packs (*.vpack)", "*.vpack"));
+        java.io.File archive = chooser.showOpenDialog(getScene() == null ? null : getScene().getWindow());
+        if (archive == null) return;
+
+        String suggestedName = archive.getName().replaceFirst("(?i)\\.vpack$", "") + " (Imported)";
+        TextInputDialog nameDialog = new TextInputDialog(suggestedName);
+        nameDialog.setTitle(Localization.text("instances.importVPackTitle"));
+        nameDialog.setHeaderText(Localization.text("instances.importVPackHeader"));
+        nameDialog.setContentText(Localization.text("instances.instanceName"));
+        String name = nameDialog.showAndWait().orElse(null);
+        if (name == null) return;
+        if (name.isBlank()) {
+            new Alert(Alert.AlertType.WARNING, Localization.text("instances.vpackNameRequired")).showAndWait();
+            return;
+        }
+
+        backupButton.setDisable(true);
+        statusLabel.setText(Localization.text("instances.vpackImporting"));
+        UiExecutor.shared().execute(() -> {
+            try {
+                VPackService.Verification verification = VPackService.verifyVPack(archive.toPath());
+                Instance restored = VPackService.restoreVPack(archive.toPath(), name);
+                UiExecutor.shared().dispatchToUi(() -> {
+                    backupButton.setDisable(false);
+                    statusLabel.setText(Localization.text("instances.vpackImported") + restored.getName());
+                    refresh();
+                    new Alert(Alert.AlertType.INFORMATION,
+                            Localization.text("instances.vpackImportSuccess") + "\\n\\n"
+                                    + verification.minecraftVersion() + " · " + verification.loader()
+                                    + " · " + verification.entryCount() + " files")
+                            .show();
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    backupButton.setDisable(false);
+                    String message = failure.getMessage() == null
+                            ? failure.getClass().getSimpleName() : failure.getMessage();
+                    statusLabel.setText(Localization.text("instances.vpackFailed") + message);
+                    new Alert(Alert.AlertType.ERROR,
+                            Localization.text("instances.vpackImportFailed") + "\\n\\n" + message).show();
                 });
             }
         });
