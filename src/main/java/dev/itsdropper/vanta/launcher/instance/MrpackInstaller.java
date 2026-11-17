@@ -252,7 +252,7 @@ public class MrpackInstaller {
 // VALIDATE INDEX
 // =============================================================
 
-    private static void validateIndex(
+    static void validateIndex(
             JsonNode index
     ) {
 
