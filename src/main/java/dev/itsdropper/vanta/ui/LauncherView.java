@@ -592,8 +592,8 @@ public class LauncherView {
                 );
                 InstancePreset previewPreset = InstancePresets.getBuiltInPresets().get(0);
 
-                List<SidebarScreenshotCapture.CaptureTarget> targets = List.of(
                 InstanceCreationProgressDialog[] progressDialogCapture = new InstanceCreationProgressDialog[1];
+                List<SidebarScreenshotCapture.CaptureTarget> targets = List.of(
                         new SidebarScreenshotCapture.CaptureTarget(
                                 "instance-mods", "Instance Mods",
                                 () -> {
