@@ -545,7 +545,8 @@ public class InstanceManager {
         }
         if (Files.isSymbolicLink(target)
                 || !Files.isDirectory(target, java.nio.file.LinkOption.NOFOLLOW_LINKS)
-                || target.startsWith(source)) {
+                || target.startsWith(source)
+                || source.startsWith(target)) {
             throw new IOException("Duplicate destination is not a safe independent directory.");
         }
 
