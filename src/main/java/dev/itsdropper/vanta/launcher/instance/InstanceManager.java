@@ -272,7 +272,7 @@ public class InstanceManager {
     public static void markInstallationComplete(
             Instance instance
     ) throws IOException {
-        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.FINALIZING, "Saving installation metadata and verifying the completed instance.");
+        InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.FINALIZING, "Finalizing the instance and clearing its installation marker.");
 
         if (instance == null) {
             throw new IllegalArgumentException(

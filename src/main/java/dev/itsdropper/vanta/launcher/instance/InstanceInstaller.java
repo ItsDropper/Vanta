@@ -296,6 +296,7 @@ public class InstanceInstaller {
             // -----------------------------------------------------
             // These downloads are independent. Start them together so
             // a fresh instance is not forced through three network stages.
+            InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_GAME_FILES, "Installing Minecraft client, libraries and assets.");
             java.util.concurrent.ExecutorService executor =
                     java.util.concurrent.Executors.newFixedThreadPool(3);
 
@@ -362,6 +363,7 @@ public class InstanceInstaller {
             // -----------------------------------------------------
 
             JsonNode fabricProfile =
+                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Fabric components.");
                     FabricInstaller.downloadProfile(
                             minecraftVersion,
                             loaderVersion
@@ -556,8 +558,10 @@ public class InstanceInstaller {
             AssetInstaller.install(instance, vanillaMetadata);
 
             JsonNode fabricProfile =
+                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
                     BabricInstaller.downloadFabricProfile(minecraftVersion, loaderVersion);
             JsonNode babricOverlay =
+                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
                     BabricInstaller.downloadOverlay(fabricProfile);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Babric components.");
             BabricInstaller.installLibraries(fabricProfile, babricOverlay);
@@ -844,6 +848,7 @@ public class InstanceInstaller {
             );
 
             JsonNode fabricProfile =
+                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Fabric components.");
                     FabricInstaller.downloadProfile(
                             minecraftVersion,
                             loaderVersion
@@ -877,6 +882,7 @@ public class InstanceInstaller {
                 loaderVersion = latestQuiltVersion;
             }
             JsonNode quiltProfile =
+                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Quilt components.");
                     QuiltInstaller.downloadProfile(minecraftVersion, loaderVersion);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Quilt components.");
             QuiltInstaller.installLibraries(quiltProfile);
@@ -899,6 +905,7 @@ public class InstanceInstaller {
                 throw new IllegalStateException("Legacy Fabric Loader version is missing.");
             }
             JsonNode legacyFabricProfile =
+                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing LegacyFabric components.");
                     LegacyFabricInstaller.downloadProfile(minecraftVersion, loaderVersion);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing LegacyFabric components.");
             LegacyFabricInstaller.installLibraries(legacyFabricProfile);
@@ -912,8 +919,10 @@ public class InstanceInstaller {
                 babricLoaderVersion = BabricInstaller.findLatestLoaderVersion(minecraftVersion);
             }
             JsonNode babricFabricProfile =
+                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
                     BabricInstaller.downloadFabricProfile(minecraftVersion, babricLoaderVersion);
             JsonNode babricOverlay =
+                    InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Preparing and installing Babric components.");
                     BabricInstaller.downloadOverlay(babricFabricProfile);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Babric components.");
             BabricInstaller.installLibraries(babricFabricProfile, babricOverlay);
