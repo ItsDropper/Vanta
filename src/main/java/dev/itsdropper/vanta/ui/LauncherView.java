@@ -855,12 +855,19 @@ public class LauncherView {
         ImportInstanceView importInstanceView =
                 new ImportInstanceView(
                         this::showCreateInstanceView,
-                        this::instanceCreated
+                        this::instanceCreated,
+                        this::refreshAfterPrismMigration
                 );
 
         viewHost.show(
                 importInstanceView
         );
+    }
+
+    private void refreshAfterPrismMigration(String summary) {
+        instancesView.refresh();
+        homeView.refreshRecentInstances();
+        notifications.success("Prism migration finished", "Vanta refreshed its instance library. The import report remains visible here.");
     }
 
     private void showPresetInstanceView() {
