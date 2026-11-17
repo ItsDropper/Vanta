@@ -13,9 +13,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
+import java.nio.file.Path;
 
 import dev.itsdropper.vanta.launcher.instance.MrpackInstaller;
+import dev.itsdropper.vanta.launcher.instance.PrismLauncherImporter;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.io.File;
@@ -27,6 +30,7 @@ public class ImportInstanceView extends VBox {
     private final Runnable onImported;
 
     private final Button importButton;
+    private final Button prismImportButton;
     private final Button backButton;
     private final Label statusLabel;
     private final ProgressIndicator progress;
@@ -135,10 +139,15 @@ public class ImportInstanceView extends VBox {
                 180
         );
 
-        importButton.setOnAction(
-                event ->
-                        chooseFile()
-        );
+        importButton.setOnAction(event -> chooseFile());
+
+        prismImportButton = new Button(Localization.text("prismImport.button"));
+        prismImportButton.getStyleClass().addAll("secondary-button", "import-prism-action");
+        prismImportButton.setPrefHeight(46);
+        prismImportButton.setPrefWidth(220);
+        prismImportButton.setTooltip(new javafx.scene.control.Tooltip(
+                Localization.text("prismImport.description")));
+        prismImportButton.setOnAction(event -> choosePrismDirectory());
 
         // =========================================================
         // PROGRESS
@@ -210,7 +219,7 @@ public class ImportInstanceView extends VBox {
                         onBack.run()
         );
 
-        FlowPane actions = new FlowPane(12, 8, backButton, importButton);
+        FlowPane actions = new FlowPane(12, 8, backButton, prismImportButton, importButton);
         actions.setAlignment(Pos.CENTER_RIGHT);
         actions.setMaxWidth(Double.MAX_VALUE);
 
@@ -236,6 +245,65 @@ public class ImportInstanceView extends VBox {
 // =============================================================
 // CHOOSE FILE
 // =============================================================
+
+    private void choosePrismDirectory() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle(Localization.text("prismImport.chooser"));
+        Path detected = PrismLauncherImporter.findDefaultPrismRoot();
+        if (detected != null && java.nio.file.Files.isDirectory(detected)) {
+            chooser.setInitialDirectory(detected.toFile());
+        }
+
+        Window window = getScene() == null ? null : getScene().getWindow();
+        File selected = chooser.showDialog(window);
+        if (selected == null) return;
+        Path root = selected.toPath();
+
+        if (!PrismLauncherImporter.looksLikePrismRoot(root)) {
+            statusLabel.setText(Localization.text("prismImport.invalid"));
+            return;
+        }
+
+        setImportBusy(true);
+        statusLabel.setText(Localization.text("prismImport.scanning"));
+        UiExecutor.shared().execute(() -> {
+            try {
+                PrismLauncherImporter.ImportResult result = PrismLauncherImporter.importAll(
+                        root,
+                        message -> UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(message))
+                );
+                UiExecutor.shared().dispatchToUi(() -> {
+                    String summary = Localization.text("prismImport.complete")
+                            + " " + result.importedInstances() + ".";
+                    if (result.globalSettingsImported()) {
+                        summary += " " + Localization.text("prismImport.settingsApplied");
+                    }
+                    if (!result.skippedInstances().isEmpty()) {
+                        summary += "\\n" + Localization.text("prismImport.skipped")
+                                + "\\n" + String.join("\\n", result.skippedInstances());
+                    }
+                    statusLabel.setText(summary);
+                    setImportBusy(false);
+                    if (result.importedInstances() > 0) onImported.run();
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    statusLabel.setText(Localization.text("prismImport.failed")
+                            + " " + (failure.getMessage() == null
+                            ? failure.getClass().getSimpleName() : failure.getMessage()));
+                    setImportBusy(false);
+                });
+            }
+        });
+    }
+
+    private void setImportBusy(boolean busy) {
+        importButton.setDisable(busy);
+        prismImportButton.setDisable(busy);
+        backButton.setDisable(busy);
+        progress.setVisible(busy);
+        progress.setManaged(busy);
+    }
 
     private void chooseFile() {
 
