@@ -179,7 +179,7 @@ class VPackServiceTest {
                 new VPackService.Options(true, false, false, false, false, false, false, false));
 
         Path backslashArchive = temporaryDirectory.resolve("backslash-path.vpack");
-        rewriteArchive(archive, backslashArchive, "mods/example.jar", "mods\\\\example.jar", null, false);
+        rewriteArchive(archive, backslashArchive, "mods/example.jar", "mods\\example.jar", null, false);
         assertThrows(IOException.class, () -> VPackService.verifyVPack(backslashArchive));
 
         Path caseVariantArchive = temporaryDirectory.resolve("case-variant-metadata.vpack");
