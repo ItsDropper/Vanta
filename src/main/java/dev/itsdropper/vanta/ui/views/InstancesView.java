@@ -1104,11 +1104,11 @@ public class InstancesView extends VBox {
         icon.getStyleClass().add("instance-empty-icon");
         icon.setAccessibleText("");
 
-        Label title = new Label(Localization.text("instances.emptyTitle"));
+        Label title = new Label(Localization.text("instances.yourLibrary"));
         title.getStyleClass().add("instance-empty-title");
         title.setWrapText(true);
 
-        Label description = new Label(Localization.text("instances.emptyDescription"));
+        Label description = new Label(Localization.text("instances.empty"));
         description.getStyleClass().add("instance-empty-description");
         description.setWrapText(true);
         description.setMaxWidth(620);
@@ -1121,7 +1121,7 @@ public class InstancesView extends VBox {
 
         Button createButton = new Button(Localization.text("common.createInstance"));
         createButton.getStyleClass().add("primary-button");
-        createButton.setAccessibleText(Localization.text("instances.createFirstAccessible"));
+        createButton.setAccessibleText(Localization.text("instances.createAccessible"));
         createButton.setOnAction(event -> onCreateInstance.run());
 
         HBox empty = new HBox(VantaUI.spacing(5), icon, copy, createButton);
