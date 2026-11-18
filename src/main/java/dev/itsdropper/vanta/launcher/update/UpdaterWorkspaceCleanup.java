@@ -58,10 +58,18 @@ public final class UpdaterWorkspaceCleanup {
         Path root = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater")
                 .toAbsolutePath().normalize();
         Path candidate = workspace.toAbsolutePath().normalize();
-        return root.equals(candidate.getParent())
-                && candidate.getFileName() != null
-                && candidate.getFileName().toString().startsWith(WORKSPACE_PREFIX)
-                && !Files.isSymbolicLink(candidate);
+        if (!root.equals(candidate.getParent())
+                || candidate.getFileName() == null
+                || !candidate.getFileName().toString().startsWith(WORKSPACE_PREFIX)
+                || Files.isSymbolicLink(candidate)
+                || !Files.isDirectory(root)) {
+            return false;
+        }
+        try {
+            return root.toRealPath().equals(candidate.getParent().toRealPath());
+        } catch (IOException unavailable) {
+            return false;
+        }
     }
 
     static void deleteWorkspace(Path workspace) throws IOException {
