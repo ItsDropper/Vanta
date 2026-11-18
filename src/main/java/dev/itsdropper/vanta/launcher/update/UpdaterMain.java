@@ -915,7 +915,7 @@ public final class UpdaterMain {
                     throw new IOException("Update archive contains too many entries.");
                 }
                 if (entry.getName() == null || entry.getName().isBlank()
-                        || entry.getName().indexOf('\\0') >= 0) {
+                        || entry.getName().indexOf('\0') >= 0) {
                     throw new IOException("Update archive contains an invalid entry name.");
                 }
 
