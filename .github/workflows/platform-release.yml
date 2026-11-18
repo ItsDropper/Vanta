@@ -117,7 +117,16 @@ jobs:
             --assets-dir release-assets \
             --output release-assets/manifest.json
 
-      - name: Attest release packages and manifest
+      - name: Sign release manifest
+        env:
+          VANTA_RELEASE_SIGNING_KEY: ${{ secrets.VANTA_RELEASE_SIGNING_KEY }}
+        run: |
+          python3 release/sign_manifest.py \
+            --manifest release-assets/manifest.json \
+            --output release-assets/manifest.sig \
+            --key-id vanta-release-2026-01
+
+      - name: Attest release packages, manifest and signature
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: release-assets/*
