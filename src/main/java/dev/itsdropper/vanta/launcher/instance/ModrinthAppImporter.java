@@ -81,7 +81,6 @@ public final class ModrinthAppImporter {
         String jdbcUrl = "jdbc:sqlite:" + appDirectory.resolve("app.db").toUri() + "?mode=ro";
 
         try (Connection connection = DriverManager.getConnection(jdbcUrl)) {
-            connection.setReadOnly(true);
             JsonNode global = readGlobalSettings(connection);
             Path instancesRoot = resolveInstancesRoot(appDirectory, global);
             if (!Files.isDirectory(instancesRoot, LinkOption.NOFOLLOW_LINKS)
@@ -131,7 +130,7 @@ public final class ModrinthAppImporter {
 
     private static JsonNode readGlobalSettings(Connection connection) throws SQLException {
         try (Statement statement = connection.createStatement();
-             ResultSet result = statement.executeQuery("SELECT * FROM settings LIMIT 1")) {
+             ResultSet result = statement.executeQuery("SELECT *, json(extra_launch_args) AS extra_launch_args_text FROM settings LIMIT 1")) {
             if (!result.next()) return JSON.createObjectNode();
             JsonNode node = JSON.createObjectNode();
             var metadata = result.getMetaData();
@@ -139,6 +138,9 @@ public final class ModrinthAppImporter {
                 Object value = result.getObject(i);
                 if (value != null) ((com.fasterxml.jackson.databind.node.ObjectNode) node)
                         .put(metadata.getColumnLabel(i), value.toString());
+                if ("extra_launch_args_text".equals(metadata.getColumnLabel(i)) && value != null) {
+                    ((com.fasterxml.jackson.databind.node.ObjectNode) node).put("extra_launch_args", value.toString());
+                }
             }
             return node;
         }
@@ -155,7 +157,7 @@ public final class ModrinthAppImporter {
         if (tableExists(connection, "instances") && tableExists(connection, "instance_content_sets")) {
             String sql = """
                     SELECT i.path, i.name, c.game_version, c.loader, c.loader_version,
-                           COALESCE(o.overrides, '{}') AS overrides
+                           COALESCE(json(o.overrides), '{}') AS overrides
                     FROM instances i
                     LEFT JOIN instance_content_sets c
                       ON c.instance_id = i.id AND c.id = i.applied_content_set_id
@@ -215,7 +217,7 @@ public final class ModrinthAppImporter {
             case "rift" -> "Rift";
             case "stein" -> "Stein";
             case "modloader" -> "ModLoader";
-            case "vanta", "vantal", "vantal oader", "vantal oader" -> "VantaLoader";
+            case "vanta", "vantaloader" -> "VantaLoader";
             default -> throw new IOException("Unsupported Modrinth loader: " + raw);
         };
     }
@@ -250,6 +252,14 @@ public final class ModrinthAppImporter {
                 LauncherSettings.setDefaultJavaArguments(String.join(" ", values));
                 imported = true;
             } catch (IOException ignored) { }
+        }
+        String locale = settings.path("locale").asText("");
+        if (!locale.isBlank()) {
+            String language = Locale.forLanguageTag(locale.replace("_", "-")).getLanguage();
+            if (dev.itsdropper.vanta.ui.Localization.isSupported(language)) {
+                LauncherSettings.setPreferredLanguageCode(language);
+                imported = true;
+            }
         }
         return imported;
     }
