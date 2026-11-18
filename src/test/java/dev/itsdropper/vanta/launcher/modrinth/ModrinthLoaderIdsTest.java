@@ -8,6 +8,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ModrinthLoaderIdsTest {
     @Test
+    void mapsVantaLoaderToItsModrinthAgentIdentifier() {
+        assertEquals("java-agent", ModrinthLoaderIds.normalize("VantaLoader"));
+        assertEquals("stein", ModrinthLoaderIds.normalize("Stein"));
+    }
+
+    @Test
     void normalizesVantaLoaderDisplayNamesToModrinthIds() {
         assertEquals("legacyfabric", ModrinthLoaderIds.normalize("Legacy Fabric"));
         assertEquals("liteloader", ModrinthLoaderIds.normalize("LiteLoader"));
