@@ -84,13 +84,26 @@ public class InstalledModScanner {
 
     private InstalledMod readMod(Path file) {
         try (JarFile jar = new JarFile(file.toFile())) {
-            InstalledMod metadata = readFabricMetadata(jar, file);
+            InstalledMod metadata = tryRead(() -> readFabricMetadata(jar, file));
             if (metadata != null) return metadata;
-            metadata = readQuiltMetadata(jar, file);
+            metadata = tryRead(() -> readQuiltMetadata(jar, file));
             if (metadata != null) return metadata;
-            metadata = readTomlMetadata(jar, "META-INF/neoforge.mods.toml", file);
+            metadata = tryRead(() -> readTomlMetadata(jar, "META-INF/neoforge.mods.toml", file));
             if (metadata != null) return metadata;
-            return readTomlMetadata(jar, "META-INF/mods.toml", file);
+            return tryRead(() -> readTomlMetadata(jar, "META-INF/mods.toml", file));
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    @FunctionalInterface
+    private interface MetadataReader {
+        InstalledMod read() throws IOException;
+    }
+
+    private InstalledMod tryRead(MetadataReader reader) {
+        try {
+            return reader.read();
         } catch (Exception ignored) {
             return null;
         }
@@ -103,6 +116,7 @@ public class InstalledModScanner {
         if (id == null || version == null) return null;
         List<DependencyRequirement> dependencies = new ArrayList<>();
         addJsonObjectRequirements(dependencies, root.get("depends"), false);
+        addJsonObjectRequirements(dependencies, root.get("recommends"), true);
         addJsonObjectRequirements(dependencies, root.get("suggests"), true);
         List<DependencyRequirement> breaks = new ArrayList<>();
         addJsonObjectRequirements(breaks, root.get("breaks"), false);
@@ -139,10 +153,34 @@ public class InstalledModScanner {
         if (array == null || !array.isArray()) return;
         for (JsonNode dependency : array) {
             String id = text(dependency, "id");
-            if (id != null) destination.add(new DependencyRequirement(
-                    id, jsonConstraint(dependency.get("versions")),
+            if (id == null || "server".equalsIgnoreCase(dependency.path("environment").asText())) {
+                continue;
+            }
+            destination.add(new DependencyRequirement(
+                    id, quiltConstraint(dependency.get("versions")),
                     dependency.path("optional").asBoolean(false)));
         }
+    }
+
+    private String quiltConstraint(JsonNode value) {
+        if (value != null && value.isObject()) {
+            JsonNode any = value.get("any");
+            JsonNode all = value.get("all");
+            if (any != null && any.isArray()) return joinQuiltConstraints(any, " || ");
+            if (all != null && all.isArray()) return joinQuiltConstraints(all, " ");
+            return "*";
+        }
+        // Quilt's legacy array form is explicitly an OR, not an AND.
+        return jsonConstraint(value);
+    }
+
+    private String joinQuiltConstraints(JsonNode values, String separator) {
+        List<String> constraints = new ArrayList<>();
+        for (JsonNode value : values) {
+            String constraint = quiltConstraint(value);
+            if (!constraint.isBlank() && !"*".equals(constraint)) constraints.add(constraint);
+        }
+        return constraints.isEmpty() ? "*" : String.join(separator, constraints);
     }
 
     private String jsonConstraint(JsonNode value) {
@@ -204,7 +242,9 @@ public class InstalledModScanner {
                         continue;
                     }
                     Boolean mandatory = dependency.getBoolean("mandatory");
-                    boolean optional = "optional".equalsIgnoreCase(type) || Boolean.FALSE.equals(mandatory);
+                    boolean optional = "optional".equalsIgnoreCase(type)
+                            || "discouraged".equalsIgnoreCase(type)
+                            || Boolean.FALSE.equals(mandatory);
                     if ("SERVER".equalsIgnoreCase(dependency.getString("side"))) continue;
                     dependencies.add(new DependencyRequirement(dependencyId, range, optional));
                 }
