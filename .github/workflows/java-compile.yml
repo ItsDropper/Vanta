@@ -40,7 +40,7 @@ jobs:
       - name: Validate release manifest tooling
         run: |
           python3 -m py_compile release/generate_manifest.py release/test_generate_manifest.py
-          python3 -m unittest release/test_generate_manifest.py
+          python3 release/test_generate_manifest.py
           python3 -c "import json; json.load(open('release/manifest.schema.json', encoding='utf-8'))"
 
 
