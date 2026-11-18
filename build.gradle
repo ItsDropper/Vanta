@@ -48,6 +48,9 @@ dependencies {
     // JSON
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.2'
 
+    // Parse Forge and NeoForge dependency metadata with a standards-compliant TOML parser.
+    implementation 'org.tomlj:tomlj:1.1.1'
+
     // Read Modrinth App's local SQLite database without modifying it.
     implementation 'org.xerial:sqlite-jdbc:3.54.1.0'
 
