@@ -91,6 +91,19 @@ class UpdateTransactionTest {
     }
 
     @Test
+    void deadReplacementProcessCannotPassStartupHealthEvenIfMarkerExists() throws Exception {
+        Fixture f = new Fixture();
+        Files.writeString(f.healthMarker, "healthy");
+        Process exited = new ProcessBuilder(
+                Path.of(System.getProperty("java.home"), "bin",
+                        System.getProperty("os.name").toLowerCase().contains("windows") ? "java.exe" : "java").toString(),
+                "-version").start();
+        assertTrue(exited.waitFor(10, java.util.concurrent.TimeUnit.SECONDS));
+        assertFalse(UpdateTransaction.awaitHealthyStartup(
+                f.healthMarker, exited, 1, java.util.concurrent.TimeUnit.SECONDS));
+    }
+
+    @Test
     void installationLockRejectsConcurrentUpdaterInSameProcess() throws Exception {
         Fixture f = new Fixture();
         try (UpdateTransaction.InstallationLock ignored =
