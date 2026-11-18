@@ -44,10 +44,14 @@ public class UpdateService {
                 .connectTimeout(Duration.ofSeconds(15))
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
+        objectMapper = createMetadataMapper();
+    }
+
+    static ObjectMapper createMetadataMapper() {
         JsonFactory jsonFactory = JsonFactory.builder()
                 .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
                 .build();
-        objectMapper = new ObjectMapper(jsonFactory);
+        return new ObjectMapper(jsonFactory);
     }
 
     public UpdateInfo checkForUpdate(String currentVersion) throws IOException, InterruptedException {
