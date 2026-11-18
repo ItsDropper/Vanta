@@ -140,6 +140,12 @@ class GenerateManifestTest(unittest.TestCase):
         result = self.run_generator()
         self.assertNotEqual(0, result.returncode)
         self.assertIn("missing required application image files", result.stderr.lower())
+
+    def test_rejects_unmanifested_release_assets(self):
+        (self.assets / "untracked-installer.exe").write_bytes(b"untracked")
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("does not match the validated platform set", result.stderr.lower())
     def test_rejects_checksum_mismatch(self):
         checksum = self.assets / "Vanta-1.3.3-windows-x64.zip.sha256"
         checksum.write_text("0" * 64 + "  Vanta-1.3.3-windows-x64.zip\n", encoding="utf-8")
