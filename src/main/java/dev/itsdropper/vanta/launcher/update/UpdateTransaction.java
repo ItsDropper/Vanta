@@ -45,9 +45,7 @@ public final class UpdateTransaction {
         }
         if (app.equals(stage) || app.equals(old) || stage.equals(old)
                 || !Files.isDirectory(stage) || Files.exists(old)
-                || parent.equals(marker.getParent())
-                || !UpdaterWorkspaceCleanup.isManagedWorkspace(marker.getParent())
-                || !"vanta-update-health".equals(marker.getFileName().toString())) {
+                || !isManagedHealthMarker(marker, true)) {
             throw new IOException("Update transaction paths are not in a clean state.");
         }
         UpdateTransaction transaction = new UpdateTransaction(
@@ -121,8 +119,7 @@ public final class UpdateTransaction {
         if (!recordedApplication.equals(app)
                 || !("PREPARED".equals(state) || "SWAPPED".equals(state) || "HEALTHY".equals(state))
                 || stage.equals(app) || backup.equals(app) || stage.equals(backup)
-                || !UpdaterWorkspaceCleanup.isManagedWorkspace(marker.getParent())
-                || !"vanta-update-health".equals(marker.getFileName().toString())) {
+                || !isManagedHealthMarker(marker, false)) {
             throw new IOException("Update transaction journal contains unsafe paths; preserving it for diagnosis.");
         }
 
@@ -188,6 +185,22 @@ public final class UpdateTransaction {
         } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
             Files.move(temporary, journal, StandardCopyOption.REPLACE_EXISTING);
         }
+    }
+
+    private static boolean isManagedHealthMarker(Path marker, boolean requireExistingWorkspace) {
+        if (marker == null || marker.getFileName() == null
+                || !"vanta-update-health".equals(marker.getFileName().toString())) return false;
+        Path workspace = marker.getParent();
+        if (workspace == null || workspace.getFileName() == null
+                || !workspace.getFileName().toString().startsWith("session-")
+                || Files.isSymbolicLink(workspace)) return false;
+        Path expectedRoot = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater")
+                .toAbsolutePath().normalize();
+        if (!expectedRoot.equals(workspace.getParent())) return false;
+        if (!requireExistingWorkspace) {
+            return !Files.exists(workspace) || Files.isDirectory(workspace);
+        }
+        return UpdaterWorkspaceCleanup.isManagedWorkspace(workspace);
     }
 
     private static Path sibling(Path app, String value) throws IOException {
