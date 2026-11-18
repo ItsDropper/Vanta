@@ -32,7 +32,7 @@ class GenerateManifestTest(unittest.TestCase):
                 f"{digest}  {archive.name}\n", encoding="utf-8"
             )
 
-    def run_generator(self):
+    def run_generator(self, minimum_version="1.0.0"):
         return subprocess.run(
             [
                 sys.executable, str(SCRIPT),
@@ -40,6 +40,7 @@ class GenerateManifestTest(unittest.TestCase):
                 "--channel", "stable",
                 "--assets-dir", str(self.assets),
                 "--output", str(self.output),
+                "--min-launcher-version", minimum_version,
             ],
             capture_output=True,
             text=True,
@@ -86,9 +87,14 @@ class GenerateManifestTest(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("unexpected release archive name", result.stderr.lower())
 
+    def test_rejects_minimum_launcher_version_newer_than_release(self):
+        result = self.run_generator(minimum_version="2.0.0")
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("minimum launcher version", result.stderr.lower())
+
     def test_rejects_checksum_mismatch(self):
         checksum = self.assets / "Vanta-1.3.3-windows-x64.zip.sha256"
-        checksum.write_text("0" * 64, encoding="utf-8")
+        checksum.write_text("0" * 64 + "  Vanta-1.3.3-windows-x64.zip\n", encoding="utf-8")
         result = self.run_generator()
         self.assertNotEqual(0, result.returncode)
         self.assertIn("checksum sidecar does not match", result.stderr.lower())
