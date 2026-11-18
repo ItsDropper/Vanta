@@ -45,7 +45,8 @@ public class UpdateDownloader {
 
         String version = normalizeVersion(updateInfo.getLatestVersion());
         URI archiveUri = validateInitialDownloadUrl(updateInfo.getDownloadUrl());
-        URI checksumUri = validateInitialDownloadUrl(updateInfo.getChecksumUrl());
+        URI checksumUri = updateInfo.getSha256() == null
+                ? validateInitialDownloadUrl(updateInfo.getChecksumUrl()) : null;
 
         Path updateDirectory = Path.of(System.getProperty("java.io.tmpdir"), "Vanta", "updates");
         Files.createDirectories(updateDirectory);
@@ -60,14 +61,20 @@ public class UpdateDownloader {
 
             downloadFile(archiveUri, temporaryZip, MAX_ARCHIVE_BYTES, progress, progressValue);
 
-            report(progress, "Downloading update checksum...");
-            downloadFile(checksumUri, checksumFile, MAX_CHECKSUM_BYTES, null, null);
+            if (checksumUri != null) {
+                report(progress, "Downloading update checksum...");
+                downloadFile(checksumUri, checksumFile, MAX_CHECKSUM_BYTES, null, null);
+            }
 
             report(progress, "Verifying update...");
             if (progressValue != null) progressValue.accept(-1.0);
 
-            String expectedHash = readExpectedHash(checksumFile);
+            String expectedHash = updateInfo.getSha256() == null
+                    ? readExpectedHash(checksumFile) : updateInfo.getSha256();
             String actualHash = calculateSha256(temporaryZip);
+            if (updateInfo.getSizeBytes() > 0 && Files.size(temporaryZip) != updateInfo.getSizeBytes()) {
+                throw new IOException("The downloaded update size does not match the release manifest.");
+            }
             if (!MessageDigest.isEqual(
                     expectedHash.toLowerCase(Locale.ROOT).getBytes(java.nio.charset.StandardCharsets.US_ASCII),
                     actualHash.getBytes(java.nio.charset.StandardCharsets.US_ASCII))) {
