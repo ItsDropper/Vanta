@@ -59,8 +59,8 @@ public class UpdateInfo {
 
     private static int[] parseVersion(String version) {
         String cleaned = version.trim().replaceFirst("^[vV]", "");
-        cleaned = cleaned.replaceFirst("(?i)(?<=\\\\d)[a-z][a-z0-9.-]*$", "");
-        String[] parts = cleaned.split("\\\\.");
+        cleaned = cleaned.replaceFirst("(?i)(?<=\\d)[a-z][a-z0-9.-]*$", "");
+        String[] parts = cleaned.split("\\.");
         int[] result = new int[3];
         for (int i = 0; i < Math.min(parts.length, 3); i++) {
             try {
