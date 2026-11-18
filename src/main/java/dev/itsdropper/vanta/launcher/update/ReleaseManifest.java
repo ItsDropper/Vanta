@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  */
 final class ReleaseManifest {
     private static final int SUPPORTED_SCHEMA_VERSION = 1;
-    private static final Pattern VERSION = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+");
+    private static final Pattern VERSION = Pattern.compile("(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)");
     private static final Pattern SHA256 = Pattern.compile("[0-9a-f]{64}");
     private static final long MAX_ARTIFACT_BYTES = 1024L * 1024 * 1024;
     private static final Set<String> PLATFORMS = Set.of(
@@ -137,7 +137,7 @@ final class ReleaseManifest {
 
             URI downloadUri = validateGitHubUrl(requiredText(artifact, "download_url"), "artifact");
             String expectedPath = "/ItsDropper/Vanta/releases/download/v" + version + "/" + expectedFileName;
-            if (!expectedPath.equals(downloadUri.getPath())) {
+            if (!expectedPath.equals(downloadUri.getRawPath())) {
                 throw new IOException("The release artifact URL does not match " + platform + ".");
             }
 
@@ -169,7 +169,11 @@ final class ReleaseManifest {
         if (!value.isTextual() || value.asText().isBlank()) {
             throw new IOException("The release manifest is missing '" + field + "'.");
         }
-        return value.asText().trim();
+        String text = value.asText();
+        if (!text.equals(text.trim())) {
+            throw new IOException("The release manifest field '" + field + "' contains surrounding whitespace.");
+        }
+        return text;
     }
 
     private static URI validateGitHubUrl(String value, String description) throws IOException {
