@@ -58,8 +58,20 @@ separately.
 Complete these one-time repository-owner steps:
 
 1. Copy the generated public key (not the private key) into
-   `src/main/resources/release-trusted-keys.json` as an entry with key ID
-   `vanta-release-2026-01` and the printed Base64 public key.
+   `src/main/resources/release-trusted-keys.json` using this structure, replacing
+   the public-key value with the one printed by the generator:
+
+   ```json
+   {
+     "schema_version": 1,
+     "keys": [
+       {
+         "key_id": "vanta-release-2026-01",
+         "public_key": "PASTE_PUBLIC_KEY_BASE64_HERE"
+       }
+     ]
+   }
+   ```
 2. Commit that public key trust anchor and build/publish a launcher containing it
    before publishing a signed release manifest.
 3. In GitHub repository Settings → Secrets and variables → Actions, create the
@@ -69,9 +81,18 @@ Complete these one-time repository-owner steps:
    repository variable, workflow file, Gradle property committed to Git, or
    release artifact.
 
-The release workflow fails at the signing step if the secret is absent or
-invalid. The secret is exposed only to the signing step in the publish job.
-The key ID is public and is intentionally committed in the workflow.
+The release workflow fails at the signing step if the secret is absent, invalid,
+or does not match the pinned public key. Release tooling and the trust store are
+checked out from protected `main`, not from the release tag. Manual dispatch is
+accepted only from `main`. The secret is exposed only to the signing step in
+the publish job. The key ID is public and is intentionally committed in the
+workflow.
+
+Protect the `v*` tag namespace with a GitHub repository ruleset: restrict tag
+creation to trusted maintainers, prevent tag deletion and force updates, and
+require the release source to have passed the normal main-branch review and CI
+process. A tag-triggered workflow is defined by the tagged commit, so tag
+protection is part of the signing-key security boundary.
 
 ## Key rotation and revocation
 
