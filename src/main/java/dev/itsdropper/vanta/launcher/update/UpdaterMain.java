@@ -10,6 +10,7 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -108,9 +109,9 @@ public final class UpdaterMain {
             String[] args
     ) throws Exception {
 
-        if (args.length != 4) {
+        if (args.length != 5) {
             throw new IllegalArgumentException(
-                    "Usage: UpdaterMain <pid> <zip> <application> <ready-file>"
+                    "Usage: UpdaterMain <pid> <process-start-time-ms> <zip> <application> <ready-file>"
             );
         }
 
@@ -132,18 +133,25 @@ public final class UpdaterMain {
             );
         }
 
-        Path zip =
-                Path.of(args[1])
-                        .toAbsolutePath()
-                        .normalize();
+        long processStartTime;
+        try {
+            processStartTime = Long.parseLong(args[1]);
+        } catch (NumberFormatException failure) {
+            throw new IllegalArgumentException("Invalid original Vanta process start time.", failure);
+        }
 
-        Path applicationDirectory =
+        Path zip =
                 Path.of(args[2])
                         .toAbsolutePath()
                         .normalize();
 
+        Path applicationDirectory =
+                Path.of(args[3])
+                        .toAbsolutePath()
+                        .normalize();
+
         Path helperApplication = ApplicationLocator.getApplicationDirectory();
-        Path readyFile = validateReadinessFile(helperApplication, Path.of(args[3]));
+        Path readyFile = validateReadinessFile(helperApplication, Path.of(args[4]));
         Path helperWorkspace = readyFile.getParent();
 
         log("---------- ENVIRONMENT ----------");
@@ -212,7 +220,7 @@ public final class UpdaterMain {
 
         log("---------- WAITING FOR VANTA ----------");
 
-        waitForProcess(pid);
+        waitForProcess(pid, processStartTime);
 
         log(
                 "Vanta process has terminated."
@@ -438,7 +446,8 @@ public final class UpdaterMain {
     }
 
     private static void waitForProcess(
-            long pid
+            long pid,
+            long expectedStartTime
     ) throws Exception {
 
         if (pid <= 0) {
@@ -453,19 +462,16 @@ public final class UpdaterMain {
                 ProcessHandle.of(pid)
                         .orElse(null);
 
-        if (process == null) {
+        if (process == null || !matchesProcessStartTime(process, expectedStartTime)) {
 
-            log(
-                    "Vanta PID is already gone."
-            );
-
+            log("Original Vanta process is already gone or its PID has been reused.");
             return;
         }
 
         long start =
                 System.currentTimeMillis();
 
-        while (process.isAlive()) {
+        while (process.isAlive() && matchesProcessStartTime(process, expectedStartTime)) {
 
             long elapsed =
                     System.currentTimeMillis()
@@ -783,6 +789,21 @@ public final class UpdaterMain {
         }
     }
 
+    private static boolean isOriginalProcessAlive(long pid, long expectedStartTime) {
+        return ProcessHandle.of(pid)
+                .filter(process -> matchesProcessStartTime(process, expectedStartTime))
+                .isPresent();
+    }
+
+    private static boolean matchesProcessStartTime(ProcessHandle process, long expectedStartTime) {
+        if (expectedStartTime <= 0) {
+            return process.isAlive();
+        }
+        return process.info().startInstant()
+                .map(start -> start.toEpochMilli() == expectedStartTime)
+                .orElse(process.isAlive());
+    }
+
     private static void startVanta(
             Path applicationDirectory,
             Path helperWorkspace
@@ -805,32 +826,41 @@ public final class UpdaterMain {
         Process process = new ProcessBuilder(command)
                 .directory(applicationDirectory.toFile())
                 .start();
-        replacementLauncherStarted = true;
         log("New Vanta PID: " + process.pid());
         log("New Vanta alive: " + process.isAlive());
         if (!process.isAlive()) {
             throw new IOException("Vanta exited immediately after the updater launched it.");
         }
+        replacementLauncherStarted = true;
     }
 
     private static void recoverAfterFailedHandoff(String[] args, Exception originalFailure) {
-        if (args == null || args.length != 4) {
+        if (args == null || args.length != 5) {
             return;
         }
 
         try {
             long originalPid = Long.parseLong(args[0]);
-            Path application = Path.of(args[2]).toAbsolutePath().normalize();
-            Path readyFile = Path.of(args[3]).toAbsolutePath().normalize();
+            long originalStartTime = Long.parseLong(args[1]);
+            Path application = Path.of(args[3]).toAbsolutePath().normalize();
+            Path readyFile = Path.of(args[4]).toAbsolutePath().normalize();
             Path workspace = readyFile.getParent();
             if (workspace == null
                     || !UpdaterWorkspaceCleanup.isManagedWorkspace(workspace)
                     || !Files.isRegularFile(readyFile)) {
                 return;
             }
-            if (ProcessHandle.of(originalPid).map(ProcessHandle::isAlive).orElse(false)) {
-                log("Original Vanta process is still alive; leaving recovery to the running launcher.");
-                return;
+            if (isOriginalProcessAlive(originalPid, originalStartTime)) {
+                log("Original Vanta process is still alive; allowing its shutdown handoff to finish.");
+                long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+                while (isOriginalProcessAlive(originalPid, originalStartTime)
+                        && System.nanoTime() < deadline) {
+                    TimeUnit.MILLISECONDS.sleep(100);
+                }
+                if (isOriginalProcessAlive(originalPid, originalStartTime)) {
+                    log("Original Vanta did not exit; avoiding a duplicate launcher instance.");
+                    return;
+                }
             }
 
             Path backup = application.resolveSibling(application.getFileName() + ".backup");
