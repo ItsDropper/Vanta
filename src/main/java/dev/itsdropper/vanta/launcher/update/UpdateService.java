@@ -30,8 +30,17 @@ public class UpdateService {
     }
 
     public UpdateInfo checkForUpdate(String currentVersion) throws IOException, InterruptedException {
-        JsonNode manifest = requestJson(STABLE_MANIFEST_URL);
-        return ReleaseManifest.parse(manifest, currentVersion, Platform.distributionId());
+        try {
+            JsonNode manifest = requestJson(STABLE_MANIFEST_URL);
+            return ReleaseManifest.parse(manifest, currentVersion, Platform.distributionId());
+        } catch (IOException missingManifest) {
+            // Existing published releases predate manifests. Keep those installations
+            // updateable until the first manifest-backed release is published.
+            if (!missingManifest.getMessage().contains("HTTP 404")) {
+                throw missingManifest;
+            }
+            return parseLatestRelease(requestJson(API_BASE + "/latest"), currentVersion);
+        }
     }
 
     UpdateInfo parseLatestRelease(JsonNode release, String currentVersion) throws IOException {
@@ -96,7 +105,7 @@ public class UpdateService {
 
     private UpdateInfo parseRelease(JsonNode release, String currentVersion) throws IOException {
         String latestVersion = release.path("tag_name").asText();
-        String releaseNotes = release.path("html_url").asText("");
+        String releaseNotes = release.path("body").asText("");
         if (latestVersion.isBlank()) {
             throw new IOException("GitHub release did not contain a version.");
         }
