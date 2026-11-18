@@ -121,12 +121,12 @@ def main() -> None:
         platform = match.group("platform")
         if platform in artifacts:
             raise SystemExit(f"Duplicate platform artifact: {platform}")
-        validate_archive(archive, platform)
         if archive.is_symlink() or not archive.is_file():
             raise SystemExit(f"Release archive must be a regular file: {archive.name}")
         size = archive.stat().st_size
         if size <= 0 or size > MAX_ARTIFACT_BYTES:
             raise SystemExit(f"Invalid artifact size for {archive.name}: {size}")
+        validate_archive(archive, platform)
 
         checksum_file = archive.with_name(archive.name + ".sha256")
         if checksum_file.is_symlink() or not checksum_file.is_file():
