@@ -102,7 +102,7 @@ public class UpdateDownloader {
     static String normalizeVersion(String rawVersion) throws IOException {
         if (rawVersion == null) throw new IOException("The update version is missing.");
         String version = rawVersion.trim().replaceFirst("^[vV]", "");
-        if (!version.matches("(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)")) {
+        if (!version.matches("(?:0|[1-9][0-9]*)(?:\\.(?:0|[1-9][0-9]*)){1,2}")) {
             throw new IOException("The update version is invalid.");
         }
         return version;
