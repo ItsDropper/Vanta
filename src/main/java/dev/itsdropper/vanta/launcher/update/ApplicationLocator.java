@@ -27,6 +27,59 @@ public final class ApplicationLocator {
                 "Could not locate the Vanta application image. Self-update requires a packaged installation.");
     }
 
+    /**
+     * Locates the installation root from the running runtime/process even when
+     * an interrupted replacement has temporarily made the image incomplete.
+     */
+    public static Path getApplicationDirectoryForRecovery() {
+        try {
+            Path javaHome = Path.of(System.getProperty("java.home")).toAbsolutePath().normalize();
+            Path current = javaHome;
+            for (int depth = 0; current != null && depth < 6; depth++, current = current.getParent()) {
+                if (current.getFileName() != null
+                        && "runtime".equalsIgnoreCase(current.getFileName().toString())) {
+                    Path root = current.getParent();
+                    if (root != null && root.getFileName() != null
+                            && "lib".equalsIgnoreCase(root.getFileName().toString())) {
+                        root = root.getParent();
+                    } else if (root != null && root.getFileName() != null
+                            && "Contents".equalsIgnoreCase(root.getFileName().toString())) {
+                        root = root.getParent();
+                    }
+                    if (hasUpdateJournal(root)) return root;
+                }
+            }
+        } catch (RuntimeException ignored) {
+            // Fall through to the native launcher path.
+        }
+
+        try {
+            Path command = ProcessHandle.current().info().command()
+                    .map(Path::of).map(path -> path.toAbsolutePath().normalize()).orElse(null);
+            if (command != null) {
+                Path parent = command.getParent();
+                Path[] candidates = {
+                        parent,
+                        parent == null ? null : parent.getParent(),
+                        parent == null || parent.getParent() == null ? null : parent.getParent().getParent()
+                };
+                for (Path candidate : candidates) {
+                    if (hasUpdateJournal(candidate)) return candidate;
+                }
+            }
+        } catch (RuntimeException ignored) {
+            // No reliable process path is available.
+        }
+        return null;
+    }
+
+    private static boolean hasUpdateJournal(Path root) {
+        if (root == null || root.getFileName() == null) return false;
+        Path parent = root.getParent();
+        return parent != null && Files.isRegularFile(
+                parent.resolve(root.getFileName() + ".update-transaction"));
+    }
+
     /** Returns the private runtime directory inside a jpackage image. */
     public static Path getRuntimeDirectory(Path root) {
         Path normalized = root.toAbsolutePath().normalize();
