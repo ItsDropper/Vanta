@@ -72,8 +72,11 @@ Complete these one-time repository-owner steps:
      ]
    }
    ```
-2. Commit that public key trust anchor and build/publish a launcher containing it
-   before publishing a signed release manifest.
+2. Commit the trust anchor before creating the first signed release tag. The
+   release build must contain the same trust store as protected `main`; the
+   publish job checks that equality. Existing launchers can bootstrap to this
+   release using their older updater, while the new build verifies its own
+   signed manifest with the newly pinned key.
 3. In GitHub repository Settings → Secrets and variables → Actions, create the
    repository secret `VANTA_RELEASE_SIGNING_KEY` containing the exact Base64
    text from `release-signing-key.txt`.
