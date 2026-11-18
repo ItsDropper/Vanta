@@ -248,11 +248,13 @@ public final class UpdateTransaction {
                                                TimeUnit unit) throws InterruptedException {
         long deadline = System.nanoTime() + unit.toNanos(timeout);
         while (System.nanoTime() < deadline) {
-            if (isHealthyMarker(marker)) return true;
             if (process != null && !process.isAlive()) return false;
+            if (isHealthyMarker(marker)) {
+                return process == null || process.isAlive();
+            }
             TimeUnit.MILLISECONDS.sleep(100);
         }
-        return isHealthyMarker(marker);
+        return (process == null || process.isAlive()) && isHealthyMarker(marker);
     }
 
     private void writeState(String state) throws IOException {
