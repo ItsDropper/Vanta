@@ -79,33 +79,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-/** Reports the largest runtime JARs and packaged image sections for size regressions. */
-tasks.register('runtimeFootprint') {
-    dependsOn tasks.named('platformAppImage')
-    doLast {
-        def bytesOf = { File file ->
-            if (!file.exists()) return 0L
-            if (file.isFile()) return file.length()
-            long total = 0L
-            file.eachFileRecurse { child -> if (child.isFile()) total += child.length() }
-            return total
-        }
-        println 'VANTA RUNTIME DEPENDENCIES (largest first)'
-        configurations.runtimeClasspath.files
-                .sort { a, b -> bytesOf(b) <=> bytesOf(a) }
-                .each { file -> println String.format('%8.2f MiB  %s', bytesOf(file) / 1048576.0, file.name) }
-        def imageName = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT).contains('mac')
-                ? 'Vanta.app' : 'Vanta'
-        File image = layout.buildDirectory.dir("packages/${imageName}").get().asFile
-        if (image.isDirectory()) {
-            println 'VANTA APPLICATION IMAGE (top-level)'
-            image.listFiles().sort { a, b -> bytesOf(b) <=> bytesOf(a) }
-                    .each { file -> println String.format('%8.2f MiB  %s', bytesOf(file) / 1048576.0, file.name) }
-            println String.format('TOTAL IMAGE: %.2f MiB', bytesOf(image) / 1048576.0)
-        }
-    }
-}
-
 shadowJar {
     archiveClassifier = 'all'
 
@@ -273,3 +246,31 @@ tasks.register('platformImageChecksum') {
                 "${checksum}  ${archive.name}${System.lineSeparator()}"
     }
 }
+
+/** Reports the largest runtime JARs and packaged image sections for size regressions. */
+tasks.register('runtimeFootprint') {
+    dependsOn tasks.named('platformAppImage')
+    doLast {
+        def bytesOf = { File file ->
+            if (!file.exists()) return 0L
+            if (file.isFile()) return file.length()
+            long total = 0L
+            file.eachFileRecurse { child -> if (child.isFile()) total += child.length() }
+            return total
+        }
+        println 'VANTA RUNTIME DEPENDENCIES (largest first)'
+        configurations.runtimeClasspath.files
+                .sort { a, b -> bytesOf(b) <=> bytesOf(a) }
+                .each { file -> println String.format('%8.2f MiB  %s', bytesOf(file) / 1048576.0, file.name) }
+        def imageName = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT).contains('mac')
+                ? 'Vanta.app' : 'Vanta'
+        File image = layout.buildDirectory.dir("packages/${imageName}").get().asFile
+        if (image.isDirectory()) {
+            println 'VANTA APPLICATION IMAGE (top-level)'
+            image.listFiles().sort { a, b -> bytesOf(b) <=> bytesOf(a) }
+                    .each { file -> println String.format('%8.2f MiB  %s', bytesOf(file) / 1048576.0, file.name) }
+            println String.format('TOTAL IMAGE: %.2f MiB', bytesOf(image) / 1048576.0)
+        }
+    }
+}
+
