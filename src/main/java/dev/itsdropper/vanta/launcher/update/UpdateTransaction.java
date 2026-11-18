@@ -158,6 +158,13 @@ public final class UpdateTransaction {
         return null;
     }
 
+    /** Fail closed when a helper owns this installation, even before its journal exists. */
+    public static void ensureNoActiveUpdate(Path applicationRoot) throws IOException {
+        try (InstallationLock ignored = acquireInstallationLock(applicationRoot)) {
+            // Acquiring and releasing the OS lock is the check.
+        }
+    }
+
     /** Recover an unfinished payload swap before JavaFX or application services start. */
     public static void recoverBeforeLaunch(Path applicationRoot) throws IOException {
         if (applicationRoot == null) return;
