@@ -11,12 +11,15 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import quote
 
+from jsonschema import Draft202012Validator, FormatChecker
+
 VERSION_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
 ARTIFACT_PATTERN = re.compile(
     r"^Vanta-(?P<version>[0-9]+\.[0-9]+\.[0-9]+)-"
     r"(?P<platform>windows-x64|linux-x64|linux-aarch64|macos-x64|macos-aarch64)\.zip$"
 )
 MAX_ARTIFACT_BYTES = 1024 * 1024 * 1024
+SCHEMA_PATH = Path(__file__).with_name("manifest.schema.json")
 
 
 def sha256(path: Path) -> str:
@@ -63,7 +66,9 @@ def main() -> None:
         if not checksum_file.is_file():
             raise SystemExit(f"Missing checksum sidecar: {checksum_file.name}")
         checksum_text = checksum_file.read_text(encoding="utf-8").strip().split()
-        if not checksum_text or not re.fullmatch(r"[a-fA-F0-9]{64}", checksum_text[0]):
+        if (len(checksum_text) != 2
+                or not re.fullmatch(r"[a-fA-F0-9]{64}", checksum_text[0])
+                or checksum_text[1].lstrip("*") != archive.name):
             raise SystemExit(f"Malformed checksum sidecar: {checksum_file.name}")
         actual_hash = sha256(archive)
         if actual_hash != checksum_text[0].lower():
@@ -98,6 +103,19 @@ def main() -> None:
         "release_notes_url": f"https://github.com/ItsDropper/Vanta/releases/tag/v{args.version}",
         "artifacts": dict(sorted(artifacts.items())),
     }
+    schema = json.loads(SCHEMA_PATH.read_text(encoding="utf-8"))
+    Draft202012Validator.check_schema(schema)
+    errors = sorted(
+        Draft202012Validator(schema, format_checker=FormatChecker()).iter_errors(manifest),
+        key=lambda error: list(error.absolute_path),
+    )
+    if errors:
+        details = "; ".join(
+            f"{'/'.join(str(part) for part in error.absolute_path) or '<root>'}: {error.message}"
+            for error in errors
+        )
+        raise SystemExit("Generated release manifest does not satisfy its JSON schema: " + details)
+
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(manifest, indent=2, sort_keys=False) + "\n", encoding="utf-8")
 
