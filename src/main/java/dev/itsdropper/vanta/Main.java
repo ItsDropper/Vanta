@@ -241,6 +241,8 @@ public class Main extends Application {
             return;
         }
 
+        dev.itsdropper.vanta.launcher.update.UpdaterWorkspaceCleanup.scheduleStaleWorkspaceSweep();
+
         boolean screenshotMode = isScreenshotCapture(args);
         if (!screenshotMode) {
             TelemetryService.installUncaughtExceptionHandler();
