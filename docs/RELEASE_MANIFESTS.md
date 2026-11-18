@@ -42,6 +42,28 @@ Manifest responses are limited to 1 MiB and must resolve to GitHub's trusted
 metadata or release-asset hosts. Artifact downloads retain their existing
 redirect-host and maximum-size checks.
 
+## Build provenance
+
+The release workflow creates GitHub artifact attestations for every published
+release asset after the manifest has passed schema and package validation.
+These attestations bind the artifact digests to the GitHub Actions workflow
+identity and its source repository. They provide independently verifiable
+build provenance; they do not replace the launcher's own release-manifest
+signature verification.
+
+With GitHub CLI installed, verify a downloaded release asset against the
+repository's published provenance using:
+
+```sh
+gh attestation verify Vanta-1.3.3-windows-x64.zip --repo ItsDropper/Vanta
+```
+
+Use the actual downloaded filename in place of the example. The manifest itself
+can be verified in the same way. A valid attestation establishes which trusted
+workflow produced the artifact, while the still-pending detached Ed25519
+manifest signature will provide the launcher's independent publisher-authenticity
+check.
+
 ## Compatibility and migration
 
 Older published releases do not contain \`manifest.json\`. Until the first
