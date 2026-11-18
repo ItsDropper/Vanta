@@ -10,8 +10,8 @@ import java.util.*;
 public final class ModrinthDependencyResolver {
     private final ModrinthClient client;
     private final InstalledModScanner installedModScanner;
-    private final Map<String, InstalledMod> fabricMetadataCache = new HashMap<>();
-    private final Map<String, String> fabricModIdProjectCache = new HashMap<>();
+    private final Map<String, InstalledMod> modMetadataCache = new HashMap<>();
+    private final Map<String, String> modIdProjectCache = new HashMap<>();
     private final Map<String, Map<String, String>> fabricApiModuleCache = new HashMap<>();
     private final Map<String, List<ModrinthVersion>> versionCache =
             new java.util.concurrent.ConcurrentHashMap<>();
@@ -24,8 +24,8 @@ public final class ModrinthDependencyResolver {
     }
 
     public void clearCaches() {
-        fabricMetadataCache.clear();
-        fabricModIdProjectCache.clear();
+        modMetadataCache.clear();
+        modIdProjectCache.clear();
         fabricApiModuleCache.clear();
         versionCache.clear();
     }
@@ -52,10 +52,10 @@ public List<ModrinthService.ResolvedMod> resolveModGraph(
             return List.of();
         }
 
-        fabricMetadataCache.clear();
+        modMetadataCache.clear();
         versionCache.clear();
         fastResolution = true;
-        fabricModIdProjectCache.clear();
+        modIdProjectCache.clear();
         fabricApiModuleCache.clear();
 
         LinkedHashSet<String> roots =
@@ -663,7 +663,7 @@ private boolean resolveDependencies(
          */
 
         InstalledMod fabricMetadata =
-                readFabricMetadata(version);
+                readModMetadata(version);
 
         if (fabricMetadata == null) {
             return true;
@@ -679,7 +679,7 @@ private boolean resolveDependencies(
         }
 
         System.out.println(
-                "[Vanta DEBUG] Inspecting Fabric dependencies for "
+                "[Vanta DEBUG] Inspecting loader metadata dependencies for "
                         + fabricMetadata.getModId()
                         + " "
                         + fabricMetadata.getVersion()
@@ -689,6 +689,7 @@ private boolean resolveDependencies(
                 fabricDependencies) {
 
             if (requirement == null
+                    || requirement.isOptional()
                     || requirement.getModId() == null
                     || requirement.getModId().isBlank()) {
 
@@ -702,7 +703,7 @@ private boolean resolveDependencies(
                     requirement.getVersionConstraint();
 
             System.out.println(
-                    "[Vanta DEBUG]   Fabric dependency: "
+                    "[Vanta DEBUG]   loader metadata dependency: "
                             + fabricDependencyModId
                             + " ["
                             + constraint
@@ -710,7 +711,7 @@ private boolean resolveDependencies(
             );
 
             /*
-             * Some Fabric dependencies are provided by the environment
+             * Some loader metadata dependencies are provided by the environment
              * itself rather than by another mod.
              */
             if (isEnvironmentDependencySatisfied(
@@ -724,7 +725,7 @@ private boolean resolveDependencies(
 
             /*
              * Fabric API contains multiple internal API modules that
-             * appear as individual Fabric dependencies.
+             * appear as individual loader metadata dependencies.
              */
             if (isProvidedByFabricApi(
                     resolved,
@@ -740,7 +741,7 @@ private boolean resolveDependencies(
              * somewhere in the resolved graph.
              */
             ModrinthVersion resolvedDependency =
-                    findResolvedFabricDependency(
+                    findResolvedModDependency(
                             resolved,
                             fabricDependencyModId
                     );
@@ -748,7 +749,7 @@ private boolean resolveDependencies(
             if (resolvedDependency != null) {
 
                 InstalledMod dependencyMetadata =
-                        readFabricMetadata(
+                        readModMetadata(
                                 resolvedDependency
                         );
 
@@ -759,13 +760,13 @@ private boolean resolveDependencies(
                 }
 
                 boolean satisfies =
-                        matchesFabricConstraint(
+                        matchesModVersionConstraint(
                                 dependencyMetadata.getVersion(),
                                 constraint
                         );
 
                 System.out.println(
-                        "[Vanta DEBUG]   Existing Fabric dependency "
+                        "[Vanta DEBUG]   Existing loader metadata dependency "
                                 + fabricDependencyModId
                                 + " "
                                 + dependencyMetadata.getVersion()
@@ -787,7 +788,7 @@ private boolean resolveDependencies(
              * Find its Modrinth project and resolve it.
              */
             String dependencyProjectId =
-                    findModrinthProjectForFabricModId(
+                    findModrinthProjectForModId(
                             instance,
                             fabricDependencyModId
                     );
@@ -804,7 +805,7 @@ private boolean resolveDependencies(
             }
 
             boolean success =
-                    resolveFabricDependency(
+                    resolveModDependency(
                             instance,
                             dependencyProjectId,
                             fabricDependencyModId,
@@ -816,7 +817,7 @@ private boolean resolveDependencies(
             if (!success) {
 
                 System.out.println(
-                        "[Vanta DEBUG]   FAILED Fabric dependency: "
+                        "[Vanta DEBUG]   FAILED loader metadata dependency: "
                                 + fabricDependencyModId
                                 + " ["
                                 + constraint
@@ -828,6 +829,28 @@ private boolean resolveDependencies(
         }
 
         return true;
+    }
+
+    private boolean isProvidedLoaderDependency(Instance instance, String dependencyModId) {
+        if (instance == null || dependencyModId == null || dependencyModId.isBlank()) return false;
+        String loader = ModrinthLoaderIds.normalize(instance.getLoader());
+        String dependency = dependencyModId.trim().toLowerCase(Locale.ROOT);
+        Set<String> providedIds = switch (loader) {
+            case "fabric" -> Set.of("fabricloader");
+            case "quilt" -> Set.of("quilt_loader", "quiltloader");
+            case "forge" -> Set.of("forge", "javafml");
+            case "neoforge" -> Set.of("neoforge", "javafml");
+            case "liteloader" -> Set.of("liteloader");
+            case "rift" -> Set.of("rift");
+            case "babric", "bta-babric" -> Set.of("babric");
+            case "legacyfabric" -> Set.of("legacyfabric", "fabricloader");
+            case "ornithe" -> Set.of("ornithe");
+            case "nilloader" -> Set.of("nilloader");
+            case "modloader" -> Set.of("modloader");
+            case "java-agent" -> Set.of("java-agent", "vanta_loader");
+            default -> Set.of();
+        };
+        return providedIds.contains(dependency);
     }
 
 private boolean isEnvironmentDependencySatisfied(
@@ -844,45 +867,13 @@ private boolean isEnvironmentDependencySatisfied(
         }
 
         /*
-         * Fabric Loader is provided by the Minecraft instance.
+         * The selected loader is supplied by the Minecraft instance,
+         * not downloaded as a third-party mod.
          */
-        if ("fabricloader".equalsIgnoreCase(
-                dependencyModId
-        )) {
-
-            if (!"fabric".equalsIgnoreCase(
-                    instance.getLoader()
-            )) {
-
-                return false;
-            }
-
-            String loaderVersion =
-                    instance.getLoaderVersion();
-
-            if (loaderVersion == null
-                    || loaderVersion.isBlank()) {
-
-                return false;
-            }
-
-            boolean satisfies =
-                    matchesFabricConstraint(
-                            loaderVersion,
-                            constraint
-                    );
-
-            System.out.println(
-                    "[Vanta DEBUG]   Environment dependency: "
-                            + "fabricloader "
-                            + loaderVersion
-                            + " ["
-                            + constraint
-                            + "] = "
-                            + satisfies
-            );
-
-            return satisfies;
+        if (isProvidedLoaderDependency(instance, dependencyModId)) {
+            String loaderVersion = instance.getLoaderVersion();
+            if (loaderVersion == null || loaderVersion.isBlank()) return false;
+            return matchesModVersionConstraint(loaderVersion, constraint);
         }
 
         /*
@@ -900,7 +891,7 @@ private boolean isEnvironmentDependencySatisfied(
             }
 
             boolean satisfies =
-                    matchesFabricConstraint(
+                    matchesModVersionConstraint(
                             minecraftVersion,
                             constraint
                     );
@@ -941,7 +932,7 @@ private boolean isEnvironmentDependencySatisfied(
 
             if (loaderVersion == null
                     || loaderVersion.isBlank()
-                    || !matchesFabricConstraint(
+                    || !matchesModVersionConstraint(
                     loaderVersion,
                     ">=0.15.0"
             )) {
@@ -949,7 +940,7 @@ private boolean isEnvironmentDependencySatisfied(
             }
 
             boolean satisfies =
-                    matchesFabricConstraint(
+                    matchesModVersionConstraint(
                             "0.3.2",
                             constraint
                     );
@@ -971,7 +962,7 @@ private boolean isEnvironmentDependencySatisfied(
          * Java is provided by the Java runtime used to launch
          * the Minecraft instance. It is not a Modrinth mod.
          *
-         * Fabric dependency constraints use the Java major version,
+         * loader metadata dependency constraints use the Java major version,
          * e.g. >=21.
          */
         if ("java".equalsIgnoreCase(
@@ -1004,7 +995,7 @@ private boolean isEnvironmentDependencySatisfied(
                     );
 
             boolean satisfies =
-                    matchesFabricConstraint(
+                    matchesModVersionConstraint(
                             javaVersion,
                             constraint
                     );
@@ -1025,7 +1016,7 @@ private boolean isEnvironmentDependencySatisfied(
         return false;
     }
 
-private ModrinthVersion findResolvedFabricDependency(
+private ModrinthVersion findResolvedModDependency(
             Map<String, ModrinthVersion> resolved,
             String fabricModId
     ) throws IOException {
@@ -1045,7 +1036,7 @@ private ModrinthVersion findResolvedFabricDependency(
             }
 
             InstalledMod metadata =
-                    readFabricMetadata(
+                    readModMetadata(
                             version
                     );
 
@@ -1066,7 +1057,7 @@ private ModrinthVersion findResolvedFabricDependency(
         return null;
     }
 
-private String findModrinthProjectForFabricModId(
+private String findModrinthProjectForModId(
             Instance instance,
             String fabricModId
     ) throws IOException, InterruptedException {
@@ -1076,11 +1067,11 @@ private String findModrinthProjectForFabricModId(
         }
 
         if ("fabric".equalsIgnoreCase(fabricModId)) {
-            fabricModIdProjectCache.put(fabricModId, "P7dR8mSH");
+            modIdProjectCache.put(fabricModId, "P7dR8mSH");
             return "P7dR8mSH";
         }
 
-        String cached = fabricModIdProjectCache.get(fabricModId);
+        String cached = modIdProjectCache.get(fabricModId);
         if (cached != null) {
             return cached;
         }
@@ -1111,12 +1102,12 @@ private String findModrinthProjectForFabricModId(
                 for (ModrinthVersion version :
                         getCompatibleCandidates(instance, projectId)) {
 
-                    InstalledMod metadata = readFabricMetadata(version);
+                    InstalledMod metadata = readModMetadata(version);
 
                     if (metadata != null
                             && fabricModId.equals(metadata.getModId())) {
 
-                        fabricModIdProjectCache.put(
+                        modIdProjectCache.put(
                                 fabricModId,
                                 projectId
                         );
@@ -1175,7 +1166,7 @@ private String findModrinthProjectForFabricModId(
                         tempFile,
                         fabricModId
                 )) {
-                    fabricModIdProjectCache.put(
+                    modIdProjectCache.put(
                             fabricModId,
                             "P7dR8mSH"
                     );
@@ -1189,7 +1180,7 @@ private String findModrinthProjectForFabricModId(
         return null;
     }
 
-private boolean resolveFabricDependency(
+private boolean resolveModDependency(
             Instance instance,
             String projectId,
             String fabricModId,
@@ -1235,7 +1226,7 @@ private boolean resolveFabricDependency(
                     candidates) {
 
                 InstalledMod metadata =
-                        readFabricMetadata(
+                        readModMetadata(
                                 candidate
                         );
 
@@ -1254,7 +1245,7 @@ private boolean resolveFabricDependency(
                  * rejects every Fabric API candidate.
                  *
                  * For Fabric API, inspect the actual JAR for the requested
-                 * module. For normal standalone mods, the Fabric mod ID must
+                 * module. For normal standalone mods, the mod ID must
                  * match exactly.
                  */
                 boolean fabricApiProvider =
@@ -1321,11 +1312,11 @@ private boolean resolveFabricDependency(
 
                 } else if (!fabricModId.equals(metadata.getModId())) {
                     continue;
-                } else if (!matchesFabricConstraint(
+                } else if (!matchesModVersionConstraint(
                         metadata.getVersion(), constraint)) {
 
                     System.out.println(
-                            "[Vanta DEBUG] Rejected Fabric dependency candidate "
+                            "[Vanta DEBUG] Rejected loader metadata dependency candidate "
                                     + candidate.getVersionNumber()
                                     + " for "
                                     + fabricModId
@@ -1343,7 +1334,7 @@ private boolean resolveFabricDependency(
                             resolved.get(projectId);
 
                     /*
-                     * Fabric API is a provider JAR: its own Fabric mod ID is
+                     * Fabric API is a provider JAR: its own mod ID is
                      * "fabric", while the dependency may target one of its
                      * nested module IDs. Once Fabric API is already resolved,
                      * validate the requested module against THAT exact JAR.
@@ -1380,12 +1371,12 @@ private boolean resolveFabricDependency(
                     }
 
                     InstalledMod existingMetadata =
-                            readFabricMetadata(existing);
+                            readModMetadata(existing);
 
                     if (existingMetadata != null
                             && fabricModId.equals(existingMetadata.getModId())
                             && existingMetadata.getVersion() != null
-                            && matchesFabricConstraint(
+                            && matchesModVersionConstraint(
                             existingMetadata.getVersion(),
                             constraint
                     )) {
@@ -1406,7 +1397,7 @@ private boolean resolveFabricDependency(
                 if (!compatibility.compatible()) {
 
                     System.out.println(
-                            "[Vanta DEBUG] Rejected Fabric dependency candidate "
+                            "[Vanta DEBUG] Rejected loader metadata dependency candidate "
                                     + candidate.getVersionNumber()
                                     + ": "
                                     + compatibility.reason()
@@ -1449,7 +1440,7 @@ private boolean resolveFabricDependency(
                 resolved.putAll(branch);
 
                 System.out.println(
-                        "[Vanta DEBUG] Resolved Fabric dependency "
+                        "[Vanta DEBUG] Resolved loader metadata dependency "
                                 + fabricModId
                                 + " -> "
                                 + candidate.getVersionNumber()
@@ -1611,7 +1602,7 @@ private boolean satisfiesDependency(
         return true;
     }
 
-public InstalledMod readFabricMetadata(
+public InstalledMod readModMetadata(
             ModrinthVersion version
     ) throws IOException {
 
@@ -1625,7 +1616,7 @@ public InstalledMod readFabricMetadata(
         if (cacheKey != null) {
 
             InstalledMod cached =
-                    fabricMetadataCache.get(
+                    modMetadataCache.get(
                             cacheKey
                     );
 
@@ -1667,7 +1658,7 @@ public InstalledMod readFabricMetadata(
             if (metadata != null
                     && cacheKey != null) {
 
-                fabricMetadataCache.put(
+                modMetadataCache.put(
                         cacheKey,
                         metadata
                 );
@@ -1678,7 +1669,7 @@ public InstalledMod readFabricMetadata(
         } catch (Exception e) {
 
             throw new IOException(
-                    "Failed to inspect Fabric metadata for "
+                    "Failed to inspect loader metadata for "
                             + version.getVersionNumber(),
                     e
             );
@@ -1719,10 +1710,10 @@ private boolean matchesFabricModuleConstraint(
             return compareSimpleVersions(actual,
                     normalizeVersionForComparison(required.substring(1).trim())) < 0;
         }
-        return matchesFabricConstraint(actual, required);
+        return matchesModVersionConstraint(actual, required);
     }
 
-private boolean matchesFabricConstraint(
+private boolean matchesModVersionConstraint(
             String version,
             String constraint
     ) {
@@ -1954,7 +1945,7 @@ private CompatibilityResult isCompatibleWithResolvedGraph(
                 );
             }
 
-            if (hasFabricBreakConflict(otherVersion, candidate)) {
+            if (hasMetadataBreakConflict(otherVersion, candidate)) {
                 return CompatibilityResult.conflict(
                         otherVersion.getVersionNumber()
                                 + " breaks "
@@ -1962,7 +1953,7 @@ private CompatibilityResult isCompatibleWithResolvedGraph(
                 );
             }
 
-            if (hasFabricBreakConflict(candidate, otherVersion)) {
+            if (hasMetadataBreakConflict(candidate, otherVersion)) {
                 return CompatibilityResult.conflict(
                         candidate.getVersionNumber()
                                 + " breaks "
@@ -1970,7 +1961,7 @@ private CompatibilityResult isCompatibleWithResolvedGraph(
                 );
             }
 
-            if (!fabricDependencyAcceptsVersion(candidate, otherVersion)) {
+            if (!metadataDependencyAcceptsVersion(candidate, otherVersion)) {
                 return CompatibilityResult.conflict(
                         projectId
                                 + " "
@@ -1982,7 +1973,7 @@ private CompatibilityResult isCompatibleWithResolvedGraph(
                 );
             }
 
-            if (!fabricDependencyAcceptsVersion(otherVersion, candidate)) {
+            if (!metadataDependencyAcceptsVersion(otherVersion, candidate)) {
                 return CompatibilityResult.conflict(
                         otherProjectId
                                 + " "
@@ -2031,28 +2022,28 @@ private boolean isGraphConsistent(
                     return false;
                 }
 
-                if (!fabricDependencyAcceptsVersion(
+                if (!metadataDependencyAcceptsVersion(
                         version,
                         otherVersion
                 )) {
                     return false;
                 }
 
-                if (!fabricDependencyAcceptsVersion(
+                if (!metadataDependencyAcceptsVersion(
                         otherVersion,
                         version
                 )) {
                     return false;
                 }
 
-                if (hasFabricBreakConflict(
+                if (hasMetadataBreakConflict(
                         version,
                         otherVersion
                 )) {
                     return false;
                 }
 
-                if (hasFabricBreakConflict(
+                if (hasMetadataBreakConflict(
                         otherVersion,
                         version
                 )) {
@@ -2095,7 +2086,7 @@ private boolean hasExplicitIncompatibility(
         return false;
     }
 
-private boolean fabricDependencyAcceptsVersion(
+private boolean metadataDependencyAcceptsVersion(
             ModrinthVersion requestingVersion,
             ModrinthVersion dependencyVersion
     ) throws IOException {
@@ -2134,8 +2125,8 @@ private boolean fabricDependencyAcceptsVersion(
             }
         }
 
-        InstalledMod requesting = readFabricMetadata(requestingVersion);
-        InstalledMod dependency = readFabricMetadata(dependencyVersion);
+        InstalledMod requesting = readModMetadata(requestingVersion);
+        InstalledMod dependency = readModMetadata(dependencyVersion);
 
         if (requesting == null || dependency == null) {
             return true;
@@ -2154,13 +2145,13 @@ private boolean fabricDependencyAcceptsVersion(
                 continue;
             }
 
-            boolean matches = matchesFabricConstraint(
+            boolean matches = matchesModVersionConstraint(
                     dependencyVersionNumber,
                     requirement.getVersionConstraint()
             );
 
             System.out.println(
-                    "[Vanta] Fabric dependency check: "
+                    "[Vanta] loader metadata dependency check: "
                             + requesting.getModId()
                             + " "
                             + requesting.getVersion()
@@ -2181,7 +2172,7 @@ private boolean fabricDependencyAcceptsVersion(
     }
 
 
-private boolean hasFabricBreakConflict(
+private boolean hasMetadataBreakConflict(
             ModrinthVersion breakingVersion,
             ModrinthVersion otherVersion
     ) throws IOException, InterruptedException {
@@ -2192,7 +2183,7 @@ private boolean hasFabricBreakConflict(
         }
 
         InstalledMod breaking =
-                readFabricMetadata(
+                readModMetadata(
                         breakingVersion
                 );
 
@@ -2203,7 +2194,7 @@ private boolean hasFabricBreakConflict(
         }
 
         InstalledMod other =
-                readFabricMetadata(
+                readModMetadata(
                         otherVersion
                 );
 
@@ -2226,13 +2217,13 @@ private boolean hasFabricBreakConflict(
                 continue;
             }
 
-            if (matchesFabricConstraint(
+            if (matchesModVersionConstraint(
                     other.getVersion(),
                     requirement.getVersionConstraint()
             )) {
 
                 System.out.println(
-                        "[Vanta] Fabric break conflict: "
+                        "[Vanta] loader metadata break conflict: "
                                 + breaking.getModId()
                                 + " "
                                 + breaking.getVersion()
@@ -2309,7 +2300,7 @@ private boolean candidateDependenciesAcceptVersion(
             }
         }
 
-        return fabricDependencyAcceptsVersion(
+        return metadataDependencyAcceptsVersion(
                 requestingVersion,
                 dependencyVersion
         );
@@ -2382,7 +2373,7 @@ ModrinthVersion resolveDependencyVersion(
         );
     }
 
-private String findFabricModId(
+private String findModId(
             Instance instance,
             String projectId
     ) throws IOException, InterruptedException {
@@ -2409,7 +2400,7 @@ private String findFabricModId(
             }
 
             InstalledMod metadata =
-                    readFabricMetadata(version);
+                    readModMetadata(version);
 
             if (metadata != null) {
                 return metadata.getModId();
@@ -2458,7 +2449,7 @@ boolean hasCompatibleInstalledDependency(
             return false;
         }
 
-        return matchesFabricConstraint(
+        return matchesModVersionConstraint(
                 dependencyMod.getVersion(),
                 requirement.getVersionConstraint()
         );
@@ -2522,7 +2513,7 @@ private InstalledMod findInstalledDependencyMod(
         }
 
         String fabricModId =
-                findFabricModId(
+                findModId(
                         instance,
                         projectId
                 );
@@ -2561,7 +2552,7 @@ private DependencyRequirement findDependencyRequirement(
         }
 
         InstalledMod requestingMod =
-                readFabricMetadata(
+                readModMetadata(
                         requestingVersion
                 );
 
