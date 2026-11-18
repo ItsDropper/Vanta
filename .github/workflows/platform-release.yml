@@ -84,7 +84,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
+          fetch-depth: 0
           persist-credentials: false
+
+      - name: Verify release tag contains the pinned trust store
+        shell: bash
+        run: |
+          git show "$GITHUB_SHA:src/main/resources/release-trusted-keys.json" > "$RUNNER_TEMP/tag-release-trusted-keys.json"
+          cmp src/main/resources/release-trusted-keys.json "$RUNNER_TEMP/tag-release-trusted-keys.json"
 
       - name: Set up Python 3
         uses: actions/setup-python@v5
