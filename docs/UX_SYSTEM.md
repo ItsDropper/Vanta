@@ -6,17 +6,30 @@ This document defines the interaction contract for Vanta's JavaFX interface. It 
 
 - Use the looked-up tokens from `ThemeManager`: `-vanta-bg`, `-vanta-surface`, `-vanta-surface-raised`, `-vanta-surface-hover`, `-vanta-border`, `-vanta-text`, `-vanta-muted`, `-vanta-subtle`, `-vanta-accent`, `-vanta-danger`, and `-vanta-success`.
 - Prefer one clear primary action per view. Secondary actions should not compete with the primary action.
-- Use 8px control radii and 12px surface radii unless a component has a strong reason to differ.
+- Use 6px control radii, 8px card radii and 10px sheet/window radii unless a component has a strong reason to differ.
 - Keep hierarchy legible: page title, short supporting description, section label, content, then contextual actions.
 - Avoid hard-coded green or blue for normal states; theme tokens must drive accent and status colors.
 - Avoid decorative effects that reduce contrast or obscure content.
 
+## Design system stylesheet
+
+`css/vanta.css` is loaded after every other stylesheet and owns the visual language. Earlier files keep structure and legacy page selectors; new visual rules go in `vanta.css` and derive colours from the `ThemeManager` tokens instead of hard-coding hex values. `ThemeManager.apply` adds the `vanta-ui-root` class, so popups, dialogs and secondary windows that are themed through it receive the same rules.
+
+Derived tokens defined on `.vanta-ui-root`: `-vantaframe` (window chrome, darker than the sheet), `-vantaline` (hairline borders), `-vantalinestrong` (control borders), `-vantahover`, `-vantaselected`, `-vantaicon`, `-vantaaccentwash`/`-vantaaccentline`, `-vantadangerwash`/`-vantadangerline`, `-vantasuccesswash` and `-vantascrim`.
+
+Surface ladder, dark to light: frame (title bar, sidebar) → sheet (`-vantabg`, the content area) → surface (cards) → raised (popovers, hover, selected rows).
+
+- The sidebar and title bar belong to the frame; pages live on one inset sheet (`app-content`). Navigation groups are separated by space, not labels or rules.
+- Controls share one height (32 px; the launch button is 40 px) and three emphases: primary (accent fill), secondary (surface with border) and quiet (text only), plus a danger treatment.
+- Cards are flat: hairline border, 8 px radius, no shadow. Selection uses an accent border and wash rather than a filled pill.
+- Icons are 24-unit outlines with a 2-unit stroke drawn by `IconView`; colour comes from CSS (`.vanta-icon` strokes, `.vanta-icon-solid` fills), so they follow hover, selection and button variants.
+
 ## Geometry, rhythm and typography
 
 - Use a 4 px base spacing unit and multiples of 8 px for common gaps. Prefer VantaUI spacing helpers over unrelated scales.
-- Shell and major-panel corners use a fourth-order superellipse (squircle), with normalized boundary |x/a|^4 + |y/b|^4 = 1. The curve is a clipped JavaFX path, independent of CSS circular corner radii.
+- Shell and major-panel corners are plain CSS radii. `VantaUI` keeps an optional fourth-order superellipse clip, but it is disabled in the live scene.
 - Use shared radius constants for windows, panels and cards. Shape hierarchy should follow component scale; do not apply the largest radius to tiny controls.
-- Use a restrained type scale: 11 px metadata, 12–13 px control/body text, 15–16 px section labels, and 22–28 px page titles. Preserve platform text rendering and allow content to wrap.
+- Use a restrained type scale: 11 px metadata and eyebrows, 12 px control and secondary text, 13 px body, 15 px empty-state and dialog titles, and 20 px page titles. Use weights 400, 500 and 600 only. Preserve platform text rendering and allow content to wrap.
 - Keep colors semantic and theme-derived. Target WCAG AA contrast: 4.5:1 for normal text and 3:1 for large text and meaningful UI boundaries. `ThemeManager` automatically adjusts primary, muted and subtle foreground tokens to at least 4.5:1 against the active raised/hover surface while preserving hue as much as possible.
 - Motion is feedback, not decoration: prefer short opacity/translation transitions, avoid layout animation, and respect the user's animation preference.
 - A squircle is a mathematical primitive, not proof that one curve is universally more beautiful. Validate actual screens at target window sizes, including keyboard/focus states.

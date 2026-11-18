@@ -20,7 +20,7 @@ import java.util.Properties;
  */
 public final class ThemeManager {
 
-    public static final String DEFAULT_ACCENT = "#6D9BFF";
+    public static final String DEFAULT_ACCENT = "#4C8DFF";
     public static final String DEFAULT_THEME = "Vanta";
 
     public record Theme(
@@ -44,8 +44,8 @@ public final class ThemeManager {
     private static final Map<String, Theme> THEMES = new LinkedHashMap<>();
 
     static {
-        register(new Theme("Vanta", "#6D9BFF", "#0D121A", "#151E29", "#1C2938", "#26374A", "#35485F",
-                "#F0F5FC", "#A0B1C8", "#7A8DA8", "#E48A94", "#69D99B"));
+        register(new Theme("Vanta", "#4C8DFF", "#0E1218", "#141A22", "#1A212B", "#222B37", "#2E3846",
+                "#EDF1F7", "#9AA6B6", "#7A8696", "#F0707D", "#4CC38A"));
         register(new Theme("Midnight", "#7C9CFF", "#090B12", "#121622", "#181E2C", "#222A3A", "#2B3447",
                 "#F2F5FF", "#8994AA", "#646F84", "#EF8C98", "#69D9A2"));
         register(new Theme("Nord", "#88C0D0", "#0E1419", "#182127", "#202B33", "#293740", "#354651",
@@ -113,6 +113,12 @@ public final class ThemeManager {
 
     public static void apply(Node node, String accent) {
         if (node == null) return;
+
+        // Popups, dialogs and sub-scenes are themed through this method; the
+        // class lets the shared design-system selectors apply to them too.
+        if (!node.getStyleClass().contains("vanta-ui-root")) {
+            node.getStyleClass().add("vanta-ui-root");
+        }
 
         boolean overengineered = LauncherSettings.isOverengineeredUiEnabled();
         if (overengineered) {

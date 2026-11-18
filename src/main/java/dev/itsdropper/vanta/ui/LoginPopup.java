@@ -416,6 +416,18 @@ public class LoginPopup {
                 );
             }
 
+            URL designCss =
+                    LoginPopup.class.getResource(
+                            "/css/vanta.css"
+                    );
+
+            if (designCss != null) {
+
+                scene.getStylesheets().add(
+                        designCss.toExternalForm()
+                );
+            }
+
             // -----------------------------------------------------
             // SHOW
             // -----------------------------------------------------

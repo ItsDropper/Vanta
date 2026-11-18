@@ -17,10 +17,10 @@ import java.util.Objects;
 /** Shared visual primitives for Vanta's JavaFX interface. */
 public final class VantaUI {
     public static final double GRID_UNIT = 4.0;
-    public static final double RADIUS_CONTROL = 10.0;
-    public static final double RADIUS_CARD = 14.0;
-    public static final double RADIUS_PANEL = 18.0;
-    public static final double RADIUS_WINDOW = 22.0;
+    public static final double RADIUS_CONTROL = 6.0;
+    public static final double RADIUS_CARD = 8.0;
+    public static final double RADIUS_PANEL = 10.0;
+    public static final double RADIUS_WINDOW = 10.0;
     public static final double SQUIRCLE_EXPONENT = 4.0;
     private static final int CURVE_SEGMENTS = 20;
     private static volatile boolean squircleClippingEnabled = true;

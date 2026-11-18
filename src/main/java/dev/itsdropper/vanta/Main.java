@@ -131,7 +131,8 @@ public class Main extends Application {
     private void applyLauncherStylesheets(Scene scene) {
         String[] stylesheets = {
                 "/css/base.css", "/css/shell.css", "/css/home.css", "/css/library.css",
-                "/css/content.css", "/css/manage.css", "/css/utilities.css", "/css/tokens.css"
+                "/css/content.css", "/css/manage.css", "/css/utilities.css", "/css/tokens.css",
+                "/css/vanta.css"
         };
         for (String stylesheet : stylesheets) {
             var resource = getClass().getResource(stylesheet);

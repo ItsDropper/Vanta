@@ -3,10 +3,21 @@ package dev.itsdropper.vanta.ui.components;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.StrokeLineJoin;
+
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * Small, dependency-free vector icons used throughout the launcher.
- * Icons are SVG paths rendered by JavaFX, so they remain crisp at any scale.
+ *
+ * Icons are drawn on a 24 x 24 grid as outlines with a uniform 2 unit stroke,
+ * round caps and round joins. A few glyphs (play, pause, overflow dots) are
+ * solid. Colour comes from the stylesheet: {@code .vanta-icon} strokes with the
+ * nearest {@code -vantaicon} looked-up colour, and {@code .vanta-icon-solid}
+ * fills with it, so icons follow hover, selection and button variants.
+ * The programmatic defaults below only apply when no stylesheet is present.
  */
 public final class IconView {
 
@@ -38,8 +49,11 @@ public final class IconView {
         SHIELD,
         SKIN,
         TERMINAL,
-        EXPERIMENTAL
+        EXPERIMENTAL,
+        ACTIVITY
     }
+
+    private static final Set<Type> SOLID = EnumSet.of(Type.PLAY, Type.PAUSE, Type.MORE);
 
     private IconView() {
     }
@@ -47,11 +61,22 @@ public final class IconView {
     public static Node create(Type type, double size) {
         SVGPath path = new SVGPath();
         path.setContent(pathFor(type));
-        path.setFill(Color.WHITE);
-        path.setStroke(null);
+        path.getStyleClass().add("vanta-icon");
+
+        if (SOLID.contains(type)) {
+            path.getStyleClass().add("vanta-icon-solid");
+            path.setFill(Color.WHITE);
+            path.setStroke(null);
+        } else {
+            path.setFill(null);
+            path.setStroke(Color.WHITE);
+            path.setStrokeWidth(2);
+            path.setStrokeLineCap(StrokeLineCap.ROUND);
+            path.setStrokeLineJoin(StrokeLineJoin.ROUND);
+        }
+
         path.setScaleX(size / 24.0);
         path.setScaleY(size / 24.0);
-        path.getStyleClass().add("vanta-icon");
 
         javafx.scene.layout.StackPane box =
                 new javafx.scene.layout.StackPane(path);
@@ -66,61 +91,63 @@ public final class IconView {
     private static String pathFor(Type type) {
         return switch (type) {
             case HOME ->
-                    "M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-5v-6h-5v6h-5A1.5 1.5 0 0 1 3 19.5z";
+                    "M4 11 12 4l8 7M6.5 9.5V20h11V9.5M10 20v-5.5h4V20";
             case INSTANCES ->
-                    "M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z";
+                    "M4 4h6.5v6.5H4zM13.5 4H20v6.5h-6.5zM4 13.5h6.5V20H4zM13.5 13.5H20V20h-6.5z";
             case MODS ->
-                    "M8 3h8v3h3v8h-3v7H8v-7H5V6h3zm2 2v3h4V5zm-3 5v2h10v-2z";
+                    "M12 3.5 20 8l-8 4.5L4 8zM4 12l8 4.5 8-4.5M4 16l8 4.5 8-4.5";
             case ACCOUNTS ->
-                    "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8m-7 9a7 7 0 0 1 14 0z";
+                    "M12 12.5a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20c.6-3.6 3.7-5.5 7.5-5.5s6.9 1.9 7.5 5.5";
             case SETTINGS ->
-                    "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8m0-6 1.2 3.1 2.1.9 2.9-1.1 1.8 1.8-1.1 2.9.9 2.1L22 13v2l-3.1 1.2-.9 2.1 1.1 2.9-1.8 1.8-2.9-1.1-2.1.9L11 22H9l-1.2-3.1-2.1-.9-2.9 1.1L1 17.3l1.1-2.9L1.2 12.3 1 10.5l3.1-1.2.9-2.1L4 4.3 5.7 2.6l2.9 1.1L10.7 2z";
+                    "M4 8h9m4 0h3M4 16h3m4 0h9M15 5.5v5M9 13.5v5";
             case SEARCH ->
-                    "M10.5 4a6.5 6.5 0 1 0 4.1 11.5l4.9 4.9 1.4-1.4-4.9-4.9A6.5 6.5 0 0 0 10.5 4m0 2a4.5 4.5 0 1 1 0 9 4.5 4.5 0 0 1 0-9";
+                    "M10.5 17a6.5 6.5 0 1 0 0-13 6.5 6.5 0 0 0 0 13zM15.5 15.5 20 20";
             case FILTER ->
-                    "M4 5h16l-6.5 7.2V19l-3 1v-7.8z";
+                    "M4 6h16M7 12h10M10 18h4";
             case PLUS ->
-                    "M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z";
+                    "M12 5v14M5 12h14";
             case REFRESH ->
-                    "M20 11a8 8 0 0 0-14.9-3H3l3-3 3 3H7.4A6 6 0 1 1 6.2 15H4.1A8 8 0 0 0 20 11m-4 2 3 3-3 3v-2.1A6 6 0 0 1 6.2 15h2.1a4 4 0 0 0 5.7 1.8V15z";
+                    "M18.5 12a6.5 6.5 0 1 1-1.9-4.6M18.5 4.5v3.5H15";
             case DOWNLOAD ->
-                    "M11 3h2v10l3.5-3.5 1.4 1.4-5.9 5.9-5.9-5.9 1.4-1.4L11 13zm-6 15h14v2H5z";
+                    "M12 4v11M7.5 10.5 12 15l4.5-4.5M5 19.5h14";
             case UPLOAD ->
-                    "M11 21h2V11l3.5 3.5 1.4-1.4-5.9-5.9-5.9 5.9 1.4 1.4L11 11zm-6-18h14v2H5z";
+                    "M12 15V4M7.5 8.5 12 4l4.5 4.5M5 19.5h14";
             case FOLDER ->
-                    "M3 6a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z";
+                    "M3.5 7.5A1.5 1.5 0 0 1 5 6h4l2 2h8a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5z";
             case TRASH ->
-                    "M5 7h14v14H5zm3-4h8l1 2h4v2H3V5h4zm1 7h2v8H9zm4 0h2v8h-2z";
+                    "M5 7h14M10 7V5h4v2M7 7l.8 12h8.4L17 7M10.5 11v5M13.5 11v5";
             case PLAY ->
-                    "M8 5v14l11-7z";
+                    "M8 5.5v13l10.5-6.5z";
             case PAUSE ->
-                    "M6 5h4v14H6zm8 0h4v14h-4z";
+                    "M7 5.5h3.5v13H7zM13.5 5.5H17v13h-3.5z";
             case CHECK ->
-                    "M9.2 16.6 5.6 13l-1.4 1.4 5 5L20 8.6 18.6 7.2z";
+                    "M5 12.5l4.5 4.5L19 7.5";
             case CLOSE ->
-                    "M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4z";
+                    "M6 6l12 12M18 6 6 18";
             case EDIT ->
-                    "M4 17.3V21h3.7L19 9.7 15.3 6zm16-9.6a1 1 0 0 0 0-1.4l-2.3-2.3a1 1 0 0 0-1.4 0l-1.5 1.5 3.7 3.7z";
+                    "M4.5 19.5l.8-3.8L16 5a1.9 1.9 0 0 1 2.7 0l.3.3a1.9 1.9 0 0 1 0 2.7L8.3 18.7zM14 7l3 3";
             case SAVE ->
-                    "M5 3h12l3 3v15H4V3zm2 2v5h8V5zm1 9h8v2H8zm0 4h8v2H8z";
+                    "M5 5.5A1.5 1.5 0 0 1 6.5 4H16l3 3v11.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5zM8 4v4.5h6.5V4M8 20v-5.5h8V20";
             case ARROW_LEFT ->
-                    "M14.5 5 7.5 12l7 7 1.5-1.5-5.5-5.5 5.5-5.5z";
+                    "M14.5 6l-6 6 6 6";
             case ARROW_RIGHT ->
-                    "m9.5 5 7 7-7 7L8 17.5l5.5-5.5L8 6.5z";
+                    "M9.5 6l6 6-6 6";
             case MORE ->
-                    "M5 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4m7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4";
+                    "M5 12a1.4 1.4 0 1 0 2.8 0 1.4 1.4 0 1 0-2.8 0zM10.6 12a1.4 1.4 0 1 0 2.8 0 1.4 1.4 0 1 0-2.8 0zM16.2 12a1.4 1.4 0 1 0 2.8 0 1.4 1.4 0 1 0-2.8 0z";
             case COPY ->
-                    "M8 8V5a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-3v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10a2 2 0 0 1 2-2zm2-3v3h4a2 2 0 0 1 2 2v2h3V5zm2 8h-7v6h7z";
+                    "M9.5 8.5h8A1.5 1.5 0 0 1 19 10v8a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 8 18v-8a1.5 1.5 0 0 1 1.5-1.5zM5 15V6a1.5 1.5 0 0 1 1.5-1.5H15";
             case PACKAGE ->
-                    "m12 2 9 4.5v11L12 22l-9-4.5v-11zm0 2.2L6.4 7 12 9.8 17.6 7zM5 8.6v3.8l6 3v-3.8zm8 3v3.8l6-3V8.6z";
+                    "M12 3.5l7.5 4v9L12 20.5l-7.5-4v-9zM4.5 7.5l7.5 4 7.5-4M12 11.5v9";
             case SHIELD ->
-                    "M12 2 20 5v6c0 5.2-3.4 9.2-8 11-4.6-1.8-8-5.8-8-11V5zm0 3L7 6.9V11c0 3.7 2.2 6.6 5 8 2.8-1.4 5-4.3 5-8V6.9z";
+                    "M12 3.5 19 6v5.5c0 4.2-2.8 7.2-7 9-4.2-1.8-7-4.8-7-9V6zM9 12l2.2 2.2L15.2 10";
             case SKIN ->
-                    "M12 2a3 3 0 0 0-3 3v2H7a3 3 0 0 0-3 3v9a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-9a3 3 0 0 0-3-3h-2V5a3 3 0 0 0-3-3m-1 5V5a1 1 0 0 1 2 0v2zm-4 4h2v2H7zm8 0h2v2h-2zM8 16h8v2H8z";
+                    "M8.5 4 4 6.5 5.5 10 8 9v10.5h8V9l2.5 1L20 6.5 15.5 4c-.5 1.2-1.9 2-3.5 2S9 5.2 8.5 4z";
             case TERMINAL ->
-                    "M4 4h16v16H4zm3 4 4 4-4 4 1.4 1.4 5.4-5.4-5.4-5.4zM13 16h4v-2h-4z";
+                    "M4 5.5h16v13H4zM7.5 10l2.5 2-2.5 2M12.5 14.5h4";
             case EXPERIMENTAL ->
-                    "M9 3h6v2h-1v4.2l5.4 8.1A2.5 2.5 0 0 1 17.3 21H6.7a2.5 2.5 0 0 1-2.1-3.7L10 9.2V5H9zm3 7-5.7 8.5a.5.5 0 0 0 .4.8h10.6a.5.5 0 0 0 .4-.8L12 10z";
+                    "M9.5 4h5M10.5 4v5.2L5.5 17.5A1.8 1.8 0 0 0 7 20h10a1.8 1.8 0 0 0 1.5-2.5L13.5 9.2V4M8 14.5h8";
+            case ACTIVITY ->
+                    "M3.5 12H7l2.5-6 4 12 2.5-6h4.5";
         };
     }
 }

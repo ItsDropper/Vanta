@@ -46,6 +46,9 @@ public final class InstanceCreationProgressDialog {
   dialog.getDialogPane().getStyleClass().add("instance-progress-dialog");
   dialog.getDialogPane().getStylesheets().add(
           InstanceCreationProgressDialog.class.getResource("/css/progress.css").toExternalForm());
+  dialog.getDialogPane().getStylesheets().add(
+          InstanceCreationProgressDialog.class.getResource("/css/vanta.css").toExternalForm());
+  dev.itsdropper.vanta.ui.ThemeManager.apply(dialog.getDialogPane(), dev.itsdropper.vanta.ui.ThemeManager.loadAccent());
   ButtonType closeType=new ButtonType(Localization.text("common.close"),ButtonBar.ButtonData.CANCEL_CLOSE);
   dialog.getDialogPane().getButtonTypes().setAll(closeType);
   actionButton=(Button)dialog.getDialogPane().lookupButton(closeType);actionButton.setDisable(true);

@@ -1,0 +1,1709 @@
+/* Vanta design system — authoritative layer.
+ *
+ * Loaded after every other stylesheet. Earlier files still define structure
+ * and legacy page selectors; this file owns the visual language: tokens,
+ * surfaces, typography, controls, navigation and state treatment.
+ *
+ * Rules here derive every colour from the ThemeManager looked-up colours
+ * (-vantabg … -vantasuccess) so theme and accent changes reach every surface.
+ * Do not add hard-coded colours below; add or derive a token instead.
+ *
+ * Layout of this file
+ *   1  Tokens
+ *   2  Window, title bar and sidebar
+ *   3  Typography
+ *   4  Buttons
+ *   5  Form controls
+ *   6  Surfaces and lists
+ *   7  Overlays: menus, tooltips, dialogs, palette, notifications
+ *   8  Progress and status
+ *   9  Screen refinements
+ */
+
+/* ============================================================
+   1  TOKENS
+   Surface ladder (dark → light):
+     frame   window chrome, title bar, sidebar
+     bg      content sheet
+     surface cards and panels on the sheet
+     raised  popovers, selected rows, inputs on cards
+     hover   pointer feedback on raised surfaces
+   Radii: 4 chip · 6 control · 8 card · 10 sheet and window.
+   Spacing follows a 4 px grid. Type: 11 · 12 · 13 · 15 · 20.
+   ============================================================ */
+
+.vanta-ui-root {
+    -vantaframe: derive(-vantabg, -42%);
+    -vantaline: derive(-vantaborder, -35%);
+    -vantalinestrong: -vantaborder;
+    -vantahover: derive(-vantasurface, -30%);
+    -vantaselected: -vantasurface;
+    -vantaicon: -vantamuted;
+    -vantaaccentwash: derive(-vantaaccent, -84%);
+    -vantaaccentline: derive(-vantaaccent, -50%);
+    -vantadangerwash: derive(-vantadanger, -86%);
+    -vantadangerline: derive(-vantadanger, -55%);
+    -vantasuccesswash: derive(-vantasuccess, -86%);
+    -vantascrim: rgba(3, 5, 9, 0.62);
+
+    -fx-font-family: "Inter", "Segoe UI", "SF Pro Text", sans-serif;
+    -fx-focus-color: -vantaaccent;
+    -fx-faint-focus-color: transparent;
+    -fx-selection-bar: -vantaaccentwash;
+    -fx-selection-bar-non-focused: -vantasurface;
+}
+
+/* Icons take their colour from the nearest -vantaicon definition. */
+.vanta-ui-root .vanta-icon {
+    -fx-fill: transparent;
+    -fx-stroke: -vantaicon;
+    -fx-stroke-width: 1.9px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+    -fx-opacity: 1;
+}
+
+.vanta-ui-root .vanta-icon.vanta-icon-solid {
+    -fx-fill: -vantaicon;
+    -fx-stroke: transparent;
+    -fx-stroke-width: 0;
+}
+
+/* ============================================================
+   2  WINDOW, TITLE BAR AND SIDEBAR
+   ============================================================ */
+
+.vanta-ui-root .launcher {
+    -fx-background-color: -vantaframe;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.vanta-ui-root .title-bar {
+    -fx-background-color: transparent;
+    -fx-background-radius: 10px 10px 0 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-min-height: 40px;
+    -fx-pref-height: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 0 6px 0 14px;
+    -fx-spacing: 6px;
+}
+
+.vanta-ui-root .title-bar-brand {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 700;
+}
+
+.vanta-ui-root .title-bar-button,
+.vanta-ui-root .title-bar-close {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-min-width: 40px;
+    -fx-pref-width: 40px;
+    -fx-max-width: 40px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .title-bar-button SVGPath,
+.vanta-ui-root .title-bar-close SVGPath {
+    -fx-fill: transparent;
+    -fx-stroke: -vantamuted;
+    -fx-stroke-width: 1.2px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
+.vanta-ui-root .title-bar-button:hover {
+    -fx-background-color: -vantasurface;
+}
+
+.vanta-ui-root .title-bar-button:pressed {
+    -fx-background-color: -vantasurfaceraised;
+}
+
+.vanta-ui-root .title-bar-button:hover SVGPath,
+.vanta-ui-root .title-bar-close:hover SVGPath {
+    -fx-stroke: -vantatext;
+}
+
+.vanta-ui-root .title-bar-close:hover,
+.vanta-ui-root .title-bar-close:pressed {
+    -fx-background-color: -vantadanger;
+}
+
+.vanta-ui-root .title-bar-close:hover SVGPath {
+    -fx-stroke: -vantabg;
+}
+
+.vanta-ui-root .title-bar-update {
+    -fx-background-color: -vantaaccentwash;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantaaccentline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantaaccent;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 0 12px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+}
+
+.vanta-ui-root .title-bar-update:hover {
+    -fx-background-color: derive(-vantaaccentwash, 12%);
+    -fx-border-color: -vantaaccent;
+}
+
+.vanta-ui-root .account-switcher {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+}
+
+.vanta-ui-root .account-switcher:hover {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: -vantalinestrong;
+}
+
+.vanta-ui-root .account-switcher:pressed {
+    -fx-background-color: -vantasurfaceraised;
+}
+
+.vanta-ui-root .account-switcher-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+/* Sidebar: part of the frame, not a floating card. */
+
+.vanta-ui-root .sidebar.vanta-surface-sidebar,
+.vanta-ui-root .sidebar {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+}
+
+.vanta-ui-root .sidebar .sidebar-logo {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 14px;
+    -fx-font-weight: 700;
+}
+
+.vanta-ui-root .sidebar .sidebar-mark {
+    -fx-fill: -vantaaccent;
+}
+
+.vanta-ui-root .sidebar .sidebar-subtitle {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .sidebar .sidebar-section-label {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 10px;
+    -fx-font-weight: 600;
+    -fx-padding: 0 0 0 10px;
+}
+
+.vanta-ui-root .sidebar .sidebar-button {
+    -vantaicon: -vantamuted;
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+    -fx-padding: 0 10px;
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-graphic-text-gap: 10px;
+}
+
+.vanta-ui-root .sidebar .sidebar-button:hover {
+    -vantaicon: -vantatext;
+    -fx-background-color: -vantahover;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .sidebar .sidebar-button:pressed {
+    -fx-background-color: -vantasurface;
+}
+
+.vanta-ui-root .sidebar .sidebar-button.sidebar-button-active,
+.vanta-ui-root .sidebar .sidebar-button.sidebar-button-active:hover {
+    -vantaicon: -vantaaccent;
+    -fx-background-color: -vantaselected;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantatext;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .sidebar .sidebar-button:focused,
+.vanta-ui-root .sidebar .sidebar-button.sidebar-button-active:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+}
+
+.vanta-ui-root .sidebar .sidebar-build {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-padding: 0 0 0 10px;
+}
+
+.vanta-ui-root .sidebar.sidebar-compact .sidebar-button {
+    -fx-padding: 0;
+    -fx-min-height: 36px;
+    -fx-pref-height: 36px;
+}
+
+.vanta-ui-root .sidebar.sidebar-compact .sidebar-button.sidebar-button-active {
+    -fx-border-width: 1px;
+}
+
+/* The content sheet: one inset surface the pages live on. */
+
+.vanta-ui-root .app-content {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+/* ============================================================
+   3  TYPOGRAPHY
+   ============================================================ */
+
+.vanta-ui-root .page-title,
+.vanta-ui-root .home-title,
+.vanta-ui-root .page-header-title,
+.vanta-ui-root .vanta-type-page-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .page-subtitle,
+.vanta-ui-root .page-header-subtitle,
+.vanta-ui-root .home-account-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+}
+
+.vanta-ui-root .vanta-type-section-title,
+.vanta-ui-root .section-title,
+.vanta-ui-root .home-section-title,
+.vanta-ui-root .accounts-section-title,
+.vanta-ui-root .state-section-title,
+.vanta-ui-root .download-section-title,
+.vanta-ui-root .server-section-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .vanta-type-body {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 400;
+}
+
+.vanta-ui-root .vanta-type-muted,
+.vanta-ui-root .home-section-subtitle,
+.vanta-ui-root .card-secondary,
+.vanta-ui-root .server-section-subtitle,
+.vanta-ui-root .settings-card-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+}
+
+.vanta-ui-root .vanta-type-metadata,
+.vanta-ui-root .footer-label {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+}
+
+/* Eyebrows and small-caps labels: quiet, never accent-coloured. */
+.vanta-ui-root .vanta-type-eyebrow,
+.vanta-ui-root .page-eyebrow,
+.vanta-ui-root .home-eyebrow,
+.vanta-ui-root .home-card-eyebrow,
+.vanta-ui-root .home-selected-label,
+.vanta-ui-root .home-featured-eyebrow,
+.vanta-ui-root .home-empty-eyebrow,
+.vanta-ui-root .accounts-eyebrow,
+.vanta-ui-root .download-eyebrow,
+.vanta-ui-root .server-eyebrow,
+.vanta-ui-root .create-type-eyebrow,
+.vanta-ui-root .create-type-section-label,
+.vanta-ui-root .command-palette-eyebrow,
+.vanta-ui-root .settings-nav-group,
+.vanta-ui-root .card-title,
+.vanta-ui-root .create-section-title,
+.vanta-ui-root .settings-section-title,
+.vanta-ui-root .instances-count {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .card-main {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .vanta-type-monospace,
+.vanta-ui-root .diagnostic-log,
+.vanta-ui-root .server-console {
+    -fx-font-family: "JetBrains Mono", "Cascadia Code", "Consolas", "Menlo", monospace;
+    -fx-font-size: 12px;
+}
+
+/* ============================================================
+   4  BUTTONS
+   One height (32), one radius (6), three emphases plus danger.
+   ============================================================ */
+
+.vanta-ui-root .button {
+    -fx-cursor: hand;
+    -fx-font-family: "Inter", "Segoe UI", "SF Pro Text", sans-serif;
+}
+
+.vanta-ui-root .button:disabled {
+    -fx-opacity: 0.45;
+    -fx-cursor: default;
+}
+
+.vanta-ui-root .primary-button,
+.vanta-ui-root .instance-create-button,
+.vanta-ui-root .instance-play-button,
+.vanta-ui-root .home-play-button,
+.vanta-ui-root .home-featured-play-button,
+.vanta-ui-root .accounts-primary-button,
+.vanta-ui-root .server-primary,
+.vanta-ui-root .vanta-button-primary {
+    -vantaicon: -vantaaccentforeground;
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantaaccentforeground;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 0 14px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .primary-button:hover,
+.vanta-ui-root .instance-create-button:hover,
+.vanta-ui-root .instance-play-button:hover,
+.vanta-ui-root .home-play-button:hover,
+.vanta-ui-root .home-featured-play-button:hover,
+.vanta-ui-root .accounts-primary-button:hover,
+.vanta-ui-root .server-primary:hover,
+.vanta-ui-root .vanta-button-primary:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.vanta-ui-root .primary-button:pressed,
+.vanta-ui-root .instance-create-button:pressed,
+.vanta-ui-root .instance-play-button:pressed,
+.vanta-ui-root .home-play-button:pressed,
+.vanta-ui-root .home-featured-play-button:pressed,
+.vanta-ui-root .accounts-primary-button:pressed,
+.vanta-ui-root .server-primary:pressed,
+.vanta-ui-root .vanta-button-primary:pressed {
+    -fx-background-color: derive(-vantaaccent, -12%);
+}
+
+/* The launch button is the one place the primary action is larger. */
+.vanta-ui-root .home-play-button,
+.vanta-ui-root .home-featured-play-button {
+    -fx-min-height: 40px;
+    -fx-pref-height: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 0 22px;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .secondary-button,
+.vanta-ui-root .settings-back-button,
+.vanta-ui-root .instance-settings-button,
+.vanta-ui-root .accounts-secondary-button,
+.vanta-ui-root .server-secondary,
+.vanta-ui-root .state-refresh-button,
+.vanta-ui-root .state-repair-button,
+.vanta-ui-root .state-environment-button,
+.vanta-ui-root .debug-button,
+.vanta-ui-root .vanta-button-secondary {
+    -vantaicon: -vantatext;
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-padding: 0 12px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+}
+
+.vanta-ui-root .secondary-button:hover,
+.vanta-ui-root .settings-back-button:hover,
+.vanta-ui-root .instance-settings-button:hover,
+.vanta-ui-root .accounts-secondary-button:hover,
+.vanta-ui-root .server-secondary:hover,
+.vanta-ui-root .state-refresh-button:hover,
+.vanta-ui-root .state-repair-button:hover,
+.vanta-ui-root .state-environment-button:hover,
+.vanta-ui-root .debug-button:hover,
+.vanta-ui-root .vanta-button-secondary:hover {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: derive(-vantaborder, 18%);
+}
+
+.vanta-ui-root .secondary-button:pressed,
+.vanta-ui-root .settings-back-button:pressed,
+.vanta-ui-root .instance-settings-button:pressed,
+.vanta-ui-root .accounts-secondary-button:pressed,
+.vanta-ui-root .server-secondary:pressed,
+.vanta-ui-root .state-refresh-button:pressed,
+.vanta-ui-root .state-repair-button:pressed,
+.vanta-ui-root .state-environment-button:pressed,
+.vanta-ui-root .debug-button:pressed,
+.vanta-ui-root .vanta-button-secondary:pressed {
+    -fx-background-color: -vantahover;
+}
+
+.vanta-ui-root .vanta-button-quiet,
+.vanta-ui-root .instance-menu-button,
+.vanta-ui-root .notification-close {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .vanta-button-quiet:hover,
+.vanta-ui-root .instance-menu-button:hover,
+.vanta-ui-root .notification-close:hover {
+    -fx-background-color: -vantasurface;
+    -fx-border-color: transparent;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .danger-button,
+.vanta-ui-root .server-danger,
+.vanta-ui-root .accounts-danger-button,
+.vanta-ui-root .modrinth-popup-danger,
+.vanta-ui-root .instance-play-button.instance-playing-button,
+.vanta-ui-root .home-playing-button {
+    -vantaicon: -vantadanger;
+    -fx-background-color: -vantadangerwash;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantadangerline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantadanger;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .danger-button:hover,
+.vanta-ui-root .server-danger:hover,
+.vanta-ui-root .accounts-danger-button:hover,
+.vanta-ui-root .modrinth-popup-danger:hover,
+.vanta-ui-root .instance-play-button.instance-playing-button:hover,
+.vanta-ui-root .home-playing-button:hover {
+    -fx-background-color: derive(-vantadangerwash, 14%);
+    -fx-border-color: -vantadanger;
+    -fx-text-fill: -vantadanger;
+}
+
+/* Keyboard focus is always a 2 px accent ring outside the control. */
+.vanta-ui-root .button:focused,
+.vanta-ui-root .toggle-button:focused {
+    -fx-background-insets: 0, 0;
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+}
+
+/* ============================================================
+   5  FORM CONTROLS
+   ============================================================ */
+
+.vanta-ui-root .text-field,
+.vanta-ui-root .password-field,
+.vanta-ui-root .text-area,
+.vanta-ui-root .create-field,
+.vanta-ui-root .combo-box-base,
+.vanta-ui-root .create-combo,
+.vanta-ui-root .choice-box,
+.vanta-ui-root .spinner,
+.vanta-ui-root .modrinth-search-field,
+.vanta-ui-root .settings-search-field,
+.vanta-ui-root .instances-search,
+.vanta-ui-root .server-input,
+.vanta-ui-root .accent-hex-field {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 6px;
+    -fx-background-insets: 0;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantatext;
+    -fx-prompt-text-fill: -vantasubtle;
+    -fx-highlight-fill: -vantaaccentwash;
+    -fx-highlight-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .text-field,
+.vanta-ui-root .password-field,
+.vanta-ui-root .create-field,
+.vanta-ui-root .modrinth-search-field,
+.vanta-ui-root .settings-search-field,
+.vanta-ui-root .instances-search,
+.vanta-ui-root .server-input,
+.vanta-ui-root .accent-hex-field {
+    -fx-padding: 0 10px;
+    -fx-min-height: 32px;
+}
+
+.vanta-ui-root .text-area {
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .text-area .content {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 6px;
+    -fx-padding: 8px 10px;
+}
+
+.vanta-ui-root .combo-box-base,
+.vanta-ui-root .create-combo,
+.vanta-ui-root .choice-box {
+    -fx-padding: 0 4px 0 6px;
+    -fx-min-height: 32px;
+}
+
+.vanta-ui-root .combo-box-base > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 8px 0 4px;
+}
+
+.vanta-ui-root .combo-box-base > .arrow-button > .arrow {
+    -fx-background-color: -vantamuted;
+}
+
+.vanta-ui-root .text-field:hover,
+.vanta-ui-root .text-area:hover,
+.vanta-ui-root .create-field:hover,
+.vanta-ui-root .combo-box-base:hover,
+.vanta-ui-root .create-combo:hover,
+.vanta-ui-root .choice-box:hover,
+.vanta-ui-root .instances-search:hover,
+.vanta-ui-root .server-input:hover {
+    -fx-border-color: derive(-vantaborder, 18%);
+}
+
+.vanta-ui-root .text-field:focused,
+.vanta-ui-root .password-field:focused,
+.vanta-ui-root .text-area:focused,
+.vanta-ui-root .create-field:focused,
+.vanta-ui-root .combo-box-base:focused,
+.vanta-ui-root .create-combo:focused,
+.vanta-ui-root .choice-box:focused,
+.vanta-ui-root .spinner:focused,
+.vanta-ui-root .modrinth-search-field:focused,
+.vanta-ui-root .settings-search-field:focused,
+.vanta-ui-root .instances-search:focused,
+.vanta-ui-root .server-input:focused,
+.vanta-ui-root .accent-hex-field:focused {
+    -fx-background-color: -vantabg;
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .text-field:disabled,
+.vanta-ui-root .text-area:disabled,
+.vanta-ui-root .combo-box-base:disabled {
+    -fx-opacity: 0.5;
+}
+
+.vanta-ui-root .create-label,
+.vanta-ui-root .server-field-label,
+.vanta-ui-root .instance-setting-label,
+.vanta-ui-root .settings-info-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .check-box,
+.vanta-ui-root .radio-button,
+.vanta-ui-root .settings-checkbox,
+.vanta-ui-root .dialog-instance-checkbox {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .check-box > .box,
+.vanta-ui-root .radio-button > .radio {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 4px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.vanta-ui-root .radio-button > .radio {
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+}
+
+.vanta-ui-root .check-box:hover > .box,
+.vanta-ui-root .radio-button:hover > .radio {
+    -fx-border-color: derive(-vantaborder, 24%);
+}
+
+.vanta-ui-root .check-box:selected > .box,
+.vanta-ui-root .radio-button:selected > .radio {
+    -fx-background-color: -vantaaccent;
+    -fx-border-color: -vantaaccent;
+}
+
+.vanta-ui-root .check-box:focused > .box,
+.vanta-ui-root .radio-button:focused > .radio {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 2px;
+}
+
+.vanta-ui-root .slider .track {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 2px;
+    -fx-pref-height: 4px;
+}
+
+.vanta-ui-root .slider .thumb {
+    -fx-background-color: -vantatext;
+    -fx-background-radius: 8px;
+    -fx-pref-width: 14px;
+    -fx-pref-height: 14px;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .slider .thumb:hover,
+.vanta-ui-root .slider:focused .thumb {
+    -fx-background-color: -vantaaccent;
+}
+
+.vanta-ui-root .separator:horizontal .line,
+.vanta-ui-root .separator:vertical .line {
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.vanta-ui-root .tab-pane .tab-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .tab-pane .tab:selected .tab-label {
+    -fx-text-fill: -vantatext;
+}
+
+/* Scrollbars: slim, only visible as a thumb. */
+.vanta-ui-root .scroll-bar:vertical,
+.vanta-ui-root .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-padding: 2px;
+}
+
+.vanta-ui-root .scroll-bar .track,
+.vanta-ui-root .scroll-bar .track-background {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.vanta-ui-root .scroll-bar .thumb {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 4px;
+    -fx-background-insets: 0;
+}
+
+.vanta-ui-root .scroll-bar .thumb:hover,
+.vanta-ui-root .scroll-bar .thumb:pressed {
+    -fx-background-color: derive(-vantaborder, 28%);
+}
+
+.vanta-ui-root .scroll-bar .increment-button,
+.vanta-ui-root .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .scroll-bar .increment-arrow,
+.vanta-ui-root .scroll-bar .decrement-arrow {
+    -fx-shape: " ";
+    -fx-padding: 0;
+}
+
+/* ============================================================
+   6  SURFACES AND LISTS
+   Cards are flat: hairline border, 8 px radius, no shadow.
+   ============================================================ */
+
+.vanta-ui-root .info-card,
+.vanta-ui-root .account-card,
+.vanta-ui-root .account-panel,
+.vanta-ui-root .accounts-card,
+.vanta-ui-root .instance-card,
+.vanta-ui-root .create-panel,
+.vanta-ui-root .create-instance-panel,
+.vanta-ui-root .instance-settings-card,
+.vanta-ui-root .mod-details-card,
+.vanta-ui-root .mod-details-header,
+.vanta-ui-root .home-info-card,
+.vanta-ui-root .home-launch-card,
+.vanta-ui-root .home-featured-card,
+.vanta-ui-root .home-recent-card,
+.vanta-ui-root .home-server-card,
+.vanta-ui-root .home-empty-card,
+.vanta-ui-root .settings-card,
+.vanta-ui-root .state-card,
+.vanta-ui-root .state-list-card,
+.vanta-ui-root .server-profile-card,
+.vanta-ui-root .server-panel,
+.vanta-ui-root .repair-issue-card,
+.vanta-ui-root .preset-choice-card,
+.vanta-ui-root .create-type-option,
+.vanta-ui-root .modrinth-project-card,
+.vanta-ui-root .modrinth-project-grid-card,
+.vanta-ui-root .language-preference-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-background-insets: 0;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .info-card:hover,
+.vanta-ui-root .account-card:hover,
+.vanta-ui-root .accounts-card:hover,
+.vanta-ui-root .instance-card:hover,
+.vanta-ui-root .home-info-card:hover,
+.vanta-ui-root .home-featured-card:hover,
+.vanta-ui-root .home-recent-card:hover,
+.vanta-ui-root .home-server-card:hover,
+.vanta-ui-root .server-profile-card:hover,
+.vanta-ui-root .preset-choice-card:hover,
+.vanta-ui-root .create-type-option:hover,
+.vanta-ui-root .modrinth-project-card:hover,
+.vanta-ui-root .modrinth-project-grid-card:hover {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -vantalinestrong;
+}
+
+/* Selection is a border and a wash, not a fill pill. */
+.vanta-ui-root .instance-card.selected-instance,
+.vanta-ui-root .accounts-card-active,
+.vanta-ui-root .server-profile-selected,
+.vanta-ui-root .preset-choice-card.selected,
+.vanta-ui-root .create-type-option.selected {
+    -fx-background-color: -vantaaccentwash;
+    -fx-border-color: -vantaaccent;
+}
+
+.vanta-ui-root .instance-icon-box,
+.vanta-ui-root .mod-icon-box,
+.vanta-ui-root .home-featured-icon-frame,
+.vanta-ui-root .home-recent-icon,
+.vanta-ui-root .state-instance-icon,
+.vanta-ui-root .state-shared-icon,
+.vanta-ui-root .accounts-card-head-frame,
+.vanta-ui-root .accounts-hero-head-frame {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
+
+.vanta-ui-root .instance-name,
+.vanta-ui-root .home-recent-name,
+.vanta-ui-root .home-featured-title,
+.vanta-ui-root .state-instance-name,
+.vanta-ui-root .accounts-card-name,
+.vanta-ui-root .modrinth-project-title,
+.vanta-ui-root .server-profile-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .instance-version,
+.vanta-ui-root .home-recent-meta,
+.vanta-ui-root .home-featured-meta,
+.vanta-ui-root .home-version,
+.vanta-ui-root .state-instance-summary,
+.vanta-ui-root .accounts-card-uuid,
+.vanta-ui-root .accounts-card-hint,
+.vanta-ui-root .modrinth-project-author,
+.vanta-ui-root .modrinth-project-description,
+.vanta-ui-root .server-profile-meta,
+.vanta-ui-root .create-type-option-meta,
+.vanta-ui-root .create-type-option-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+}
+
+.vanta-ui-root .instance-ready,
+.vanta-ui-root .home-card-status,
+.vanta-ui-root .ready-label,
+.vanta-ui-root .account-connected,
+.vanta-ui-root .connected-label,
+.vanta-ui-root .home-status-ready {
+    -fx-text-fill: -vantasuccess;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .disconnected-label {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 12px;
+}
+
+/* Chips: loader, environment, tags. Square-ish, quiet. */
+.vanta-ui-root .home-loader,
+.vanta-ui-root .instance-loader,
+.vanta-ui-root .modrinth-tag-chip,
+.vanta-ui-root .modrinth-loader-chip,
+.vanta-ui-root .modrinth-environment-chip,
+.vanta-ui-root .import-format-badge,
+.vanta-ui-root .accounts-status-pill,
+.vanta-ui-root .login-step {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 4px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 11px;
+    -fx-font-weight: 500;
+    -fx-padding: 2px 7px;
+}
+
+.vanta-ui-root .accounts-status-connected {
+    -fx-text-fill: -vantasuccess;
+    -fx-border-color: derive(-vantasuccess, -55%);
+    -fx-background-color: -vantasuccesswash;
+}
+
+.vanta-ui-root .accounts-status-disconnected {
+    -fx-text-fill: -vantasubtle;
+}
+
+/* Lists and tables */
+.vanta-ui-root .list-view,
+.vanta-ui-root .table-view,
+.vanta-ui-root .tree-view {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .list-cell,
+.vanta-ui-root .tree-cell,
+.vanta-ui-root .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .list-cell:filled:hover,
+.vanta-ui-root .tree-cell:filled:hover,
+.vanta-ui-root .table-row-cell:filled:hover {
+    -fx-background-color: -vantasurface;
+}
+
+.vanta-ui-root .list-cell:filled:selected,
+.vanta-ui-root .tree-cell:filled:selected,
+.vanta-ui-root .table-row-cell:filled:selected {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .table-view .column-header-background,
+.vanta-ui-root .table-view .column-header,
+.vanta-ui-root .table-view .filler {
+    -fx-background-color: -vantabg;
+    -fx-border-color: transparent transparent -vantaline transparent;
+}
+
+.vanta-ui-root .table-view .column-header .label {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* ============================================================
+   7  OVERLAYS
+   ============================================================ */
+
+.vanta-ui-root .context-menu,
+.vanta-ui-root .combo-box-popup,
+.vanta-ui-root .choice-box-popup,
+.vanta-ui-root .theme-selector-popup,
+.vanta-ui-root .modrinth-popup,
+.vanta-ui-root .instance-action-popup {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 8px;
+    -fx-background-insets: 0;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-padding: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.40), 20, 0.1, 0, 6);
+}
+
+.vanta-ui-root .combo-box-popup .list-view {
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-padding: 6px 10px;
+}
+
+.vanta-ui-root .combo-box-popup .list-cell:filled:hover,
+.vanta-ui-root .combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: -vantahover;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 5px;
+    -fx-padding: 6px 10px;
+}
+
+.vanta-ui-root .context-menu .menu-item .label {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .context-menu .menu-item:hover,
+.vanta-ui-root .context-menu .menu-item:focused {
+    -fx-background-color: -vantahover;
+}
+
+.vanta-ui-root .tooltip {
+    -fx-background-color: -vantaframe;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-padding: 5px 8px;
+}
+
+.vanta-ui-root .dialog-pane {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.vanta-ui-root .dialog-pane .header-panel {
+    -fx-background-color: transparent;
+}
+
+.vanta-ui-root .dialog-pane .content {
+    -fx-background-color: transparent;
+}
+
+.vanta-ui-root .dialog-pane .label {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+}
+
+/* Command palette */
+.vanta-ui-root .command-palette-scrim {
+    -fx-background-color: -vantascrim;
+}
+
+.vanta-ui-root .command-palette-panel {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.50), 32, 0.1, 0, 12);
+}
+
+.vanta-ui-root .command-palette-search {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-radius: 0;
+    -fx-background-radius: 0;
+    -fx-font-size: 15px;
+}
+
+.vanta-ui-root .command-palette-search:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaline transparent;
+}
+
+.vanta-ui-root .command-result {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+}
+
+.vanta-ui-root .command-result.command-result-selected {
+    -fx-background-color: -vantasurfaceraised;
+}
+
+.vanta-ui-root .command-result-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .command-result-description,
+.vanta-ui-root .command-palette-hint,
+.vanta-ui-root .command-palette-empty {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .command-result-shortcut,
+.vanta-ui-root .command-palette-key {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 4px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-padding: 1px 6px;
+}
+
+/* Notifications */
+.vanta-ui-root .notification {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.40), 20, 0.1, 0, 6);
+}
+
+.vanta-ui-root .notification-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .notification-message {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .notification-message-error {
+    -fx-text-fill: -vantadanger;
+    -fx-font-size: 12px;
+}
+
+/* ============================================================
+   8  PROGRESS AND STATUS
+   Bars reflect real operation state; this file only styles them.
+   ============================================================ */
+
+.vanta-ui-root .progress-bar {
+    -fx-accent: -vantaaccent;
+    -fx-background-color: transparent;
+    -fx-control-inner-background: transparent;
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .progress-bar > .track {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 2px;
+    -fx-background-insets: 0;
+    -fx-padding: 2px;
+}
+
+.vanta-ui-root .progress-bar > .bar {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 2px;
+    -fx-background-insets: 0;
+    -fx-padding: 2px;
+}
+
+.vanta-ui-root .progress-indicator {
+    -fx-progress-color: -vantaaccent;
+}
+
+.vanta-ui-root .notification-progress,
+.vanta-ui-root .state-progress,
+.vanta-ui-root .download-progress {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 2px;
+}
+
+.vanta-ui-root .notification-progress > .bar,
+.vanta-ui-root .state-progress > .bar,
+.vanta-ui-root .download-progress > .bar {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 2px;
+}
+
+.vanta-ui-root .loading-progress-track {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 2px;
+}
+
+.vanta-ui-root .loading-progress-fill {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 2px;
+}
+
+/* Instance creation progress */
+.vanta-ui-root .instance-progress-dialog,
+.instance-progress-dialog {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.vanta-ui-root .instance-progress-headline,
+.instance-progress-headline {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .instance-progress-subtitle,
+.vanta-ui-root .instance-progress-detail,
+.vanta-ui-root .instance-progress-current-label,
+.instance-progress-subtitle,
+.instance-progress-detail,
+.instance-progress-current-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 400;
+}
+
+.vanta-ui-root .instance-progress-identity,
+.instance-progress-identity {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 6px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .instance-progress-stage-list,
+.instance-progress-stage-list {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
+    -fx-border-radius: 8px;
+}
+
+.vanta-ui-root .instance-progress-current,
+.instance-progress-current {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 6px;
+}
+
+.vanta-ui-root .instance-progress-stage.progress-active,
+.instance-progress-stage.progress-active {
+    -fx-background-color: -vantaaccentwash;
+    -fx-border-color: -vantaaccentline;
+}
+
+.vanta-ui-root .instance-progress-stage.progress-active .instance-progress-marker,
+.vanta-ui-root .instance-progress-stage.progress-active .instance-progress-stage-title,
+.instance-progress-stage.progress-active .instance-progress-marker,
+.instance-progress-stage.progress-active .instance-progress-stage-title {
+    -fx-text-fill: -vantaaccent;
+}
+
+.vanta-ui-root .instance-progress-stage.progress-pending .instance-progress-marker,
+.vanta-ui-root .instance-progress-stage.progress-pending .instance-progress-stage-title,
+.vanta-ui-root .instance-progress-stage.progress-skipped .instance-progress-marker,
+.vanta-ui-root .instance-progress-stage.progress-skipped .instance-progress-stage-title,
+.instance-progress-stage.progress-pending .instance-progress-marker,
+.instance-progress-stage.progress-pending .instance-progress-stage-title,
+.instance-progress-stage.progress-skipped .instance-progress-marker,
+.instance-progress-stage.progress-skipped .instance-progress-stage-title {
+    -fx-text-fill: -vantasubtle;
+}
+
+.vanta-ui-root .instance-progress-stage.progress-complete .instance-progress-marker,
+.instance-progress-stage.progress-complete .instance-progress-marker {
+    -fx-text-fill: -vantasuccess;
+}
+
+.vanta-ui-root .instance-progress-stage.progress-complete .instance-progress-stage-title,
+.instance-progress-stage.progress-complete .instance-progress-stage-title {
+    -fx-text-fill: -vantamuted;
+}
+
+.vanta-ui-root .instance-progress-stage.progress-failed,
+.instance-progress-stage.progress-failed {
+    -fx-background-color: -vantadangerwash;
+    -fx-border-color: -vantadangerline;
+}
+
+.vanta-ui-root .instance-progress-stage.progress-failed .instance-progress-marker,
+.vanta-ui-root .instance-progress-stage.progress-failed .instance-progress-stage-title,
+.vanta-ui-root .instance-progress-error,
+.instance-progress-stage.progress-failed .instance-progress-marker,
+.instance-progress-stage.progress-failed .instance-progress-stage-title,
+.instance-progress-error {
+    -fx-text-fill: -vantadanger;
+}
+
+/* Status dots (servers, downloads) */
+.vanta-ui-root .accounts-error,
+.vanta-ui-root .home-load-error-title {
+    -fx-text-fill: -vantadanger;
+}
+
+/* ============================================================
+   9  SCREEN REFINEMENTS
+   Colour, radius and type only; layout stays with each view.
+   ============================================================ */
+
+/* Home */
+.vanta-ui-root .home-page {
+    -fx-padding: 28px 32px 28px 32px;
+}
+
+.vanta-ui-root .home-minecraft-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 22px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .home-launch-card {
+    -fx-padding: 24px;
+}
+
+.vanta-ui-root .home-card-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .home-card-description,
+.vanta-ui-root .home-launch-status,
+.vanta-ui-root .home-recent-status,
+.vanta-ui-root .home-recent-playtime,
+.vanta-ui-root .home-featured-playtime {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .home-empty-title,
+.vanta-ui-root .download-empty-title,
+.vanta-ui-root .instance-empty-title,
+.vanta-ui-root .accounts-empty-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .home-empty-description,
+.vanta-ui-root .download-empty-body,
+.vanta-ui-root .instance-empty-description,
+.vanta-ui-root .accounts-empty-text {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .instance-empty-icon,
+.vanta-ui-root .download-empty-icon,
+.vanta-ui-root .accounts-empty-icon {
+    -fx-text-fill: -vantasubtle;
+}
+
+/* Empty states: no frame, centred copy, one action. */
+.vanta-ui-root .vanta-empty-state {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.vanta-ui-root .vanta-empty-state-icon {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 28px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .vanta-empty-state-eyebrow {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .vanta-empty-state-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .vanta-empty-state-description {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+/* Settings */
+.vanta-ui-root .settings-shell .settings-nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .settings-shell .settings-nav-button:hover {
+    -fx-background-color: -vantahover;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .settings-shell .settings-nav-button.selected {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantatext;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .settings-card-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .instance-setting-value,
+.vanta-ui-root .settings-info-value {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .accent-preset {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+}
+
+.vanta-ui-root .accent-preset:hover {
+    -fx-border-color: -vantatext;
+}
+
+/* Modrinth browser */
+.vanta-ui-root .modrinth-filter-sidebar {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent -vantaline transparent transparent;
+    -fx-border-width: 0 1px 0 0;
+}
+
+.vanta-ui-root .modrinth-filter-option-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .modrinth-filter-option-selected .modrinth-filter-option-label {
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .modrinth-content-segment,
+.vanta-ui-root .modrinth-layout-button,
+.vanta-ui-root .modrinth-page-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .modrinth-content-segment:hover,
+.vanta-ui-root .modrinth-layout-button:hover,
+.vanta-ui-root .modrinth-page-button:hover {
+    -fx-background-color: -vantasurface;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .modrinth-content-segment-selected,
+.vanta-ui-root .modrinth-current-page {
+    -fx-background-color: -vantasurfaceraised;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .modrinth-stat-value {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .modrinth-version-row {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.vanta-ui-root .modrinth-version-row:hover {
+    -fx-background-color: -vantasurface;
+}
+
+.vanta-ui-root .modrinth-result-skeleton {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+}
+
+/* Mod toggles */
+.vanta-ui-root .mod-toggle {
+    -fx-background-color: -vantaborder;
+    -fx-background-radius: 14px;
+}
+
+.vanta-ui-root .mod-toggle:selected {
+    -fx-background-color: -vantaaccent;
+}
+
+/* State centre, servers, downloads */
+.vanta-ui-root .state-hero-title,
+.vanta-ui-root .server-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .state-hero-subtitle,
+.vanta-ui-root .server-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .state-status-attention,
+.vanta-ui-root .state-icon-attention {
+    -fx-text-fill: -vantadanger;
+}
+
+.vanta-ui-root .server-console,
+.vanta-ui-root .diagnostic-log {
+    -fx-background-color: -vantaframe;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantaline;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantamuted;
+}
+
+.vanta-ui-root .download-stat-value {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .download-stat-label,
+.vanta-ui-root .download-task-source {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+}
+
+.vanta-ui-root .download-task-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 500;
+}
+
+/* Onboarding and sign-in */
+.vanta-ui-root .onboarding-overlay {
+    -fx-background-color: -vantascrim;
+}
+
+.vanta-ui-root .onboarding-page,
+.vanta-ui-root .login-window {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 10px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+}
+
+.vanta-ui-root .onboarding-title,
+.vanta-ui-root .login-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .onboarding-subtitle,
+.vanta-ui-root .onboarding-feature-description,
+.vanta-ui-root .login-subtitle,
+.vanta-ui-root .login-instruction {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .onboarding-feature-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .login-title-bar {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaline transparent;
+}
+
+.vanta-ui-root .verification-code {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-radius: 8px;
+    -fx-text-fill: -vantatext;
+    -fx-font-family: "JetBrains Mono", "Cascadia Code", "Consolas", "Menlo", monospace;
+    -fx-font-size: 22px;
+    -fx-font-weight: 600;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .login-status.active {
+    -fx-text-fill: -vantasuccess;
+}
+
+.vanta-ui-root .login-status.error {
+    -fx-text-fill: -vantadanger;
+}
+
+/* ============================================================
+   10  ICON COLOUR BY CONTEXT
+   State-dependent icon colours are set explicitly on the icon rather than
+   through -vantaicon, so hover, selection and press update reliably.
+   ============================================================ */
+
+.vanta-ui-root .sidebar-button:hover .vanta-icon {
+    -fx-stroke: -vantatext;
+}
+
+.vanta-ui-root .sidebar-button.sidebar-button-active .vanta-icon,
+.vanta-ui-root .sidebar-button.sidebar-button-active:hover .vanta-icon {
+    -fx-stroke: -vantaaccent;
+}
+
+.vanta-ui-root .button:hover .vanta-icon {
+    -fx-stroke: -vantatext;
+}
+
+.vanta-ui-root .button:hover .vanta-icon.vanta-icon-solid {
+    -fx-fill: -vantatext;
+    -fx-stroke: transparent;
+}
+
+.vanta-ui-root .primary-button .vanta-icon,
+.vanta-ui-root .primary-button:hover .vanta-icon,
+.vanta-ui-root .instance-create-button .vanta-icon,
+.vanta-ui-root .instance-play-button .vanta-icon,
+.vanta-ui-root .home-play-button .vanta-icon,
+.vanta-ui-root .home-featured-play-button .vanta-icon,
+.vanta-ui-root .accounts-primary-button .vanta-icon,
+.vanta-ui-root .server-primary .vanta-icon,
+.vanta-ui-root .vanta-button-primary .vanta-icon {
+    -fx-stroke: -vantaaccentforeground;
+}
+
+.vanta-ui-root .primary-button .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .primary-button:hover .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .instance-create-button .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .instance-play-button .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .home-play-button .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .home-featured-play-button .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .accounts-primary-button .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .server-primary .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .vanta-button-primary .vanta-icon.vanta-icon-solid {
+    -fx-fill: -vantaaccentforeground;
+    -fx-stroke: transparent;
+}
+
+.vanta-ui-root .danger-button .vanta-icon,
+.vanta-ui-root .danger-button:hover .vanta-icon,
+.vanta-ui-root .server-danger .vanta-icon,
+.vanta-ui-root .accounts-danger-button .vanta-icon,
+.vanta-ui-root .home-playing-button .vanta-icon {
+    -fx-stroke: -vantadanger;
+}
+
+.vanta-ui-root .danger-button .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .danger-button:hover .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .server-danger .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .accounts-danger-button .vanta-icon.vanta-icon-solid,
+.vanta-ui-root .home-playing-button .vanta-icon.vanta-icon-solid {
+    -fx-fill: -vantadanger;
+    -fx-stroke: transparent;
+}

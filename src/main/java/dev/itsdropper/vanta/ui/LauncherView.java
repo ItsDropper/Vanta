@@ -242,15 +242,12 @@ public class LauncherView {
         root.widthProperty().addListener((observable, oldWidth, newWidth) -> {
             boolean compact = newWidth.doubleValue() < 1120;
             sidebar.setCompact(compact);
-            BorderPane.setMargin(
-                    sidebar,
-                    new Insets(compact ? 12 : 16)
-            );
         });
 
+        // The sidebar is part of the window frame; it carries its own gutter.
         BorderPane.setMargin(
                 sidebar,
-                new Insets(16)
+                Insets.EMPTY
         );
 
         window.setLeft(
@@ -263,16 +260,21 @@ public class LauncherView {
         content.getStyleClass().add(
                 "content"
         );
+        content.getStyleClass().add(
+                "app-content"
+        );
 
         viewHost = new ViewHost(content);
 
+        // Pages live on one inset sheet; the margin leaves a frame gutter on
+        // the right and bottom, the sidebar and title bar form the other sides.
         content.setPadding(
-                new Insets(
-                        16,
-                        16,
-                        16,
-                        0
-                )
+                new Insets(8)
+        );
+
+        BorderPane.setMargin(
+                content,
+                new Insets(0, 8, 8, 0)
         );
 
         window.setCenter(

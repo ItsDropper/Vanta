@@ -4,7 +4,6 @@ import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Pos;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
@@ -199,15 +198,6 @@ public class TitleBar extends HBox {
         // LAYOUT
         // =========================================================
 
-        Label brand =
-                new Label(
-                        "VANTA"
-                );
-
-        brand.getStyleClass().add(
-                "title-bar-brand"
-        );
-
         Region spacer =
                 new Region();
 
@@ -216,8 +206,9 @@ public class TitleBar extends HBox {
                 Priority.ALWAYS
         );
 
+        // The wordmark lives in the sidebar; the title bar is drag space,
+        // account and window controls only.
         getChildren().addAll(
-                brand,
                 spacer,
                 accountSwitcher,
                 updateButton,

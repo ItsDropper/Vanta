@@ -408,7 +408,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         accentHexField = new TextField(accentColor);
         accentHexField.getStyleClass().add("accent-hex-field");
-        accentHexField.setPromptText("#6D9BFF");
+        accentHexField.setPromptText("#4C8DFF");
         accentHexField.setPrefWidth(110);
         accentHexField.setAccessibleText("Accent color hexadecimal value");
 
@@ -444,7 +444,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         FlowPane presets = new FlowPane(8, 8);
         presets.setPrefWrapLength(560);
-        addPreset(presets, "Blue", "#6D9BFF");
+        addPreset(presets, "Blue", "#4C8DFF");
         addPreset(presets, "Cyan", "#42C6E8");
         addPreset(presets, "Emerald", "#4FD18B");
         addPreset(presets, "Violet", "#8B7CFF");

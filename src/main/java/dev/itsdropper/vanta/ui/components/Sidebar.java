@@ -8,11 +8,14 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 
-import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.VantaUI;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 
 import java.io.InputStream;
 import java.util.Properties;
@@ -23,12 +26,15 @@ import java.util.function.Consumer;
 
 public class Sidebar extends VBox {
 
+    private static final double EXPANDED_WIDTH = 216;
+    private static final double COMPACT_WIDTH = 56;
+
     public enum Page {
         HOME("Home", 1, IconView.Type.HOME, "Return to your launcher dashboard"),
         INSTANCES("Instances", 2, IconView.Type.INSTANCES, "Manage, back up and restore installations"),
         MODS("Mods", 3, IconView.Type.MODS, "Manage global mods and browse Modrinth"),
         STATE("State Center", 4, IconView.Type.SHIELD, "Inspect and repair Minecraft installations"),
-        CRASH_LAB("Crash Lab", 0, IconView.Type.TERMINAL, "Review launch history and compare crash evidence"),
+        CRASH_LAB("Crash Lab", 0, IconView.Type.ACTIVITY, "Review launch history and compare crash evidence"),
         SKIN("Skin Changer", 5, IconView.Type.SKIN, "Manage your Minecraft appearance"),
         ACCOUNTS("Accounts", 6, IconView.Type.ACCOUNTS, "Switch or manage Microsoft accounts"),
         SETTINGS("Settings", 7, IconView.Type.SETTINGS, "Configure Vanta and its runtime"),
@@ -78,10 +84,8 @@ public class Sidebar extends VBox {
     private final Map<Page, Button> navigationButtons =
             new EnumMap<>(Page.class);
     private final Map<Page, String> navigationTitles = new EnumMap<>(Page.class);
-    private final java.util.List<Label> sectionLabels = new java.util.ArrayList<>();
-    private VBox branding;
+    private HBox branding;
     private Label logo;
-    private Label subtitle;
     private Label build;
     private boolean compact;
 
@@ -91,47 +95,41 @@ public class Sidebar extends VBox {
                 "sidebar"
         );
 
-        setPadding(new Insets(
-                VantaUI.spacing(4),
-                VantaUI.spacing(2),
-                VantaUI.spacing(3),
-                VantaUI.spacing(2)
-        ));
+        setPadding(expandedPadding());
 
-        setSpacing(VantaUI.spacing(1));
+        setSpacing(2);
 
-        setPrefWidth(236);
-        setMinWidth(236);
-        setMaxWidth(236);
+        setPrefWidth(EXPANDED_WIDTH);
+        setMinWidth(EXPANDED_WIDTH);
+        setMaxWidth(EXPANDED_WIDTH);
 
         // ---------------------------------------------------------
         // BRAND
         // ---------------------------------------------------------
 
-        logo = new Label("VANTA");
+        SVGPath mark = new SVGPath();
+        mark.setContent("M3 4h4.2L12 14.2 16.8 4H21L13.9 20h-3.8z");
+        mark.setFill(Color.web("#4C8DFF"));
+        mark.getStyleClass().add("sidebar-mark");
+        StackPane markBox = new StackPane(mark);
+        markBox.setMinSize(24, 24);
+        markBox.setPrefSize(24, 24);
+        markBox.setMaxSize(24, 24);
+        markBox.setMouseTransparent(true);
 
+        logo = new Label("Vanta");
         logo.getStyleClass().add(
                 "sidebar-logo"
         );
 
-        subtitle = new Label(Localization.text("sidebar.subtitle"));
-
-        subtitle.getStyleClass().add(
-                "sidebar-subtitle"
-        );
-
-        branding = new VBox(
-                        VantaUI.spacing(1),
-                        logo,
-                        subtitle
-                );
-
-        branding.setPadding(new Insets(
-                VantaUI.spacing(1),
+        branding = new HBox(
                 VantaUI.spacing(2),
-                VantaUI.spacing(6),
-                VantaUI.spacing(2)
-        ));
+                markBox,
+                logo
+        );
+        branding.setAlignment(Pos.CENTER_LEFT);
+        branding.setPadding(brandingPadding());
+        branding.setAccessibleText("Vanta");
 
         getChildren().add(
                 branding
@@ -139,22 +137,20 @@ public class Sidebar extends VBox {
 
         // ---------------------------------------------------------
         // NAVIGATION
+        // Groups are separated by space rather than labels or rules.
         // ---------------------------------------------------------
 
-        addSectionLabel("Play");
         addButton(Page.HOME);
-
-        addSectionLabel("Library");
         addButton(Page.INSTANCES);
         addButton(Page.MODS);
 
-        addSectionLabel("Manage");
+        addGroupGap();
         addButton(Page.STATE);
         addButton(Page.CRASH_LAB);
         addButton(Page.SERVERS);
         addButton(Page.DOWNLOADS);
 
-        addSectionLabel("Profile");
+        addGroupGap();
         addButton(Page.SKIN);
         addButton(Page.ACCOUNTS);
 
@@ -173,11 +169,8 @@ public class Sidebar extends VBox {
         addButton(Page.EXPERIMENTAL);
         addButton(Page.SETTINGS);
 
-        build = new Label(
-                        Localization.text("sidebar.brandPrefix")
-                                + loadVersion()
-                                + "  •  LOCAL"
-                );
+        String version = loadVersion();
+        build = new Label("v" + version);
 
         build.getStyleClass().add(
                 "sidebar-build"
@@ -185,13 +178,32 @@ public class Sidebar extends VBox {
         VantaUI.styleText(build, VantaUI.TextRole.METADATA);
 
         build.setWrapText(true);
-        build.setAccessibleText(Localization.text("sidebar.versionPrefix") + loadVersion()
+        build.setAccessibleText(Localization.text("sidebar.versionPrefix") + version
                 + ". Navigate with Control plus numbers one through nine.");
         build.setTooltip(new Tooltip(Localization.text("sidebar.shortcutsPrefix")
                 + "Ctrl+3 Mods · Ctrl+4 State · Ctrl+5 Skin · Ctrl+6 Accounts · Ctrl+7 Settings · Ctrl+8 Downloads · Ctrl+9 Server Manager"));
 
+        VBox.setMargin(build, new Insets(VantaUI.spacing(2), 0, 0, 0));
         getChildren().add(
                 build
+        );
+    }
+
+    private static Insets expandedPadding() {
+        return new Insets(
+                VantaUI.spacing(1),
+                VantaUI.spacing(2),
+                VantaUI.spacing(3),
+                VantaUI.spacing(2)
+        );
+    }
+
+    private static Insets brandingPadding() {
+        return new Insets(
+                VantaUI.spacing(1),
+                VantaUI.spacing(2),
+                VantaUI.spacing(3),
+                VantaUI.spacing(2)
         );
     }
 
@@ -230,14 +242,13 @@ public class Sidebar extends VBox {
         return "1.1.8";
     }
 
-    private void addSectionLabel(String title) {
-        Label label = new Label(title);
-        sectionLabels.add(label);
-        label.getStyleClass().add("sidebar-section-label");
-        VantaUI.styleText(label, VantaUI.TextRole.EYEBROW);
-        label.setMaxWidth(Double.MAX_VALUE);
-        VBox.setMargin(label, new Insets(9, 8, 2, 8));
-        getChildren().add(label);
+    private void addGroupGap() {
+        Region gap = new Region();
+        gap.setMinHeight(VantaUI.spacing(2));
+        gap.setPrefHeight(VantaUI.spacing(2));
+        gap.setMaxHeight(VantaUI.spacing(2));
+        gap.setMouseTransparent(true);
+        getChildren().add(gap);
     }
 
     private void addButton(Page page) {
@@ -307,53 +318,28 @@ public class Sidebar extends VBox {
 
         if (compact) {
             getStyleClass().add("sidebar-compact");
-            setPadding(new Insets(
-                    VantaUI.spacing(3),
-                    VantaUI.spacing(1),
-                    VantaUI.spacing(2),
-                    VantaUI.spacing(1)
-            ));
-            setPrefWidth(68);
-            setMinWidth(68);
-            setMaxWidth(68);
-            logo.setText("V");
-            subtitle.setVisible(false);
-            subtitle.setManaged(false);
+            setPrefWidth(COMPACT_WIDTH);
+            setMinWidth(COMPACT_WIDTH);
+            setMaxWidth(COMPACT_WIDTH);
+            logo.setVisible(false);
+            logo.setManaged(false);
+            branding.setAlignment(Pos.CENTER);
             branding.setPadding(new Insets(
-                    VantaUI.spacing(1), 0, VantaUI.spacing(4), 0
+                    VantaUI.spacing(1), 0, VantaUI.spacing(3), 0
             ));
             build.setVisible(false);
             build.setManaged(false);
-            sectionLabels.forEach(label -> {
-                label.setVisible(false);
-                label.setManaged(false);
-            });
         } else {
             getStyleClass().remove("sidebar-compact");
-            setPadding(new Insets(
-                    VantaUI.spacing(4),
-                    VantaUI.spacing(2),
-                    VantaUI.spacing(3),
-                    VantaUI.spacing(2)
-            ));
-            setPrefWidth(236);
-            setMinWidth(236);
-            setMaxWidth(236);
-            logo.setText("VANTA");
-            subtitle.setVisible(true);
-            subtitle.setManaged(true);
-            branding.setPadding(new Insets(
-                    VantaUI.spacing(1),
-                    VantaUI.spacing(2),
-                    VantaUI.spacing(4),
-                    VantaUI.spacing(2)
-            ));
+            setPrefWidth(EXPANDED_WIDTH);
+            setMinWidth(EXPANDED_WIDTH);
+            setMaxWidth(EXPANDED_WIDTH);
+            logo.setVisible(true);
+            logo.setManaged(true);
+            branding.setAlignment(Pos.CENTER_LEFT);
+            branding.setPadding(brandingPadding());
             build.setVisible(true);
             build.setManaged(true);
-            sectionLabels.forEach(label -> {
-                label.setVisible(true);
-                label.setManaged(true);
-            });
         }
 
         navigationButtons.forEach((page, button) -> {
@@ -363,7 +349,6 @@ public class Sidebar extends VBox {
                     : ContentDisplay.LEFT);
             button.setGraphicTextGap(compact ? 0 : 10);
             button.setAlignment(compact ? Pos.CENTER : Pos.CENTER_LEFT);
-            button.setMinHeight(compact ? VantaUI.spacing(11) : Region.USE_COMPUTED_SIZE);
         });
     }
 
