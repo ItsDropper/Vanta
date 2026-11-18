@@ -4,9 +4,18 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 SCRIPT = Path(__file__).with_name("generate_manifest.py")
+REQUIRED_FILES = {
+    "windows-x64": ("Vanta.exe", "runtime/bin/java.dll", "runtime/lib/modules", "app/Vanta.cfg"),
+    "linux-x64": ("bin/Vanta", "lib/runtime/lib/modules", "lib/app/Vanta.cfg"),
+    "linux-aarch64": ("bin/Vanta", "lib/runtime/lib/modules", "lib/app/Vanta.cfg"),
+    "macos-x64": ("Contents/MacOS/Vanta", "Contents/runtime/lib/modules", "Contents/app/Vanta.cfg"),
+    "macos-aarch64": ("Contents/MacOS/Vanta", "Contents/runtime/lib/modules", "Contents/app/Vanta.cfg"),
+}
+
 PLATFORMS = (
     "windows-x64",
     "linux-x64",
@@ -26,7 +35,9 @@ class GenerateManifestTest(unittest.TestCase):
         self.output = self.root / "manifest.json"
         for platform in PLATFORMS:
             archive = self.assets / f"Vanta-1.3.3-{platform}.zip"
-            archive.write_bytes((f"fixture:{platform}").encode())
+            with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as package:
+                for entry in REQUIRED_FILES[platform]:
+                    package.writestr(entry, f"fixture:{platform}:{entry}".encode())
             digest = hashlib.sha256(archive.read_bytes()).hexdigest()
             (self.assets / f"{archive.name}.sha256").write_text(
                 f"{digest}  {archive.name}\n", encoding="utf-8"
@@ -92,6 +103,43 @@ class GenerateManifestTest(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("minimum launcher version", result.stderr.lower())
 
+
+    def test_rejects_corrupt_zip_archive(self):
+        archive = self.assets / "Vanta-1.3.3-windows-x64.zip"
+        archive.write_bytes(b"not a zip archive")
+        checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
+        (self.assets / (archive.name + ".sha256")).write_text(
+            f"{checksum}  {archive.name}\n", encoding="utf-8"
+        )
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("invalid zip archive", result.stderr.lower())
+
+    def test_rejects_archive_path_traversal(self):
+        archive = self.assets / "Vanta-1.3.3-windows-x64.zip"
+        with zipfile.ZipFile(archive, "w") as package:
+            package.writestr("../escape", b"unsafe")
+            for entry in REQUIRED_FILES["windows-x64"]:
+                package.writestr(entry, b"fixture")
+        checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
+        (self.assets / (archive.name + ".sha256")).write_text(
+            f"{checksum}  {archive.name}\n", encoding="utf-8"
+        )
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("unsafe zip entry path", result.stderr.lower())
+
+    def test_rejects_incomplete_application_image(self):
+        archive = self.assets / "Vanta-1.3.3-windows-x64.zip"
+        with zipfile.ZipFile(archive, "w") as package:
+            package.writestr("Vanta.exe", b"launcher")
+        checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
+        (self.assets / (archive.name + ".sha256")).write_text(
+            f"{checksum}  {archive.name}\n", encoding="utf-8"
+        )
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("missing required application image files", result.stderr.lower())
     def test_rejects_checksum_mismatch(self):
         checksum = self.assets / "Vanta-1.3.3-windows-x64.zip.sha256"
         checksum.write_text("0" * 64 + "  Vanta-1.3.3-windows-x64.zip\n", encoding="utf-8")
