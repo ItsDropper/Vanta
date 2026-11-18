@@ -82,6 +82,9 @@ public final class UpdaterLauncher {
         if (processId <= 0 || updateZip == null || applicationDirectory == null) {
             throw new IllegalArgumentException("A valid process ID, update archive, and application directory are required.");
         }
+        if (processId != ProcessHandle.current().pid()) {
+            throw new IllegalArgumentException("The updater can only hand off the current Vanta process.");
+        }
 
         Path absoluteZip = updateZip.toAbsolutePath().normalize();
         Path absoluteApplication = applicationDirectory.toRealPath();
