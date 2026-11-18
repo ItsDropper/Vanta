@@ -37,7 +37,7 @@ public final class ModrinthLoaderIds {
 
         return switch (normalized) {
             case "btababric" -> "bta-babric";
-            case "javaagent" -> "java-agent";
+            case "javaagent", "vantaloader" -> "java-agent";
             case "legacyfabric" -> "legacyfabric";
             case "nilloader" -> "nilloader";
             case "risugamimodloader", "risugamismodloader", "modloader" -> "modloader";
