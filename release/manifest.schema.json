@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/ItsDropper/Vanta/releases/download/v1.0.0/manifest.schema.json",
+  "$id": "https://raw.githubusercontent.com/ItsDropper/Vanta/main/release/manifest.schema.json",
   "title": "Vanta Release Manifest",
   "description": "Versioned metadata describing a Vanta stable release and its platform-specific update artifacts.",
   "type": "object",
