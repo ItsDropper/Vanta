@@ -165,6 +165,8 @@ public final class UpdateTransaction {
     }
 
     private static void recoverJournal(Path app, Path journal) throws IOException {
+        Path parent = app.getParent();
+        if (parent == null) throw new IOException("Installation root has no parent directory.");
         Properties properties = new Properties();
         try (var input = Files.newInputStream(journal)) { properties.load(input); }
 
