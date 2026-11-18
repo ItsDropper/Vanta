@@ -252,10 +252,12 @@ public class Main extends Application {
             try {
                 dev.itsdropper.vanta.launcher.update.UpdateTransaction.recoverBeforeLaunch(
                         dev.itsdropper.vanta.launcher.update.ApplicationLocator.getApplicationDirectory());
-            } catch (java.io.IOException | IllegalStateException recoveryFailure) {
+            } catch (java.io.IOException recoveryFailure) {
                 System.err.println("[Vanta Update Recovery] " + recoveryFailure.getMessage());
                 recoveryFailure.printStackTrace();
                 return;
+            } catch (IllegalStateException un-packagedDevelopmentLaunch) {
+                // Self-update recovery applies only to packaged jpackage images.
             }
         }
 
