@@ -224,7 +224,10 @@ public class LauncherView {
                 );
 
         stage.addEventHandler(javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST,
-                event -> environmentGuardianService.close());
+                event -> dev.itsdropper.vanta.LauncherProcessLifecycle.exit(
+                        environmentGuardianService::close,
+                        discordPresenceService::shutdown
+                ));
 
         window.setTop(
                 titleBar
