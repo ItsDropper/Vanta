@@ -18,6 +18,7 @@ class UpdaterWorkspaceCleanupTest {
     @Test
     void onlyAcceptsDirectManagedSessionDirectories() {
         Path root = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater");
+        Files.createDirectories(root);
         assertTrue(UpdaterWorkspaceCleanup.isManagedWorkspace(root.resolve("session-test")));
         assertFalse(UpdaterWorkspaceCleanup.isManagedWorkspace(root.resolve("other")));
         assertFalse(UpdaterWorkspaceCleanup.isManagedWorkspace(temporaryDirectory.resolve("session-test")));
@@ -58,6 +59,8 @@ class UpdaterWorkspaceCleanupTest {
         String classPath = String.join(File.pathSeparator,
                 System.getProperty("java.class.path"),
                 Path.of(UpdaterWorkspaceCleanupTest.class.getProtectionDomain()
+                        .getCodeSource().getLocation().toURI()).toString(),
+                Path.of(UpdaterWorkspaceCleanup.class.getProtectionDomain()
                         .getCodeSource().getLocation().toURI()).toString());
         Process updater = new ProcessBuilder(java.toString(), "-cp", classPath,
                 Child.class.getName())
