@@ -258,7 +258,7 @@ public class Main extends Application {
                 System.err.println("[Vanta Update Recovery] " + recoveryFailure.getMessage());
                 recoveryFailure.printStackTrace();
                 return;
-            } catch (IllegalStateException un-packagedDevelopmentLaunch) {
+            } catch (IllegalStateException unPackagedDevelopmentLaunch) {
                 // Self-update recovery applies only to packaged jpackage images.
             }
         }
