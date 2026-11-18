@@ -77,13 +77,33 @@ public class ModrinthService {
             int limit,
             int offset
     ) throws IOException, InterruptedException {
+        return searchModsPage(instance, query, index, limit, offset, true);
+    }
+
+    /**
+     * Searches the instance mod catalog. Compatibility constraints are applied
+     * only when requested by the caller; leaving them off deliberately exposes
+     * the wider Modrinth catalog without changing the selected instance.
+     */
+    public ModrinthSearchResult searchModsPage(
+            Instance instance,
+            String query,
+            String index,
+            int limit,
+            int offset,
+            boolean compatibleOnly
+    ) throws IOException, InterruptedException {
         if (instance == null) throw new IllegalArgumentException("Instance cannot be null.");
-        String loader = ModrinthLoaderIds.normalize(instance.getLoader());
-        List<String> loaders = loader == null || loader.isBlank()
-                || loader.equalsIgnoreCase("vanilla") ? List.of() : List.of(loader);
-        List<String> versions = instance.getMinecraftVersion() == null
-                || instance.getMinecraftVersion().isBlank()
-                ? List.of() : List.of(instance.getMinecraftVersion());
+        List<String> loaders = List.of();
+        List<String> versions = List.of();
+        if (compatibleOnly) {
+            String loader = ModrinthLoaderIds.normalize(instance.getLoader());
+            loaders = loader == null || loader.isBlank()
+                    || loader.equalsIgnoreCase("vanilla") ? List.of() : List.of(loader);
+            versions = instance.getMinecraftVersion() == null
+                    || instance.getMinecraftVersion().isBlank()
+                    ? List.of() : List.of(instance.getMinecraftVersion());
+        }
         return client.searchPage(
                 query, ModrinthContentType.MOD, loaders, versions,
                 List.of(), index, limit, offset

@@ -8,6 +8,7 @@ import dev.itsdropper.vanta.ui.components.ModrinthBrowserToolbar;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -45,6 +46,7 @@ public class BrowseModsView extends VBox {
 
     private final TextField searchField;
     private final ModrinthBrowserToolbar browserToolbar;
+    private final CheckBox compatibleOnlyCheckBox;
 
     private final FlowPane results;
     private final Label statusLabel;
@@ -140,6 +142,20 @@ public class BrowseModsView extends VBox {
                 this::applyResultLayout
         );
         searchField = browserToolbar.getSearchField();
+
+        compatibleOnlyCheckBox = new CheckBox(
+                Localization.text("browseMods.onlyCompatibleContent")
+        );
+        compatibleOnlyCheckBox.setSelected(false);
+        compatibleOnlyCheckBox.setAccessibleText(
+                Localization.text("browseMods.onlyCompatibleContent")
+        );
+        compatibleOnlyCheckBox.setTooltip(new javafx.scene.control.Tooltip(
+                Localization.text("browseMods.onlyCompatibleContentHelp")
+        ));
+        compatibleOnlyCheckBox.getStyleClass().add("dialog-instance-checkbox");
+        compatibleOnlyCheckBox.selectedProperty().addListener((obs, wasSelected, isSelected) ->
+                browserToolbar.refresh());
 
         // =========================================================
         // MOST DOWNLOADED TITLE
@@ -267,6 +283,7 @@ public class BrowseModsView extends VBox {
         getChildren().addAll(
                 header,
                 browserToolbar,
+                compatibleOnlyCheckBox,
                 searchScrollPane,
                 statusLabel,
                 retryButton
@@ -600,7 +617,8 @@ public class BrowseModsView extends VBox {
                                 query,
                                 state.index(),
                                 state.limit(),
-                                state.offset()
+                                state.offset(),
+                                compatibleOnlyCheckBox.isSelected()
                         );
                 List<ModrinthProject> projects =
                         modrinthService.mapSearchHitsToProjects(response.getHits());
