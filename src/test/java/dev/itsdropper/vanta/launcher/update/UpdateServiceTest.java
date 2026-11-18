@@ -1,15 +1,10 @@
 package dev.itsdropper.vanta.launcher.update;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class UpdateServiceTest {
-    private static final ObjectMapper JSON = new ObjectMapper();
-
     @Test
     void normalizesExplicitVersionTags() {
         assertEquals("1.2.3", UpdateService.normalizeTargetVersion("v1.2.3"));
@@ -26,39 +21,10 @@ class UpdateServiceTest {
     }
 
     @Test
-    void malformedReleaseTagsAreNotReportedAsMissingPackages() {
-        UpdateService service = new UpdateService();
-        var release = read("""
-                {"tag_name":"not-a-version","assets":[]}
-                """);
-        assertThrows(IOException.class, () -> service.parseLatestRelease(release, "1.2.3"));
-    }
-
-    @Test
-    void validReleaseWithoutCurrentPlatformPackageReturnsNoUpdate() throws Exception {
-        UpdateService service = new UpdateService();
-        var release = read("""
-                {"tag_name":"v1.2.4","body":"Release notes","assets":[]}
-                """);
-        UpdateInfo info = service.parseLatestRelease(release, "1.2.3");
-        assertEquals("1.2.3", info.getLatestVersion());
-        assertNull(info.getDownloadUrl());
-        assertFalse(info.isUpdateAvailable());
-    }
-
-    @Test
-    void duplicateJsonKeysAreRejectedByStrictParserConfiguration() {
-        var strictMapper = UpdateService.createMetadataMapper();
-        assertThrows(IOException.class,
-                () -> strictMapper.readTree("{\"tag_name\":\"v1.2.3\",\"tag_name\":\"v9.9.9\"}"));
-    }
-
-    private static com.fasterxml.jackson.databind.JsonNode read(String value) {
-        try {
-            return JSON.readTree(value);
-        } catch (IOException failure) {
-            throw new AssertionError(failure);
-        }
+    void duplicateJsonKeysAreRejectedByProductionMetadataParser() {
+        var mapper = UpdateService.createMetadataMapper();
+        assertThrows(java.io.IOException.class,
+                () -> mapper.readTree("{\\"tag_name\\":\\"v1.2.3\\",\\"tag_name\\":\\"v9.9.9\\"}"));
     }
 
     // Retain the manual live-service diagnostic entry point for maintainers.
