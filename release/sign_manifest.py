@@ -15,6 +15,7 @@ from typing import Mapping
 
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
+from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from jsonschema import Draft202012Validator, FormatChecker
 
 DOMAIN_PREFIX = b"VANTA-RELEASE-MANIFEST-V1\n"
@@ -48,6 +49,43 @@ def validate_manifest(payload: bytes) -> None:
         first = errors[0]
         location = "/".join(str(part) for part in first.absolute_path) or "<root>"
         raise ValueError(f"Manifest does not satisfy its schema at {location}: {first.message}")
+
+
+def load_trusted_keys(path: Path) -> dict[str, bytes]:
+    try:
+        root = json.loads(path.read_bytes(), object_pairs_hook=_reject_duplicate_keys)
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise ValueError(f"Cannot read pinned release keyring: {path}") from error
+    if not isinstance(root, dict) or set(root) != {"schema_version", "keys"} or root["schema_version"] != 1:
+        raise ValueError("Pinned release keyring has an unsupported format.")
+    if not isinstance(root["keys"], list):
+        raise ValueError("Pinned release keyring keys must be an array.")
+    trusted: dict[str, bytes] = {}
+    for entry in root["keys"]:
+        if not isinstance(entry, dict) or set(entry) != {"key_id", "public_key"}:
+            raise ValueError("Pinned release key entry has missing or unknown fields.")
+        key_id, encoded = entry["key_id"], entry["public_key"]
+        if not isinstance(key_id, str) or not KEY_ID_PATTERN.fullmatch(key_id) or key_id in trusted:
+            raise ValueError("Pinned release keyring contains an invalid or duplicate key ID.")
+        if not isinstance(encoded, str):
+            raise ValueError("Pinned release public key must be Base64 text.")
+        try:
+            public_bytes = base64.b64decode(encoded, validate=True)
+        except (ValueError, base64.binascii.Error) as error:
+            raise ValueError("Pinned release public key is not valid Base64.") from error
+        if len(public_bytes) != 32 or base64.b64encode(public_bytes).decode("ascii") != encoded:
+            raise ValueError("Pinned release public keys must be canonical Base64 for exactly 32 bytes.")
+        trusted[key_id] = public_bytes
+    return trusted
+
+
+def require_pinned_signing_key(private_key: Ed25519PrivateKey, key_id: str, keyring_path: Path) -> None:
+    trusted = load_trusted_keys(keyring_path)
+    public_bytes = private_key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw)
+    if trusted.get(key_id) != public_bytes:
+        raise ValueError(
+            f"Signing key {key_id!r} does not match a public key pinned in {keyring_path}."
+        )
 
 
 def create_signature(payload: bytes, private_key: Ed25519PrivateKey, key_id: str) -> bytes:
@@ -136,12 +174,17 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--key-id", required=True)
     parser.add_argument("--key-file", type=Path)
+    parser.add_argument(
+        "--trusted-keys", type=Path,
+        default=Path(__file__).parents[1] / "src/main/resources/release-trusted-keys.json",
+    )
     args = parser.parse_args()
 
     try:
         payload = args.manifest.read_bytes()
         validate_manifest(payload)
         private_key = load_private_key(args)
+        require_pinned_signing_key(private_key, args.key_id, args.trusted_keys)
         atomic_write(args.output, create_signature(payload, private_key, args.key_id))
     except (OSError, ValueError) as error:
         print(f"Release manifest signing failed: {error}", file=sys.stderr)
