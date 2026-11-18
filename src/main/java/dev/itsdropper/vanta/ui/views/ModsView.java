@@ -23,6 +23,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 import dev.itsdropper.vanta.launcher.instance.InstalledModManager;
 import dev.itsdropper.vanta.launcher.instance.InstalledModRecord;
 import dev.itsdropper.vanta.launcher.service.ModrinthService;
@@ -1615,6 +1616,16 @@ public class ModsView extends VBox {
             }
 
             Files.deleteIfExists(file);
+            if (managedMod) {
+                try {
+                    new LaunchHistoryRepository().recordActivity(instance,
+                            LaunchHistoryRepository.Outcome.MOD_REMOVED,
+                            "Removed managed mod file: " + file.getFileName());
+                } catch (IOException | RuntimeException historyFailure) {
+                    System.err.println("[Vanta Timeline] Could not record mod removal: "
+                            + historyFailure.getClass().getSimpleName());
+                }
+            }
             loadInstalledContent();
 
         } catch (IOException e) {

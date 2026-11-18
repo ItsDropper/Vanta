@@ -15,6 +15,15 @@ public final class ModrinthInstallService {
     private final ModrinthDependencyResolver dependencies;
     private final ModrinthArtifactDownloader downloader;
 
+    private static void recordTimeline(Instance instance, LaunchHistoryRepository.Outcome outcome, String message) {
+        try {
+            new LaunchHistoryRepository().recordActivity(instance, outcome, message);
+        } catch (IOException | RuntimeException failure) {
+            System.err.println("[Vanta Timeline] Could not record Modrinth activity: "
+                    + failure.getClass().getSimpleName());
+        }
+    }
+
     public ModrinthInstallService(ModrinthClient client, InstalledModScanner installedModScanner,
                                   ModrinthCatalogService catalog, ModrinthDependencyResolver dependencies) {
         this(client, installedModScanner, catalog, dependencies, DownloadUtil::downloadFile);
@@ -77,8 +86,11 @@ public Path installMod(
         }
         Consumer<String> listener = progress == null ? ignored -> { } : progress;
         reportProgress(listener, "Resolving dependencies for " + project.getTitle() + "…");
-        return ModrinthGraphInstallTransaction.execute(instance, () ->
+        Path installed = ModrinthGraphInstallTransaction.execute(instance, () ->
                 installModProject(instance, project.getProjectId(), new HashSet<>(), listener));
+        recordTimeline(instance, LaunchHistoryRepository.Outcome.MOD_INSTALLED,
+                "Installed Modrinth mod: " + project.getTitle());
+        return installed;
     }
 
 public Path installModVersion(
@@ -100,8 +112,11 @@ public Path installModVersion(
             throw new IllegalArgumentException("Invalid mod version installation request.");
         }
         Consumer<String> listener = progress == null ? ignored -> { } : progress;
-        return ModrinthGraphInstallTransaction.execute(instance, () ->
+        Path installed = ModrinthGraphInstallTransaction.execute(instance, () ->
                 installModVersion(instance, projectId, version, new HashSet<>(), listener));
+        recordTimeline(instance, LaunchHistoryRepository.Outcome.MOD_UPDATED,
+                "Installed selected Modrinth version for project " + projectId);
+        return installed;
     }
 
 public List<Path> installResolvedGraph(
@@ -137,14 +152,17 @@ public List<Path> installResolvedGraph(
         List<ModrinthService.ResolvedMod> validated = validateResolvedGraph(resolvedMods);
         if (validated.isEmpty()) return List.of();
         Consumer<String> listener = progress == null ? ignored -> { } : progress;
-        return ModrinthGraphInstallTransaction.execute(instance, () -> {
-            List<Path> installed = new ArrayList<>(validated.size());
+        List<Path> installed = ModrinthGraphInstallTransaction.execute(instance, () -> {
+            List<Path> result = new ArrayList<>(validated.size());
             for (ModrinthService.ResolvedMod resolved : validated) {
-                installed.add(installResolvedVersion(
+                result.add(installResolvedVersion(
                         instance, resolved.projectId(), resolved.version(), listener));
             }
-            return List.copyOf(installed);
+            return List.copyOf(result);
         });
+        recordTimeline(instance, LaunchHistoryRepository.Outcome.MOD_INSTALLED,
+                "Installed " + installed.size() + " resolved Modrinth mods as one dependency transaction");
+        return installed;
     }
 
 

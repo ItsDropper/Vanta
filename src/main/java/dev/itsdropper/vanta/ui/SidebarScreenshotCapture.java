@@ -133,8 +133,8 @@ public final class SidebarScreenshotCapture {
 
     /**
      * Captures nested production views separately from the stable sidebar set.
-     * Keeping these in an additional directory preserves the original nine-page
-     * artifact contract while expanding visual coverage.
+     * Keeping these in an additional directory preserves the sidebar artifact
+     * contract while expanding visual coverage.
      */
     public static void captureAdditional(
             Parent root,
@@ -212,7 +212,7 @@ public final class SidebarScreenshotCapture {
         List<String> lines = new ArrayList<>();
         lines.add("# Vanta additional UI screenshots");
         lines.add("");
-        lines.add("Production JavaFX views not represented by the nine sidebar destinations.");
+        lines.add("Production JavaFX views not represented by the sidebar destinations.");
         lines.add("");
         lines.add("![Additional UI views](overview.png)");
         lines.add("");
@@ -405,9 +405,10 @@ public final class SidebarScreenshotCapture {
         lines.add("");
         lines.add("![All sidebar destinations](overview.png)");
         lines.add("");
-        for (Sidebar.Page page : pages) {
+        for (int i = 0; i < pages.size(); i++) {
+            Sidebar.Page page = pages.get(i);
             lines.add(String.format(Locale.ROOT, "%02d. %s — %s — %s",
-                    page.shortcutNumber(), page.title(), fileName(page), page.description()));
+                    i + 1, page.title(), fileName(page), page.description()));
         }
         lines.add("");
         Files.writeString(outputDirectory.resolve("index.md"),
@@ -415,7 +416,7 @@ public final class SidebarScreenshotCapture {
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
     }
 
-    /** Builds a compact 3×3 review image while preserving each full-size page PNG. */
+    /** Builds a compact overview while preserving each full-size page PNG. */
     private static void writeOverview(Path outputDirectory, List<Sidebar.Page> pages) throws IOException {
         int rows = (int) Math.ceil(pages.size() / (double) OVERVIEW_COLUMNS);
         int cellHeight = THUMBNAIL_HEIGHT + LABEL_HEIGHT;
@@ -450,7 +451,7 @@ public final class SidebarScreenshotCapture {
                 graphics.fillRect(x, y + THUMBNAIL_HEIGHT, THUMBNAIL_WIDTH, LABEL_HEIGHT);
                 graphics.setColor(new Color(235, 239, 247));
                 graphics.drawString(
-                        String.format(Locale.ROOT, "%d  %s", page.shortcutNumber(), page.title()),
+                        String.format(Locale.ROOT, "%d  %s", i + 1, page.title()),
                         x + 16,
                         y + THUMBNAIL_HEIGHT + 24
                 );
@@ -468,6 +469,6 @@ public final class SidebarScreenshotCapture {
         String slug = page.title().toLowerCase(Locale.ROOT)
                 .replaceAll("[^a-z0-9]+", "-")
                 .replaceAll("(^-|-$)", "");
-        return String.format(Locale.ROOT, "%02d-%s.png", page.shortcutNumber(), slug);
+        return String.format(Locale.ROOT, "%02d-%s.png", page.ordinal() + 1, slug);
     }
 }

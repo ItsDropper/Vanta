@@ -53,3 +53,11 @@ To update the bundled model corpus:
 5. Let the crash-diagnosis workflow train the model from the updated corpus and run the full regression suite on Ubuntu, Windows, and macOS.
 
 The local queue is never silently merged into the repository corpus. This keeps personal crash data out of CI and makes every shipped training example reviewable.
+
+## Persistent launch history and Crash Lab
+
+LaunchHistoryRepository stores launch preparation, process creation, running, shutdown, and terminal outcomes in the local Vanta data directory under launch-history/history.json. It also stores structured instance activity for Modrinth installs, removals and selected-version updates; Minecraft/loader metadata changes; duplication; full backups and restores; recovery points; and successful repairs.
+
+The Crash Lab sidebar page displays these events and launch records. Selecting a failed launch compares its sanitized process evidence with the latest earlier successful launch for the same stable instance ID. It reports lines present in the failure evidence but absent from the successful run. This is a diagnostic aid, not proof that a changed line or mod caused the failure. If no earlier successful run exists, the UI says so rather than inventing a baseline.
+
+The history store is local-only, bounded to 200 records, 48 KiB of diagnostic evidence per record, and 16 MiB total. It uses atomic writes and process/thread locking. Evidence is sanitized before persistence, including credentials, common user identifiers, network addresses, emails, home paths, and lines containing server or world-session details. Redaction is best-effort and does not establish anonymity. The store is not uploaded by Crash Lab; any separate crash-report telemetry remains governed by the launcher's existing explicit telemetry settings.

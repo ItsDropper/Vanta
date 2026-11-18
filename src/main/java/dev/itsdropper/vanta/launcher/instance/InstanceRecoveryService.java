@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher.instance;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.io.IOException;
@@ -44,6 +45,15 @@ public final class InstanceRecoveryService {
     ) { }
 
     private InstanceRecoveryService() { }
+
+    private static void recordTimeline(Instance instance, LaunchHistoryRepository.Outcome outcome, String message) {
+        try {
+            new LaunchHistoryRepository().recordActivity(instance, outcome, message);
+        } catch (IOException | RuntimeException failure) {
+            System.err.println("[Vanta Timeline] Could not record recovery activity: "
+                    + failure.getClass().getSimpleName());
+        }
+    }
 
     public static RecoveryPoint createRecoveryPoint(Instance instance, String reason) throws IOException {
         recoverInterruptedRestores(instance);
@@ -136,6 +146,8 @@ public final class InstanceRecoveryService {
             }
 
             RecoveryPoint point = new RecoveryPoint(id, parseTimestamp(id), safeReason, expandedBytes, fileCount);
+            recordTimeline(instance, LaunchHistoryRepository.Outcome.RECOVERY_CREATED,
+                    "Created a local recovery point: " + safeReason);
             if (applyRetention) {
                 try {
                     pruneRecoveryPoints(instanceId, LauncherSettings.getRecoveryPointRetention(), vantaDirectory);
@@ -282,6 +294,10 @@ public final class InstanceRecoveryService {
             } catch (IOException cleanupFailure) {
                 System.err.println("Recovery retention cleanup failed: " + cleanupFailure.getMessage());
             }
+        }
+        if (committed) {
+            recordTimeline(instance, LaunchHistoryRepository.Outcome.RECOVERY_RESTORED,
+                    "Restored a local recovery point");
         }
     }
 

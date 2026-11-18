@@ -837,3 +837,34 @@
     -fx-font-size: 12px;
     -fx-padding: 14px 10px;
 }
+
+/* Crash Lab: dense evidence workspace with readable, independently scrollable panes. */
+.crash-lab-page { -fx-spacing: 14px; }
+.crash-lab-page .list-view {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder;
+    -fx-border-radius: 8px;
+    -fx-control-inner-background: -vantabg;
+}
+.crash-lab-page .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantamuted;
+    -fx-padding: 11px 10px;
+    -fx-border-color: transparent transparent -vantaborder transparent;
+}
+.crash-lab-page .list-cell:filled:selected,
+.crash-lab-page .list-cell:filled:selected:focused {
+    -fx-background-color: -vantaaccentsoft;
+    -fx-text-fill: -vantatext;
+}
+.crash-lab-page .crash-lab-evidence {
+    -fx-control-inner-background: -vantabg;
+    -fx-background-color: -vantabg;
+    -fx-text-fill: -vantatext;
+    -fx-highlight-fill: -vantaaccentsoft;
+    -fx-highlight-text-fill: -vantatext;
+    -fx-font-family: "Consolas", "JetBrains Mono", monospace;
+    -fx-font-size: 10px;
+}
+.crash-lab-page .settings-card { -fx-min-width: 0; }

@@ -77,3 +77,11 @@ Never assume deleting an instance is safe without distinguishing launcher-manage
 - Report which operation failed, while redacting credentials and tokens.
 - Make repair idempotent where possible.
 - Test failure cases, not only the successful path.
+
+### Launch history and Crash Lab
+
+LaunchHistoryRepository is the local event store shared by launch lifecycle tracking and instance operations. It persists bounded launch records and structured lifecycle events, plus completed activity events for Modrinth mod changes, Minecraft/loader metadata changes, duplication, backups, recovery points, and repairs. The store uses a versioned JSON schema, thread/process locking, atomic replacement, bounded retention, and owner-only POSIX permissions where supported.
+
+CrashLabView presents the per-instance timeline and compares a failed launch with the latest earlier successful launch of the same instance. The comparison uses sanitized, bounded process evidence; it is a textual evidence delta, not a claim of causal proof. Crash-case human review remains separate in CrashCaseRepository.
+
+History is local-only and performs no network I/O. Diagnostic excerpts are sanitized before persistence, including common credentials, UUIDs, network addresses, email addresses, home paths, and session/world activity lines. Redaction is best-effort; users must inspect evidence before exporting or sharing it. The store retains at most 200 records, with a 48 KiB diagnostic excerpt per record and a 16 MiB database limit. Do not add raw account identifiers, server destinations, world names, or full filesystem paths to event messages.

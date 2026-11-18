@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
 import dev.itsdropper.vanta.launcher.service.ModrinthInstallService;
 import dev.itsdropper.vanta.ui.LauncherSettings;
@@ -307,6 +308,15 @@ public class InstanceManager {
         );
     }
 
+    private static void recordTimeline(Instance instance, LaunchHistoryRepository.Outcome outcome, String message) {
+        try {
+            new LaunchHistoryRepository().recordActivity(instance, outcome, message);
+        } catch (IOException | RuntimeException failure) {
+            System.err.println("[Vanta Timeline] Could not record instance activity: "
+                    + failure.getClass().getSimpleName());
+        }
+    }
+
     public static Instance updateMinecraftVersion(
             Instance instance,
             String minecraftVersion
@@ -364,10 +374,15 @@ public class InstanceManager {
                 directory
         );
 
-        Path metadata =
-                directory.resolve(
-                        "instance.json"
-                );
+        Path metadata = directory.resolve("instance.json");
+        Instance previous = null;
+        if (!Files.isSymbolicLink(metadata) && Files.isRegularFile(metadata, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            try {
+                previous = MAPPER.readValue(metadata.toFile(), Instance.class);
+            } catch (IOException invalidPreviousMetadata) {
+                System.err.println("[Vanta Timeline] Could not inspect previous instance metadata.");
+            }
+        }
         Path temporary = directory.resolve(
                 "instance.json." + java.util.UUID.randomUUID() + ".tmp");
 
@@ -382,6 +397,20 @@ public class InstanceManager {
             }
         } finally {
             Files.deleteIfExists(temporary);
+        }
+
+        if (previous != null && java.util.Objects.equals(instance.getId(), previous.getId())) {
+            if (!java.util.Objects.equals(previous.getMinecraftVersion(), instance.getMinecraftVersion())) {
+                recordTimeline(instance, LaunchHistoryRepository.Outcome.VERSION_CHANGED,
+                        "Changed Minecraft version from " + previous.getMinecraftVersion()
+                                + " to " + instance.getMinecraftVersion());
+            }
+            if (!java.util.Objects.equals(previous.getLoader(), instance.getLoader())
+                    || !java.util.Objects.equals(previous.getLoaderVersion(), instance.getLoaderVersion())) {
+                recordTimeline(instance, LaunchHistoryRepository.Outcome.LOADER_CHANGED,
+                        "Changed loader metadata from " + previous.getDisplayLoader()
+                                + " to " + instance.getDisplayLoader());
+            }
         }
     }
 
@@ -522,6 +551,8 @@ public class InstanceManager {
             saveInstance(duplicate);
             Files.delete(marker);
             completed = true;
+            recordTimeline(duplicate, LaunchHistoryRepository.Outcome.INSTANCE_DUPLICATED,
+                    "Created this instance by duplicating " + source.getName());
             return duplicate;
         } finally {
             if (!completed) deleteInstanceQuietly(target);

@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher.instance;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -103,6 +104,14 @@ public final class InstanceRepairService {
         }
         try {
             repairInternal(instance);
+            try {
+                new LaunchHistoryRepository().recordActivity(instance,
+                        LaunchHistoryRepository.Outcome.REPAIRED,
+                        "Repaired Vanta-managed Minecraft installation files");
+            } catch (java.io.IOException | RuntimeException historyFailure) {
+                System.err.println("[Vanta Timeline] Could not record repair activity: "
+                        + historyFailure.getClass().getSimpleName());
+            }
         } finally {
             endRepair(instance);
         }

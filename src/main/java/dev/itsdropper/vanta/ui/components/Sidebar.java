@@ -28,6 +28,7 @@ public class Sidebar extends VBox {
         INSTANCES("Instances", 2, IconView.Type.INSTANCES, "Manage, back up and restore installations"),
         MODS("Mods", 3, IconView.Type.MODS, "Manage global mods and browse Modrinth"),
         STATE("State Center", 4, IconView.Type.SHIELD, "Inspect and repair Minecraft installations"),
+        CRASH_LAB("Crash Lab", 0, IconView.Type.TERMINAL, "Review launch history and compare crash evidence"),
         SKIN("Skin Changer", 5, IconView.Type.SKIN, "Manage your Minecraft appearance"),
         ACCOUNTS("Accounts", 6, IconView.Type.ACCOUNTS, "Switch or manage Microsoft accounts"),
         SETTINGS("Settings", 7, IconView.Type.SETTINGS, "Configure Vanta and its runtime"),
@@ -149,6 +150,7 @@ public class Sidebar extends VBox {
 
         addSectionLabel("Manage");
         addButton(Page.STATE);
+        addButton(Page.CRASH_LAB);
         addButton(Page.SERVERS);
         addButton(Page.DOWNLOADS);
 

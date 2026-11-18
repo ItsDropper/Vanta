@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher.instance;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,6 +29,15 @@ import java.util.zip.ZipOutputStream;
  */
 public final class InstanceBackupService {
     private InstanceBackupService() { }
+
+    private static void recordTimeline(Instance instance, LaunchHistoryRepository.Outcome outcome, String message) {
+        try {
+            new LaunchHistoryRepository().recordActivity(instance, outcome, message);
+        } catch (IOException | RuntimeException failure) {
+            System.err.println("[Vanta Timeline] Could not record backup activity: "
+                    + failure.getClass().getSimpleName());
+        }
+    }
 
     public static void createBackup(Instance instance, Path output) throws IOException {
         if (instance == null || instance.getDirectory() == null) {
@@ -78,6 +88,8 @@ public final class InstanceBackupService {
             } catch (java.nio.file.AtomicMoveNotSupportedException ignored) {
                 Files.move(temporary, destination, StandardCopyOption.REPLACE_EXISTING);
             }
+            recordTimeline(instance, LaunchHistoryRepository.Outcome.BACKUP_CREATED,
+                    "Created and verified a full instance backup");
         } catch (Exception ex) {
             Files.deleteIfExists(temporary);
             if (ex instanceof IOException io) throw io;
@@ -289,6 +301,8 @@ public final class InstanceBackupService {
             mapper.writerWithDefaultPrettyPrinter().writeValue(metadata.toFile(), restored);
             Files.deleteIfExists(marker);
             completed = true;
+            recordTimeline(restored, LaunchHistoryRepository.Outcome.BACKUP_RESTORED,
+                    "Restored a full backup as a separate instance");
             return restored;
         } finally {
             if (!completed) {

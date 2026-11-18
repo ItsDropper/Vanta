@@ -70,13 +70,16 @@ public class LaunchService {
     private long launchStartedAtMillis;
 
     private Set<String> crashReportsBeforeLaunch = Set.of();
+    private final LaunchHistoryRepository launchHistoryRepository;
+    private String launchHistoryId;
 
-    public LaunchService(
-            AccountService accountService
-    ) {
+    public LaunchService(AccountService accountService) {
+        this(accountService, new LaunchHistoryRepository());
+    }
 
-        this.accountService =
-                accountService;
+    LaunchService(AccountService accountService, LaunchHistoryRepository launchHistoryRepository) {
+        this.accountService = accountService;
+        this.launchHistoryRepository = java.util.Objects.requireNonNull(launchHistoryRepository);
     }
 
     // =============================================================
@@ -153,6 +156,7 @@ public class LaunchService {
         failedInstance = null;
 
         failureHandled = false;
+        beginHistory(instance);
 
         try {
 
@@ -297,6 +301,9 @@ public class LaunchService {
             setState(
                     LaunchState.ERROR
             );
+            finishHistory(LaunchHistoryRepository.Outcome.FAILED,
+                    lastFailure == null ? "Minecraft launch failed" : lastFailure.title(),
+                    getRecentOutput().isBlank() ? buildDetails(e) : getRecentOutput(), null);
 
             throw e;
         }
@@ -821,6 +828,7 @@ public class LaunchService {
                         long startedAt;
                         boolean intentionalClose;
                         Set<String> previousCrashReports;
+                        String diagnosticContext;
 
                         synchronized (this) {
 
@@ -833,6 +841,8 @@ public class LaunchService {
                             startedAt = launchStartedAtMillis;
                             previousCrashReports = crashReportsBeforeLaunch;
                             intentionalClose = state == LaunchState.CLOSING;
+                            diagnosticContext = exitCode != 0 || failureHandled
+                                    ? collectDiagnosticContext(processOutput) : processOutput;
 
                             if (failedInstance == null) {
                                 failedInstance = runningInstance;
@@ -863,6 +873,17 @@ public class LaunchService {
                                     setState(LaunchState.IDLE);
                                 }
                             }
+                            LaunchHistoryRepository.Outcome outcome = intentionalClose
+                                    ? LaunchHistoryRepository.Outcome.STOPPED
+                                    : exitCode == 0
+                                    ? LaunchHistoryRepository.Outcome.SUCCEEDED
+                                    : LaunchHistoryRepository.Outcome.FAILED;
+                            finishHistory(outcome,
+                                    outcome == LaunchHistoryRepository.Outcome.FAILED
+                                            ? (lastFailure == null ? "Minecraft exited unexpectedly" : lastFailure.title())
+                                            : outcome == LaunchHistoryRepository.Outcome.STOPPED
+                                            ? "Minecraft was closed by the user." : "Minecraft exited normally.",
+                                    diagnosticContext, exitCode);
                         }
 
                         // Only a non-zero, non-user-initiated exit is eligible.
@@ -941,17 +962,33 @@ public class LaunchService {
     public synchronized void close() {
 
         if (!isRunning()) {
+            Process finishedProcess = minecraftProcess;
+            Integer exitCode = null;
+            if (finishedProcess != null) {
+                try {
+                    exitCode = finishedProcess.exitValue();
+                } catch (IllegalThreadStateException stillRunning) {
+                    // The process can transition between isAlive() and exitValue().
+                }
+            }
+            LaunchHistoryRepository.Outcome outcome = state == LaunchState.CLOSING
+                    ? LaunchHistoryRepository.Outcome.STOPPED
+                    : state == LaunchState.ERROR || (exitCode != null && exitCode != 0)
+                    ? LaunchHistoryRepository.Outcome.FAILED
+                    : exitCode != null
+                    ? LaunchHistoryRepository.Outcome.SUCCEEDED
+                    : LaunchHistoryRepository.Outcome.STOPPED;
+            finishHistory(outcome,
+                    outcome == LaunchHistoryRepository.Outcome.FAILED
+                            ? (lastFailure == null ? "Minecraft exited unexpectedly" : lastFailure.title())
+                            : outcome == LaunchHistoryRepository.Outcome.SUCCEEDED
+                            ? "Minecraft exited normally." : "Minecraft was closed by the user.",
+                    getRecentOutput(), exitCode);
 
             minecraftProcess = null;
-
             runningInstance = null;
-
             runningServerTarget = null;
-
-            setState(
-                    LaunchState.IDLE
-            );
-
+            setState(LaunchState.IDLE);
             return;
         }
 
@@ -991,6 +1028,8 @@ public class LaunchService {
                             if (minecraftProcess ==
                                     process) {
 
+                                finishHistory(LaunchHistoryRepository.Outcome.STOPPED,
+                                        "Minecraft was closed by the user.", getRecentOutput(), null);
                                 minecraftProcess = null;
 
                                 runningInstance = null;
@@ -1045,12 +1084,61 @@ public class LaunchService {
         return state;
     }
 
+    private void beginHistory(Instance instance) {
+        try {
+            launchHistoryId = launchHistoryRepository.begin(instance);
+        } catch (IOException | RuntimeException failure) {
+            launchHistoryId = null;
+            System.err.println("[Vanta Launch History] Could not start timeline record: "
+                    + failure.getClass().getSimpleName());
+        }
+    }
+
+    private void finishHistory(LaunchHistoryRepository.Outcome outcome, String message,
+                               String diagnosticText, Integer exitCode) {
+        String id = launchHistoryId;
+        if (id == null) return;
+        try {
+            launchHistoryRepository.finish(id, outcome, message, diagnosticText, exitCode);
+        } catch (IOException | RuntimeException failure) {
+            System.err.println("[Vanta Launch History] Could not finalize timeline record: "
+                    + failure.getClass().getSimpleName());
+        } finally {
+            launchHistoryId = null;
+        }
+    }
+
     private synchronized void setState(
             LaunchState newState
     ) {
 
         state =
                 newState;
+
+        if (launchHistoryId != null) {
+            LaunchHistoryRepository.Outcome historyState = switch (newState) {
+                case PREPARING -> null; // begin() already persists the initial launch-request event.
+                case STARTING -> LaunchHistoryRepository.Outcome.STARTING;
+                case RUNNING -> LaunchHistoryRepository.Outcome.RUNNING;
+                case CLOSING -> LaunchHistoryRepository.Outcome.STOPPING;
+                case IDLE, ERROR -> null;
+            };
+            if (historyState != null) {
+                try {
+                    launchHistoryRepository.transition(launchHistoryId, historyState,
+                            switch (newState) {
+                                case PREPARING -> "Preparing Minecraft instance";
+                                case STARTING -> "Creating Minecraft process";
+                                case RUNNING -> "Minecraft process started";
+                                case CLOSING -> "User requested shutdown";
+                                default -> "Launch state changed";
+                            });
+                } catch (IOException | RuntimeException failure) {
+                    System.err.println("[Vanta Launch History] Could not record state transition: "
+                            + failure.getClass().getSimpleName());
+                }
+            }
+        }
 
         for (
                 Consumer<LaunchState> listener

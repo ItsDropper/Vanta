@@ -70,6 +70,7 @@ public class LauncherView {
     private final DownloadCenterView downloadCenterView;
     private final ServerManagerView serverManagerView;
     private final ExperimentalView experimentalView;
+    private final CrashLabView crashLabView;
 
     private final NotificationManager notifications;
     private final CommandPalette commandPalette;
@@ -325,6 +326,7 @@ public class LauncherView {
         downloadCenterView = new DownloadCenterView(screenshotMode);
         serverManagerView = new ServerManagerView();
         experimentalView = new ExperimentalView(accountService, this::showCrashCaseReviewView);
+        crashLabView = new CrashLabView(this::showCrashCaseReviewView);
 
         settingsView =
                 new SettingsView(
@@ -549,6 +551,7 @@ public class LauncherView {
             case INSTANCES -> showAnimatedContent(instancesView);
             case MODS -> showAnimatedContent(globalModsView);
             case STATE -> showStatePage();
+            case CRASH_LAB -> showAnimatedContent(crashLabView);
             case SETTINGS -> showAnimatedContent(settingsView);
             case DOWNLOADS -> showAnimatedContent(downloadCenterView);
             case SERVERS -> showAnimatedContent(serverManagerView);
@@ -565,6 +568,7 @@ public class LauncherView {
             case INSTANCES -> viewHost.showForCapture(instancesView);
             case MODS -> viewHost.showForCapture(globalModsView);
             case STATE -> viewHost.showForCapture(stateCenterView);
+            case CRASH_LAB -> viewHost.showForCapture(crashLabView);
             case SETTINGS -> viewHost.showForCapture(settingsView);
             case DOWNLOADS -> viewHost.showForCapture(downloadCenterView);
             case SERVERS -> viewHost.showForCapture(serverManagerView);
@@ -1664,7 +1668,7 @@ public class LauncherView {
     }
 
     private void showCrashCaseReviewView() {
-        viewHost.show(new CrashCaseReviewView(() -> showPage(Sidebar.Page.HOME)));
+        viewHost.show(new CrashCaseReviewView(() -> showPage(Sidebar.Page.CRASH_LAB)));
     }
 
     private List<CrashCaseRepository.VerifiedFix> findLocalFixReferences(

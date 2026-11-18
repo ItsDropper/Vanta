@@ -107,22 +107,20 @@ A live world must not be copied as if it were a consistent backup. Prefer a clea
 
 ### 3. Crash Lab
 
-**Priority: P0**
+**Priority: P0 — baseline implemented**
 
-Turn the existing launch failure parser and repair diagnosis engine into a complete diagnostic workflow.
+The Crash Lab sidebar page now connects persistent launch history to the existing deterministic diagnostic and human-review systems.
 
-A diagnosis should include:
+Implemented:
+- Durable per-instance launch lifecycle and outcome history.
+- Sanitized, bounded process evidence stored locally.
+- Automatic comparison of a failed launch with the latest earlier successful launch for the same instance.
+- A visible evidence delta that distinguishes new failure output from the successful baseline.
+- Existing local crash-case review remains available from Crash Lab.
 
-- A concise problem summary.
-- Exact supporting log evidence.
-- Confidence and uncertainty.
-- Likely affected component or mod.
-- Safe manual investigation steps.
-- Reversible actions when a specific file can be identified confidently.
+The comparison is evidence, not causal attribution. The diagnostic engine remains advisory; Vanta must not automatically remove or disable a mod based only on a weak stack-trace guess.
 
-Add local launch history so a user can compare the last successful launch with the failed one. Redact access tokens, usernames where appropriate, and sensitive paths from any export.
-
-Do not automatically remove or disable a mod based only on a weak stack-trace guess.
+Remaining work includes richer structured environment snapshots, explicit comparison selection, and linking identified mod versions to the dependency graph.
 
 ### 4. Instance Diff Engine
 
@@ -160,18 +158,20 @@ A transaction must never report success merely because downloads completed.
 
 ### 6. Instance Timeline
 
-**Priority: P1**
+**Priority: P1 — core event history implemented**
 
-Create a local chronological event history for meaningful changes:
+LaunchHistoryRepository provides a local chronological timeline keyed by stable instance IDs.
 
-- Launch started, succeeded, or failed.
-- Mods installed, removed, or updated.
-- Loader or Minecraft version changed.
-- Configuration snapshot created or restored.
-- Backup created and verified.
-- Repair started, completed, or failed.
+Recorded today:
+- Launch preparation, process start, running, shutdown, success, failure, and exit code.
+- Modrinth mod installation, removal, and selected-version updates.
+- Minecraft and loader metadata changes and instance duplication.
+- Full backup creation/restoration and recovery-point creation/restoration.
+- Successful Vanta-managed installation repair.
 
-Events should reference stable instance IDs and structured metadata. Avoid storing entire logs in the event database; retain bounded references to local diagnostic files instead.
+The store is bounded (200 records, 48 KiB diagnostic evidence per launch, 16 MiB total), atomically written, process/thread locked, and local-only. Diagnostic excerpts are sanitized before storage.
+
+Not yet represented as first-class events: configuration snapshots/restores, individual repair failures, and detailed per-file mod transaction deltas. Add these at service boundaries rather than inferring them from filenames or UI labels.
 
 ### 7. Performance Lab
 
@@ -217,10 +217,10 @@ Keep server addresses and private connection details out of public manifests unl
 | 2 | Drift report in State Center | Lockfile scanner |
 | 3 | Reviewable lockfile reconciliation | Drift report and safe file operations |
 | 4 | Environment Guardian snapshots | Existing backup service |
-| 5 | Crash Lab with launch history | Existing diagnostics |
+| 5 | Crash Lab with persistent launch history and successful-vs-failed evidence comparison | Existing diagnostics (implemented baseline) |
 | 6 | Instance Diff Engine | Shared normalized environment model |
 | 7 | Transactional mod changes | Dependency resolver and backup/recovery primitives |
-| 8 | Timeline, Performance Lab, and configuration tools | Structured event and measurement models |
+| 8 | Expand the instance timeline, persist Performance Lab measurements, and add configuration tools | Structured event and measurement models (timeline baseline implemented) |
 
 ## Engineering constraints
 
