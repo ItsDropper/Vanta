@@ -143,7 +143,7 @@ public final class LaunchHistoryRepository {
         long now = System.currentTimeMillis();
         LaunchRecord record = new LaunchRecord(
                 id,
-                safeText(instance.getId(), 128),
+                safeInstanceId(instance.getId()),
                 instance.getName(),
                 instance.getMinecraftVersion(),
                 instance.getLoader(),
@@ -340,6 +340,15 @@ public final class LaunchHistoryRepository {
             safe = safe.substring(0, MAX_EVIDENCE_CHARS) + "\n[TRUNCATED: launch-history evidence limit]";
         }
         return safe.trim();
+    }
+
+    private static String safeInstanceId(String input) {
+        if (input == null) throw new IllegalArgumentException("Instance id is required.");
+        String id = input.trim();
+        if (!id.matches("[A-Za-z0-9._-]{1,128}")) {
+            throw new IllegalArgumentException("Instance id contains unsupported characters.");
+        }
+        return id;
     }
 
     private static String safeText(String input, int limit) {

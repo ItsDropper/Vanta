@@ -219,6 +219,10 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
                 .toList();
         String keep = selectedId;
         timeline.setItems(FXCollections.observableArrayList(filtered));
+        if (filtered.isEmpty()) {
+            clearSelection();
+            return;
+        }
         if (keep != null) {
             filtered.stream().filter(record -> record.id().equals(keep))
                     .findFirst().ifPresent(record -> timeline.getSelectionModel().select(record));
@@ -306,13 +310,25 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
             LaunchHistoryRepository.LaunchRecord baseline,
             LaunchHistoryRepository.LaunchRecord failed
     ) {
-        Set<String> known = new HashSet<>(baseline.sanitizedLog().lines().toList());
+        Set<String> known = baseline.sanitizedLog().lines()
+                .map(CrashLabView::normalizeComparisonLine)
+                .collect(java.util.stream.Collectors.toSet());
         List<String> newLines = failed.sanitizedLog().lines()
-                .filter(line -> !line.isBlank() && !known.contains(line))
+                .filter(line -> !line.isBlank())
+                .filter(line -> !known.contains(normalizeComparisonLine(line)))
+                .distinct()
                 .limit(100)
                 .toList();
         return newLines.isEmpty() ? Localization.text("crashLab.noNewEvidence")
                 : String.join("\n", newLines);
+    }
+
+    private static String normalizeComparisonLine(String line) {
+        return line.toLowerCase(Locale.ROOT)
+                .replaceAll("\\b\\d{4}-\\d{2}-\\d{2}[ t]\\d{2}:\\d{2}:\\d{2}(?:[.,]\\d+)?\\b", "[time]")
+                .replaceAll("(?i)thread[- ]#?\\d+", "thread")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     private void clearSelection() {

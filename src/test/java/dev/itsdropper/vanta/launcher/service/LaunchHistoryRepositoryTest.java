@@ -160,4 +160,13 @@ class LaunchHistoryRepositoryTest {
         assertThrows(IllegalStateException.class, () ->
                 repository.transition(activity.id(), LaunchHistoryRepository.Outcome.RUNNING, "Invalid"));
     }
+
+    @Test
+    void preservesUuidShapedStableInstanceIds() throws Exception {
+        String instanceId = "123e4567-e89b-12d3-a456-426614174000";
+        LaunchHistoryRepository repository = new LaunchHistoryRepository(
+                temporaryDirectory.resolve("uuid-id.json"));
+        String launchId = repository.begin(instance(instanceId, "UUID instance"));
+        assertEquals(instanceId, repository.find(launchId).instanceId());
+    }
 }
