@@ -14,6 +14,17 @@ class UpdaterMainPlatformTest {
     Path temporaryDirectory;
 
     @Test
+    void distinguishesOriginalProcessFromReusedPid() {
+        ProcessHandle current = ProcessHandle.current();
+        long startTime = current.info().startInstant()
+                .map(java.time.Instant::toEpochMilli).orElse(-1L);
+        assertTrue(UpdaterMain.matchesProcessStartTime(current, startTime));
+        if (startTime > 0) {
+            assertFalse(UpdaterMain.matchesProcessStartTime(current, startTime + 60_000));
+        }
+    }
+
+    @Test
     void acceptsOnlyReadinessMarkerInsidePrivateHelperWorkspace() throws Exception {
         Path workspace = temporaryDirectory.resolve("session-123");
         Path helperApplication = workspace.resolve("application");
