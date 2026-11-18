@@ -115,12 +115,15 @@ public final class UpdaterLauncher {
             }
 
             Path readyFile = tempUpdaterDirectory.resolve("updater-ready");
+            long originalProcessStartTime = ProcessHandle.current().info().startInstant()
+                    .map(java.time.Instant::toEpochMilli)
+                    .orElseThrow(() -> new IOException(
+                            "The operating system did not provide a stable Vanta process start time; refusing an unsafe updater handoff."));
             List<String> command = List.of(
                     helperLauncher.toString(),
                     "--vanta-updater",
                     Long.toString(processId),
-                    Long.toString(ProcessHandle.current().info().startInstant()
-                            .map(java.time.Instant::toEpochMilli).orElse(-1L)),
+                    Long.toString(originalProcessStartTime),
                     absoluteZip.toString(),
                     absoluteApplication.toString(),
                     readyFile.toString()
