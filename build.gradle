@@ -122,6 +122,25 @@ tasks.register('updaterJar', Jar) {
 }
 
 
+tasks.register('updaterJarChecksum') {
+    dependsOn tasks.named('updaterJar')
+    doLast {
+        def archive = tasks.named('updaterJar').get().archiveFile.get().asFile
+        def digest = java.security.MessageDigest.getInstance('SHA-256')
+        archive.withInputStream { input ->
+            byte[] buffer = new byte[65536]
+            int read
+            while ((read = input.read(buffer)) != -1) {
+                digest.update(buffer, 0, read)
+            }
+        }
+        def checksum = digest.digest().collect { String.format('%02x', it & 0xff) }.join()
+        new File(archive.parentFile, archive.name + '.sha256').text =
+                "${checksum}  ${archive.name}${System.lineSeparator()}"
+    }
+}
+
+
 tasks.register('platformAppImage', Exec) {
     dependsOn tasks.named('installDist')
 

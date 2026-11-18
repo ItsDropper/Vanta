@@ -78,12 +78,40 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
+  updater:
+    if: ${{ github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    name: Build standalone updater JAR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Build updater JAR and SHA-256 checksum
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --no-daemon updaterJarChecksum -PvantaVersion="${{ inputs.version || github.ref_name }}"
+
+      - name: Upload standalone updater release asset
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-release-updater
+          path: build/updater/VantaUpdater-*.jar*
+          if-no-files-found: error
+          retention-days: 7
+
   validate:
     outputs:
       version: ${{ steps.release_metadata.outputs.version }}
     if: ${{ github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     name: Validate and sign release (no publication)
-    needs: build
+    needs: [build, updater]
     runs-on: ubuntu-latest
     permissions:
       contents: read

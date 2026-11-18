@@ -21,6 +21,14 @@ ARTIFACT_PATTERN = re.compile(
     r"(?P<platform>windows-x64|linux-x64|linux-aarch64|macos-x64|macos-aarch64)\.zip$"
 )
 MAX_ARTIFACT_BYTES = 1024 * 1024 * 1024
+MAX_UPDATER_BYTES = 128 * 1024 * 1024
+UPDATER_REQUIRED_CLASSES = (
+    "dev/itsdropper/vanta/launcher/update/UpdaterMain.class",
+    "dev/itsdropper/vanta/launcher/update/UpdateTransaction.class",
+    "dev/itsdropper/vanta/launcher/update/UpdaterWorkspaceCleanup.class",
+    "dev/itsdropper/vanta/launcher/update/ApplicationLocator.class",
+    "dev/itsdropper/vanta/launcher/Platform.class",
+)
 SCHEMA_PATH = Path(__file__).with_name("manifest.schema.json")
 
 
@@ -91,6 +99,47 @@ def validate_archive(path: Path, platform: str) -> None:
     except zipfile.BadZipFile as invalid_archive:
         raise SystemExit(f"Invalid ZIP archive: {path.name}") from invalid_archive
 
+
+def validate_updater_jar(path: Path) -> None:
+    if path.is_symlink() or not path.is_file():
+        raise SystemExit(f"Standalone updater must be a regular JAR file: {path.name}")
+    size = path.stat().st_size
+    if size <= 0 or size > MAX_UPDATER_BYTES:
+        raise SystemExit(f"Invalid standalone updater size: {size}")
+    try:
+        with zipfile.ZipFile(path) as archive:
+            names = archive.namelist()
+            if len(names) != len(set(names)):
+                raise SystemExit("Standalone updater JAR contains duplicate entries.")
+            missing = sorted(set(UPDATER_REQUIRED_CLASSES) - set(names))
+            if missing:
+                raise SystemExit("Standalone updater JAR is missing required classes: " + ", ".join(missing))
+            try:
+                manifest = archive.read("META-INF/MANIFEST.MF").decode("utf-8")
+            except (KeyError, UnicodeDecodeError) as error:
+                raise SystemExit("Standalone updater JAR has no valid JAR manifest.") from error
+            if not re.search(r"(?m)^Main-Class: dev\\.itsdropper\\.vanta\\.launcher\\.update\\.UpdaterMain\\r?$", manifest):
+                raise SystemExit("Standalone updater JAR has an unexpected Main-Class.")
+            corrupt_entry = archive.testzip()
+            if corrupt_entry is not None:
+                raise SystemExit(f"Corrupt standalone updater JAR entry: {corrupt_entry}")
+    except zipfile.BadZipFile as error:
+        raise SystemExit("Standalone updater is not a valid JAR archive.") from error
+
+
+def validate_updater_checksum(path: Path) -> None:
+    checksum_file = path.with_name(path.name + ".sha256")
+    if checksum_file.is_symlink() or not checksum_file.is_file():
+        raise SystemExit(f"Missing standalone updater checksum: {checksum_file.name}")
+    fields = checksum_file.read_text(encoding="utf-8").strip().split()
+    if (len(fields) != 2
+            or not re.fullmatch(r"[a-fA-F0-9]{64}", fields[0])
+            or fields[1].lstrip("*") != path.name):
+        raise SystemExit(f"Malformed standalone updater checksum: {checksum_file.name}")
+    if sha256(path) != fields[0].lower():
+        raise SystemExit("Standalone updater checksum does not match the JAR.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--version", required=True)
@@ -106,6 +155,10 @@ def main() -> None:
         raise SystemExit(f"Invalid minimum launcher version: {args.min_launcher_version}")
     if tuple(map(int, args.min_launcher_version.split("."))) > tuple(map(int, args.version.split("."))):
         raise SystemExit("The minimum launcher version cannot be newer than the release version.")
+
+    updater_jar = args.assets_dir / f"VantaUpdater-{args.version}.jar"
+    validate_updater_jar(updater_jar)
+    validate_updater_checksum(updater_jar)
 
     artifacts: dict[str, dict[str, object]] = {}
     archives = sorted(args.assets_dir.glob("Vanta-*.zip"))
@@ -160,6 +213,8 @@ def main() -> None:
         raise SystemExit("Release is missing required platform artifacts: " + ", ".join(missing))
 
     expected_assets = {
+        updater_jar.name,
+        updater_jar.name + ".sha256",
         name
         for artifact in artifacts.values()
         for name in (artifact["file_name"], artifact["file_name"] + ".sha256")

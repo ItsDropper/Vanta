@@ -33,6 +33,22 @@ class GenerateManifestTest(unittest.TestCase):
         self.assets = self.root / "assets"
         self.assets.mkdir()
         self.output = self.root / "manifest.json"
+        updater = self.assets / "VantaUpdater-1.3.3.jar"
+        with zipfile.ZipFile(updater, "w", compression=zipfile.ZIP_DEFLATED) as package:
+            package.writestr("META-INF/MANIFEST.MF",
+                             "Manifest-Version: 1.0\\r\\nMain-Class: dev.itsdropper.vanta.launcher.update.UpdaterMain\\r\\n\\r\\n")
+            for class_file in (
+                "dev/itsdropper/vanta/launcher/update/UpdaterMain.class",
+                "dev/itsdropper/vanta/launcher/update/UpdateTransaction.class",
+                "dev/itsdropper/vanta/launcher/update/UpdaterWorkspaceCleanup.class",
+                "dev/itsdropper/vanta/launcher/update/ApplicationLocator.class",
+                "dev/itsdropper/vanta/launcher/Platform.class",
+            ):
+                package.writestr(class_file, b"fixture-class")
+        updater_hash = hashlib.sha256(updater.read_bytes()).hexdigest()
+        (self.assets / (updater.name + ".sha256")).write_text(
+            f"{updater_hash}  {updater.name}\\n", encoding="utf-8"
+        )
         for platform in PLATFORMS:
             archive = self.assets / f"Vanta-1.3.3-{platform}.zip"
             with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_DEFLATED) as package:
@@ -72,6 +88,41 @@ class GenerateManifestTest(unittest.TestCase):
             self.assertEqual(64, len(artifact["sha256"]))
             self.assertGreater(artifact["size_bytes"], 0)
             self.assertIn("/releases/download/v1.3.3/", artifact["download_url"])
+
+
+    def test_rejects_missing_standalone_updater(self):
+        (self.assets / "VantaUpdater-1.3.3.jar").unlink()
+        (self.assets / "VantaUpdater-1.3.3.jar.sha256").unlink()
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("must be a regular jar", result.stderr.lower())
+
+    def test_rejects_updater_with_wrong_main_class(self):
+        updater = self.assets / "VantaUpdater-1.3.3.jar"
+        with zipfile.ZipFile(updater, "w") as package:
+            package.writestr("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\\r\\nMain-Class: Wrong\\r\\n\\r\\n")
+            for class_file in (
+                "dev/itsdropper/vanta/launcher/update/UpdaterMain.class",
+                "dev/itsdropper/vanta/launcher/update/UpdateTransaction.class",
+                "dev/itsdropper/vanta/launcher/update/UpdaterWorkspaceCleanup.class",
+                "dev/itsdropper/vanta/launcher/update/ApplicationLocator.class",
+                "dev/itsdropper/vanta/launcher/Platform.class",
+            ):
+                package.writestr(class_file, b"fixture-class")
+        digest = hashlib.sha256(updater.read_bytes()).hexdigest()
+        (self.assets / (updater.name + ".sha256")).write_text(
+            f"{digest}  {updater.name}\\n", encoding="utf-8"
+        )
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("unexpected main-class", result.stderr.lower())
+
+    def test_rejects_updater_checksum_mismatch(self):
+        checksum = self.assets / "VantaUpdater-1.3.3.jar.sha256"
+        checksum.write_text("0" * 64 + "  VantaUpdater-1.3.3.jar\\n", encoding="utf-8")
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("updater checksum does not match", result.stderr.lower())
 
     def test_rejects_missing_platform_artifact(self):
         (self.assets / "Vanta-1.3.3-macos-aarch64.zip").unlink()

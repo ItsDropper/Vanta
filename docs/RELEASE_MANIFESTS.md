@@ -107,11 +107,17 @@ one key for both trust domains.
 
 ## Release pipeline
 
-The release workflow builds all five platform archives, validates their ZIP
-contents and SHA-256 sidecars, generates `manifest.json`, signs its exact bytes
-into `manifest.sig`, independently verifies that signature against the
-committed trust store, and then uploads the validated bundle as a short-lived
-workflow artifact.
+The release workflow builds all five platform archives and the standalone
+`VantaUpdater-<version>.jar` on a dedicated Java 21 runner. The updater JAR is
+published alongside the five platform packages with its own SHA-256 sidecar.
+Before signing, validation checks the JAR structure, its `UpdaterMain` entry
+point, required updater classes, and checksum. The five platform archives are
+validated for their ZIP contents and SHA-256 sidecars. The workflow then
+generates `manifest.json` for the platform update packages, signs its exact
+bytes into `manifest.sig`, independently verifies that signature against the
+committed trust store, and uploads the complete release bundle as a short-lived
+workflow artifact. The standalone updater is an additional release download;
+it is not part of the launcher's automatic platform-update manifest.
 
 **Manual runs default to dry-run mode.** Open Actions → **Platform release
 packages**, select `main`, enter a stable version such as `1.2.8`, and leave
