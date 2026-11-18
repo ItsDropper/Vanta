@@ -239,6 +239,22 @@ public class GlobalModsView extends VBox {
         Label filtersTitle = new Label(Localization.text("modrinth.filters"));
         filtersTitle.getStyleClass().add("settings-section-title");
 
+        Button clearFiltersButton = new Button(Localization.text("modrinth.clear"));
+        clearFiltersButton.getStyleClass().add("secondary-button");
+        clearFiltersButton.setMaxWidth(Double.MAX_VALUE);
+        clearFiltersButton.setOnAction(event -> {
+            selectedLoaders.clear();
+            selectedVersions.clear();
+            selectedCategories.clear();
+            updateLoaderButton();
+            updateVersionButton();
+            updateCategoriesButton();
+            rebuildLoaderFilterOptions();
+            rebuildVersionFilterOptions();
+            rebuildCategoryFilterOptions();
+            browserToolbar.refresh();
+        });
+
         versionFilterOptions = new VBox(4);
         versionFilterOptions.getStyleClass().add("modrinth-filter-options");
         ScrollPane versionScroll = createFilterScroll(versionFilterOptions, screenshotPreview ? 112 : 224);
@@ -278,7 +294,7 @@ public class GlobalModsView extends VBox {
         versionPanel.setAnimated(true);
         loaderPanel.setAnimated(true);
         categoryPanel.setAnimated(true);
-        VBox filterSidebar = new VBox(9, filtersTitle, versionPanel, loaderPanel, categoryPanel);
+        VBox filterSidebar = new VBox(9, filtersTitle, clearFiltersButton, versionPanel, loaderPanel, categoryPanel);
         filterSidebar.getStyleClass().add("modrinth-filter-sidebar");
         filterSidebar.setPrefWidth(250);
         filterSidebar.setMinWidth(220);
