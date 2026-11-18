@@ -95,6 +95,33 @@ public final class ApplicationLocator {
         throw new IllegalStateException("Could not locate the bundled Java runtime in " + normalized);
     }
 
+    /**
+     * Returns the payload location implied by the native launcher and bundled
+     * runtime, even while an interrupted update has temporarily moved it.
+     */
+    public static Path getApplicationPayloadDirectoryForRecovery(Path root) {
+        return root.toAbsolutePath().normalize().resolve(getApplicationPayloadRelativePath(root));
+    }
+
+    static Path getApplicationPayloadRelativePath(Path root) {
+        Path normalized = root.toAbsolutePath().normalize();
+        if (Files.isRegularFile(normalized.resolve("Vanta.exe"))
+                && isRuntimeImage(normalized.resolve("runtime"))) {
+            return Path.of("app");
+        }
+        if (Files.isRegularFile(normalized.resolve("bin/Vanta"))
+                && isRuntimeImage(normalized.resolve("lib/runtime"))) {
+            return Path.of("lib/app");
+        }
+        Path contents = normalized.resolve("Contents");
+        if (Files.isRegularFile(contents.resolve("MacOS/Vanta"))
+                && isRuntimeImage(contents.resolve("runtime"))) {
+            return Path.of("Contents/app");
+        }
+        throw new IllegalStateException("Cannot determine Vanta payload location without its native launcher and runtime: "
+                + normalized);
+    }
+
     /** Returns the directory containing the application JAR and configuration. */
     public static Path getApplicationPayloadDirectory(Path root) {
         Path normalized = root.toAbsolutePath().normalize();
