@@ -37,6 +37,10 @@ Vanta has 13 non-vanilla loader integrations. They deliberately use different in
 
 The loader-specific implementation guide identifies the source classes, version gates, metadata sources, and launch model for each integration. The compatibility guide remains authoritative for validation status. Modrinth metadata visibility is not proof that an installer or launch path works.
 
+### Launcher migration
+
+The import screen supports read-only migration from Prism Launcher and Modrinth App. Prism profiles are reconstructed through Vanta's loader installers; Modrinth App profiles are read from its SQLite `app.db` (including the current `instances` / `instance_content_sets` schema and the legacy `profiles` schema). Instance-owned game data and supported launch settings are copied into new Vanta instances. Source launcher databases and files are never modified. Unsupported loader identifiers, unavailable pinned loader versions, unsafe paths, and incomplete profiles are reported as skipped rather than silently rewritten. Launcher account credentials are not migrated.
+
 ### Modrinth
 
 Modrinth functionality is separated into catalog/search, dependency resolution, installation, scanning, and repair responsibilities. Dependency selection must respect the target Minecraft version and loader, account for already-installed compatible projects, and handle unresolved or incompatible dependencies with actionable errors. The Modrinth pack format's documented loader dependency IDs do not represent every loader Vanta can install independently.
