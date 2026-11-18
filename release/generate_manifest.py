@@ -215,6 +215,7 @@ def main() -> None:
     expected_assets = {
         updater_jar.name,
         updater_jar.name + ".sha256",
+    } | {
         name
         for artifact in artifacts.values()
         for name in (artifact["file_name"], artifact["file_name"] + ".sha256")
