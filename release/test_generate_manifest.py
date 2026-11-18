@@ -36,7 +36,7 @@ class GenerateManifestTest(unittest.TestCase):
         updater = self.assets / "VantaUpdater-1.3.3.jar"
         with zipfile.ZipFile(updater, "w", compression=zipfile.ZIP_DEFLATED) as package:
             package.writestr("META-INF/MANIFEST.MF",
-                             "Manifest-Version: 1.0\\r\\nMain-Class: dev.itsdropper.vanta.launcher.update.UpdaterMain\\r\\n\\r\\n")
+                             "Manifest-Version: 1.0\r\nMain-Class: dev.itsdropper.vanta.launcher.update.UpdaterMain\r\n\r\n")
             for class_file in (
                 "dev/itsdropper/vanta/launcher/update/UpdaterMain.class",
                 "dev/itsdropper/vanta/launcher/update/UpdateTransaction.class",
@@ -47,7 +47,7 @@ class GenerateManifestTest(unittest.TestCase):
                 package.writestr(class_file, b"fixture-class")
         updater_hash = hashlib.sha256(updater.read_bytes()).hexdigest()
         (self.assets / (updater.name + ".sha256")).write_text(
-            f"{updater_hash}  {updater.name}\\n", encoding="utf-8"
+            f"{updater_hash}  {updater.name}\n", encoding="utf-8"
         )
         for platform in PLATFORMS:
             archive = self.assets / f"Vanta-1.3.3-{platform}.zip"
@@ -100,7 +100,7 @@ class GenerateManifestTest(unittest.TestCase):
     def test_rejects_updater_with_wrong_main_class(self):
         updater = self.assets / "VantaUpdater-1.3.3.jar"
         with zipfile.ZipFile(updater, "w") as package:
-            package.writestr("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\\r\\nMain-Class: Wrong\\r\\n\\r\\n")
+            package.writestr("META-INF/MANIFEST.MF", "Manifest-Version: 1.0\r\nMain-Class: Wrong\r\n\r\n")
             for class_file in (
                 "dev/itsdropper/vanta/launcher/update/UpdaterMain.class",
                 "dev/itsdropper/vanta/launcher/update/UpdateTransaction.class",
@@ -111,7 +111,7 @@ class GenerateManifestTest(unittest.TestCase):
                 package.writestr(class_file, b"fixture-class")
         digest = hashlib.sha256(updater.read_bytes()).hexdigest()
         (self.assets / (updater.name + ".sha256")).write_text(
-            f"{digest}  {updater.name}\\n", encoding="utf-8"
+            f"{digest}  {updater.name}\n", encoding="utf-8"
         )
         result = self.run_generator()
         self.assertNotEqual(0, result.returncode)
@@ -119,7 +119,7 @@ class GenerateManifestTest(unittest.TestCase):
 
     def test_rejects_updater_checksum_mismatch(self):
         checksum = self.assets / "VantaUpdater-1.3.3.jar.sha256"
-        checksum.write_text("0" * 64 + "  VantaUpdater-1.3.3.jar\\n", encoding="utf-8")
+        checksum.write_text("0" * 64 + "  VantaUpdater-1.3.3.jar\n", encoding="utf-8")
         result = self.run_generator()
         self.assertNotEqual(0, result.returncode)
         self.assertIn("updater checksum does not match", result.stderr.lower())
