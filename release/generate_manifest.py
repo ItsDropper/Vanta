@@ -15,9 +15,9 @@ from urllib.parse import quote
 
 from jsonschema import Draft202012Validator, FormatChecker
 
-VERSION_PATTERN = re.compile(r"^[0-9]+\.[0-9]+\.[0-9]+$")
+VERSION_PATTERN = re.compile(r"^(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)$")
 ARTIFACT_PATTERN = re.compile(
-    r"^Vanta-(?P<version>[0-9]+\.[0-9]+\.[0-9]+)-"
+    r"^Vanta-(?P<version>(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*)\.(?:0|[1-9][0-9]*))-"
     r"(?P<platform>windows-x64|linux-x64|linux-aarch64|macos-x64|macos-aarch64)\.zip$"
 )
 MAX_ARTIFACT_BYTES = 1024 * 1024 * 1024
