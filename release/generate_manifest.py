@@ -118,7 +118,7 @@ def validate_updater_jar(path: Path) -> None:
                 manifest = archive.read("META-INF/MANIFEST.MF").decode("utf-8")
             except (KeyError, UnicodeDecodeError) as error:
                 raise SystemExit("Standalone updater JAR has no valid JAR manifest.") from error
-            if not re.search(r"(?m)^Main-Class: dev\\.itsdropper\\.vanta\\.launcher\\.update\\.UpdaterMain\\r?$", manifest):
+            if not re.search(r"(?m)^Main-Class: dev\.itsdropper\.vanta\.launcher\.update\.UpdaterMain\r?$", manifest):
                 raise SystemExit("Standalone updater JAR has an unexpected Main-Class.")
             corrupt_entry = archive.testzip()
             if corrupt_entry is not None:
