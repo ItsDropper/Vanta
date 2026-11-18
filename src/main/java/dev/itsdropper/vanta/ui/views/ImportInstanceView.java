@@ -426,6 +426,8 @@ public class ImportInstanceView extends VBox {
         importButton.setDisable(
                 true
         );
+        prismImportButton.setDisable(true);
+        modrinthAppImportButton.setDisable(true);
 
         backButton.setDisable(
                 true
@@ -474,6 +476,8 @@ public class ImportInstanceView extends VBox {
                             importButton.setDisable(
                                     false
                             );
+                            prismImportButton.setDisable(false);
+                            modrinthAppImportButton.setDisable(false);
 
                             backButton.setDisable(
                                     false
