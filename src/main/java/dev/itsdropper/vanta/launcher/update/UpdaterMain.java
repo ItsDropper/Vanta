@@ -288,16 +288,14 @@ public final class UpdaterMain {
                 backupDirectory
         );
 
+        Path healthMarker = helperWorkspace.resolve("vanta-update-health");
+        UpdateTransaction transaction = UpdateTransaction.begin(
+                applicationDirectory, stagingDirectory, backupDirectory, healthMarker);
+
         log("---------- EXTRACTING UPDATE ----------");
 
-        Files.createDirectories(
-                stagingDirectory
-        );
-
-        extractZip(
-                zip,
-                stagingDirectory
-        );
+        Files.createDirectories(stagingDirectory);
+        extractZip(zip, stagingDirectory);
 
         restoreExecutablePermissions(stagingDirectory);
 
@@ -310,10 +308,7 @@ public final class UpdaterMain {
         );
 
         log("Extracted application verified.");
-
-        Path healthMarker = helperWorkspace.resolve("vanta-update-health");
-        UpdateTransaction transaction = UpdateTransaction.begin(
-                applicationDirectory, stagingDirectory, backupDirectory, healthMarker);
+        transaction.markStaged();
 
         log("---------- REPLACING APPLICATION ----------");
 
