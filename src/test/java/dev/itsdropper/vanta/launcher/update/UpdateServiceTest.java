@@ -48,10 +48,7 @@ class UpdateServiceTest {
 
     @Test
     void duplicateJsonKeysAreRejectedByStrictParserConfiguration() {
-        var factory = com.fasterxml.jackson.core.JsonFactory.builder()
-                .enable(com.fasterxml.jackson.core.StreamReadFeature.STRICT_DUPLICATE_DETECTION)
-                .build();
-        var strictMapper = new ObjectMapper(factory);
+        var strictMapper = UpdateService.createMetadataMapper();
         assertThrows(IOException.class,
                 () -> strictMapper.readTree("{\"tag_name\":\"v1.2.3\",\"tag_name\":\"v9.9.9\"}"));
     }
