@@ -733,13 +733,7 @@ public final class UpdaterMain {
             // used on the next ordinary launcher start after a power loss.
             UpdateTransaction.recoverBeforeLaunch(application);
             if (!ApplicationLocator.isSupportedInstallation(application)) {
-                Path backup = application.resolveSibling(application.getFileName() + ".backup");
-                if (!Files.isDirectory(backup)) {
-                    log("No verified previous Vanta installation is available for recovery.");
-                    return;
-                }
-                if (Files.exists(application)) deleteDirectory(application);
-                moveDirectory(backup, application);
+                throw new IOException("Recovered Vanta image failed installation validation.");
             }
             verifyExtractedApplication(application);
             startVanta(application, workspace, null);
