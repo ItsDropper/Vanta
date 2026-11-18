@@ -7,23 +7,35 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class RuntimeSecurityPolicyTest {
     private final Clock clock=Clock.fixed(Instant.parse("2026-11-18T12:00:00Z"),ZoneOffset.UTC);
+
+    @Test void verifiesEd25519SignatureAndParsesPolicy() throws Exception {
+        byte[] p=manifest("2027-11-18T00:00:00Z","DISABLE_BASE64_INTRINSICS");
+        var pair=KeyPairGenerator.getInstance("Ed25519").generateKeyPair();
+        var parsed=RuntimeSecurityPolicy.parseAndVerify(p,sign(p,pair.getPrivate()),clock,pair.getPublic());
+        assertEquals(1,parsed.size());
+        assertEquals(17,parsed.get(0).min());
+        assertTrue(parsed.get(0).actions().contains(RuntimeSecurityPolicy.Action.DISABLE_BASE64_INTRINSICS));
+    }
     @Test void rejectsTamperedSignedBytes() throws Exception {
         byte[] p=manifest("2027-11-18T00:00:00Z","DISABLE_BASE64_INTRINSICS");
         var pair=KeyPairGenerator.getInstance("Ed25519").generateKeyPair();
-        Signature s=Signature.getInstance("Ed25519");s.initSign(pair.getPrivate());s.update(p);byte[] sig=s.sign();p[8]^=1;
-        assertThrows(Exception.class,()->RuntimeSecurityPolicy.parseAndVerify(p,sig,clock));
+        byte[] sig=sign(p,pair.getPrivate());p[8]^=1;
+        assertThrows(Exception.class,()->RuntimeSecurityPolicy.parseAndVerify(p,sig,clock,pair.getPublic()));
     }
-    @Test void rejectsExpiredPolicy() throws Exception {assertRejected(manifest("2026-11-17T00:00:00Z","DISABLE_BASE64_INTRINSICS"));}
-    @Test void rejectsUnknownMitigation() throws Exception {assertRejected(manifest("2027-11-18T00:00:00Z","RUN_ARBITRARY_COMMAND"));}
+    @Test void rejectsExpiredPolicy() throws Exception {assertRejected("2026-11-17T00:00:00Z","DISABLE_BASE64_INTRINSICS");}
+    @Test void rejectsUnknownMitigation() throws Exception {assertRejected("2027-11-18T00:00:00Z","RUN_ARBITRARY_COMMAND");}
     @Test void normalizesSupportedArchitectureAliases(){
         assertEquals("x64",RuntimeSecurityPolicy.normalizeArchitecture("AMD64"));
         assertEquals("x64",RuntimeSecurityPolicy.normalizeArchitecture("x86-64"));
         assertEquals("aarch64",RuntimeSecurityPolicy.normalizeArchitecture("ARM64"));
         assertNull(RuntimeSecurityPolicy.normalizeArchitecture("riscv64"));
     }
-    private void assertRejected(byte[] p)throws Exception{
-        // Invalid cases are rejected before signature verification is relevant.
-        assertThrows(Exception.class,()->RuntimeSecurityPolicy.parseAndVerify(p,new byte[64],clock));
+    private void assertRejected(String expiry,String action)throws Exception{
+        byte[] p=manifest(expiry,action);var pair=KeyPairGenerator.getInstance("Ed25519").generateKeyPair();
+        assertThrows(Exception.class,()->RuntimeSecurityPolicy.parseAndVerify(p,sign(p,pair.getPrivate()),clock,pair.getPublic()));
+    }
+    private static byte[] sign(byte[] p,PrivateKey key)throws Exception{
+        Signature s=Signature.getInstance("Ed25519");s.initSign(key);s.update(p);return s.sign();
     }
     private static byte[] manifest(String expiry,String action){
         return ("""
