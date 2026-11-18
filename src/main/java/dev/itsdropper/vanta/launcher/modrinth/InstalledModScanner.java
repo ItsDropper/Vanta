@@ -267,19 +267,45 @@ public class InstalledModScanner {
     private String forgeVersionRange(String range) {
         if (range == null || range.isBlank() || "*".equals(range.trim())) return "*";
         String value = range.trim();
-        if ((value.startsWith("[") || value.startsWith("("))
-                && (value.endsWith("]") || value.endsWith(")"))) {
-            String inner = value.substring(1, value.length() - 1).trim();
+        if (!(value.startsWith("[") || value.startsWith("("))) return value;
+
+        List<String> alternatives = new ArrayList<>();
+        int cursor = 0;
+        while (cursor < value.length()) {
+            while (cursor < value.length()
+                    && (Character.isWhitespace(value.charAt(cursor)) || value.charAt(cursor) == ',')) {
+                cursor++;
+            }
+            if (cursor >= value.length()) break;
+            char opening = value.charAt(cursor);
+            if (opening != '[' && opening != '(') return value;
+
+            int closing = -1;
+            for (int i = cursor + 1; i < value.length(); i++) {
+                char current = value.charAt(i);
+                if (current == ']' || current == ')') {
+                    closing = i;
+                    break;
+                }
+            }
+            if (closing < 0) return value;
+
+            String inner = value.substring(cursor + 1, closing).trim();
             int comma = inner.indexOf(',');
-            if (comma < 0) return inner.isBlank() ? "*" : "=" + inner;
-            String lower = inner.substring(0, comma).trim();
-            String upper = inner.substring(comma + 1).trim();
-            List<String> bounds = new ArrayList<>(2);
-            if (!lower.isEmpty()) bounds.add((value.startsWith("[") ? ">=" : ">") + lower);
-            if (!upper.isEmpty()) bounds.add((value.endsWith("]") ? "<=" : "<") + upper);
-            return bounds.isEmpty() ? "*" : String.join(" ", bounds);
+            if (comma < 0) {
+                if (opening != '[' || value.charAt(closing) != ']') return value;
+                if (!inner.isBlank()) alternatives.add("=" + inner);
+            } else {
+                String lower = inner.substring(0, comma).trim();
+                String upper = inner.substring(comma + 1).trim();
+                List<String> bounds = new ArrayList<>(2);
+                if (!lower.isEmpty()) bounds.add((opening == '[' ? ">=" : ">") + lower);
+                if (!upper.isEmpty()) bounds.add((value.charAt(closing) == ']' ? "<=" : "<") + upper);
+                if (!bounds.isEmpty()) alternatives.add(String.join(" ", bounds));
+            }
+            cursor = closing + 1;
         }
-        return value;
+        return alternatives.isEmpty() ? "*" : String.join(" || ", alternatives);
     }
 
     private byte[] readBounded(JarFile jar, JarEntry entry) throws IOException {
