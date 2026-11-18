@@ -18,6 +18,16 @@ class ModrinthLoaderIdsTest {
     }
 
     @Test
+    void resolverUsesCanonicalLoaderIdsForVersionFiltering() {
+        var resolver = new dev.itsdropper.vanta.launcher.service.ModrinthDependencyResolver(
+                new ModrinthClient(), new InstalledModScanner());
+        assertEquals("legacyfabric", resolver.normalizeLoader("Legacy Fabric"));
+        assertEquals("neoforge", resolver.normalizeLoader("NeoForge"));
+        assertEquals("nilloader", resolver.normalizeLoader("NilLoader"));
+        assertEquals("bta-babric", resolver.normalizeLoader("BTA Babric"));
+    }
+
+    @Test
     void matchesExactAndMinorFamilyMinecraftVersions() {
         assertTrue(ModrinthLoaderIds.supportsGameVersion(
                 java.util.List.of("1.20.1", "1.20.2"), "1.20"));
