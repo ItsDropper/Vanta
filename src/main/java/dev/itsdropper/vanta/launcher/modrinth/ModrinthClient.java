@@ -73,8 +73,7 @@ public class ModrinthClient {
             String loader,
             String minecraftVersion
     ) throws IOException, InterruptedException {
-        List<String> loaders = loader == null || loader.isBlank()
-                ? List.of() : List.of(ModrinthLoaderIds.normalize(loader));
+        List<String> loaders = loaderFacetForSearch(loader);
         List<String> versions = minecraftVersion == null || minecraftVersion.isBlank()
                 ? List.of() : List.of(minecraftVersion);
         ModrinthSearchResult result = searchPage(
@@ -135,6 +134,14 @@ public class ModrinthClient {
         );
         checkResponse(response);
         return mapper.readValue(response.body(), ModrinthSearchResult.class);
+    }
+
+    static List<String> loaderFacetForSearch(String loader) {
+        if (loader == null || loader.isBlank()
+                || !ModrinthLoaderIds.supportsSearchFacet(loader)) {
+            return List.of();
+        }
+        return List.of(ModrinthLoaderIds.normalize(loader));
     }
 
     private static final long TAG_CACHE_TTL_MILLIS = java.time.Duration.ofHours(6).toMillis();
@@ -238,7 +245,7 @@ public class ModrinthClient {
 
         String facets = buildFacets(
                 contentType,
-                loader == null || loader.isBlank() ? List.of() : List.of(loader),
+                loaderFacetForSearch(loader),
                 minecraftVersion == null || minecraftVersion.isBlank() ? List.of() : List.of(minecraftVersion),
                 List.of()
         );
@@ -289,7 +296,7 @@ public class ModrinthClient {
                 || contentType != ModrinthContentType.MOD
                 || loader == null
                 || loader.isBlank()
-                || loader.equalsIgnoreCase("vanilla")
+                || ModrinthLoaderIds.normalize(loader).equals("minecraft")
                 || result.getHits() == null) {
             return result;
         }
