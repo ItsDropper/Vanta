@@ -67,7 +67,7 @@ class ReleaseManifestTest {
 
     @Test
     void returnsNoUpdateArtifactForUnsupportedPlatform() throws Exception {
-        UpdateInfo info = ReleaseManifest.parse(JSON.readTree(MANIFEST), "1.3.2", "linux-x64");
+        UpdateInfo info = ReleaseManifest.parse(JSON.readTree(MANIFEST), "1.3.2", "freebsd-x64");
         assertFalse(info.isUpdateAvailable());
         assertNull(info.getDownloadUrl());
     }
