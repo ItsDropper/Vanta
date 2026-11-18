@@ -25,13 +25,14 @@ public final class UpdaterWorkspaceCleanup {
 
         Thread cleanup = new Thread(() -> {
             try {
-                ProcessHandle.of(updaterPid).ifPresent(process -> {
+                ProcessHandle process = ProcessHandle.of(updaterPid).orElse(null);
+                if (process != null) {
                     try {
                         process.onExit().get(5, TimeUnit.MINUTES);
                     } catch (Exception stillRunning) {
                         return;
                     }
-                });
+                }
                 deleteWorkspace(workspace);
             } catch (IOException failure) {
                 System.err.println("[Vanta Updater Cleanup] " + failure.getMessage());
