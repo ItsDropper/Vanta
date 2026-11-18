@@ -105,6 +105,17 @@ public class ModrinthClient {
         if (offset < 0) {
             throw new IllegalArgumentException("Modrinth search offset cannot be negative.");
         }
+        List<String> requestedLoaderIds = loaders == null ? List.of() : loaders.stream()
+                .filter(loader -> loader != null && !loader.isBlank())
+                .map(ModrinthLoaderIds::normalize)
+                .filter(loader -> !loader.equals("minecraft"))
+                .distinct()
+                .toList();
+        boolean localLoaderFilter = contentType == ModrinthContentType.MOD
+                && requestedLoaderIds.stream().anyMatch(loader ->
+                        !ModrinthLoaderIds.supportsSearchFacet(loader));
+        List<String> apiLoaderFacets = localLoaderFilter ? List.of()
+                : requestedLoaderIds;
         String normalizedIndex = index == null || index.isBlank() ? "relevance" : index;
         if (!List.of("relevance", "downloads", "follows", "newest", "updated").contains(normalizedIndex)) {
             throw new IllegalArgumentException("Unsupported Modrinth search index: " + normalizedIndex);
@@ -116,7 +127,7 @@ public class ModrinthClient {
         }
         url.append("facets=").append(encode(buildFacets(
                 contentType,
-                loaders == null ? List.of() : loaders,
+                apiLoaderFacets,
                 versions == null ? List.of() : versions,
                 categories == null ? List.of() : categories
         )));
@@ -133,7 +144,12 @@ public class ModrinthClient {
                 request, HttpResponse.BodyHandlers.ofString()
         );
         checkResponse(response);
-        return mapper.readValue(response.body(), ModrinthSearchResult.class);
+        ModrinthSearchResult result = mapper.readValue(response.body(), ModrinthSearchResult.class);
+        if (localLoaderFilter) {
+            return filterLoaderVersionCompatibility(
+                    result, contentType, requestedLoaderIds, versions == null ? List.of() : versions);
+        }
+        return result;
     }
 
     static List<String> loaderFacetForSearch(String loader) {
@@ -292,37 +308,57 @@ public class ModrinthClient {
             String loader,
             String minecraftVersion
     ) throws IOException, InterruptedException {
-        if (result == null
-                || contentType != ModrinthContentType.MOD
-                || loader == null
-                || loader.isBlank()
-                || ModrinthLoaderIds.normalize(loader).equals("minecraft")
+        if (loader == null || loader.isBlank()
+                || ModrinthLoaderIds.normalize(loader).equals("minecraft")) {
+            return result;
+        }
+        return filterLoaderVersionCompatibility(
+                result, contentType, List.of(ModrinthLoaderIds.normalize(loader)),
+                minecraftVersion == null || minecraftVersion.isBlank()
+                        ? List.of() : List.of(minecraftVersion));
+    }
+
+    private ModrinthSearchResult filterLoaderVersionCompatibility(
+            ModrinthSearchResult result,
+            ModrinthContentType contentType,
+            List<String> loaderIds,
+            List<String> minecraftVersions
+    ) throws IOException, InterruptedException {
+        if (result == null || contentType != ModrinthContentType.MOD
                 || result.getHits() == null) {
             return result;
         }
 
-        String loaderId = ModrinthLoaderIds.normalize(loader);
+        List<String> requestedLoaders = loaderIds == null ? List.of() : loaderIds.stream()
+                .filter(value -> value != null && !value.isBlank())
+                .map(ModrinthLoaderIds::normalize)
+                .distinct()
+                .toList();
+        List<String> requestedVersions = minecraftVersions == null ? List.of() : minecraftVersions.stream()
+                .filter(value -> value != null && !value.isBlank())
+                .toList();
+        if (requestedLoaders.isEmpty() && requestedVersions.isEmpty()) return result;
+
         List<ModrinthSearchHit> compatible = new java.util.ArrayList<>();
         for (ModrinthSearchHit hit : result.getHits()) {
-            if (hit == null || hit.getProjectId() == null || hit.getProjectId().isBlank()) {
-                continue;
-            }
+            if (hit == null || hit.getProjectId() == null || hit.getProjectId().isBlank()) continue;
 
-            boolean supported = getVersions(hit.getProjectId()).stream().anyMatch(version ->
-                    version.getLoaders() != null
-                            && version.getLoaders().stream()
-                            .map(ModrinthLoaderIds::normalize)
-                            .anyMatch(loaderId::equals)
-                            && (minecraftVersion == null || minecraftVersion.isBlank()
-                                || ModrinthLoaderIds.supportsGameVersion(
-                                        version.getGameVersions(), minecraftVersion))
-            );
-            if (supported) {
-                compatible.add(hit);
-            }
+            boolean supported = getVersions(hit.getProjectId()).stream().anyMatch(version -> {
+                boolean loaderMatches = requestedLoaders.isEmpty()
+                        || (version.getLoaders() != null && version.getLoaders().stream()
+                        .map(ModrinthLoaderIds::normalize).anyMatch(requestedLoaders::contains));
+                boolean gameVersionMatches = requestedVersions.isEmpty()
+                        || requestedVersions.stream().anyMatch(requested ->
+                        ModrinthLoaderIds.supportsGameVersion(version.getGameVersions(), requested));
+                return loaderMatches && gameVersionMatches;
+            });
+            if (supported) compatible.add(hit);
         }
 
         result.setHits(compatible);
+        // The API's total is the unfiltered count. The local fallback only knows
+        // the filtered count for this page, so expose that count rather than
+        // advertising pagination that would lead to empty result pages.
         result.setTotalHits(compatible.size());
         return result;
     }
