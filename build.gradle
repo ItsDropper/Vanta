@@ -149,6 +149,16 @@ tasks.register('platformAppImage', Exec) {
             ? file("${javaHome}/bin/jpackage.exe")
             : file("${javaHome}/bin/jpackage")
 
+    // Track the generated image so diagnostic tasks in later Gradle invocations
+    // reuse the completed package instead of invoking jpackage over an existing
+    // destination. Declare the actual inputs so changed application/runtime
+    // contents correctly invalidate the image.
+    inputs.dir(packageInput)
+    inputs.files(javafxModuleJars)
+    inputs.property('jpackageVersion', jpackageVersion)
+    inputs.property('javaHome', javaHome)
+    outputs.dir(packageOutput)
+
     doFirst {
         if (!windowsHost && !macHost && !linuxHost) {
             throw new GradleException("Unsupported jpackage host operating system: ${hostOs}")
@@ -156,6 +166,9 @@ tasks.register('platformAppImage', Exec) {
         if (!jpackageExecutable.isFile()) {
             throw new GradleException("jpackage is required to create the platform application image.")
         }
+        // jpackage refuses to overwrite an existing application image. Gradle
+        // runs this action only when the declared inputs invalidate the output.
+        delete(packageOutput)
         packageOutput.get().asFile.mkdirs()
         javafxModuleDirectory.get().asFile.mkdirs()
         copy {
