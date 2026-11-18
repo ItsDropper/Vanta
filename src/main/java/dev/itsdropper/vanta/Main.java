@@ -223,7 +223,7 @@ public class Main extends Application {
     }
 
     static boolean isUpdaterCleanupInvocation(String[] args) {
-        return args != null && args.length == 4 && "--vanta-cleanup-updater".equals(args[0]);
+        return args != null && args.length >= 4 && "--vanta-cleanup-updater".equals(args[0]);
     }
 
     public static void main(String[] args) {
@@ -237,7 +237,7 @@ public class Main extends Application {
             } catch (RuntimeException invalidCleanupArguments) {
                 System.err.println("[Vanta Updater Cleanup] Ignoring invalid cleanup arguments.");
             }
-            launch(new String[0]);
+            launch(args);
             return;
         }
 
@@ -252,7 +252,7 @@ public class Main extends Application {
             try {
                 dev.itsdropper.vanta.launcher.update.UpdateTransaction.recoverBeforeLaunch(
                         dev.itsdropper.vanta.launcher.update.ApplicationLocator.getApplicationDirectory());
-            } catch (java.io.IOException recoveryFailure) {
+            } catch (java.io.IOException | IllegalStateException recoveryFailure) {
                 System.err.println("[Vanta Update Recovery] " + recoveryFailure.getMessage());
                 recoveryFailure.printStackTrace();
                 return;
