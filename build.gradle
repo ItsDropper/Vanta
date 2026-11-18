@@ -104,6 +104,8 @@ tasks.register('updaterJar', Jar) {
     // UpdaterMain calls ApplicationLocator; include its nested Layout enum too.
     include 'dev/itsdropper/vanta/launcher/update/ApplicationLocator.class'
     include 'dev/itsdropper/vanta/launcher/update/ApplicationLocator$*.class'
+    include 'dev/itsdropper/vanta/launcher/Platform.class'
+    include 'dev/itsdropper/vanta/launcher/Platform$*.class'
 
     manifest {
         attributes(
