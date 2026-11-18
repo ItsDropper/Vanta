@@ -608,6 +608,7 @@ public class BrowseModsView extends VBox {
             skeleton.getStyleClass().add("modrinth-result-skeleton");
             results.getChildren().add(skeleton);
         }
+        boolean compatibleOnly = compatibleOnlyCheckBox.isSelected();
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -618,7 +619,7 @@ public class BrowseModsView extends VBox {
                                 state.index(),
                                 state.limit(),
                                 state.offset(),
-                                compatibleOnlyCheckBox.isSelected()
+                                compatibleOnly
                         );
                 List<ModrinthProject> projects =
                         modrinthService.mapSearchHitsToProjects(response.getHits());
