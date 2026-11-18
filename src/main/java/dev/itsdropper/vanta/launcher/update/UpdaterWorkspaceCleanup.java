@@ -18,7 +18,7 @@ public final class UpdaterWorkspaceCleanup {
     private UpdaterWorkspaceCleanup() {
     }
 
-    public static void schedule(Path workspace, long updaterPid) {
+    public static void schedule(Path workspace, long updaterPid, long updaterStartTime) {
         if (updaterPid <= 0 || !isManagedWorkspace(workspace)) {
             return;
         }
@@ -26,7 +26,7 @@ public final class UpdaterWorkspaceCleanup {
         Thread cleanup = new Thread(() -> {
             try {
                 ProcessHandle process = ProcessHandle.of(updaterPid).orElse(null);
-                if (process != null) {
+                if (process != null && matchesStartTime(process, updaterStartTime)) {
                     try {
                         process.onExit().get(5, TimeUnit.MINUTES);
                     } catch (Exception stillRunning) {
@@ -40,6 +40,15 @@ public final class UpdaterWorkspaceCleanup {
         }, "vanta-updater-workspace-cleanup");
         cleanup.setDaemon(true);
         cleanup.start();
+    }
+
+    private static boolean matchesStartTime(ProcessHandle process, long expectedStartTime) {
+        if (expectedStartTime <= 0) {
+            return process.isAlive();
+        }
+        return process.info().startInstant()
+                .map(start -> start.toEpochMilli() == expectedStartTime)
+                .orElse(process.isAlive());
     }
 
     static boolean isManagedWorkspace(Path workspace) {
