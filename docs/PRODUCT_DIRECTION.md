@@ -116,6 +116,7 @@ Implemented:
 - Sanitized, bounded process evidence stored locally.
 - Automatic comparison of a failed launch with the latest earlier successful launch for the same instance.
 - A visible evidence delta that distinguishes new failure output from the successful baseline.
+- Deterministic diagnosis summaries with confidence, supporting evidence, and suggested checks.
 - Existing local crash-case review remains available from Crash Lab.
 
 The comparison is evidence, not causal attribution. The diagnostic engine remains advisory; Vanta must not automatically remove or disable a mod based only on a weak stack-trace guess.

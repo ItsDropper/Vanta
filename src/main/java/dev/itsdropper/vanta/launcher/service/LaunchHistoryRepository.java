@@ -337,7 +337,8 @@ public final class LaunchHistoryRepository {
         safe = PRIVATE_SESSION_LINE.matcher(safe).replaceAll("[REDACTED_SESSION_DETAIL]");
         safe = CONTROL_CHARS.matcher(safe).replaceAll("");
         if (safe.length() > MAX_EVIDENCE_CHARS) {
-            safe = safe.substring(0, MAX_EVIDENCE_CHARS) + "\n[TRUNCATED: launch-history evidence limit]";
+            String marker = "\n[TRUNCATED: launch-history evidence limit]";
+            safe = safe.substring(0, MAX_EVIDENCE_CHARS - marker.length()) + marker;
         }
         return safe.trim();
     }

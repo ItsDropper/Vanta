@@ -1,6 +1,8 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
+import dev.itsdropper.vanta.launcher.repair.RepairDiagnosis;
+import dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine;
 import dev.itsdropper.vanta.ui.LauncherViewLifecycle;
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.ResponsiveLayout;
@@ -24,7 +26,6 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -253,6 +254,30 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
         if (record.failureCategory() != null) {
             summary.append("\n").append(Localization.text("crashLab.category")).append(": ")
                     .append(record.failureCategory());
+        }
+        if (record.outcome() == LaunchHistoryRepository.Outcome.FAILED
+                && !record.sanitizedLog().isBlank()) {
+            List<RepairDiagnosis> diagnoses = RepairDiagnosticEngine.diagnose(record.sanitizedLog());
+            if (!diagnoses.isEmpty()) {
+                summary.append("\n\n").append(Localization.text("crashLab.diagnosis"))
+                        .append(" — ").append(Localization.text("crashLab.advisory")).append("\n");
+                for (RepairDiagnosis diagnosis : diagnoses.stream().limit(3).toList()) {
+                    summary.append("\n").append(diagnosis.title()).append(" · ")
+                            .append(diagnosis.category()).append(" · ").append(diagnosis.confidence()).append("\n")
+                            .append(diagnosis.description());
+                    if (!diagnosis.evidence().isBlank()) {
+                        summary.append("\n").append(Localization.text("crashLab.supportingEvidence"))
+                                .append(": ").append(diagnosis.evidence());
+                    }
+                    if (!diagnosis.suggestedActions().isEmpty()) {
+                        summary.append("\n").append(Localization.text("crashLab.suggestedChecks")).append(": ");
+                        summary.append(String.join("; ", diagnosis.suggestedActions().stream().limit(3).toList()));
+                    }
+                    summary.append("\n");
+                }
+            } else {
+                summary.append("\n\n").append(Localization.text("crashLab.noDiagnosis"));
+            }
         }
         summary.append("\n\n").append(Localization.text("crashLab.events")).append("\n");
         for (LaunchHistoryRepository.Event event : record.events()) {

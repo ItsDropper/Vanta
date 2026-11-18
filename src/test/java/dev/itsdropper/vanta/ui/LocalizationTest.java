@@ -723,7 +723,12 @@ class LocalizationTest {
                 "crashLab.noNewEvidence",
                 "crashLab.comparisonFailureOnly",
                 "crashLab.activityNoCompare",
-                "crashLab.loading"
+                "crashLab.loading",
+                "crashLab.diagnosis",
+                "crashLab.advisory",
+                "crashLab.supportingEvidence",
+                "crashLab.suggestedChecks",
+                "crashLab.noDiagnosis"
         );
 
         for (Localization.Language language : Localization.getSupportedLanguages()) {

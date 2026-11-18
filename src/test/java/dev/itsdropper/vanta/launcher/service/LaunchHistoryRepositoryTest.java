@@ -65,10 +65,14 @@ class LaunchHistoryRepositoryTest {
                 "Closed by user", "Minecraft shutdown complete", 0);
 
         List<LaunchHistoryRepository.LaunchRecord> records = repository.list();
-        assertEquals(LaunchHistoryRepository.Outcome.STOPPED, records.get(0).outcome());
-        assertEquals(LaunchHistoryRepository.Outcome.SUCCEEDED, records.get(1).outcome());
-        assertTrue(records.get(0).terminal());
-        assertTrue(records.get(1).terminal());
+        var stoppedRecord = records.stream().filter(record -> record.instanceId().equals("two"))
+                .findFirst().orElseThrow();
+        var successfulRecord = records.stream().filter(record -> record.instanceId().equals("one"))
+                .findFirst().orElseThrow();
+        assertEquals(LaunchHistoryRepository.Outcome.STOPPED, stoppedRecord.outcome());
+        assertEquals(LaunchHistoryRepository.Outcome.SUCCEEDED, successfulRecord.outcome());
+        assertTrue(stoppedRecord.terminal());
+        assertTrue(successfulRecord.terminal());
     }
 
     @Test
@@ -151,12 +155,14 @@ class LaunchHistoryRepositoryTest {
                 "Changed loader metadata");
         List<LaunchHistoryRepository.LaunchRecord> timeline = repository.list();
         assertEquals(3, timeline.size());
-        assertEquals(loaderChange.id(), timeline.get(0).id());
-        assertEquals(LaunchHistoryRepository.Outcome.LOADER_CHANGED, timeline.get(0).outcome());
-        assertEquals(activity.id(), timeline.get(1).id());
-        assertEquals(LaunchHistoryRepository.Outcome.BACKUP_CREATED, timeline.get(1).outcome());
-        assertEquals("Created a verified backup", timeline.get(1).events().getFirst().message());
-        assertTrue(timeline.get(1).terminal());
+        var loaderEvent = timeline.stream().filter(record -> record.id().equals(loaderChange.id()))
+                .findFirst().orElseThrow();
+        var backupEvent = timeline.stream().filter(record -> record.id().equals(activity.id()))
+                .findFirst().orElseThrow();
+        assertEquals(LaunchHistoryRepository.Outcome.LOADER_CHANGED, loaderEvent.outcome());
+        assertEquals(LaunchHistoryRepository.Outcome.BACKUP_CREATED, backupEvent.outcome());
+        assertEquals("Created a verified backup", backupEvent.events().getFirst().message());
+        assertTrue(backupEvent.terminal());
         assertThrows(IllegalStateException.class, () ->
                 repository.transition(activity.id(), LaunchHistoryRepository.Outcome.RUNNING, "Invalid"));
     }
@@ -168,5 +174,18 @@ class LaunchHistoryRepositoryTest {
                 temporaryDirectory.resolve("uuid-id.json"));
         String launchId = repository.begin(instance(instanceId, "UUID instance"));
         assertEquals(instanceId, repository.find(launchId).instanceId());
+    }
+
+    @Test
+    void truncatesDiagnosticEvidenceInsideTheConfiguredRecordLimit() throws Exception {
+        LaunchHistoryRepository repository = new LaunchHistoryRepository(
+                temporaryDirectory.resolve("bounded-evidence.json"));
+        String id = repository.begin(instance("bounded", "Bounded"));
+        String largeLog = "diagnostic-line\n".repeat(8_000);
+        var record = repository.finish(id, LaunchHistoryRepository.Outcome.FAILED,
+                "Process failed", largeLog, 1);
+        assertTrue(record.sanitizedLog().length() <= 48 * 1024);
+        assertTrue(record.sanitizedLog().endsWith("[TRUNCATED: launch-history evidence limit]"));
+        assertEquals(record.id(), repository.find(id).id());
     }
 }

@@ -639,6 +639,16 @@ public class LaunchService {
      * detection or consume unbounded memory.
      */
     private String collectDiagnosticContext(String processOutput) {
+        return collectLaunchEvidence(processOutput, true);
+    }
+
+    private String collectSuccessfulLaunchEvidence(String processOutput) {
+        // Include the instance's latest.log as a useful comparison baseline, but never
+        // attach old crash-report files to a successful or user-stopped session.
+        return collectLaunchEvidence(processOutput, false);
+    }
+
+    private String collectLaunchEvidence(String processOutput, boolean includeCrashReports) {
         StringBuilder combined = new StringBuilder();
         appendDiagnosticText(combined, "PROCESS OUTPUT", processOutput, 120_000);
 
@@ -649,6 +659,7 @@ public class LaunchService {
 
         Path directory = instance.getDirectory();
         appendDiagnosticFile(combined, "LATEST LOG", directory.resolve("logs").resolve("latest.log"), 180_000);
+        if (!includeCrashReports) return combined.toString();
 
         Path crashDirectory = directory.resolve("crash-reports");
         if (Files.isDirectory(crashDirectory)) {
@@ -841,8 +852,9 @@ public class LaunchService {
                             startedAt = launchStartedAtMillis;
                             previousCrashReports = crashReportsBeforeLaunch;
                             intentionalClose = state == LaunchState.CLOSING;
-                            diagnosticContext = exitCode != 0 || failureHandled
-                                    ? collectDiagnosticContext(processOutput) : processOutput;
+                            diagnosticContext = !intentionalClose && (exitCode != 0 || failureHandled)
+                                    ? collectDiagnosticContext(processOutput)
+                                    : collectSuccessfulLaunchEvidence(processOutput);
 
                             if (failedInstance == null) {
                                 failedInstance = runningInstance;
