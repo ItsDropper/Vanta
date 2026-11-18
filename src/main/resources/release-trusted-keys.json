@@ -1,4 +1,9 @@
 {
   "schema_version": 1,
-  "keys": []
+  "keys": [
+    {
+      "key_id": "vanta-release-2026-01",
+      "public_key": "AiZLjkt+kpJ5oPE8caVFFTrAlk+zBoVtFcgGe17ZsyM="
+    }
+  ]
 }
