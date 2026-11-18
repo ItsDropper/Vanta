@@ -847,6 +847,7 @@ private boolean resolveDependencies(
             case "nilloader" -> Set.of("nilloader");
             case "modloader" -> Set.of("modloader");
             case "java-agent" -> Set.of("java-agent", "vanta_loader");
+            case "stein" -> Set.of("stein");
             default -> Set.of();
         };
         return providedIds.contains(dependency);
