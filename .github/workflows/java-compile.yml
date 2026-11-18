@@ -37,11 +37,20 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      - name: Validate release manifest tooling
+      - name: Validate release manifest tooling (Linux/macOS)
+        if: runner.os != 'Windows'
         run: |
           python3 -m py_compile release/generate_manifest.py release/test_generate_manifest.py
           python3 release/test_generate_manifest.py
           python3 -c "import json; json.load(open('release/manifest.schema.json', encoding='utf-8'))"
+
+      - name: Validate release manifest tooling (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          python -m py_compile release/generate_manifest.py release/test_generate_manifest.py
+          python release/test_generate_manifest.py
+          python -c "import json; json.load(open('release/manifest.schema.json', encoding='utf-8'))"
 
 
       - name: Run tests and build portable distributions (Linux/macOS)
