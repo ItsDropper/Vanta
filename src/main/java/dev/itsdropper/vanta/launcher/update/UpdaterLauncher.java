@@ -116,6 +116,8 @@ public final class UpdaterLauncher {
                     helperLauncher.toString(),
                     "--vanta-updater",
                     Long.toString(processId),
+                    Long.toString(ProcessHandle.current().info().startInstant()
+                            .map(java.time.Instant::toEpochMilli).orElse(-1L)),
                     absoluteZip.toString(),
                     absoluteApplication.toString(),
                     readyFile.toString()
