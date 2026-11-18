@@ -286,6 +286,9 @@ public final class UpdaterMain {
         log("Backup payload: " + backupPayload);
 
         log("---------- PREPARING UPDATE TRANSACTION ----------");
+        if (UpdateTransaction.hasPendingTransaction(applicationDirectory)) {
+            throw new IOException("An unfinished update transaction must be recovered before another update can start.");
+        }
         if (Files.exists(stagingDirectory)) {
             deleteDirectory(stagingDirectory);
         }
