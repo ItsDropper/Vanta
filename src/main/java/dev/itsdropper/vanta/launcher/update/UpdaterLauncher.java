@@ -137,6 +137,7 @@ public final class UpdaterLauncher {
                     .start();
 
             log("Updater process PID: " + helperProcess.pid());
+            UpdaterWorkspaceCleanup.writeOwner(tempUpdaterDirectory, helperProcess.toHandle());
             log("Updater command: " + helperProcess.info().command().orElse("<unknown>"));
             log("Waiting for updater readiness handshake.");
 
@@ -168,32 +169,37 @@ public final class UpdaterLauncher {
             log("========================================");
         } catch (Exception failure) {
             log("FAILED TO START UPDATER: " + failure);
-            terminateHelperProcess(helperProcess);
-            if (!handoffReady) {
+            boolean helperStopped = terminateHelperProcess(helperProcess);
+            if (!handoffReady && helperStopped) {
                 try {
                     deleteTemporaryUpdaterDirectory(tempUpdaterDirectory);
                 } catch (IOException cleanupFailure) {
                     failure.addSuppressed(cleanupFailure);
                     log("Could not remove failed updater workspace: " + cleanupFailure);
                 }
+            } else if (!helperStopped) {
+                log("Preserving updater workspace because its helper process could not be reaped.");
             }
             throw failure;
         }
     }
 
-    private static void terminateHelperProcess(Process process) {
+    private static boolean terminateHelperProcess(Process process) {
         if (process == null || !process.isAlive()) {
-            return;
+            return true;
         }
         process.descendants().forEach(ProcessHandle::destroyForcibly);
         process.destroyForcibly();
         try {
             if (!process.waitFor(5, TimeUnit.SECONDS)) {
                 log("Updater helper did not exit after forced termination: " + process.pid());
+                return false;
             }
+            return !process.isAlive();
         } catch (InterruptedException interrupted) {
             Thread.currentThread().interrupt();
             log("Interrupted while reaping updater helper process " + process.pid());
+            return false;
         }
     }
 
