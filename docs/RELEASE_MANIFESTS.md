@@ -26,7 +26,7 @@ The signature envelope is UTF-8 JSON with exactly these fields:
 ```
 
 The signature is Ed25519 over the exact manifest response bytes prefixed by
-the domain-separation string `VANTA-RELEASE-MANIFEST-V1\n`. The manifest is
+the domain-separation string `VANTA-RELEASE-MANIFEST-V1\\n`. The manifest is
 verified before JSON parsing or field interpretation. The signature envelope
 is size-limited, duplicate JSON keys are rejected, and its key ID must resolve
 to a public key embedded in `src/main/resources/release-trusted-keys.json`.
@@ -45,7 +45,7 @@ is a temporary fine-grained personal access token because GitHub's built-in
 `GITHUB_TOKEN` cannot create repository Actions secrets.
 
 1. Create a fine-grained token restricted to **only** the
-   `ItsDropper/Vanta` repository, with **Actions: read and write** repository
+   `ItsDropper/Vanta` repository, with **Secrets: read and write** repository
    permission. Give it a short expiry. Do not grant Contents, Administration,
    or unrelated permissions.
 2. In repository Settings → Secrets and variables → Actions, add that token as
@@ -78,7 +78,7 @@ uses the repository-scoped bootstrap token only in the key-installation step.
 The release workflow fails at the signing step if the secret is absent, invalid,
 or does not match the pinned public key. Release tooling and the trust store are
 checked out from protected `main`, not from the release tag. The secret is
-exposed only to the signing step in the publish job.
+exposed only to the signing step in the validation job.
 
 Protect the `v*` tag namespace with a GitHub repository ruleset: restrict tag
 creation to trusted maintainers, prevent tag deletion and force updates, and
@@ -109,14 +109,36 @@ one key for both trust domains.
 
 The release workflow builds all five platform archives, validates their ZIP
 contents and SHA-256 sidecars, generates `manifest.json`, signs its exact bytes
-into `manifest.sig`, and publishes both files with the archives. GitHub build
-provenance attestations cover the packages, manifest and signature envelope.
+into `manifest.sig`, independently verifies that signature against the
+committed trust store, and then uploads the validated bundle as a short-lived
+workflow artifact.
 
-To test a signature locally after provisioning a key:
+**Manual runs default to dry-run mode.** Open Actions → **Platform release
+packages**, select `main`, enter a stable version such as `1.2.8`, and leave
+the mode set to `dry-run`. This executes all five platform builds, validates
+the archives and checksums, generates the manifest, signs it with
+`VANTA_RELEASE_SIGNING_KEY`, and verifies the signature using the public
+keyring. It does not create or move a tag, publish a GitHub Release, or create
+a provenance attestation. The validated bundle is downloadable from the run's
+`vanta-validated-release-<version>` artifact for inspection.
 
-```powershell
-$env:VANTA_RELEASE_SIGNING_KEY = (Get-Content -Raw release-signing-key.txt).Trim()
-python release/sign_manifest.py --manifest release-assets/manifest.json --output release-assets/manifest.sig --key-id vanta-release-2026-01
+Only select `publish` when the version is ready to become a real release.
+That mode performs the same complete validation first, then creates build
+provenance attestations and publishes the GitHub Release. A pushed `v*` tag
+also follows the publish path after validation. Manual runs are restricted to
+`main`; tag runs must contain exactly the same pinned trust store as current
+`main`.
+
+The validation job has read-only repository permissions. Write permission for
+GitHub Releases and attestations is isolated to the separate publish job, which
+is skipped entirely for manual dry runs. A failed build, manifest validation,
+signing operation, or independent signature verification prevents publication.
+
+To verify a manifest and signature locally:
+
+```sh
+python -m pip install -r release/requirements.txt
+python release/verify_manifest.py --manifest release-assets/manifest.json --signature release-assets/manifest.sig
 ```
 
 The Java updater verifies the detached signature before parsing the manifest,
@@ -126,9 +148,8 @@ downloads are independently checked against the signed size and SHA-256 digest.
 ## Manifest validation
 
 The JSON contract is defined by [manifest.schema.json](../release/manifest.schema.json).
-The release workflow generates it with [generate_manifest.py](../release/generate_manifest.py)
-only after all platform build jobs have completed. The generator validates the
-completed document against the Draft 2020-12 schema using pinned dependencies.
+The generator validates it with pinned dependencies after all platform builds
+have completed.
 
 For every required platform, manifest generation:
 
@@ -138,7 +159,7 @@ For every required platform, manifest generation:
    encrypted entries, and checks native launcher/runtime/configuration files.
 4. Rejects extra or untracked files.
 5. Records the artifact filename, GitHub release URL, byte size and digest.
-6. Fails publication if any required platform artifact is missing or invalid.
+6. Fails validation if any required platform artifact is missing or invalid.
 
 The updater validates schema version, product, channel, semantic version,
 timestamp, minimum launcher version, release-notes URL, exact root/artifact
@@ -146,8 +167,8 @@ field sets, all five platform entries, URLs, sizes and SHA-256 formats.
 
 ## Build provenance
 
-The release workflow creates GitHub artifact attestations for all release
-assets after manifest generation and signing. These attestations bind artifact
+The publish job creates GitHub artifact attestations for all release assets
+after manifest generation and signing. These attestations bind artifact
 digests to the GitHub Actions workflow identity and source repository. They
 complement, but do not replace, the launcher's pinned Ed25519 publisher
 verification.
@@ -157,15 +178,3 @@ With GitHub CLI installed:
 ```sh
 gh attestation verify Vanta-1.3.3-windows-x64.zip --repo ItsDropper/Vanta
 ```
-
-## Compatibility and current deployment state
-
-Unsigned historical releases cannot be authenticated by the new updater and
-are not eligible for automatic update or rollback. A launcher build with a
-populated trust store is required before signed releases can be consumed.
-
-**Initial key provisioning is a required deployment gate.** The committed
-trust store intentionally remains empty until the GitHub Actions bootstrap
-workflow has installed `VANTA_RELEASE_SIGNING_KEY` and committed its matching
-public key. Until then, the updater fails closed with an explicit
-missing-trust-anchor error; it never accepts an unsigned manifest as a fallback.

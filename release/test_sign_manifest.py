@@ -13,6 +13,7 @@ from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 
 sys.path.insert(0, str(Path(__file__).parent))
 import sign_manifest
+import verify_manifest
 
 
 class SignManifestTests(unittest.TestCase):
@@ -87,6 +88,53 @@ class SignManifestTests(unittest.TestCase):
             keyring.write_text(json.dumps({"schema_version": 1, "keys": entries}), encoding="utf-8")
             trusted = sign_manifest.load_trusted_keys(keyring)
             self.assertEqual({"release-old-01", "release-new-01"}, set(trusted))
+
+    def test_release_verifier_checks_schema_and_pinned_signature(self) -> None:
+        import json
+        import tempfile
+
+        artifacts = {}
+        for platform in ("windows-x64", "linux-x64", "linux-aarch64", "macos-x64", "macos-aarch64"):
+            file_name = f"Vanta-1.2.3-{platform}.zip"
+            artifacts[platform] = {
+                "file_name": file_name,
+                "download_url": f"https://github.com/ItsDropper/Vanta/releases/download/v1.2.3/{file_name}",
+                "size_bytes": 1,
+                "sha256": "a" * 64,
+            }
+        manifest = {
+            "schema_version": 1,
+            "product": "vanta",
+            "channel": "stable",
+            "version": "1.2.3",
+            "published_at": "2026-11-18T00:00:00Z",
+            "min_launcher_version": "1.0.0",
+            "release_notes_url": "https://github.com/ItsDropper/Vanta/releases/tag/v1.2.3",
+            "artifacts": artifacts,
+        }
+        payload = (json.dumps(manifest, indent=2) + "\\n").encode("utf-8")
+        envelope = sign_manifest.create_signature(payload, self.private_key, "release-test-01")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            manifest_path = root / "manifest.json"
+            signature_path = root / "manifest.sig"
+            keyring_path = root / "trusted-keys.json"
+            manifest_path.write_bytes(payload)
+            signature_path.write_bytes(envelope)
+            keyring_path.write_text(json.dumps({
+                "schema_version": 1,
+                "keys": [{
+                    "key_id": "release-test-01",
+                    "public_key": base64.b64encode(self.public_key).decode("ascii"),
+                }],
+            }), encoding="utf-8")
+            self.assertEqual(
+                "release-test-01",
+                verify_manifest.verify_files(manifest_path, signature_path, keyring_path),
+            )
+            manifest_path.write_bytes(payload + b" ")
+            with self.assertRaises(ValueError):
+                verify_manifest.verify_files(manifest_path, signature_path, keyring_path)
 
     def test_private_key_decoder_requires_canonical_32_byte_key(self) -> None:
         encoded = base64.b64encode(self.private_key.private_bytes_raw()).decode("ascii")

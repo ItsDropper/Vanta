@@ -67,7 +67,7 @@ def main() -> int:
     if not bootstrap_token:
         raise RuntimeError(
             "Missing VANTA_RELEASE_BOOTSTRAP_TOKEN. Add a temporary fine-grained token "
-            "with Actions: write access to this repository, then rerun."
+            "with Secrets: read and write permission for this repository, then rerun."
         )
 
     root = json.loads(KEYRING_PATH.read_text(encoding="utf-8"))
