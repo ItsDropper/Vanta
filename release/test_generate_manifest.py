@@ -68,6 +68,24 @@ class GenerateManifestTest(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("missing required platform artifacts", result.stderr.lower())
 
+    def test_rejects_checksum_sidecar_for_another_archive(self):
+        checksum = self.assets / "Vanta-1.3.3-windows-x64.zip.sha256"
+        checksum.write_text(
+            hashlib.sha256((self.assets / "Vanta-1.3.3-windows-x64.zip").read_bytes()).hexdigest()
+            + "  Vanta-1.3.3-linux-x64.zip\n",
+            encoding="utf-8",
+        )
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("malformed checksum sidecar", result.stderr.lower())
+
+    def test_rejects_unexpected_release_archive(self):
+        unexpected = self.assets / "Vanta-1.3.3-freebsd-x64.zip"
+        unexpected.write_bytes(b"unexpected")
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("unexpected release archive name", result.stderr.lower())
+
     def test_rejects_checksum_mismatch(self):
         checksum = self.assets / "Vanta-1.3.3-windows-x64.zip.sha256"
         checksum.write_text("0" * 64, encoding="utf-8")
