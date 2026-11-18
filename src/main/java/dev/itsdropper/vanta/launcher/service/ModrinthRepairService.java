@@ -533,7 +533,7 @@ public Path repairModDependency(
          * Fallback: inspect the files installed by this repair.
          */
         InstalledMod repairedMetadata =
-                dependencies.readFabricMetadata(
+                dependencies.readModMetadata(
                         repaired.version()
                 );
 
@@ -675,7 +675,7 @@ private void removeInstalledMod(
         }
 
         /*
-         * First get the Fabric mod ID from the registry.
+         * First get the mod ID from the registry.
          */
         String modId = null;
 
@@ -703,7 +703,7 @@ private void removeInstalledMod(
         }
 
         /*
-         * Delete every physical JAR belonging to that Fabric mod ID.
+         * Delete every physical JAR belonging to that mod ID.
          */
         if (modId != null
                 && !modId.isBlank()) {
