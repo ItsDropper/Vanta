@@ -251,7 +251,9 @@ public class Main extends Application {
         if (!dev.itsdropper.vanta.launcher.update.UpdateTransaction.isHealthInvocation(args)) {
             try {
                 dev.itsdropper.vanta.launcher.update.UpdateTransaction.recoverBeforeLaunch(
-                        dev.itsdropper.vanta.launcher.update.ApplicationLocator.getApplicationDirectory());
+                        java.util.Optional.ofNullable(
+                                dev.itsdropper.vanta.launcher.update.ApplicationLocator.getApplicationDirectoryForRecovery())
+                                .orElseGet(dev.itsdropper.vanta.launcher.update.ApplicationLocator::getApplicationDirectory));
             } catch (java.io.IOException recoveryFailure) {
                 System.err.println("[Vanta Update Recovery] " + recoveryFailure.getMessage());
                 recoveryFailure.printStackTrace();
