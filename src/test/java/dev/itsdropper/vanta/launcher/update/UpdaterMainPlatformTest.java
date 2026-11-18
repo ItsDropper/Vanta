@@ -41,6 +41,27 @@ class UpdaterMainPlatformTest {
     }
 
     @Test
+    void locatesPayloadFromStableBootstrapWhenPayloadDirectoryIsMissing() throws Exception {
+        Path windows = temporaryDirectory.resolve("WindowsVanta");
+        createFile(windows.resolve("Vanta.exe"));
+        createFile(windows.resolve("runtime/lib/modules"));
+        assertEquals(windows.resolve("app"),
+                ApplicationLocator.getApplicationPayloadDirectoryForRecovery(windows));
+
+        Path linux = temporaryDirectory.resolve("LinuxVanta");
+        createFile(linux.resolve("bin/Vanta"));
+        createFile(linux.resolve("lib/runtime/lib/modules"));
+        assertEquals(linux.resolve("lib/app"),
+                ApplicationLocator.getApplicationPayloadDirectoryForRecovery(linux));
+
+        Path mac = temporaryDirectory.resolve("Vanta.app");
+        createFile(mac.resolve("Contents/MacOS/Vanta"));
+        createFile(mac.resolve("Contents/runtime/Contents/Home/lib/modules"));
+        assertEquals(mac.resolve("Contents/app"),
+                ApplicationLocator.getApplicationPayloadDirectoryForRecovery(mac));
+    }
+
+    @Test
     void restoresLinuxLauncherAndRuntimeExecutablePermissions() throws Exception {
         assumeFalse(System.getProperty("os.name", "").toLowerCase().contains("windows"));
         String previous = System.getProperty("os.name");
