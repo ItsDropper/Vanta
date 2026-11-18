@@ -32,7 +32,7 @@ class InstalledModScannerTest {
         InstalledMod mod = new InstalledModScanner().scanFile(file);
         assertNotNull(mod);
         assertEquals("fabric_example", mod.getModId());
-        assertEquals(2, mod.getDependencies().size());
+        assertEquals(3, mod.getDependencies().size());
         assertTrue(mod.getDependencies().stream().anyMatch(DependencyRequirement::isOptional));
         assertEquals("old_api", mod.getBreaks().get(0).getModId());
     }
