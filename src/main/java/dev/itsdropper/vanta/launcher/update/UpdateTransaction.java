@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
+import java.nio.channels.FileChannel;
+import java.nio.channels.Channels;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
@@ -42,7 +44,10 @@ public final class UpdateTransaction {
             throw new IOException("Update transaction paths must share the installation parent.");
         }
         if (app.equals(stage) || app.equals(old) || stage.equals(old)
-                || !Files.isDirectory(stage) || Files.exists(old)) {
+                || !Files.isDirectory(stage) || Files.exists(old)
+                || parent.equals(marker.getParent())
+                || !UpdaterWorkspaceCleanup.isManagedWorkspace(marker.getParent())
+                || !"vanta-update-health".equals(marker.getFileName().toString())) {
             throw new IOException("Update transaction paths are not in a clean state.");
         }
         UpdateTransaction transaction = new UpdateTransaction(
@@ -110,9 +115,14 @@ public final class UpdateTransaction {
 
         Path stage = sibling(app, properties.getProperty("staging"));
         Path backup = sibling(app, properties.getProperty("backup"));
+        Path recordedApplication = Path.of(required(properties, "application")).toAbsolutePath().normalize();
         Path marker = Path.of(required(properties, "healthMarker")).toAbsolutePath().normalize();
-        if (stage.equals(app) || backup.equals(app) || stage.equals(backup)
-                || !marker.getFileName().toString().equals("vanta-update-health")) {
+        String state = required(properties, "state");
+        if (!recordedApplication.equals(app)
+                || !("PREPARED".equals(state) || "SWAPPED".equals(state) || "HEALTHY".equals(state))
+                || stage.equals(app) || backup.equals(app) || stage.equals(backup)
+                || !UpdaterWorkspaceCleanup.isManagedWorkspace(marker.getParent())
+                || !"vanta-update-health".equals(marker.getFileName().toString())) {
             throw new IOException("Update transaction journal contains unsafe paths; preserving it for diagnosis.");
         }
 
@@ -168,9 +178,10 @@ public final class UpdateTransaction {
         properties.setProperty("backup", backup.toString());
         properties.setProperty("healthMarker", healthMarker.toString());
         Path temporary = journal.resolveSibling(journal.getFileName() + ".tmp");
-        try (var output = Files.newOutputStream(temporary,
+        try (FileChannel channel = FileChannel.open(temporary,
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)) {
-            properties.store(output, "Vanta self-update transaction");
+            properties.store(Channels.newOutputStream(channel), "Vanta self-update transaction");
+            channel.force(true);
         }
         try {
             Files.move(temporary, journal, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
