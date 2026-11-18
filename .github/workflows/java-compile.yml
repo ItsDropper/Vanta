@@ -47,6 +47,14 @@ jobs:
         if: runner.os == 'Windows'
         run: .\\gradlew.bat test distZip distTar platformImageChecksum
 
+      - name: Report runtime and application image footprint (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: ./gradlew runtimeFootprint
+
+      - name: Report runtime and application image footprint (Windows)
+        if: runner.os == 'Windows'
+        run: .\\gradlew.bat runtimeFootprint
+
       - name: Verify Windows application image layout
         if: runner.os == 'Windows'
         shell: pwsh
