@@ -31,8 +31,7 @@ public final class ModrinthDependencyResolver {
     }
 
     public String normalizeLoader(String loader) {
-        if (loader == null) return "";
-        return loader.trim().toLowerCase();
+        return ModrinthLoaderIds.normalize(loader);
     }
 
 public List<ModrinthService.ResolvedMod> resolveModGraph(
@@ -655,7 +654,7 @@ private boolean resolveDependencies(
 
         /*
          * ---------------------------------------------------------
-         * SECOND: Inspect the actual Fabric JAR.
+         * SECOND: Inspect the actual loader metadata descriptor.
          *
          * This catches dependencies that the Modrinth project failed
          * to declare in its Modrinth metadata.
@@ -737,7 +736,7 @@ private boolean resolveDependencies(
             }
 
             /*
-             * See whether this Fabric mod is already represented
+             * See whether this mod is already represented
              * somewhere in the resolved graph.
              */
             ModrinthVersion resolvedDependency =
@@ -782,7 +781,7 @@ private boolean resolveDependencies(
             }
 
             /*
-             * The dependency exists in fabric.mod.json but is not
+             * The dependency exists in the loader metadata but is not
              * currently represented in the graph.
              *
              * Find its Modrinth project and resolve it.
@@ -797,7 +796,7 @@ private boolean resolveDependencies(
                     || dependencyProjectId.isBlank()) {
 
                 System.out.println(
-                        "[Vanta DEBUG]   Could not find Modrinth project for Fabric mod "
+                        "[Vanta DEBUG]   Could not find Modrinth project for mod "
                                 + fabricDependencyModId
                 );
 
@@ -1077,7 +1076,7 @@ private String findModrinthProjectForModId(
         }
 
         /*
-         * Standalone Fabric IDs should be resolved directly through
+         * Standalone mod IDs should be resolved directly through
          * Modrinth. Fabric API inspection is only relevant to IDs that
          * are actually in Fabric API's namespace.
          */
