@@ -68,19 +68,28 @@ public final class UpdateTransaction {
     }
 
     public static boolean isHealthInvocation(String[] args) {
-        return args != null && args.length == 2 && HEALTH_ARGUMENT.equals(args[0]);
+        return healthMarkerArgument(args) != null;
     }
 
     public static void acknowledgeHealthyStartup(String[] args) throws IOException {
-        if (!isHealthInvocation(args)) return;
-        Path marker = Path.of(args[1]).toAbsolutePath().normalize();
+        String markerArgument = healthMarkerArgument(args);
+        if (markerArgument == null) return;
+        Path marker = Path.of(markerArgument).toAbsolutePath().normalize();
         Path parent = marker.getParent();
-        if (parent == null || !Files.isDirectory(parent)
+        if (parent == null || !UpdaterWorkspaceCleanup.isManagedWorkspace(parent)
                 || !"vanta-update-health".equals(marker.getFileName().toString())) {
             throw new IOException("Invalid update health marker path.");
         }
         Files.writeString(marker, "healthy" + System.lineSeparator(),
                 StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+    }
+
+    private static String healthMarkerArgument(String[] args) {
+        if (args == null) return null;
+        for (int i = 0; i + 1 < args.length; i++) {
+            if (HEALTH_ARGUMENT.equals(args[i])) return args[i + 1];
+        }
+        return null;
     }
 
     /**
