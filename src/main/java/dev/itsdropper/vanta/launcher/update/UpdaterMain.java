@@ -820,6 +820,8 @@ public final class UpdaterMain {
             command.add("--vanta-cleanup-updater");
             command.add(helperWorkspace.toAbsolutePath().normalize().toString());
             command.add(Long.toString(ProcessHandle.current().pid()));
+            command.add(Long.toString(ProcessHandle.current().info().startInstant()
+                    .map(java.time.Instant::toEpochMilli).orElse(-1L)));
         }
 
         log("Starting Vanta: " + executable);
