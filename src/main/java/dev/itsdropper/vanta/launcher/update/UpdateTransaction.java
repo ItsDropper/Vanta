@@ -85,6 +85,13 @@ public final class UpdateTransaction {
         Files.deleteIfExists(journal);
     }
 
+    public static boolean hasPendingTransaction(Path applicationRoot) {
+        if (applicationRoot == null) return false;
+        Path app = applicationRoot.toAbsolutePath().normalize();
+        Path parent = app.getParent();
+        return parent != null && Files.exists(parent.resolve(app.getFileName() + JOURNAL_SUFFIX));
+    }
+
     /** Exclusive cross-process lock for one installation's update/recovery work. */
     public static InstallationLock acquireInstallationLock(Path applicationRoot) throws IOException {
         Path app = applicationRoot.toAbsolutePath().normalize();
