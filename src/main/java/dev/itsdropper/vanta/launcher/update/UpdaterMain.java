@@ -827,8 +827,10 @@ public final class UpdaterMain {
             command.add(Long.toString(ProcessHandle.current().info().startInstant()
                     .map(java.time.Instant::toEpochMilli).orElse(-1L)));
         }
-        command.add("--vanta-update-health");
-        command.add(healthMarker.toAbsolutePath().normalize().toString());
+        if (healthMarker != null) {
+            command.add("--vanta-update-health");
+            command.add(healthMarker.toAbsolutePath().normalize().toString());
+        }
 
         log("Starting Vanta and awaiting startup-health acknowledgement: " + executable);
         Process process = new ProcessBuilder(command)
@@ -871,7 +873,7 @@ public final class UpdaterMain {
                 moveDirectory(backup, application);
             }
             verifyExtractedApplication(application);
-            startVanta(application, workspace, workspace.resolve("vanta-update-health-recovery"));
+            startVanta(application, workspace, null);
             log("Recovered Vanta installation relaunched after updater failure.");
         } catch (Exception recoveryFailure) {
             originalFailure.addSuppressed(recoveryFailure);
