@@ -15,10 +15,10 @@ class MainUpdaterDispatchTest {
     @Test
     void recognizesUpdaterWorkspaceCleanupMode() {
         assertTrue(Main.isUpdaterCleanupInvocation(new String[]{
-                "--vanta-cleanup-updater", "/tmp/Vanta-updater/session-test", "123"
+                "--vanta-cleanup-updater", "/tmp/Vanta-updater/session-test", "123", "456"
         }));
         assertFalse(Main.isUpdaterCleanupInvocation(new String[]{
-                "--vanta-cleanup-updater", "/tmp/Vanta-updater/session-test"
+                "--vanta-cleanup-updater", "/tmp/Vanta-updater/session-test", "123"
         }));
     }
 
