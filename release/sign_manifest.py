@@ -110,7 +110,8 @@ def verify_signature(payload: bytes, envelope_bytes: bytes, trusted_keys: Mappin
         raise ValueError("Signature envelope is not valid JSON.") from error
     if not isinstance(envelope, dict) or set(envelope) != SIGNATURE_FIELDS:
         raise ValueError("Signature envelope has missing or unknown fields.")
-    if envelope["schema_version"] != 1 or envelope["algorithm"] != "Ed25519":
+    if type(envelope["schema_version"]) is not int or envelope["schema_version"] != 1
+            or envelope["algorithm"] != "Ed25519":
         raise ValueError("Unsupported signature envelope format.")
     key_id = envelope["key_id"]
     if not isinstance(key_id, str) or not KEY_ID_PATTERN.fullmatch(key_id):
