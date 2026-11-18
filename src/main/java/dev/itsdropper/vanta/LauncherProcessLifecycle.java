@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta;
 
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -11,34 +13,63 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public final class LauncherProcessLifecycle {
     private static final AtomicBoolean EXITING = new AtomicBoolean();
+    private static final List<Runnable> CLEANUP_ACTIONS = new CopyOnWriteArrayList<>();
 
     private LauncherProcessLifecycle() {
+    }
+
+    /**
+     * Register resources that must be released when the launcher window closes.
+     * Registration is safe before the main launcher view has finished starting.
+     */
+    public static void registerCleanup(Runnable cleanup) {
+        if (cleanup == null) {
+            return;
+        }
+        if (EXITING.get()) {
+            runCleanup(cleanup);
+            return;
+        }
+
+        CLEANUP_ACTIONS.add(cleanup);
+        if (EXITING.get() && CLEANUP_ACTIONS.remove(cleanup)) {
+            runCleanup(cleanup);
+        }
     }
 
     /**
      * Runs best-effort cleanup and then terminates the launcher process.
      * Child game processes are intentionally not destroyed here.
      */
-    public static void exit(Runnable... cleanupActions) {
+    public static void exit(Runnable... additionalCleanupActions) {
         if (!EXITING.compareAndSet(false, true)) {
             return;
         }
 
-        if (cleanupActions != null) {
-            for (Runnable cleanup : cleanupActions) {
-                if (cleanup == null) {
-                    continue;
-                }
-                try {
-                    cleanup.run();
-                } catch (Throwable failure) {
-                    System.err.println("[Vanta Shutdown] Cleanup failed: "
-                            + failure.getClass().getSimpleName());
-                    failure.printStackTrace(System.err);
-                }
+        for (Runnable cleanup : CLEANUP_ACTIONS) {
+            runCleanup(cleanup);
+        }
+        CLEANUP_ACTIONS.clear();
+
+        if (additionalCleanupActions != null) {
+            for (Runnable cleanup : additionalCleanupActions) {
+                runCleanup(cleanup);
             }
         }
 
         System.exit(0);
+    }
+
+    private static void runCleanup(Runnable cleanup) {
+        if (cleanup == null) {
+            return;
+        }
+        try {
+            cleanup.run();
+        } catch (Throwable failure) {
+            System.err.println("[Vanta Shutdown] Cleanup failed: "
+                    + failure.getClass().getSimpleName());
+            failure.printStackTrace(System.err);
+        }
     }
 }
