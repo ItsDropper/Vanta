@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UpdateServicePlatformTest {
     @Test
-    void createsVersionScopedSignedManifestUrlsForLinux() {
-        assertEquals("linux-x64", Platform.distributionId("Linux", "amd64"));
+    void createsVersionScopedSignedManifestUrlsForLinux() throws Exception {
+        assertEquals("linux-x64", distributionId("Linux", "amd64"));
         assertEquals("https://github.com/ItsDropper/Vanta/releases/download/v1.2.7/manifest.json",
                 UpdateService.releaseManifestUrl("v1.2.7"));
         assertEquals("https://github.com/ItsDropper/Vanta/releases/download/v1.2.7/manifest.sig",
@@ -16,9 +16,9 @@ class UpdateServicePlatformTest {
     }
 
     @Test
-    void createsVersionScopedSignedManifestUrlsForWindowsAndMacos() {
-        assertEquals("windows-x64", Platform.distributionId("Windows 11", "AMD64"));
-        assertEquals("macos-aarch64", Platform.distributionId("Darwin", "arm64"));
+    void createsVersionScopedSignedManifestUrlsForWindowsAndMacos() throws Exception {
+        assertEquals("windows-x64", distributionId("Windows 11", "AMD64"));
+        assertEquals("macos-aarch64", distributionId("Darwin", "arm64"));
         assertEquals("https://github.com/ItsDropper/Vanta/releases/download/v1.2.8/manifest.json",
                 UpdateService.releaseManifestUrl("1.2.8"));
     }
@@ -31,5 +31,23 @@ class UpdateServicePlatformTest {
             assertThrows(IllegalArgumentException.class,
                     () -> UpdateService.releaseSignatureUrl(version), version);
         }
+    }
+
+    private static String distributionId(String os, String arch) {
+        String previousOs = System.getProperty("os.name");
+        String previousArch = System.getProperty("os.arch");
+        try {
+            System.setProperty("os.name", os);
+            System.setProperty("os.arch", arch);
+            return Platform.distributionId();
+        } finally {
+            restore("os.name", previousOs);
+            restore("os.arch", previousArch);
+        }
+    }
+
+    private static void restore(String key, String value) {
+        if (value == null) System.clearProperty(key);
+        else System.setProperty(key, value);
     }
 }
