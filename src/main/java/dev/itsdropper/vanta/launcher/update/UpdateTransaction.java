@@ -159,6 +159,12 @@ public final class UpdateTransaction {
         Path journal = parent.resolve(app.getFileName() + JOURNAL_SUFFIX);
         if (!Files.isRegularFile(journal)) return;
 
+        try (InstallationLock ignored = acquireInstallationLock(app)) {
+            recoverJournal(app, journal);
+        }
+    }
+
+    private static void recoverJournal(Path app, Path journal) throws IOException {
         Properties properties = new Properties();
         try (var input = Files.newInputStream(journal)) { properties.load(input); }
 
