@@ -10,7 +10,7 @@ import re
 import stat
 import zipfile
 from datetime import datetime, timezone
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from urllib.parse import quote
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -53,11 +53,13 @@ def validate_archive(path: Path, platform: str) -> None:
             total_uncompressed = 0
             names: set[str] = set()
             regular_files: set[str] = set()
+            file_sizes: dict[str, int] = {}
             for entry in entries:
                 name = entry.filename
-                normalized = PurePosixPath(name)
-                if (not name or name.startswith("/") or "\\\\" in name
-                        or any(part in ("", ".", "..") for part in normalized.parts)):
+                path_parts = name.rstrip("/").split("/")
+                if (not name or name.startswith("/") or "\\" in name or "\x00" in name
+                        or ":" in path_parts[0]
+                        or any(part in ("", ".", "..") for part in path_parts)):
                     raise SystemExit(f"Unsafe ZIP entry path in {path.name}: {name!r}")
                 if name in names:
                     raise SystemExit(f"Duplicate ZIP entry in {path.name}: {name}")
@@ -72,9 +74,14 @@ def validate_archive(path: Path, platform: str) -> None:
                     raise SystemExit(f"Uncompressed release archive is too large: {path.name}")
                 if not entry.is_dir():
                     regular_files.add(name)
-            missing = sorted(set(PLATFORM_REQUIRED_FILES[platform]) - regular_files)
+                    file_sizes[name] = entry.file_size
+            required_files = set(PLATFORM_REQUIRED_FILES[platform])
+            missing = sorted(required_files - regular_files)
             if missing:
                 raise SystemExit(f"{path.name} is missing required application image files: " + ", ".join(missing))
+            empty_files = sorted(name for name in required_files if file_sizes[name] <= 0)
+            if empty_files:
+                raise SystemExit(f"{path.name} contains empty required application image files: " + ", ".join(empty_files))
             corrupt_entry = archive.testzip()
             if corrupt_entry is not None:
                 raise SystemExit(f"Corrupt ZIP entry in {path.name}: {corrupt_entry}")
