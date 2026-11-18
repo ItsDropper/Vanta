@@ -13,6 +13,16 @@ class MainUpdaterDispatchTest {
     }
 
     @Test
+    void recognizesUpdaterWorkspaceCleanupMode() {
+        assertTrue(Main.isUpdaterCleanupInvocation(new String[]{
+                "--vanta-cleanup-updater", "/tmp/Vanta-updater/session-test", "123"
+        }));
+        assertFalse(Main.isUpdaterCleanupInvocation(new String[]{
+                "--vanta-cleanup-updater", "/tmp/Vanta-updater/session-test"
+        }));
+    }
+
+    @Test
     void doesNotTreatNormalLauncherArgumentsAsUpdaterMode() {
         assertFalse(Main.isUpdaterInvocation(new String[0]));
         assertFalse(Main.isUpdaterInvocation(new String[]{"--capture-sidebar-screenshots"}));
