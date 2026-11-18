@@ -5,7 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -19,6 +21,8 @@ final class ReleaseManifest {
     private static final Pattern VERSION = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+");
     private static final Pattern SHA256 = Pattern.compile("(?i)[0-9a-f]{64}");
     private static final long MAX_ARTIFACT_BYTES = 1024L * 1024 * 1024;
+    private static final Set<String> PLATFORMS = Set.of(
+            "windows-x64", "linux-x64", "linux-aarch64", "macos-x64", "macos-aarch64");
 
     private ReleaseManifest() {}
 
@@ -27,7 +31,8 @@ final class ReleaseManifest {
         if (manifest == null || !manifest.isObject()) {
             throw new IOException("The Vanta release manifest must be a JSON object.");
         }
-        if (manifest.path("schema_version").asInt(-1) != SUPPORTED_SCHEMA_VERSION) {
+        if (!manifest.path("schema_version").isIntegralNumber()
+                || manifest.path("schema_version").asInt(-1) != SUPPORTED_SCHEMA_VERSION) {
             throw new IOException("The Vanta release manifest uses an unsupported schema version.");
         }
         if (!"vanta".equals(manifest.path("product").asText())) {
@@ -64,7 +69,14 @@ final class ReleaseManifest {
         }
 
         String releaseNotesUrl = requiredText(manifest, "release_notes_url");
-        validateGitHubUrl(releaseNotesUrl, "release notes");
+        URI releaseNotesUri = validateGitHubUrl(releaseNotesUrl, "release notes");
+        if (!("/ItsDropper/Vanta/releases/tag/v" + version).equals(releaseNotesUri.getPath())) {
+            throw new IOException("The release notes URL does not match the declared release version.");
+        }
+        if (UpdateInfo.compareVersions(minimumVersion, version) > 0) {
+            throw new IOException("The minimum launcher version cannot be newer than the release itself.");
+        }
+        validateManifestShape(manifest, version);
 
         JsonNode artifact = manifest.path("artifacts").path(platformId);
         if (!artifact.isObject()) {
@@ -95,6 +107,62 @@ final class ReleaseManifest {
 
         return new UpdateInfo(currentVersion, version, downloadUrl, null, releaseNotesUrl,
                 sha256, size, minimumVersion);
+    }
+
+
+    private static void validateManifestShape(JsonNode manifest, String version) throws IOException {
+        requireExactFields(manifest, Set.of(
+                "schema_version", "product", "channel", "version", "published_at",
+                "min_launcher_version", "release_notes_url", "artifacts"), "manifest");
+
+        JsonNode artifacts = manifest.path("artifacts");
+        if (!artifacts.isObject() || artifacts.size() != PLATFORMS.size()) {
+            throw new IOException("The release manifest must contain exactly the five supported platform artifacts.");
+        }
+        Set<String> actualPlatforms = new HashSet<>();
+        artifacts.fieldNames().forEachRemaining(actualPlatforms::add);
+        if (!actualPlatforms.equals(PLATFORMS)) {
+            throw new IOException("The release manifest does not contain the complete supported platform set.");
+        }
+
+        for (String platform : PLATFORMS) {
+            JsonNode artifact = artifacts.path(platform);
+            requireExactFields(artifact, Set.of("file_name", "download_url", "size_bytes", "sha256"),
+                    "artifact " + platform);
+
+            String fileName = requiredText(artifact, "file_name");
+            String expectedFileName = "Vanta-" + version + "-" + platform + ".zip";
+            if (!expectedFileName.equals(fileName)) {
+                throw new IOException("The release manifest contains an unexpected filename for " + platform + ".");
+            }
+
+            URI downloadUri = validateGitHubUrl(requiredText(artifact, "download_url"), "artifact");
+            String expectedPath = "/ItsDropper/Vanta/releases/download/v" + version + "/" + expectedFileName;
+            if (!expectedPath.equals(downloadUri.getPath())) {
+                throw new IOException("The release artifact URL does not match " + platform + ".");
+            }
+
+            JsonNode size = artifact.path("size_bytes");
+            if (!size.isIntegralNumber() || size.asLong(-1) <= 0 || size.asLong() > MAX_ARTIFACT_BYTES) {
+                throw new IOException("The release manifest contains an invalid size for " + platform + ".");
+            }
+            String digest = requiredText(artifact, "sha256");
+            if (!SHA256.matcher(digest).matches()) {
+                throw new IOException("The release manifest contains an invalid SHA-256 digest for " + platform + ".");
+            }
+        }
+    }
+
+    private static void requireExactFields(JsonNode node, Set<String> expected, String description)
+            throws IOException {
+        if (!node.isObject()) {
+            throw new IOException("The release manifest " + description + " must be a JSON object.");
+        }
+        Set<String> actual = new HashSet<>();
+        node.fieldNames().forEachRemaining(actual::add);
+        if (!actual.equals(expected)) {
+            throw new IOException("The release manifest " + description + " has missing or unknown fields.");
+        }
     }
 
     private static String requiredText(JsonNode node, String field) throws IOException {
