@@ -64,7 +64,9 @@ class UpdaterWorkspaceCleanupTest {
                 .redirectErrorStream(true)
                 .start();
 
-        UpdaterWorkspaceCleanup.schedule(workspace, updater.pid());
+        long updaterStartTime = updater.info().startInstant()
+                .map(java.time.Instant::toEpochMilli).orElse(-1L);
+        UpdaterWorkspaceCleanup.schedule(workspace, updater.pid(), updaterStartTime);
         assertTrue(Files.exists(workspace), "Workspace must remain while updater is alive");
         assertTrue(updater.waitFor(10, TimeUnit.SECONDS), "Test updater process did not exit");
 
