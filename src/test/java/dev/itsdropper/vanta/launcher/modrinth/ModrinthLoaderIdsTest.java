@@ -8,6 +8,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ModrinthLoaderIdsTest {
     @Test
+    void unsupportedCustomLoadersUseVersionMetadataInsteadOfSearchFacets() {
+        assertTrue(ModrinthClient.loaderFacetForSearch("Stein").isEmpty());
+        assertTrue(ModrinthClient.loaderFacetForSearch("NilLoader").isEmpty());
+        assertEquals(java.util.List.of("java-agent"),
+                ModrinthClient.loaderFacetForSearch("VantaLoader"));
+        assertEquals(java.util.List.of("neoforge"),
+                ModrinthClient.loaderFacetForSearch("NeoForge"));
+    }
+
+    @Test
     void mapsVantaLoaderToItsModrinthAgentIdentifier() {
         assertEquals("java-agent", ModrinthLoaderIds.normalize("VantaLoader"));
         assertEquals("stein", ModrinthLoaderIds.normalize("Stein"));
