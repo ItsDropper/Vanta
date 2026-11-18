@@ -105,6 +105,17 @@ class ReleaseManifestTest {
 
 
     @Test
+    void rejectsNonCanonicalVersionsAndSurroundingWhitespace() {
+        String leadingZero = MANIFEST.replace("\"version\": \"1.3.3\"", "\"version\": \"01.3.3\"");
+        assertThrows(IOException.class,
+                () -> ReleaseManifest.parse(read(leadingZero), "1.3.2", "windows-x64"));
+
+        String whitespace = MANIFEST.replace("\"product\": \"vanta\"", "\"product\": \" vanta\"");
+        assertThrows(IOException.class,
+                () -> ReleaseManifest.parse(read(whitespace), "1.3.2", "windows-x64"));
+    }
+
+    @Test
     void rejectsUnknownManifestFields() {
         String altered = MANIFEST.replace("\"channel\": \"stable\",",
                 "\"channel\": \"stable\", \"unsigned_extension\": true,");
