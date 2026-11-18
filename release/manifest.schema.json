@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ItsDropper/Vanta/releases/download/v1.0.0/manifest.schema.json",
+  "title": "Vanta Release Manifest",
+  "description": "Versioned metadata describing a Vanta stable release and its platform-specific update artifacts.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "product", "channel", "version", "published_at", "min_launcher_version", "release_notes_url", "artifacts"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "product": { "const": "vanta" },
+    "channel": { "const": "stable" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "published_at": { "type": "string", "format": "date-time" },
+    "min_launcher_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "release_notes_url": { "type": "string", "format": "uri", "pattern": "^https://github\\.com/ItsDropper/Vanta/releases/tag/" },
+    "artifacts": {
+      "type": "object",
+      "propertyNames": { "enum": ["windows-x64", "linux-x64", "linux-aarch64", "macos-x64", "macos-aarch64"] },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["file_name", "download_url", "size_bytes", "sha256"],
+        "properties": {
+          "file_name": { "type": "string", "pattern": "^Vanta-[0-9]+\\.[0-9]+\\.[0-9]+-(windows-x64|linux-x64|linux-aarch64|macos-x64|macos-aarch64)\\.zip$" },
+          "download_url": { "type": "string", "format": "uri", "pattern": "^https://github\\.com/ItsDropper/Vanta/releases/download/v" },
+          "size_bytes": { "type": "integer", "minimum": 1, "maximum": 1073741824 },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    }
+  }
+}
