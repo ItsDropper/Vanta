@@ -367,8 +367,8 @@ public final class UpdaterMain {
         }
 
         log("Updated Vanta passed its startup-health handshake.");
-        transaction.commit();
         replacementLauncherStarted = true;
+        transaction.commit();
         log("Update transaction committed; previous installation can now be removed.");
     }
 
