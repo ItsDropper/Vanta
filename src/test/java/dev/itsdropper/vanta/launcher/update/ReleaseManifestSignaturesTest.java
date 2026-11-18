@@ -66,6 +66,16 @@ class ReleaseManifestSignaturesTest {
     }
 
     @Test
+    void pinnedTrustStoreNeverAcceptsAnUnknownSigner() throws Exception {
+        byte[] payload = "manifest".getBytes(StandardCharsets.UTF_8);
+        byte[] envelope = ("{\"schema_version\":1,\"algorithm\":\"Ed25519\","
+                + "\"key_id\":\"not-pinned-01\",\"signature\":\""
+                + Base64.getEncoder().encodeToString(new byte[64]) + "\"}")
+                .getBytes(StandardCharsets.UTF_8);
+        assertThrows(IOException.class, () -> ReleaseManifestSignatures.verifyPinned(payload, envelope));
+    }
+
+    @Test
     void parsesKeyringAndRejectsDuplicateIds() throws Exception {
         KeyPair pair = KeyPairGenerator.getInstance("Ed25519").generateKeyPair();
         String key = rawPublicKey(pair);
