@@ -40,9 +40,13 @@ public class Main extends Application {
             return;
         }
 
+        // Install shutdown handling before showing the splash screen. The
+        // launcher view and its services are initialized asynchronously.
+        stage.addEventHandler(javafx.stage.WindowEvent.WINDOW_CLOSE_REQUEST,
+                event -> LauncherProcessLifecycle.exit());
+
         // Keep Vanta alive while its window is intentionally hidden during a
-        // Minecraft session. LauncherProcessLifecycle explicitly terminates
-        // the JVM when the user closes the launcher window.
+        // Minecraft session. The close handler above always terminates the JVM.
         javafx.application.Platform.setImplicitExit(false);
 
         RuntimeSecurityPolicy.getInstance().initialize();
