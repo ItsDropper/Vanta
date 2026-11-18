@@ -12,7 +12,7 @@ on:
         type: string
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: platform-release-${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
@@ -73,6 +73,10 @@ jobs:
     name: Generate manifest and publish GitHub release
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      attestations: write
+      id-token: write
     steps:
       - name: Check out release tooling
         uses: actions/checkout@v4
@@ -108,6 +112,11 @@ jobs:
             --channel stable \
             --assets-dir release-assets \
             --output release-assets/manifest.json
+
+      - name: Attest release packages and manifest
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: release-assets/*
 
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
