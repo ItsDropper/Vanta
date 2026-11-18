@@ -97,128 +97,113 @@ public final class UpdaterLauncher {
         verifyWritableInstallParent(absoluteApplication);
 
         Path tempUpdaterDirectory = createTemporaryUpdaterDirectory();
-        log("Update archive: " + absoluteZip);
-        log("Application image: " + absoluteApplication);
-        log("Updater workspace: " + tempUpdaterDirectory);
-
-        /*
-         * Run the updater from a private copy of the complete application image.
-         * This avoids Windows executable/DLL locks and avoids relying on a
-         * standalone java/javaw binary that jpackage does not guarantee to ship.
-         * The helper can then replace the original image on every supported OS.
-         */
-        Path helperApplication = tempUpdaterDirectory.resolve("application");
-        copyApplicationImage(absoluteApplication, helperApplication);
-        Path helperLauncher = ApplicationLocator.getLauncherExecutable(helperApplication);
-        if (!Files.isRegularFile(helperLauncher) || !Files.isExecutable(helperLauncher)) {
-            throw new IOException("Copied updater launcher is missing or not executable: " + helperLauncher);
-        }
-
-        Path readyFile = tempUpdaterDirectory.resolve("updater-ready");
-        List<String> command = List.of(
-                helperLauncher.toString(),
-                "--vanta-updater",
-                Long.toString(processId),
-                absoluteZip.toString(),
-                absoluteApplication.toString(),
-                readyFile.toString()
-        );
-
-        log("Copied application image for isolated updater: " + helperApplication);
-        log("Updater helper executable: " + helperLauncher);
-
-        for (int i = 0; i < command.size(); i++) {
-            log("[" + i + "] " + command.get(i));
-        }
-
-        log("Starting updater process and waiting for original Vanta PID " + processId + " to exit.");
+        Process helperProcess = null;
+        boolean handoffReady = false;
         try {
+            log("Update archive: " + absoluteZip);
+            log("Application image: " + absoluteApplication);
+            log("Updater workspace: " + tempUpdaterDirectory);
 
-            Process process =
-                    new ProcessBuilder(command)
-                            .directory(
-                                    tempUpdaterDirectory.toFile()
-                            )
-                            .redirectErrorStream(true)
-                            .redirectOutput(
-                                    ProcessBuilder.Redirect.appendTo(
-                                            getUpdaterOutputLog().toFile()
-                                    )
-                            )
-                            .start();
+            Path helperApplication = tempUpdaterDirectory.resolve("application");
+            copyApplicationImage(absoluteApplication, helperApplication);
+            Path helperLauncher = ApplicationLocator.getLauncherExecutable(helperApplication);
+            if (!Files.isRegularFile(helperLauncher) || !Files.isExecutable(helperLauncher)) {
+                throw new IOException("Copied updater launcher is missing or not executable: " + helperLauncher);
+            }
 
-            log("Updater process PID: " + process.pid());
-            log("Updater command: " + process.info().command().orElse("<unknown>"));
+            Path readyFile = tempUpdaterDirectory.resolve("updater-ready");
+            List<String> command = List.of(
+                    helperLauncher.toString(),
+                    "--vanta-updater",
+                    Long.toString(processId),
+                    absoluteZip.toString(),
+                    absoluteApplication.toString(),
+                    readyFile.toString()
+            );
+
+            log("Copied application image for isolated updater: " + helperApplication);
+            log("Updater helper executable: " + helperLauncher);
+            for (int i = 0; i < command.size(); i++) {
+                log("[" + i + "] " + command.get(i));
+            }
+
+            log("Starting updater process and waiting for original Vanta PID " + processId + " to exit.");
+            helperProcess = new ProcessBuilder(command)
+                    .directory(tempUpdaterDirectory.toFile())
+                    .redirectErrorStream(true)
+                    .redirectOutput(ProcessBuilder.Redirect.appendTo(getUpdaterOutputLog().toFile()))
+                    .start();
+
+            log("Updater process PID: " + helperProcess.pid());
+            log("Updater command: " + helperProcess.info().command().orElse("<unknown>"));
             log("Waiting for updater readiness handshake.");
 
             long readyDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
             while (!Files.isRegularFile(readyFile)) {
-                if (!process.isAlive()) {
+                if (!helperProcess.isAlive()) {
                     throw new IOException("Updater helper exited before becoming ready (exit code "
-                            + process.exitValue() + "). See " + getUpdaterOutputLog());
+                            + helperProcess.exitValue() + "). See " + getUpdaterOutputLog());
                 }
                 if (System.nanoTime() >= readyDeadline) {
-                    process.destroyForcibly();
                     throw new IOException("Updater helper did not become ready within 15 seconds.");
                 }
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
                 } catch (InterruptedException interrupted) {
-                    process.destroyForcibly();
                     Thread.currentThread().interrupt();
                     throw new IOException("Interrupted while waiting for updater readiness.", interrupted);
                 }
             }
 
+            if (!helperProcess.isAlive()) {
+                throw new IOException("Updater helper exited immediately after its readiness handshake. See "
+                        + getUpdaterOutputLog());
+            }
+
+            handoffReady = true;
             log("SUCCESS: updater helper validated its inputs and is waiting for the original process to exit.");
-
-        } catch (Exception e) {
-
-            log(
-                    "========================================"
-            );
-
-            log(
-                    "FAILED TO START UPDATER"
-            );
-
-            log(
-                    "Exception class: "
-                            + e.getClass().getName()
-            );
-
-            log(
-                    "Exception message: "
-                            + e.getMessage()
-            );
-
-            StringWriter stackTrace =
-                    new StringWriter();
-
-            e.printStackTrace(
-                    new PrintWriter(stackTrace)
-            );
-
-            log(
-                    stackTrace.toString()
-            );
-
-            log(
-                    "========================================"
-            );
-
-            throw e;
+            log("UpdaterLauncher.start() FINISHED. Vanta can now shut down.");
+            log("========================================");
+        } catch (Exception failure) {
+            log("FAILED TO START UPDATER: " + failure);
+            terminateHelperProcess(helperProcess);
+            if (!handoffReady) {
+                try {
+                    deleteTemporaryUpdaterDirectory(tempUpdaterDirectory);
+                } catch (IOException cleanupFailure) {
+                    failure.addSuppressed(cleanupFailure);
+                    log("Could not remove failed updater workspace: " + cleanupFailure);
+                }
+            }
+            throw failure;
         }
+    }
 
-        log(
-                "UpdaterLauncher.start() FINISHED."
-        );
+    private static void terminateHelperProcess(Process process) {
+        if (process == null || !process.isAlive()) {
+            return;
+        }
+        process.descendants().forEach(ProcessHandle::destroyForcibly);
+        process.destroyForcibly();
+        try {
+            if (!process.waitFor(5, TimeUnit.SECONDS)) {
+                log("Updater helper did not exit after forced termination: " + process.pid());
+            }
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            log("Interrupted while reaping updater helper process " + process.pid());
+        }
+    }
 
-        log(
-                "Vanta can now shut down."
-        );
-
-        log("========================================");
+    private static void deleteTemporaryUpdaterDirectory(Path directory) throws IOException {
+        if (directory == null || !Files.exists(directory)) {
+            return;
+        }
+        try (var paths = Files.walk(directory)) {
+            for (Path path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) {
+                Files.deleteIfExists(path);
+            }
+        }
     }
 
     private static Path createTemporaryUpdaterDirectory()
