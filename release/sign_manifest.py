@@ -37,7 +37,7 @@ def validate_manifest(payload: bytes) -> None:
     if not payload or len(payload) > MAX_MANIFEST_BYTES:
         raise ValueError("Manifest must be between 1 byte and 1 MiB.")
     try:
-        manifest = json.loads(payload)
+        manifest = json.loads(payload, object_pairs_hook=_reject_duplicate_keys)
     except (UnicodeDecodeError, json.JSONDecodeError) as error:
         raise ValueError("Manifest is not valid UTF-8 JSON.") from error
     schema_path = Path(__file__).with_name("manifest.schema.json")
