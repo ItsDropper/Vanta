@@ -160,6 +160,26 @@ public class ModrinthClient {
         return List.of(ModrinthLoaderIds.normalize(loader));
     }
 
+    private static final long VERSION_FILTER_CACHE_TTL_MILLIS = Duration.ofMinutes(5).toMillis();
+    private static final java.util.Map<String, VersionFilterCacheEntry> VERSION_FILTER_CACHE =
+            new java.util.concurrent.ConcurrentHashMap<>();
+
+    private record VersionFilterCacheEntry(List<ModrinthVersion> versions, long fetchedAtMillis) {}
+
+    private List<ModrinthVersion> getVersionsForCompatibility(String projectId)
+            throws IOException, InterruptedException {
+        long now = System.currentTimeMillis();
+        VersionFilterCacheEntry cached = VERSION_FILTER_CACHE.get(projectId);
+        if (cached != null && now - cached.fetchedAtMillis() < VERSION_FILTER_CACHE_TTL_MILLIS) {
+            return cached.versions();
+        }
+
+        List<ModrinthVersion> versions = getVersions(projectId);
+        List<ModrinthVersion> immutable = versions == null ? List.of() : List.copyOf(versions);
+        VERSION_FILTER_CACHE.put(projectId, new VersionFilterCacheEntry(immutable, System.currentTimeMillis()));
+        return immutable;
+    }
+
     private static final long TAG_CACHE_TTL_MILLIS = java.time.Duration.ofHours(6).toMillis();
     private static final java.util.Map<String, TagCacheEntry> TAG_CACHE =
             new java.util.concurrent.ConcurrentHashMap<>();
@@ -309,7 +329,8 @@ public class ModrinthClient {
             String minecraftVersion
     ) throws IOException, InterruptedException {
         if (loader == null || loader.isBlank()
-                || ModrinthLoaderIds.normalize(loader).equals("minecraft")) {
+                || ModrinthLoaderIds.normalize(loader).equals("minecraft")
+                || ModrinthLoaderIds.supportsSearchFacet(loader)) {
             return result;
         }
         return filterLoaderVersionCompatibility(
@@ -343,7 +364,7 @@ public class ModrinthClient {
         for (ModrinthSearchHit hit : result.getHits()) {
             if (hit == null || hit.getProjectId() == null || hit.getProjectId().isBlank()) continue;
 
-            boolean supported = getVersions(hit.getProjectId()).stream().anyMatch(version -> {
+            boolean supported = getVersionsForCompatibility(hit.getProjectId()).stream().anyMatch(version -> {
                 boolean loaderMatches = requestedLoaders.isEmpty()
                         || (version.getLoaders() != null && version.getLoaders().stream()
                         .map(ModrinthLoaderIds::normalize).anyMatch(requestedLoaders::contains));
