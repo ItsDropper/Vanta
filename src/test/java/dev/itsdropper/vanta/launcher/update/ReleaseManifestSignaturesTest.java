@@ -14,12 +14,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class ReleaseManifestSignaturesTest {
     private static final byte[] DOMAIN =
-            "VANTA-RELEASE-MANIFEST-V1\\n".getBytes(StandardCharsets.US_ASCII);
+            "VANTA-RELEASE-MANIFEST-V1\n".getBytes(StandardCharsets.US_ASCII);
 
     @Test
     void verifiesExactManifestBytesUsingPinnedKeyId() throws Exception {
         KeyPair pair = KeyPairGenerator.getInstance("Ed25519").generateKeyPair();
-        byte[] payload = "{\\"version\\":\\"1.2.3\\"}".getBytes(StandardCharsets.UTF_8);
+        byte[] payload = "{\"version\":\"1.2.3\"}".getBytes(StandardCharsets.UTF_8);
         assertDoesNotThrow(() -> ReleaseManifestSignatures.verify(payload,
                 envelope("release-test-01", sign(payload, pair)),
                 Map.of("release-test-01", rawPublicKey(pair))));
@@ -51,14 +51,14 @@ class ReleaseManifestSignaturesTest {
         KeyPair pair = KeyPairGenerator.getInstance("Ed25519").generateKeyPair();
         byte[] payload = "manifest".getBytes(StandardCharsets.UTF_8);
         String signature = Base64.getEncoder().encodeToString(sign(payload, pair));
-        String duplicate = "{\\"schema_version\\":1,\\"algorithm\\":\\"Ed25519\\","
-                + "\\"key_id\\":\\"release-test-01\\",\\"key_id\\":\\"release-test-02\\","
-                + "\\"signature\\":\\"" + signature + "\\"}";
+        String duplicate = "{\"schema_version\":1,\"algorithm\":\"Ed25519\","
+                + "\"key_id\":\"release-test-01\",\"key_id\":\"release-test-02\","
+                + "\"signature\":\"" + signature + "\"}";
         assertThrows(IOException.class, () -> ReleaseManifestSignatures.verify(payload,
                 duplicate.getBytes(StandardCharsets.UTF_8), Map.of("release-test-01", rawPublicKey(pair))));
-        String extra = "{\\"schema_version\\":1,\\"algorithm\\":\\"Ed25519\\","
-                + "\\"key_id\\":\\"release-test-01\\",\\"signature\\":\\""
-                + signature + "\\",\\"extra\\":true}";
+        String extra = "{\"schema_version\":1,\"algorithm\":\"Ed25519\","
+                + "\"key_id\":\"release-test-01\",\"signature\":\""
+                + signature + "\",\"extra\":true}";
         assertThrows(IOException.class, () -> ReleaseManifestSignatures.verify(payload,
                 extra.getBytes(StandardCharsets.UTF_8), Map.of("release-test-01", rawPublicKey(pair))));
         assertThrows(IOException.class, () -> ReleaseManifestSignatures.verify(payload,
@@ -69,18 +69,18 @@ class ReleaseManifestSignaturesTest {
     void parsesKeyringAndRejectsDuplicateIds() throws Exception {
         KeyPair pair = KeyPairGenerator.getInstance("Ed25519").generateKeyPair();
         String key = rawPublicKey(pair);
-        String entry = "{\\"key_id\\":\\"release-test-01\\",\\"public_key\\":\\"" + key + "\\"}";
-        byte[] valid = ("{\\"schema_version\\":1,\\"keys\\":[" + entry + "]}")
+        String entry = "{\"key_id\":\"release-test-01\",\"public_key\":\"" + key + "\"}";
+        byte[] valid = ("{\"schema_version\":1,\"keys\":[" + entry + "]}")
                 .getBytes(StandardCharsets.UTF_8);
         assertEquals(Map.of("release-test-01", key), ReleaseManifestSignatures.parseKeyring(valid));
-        byte[] duplicate = ("{\\"schema_version\\":1,\\"keys\\":[" + entry + "," + entry + "]}")
+        byte[] duplicate = ("{\"schema_version\":1,\"keys\":[" + entry + "," + entry + "]}")
                 .getBytes(StandardCharsets.UTF_8);
         assertThrows(IOException.class, () -> ReleaseManifestSignatures.parseKeyring(duplicate));
     }
 
     private static byte[] envelope(String keyId, byte[] signature) {
-        String json = "{\\"schema_version\\":1,\\"algorithm\\":\\"Ed25519\\",\\"key_id\\":\\""
-                + keyId + "\\",\\"signature\\":\\"" + Base64.getEncoder().encodeToString(signature) + "\\"}";
+        String json = "{\"schema_version\":1,\"algorithm\":\"Ed25519\",\"key_id\":\""
+                + keyId + "\",\"signature\":\"" + Base64.getEncoder().encodeToString(signature) + "\"}";
         return json.getBytes(StandardCharsets.UTF_8);
     }
 
