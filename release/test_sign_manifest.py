@@ -112,7 +112,7 @@ class SignManifestTests(unittest.TestCase):
             "release_notes_url": "https://github.com/ItsDropper/Vanta/releases/tag/v1.2.3",
             "artifacts": artifacts,
         }
-        payload = (json.dumps(manifest, indent=2) + "\\n").encode("utf-8")
+        payload = (json.dumps(manifest, indent=2) + "\n").encode("utf-8")
         envelope = sign_manifest.create_signature(payload, self.private_key, "release-test-01")
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
