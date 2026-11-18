@@ -215,7 +215,24 @@ public class Main extends Application {
         return args != null && args.length > 0 && "--vanta-updater".equals(args[0]);
     }
 
+    static boolean isUpdaterCleanupInvocation(String[] args) {
+        return args != null && args.length == 3 && "--vanta-cleanup-updater".equals(args[0]);
+    }
+
     public static void main(String[] args) {
+        if (isUpdaterCleanupInvocation(args)) {
+            try {
+                dev.itsdropper.vanta.launcher.update.UpdaterWorkspaceCleanup.schedule(
+                        Path.of(args[1]),
+                        Long.parseLong(args[2])
+                );
+            } catch (RuntimeException invalidCleanupArguments) {
+                System.err.println("[Vanta Updater Cleanup] Ignoring invalid cleanup arguments.");
+            }
+            launch(new String[0]);
+            return;
+        }
+
         if (isUpdaterInvocation(args)) {
             dev.itsdropper.vanta.launcher.update.UpdaterMain.main(
                     java.util.Arrays.copyOfRange(args, 1, args.length)
