@@ -33,6 +33,7 @@ public class ImportInstanceView extends VBox {
 
     private final Button importButton;
     private final Button prismImportButton;
+    private final Button modrinthAppImportButton;
     private final Button backButton;
     private final Label statusLabel;
     private final ProgressIndicator progress;
@@ -154,6 +155,15 @@ public class ImportInstanceView extends VBox {
                 Localization.text("prismImport.description")));
         prismImportButton.setOnAction(event -> choosePrismDirectory());
 
+        modrinthAppImportButton = new Button(Localization.text("modrinthAppImport.button"));
+        modrinthAppImportButton.getStyleClass().addAll("secondary-button", "import-modrinth-app-action");
+        modrinthAppImportButton.setAccessibleText(Localization.text("modrinthAppImport.button"));
+        modrinthAppImportButton.setPrefHeight(46);
+        modrinthAppImportButton.setPrefWidth(220);
+        modrinthAppImportButton.setTooltip(new javafx.scene.control.Tooltip(
+                Localization.text("modrinthAppImport.description")));
+        modrinthAppImportButton.setOnAction(event -> chooseModrinthAppDirectory());
+
         // =========================================================
         // PROGRESS
         // =========================================================
@@ -224,7 +234,7 @@ public class ImportInstanceView extends VBox {
                         onBack.run()
         );
 
-        FlowPane actions = new FlowPane(12, 8, backButton, prismImportButton, importButton);
+        FlowPane actions = new FlowPane(12, 8, backButton, prismImportButton, modrinthAppImportButton, importButton);
         actions.setAlignment(Pos.CENTER_RIGHT);
         actions.setMaxWidth(Double.MAX_VALUE);
 
@@ -303,9 +313,62 @@ public class ImportInstanceView extends VBox {
         });
     }
 
+    private void chooseModrinthAppDirectory() {
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle(Localization.text("modrinthAppImport.chooser"));
+        Path detected = dev.itsdropper.vanta.launcher.instance.ModrinthAppImporter.findDefaultAppDirectory();
+        if (detected != null && java.nio.file.Files.isDirectory(detected)) {
+            chooser.setInitialDirectory(detected.toFile());
+        }
+
+        Window window = getScene() == null ? null : getScene().getWindow();
+        File selected = chooser.showDialog(window);
+        if (selected == null) return;
+        Path root = selected.toPath();
+
+        if (!dev.itsdropper.vanta.launcher.instance.ModrinthAppImporter.looksLikeAppDirectory(root)) {
+            statusLabel.setText(Localization.text("modrinthAppImport.invalid"));
+            return;
+        }
+
+        setImportBusy(true);
+        statusLabel.setText(Localization.text("modrinthAppImport.scanning"));
+        UiExecutor.shared().execute(() -> {
+            try {
+                var result = dev.itsdropper.vanta.launcher.instance.ModrinthAppImporter.importAll(
+                        root,
+                        message -> UiExecutor.shared().dispatchToUi(() -> statusLabel.setText(message))
+                );
+                UiExecutor.shared().dispatchToUi(() -> {
+                    String summary = Localization.text("modrinthAppImport.complete")
+                            + " " + result.importedInstances() + ".";
+                    if (result.globalSettingsImported()) {
+                        summary += " " + Localization.text("modrinthAppImport.settingsApplied");
+                    }
+                    if (!result.skippedInstances().isEmpty()) {
+                        summary += "\\n" + Localization.text("modrinthAppImport.skipped")
+                                + "\\n" + String.join("\\n", result.skippedInstances());
+                    }
+                    statusLabel.setText(summary);
+                    setImportBusy(false);
+                    if (onPrismImported != null) onPrismImported.accept(summary);
+                    else if (result.importedInstances() > 0) onImported.run();
+                });
+            } catch (Throwable failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    statusLabel.setText(Localization.text("modrinthAppImport.failed")
+                            + " " + (failure.getMessage() == null
+                            ? failure.getClass().getSimpleName() : failure.getMessage()));
+                    setImportBusy(false);
+                });
+            }
+        });
+    }
+
     private void setImportBusy(boolean busy) {
         importButton.setDisable(busy);
         prismImportButton.setDisable(busy);
+        modrinthAppImportButton.setDisable(busy);
         backButton.setDisable(busy);
         progress.setVisible(busy);
         progress.setManaged(busy);
