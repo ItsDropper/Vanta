@@ -6,6 +6,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
@@ -75,7 +76,7 @@ public final class UpdateTransaction {
     public void markSwapped() throws IOException { writeState("SWAPPED"); }
 
     public void commit() throws IOException {
-        if (!Files.isRegularFile(healthMarker)) {
+        if (!isHealthyMarker(healthMarker)) {
             throw new IOException("Cannot commit before Vanta reports healthy startup.");
         }
         writeState("HEALTHY");
@@ -203,7 +204,7 @@ public final class UpdateTransaction {
         }
 
         boolean installedPayloadValid = ApplicationLocator.isSupportedInstallation(app);
-        if (Files.isRegularFile(marker) && installedPayloadValid) {
+        if (isHealthyMarker(marker) && installedPayloadValid) {
             cleanupCommitted(stage, backup, marker, journal);
             return;
         }
@@ -240,11 +241,11 @@ public final class UpdateTransaction {
                                                TimeUnit unit) throws InterruptedException {
         long deadline = System.nanoTime() + unit.toNanos(timeout);
         while (System.nanoTime() < deadline) {
-            if (Files.isRegularFile(marker)) return true;
+            if (isHealthyMarker(marker)) return true;
             if (process != null && !process.isAlive()) return false;
             TimeUnit.MILLISECONDS.sleep(100);
         }
-        return Files.isRegularFile(marker);
+        return isHealthyMarker(marker);
     }
 
     private void writeState(String state) throws IOException {
@@ -270,13 +271,18 @@ public final class UpdateTransaction {
         }
     }
 
+    private static boolean isHealthyMarker(Path marker) {
+        return marker != null && Files.isRegularFile(marker, LinkOption.NOFOLLOW_LINKS)
+                && !Files.isSymbolicLink(marker);
+    }
+
     private static boolean isManagedHealthMarker(Path marker, boolean requireExistingWorkspace) {
         if (marker == null || marker.getFileName() == null
                 || !"vanta-update-health".equals(marker.getFileName().toString())) return false;
         Path workspace = marker.getParent();
         if (workspace == null || workspace.getFileName() == null
                 || !workspace.getFileName().toString().startsWith("session-")
-                || Files.isSymbolicLink(workspace)) return false;
+                || Files.isSymbolicLink(workspace) || Files.isSymbolicLink(marker)) return false;
         Path expectedRoot = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater")
                 .toAbsolutePath().normalize();
         if (!expectedRoot.equals(workspace.getParent())) return false;
