@@ -64,9 +64,16 @@ public class UpdateService {
     public UpdateInfo getVersion(String currentVersion, String targetVersion)
             throws IOException, InterruptedException {
         String normalized = normalizeTargetVersion(targetVersion);
-        String releaseBase = RELEASE_DOWNLOAD_BASE + "v" + normalized + "/";
-        return fetchSignedManifest(currentVersion, releaseBase + "manifest.json",
-                releaseBase + "manifest.sig", normalized);
+        return fetchSignedManifest(currentVersion, releaseManifestUrl(normalized),
+                releaseSignatureUrl(normalized), normalized);
+    }
+
+    static String releaseManifestUrl(String version) {
+        return RELEASE_DOWNLOAD_BASE + "v" + normalizeTargetVersion(version) + "/manifest.json";
+    }
+
+    static String releaseSignatureUrl(String version) {
+        return RELEASE_DOWNLOAD_BASE + "v" + normalizeTargetVersion(version) + "/manifest.sig";
     }
 
     public List<UpdateInfo> getAvailableVersions(String currentVersion)
