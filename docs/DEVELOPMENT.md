@@ -38,6 +38,8 @@ For host-specific distribution and application-image checks, use the tasks confi
 
 On Windows, `platformAppImage` creates the host's jpackage application image; on Linux/macOS use the platform tasks available to that host. Do not assume a cross-OS jpackage image can be produced from a different host. The CI workflow is the source of truth for the current matrix and task invocations.
 
+The `platform-release.yml` workflow can be triggered manually from GitHub Actions or by pushing a version tag. It builds the five supported platform images, verifies their SHA-256 sidecars, generates a release manifest, and publishes the assets only after every platform build succeeds. See [Release manifests](RELEASE_MANIFESTS.md) for the manifest contract, compatibility behavior and current signing limitation.
+
 The first build may download Gradle dependencies. A successful compile is not a substitute for testing the affected runtime behavior. Loader-specific integration status is documented in [Loader Compatibility](LOADER_COMPATIBILITY.md), and implementation paths are mapped in [Loader Implementations](LOADER_IMPLEMENTATIONS.md).
 
 ## UI screenshots
