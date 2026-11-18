@@ -59,13 +59,21 @@ public class UpdateInfo {
 
     private static int[] parseVersion(String version) {
         String cleaned = version.trim().replaceFirst("^[vV]", "");
-        String[] parts = cleaned.split("\\.");
+        java.util.regex.Matcher matcher = java.util.regex.Pattern
+                .compile("^(\\\\d+)(?:\\\\.(\\\\d+))?(?:\\\\.(\\\\d+))?(?:[-+][0-9A-Za-z.-]*|[A-Za-z][0-9A-Za-z.-]*)?$")
+                .matcher(cleaned);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Invalid version: " + version);
+        }
         int[] result = new int[3];
-        for (int i = 0; i < Math.min(parts.length, 3); i++) {
-            try {
-                result[i] = Integer.parseInt(parts[i]);
-            } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Invalid version: " + version, e);
+        for (int i = 0; i < result.length; i++) {
+            String part = matcher.group(i + 1);
+            if (part != null) {
+                try {
+                    result[i] = Integer.parseInt(part);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid version: " + version, e);
+                }
             }
         }
         return result;
