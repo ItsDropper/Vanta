@@ -9,7 +9,7 @@ import java.net.http.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.security.*;
-import java.security.spec.X509EncodedKeySpec;
+
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -22,7 +22,6 @@ public final class RuntimeSecurityPolicy {
     private static final URI MANIFEST=URI.create("https://raw.githubusercontent.com/ItsDropper/Vanta/main/security/runtime-policy.json");
     private static final URI SIGNATURE=URI.create("https://raw.githubusercontent.com/ItsDropper/Vanta/main/security/runtime-policy.sig");
     private static final String PUBLIC_KEY="mzWz277tLKqkSi2NzgaH9k/uKLHcMw/SJzP6X/JeBVE=";
-    private static final byte[] PREFIX={0x30,0x2a,0x30,0x05,0x06,0x03,0x2b,0x65,0x70,0x03,0x21,0x00};
     private static final int LIMIT=65536;
     private static final ObjectMapper JSON=new ObjectMapper();
     private static final RuntimeSecurityPolicy INSTANCE=new RuntimeSecurityPolicy();
@@ -104,15 +103,16 @@ public final class RuntimeSecurityPolicy {
         finally{Files.deleteIfExists(tmp);}
     }
     static List<Rule> parseAndVerify(byte[] payload,byte[] signature,Clock clock)throws Exception{
-        byte[] raw=Base64.getDecoder().decode(PUBLIC_KEY),encoded=new byte[PREFIX.length+raw.length];
-        System.arraycopy(PREFIX,0,encoded,0,PREFIX.length);System.arraycopy(raw,0,encoded,PREFIX.length,raw.length);
-        PublicKey key=KeyFactory.getInstance("Ed25519").generatePublic(new X509EncodedKeySpec(encoded));
+        PublicKey key=Ed25519Signatures.decodePublicKey(PUBLIC_KEY);
         return parseAndVerify(payload,signature,clock,key);
     }
     static List<Rule> parseAndVerify(byte[] payload,byte[] signature,Clock clock,PublicKey key)throws Exception{
         if(payload==null||payload.length==0||payload.length>LIMIT)throw new IOException("Invalid policy size");
-        Signature verifier=Signature.getInstance("Ed25519");verifier.initVerify(key);verifier.update(payload);
-        if(signature==null||!verifier.verify(signature))throw new IOException("Invalid policy signature");
+        try {
+            Ed25519Signatures.verify(payload, signature, key);
+        } catch (GeneralSecurityException invalidSignature) {
+            throw new IOException("Invalid policy signature", invalidSignature);
+        }
         JsonNode root=JSON.readTree(payload);
         if(root.path("schemaVersion").asInt(-1)!=1||root.path("sequence").asLong(0)<1||!root.path("rules").isArray())throw new IOException("Invalid policy schema");
         Instant issued=Instant.parse(text(root,"issuedAt")),expires=Instant.parse(text(root,"expiresAt")),now=clock.instant();
