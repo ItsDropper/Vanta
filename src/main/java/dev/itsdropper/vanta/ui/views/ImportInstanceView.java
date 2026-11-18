@@ -347,8 +347,8 @@ public class ImportInstanceView extends VBox {
                         summary += " " + Localization.text("modrinthAppImport.settingsApplied");
                     }
                     if (!result.skippedInstances().isEmpty()) {
-                        summary += "\\n" + Localization.text("modrinthAppImport.skipped")
-                                + "\\n" + String.join("\\n", result.skippedInstances());
+                        summary += "\n" + Localization.text("modrinthAppImport.skipped")
+                                + "\n" + String.join("\n", result.skippedInstances());
                     }
                     statusLabel.setText(summary);
                     setImportBusy(false);
