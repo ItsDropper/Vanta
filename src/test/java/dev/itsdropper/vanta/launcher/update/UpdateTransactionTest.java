@@ -30,6 +30,20 @@ class UpdateTransactionTest {
     }
 
     @Test
+    void crashBetweenDirectoryMovesCanRestoreWhenApplicationPathIsMissing() throws Exception {
+        Fixture fixture = new Fixture();
+        fixture.begin();
+
+        Files.move(fixture.application, fixture.backup);
+
+        UpdateTransaction.recoverBeforeLaunch(fixture.application);
+
+        assertEquals("old", Files.readString(fixture.application.resolve("version.txt")));
+        assertFalse(Files.exists(fixture.backup));
+        assertFalse(Files.exists(fixture.journal()));
+    }
+
+    @Test
     void healthyMarkerCommitsNewInstallationAfterUpdaterCrash() throws Exception {
         Fixture fixture = new Fixture();
         fixture.begin();
