@@ -256,68 +256,37 @@ public final class UpdaterMain {
             );
         }
 
-        Path stagingDirectory =
-                parent.resolve(
-                        applicationDirectory.getFileName()
-                                + ".update"
-                );
+        Path stagingDirectory = parent.resolve(applicationDirectory.getFileName() + ".update");
+        Path activePayload = ApplicationLocator.getApplicationPayloadDirectoryForRecovery(applicationDirectory);
+        Path stagedPayload = stagingDirectory.resolve(
+                ApplicationLocator.getApplicationPayloadRelativePath(applicationDirectory));
+        Path backupPayload = activePayload.resolveSibling(activePayload.getFileName() + ".backup");
 
-        Path backupDirectory =
-                parent.resolve(
-                        applicationDirectory.getFileName()
-                                + ".backup"
-                );
+        log("Staging directory: " + stagingDirectory);
+        log("Active payload: " + activePayload);
+        log("Staged payload: " + stagedPayload);
+        log("Backup payload: " + backupPayload);
 
-        log(
-                "Staging directory: "
-                        + stagingDirectory
-        );
-
-        log(
-                "Backup directory: "
-                        + backupDirectory
-        );
-
-        log("---------- CLEANING OLD STAGING ----------");
-
-        deleteDirectory(
-                stagingDirectory
-        );
-
-        deleteDirectory(
-                backupDirectory
-        );
+        log("---------- PREPARING UPDATE TRANSACTION ----------");
+        if (Files.exists(stagingDirectory)) {
+            deleteDirectory(stagingDirectory);
+        }
 
         Path healthMarker = helperWorkspace.resolve("vanta-update-health");
         UpdateTransaction transaction = UpdateTransaction.begin(
-                applicationDirectory, stagingDirectory, backupDirectory, healthMarker);
+                applicationDirectory, stagingDirectory, activePayload, stagedPayload, backupPayload, healthMarker);
 
         log("---------- EXTRACTING UPDATE ----------");
-
         Files.createDirectories(stagingDirectory);
         extractZip(zip, stagingDirectory);
-
         restoreExecutablePermissions(stagingDirectory);
 
-        log(
-                "ZIP extraction completed and native executable permissions restored."
-        );
-
-        verifyExtractedApplication(
-                stagingDirectory
-        );
-
-        log("Extracted application verified.");
+        log("ZIP extraction completed and executable permissions restored.");
+        verifyExtractedApplication(stagingDirectory);
         transaction.markStaged();
 
-        log("---------- REPLACING APPLICATION ----------");
-
-        moveApplication(
-                applicationDirectory,
-                stagingDirectory,
-                backupDirectory
-        );
-
+        log("---------- REPLACING APPLICATION PAYLOAD ----------");
+        moveApplication(activePayload, stagedPayload, backupPayload);
         transaction.markSwapped();
 
         log("Application replacement completed.");
@@ -591,151 +560,52 @@ public final class UpdaterMain {
     }
 
     private static void moveApplication(
-            Path applicationDirectory,
-            Path stagingDirectory,
-            Path backupDirectory
+            Path activePayload,
+            Path stagedPayload,
+            Path backupPayload
     ) throws IOException {
+        long startedAt = System.currentTimeMillis();
+        IOException lastError = null;
 
-        long start =
-                System.currentTimeMillis();
-
-        IOException lastError =
-                null;
-
-        while (true) {
-
+        while (System.currentTimeMillis() - startedAt < FILE_RELEASE_TIMEOUT_MS) {
             try {
-
-                log(
-                        "Attempting application replacement."
-                );
-
-                log(
-                        "Moving current Vanta to backup."
-                );
-
-                moveDirectory(
-                        applicationDirectory,
-                        backupDirectory
-                );
-
-                log(
-                        "Current Vanta moved to: "
-                                + backupDirectory
-                );
-
-                log(
-                        "Moving new Vanta into application location."
-                );
-
-                moveDirectory(
-                        stagingDirectory,
-                        applicationDirectory
-                );
-
-                log(
-                        "New Vanta moved into place."
-                );
-
-                return;
-
-            } catch (IOException error) {
-
-                lastError = error;
-
-                log(
-                        "Application replacement attempt failed: "
-                                + error
-                );
-
-                /*
-                 * If the old application was moved successfully
-                 * but the new one could not be moved into place,
-                 * restore the old installation.
-                 */
-                if (Files.exists(backupDirectory)
-                        && !Files.exists(
-                        applicationDirectory
-                )) {
-
-                    try {
-
-                        log(
-                                "Attempting rollback."
-                        );
-
-                        moveDirectory(
-                                backupDirectory,
-                                applicationDirectory
-                        );
-
-                        log(
-                                "ROLLBACK SUCCESSFUL."
-                        );
-
-                    } catch (IOException rollbackError) {
-
-                        error.addSuppressed(
-                                rollbackError
-                        );
-
-                        log(
-                                "ROLLBACK FAILED: "
-                                        + rollbackError
-                        );
-                    }
-                }
-
-                long elapsed =
-                        System.currentTimeMillis()
-                                - start;
-
-                if (elapsed >=
-                        FILE_RELEASE_TIMEOUT_MS) {
-
-                    log(
-                            "Application replacement failed "
-                                    + "after 30 seconds of retries."
-                    );
-
-                    throw lastError;
-                }
-
-                log(
-                        "Retrying application replacement in "
-                                + RETRY_DELAY_MS
-                                + " ms."
-                );
-
+                log("Moving current application payload to rollback slot: " + activePayload);
+                moveDirectory(activePayload, backupPayload);
                 try {
-
-                    TimeUnit.MILLISECONDS.sleep(
-                            RETRY_DELAY_MS
-                    );
-
-                } catch (InterruptedException interrupted) {
-
-                    Thread.currentThread().interrupt();
-
-                    IOException interruptedError =
-                            new IOException(
-                                    "Updater interrupted while "
-                                            + "waiting to retry "
-                                            + "application replacement.",
-                                    interrupted
-                            );
-
-                    if (lastError != null) {
-
-                        interruptedError.addSuppressed(
-                                lastError
-                        );
+                    log("Moving staged application payload into stable launcher image: " + stagedPayload);
+                    moveDirectory(stagedPayload, activePayload);
+                    return;
+                } catch (IOException installFailure) {
+                    log("New payload move failed; restoring previous payload: " + installFailure);
+                    try {
+                        moveDirectory(backupPayload, activePayload);
+                    } catch (IOException rollbackFailure) {
+                        installFailure.addSuppressed(rollbackFailure);
+                        throw installFailure;
                     }
-
-                    throw interruptedError;
+                    throw installFailure;
+                }
+            } catch (IOException error) {
+                lastError = error;
+                if (Files.exists(backupPayload) && !Files.exists(activePayload)) {
+                    try {
+                        moveDirectory(backupPayload, activePayload);
+                    } catch (IOException rollbackFailure) {
+                        error.addSuppressed(rollbackFailure);
+                    }
+                }
+                log("Payload replacement attempt failed; retrying: " + error);
+                try {
+                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY_MS);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    IOException failure = new IOException("Updater interrupted during payload replacement.", interrupted);
+                    failure.addSuppressed(error);
+                    throw failure;
                 }
             }
         }
+        throw lastError == null ? new IOException("Payload replacement timed out.") : lastError;
     }
 
     private static void moveDirectory(
