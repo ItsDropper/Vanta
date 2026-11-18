@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.launcher.update;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
@@ -11,6 +12,19 @@ import static org.junit.jupiter.api.Assertions.*;
 class UpdateTransactionTest {
     @TempDir
     Path temporaryDirectory;
+
+    @AfterEach
+    void removeUpdaterWorkspace() throws Exception {
+        Path workspace = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater")
+                .resolve("session-" + temporaryDirectory.getFileName());
+        if (Files.exists(workspace)) {
+            try (var paths = Files.walk(workspace)) {
+                for (Path path : paths.sorted(java.util.Comparator.reverseOrder()).toList()) {
+                    Files.deleteIfExists(path);
+                }
+            }
+        }
+    }
 
     @Test
     void interruptedSwapRestoresPreviousInstallation() throws Exception {
@@ -75,7 +89,8 @@ class UpdateTransactionTest {
         private final Path application = temporaryDirectory.resolve("Vanta");
         private final Path staging = temporaryDirectory.resolve("Vanta.update");
         private final Path backup = temporaryDirectory.resolve("Vanta.backup");
-        private final Path workspace = temporaryDirectory.resolve("session-test");
+        private final Path workspace = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater")
+                .resolve("session-" + temporaryDirectory.getFileName());
         private final Path healthMarker = workspace.resolve("vanta-update-health");
 
         private Fixture() throws Exception {
