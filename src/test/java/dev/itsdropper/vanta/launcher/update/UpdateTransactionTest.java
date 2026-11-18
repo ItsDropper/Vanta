@@ -97,6 +97,8 @@ class UpdateTransactionTest {
                      UpdateTransaction.acquireInstallationLock(f.application)) {
             assertThrows(java.io.IOException.class,
                     () -> UpdateTransaction.acquireInstallationLock(f.application));
+            assertThrows(java.io.IOException.class,
+                    () -> UpdateTransaction.ensureNoActiveUpdate(f.application));
         }
         try (UpdateTransaction.InstallationLock ignored =
                      UpdateTransaction.acquireInstallationLock(f.application)) {
