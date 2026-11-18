@@ -18,10 +18,13 @@ on:
       - 'fix/auto-update-guaranteed-shutdown'
     paths:
       - 'src/main/java/dev/itsdropper/vanta/launcher/update/**'
+      - 'src/main/java/dev/itsdropper/vanta/LauncherProcessLifecycle.java'
+      - 'src/main/java/dev/itsdropper/vanta/Main.java'
       - 'src/main/java/dev/itsdropper/vanta/ui/LauncherView.java'
       - 'src/main/java/dev/itsdropper/vanta/ui/views/SkinChangerView.java'
       - 'src/main/java/dev/itsdropper/vanta/ui/views/SkinModel3D.java'
       - 'src/test/java/dev/itsdropper/vanta/launcher/update/**'
+      - 'src/test/java/dev/itsdropper/vanta/LauncherProcessLifecycleTest.java'
       - 'build.gradle'
       - '.github/workflows/auto-update-process-exit.yml'
   workflow_dispatch:
