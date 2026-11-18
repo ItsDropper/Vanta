@@ -25,6 +25,33 @@ class ReleaseManifestTest {
                   "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-windows-x64.zip",
                   "size_bytes": 123456,
                   "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+                },
+                "linux-x64": {
+                  "file_name": "Vanta-1.3.3-linux-x64.zip",
+                  "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-linux-x64.zip",
+                  "size_bytes": 234567,
+                  "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                }
+,
+                "linux-aarch64": {
+                  "file_name": "Vanta-1.3.3-linux-aarch64.zip",
+                  "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-linux-aarch64.zip",
+                  "size_bytes": 234567,
+                  "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                }
+,
+                "macos-x64": {
+                  "file_name": "Vanta-1.3.3-macos-x64.zip",
+                  "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-macos-x64.zip",
+                  "size_bytes": 234567,
+                  "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+                }
+,
+                "macos-aarch64": {
+                  "file_name": "Vanta-1.3.3-macos-aarch64.zip",
+                  "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-macos-aarch64.zip",
+                  "size_bytes": 234567,
+                  "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
                 }
               }
             }
@@ -75,6 +102,24 @@ class ReleaseManifestTest {
     void rejectsUpdatesRequiringANewerLauncher() {
         String altered = MANIFEST.replace("\"min_launcher_version\": \"1.0.0\"",
                 "\"min_launcher_version\": \"2.0.0\"");
+        assertThrows(IOException.class,
+                () -> ReleaseManifest.parse(read(altered), "1.3.2", "windows-x64"));
+    }
+
+
+    @Test
+    void rejectsUnknownManifestFields() {
+        String altered = MANIFEST.replace("\\"channel\\": \\"stable\\",",
+                "\\"channel\\": \\"stable\\", \\"unsigned_extension\\": true,");
+        assertThrows(IOException.class,
+                () -> ReleaseManifest.parse(read(altered), "1.3.2", "windows-x64"));
+    }
+
+    @Test
+    void validatesArtifactsForOtherPlatformsToo() {
+        String altered = MANIFEST.replace(
+                "\\"sha256\\": \\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\\"",
+                "\\"sha256\\": \\"not-a-digest\\"");
         assertThrows(IOException.class,
                 () -> ReleaseManifest.parse(read(altered), "1.3.2", "windows-x64"));
     }
