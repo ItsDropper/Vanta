@@ -61,14 +61,17 @@ def validate_archive(path: Path, platform: str) -> None:
                         or ":" in path_parts[0]
                         or any(part in ("", ".", "..") for part in path_parts)):
                     raise SystemExit(f"Unsafe ZIP entry path in {path.name}: {name!r}")
-                if name in names:
-                    raise SystemExit(f"Duplicate ZIP entry in {path.name}: {name}")
-                names.add(name)
+                canonical_name = name.rstrip("/").casefold()
+                if canonical_name in names:
+                    raise SystemExit(f"Duplicate or case-colliding ZIP entry in {path.name}: {name}")
+                names.add(canonical_name)
                 if entry.flag_bits & 0x1:
                     raise SystemExit(f"Encrypted ZIP entries are not supported: {name}")
                 mode = (entry.external_attr >> 16) & 0o170000
                 if stat.S_ISLNK(mode):
                     raise SystemExit(f"Symbolic links are not allowed in release archives: {name}")
+                if mode not in (0, stat.S_IFREG, stat.S_IFDIR):
+                    raise SystemExit(f"Special filesystem entries are not allowed in release archives: {name}")
                 total_uncompressed += entry.file_size
                 if total_uncompressed > MAX_UNCOMPRESSED_BYTES:
                     raise SystemExit(f"Uncompressed release archive is too large: {path.name}")
