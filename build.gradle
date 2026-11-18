@@ -64,10 +64,9 @@ dependencies {
 
     // WebP image support
     implementation 'com.twelvemonkeys.imageio:imageio-webp:3.12.0'
-    implementation 'com.twelvemonkeys.imageio:imageio-core:3.12.0'
 
     // Markdown
-    implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
+    implementation 'com.vladsch.flexmark:flexmark:0.64.8'
 
     // Discord Rich Presence
     implementation 'io.github.cdagaming:DiscordIPC:0.11.3'
@@ -168,8 +167,26 @@ tasks.register('platformAppImage', Exec) {
                 '--main-jar', mainJar,
                 '--main-class', application.mainClass.get(),
                 '--module-path', modulePath,
-                '--add-modules', 'ALL-MODULE-PATH',
-                '--java-options', '--add-modules=ALL-MODULE-PATH'
+                // Keep the bundled runtime to modules Vanta actually uses.
+                // ALL-MODULE-PATH would pull in every JDK module and inflate
+                // each platform image unnecessarily.
+                '--add-modules', [
+                        'java.base',
+                        'java.desktop',
+                        'java.logging',
+                        'java.management',
+                        'java.naming',
+                        'java.net.http',
+                        'java.prefs',
+                        'java.sql',
+                        'java.transaction.xa',
+                        'java.xml',
+                        'jdk.charsets',
+                        'jdk.crypto.ec',
+                        'jdk.localedata',
+                        'jdk.unsupported',
+                        'javafx.controls'
+                ].join(',')
         ]
         if (hostIsX64) {
             jpackageArguments.addAll(['--java-options', '-XX:-UseBASE64Intrinsics'])
