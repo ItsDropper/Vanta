@@ -305,9 +305,11 @@ public final class UpdaterMain {
                 stagingDirectory
         );
 
-        log(
-                "Extracted application verified."
-        );
+        log("Extracted application verified.");
+
+        Path healthMarker = helperWorkspace.resolve("vanta-update-health");
+        UpdateTransaction transaction = UpdateTransaction.begin(
+                applicationDirectory, stagingDirectory, backupDirectory, healthMarker);
 
         log("---------- REPLACING APPLICATION ----------");
 
@@ -317,9 +319,9 @@ public final class UpdaterMain {
                 backupDirectory
         );
 
-        log(
-                "Application replacement completed."
-        );
+        transaction.markSwapped();
+
+        log("Application replacement completed.");
 
         log("---------- VERIFYING NEW APPLICATION ----------");
 
@@ -353,20 +355,21 @@ public final class UpdaterMain {
 
         log("---------- STARTING UPDATED VANTA ----------");
 
-        startVanta(
-                applicationDirectory,
-                helperWorkspace
-        );
-
-        log("Updated Vanta launched.");
-
-        log("---------- CLEANING BACKUP ----------");
-        try {
-            deleteDirectory(backupDirectory);
-            log("Backup deleted successfully.");
-        } catch (Exception cleanupFailure) {
-            log("WARNING: Could not delete backup directory: " + cleanupFailure);
+        Process replacement = startVanta(applicationDirectory, helperWorkspace, healthMarker);
+        if (!UpdateTransaction.awaitHealthyStartup(healthMarker, replacement, 90, TimeUnit.SECONDS)) {
+            if (replacement.isAlive()) {
+                replacement.descendants().forEach(ProcessHandle::destroyForcibly);
+                replacement.destroyForcibly();
+                replacement.waitFor(10, TimeUnit.SECONDS);
+            }
+            throw new IOException("Updated Vanta did not complete startup health checks within 90 seconds. "
+                    + "The previous installation will be restored.");
         }
+
+        log("Updated Vanta passed its startup-health handshake.");
+        transaction.commit();
+        replacementLauncherStarted = true;
+        log("Update transaction committed; previous installation can now be removed.");
     }
 
     static Path validateReadinessFile(Path helperApplication, Path readyFile) throws IOException {
@@ -804,9 +807,10 @@ public final class UpdaterMain {
                 .orElse(process.isAlive());
     }
 
-    private static void startVanta(
+    private static Process startVanta(
             Path applicationDirectory,
-            Path helperWorkspace
+            Path helperWorkspace,
+            Path healthMarker
     ) throws IOException {
         Path executable = ApplicationLocator.getLauncherExecutable(applicationDirectory)
                 .toAbsolutePath().normalize();
@@ -823,75 +827,52 @@ public final class UpdaterMain {
             command.add(Long.toString(ProcessHandle.current().info().startInstant()
                     .map(java.time.Instant::toEpochMilli).orElse(-1L)));
         }
+        command.add("--vanta-update-health");
+        command.add(healthMarker.toAbsolutePath().normalize().toString());
 
-        log("Starting Vanta: " + executable);
+        log("Starting Vanta and awaiting startup-health acknowledgement: " + executable);
         Process process = new ProcessBuilder(command)
                 .directory(applicationDirectory.toFile())
                 .start();
         log("New Vanta PID: " + process.pid());
-        log("New Vanta alive: " + process.isAlive());
         if (!process.isAlive()) {
             throw new IOException("Vanta exited immediately after the updater launched it.");
         }
-        replacementLauncherStarted = true;
+        return process;
     }
 
     private static void recoverAfterFailedHandoff(String[] args, Exception originalFailure) {
-        if (args == null || args.length != 5) {
-            return;
-        }
-
+        if (args == null || args.length != 5) return;
         try {
             long originalPid = Long.parseLong(args[0]);
             long originalStartTime = Long.parseLong(args[1]);
             Path application = Path.of(args[3]).toAbsolutePath().normalize();
             Path readyFile = Path.of(args[4]).toAbsolutePath().normalize();
             Path workspace = readyFile.getParent();
-            if (workspace == null
-                    || !UpdaterWorkspaceCleanup.isManagedWorkspace(workspace)
-                    || !Files.isRegularFile(readyFile)) {
+            if (workspace == null || !UpdaterWorkspaceCleanup.isManagedWorkspace(workspace)
+                    || !Files.isRegularFile(readyFile)) return;
+
+            if (isOriginalProcessAlive(originalPid, originalStartTime)) {
+                log("Original Vanta is still alive; not starting a duplicate instance.");
                 return;
             }
-            if (isOriginalProcessAlive(originalPid, originalStartTime)) {
-                log("Original Vanta process is still alive; allowing its shutdown handoff to finish.");
-                long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
-                while (isOriginalProcessAlive(originalPid, originalStartTime)
-                        && System.nanoTime() < deadline) {
-                    TimeUnit.MILLISECONDS.sleep(100);
-                }
-                if (isOriginalProcessAlive(originalPid, originalStartTime)) {
-                    log("Original Vanta did not exit; avoiding a duplicate launcher instance.");
+
+            // The durable journal decides whether to restore the backup or
+            // retain the already-healthy image. This is also the same path
+            // used on the next ordinary launcher start after a power loss.
+            UpdateTransaction.recoverBeforeLaunch(application);
+            if (!ApplicationLocator.isSupportedInstallation(application)) {
+                Path backup = application.resolveSibling(application.getFileName() + ".backup");
+                if (!Files.isDirectory(backup)) {
+                    log("No verified previous Vanta installation is available for recovery.");
                     return;
                 }
-            }
-
-            Path backup = application.resolveSibling(application.getFileName() + ".backup");
-            boolean applicationValid = false;
-            if (Files.isDirectory(application)) {
-                try {
-                    verifyExtractedApplication(application);
-                    applicationValid = true;
-                } catch (IOException invalidInstallation) {
-                    log("Current installation is not launchable; checking updater backup.");
-                }
-            }
-
-            if (!applicationValid && Files.isDirectory(backup)) {
-                if (Files.exists(application)) {
-                    deleteDirectory(application);
-                }
+                if (Files.exists(application)) deleteDirectory(application);
                 moveDirectory(backup, application);
-                log("Restored previous Vanta installation after updater failure.");
-                applicationValid = true;
             }
-
-            if (!applicationValid) {
-                log("No verified Vanta installation is available for automatic recovery.");
-                return;
-            }
-
-            startVanta(application, workspace);
-            log("Previous Vanta installation relaunched after update failure.");
+            verifyExtractedApplication(application);
+            startVanta(application, workspace, workspace.resolve("vanta-update-health-recovery"));
+            log("Recovered Vanta installation relaunched after updater failure.");
         } catch (Exception recoveryFailure) {
             originalFailure.addSuppressed(recoveryFailure);
             log("Automatic update recovery failed: " + recoveryFailure);
