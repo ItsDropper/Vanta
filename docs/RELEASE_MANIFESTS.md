@@ -80,7 +80,6 @@ or does not match the pinned public key. Release tooling and the trust store are
 checked out from protected `main`, not from the release tag. The secret is
 exposed only to the signing step in the publish job.
 
-
 Protect the `v*` tag namespace with a GitHub repository ruleset: restrict tag
 creation to trusted maintainers, prevent tag deletion and force updates, and
 require the release source to have passed the normal main-branch review and CI
@@ -166,7 +165,7 @@ are not eligible for automatic update or rollback. A launcher build with a
 populated trust store is required before signed releases can be consumed.
 
 **Initial key provisioning is a required deployment gate.** The committed
-trust store intentionally contains no key until the repository owner generates
-a private key locally and pins its corresponding public key. In this state,
-the updater fails closed with an explicit missing-trust-anchor error; it never
-accepts an unsigned manifest as a fallback.
+trust store intentionally remains empty until the GitHub Actions bootstrap
+workflow has installed `VANTA_RELEASE_SIGNING_KEY` and committed its matching
+public key. Until then, the updater fails closed with an explicit
+missing-trust-anchor error; it never accepts an unsigned manifest as a fallback.
