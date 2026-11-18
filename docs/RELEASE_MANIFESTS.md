@@ -16,7 +16,9 @@ image update archives. The current platform key is resolved through
 
 The JSON contract is defined by [manifest.schema.json](../release/manifest.schema.json).
 The release workflow generates it with [generate_manifest.py](../release/generate_manifest.py)
-only after all platform build jobs have completed.
+only after all platform build jobs have completed. The generator validates the
+completed document against the Draft 2020-12 schema using the pinned dependency
+in [requirements.txt](../release/requirements.txt); a schema mismatch blocks publication.
 
 ## Artifact validation
 
@@ -29,10 +31,12 @@ For every required platform, manifest generation:
 5. Fails publication if any required platform artifact is missing or invalid.
 
 At update time, Vanta validates the manifest schema version, product, channel,
-semantic version, timestamp, minimum launcher version, platform artifact name,
-GitHub HTTPS URL, declared size and SHA-256 format. The updater then verifies
-both the downloaded byte count and digest before handing the archive to the
-transactional installer.
+semantic version, timestamp, minimum launcher version, release-notes URL, and
+exact root/artifact field sets. It requires all five supported platform entries
+and validates every entry's versioned filename, exact GitHub release URL, size
+and SHA-256 format—not only the artifact selected by the current machine. The
+updater then verifies both the downloaded byte count and digest before handing
+the archive to the transactional installer.
 
 Manifest responses are limited to 1 MiB and must resolve to GitHub's trusted
 metadata or release-asset hosts. Artifact downloads retain their existing
