@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Properties;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -97,7 +96,7 @@ public final class UpdateTransaction {
      * to finish startup and publish its health acknowledgement first.
      */
     public static void recoverBeforeLaunch(Path application) throws IOException {
-        if (application == null || !ApplicationLocator.isSupportedInstallation(application)) return;
+        if (application == null) return;
         Path app = application.toAbsolutePath().normalize();
         Path parent = app.getParent();
         if (parent == null) return;
@@ -118,10 +117,17 @@ public final class UpdateTransaction {
         }
 
         if (Files.isRegularFile(marker) && ApplicationLocator.isSupportedInstallation(app)) {
-            deleteTree(backup);
-            deleteTree(stage);
-            Files.deleteIfExists(marker);
-            Files.deleteIfExists(journal);
+            // A health marker is the commit point. Cleanup is retryable and
+            // must not prevent an already-healthy installation from opening.
+            try {
+                deleteTree(backup);
+                deleteTree(stage);
+                Files.deleteIfExists(marker);
+                Files.deleteIfExists(journal);
+            } catch (IOException cleanupFailure) {
+                System.err.println("[Vanta Update Recovery] Deferred post-commit cleanup: "
+                        + cleanupFailure.getMessage());
+            }
             return;
         }
 
@@ -131,9 +137,16 @@ public final class UpdateTransaction {
         } else if (!ApplicationLocator.isSupportedInstallation(app)) {
             throw new IOException("Interrupted update has no verified previous installation to restore.");
         }
-        deleteTree(stage);
-        Files.deleteIfExists(marker);
-        Files.deleteIfExists(journal);
+        // The old image is now back in place. Staging/journal cleanup can be
+        // retried later and must not block startup of the restored launcher.
+        try {
+            deleteTree(stage);
+            Files.deleteIfExists(marker);
+            Files.deleteIfExists(journal);
+        } catch (IOException cleanupFailure) {
+            System.err.println("[Vanta Update Recovery] Deferred rollback cleanup: "
+                    + cleanupFailure.getMessage());
+        }
     }
 
     public static boolean awaitHealthyStartup(Path marker, Process process, long timeout,
