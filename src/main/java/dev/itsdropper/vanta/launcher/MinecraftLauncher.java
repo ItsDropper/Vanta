@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.java.JavaLocator;
 import dev.itsdropper.vanta.launcher.instance.RiftModMetadataCompatibility;
+import dev.itsdropper.vanta.security.RuntimeSecurityPolicy;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -186,10 +187,8 @@ public class MinecraftLauncher {
         // Java4Shell (CVE-2026-114938) affects the AVX-512 VBMI Base64
         // intrinsic on supported x86-64 CPUs. Disable that intrinsic on
         // Java 17+ child runtimes. Java 8/11 and ARM64 are not affected.
-        command.addAll(java4ShellMitigationArguments(
-                data.javaVersion,
-                System.getProperty("os.arch")
-        ));
+        command.addAll(RuntimeSecurityPolicy.getInstance().argumentsFor(
+                data.javaVersion, System.getProperty("os.arch")));
 
         // =============================================================
         // OPTIONAL JDK MODULES

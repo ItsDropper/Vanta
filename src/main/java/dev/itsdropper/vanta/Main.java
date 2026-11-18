@@ -16,6 +16,7 @@ import dev.itsdropper.vanta.ui.LoadingScreen;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
+import dev.itsdropper.vanta.security.RuntimeSecurityPolicy;
 
 public class Main extends Application {
 
@@ -42,6 +43,8 @@ public class Main extends Application {
             startScreenshotCapture(stage, arguments);
             return;
         }
+
+        RuntimeSecurityPolicy.getInstance().initialize();
 
         LoadingScreen loadingScreen = new LoadingScreen();
         ThemeManager.apply(loadingScreen.getRoot(), ThemeManager.loadAccent());

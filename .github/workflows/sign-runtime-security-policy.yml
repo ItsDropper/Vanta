@@ -1,0 +1,36 @@
+name: Sign runtime security policy
+on:
+  push:
+    branches: [main]
+    paths: [security/runtime-policy.json]
+permissions:
+  contents: write
+concurrency:
+  group: runtime-security-policy-signing
+  cancel-in-progress: false
+jobs:
+  sign-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Sign manifest
+        env:
+          SIGNING_KEY: ${{ secrets.VANTA_RUNTIME_POLICY_SIGNING_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "$SIGNING_KEY" || { echo "::error::Missing VANTA_RUNTIME_POLICY_SIGNING_KEY"; exit 1; }
+          key="$(mktemp)"; sig="$(mktemp)"; trap 'rm -f "$key" "$sig"' EXIT
+          printf '%s\n' "$SIGNING_KEY" > "$key"
+          openssl pkeyutl -sign -rawin -inkey "$key" -in security/runtime-policy.json -out "$sig"
+          openssl base64 -A -in "$sig" > security/runtime-policy.sig
+          printf '\n' >> security/runtime-policy.sig
+      - name: Commit signature
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add security/runtime-policy.sig
+          git diff --cached --quiet && exit 0
+          git commit -m "Sign runtime security policy"
+          git push

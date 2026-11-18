@@ -1,0 +1,1 @@
+{"schemaVersion":1,"sequence":1,"issuedAt":"2026-11-18T00:00:00Z","expiresAt":"2027-11-18T00:00:00Z","rules":[{"id":"CVE-2026-114938","minimumJavaMajor":17,"maximumJavaMajor":999,"architectures":["x64"],"mitigations":["DISABLE_BASE64_INTRINSICS"]}]}
