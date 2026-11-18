@@ -94,7 +94,9 @@ tasks.register('runtimeFootprint') {
         configurations.runtimeClasspath.files
                 .sort { a, b -> bytesOf(b) <=> bytesOf(a) }
                 .each { file -> println String.format('%8.2f MiB  %s', bytesOf(file) / 1048576.0, file.name) }
-        File image = layout.buildDirectory.dir("packages/${releaseImageName}").get().asFile
+        def imageName = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT).contains('mac')
+                ? 'Vanta.app' : 'Vanta'
+        File image = layout.buildDirectory.dir("packages/${imageName}").get().asFile
         if (image.isDirectory()) {
             println 'VANTA APPLICATION IMAGE (top-level)'
             image.listFiles().sort { a, b -> bytesOf(b) <=> bytesOf(a) }
