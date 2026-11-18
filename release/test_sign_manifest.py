@@ -54,6 +54,40 @@ class SignManifestTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "missing or unknown"):
             sign_manifest.verify_signature(self.payload, extra, {"release-test-01": self.public_key})
 
+    def test_signing_key_must_match_the_pinned_public_key(self) -> None:
+        import json
+        import tempfile
+
+        public_key = base64.b64encode(self.public_key).decode("ascii")
+        with tempfile.TemporaryDirectory() as directory:
+            keyring = Path(directory) / "trusted-keys.json"
+            keyring.write_text(json.dumps({
+                "schema_version": 1,
+                "keys": [{"key_id": "release-test-01", "public_key": public_key}],
+            }), encoding="utf-8")
+            sign_manifest.require_pinned_signing_key(self.private_key, "release-test-01", keyring)
+            with self.assertRaisesRegex(ValueError, "does not match"):
+                sign_manifest.require_pinned_signing_key(
+                    Ed25519PrivateKey.generate(), "release-test-01", keyring
+                )
+
+    def test_keyring_supports_overlapping_rotation_keys(self) -> None:
+        import json
+        import tempfile
+
+        second = Ed25519PrivateKey.generate().public_key().public_bytes(
+            encoding=Encoding.Raw, format=PublicFormat.Raw
+        )
+        entries = [
+            {"key_id": "release-old-01", "public_key": base64.b64encode(self.public_key).decode("ascii")},
+            {"key_id": "release-new-01", "public_key": base64.b64encode(second).decode("ascii")},
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            keyring = Path(directory) / "trusted-keys.json"
+            keyring.write_text(json.dumps({"schema_version": 1, "keys": entries}), encoding="utf-8")
+            trusted = sign_manifest.load_trusted_keys(keyring)
+            self.assertEqual({"release-old-01", "release-new-01"}, set(trusted))
+
     def test_private_key_decoder_requires_canonical_32_byte_key(self) -> None:
         encoded = base64.b64encode(self.private_key.private_bytes_raw()).decode("ascii")
         self.assertEqual(32, len(sign_manifest.decode_key(encoded)))
