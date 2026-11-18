@@ -43,7 +43,7 @@ public final class UpdateTransaction {
             throw new IOException("Update transaction paths must share the installation parent.");
         }
         if (app.equals(stage) || app.equals(old) || stage.equals(old)
-                || Files.exists(old) || Files.exists(stage)) {
+                || !Files.isDirectory(stage) || Files.exists(old)) {
             throw new IOException("Update transaction paths are not in a clean state.");
         }
         UpdateTransaction transaction = new UpdateTransaction(
