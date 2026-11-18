@@ -37,6 +37,7 @@ public final class UpdaterMain {
     private static final long MAX_ENTRY_BYTES = 1024L * 1024 * 1024;
 
     private static volatile boolean replacementLauncherStarted;
+    private static UpdateTransaction.InstallationLock installationLock;
 
     private UpdaterMain() {
     }
@@ -69,6 +70,7 @@ public final class UpdaterMain {
             log("========================================");
 
         } catch (Exception e) {
+            closeInstallationLock();
 
             log("========================================");
             log("VANTA UPDATE FAILED");
@@ -106,6 +108,20 @@ public final class UpdaterMain {
                 recoverAfterFailedHandoff(args, e);
             }
             System.exit(1);
+        } finally {
+            closeInstallationLock();
+        }
+    }
+
+    private static void closeInstallationLock() {
+        UpdateTransaction.InstallationLock lock = installationLock;
+        installationLock = null;
+        if (lock != null) {
+            try {
+                lock.close();
+            } catch (IOException closeFailure) {
+                log("Could not release installation update lock: " + closeFailure);
+            }
         }
     }
 
@@ -153,6 +169,8 @@ public final class UpdaterMain {
                 Path.of(args[3])
                         .toAbsolutePath()
                         .normalize();
+
+        installationLock = UpdateTransaction.acquireInstallationLock(applicationDirectory);
 
         Path helperApplication = ApplicationLocator.getApplicationDirectory();
         Path readyFile = validateReadinessFile(helperApplication, Path.of(args[4]));
