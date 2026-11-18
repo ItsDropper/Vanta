@@ -31,6 +31,8 @@ public final class UpdaterMain {
     private static final long RETRY_DELAY_MS =
             500;
 
+    private static volatile boolean replacementLauncherStarted;
+
     private UpdaterMain() {
     }
 
@@ -95,6 +97,9 @@ public final class UpdaterMain {
 
             e.printStackTrace();
 
+            if (!replacementLauncherStarted) {
+                recoverAfterFailedHandoff(args, e);
+            }
             System.exit(1);
         }
     }
@@ -139,6 +144,7 @@ public final class UpdaterMain {
 
         Path helperApplication = ApplicationLocator.getApplicationDirectory();
         Path readyFile = validateReadinessFile(helperApplication, Path.of(args[3]));
+        Path helperWorkspace = readyFile.getParent();
 
         log("---------- ENVIRONMENT ----------");
 
@@ -317,30 +323,6 @@ public final class UpdaterMain {
                 "New Vanta installation verified."
         );
 
-        log("---------- CLEANING BACKUP ----------");
-
-        try {
-
-            deleteDirectory(
-                    backupDirectory
-            );
-
-            log(
-                    "Backup deleted successfully."
-            );
-
-        } catch (Exception e) {
-
-            /*
-             * The update has already succeeded.
-             * Keeping the backup is safer than failing the update.
-             */
-            log(
-                    "WARNING: Could not delete backup directory: "
-                            + e
-            );
-        }
-
         log("---------- CLEANING UPDATE ZIP ----------");
 
         try {
@@ -364,12 +346,19 @@ public final class UpdaterMain {
         log("---------- STARTING UPDATED VANTA ----------");
 
         startVanta(
-                applicationDirectory
+                applicationDirectory,
+                helperWorkspace
         );
 
-        log(
-                "Updated Vanta launched."
-        );
+        log("Updated Vanta launched.");
+
+        log("---------- CLEANING BACKUP ----------");
+        try {
+            deleteDirectory(backupDirectory);
+            log("Backup deleted successfully.");
+        } catch (Exception cleanupFailure) {
+            log("WARNING: Could not delete backup directory: " + cleanupFailure);
+        }
     }
 
     static Path validateReadinessFile(Path helperApplication, Path readyFile) throws IOException {
@@ -795,7 +784,8 @@ public final class UpdaterMain {
     }
 
     private static void startVanta(
-            Path applicationDirectory
+            Path applicationDirectory,
+            Path helperWorkspace
     ) throws IOException {
         Path executable = ApplicationLocator.getLauncherExecutable(applicationDirectory)
                 .toAbsolutePath().normalize();
@@ -803,12 +793,77 @@ public final class UpdaterMain {
             throw new IOException("Updated Vanta launcher is missing or not executable: " + executable);
         }
 
-        log("Starting updated Vanta: " + executable);
-        Process process = new ProcessBuilder(executable.toString())
+        List<String> command = new java.util.ArrayList<>();
+        command.add(executable.toString());
+        if (UpdaterWorkspaceCleanup.isManagedWorkspace(helperWorkspace)) {
+            command.add("--vanta-cleanup-updater");
+            command.add(helperWorkspace.toAbsolutePath().normalize().toString());
+            command.add(Long.toString(ProcessHandle.current().pid()));
+        }
+
+        log("Starting Vanta: " + executable);
+        Process process = new ProcessBuilder(command)
                 .directory(applicationDirectory.toFile())
                 .start();
+        replacementLauncherStarted = true;
         log("New Vanta PID: " + process.pid());
         log("New Vanta alive: " + process.isAlive());
+        if (!process.isAlive()) {
+            throw new IOException("Vanta exited immediately after the updater launched it.");
+        }
+    }
+
+    private static void recoverAfterFailedHandoff(String[] args, Exception originalFailure) {
+        if (args == null || args.length != 4) {
+            return;
+        }
+
+        try {
+            long originalPid = Long.parseLong(args[0]);
+            Path application = Path.of(args[2]).toAbsolutePath().normalize();
+            Path readyFile = Path.of(args[3]).toAbsolutePath().normalize();
+            Path workspace = readyFile.getParent();
+            if (workspace == null
+                    || !UpdaterWorkspaceCleanup.isManagedWorkspace(workspace)
+                    || !Files.isRegularFile(readyFile)) {
+                return;
+            }
+            if (ProcessHandle.of(originalPid).map(ProcessHandle::isAlive).orElse(false)) {
+                log("Original Vanta process is still alive; leaving recovery to the running launcher.");
+                return;
+            }
+
+            Path backup = application.resolveSibling(application.getFileName() + ".backup");
+            boolean applicationValid = false;
+            if (Files.isDirectory(application)) {
+                try {
+                    verifyExtractedApplication(application);
+                    applicationValid = true;
+                } catch (IOException invalidInstallation) {
+                    log("Current installation is not launchable; checking updater backup.");
+                }
+            }
+
+            if (!applicationValid && Files.isDirectory(backup)) {
+                if (Files.exists(application)) {
+                    deleteDirectory(application);
+                }
+                moveDirectory(backup, application);
+                log("Restored previous Vanta installation after updater failure.");
+                applicationValid = true;
+            }
+
+            if (!applicationValid) {
+                log("No verified Vanta installation is available for automatic recovery.");
+                return;
+            }
+
+            startVanta(application, workspace);
+            log("Previous Vanta installation relaunched after update failure.");
+        } catch (Exception recoveryFailure) {
+            originalFailure.addSuppressed(recoveryFailure);
+            log("Automatic update recovery failed: " + recoveryFailure);
+        }
     }
 
     private static void extractZip(
