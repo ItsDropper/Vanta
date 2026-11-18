@@ -71,7 +71,7 @@ def main() -> int:
         )
 
     root = json.loads(KEYRING_PATH.read_text(encoding="utf-8"))
-    if not isinstance(root, dict) or set(root) != {"schema_version", "keys"} or root["schema_version"] != 1:
+    if not isinstance(root, dict) or set(root) != {"schema_version", "keys"} or type(root["schema_version"]) is not int or root["schema_version"] != 1:
         raise RuntimeError("The committed release trust store has an unsupported format.")
     if not isinstance(root["keys"], list) or root["keys"]:
         raise RuntimeError("Initial bootstrap requires an empty release trust store; refusing to rotate or overwrite keys.")
