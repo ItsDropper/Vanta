@@ -686,12 +686,10 @@ public final class UpdaterMain {
     }
 
     static boolean matchesProcessStartTime(ProcessHandle process, long expectedStartTime) {
-        if (expectedStartTime <= 0) {
-            return process.isAlive();
-        }
+        if (expectedStartTime <= 0) return false;
         return process.info().startInstant()
                 .map(start -> start.toEpochMilli() == expectedStartTime)
-                .orElse(process.isAlive());
+                .orElse(false);
     }
 
     private static Process startVanta(
@@ -707,12 +705,13 @@ public final class UpdaterMain {
 
         List<String> command = new java.util.ArrayList<>();
         command.add(executable.toString());
-        if (UpdaterWorkspaceCleanup.isManagedWorkspace(helperWorkspace)) {
+        long updaterStartTime = ProcessHandle.current().info().startInstant()
+                .map(java.time.Instant::toEpochMilli).orElse(-1L);
+        if (updaterStartTime > 0 && UpdaterWorkspaceCleanup.isManagedWorkspace(helperWorkspace)) {
             command.add("--vanta-cleanup-updater");
             command.add(helperWorkspace.toAbsolutePath().normalize().toString());
             command.add(Long.toString(ProcessHandle.current().pid()));
-            command.add(Long.toString(ProcessHandle.current().info().startInstant()
-                    .map(java.time.Instant::toEpochMilli).orElse(-1L)));
+            command.add(Long.toString(updaterStartTime));
         }
         if (healthMarker != null) {
             command.add("--vanta-update-health");
