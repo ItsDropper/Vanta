@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.launcher.update;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Files;
@@ -27,68 +27,75 @@ class UpdateTransactionTest {
     }
 
     @Test
-    void interruptedSwapRestoresPreviousInstallation() throws Exception {
-        Fixture fixture = new Fixture();
-        UpdateTransaction transaction = fixture.begin();
-
-        Files.move(fixture.application, fixture.backup);
-        Files.move(fixture.staging, fixture.application);
+    void interruptionAfterBothPayloadMovesRestoresPreviousPayload() throws Exception {
+        Fixture f = new Fixture();
+        UpdateTransaction transaction = f.begin();
+        Files.move(f.activePayload, f.backupPayload);
+        Files.move(f.stagedPayload, f.activePayload);
         transaction.markSwapped();
 
-        UpdateTransaction.recoverBeforeLaunch(fixture.application);
+        UpdateTransaction.recoverBeforeLaunch(f.application);
 
-        assertEquals("old", Files.readString(fixture.application.resolve("version.txt")));
-        assertFalse(Files.exists(fixture.backup));
-        assertFalse(Files.exists(fixture.staging));
-        assertFalse(Files.exists(fixture.journal()));
+        assertEquals("old", Files.readString(f.activePayload.resolve("version.txt")));
+        assertTrue(Files.exists(f.application.resolve("bin/Vanta")));
+        assertTrue(Files.exists(f.application.resolve("lib/runtime/lib/modules")));
+        assertFalse(Files.exists(f.backupPayload));
+        assertFalse(Files.exists(f.staging));
+        assertFalse(Files.exists(f.journal()));
     }
 
     @Test
-    void crashBetweenDirectoryMovesCanRestoreWhenApplicationPathIsMissing() throws Exception {
-        Fixture fixture = new Fixture();
-        fixture.begin();
+    void interruptionBetweenPayloadMovesRestoresFromBackupUsingStableBootstrap() throws Exception {
+        Fixture f = new Fixture();
+        f.begin();
+        Files.move(f.activePayload, f.backupPayload);
 
-        Files.move(fixture.application, fixture.backup);
+        assertTrue(Files.exists(f.application.resolve("bin/Vanta")));
+        assertTrue(Files.exists(f.application.resolve("lib/runtime/lib/modules")));
+        assertFalse(Files.exists(f.activePayload));
 
-        UpdateTransaction.recoverBeforeLaunch(fixture.application);
+        UpdateTransaction.recoverBeforeLaunch(f.application);
 
-        assertEquals("old", Files.readString(fixture.application.resolve("version.txt")));
-        assertFalse(Files.exists(fixture.backup));
-        assertFalse(Files.exists(fixture.journal()));
+        assertEquals("old", Files.readString(f.activePayload.resolve("version.txt")));
+        assertFalse(Files.exists(f.backupPayload));
+        assertFalse(Files.exists(f.journal()));
     }
 
     @Test
-    void healthyMarkerCommitsNewInstallationAfterUpdaterCrash() throws Exception {
-        Fixture fixture = new Fixture();
-        fixture.begin();
+    void healthyMarkerCommitsNewPayloadAfterUpdaterCrash() throws Exception {
+        Fixture f = new Fixture();
+        f.begin();
+        Files.move(f.activePayload, f.backupPayload);
+        Files.move(f.stagedPayload, f.activePayload);
+        Files.writeString(f.healthMarker, "healthy");
 
-        Files.move(fixture.application, fixture.backup);
-        Files.move(fixture.staging, fixture.application);
-        Files.writeString(fixture.healthMarker, "healthy");
+        UpdateTransaction.recoverBeforeLaunch(f.application);
 
-        UpdateTransaction.recoverBeforeLaunch(fixture.application);
-
-        assertEquals("new", Files.readString(fixture.application.resolve("version.txt")));
-        assertFalse(Files.exists(fixture.backup));
-        assertFalse(Files.exists(fixture.journal()));
+        assertEquals("new", Files.readString(f.activePayload.resolve("version.txt")));
+        assertFalse(Files.exists(f.backupPayload));
+        assertFalse(Files.exists(f.staging));
+        assertFalse(Files.exists(f.journal()));
     }
 
     @Test
-    void interruptionBeforeSwapKeepsCurrentInstallationAndDiscardsStage() throws Exception {
-        Fixture fixture = new Fixture();
-        fixture.begin();
+    void interruptionBeforeSwapKeepsCurrentPayloadAndDiscardsStage() throws Exception {
+        Fixture f = new Fixture();
+        f.begin();
 
-        UpdateTransaction.recoverBeforeLaunch(fixture.application);
+        UpdateTransaction.recoverBeforeLaunch(f.application);
 
-        assertEquals("old", Files.readString(fixture.application.resolve("version.txt")));
-        assertFalse(Files.exists(fixture.staging));
-        assertFalse(Files.exists(fixture.journal()));
+        assertEquals("old", Files.readString(f.activePayload.resolve("version.txt")));
+        assertFalse(Files.exists(f.staging));
+        assertFalse(Files.exists(f.backupPayload));
+        assertFalse(Files.exists(f.journal()));
     }
 
     private final class Fixture {
         private final Path application = temporaryDirectory.resolve("Vanta");
         private final Path staging = temporaryDirectory.resolve("Vanta.update");
-        private final Path backup = temporaryDirectory.resolve("Vanta.backup");
+        private final Path activePayload = application.resolve("lib/app");
+        private final Path stagedPayload = staging.resolve("lib/app");
+        private final Path backupPayload = application.resolve("lib/app.backup");
         private final Path workspace = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater")
                 .resolve("session-" + temporaryDirectory.getFileName());
         private final Path healthMarker = workspace.resolve("vanta-update-health");
@@ -100,7 +107,7 @@ class UpdateTransactionTest {
 
         private UpdateTransaction begin() throws Exception {
             UpdateTransaction transaction = UpdateTransaction.begin(
-                    application, staging, backup, healthMarker);
+                    application, staging, activePayload, stagedPayload, backupPayload, healthMarker);
             createImage(staging, "new");
             transaction.markStaged();
             return transaction;
@@ -115,10 +122,11 @@ class UpdateTransactionTest {
         Files.createDirectories(root.resolve("bin"));
         Files.createDirectories(root.resolve("lib/runtime/lib"));
         Files.createDirectories(root.resolve("lib/app"));
-        Files.writeString(root.resolve("bin/Vanta"), "launcher");
-        root.resolve("bin/Vanta").toFile().setExecutable(true);
-        Files.writeString(root.resolve("lib/runtime/lib/modules"), "modules");
+        Path launcher = root.resolve("bin/Vanta");
+        Files.writeString(launcher, "native-launcher");
+        launcher.toFile().setExecutable(true);
+        Files.writeString(root.resolve("lib/runtime/lib/modules"), "runtime-modules");
         Files.writeString(root.resolve("lib/app/Vanta.cfg"), "main-class=Vanta");
-        Files.writeString(root.resolve("version.txt"), version);
+        Files.writeString(root.resolve("lib/app/version.txt"), version);
     }
 }
