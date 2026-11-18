@@ -16,7 +16,7 @@ class UpdaterWorkspaceCleanupTest {
     Path temporaryDirectory;
 
     @Test
-    void onlyAcceptsDirectManagedSessionDirectories() {
+    void onlyAcceptsDirectManagedSessionDirectories() throws Exception {
         Path root = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater");
         Files.createDirectories(root);
         assertTrue(UpdaterWorkspaceCleanup.isManagedWorkspace(root.resolve("session-test")));
