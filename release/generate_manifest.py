@@ -43,6 +43,8 @@ def main() -> None:
         raise SystemExit(f"Invalid release version: {args.version}")
     if not VERSION_PATTERN.fullmatch(args.min_launcher_version):
         raise SystemExit(f"Invalid minimum launcher version: {args.min_launcher_version}")
+    if tuple(map(int, args.min_launcher_version.split("."))) > tuple(map(int, args.version.split("."))):
+        raise SystemExit("The minimum launcher version cannot be newer than the release version.")
 
     artifacts: dict[str, dict[str, object]] = {}
     archives = sorted(args.assets_dir.glob("Vanta-*.zip"))
