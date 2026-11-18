@@ -24,7 +24,7 @@ class UpdateServiceTest {
     void duplicateJsonKeysAreRejectedByProductionMetadataParser() {
         var mapper = UpdateService.createMetadataMapper();
         assertThrows(java.io.IOException.class,
-                () -> mapper.readTree("{\\"tag_name\\":\\"v1.2.3\\",\\"tag_name\\":\\"v9.9.9\\"}"));
+                () -> mapper.readTree("{\"tag_name\":\"v1.2.3\",\"tag_name\":\"v9.9.9\"}"));
     }
 
     // Retain the manual live-service diagnostic entry point for maintainers.
