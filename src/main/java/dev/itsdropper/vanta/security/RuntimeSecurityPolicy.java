@@ -82,7 +82,13 @@ public final class RuntimeSecurityPolicy {
             JsonNode e=JSON.readTree(Files.readAllBytes(file));
             byte[] p=Base64.getDecoder().decode(text(e,"payload")),s=Base64.getDecoder().decode(text(e,"signature"));
             List<Rule> parsed=parseAndVerify(p,s,Clock.systemUTC());checkSequence(verifiedSequence(p),sha(p));
-            rules.set(parsed);status="Cached signed runtime policy "+verifiedSequence(p)+" verified.";
+            rules.set(parsed);
+            Path state=cache.resolve("runtime-policy.state");
+            if(!Files.exists(state)){
+                Files.createDirectories(cache);
+                writeAtomic(state,JSON.writeValueAsBytes(Map.of("sequence",verifiedSequence(p),"sha256",sha(p))));
+            }
+            status="Cached signed runtime policy "+verifiedSequence(p)+" verified.";
         }catch(Exception e){status="Cached policy rejected; built-in protections remain active.";}
     }
     private void checkSequence(long seq,String digest)throws Exception{
