@@ -1,0 +1,52 @@
+name: Bootstrap release manifest signing key
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-signing-key-bootstrap
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    if: ${{ github.ref == 'refs/heads/main' && github.repository == 'ItsDropper/Vanta' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install pinned key-bootstrap dependencies
+        run: python -m pip install --disable-pip-version-check 'cryptography==46.0.3' 'PyNaCl==1.6.0'
+
+      - name: Generate key and install repository secret
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_REF: ${{ github.ref }}
+          VANTA_RELEASE_BOOTSTRAP_TOKEN: ${{ secrets.VANTA_RELEASE_BOOTSTRAP_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python release/bootstrap_signing_key.py
+
+      - name: Commit pinned public key
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/main/resources/release-trusted-keys.json
+          if git diff --cached --quiet; then
+            echo "::error::The trust store was not changed; refusing an empty bootstrap commit."
+            exit 1
+          fi
+          git commit -m "Pin initial release manifest signing key"
+          git push origin HEAD:main
