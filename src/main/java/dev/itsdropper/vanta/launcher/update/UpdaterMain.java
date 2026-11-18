@@ -32,6 +32,10 @@ public final class UpdaterMain {
     private static final long RETRY_DELAY_MS =
             500;
 
+    private static final int MAX_ARCHIVE_ENTRIES = 100_000;
+    private static final long MAX_EXTRACTED_BYTES = 2L * 1024 * 1024 * 1024;
+    private static final long MAX_ENTRY_BYTES = 1024L * 1024 * 1024;
+
     private static volatile boolean replacementLauncherStarted;
 
     private UpdaterMain() {
@@ -902,68 +906,50 @@ public final class UpdaterMain {
             ZipEntry entry;
 
             int entryCount = 0;
+            long totalExtractedBytes = 0;
+            byte[] buffer = new byte[64 * 1024];
 
-            while ((entry =
-                    zipInput.getNextEntry()) != null) {
-
+            while ((entry = zipInput.getNextEntry()) != null) {
                 entryCount++;
+                if (entryCount > MAX_ARCHIVE_ENTRIES) {
+                    throw new IOException("Update archive contains too many entries.");
+                }
+                if (entry.getName() == null || entry.getName().isBlank()
+                        || entry.getName().indexOf('\\0') >= 0) {
+                    throw new IOException("Update archive contains an invalid entry name.");
+                }
 
-                Path output =
-                        normalizedDestination
-                                .resolve(
-                                        entry.getName()
-                                )
-                                .normalize();
-
-                log(
-                        "ZIP entry #"
-                                + entryCount
-                                + ": "
-                                + entry.getName()
-                );
-
-                if (!output.startsWith(
-                        normalizedDestination
-                )) {
-
-                    throw new IOException(
-                            "Unsafe ZIP entry: "
-                                    + entry.getName()
-                    );
+                Path output = normalizedDestination.resolve(entry.getName()).normalize();
+                log("ZIP entry #" + entryCount + ": " + entry.getName());
+                if (!output.startsWith(normalizedDestination) || output.equals(normalizedDestination)) {
+                    throw new IOException("Unsafe ZIP entry: " + entry.getName());
                 }
 
                 if (entry.isDirectory()) {
-
-                    Files.createDirectories(
-                            output
-                    );
-
+                    Files.createDirectories(output);
                 } else {
+                    Path entryParent = output.getParent();
+                    if (entryParent != null) Files.createDirectories(entryParent);
 
-                    Path entryParent =
-                            output.getParent();
-
-                    if (entryParent != null) {
-
-                        Files.createDirectories(
-                                entryParent
-                        );
+                    long entryBytes = 0;
+                    try (var fileOutput = Files.newOutputStream(output)) {
+                        int read;
+                        while ((read = zipInput.read(buffer)) != -1) {
+                            entryBytes += read;
+                            totalExtractedBytes += read;
+                            if (entryBytes > MAX_ENTRY_BYTES || totalExtractedBytes > MAX_EXTRACTED_BYTES) {
+                                throw new IOException("Update archive exceeds the extraction size limit.");
+                            }
+                            fileOutput.write(buffer, 0, read);
+                        }
                     }
-
-                    Files.copy(
-                            zipInput,
-                            output,
-                            StandardCopyOption.REPLACE_EXISTING
-                    );
                 }
-
                 zipInput.closeEntry();
             }
 
-            log(
-                    "Total ZIP entries extracted: "
-                            + entryCount
-            );
+            if (entryCount == 0) throw new IOException("Update archive was empty.");
+            log("Total ZIP entries extracted: " + entryCount
+                    + ", uncompressed bytes: " + totalExtractedBytes);
         }
     }
 
