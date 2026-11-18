@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 
 import dev.itsdropper.vanta.launcher.instance.MrpackInstaller;
 import dev.itsdropper.vanta.launcher.instance.PrismLauncherImporter;
+import dev.itsdropper.vanta.launcher.instance.ModrinthAppImporter;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.io.File;
@@ -316,7 +317,7 @@ public class ImportInstanceView extends VBox {
     private void chooseModrinthAppDirectory() {
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle(Localization.text("modrinthAppImport.chooser"));
-        Path detected = dev.itsdropper.vanta.launcher.instance.ModrinthAppImporter.findDefaultAppDirectory();
+        Path detected = ModrinthAppImporter.findDefaultAppDirectory();
         if (detected != null && java.nio.file.Files.isDirectory(detected)) {
             chooser.setInitialDirectory(detected.toFile());
         }
