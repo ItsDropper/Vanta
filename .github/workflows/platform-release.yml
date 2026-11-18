@@ -14,6 +14,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: platform-release-${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     name: Build ${{ matrix.os }} application image
@@ -64,16 +68,34 @@ jobs:
           retention-days: 7
 
   publish:
-    name: Publish GitHub release
+    name: Generate manifest and publish GitHub release
     needs: build
     runs-on: ubuntu-latest
     steps:
+      - name: Check out release tooling
+        uses: actions/checkout@v4
+
+      - name: Resolve release metadata
+        shell: bash
+        run: |
+          VERSION="${{ inputs.version || github.ref_name }}"
+          VERSION="${VERSION#v}"
+          echo "VANTA_VERSION=$VERSION" >> "$GITHUB_ENV"
+
       - name: Download all platform packages
         uses: actions/download-artifact@v4
         with:
           pattern: vanta-release-*
           path: release-assets
           merge-multiple: true
+
+      - name: Generate and validate release manifest
+        run: |
+          python3 release/generate_manifest.py \
+            --version "$VANTA_VERSION" \
+            --channel stable \
+            --assets-dir release-assets \
+            --output release-assets/manifest.json
 
       - name: Publish release assets
         uses: softprops/action-gh-release@v2
