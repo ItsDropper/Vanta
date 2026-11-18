@@ -210,6 +210,11 @@ public final class PrismLauncherImporter {
         return null;
     }
 
+    static Instance installImportedProfile(String name, String minecraftVersion, String loader, String loaderVersion)
+            throws Exception {
+        return installProfile(new PrismProfile(name, minecraftVersion, loader, loaderVersion));
+    }
+
     private static Instance installProfile(PrismProfile profile) throws Exception {
         String name = uniqueName(profile.name());
         String mc = profile.minecraftVersion();
