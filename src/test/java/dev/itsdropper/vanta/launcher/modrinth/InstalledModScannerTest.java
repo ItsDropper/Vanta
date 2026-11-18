@@ -53,6 +53,22 @@ class InstalledModScannerTest {
         assertEquals("broken_api", mod.getBreaks().get(0).getModId());
     }
 
+    @Test void supportsQuiltAnyAndAllVersionSpecifierObjects() throws Exception {
+        Path file = jar("quilt-complex.jar", "quilt.mod.json", """
+                {"quilt_loader":{"id":"quilt_complex","version":"1.0.0",
+                 "depends":[
+                   {"id":"bounded_api","versions":{"all":[">=1.2.0","<2.0.0"]}},
+                   {"id":"alternative_api","versions":{"any":[">=3.0.0","<1.0.0"]}},
+                   {"id":"legacy_array","versions":[">=4.0.0","<5.0.0"]}
+                 ]}}
+                """);
+        InstalledMod mod = new InstalledModScanner().scanFile(file);
+        assertNotNull(mod);
+        assertEquals(">=1.2.0 <2.0.0", mod.getDependencies().get(0).getVersionConstraint());
+        assertEquals(">=3.0.0 || <1.0.0", mod.getDependencies().get(1).getVersionConstraint());
+        assertEquals(">=4.0.0 || <5.0.0", mod.getDependencies().get(2).getVersionConstraint());
+    }
+
     @Test void readsForgeTomlDependenciesAndConvertsRanges() throws Exception {
         Path file = jar("forge.jar", "META-INF/mods.toml", """
                 modLoader="javafml"
