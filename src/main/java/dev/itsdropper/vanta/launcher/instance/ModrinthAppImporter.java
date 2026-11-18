@@ -169,7 +169,7 @@ public final class ModrinthAppImporter {
                 while (result.next()) {
                     profiles.add(new Profile(result.getString("path"), result.getString("name"),
                             nullToEmpty(result.getString("game_version")),
-                            mapLoader(result.getString("loader")),
+                            safeMapLoader(result.getString("loader")),
                             nullToEmpty(result.getString("loader_version")),
                             JSON.readTree(result.getString("overrides"))));
                 }
@@ -182,7 +182,7 @@ public final class ModrinthAppImporter {
                 while (result.next()) {
                     profiles.add(new Profile(result.getString("path"), result.getString("name"),
                             nullToEmpty(result.getString("game_version")),
-                            mapLoader(result.getString("mod_loader")),
+                            safeMapLoader(result.getString("mod_loader")),
                             nullToEmpty(result.getString("mod_loader_version")),
                             JSON.createObjectNode()));
                 }
@@ -191,6 +191,16 @@ public final class ModrinthAppImporter {
             throw new SQLException("Unsupported Modrinth App database schema: no instance metadata tables found.");
         }
         return profiles;
+    }
+
+    private static String safeMapLoader(String raw) {
+        try {
+            return mapLoader(raw);
+        } catch (IOException unsupported) {
+            // Keep the row in the result so one unsupported profile cannot
+            // prevent the remaining supported profiles from being imported.
+            return "Unsupported Modrinth loader: " + raw;
+        }
     }
 
     private static boolean tableExists(Connection connection, String name) throws SQLException {
