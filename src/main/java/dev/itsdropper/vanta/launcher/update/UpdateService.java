@@ -5,12 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 public class UpdateService {
 
@@ -18,12 +23,20 @@ public class UpdateService {
             "https://api.github.com/repos/ItsDropper/Vanta/releases";
     private static final String STABLE_MANIFEST_URL =
             "https://github.com/ItsDropper/Vanta/releases/latest/download/manifest.json";
+    private static final int MAX_METADATA_BYTES = 1024 * 1024;
+    private static final Set<String> METADATA_HOSTS = Set.of(
+            "api.github.com",
+            "github.com",
+            "release-assets.githubusercontent.com",
+            "objects.githubusercontent.com"
+    );
 
     private final HttpClient httpClient;
     private final ObjectMapper objectMapper;
 
     public UpdateService() {
         httpClient = HttpClient.newBuilder()
+                .connectTimeout(Duration.ofSeconds(15))
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
         objectMapper = new ObjectMapper();
@@ -91,16 +104,40 @@ public class UpdateService {
     private JsonNode requestJson(String url) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
+                .timeout(Duration.ofSeconds(30))
                 .header("Accept", "application/vnd.github+json")
                 .header("User-Agent", "Vanta-Launcher")
                 .GET()
                 .build();
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw new IOException("GitHub returned HTTP " + response.statusCode()
-                    + " while retrieving Vanta release metadata.");
+        HttpResponse<InputStream> response = httpClient.send(
+                request, HttpResponse.BodyHandlers.ofInputStream());
+        try (InputStream body = response.body()) {
+            if (response.statusCode() != 200) {
+                throw new IOException("GitHub returned HTTP " + response.statusCode()
+                        + " while retrieving Vanta release metadata.");
+            }
+            validateMetadataResponseUri(response.uri());
+            long contentLength = response.headers().firstValueAsLong("Content-Length").orElse(-1);
+            if (contentLength > MAX_METADATA_BYTES) {
+                throw new IOException("The Vanta release metadata exceeds the allowed size.");
+            }
+            byte[] bytes = body.readNBytes(MAX_METADATA_BYTES + 1);
+            if (bytes.length > MAX_METADATA_BYTES) {
+                throw new IOException("The Vanta release metadata exceeds the allowed size.");
+            }
+            return objectMapper.readTree(new String(bytes, StandardCharsets.UTF_8));
         }
-        return objectMapper.readTree(response.body());
+    }
+
+    private static void validateMetadataResponseUri(URI uri) throws IOException {
+        if (!"https".equalsIgnoreCase(uri.getScheme())
+                || uri.getHost() == null
+                || !METADATA_HOSTS.contains(uri.getHost().toLowerCase(Locale.ROOT))
+                || uri.getUserInfo() != null
+                || uri.getFragment() != null
+                || (uri.getPort() != -1 && uri.getPort() != 443)) {
+            throw new IOException("Vanta release metadata redirected to an untrusted host.");
+        }
     }
 
     private UpdateInfo parseRelease(JsonNode release, String currentVersion) throws IOException {
