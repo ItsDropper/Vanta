@@ -662,9 +662,11 @@ public class LaunchService {
         if (!includeCrashReports) return combined.toString();
 
         Path crashDirectory = directory.resolve("crash-reports");
-        if (Files.isDirectory(crashDirectory)) {
+        if (!Files.isSymbolicLink(crashDirectory)
+                && Files.isDirectory(crashDirectory, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
             try (Stream<Path> files = Files.list(crashDirectory)) {
-                files.filter(Files::isRegularFile)
+                files.filter(path -> !Files.isSymbolicLink(path)
+                        && Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS))
                         .filter(p -> p.getFileName().toString().endsWith(".txt"))
                         .sorted(Comparator.comparingLong(this::lastModified).reversed())
                         .limit(2)
@@ -683,7 +685,8 @@ public class LaunchService {
 
     private void appendDiagnosticFile(StringBuilder target, String label, Path path, int maxChars) {
         try {
-            if (!Files.isRegularFile(path)) return;
+            if (Files.isSymbolicLink(path)
+                    || !Files.isRegularFile(path, java.nio.file.LinkOption.NOFOLLOW_LINKS)) return;
             long size = Files.size(path);
             if (size <= 0) return;
             String text;
