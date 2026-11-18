@@ -795,7 +795,7 @@ public final class UpdaterMain {
                 .isPresent();
     }
 
-    private static boolean matchesProcessStartTime(ProcessHandle process, long expectedStartTime) {
+    static boolean matchesProcessStartTime(ProcessHandle process, long expectedStartTime) {
         if (expectedStartTime <= 0) {
             return process.isAlive();
         }
