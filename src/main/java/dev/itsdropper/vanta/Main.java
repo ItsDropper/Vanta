@@ -216,7 +216,7 @@ public class Main extends Application {
     }
 
     static boolean isUpdaterCleanupInvocation(String[] args) {
-        return args != null && args.length == 3 && "--vanta-cleanup-updater".equals(args[0]);
+        return args != null && args.length == 4 && "--vanta-cleanup-updater".equals(args[0]);
     }
 
     public static void main(String[] args) {
@@ -224,7 +224,8 @@ public class Main extends Application {
             try {
                 dev.itsdropper.vanta.launcher.update.UpdaterWorkspaceCleanup.schedule(
                         Path.of(args[1]),
-                        Long.parseLong(args[2])
+                        Long.parseLong(args[2]),
+                        Long.parseLong(args[3])
                 );
             } catch (RuntimeException invalidCleanupArguments) {
                 System.err.println("[Vanta Updater Cleanup] Ignoring invalid cleanup arguments.");
