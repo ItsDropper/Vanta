@@ -88,8 +88,8 @@ public final class ModrinthAppImporter {
                 throw new IOException("The Modrinth profiles directory was not found. Check the app's custom directory.");
             }
 
-            boolean settingsImported = importGlobalSettings(global);
             List<Profile> profiles = readProfiles(connection);
+            boolean settingsImported = importGlobalSettings(global);
             List<String> skipped = new ArrayList<>();
             int imported = 0;
 
