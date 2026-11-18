@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a deterministic Vanta release manifest from verified CI artifacts."""
+"""Generate a schema-validated Vanta release manifest from verified CI artifacts."""
 
 from __future__ import annotations
 
@@ -119,12 +119,14 @@ def main() -> None:
         if platform in artifacts:
             raise SystemExit(f"Duplicate platform artifact: {platform}")
         validate_archive(archive, platform)
+        if archive.is_symlink() or not archive.is_file():
+            raise SystemExit(f"Release archive must be a regular file: {archive.name}")
         size = archive.stat().st_size
         if size <= 0 or size > MAX_ARTIFACT_BYTES:
             raise SystemExit(f"Invalid artifact size for {archive.name}: {size}")
 
         checksum_file = archive.with_name(archive.name + ".sha256")
-        if not checksum_file.is_file():
+        if checksum_file.is_symlink() or not checksum_file.is_file():
             raise SystemExit(f"Missing checksum sidecar: {checksum_file.name}")
         checksum_text = checksum_file.read_text(encoding="utf-8").strip().split()
         if (len(checksum_text) != 2
@@ -153,6 +155,24 @@ def main() -> None:
     missing = sorted(expected_platforms - artifacts.keys())
     if missing:
         raise SystemExit("Release is missing required platform artifacts: " + ", ".join(missing))
+
+    expected_assets = {
+        name
+        for artifact in artifacts.values()
+        for name in (artifact["file_name"], artifact["file_name"] + ".sha256")
+    }
+    actual_entries = {entry.name for entry in args.assets_dir.iterdir()}
+    unexpected_assets = sorted(actual_entries - expected_assets)
+    missing_assets = sorted(expected_assets - actual_entries)
+    if unexpected_assets or missing_assets:
+        details = []
+        if unexpected_assets:
+            details.append("unexpected: " + ", ".join(unexpected_assets))
+        if missing_assets:
+            details.append("missing: " + ", ".join(missing_assets))
+        raise SystemExit("Release asset directory does not match the validated platform set (" + "; ".join(details) + ").")
+    if any(entry.is_symlink() or not entry.is_file() for entry in args.assets_dir.iterdir()):
+        raise SystemExit("Release asset directory may contain only regular files.")
 
     manifest = {
         "schema_version": 1,
