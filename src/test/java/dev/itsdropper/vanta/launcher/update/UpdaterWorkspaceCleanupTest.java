@@ -74,7 +74,7 @@ class UpdaterWorkspaceCleanupTest {
         Files.createDirectories(workspace);
         Files.writeString(workspace.resolve("marker"), "temporary");
 
-        Path java = Path.of(System.getProperty("java.home"), "bin",
+        Path javaExecutable = Path.of(System.getProperty("java.home"), "bin",
                 System.getProperty("os.name").toLowerCase().contains("win") ? "java.exe" : "java");
         String classPath = String.join(File.pathSeparator,
                 System.getProperty("java.class.path"),
@@ -82,7 +82,7 @@ class UpdaterWorkspaceCleanupTest {
                         .getCodeSource().getLocation().toURI()).toString(),
                 Path.of(UpdaterWorkspaceCleanup.class.getProtectionDomain()
                         .getCodeSource().getLocation().toURI()).toString());
-        Process updater = new ProcessBuilder(java.toString(), "-cp", classPath,
+        Process updater = new ProcessBuilder(javaExecutable.toString(), "-cp", classPath,
                 Child.class.getName())
                 .redirectErrorStream(true)
                 .start();
