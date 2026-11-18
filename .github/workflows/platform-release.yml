@@ -43,7 +43,7 @@ jobs:
         run: |
           VERSION="$RELEASE_VERSION"
           VERSION="${VERSION#v}"
-          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$ ]]; then
+          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
             echo "Expected a stable semantic version such as 1.2.8; got: $VERSION"
             exit 1
           fi
@@ -68,7 +68,7 @@ jobs:
       - name: Build platform image and checksum (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
-        run: .\\gradlew.bat --no-daemon platformImageChecksum "-PvantaVersion=$env:VANTA_VERSION"
+        run: .\gradlew.bat --no-daemon platformImageChecksum "-PvantaVersion=$env:VANTA_VERSION"
 
       - name: Upload platform release assets
         uses: actions/upload-artifact@v4
@@ -118,7 +118,7 @@ jobs:
         run: |
           VERSION="$RELEASE_VERSION"
           VERSION="${VERSION#v}"
-          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$ ]]; then
+          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
             echo "Invalid stable release version: $VERSION"
             exit 1
           fi
@@ -134,25 +134,25 @@ jobs:
 
       - name: Generate and validate release manifest
         run: |
-          python3 release/generate_manifest.py \\
-            --version "$VANTA_VERSION" \\
-            --channel stable \\
-            --assets-dir release-assets \\
+          python3 release/generate_manifest.py \
+            --version "$VANTA_VERSION" \
+            --channel stable \
+            --assets-dir release-assets \
             --output release-assets/manifest.json
 
       - name: Sign release manifest
         env:
           VANTA_RELEASE_SIGNING_KEY: ${{ secrets.VANTA_RELEASE_SIGNING_KEY }}
         run: |
-          python3 release/sign_manifest.py \\
-            --manifest release-assets/manifest.json \\
-            --output release-assets/manifest.sig \\
+          python3 release/sign_manifest.py \
+            --manifest release-assets/manifest.json \
+            --output release-assets/manifest.sig \
             --key-id vanta-release-2026-01
 
       - name: Independently verify signed release manifest
         run: |
-          python3 release/verify_manifest.py \\
-            --manifest release-assets/manifest.json \\
+          python3 release/verify_manifest.py \
+            --manifest release-assets/manifest.json \
             --signature release-assets/manifest.sig
 
       - name: Upload validated release bundle
