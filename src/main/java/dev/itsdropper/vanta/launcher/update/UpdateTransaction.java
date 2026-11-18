@@ -44,7 +44,7 @@ public final class UpdateTransaction {
             throw new IOException("Update transaction paths must share the installation parent.");
         }
         if (app.equals(stage) || app.equals(old) || stage.equals(old)
-                || !Files.isDirectory(stage) || Files.exists(old)
+                || Files.exists(stage) || Files.exists(old)
                 || !isManagedHealthMarker(marker, true)) {
             throw new IOException("Update transaction paths are not in a clean state.");
         }
@@ -52,6 +52,10 @@ public final class UpdateTransaction {
                 app, stage, old, parent.resolve(app.getFileName() + JOURNAL_SUFFIX), marker);
         transaction.writeState("PREPARED");
         return transaction;
+    }
+
+    public void markStaged() throws IOException {
+        writeState("STAGED");
     }
 
     public void markSwapped() throws IOException {
@@ -117,7 +121,7 @@ public final class UpdateTransaction {
         Path marker = Path.of(required(properties, "healthMarker")).toAbsolutePath().normalize();
         String state = required(properties, "state");
         if (!recordedApplication.equals(app)
-                || !("PREPARED".equals(state) || "SWAPPED".equals(state) || "HEALTHY".equals(state))
+                || !("PREPARED".equals(state) || "STAGED".equals(state) || "SWAPPED".equals(state) || "HEALTHY".equals(state))
                 || stage.equals(app) || backup.equals(app) || stage.equals(backup)
                 || !isManagedHealthMarker(marker, false)) {
             throw new IOException("Update transaction journal contains unsafe paths; preserving it for diagnosis.");
