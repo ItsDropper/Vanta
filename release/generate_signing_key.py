@@ -8,7 +8,6 @@ import base64
 import hashlib
 import os
 import re
-import sys
 from pathlib import Path
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
