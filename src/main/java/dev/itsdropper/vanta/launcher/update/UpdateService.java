@@ -91,7 +91,7 @@ public class UpdateService {
             }
             try {
                 UpdateInfo info = getVersion(currentVersion, version);
-                if (info.isDowngrade() && info.isUpdateAvailable()) {
+                if (info.isDowngrade()) {
                     versions.add(info);
                 }
             } catch (HttpStatusException missingHistoricalManifest) {
