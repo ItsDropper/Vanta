@@ -21,6 +21,11 @@ java {
 def hostIsX64 = ['amd64', 'x86_64', 'x86-64', 'x64'].contains(
         System.getProperty('os.arch', '').toLowerCase(java.util.Locale.ROOT))
 
+def dependencyHostOs = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT)
+def sqliteNativeClassifier = dependencyHostOs.contains('windows') ? 'natives-windows'
+        : ((dependencyHostOs.contains('mac') || dependencyHostOs.contains('darwin'))
+        ? 'natives-mac' : 'natives-linux')
+
 application {
     mainClass = 'dev.itsdropper.vanta.Main'
     // Protect Vanta's own bundled JVM as well as Minecraft child processes.
@@ -52,7 +57,9 @@ dependencies {
     implementation 'org.tomlj:tomlj:1.1.1'
 
     // Read Modrinth App's local SQLite database without modifying it.
-    implementation 'org.xerial:sqlite-jdbc:3.54.1.0'
+    // Keep the small JDBC classes jar and package only this build host's native SQLite binaries.
+    implementation 'org.xerial:sqlite-jdbc:3.54.1.0:without-natives'
+    runtimeOnly "org.xerial:sqlite-jdbc:3.54.1.0:${sqliteNativeClassifier}"
 
     // Minecraft authentication
     implementation 'net.raphimc:MinecraftAuth:4.1.2'
