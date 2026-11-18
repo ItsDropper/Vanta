@@ -17,7 +17,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey, Ed25519PublicKey
 from jsonschema import Draft202012Validator, FormatChecker
 
-DOMAIN_PREFIX = b"VANTA-RELEASE-MANIFEST-V1\\n"
+DOMAIN_PREFIX = b"VANTA-RELEASE-MANIFEST-V1\n"
 KEY_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{2,63}$")
 SIGNATURE_FIELDS = {"schema_version", "algorithm", "key_id", "signature"}
 MAX_MANIFEST_BYTES = 1024 * 1024
