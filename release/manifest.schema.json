@@ -27,7 +27,7 @@
     },
     "version": {
       "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
     },
     "published_at": {
       "type": "string",
@@ -35,7 +35,7 @@
     },
     "min_launcher_version": {
       "type": "string",
-      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
     },
     "release_notes_url": {
       "type": "string",
@@ -65,12 +65,12 @@
         "properties": {
           "file_name": {
             "type": "string",
-            "pattern": "^Vanta-[0-9]+\\.[0-9]+\\.[0-9]+-(windows-x64|linux-x64|linux-aarch64|macos-x64|macos-aarch64)\\.zip$"
+            "pattern": "^Vanta-(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)-(windows-x64|linux-x64|linux-aarch64|macos-x64|macos-aarch64)\\.zip$"
           },
           "download_url": {
             "type": "string",
             "format": "uri",
-            "pattern": "^https://github\\.com/ItsDropper/Vanta/releases/download/v[0-9]+\\.[0-9]+\\.[0-9]+/Vanta-[0-9]+\\.[0-9]+\\.[0-9]+-(windows-x64|linux-x64|linux-aarch64|macos-x64|macos-aarch64)\\.zip$"
+            "pattern": "^https://github\\.com/ItsDropper/Vanta/releases/download/v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)/Vanta-(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)-(windows-x64|linux-x64|linux-aarch64|macos-x64|macos-aarch64)\\.zip$"
           },
           "size_bytes": {
             "type": "integer",
