@@ -79,7 +79,7 @@ final class ReleaseManifest {
         }
         String downloadUrl = requiredText(artifact, "download_url");
         URI downloadUri = validateGitHubUrl(downloadUrl, "artifact");
-        String expectedPath = "/releases/download/v" + version + "/" + fileName;
+        String expectedPath = "/ItsDropper/Vanta/releases/download/v" + version + "/" + fileName;
         if (!expectedPath.equals(downloadUri.getPath())) {
             throw new IOException("The release artifact URL does not match its declared version and filename.");
         }
