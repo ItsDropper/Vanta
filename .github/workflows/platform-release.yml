@@ -29,8 +29,10 @@ jobs:
     steps:
       - name: Validate release version
         shell: bash
+        env:
+          RELEASE_VERSION: ${{ inputs.version || github.ref_name }}
         run: |
-          VERSION="${{ inputs.version || github.ref_name }}"
+          VERSION="$RELEASE_VERSION"
           VERSION="${VERSION#v}"
           if [[ ! "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Expected a stable semantic version such as 1.2.8; got: $VERSION"
@@ -77,8 +79,10 @@ jobs:
 
       - name: Resolve release metadata
         shell: bash
+        env:
+          RELEASE_VERSION: ${{ inputs.version || github.ref_name }}
         run: |
-          VERSION="${{ inputs.version || github.ref_name }}"
+          VERSION="$RELEASE_VERSION"
           VERSION="${VERSION#v}"
           echo "VANTA_VERSION=$VERSION" >> "$GITHUB_ENV"
 
