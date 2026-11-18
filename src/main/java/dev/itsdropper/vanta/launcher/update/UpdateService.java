@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.launcher.update;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.Platform;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class UpdateService {
 
@@ -24,6 +27,8 @@ public class UpdateService {
     private static final String STABLE_MANIFEST_URL =
             "https://github.com/ItsDropper/Vanta/releases/latest/download/manifest.json";
     private static final int MAX_METADATA_BYTES = 1024 * 1024;
+    private static final Pattern RELEASE_VERSION =
+            Pattern.compile("(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)\\.(?:0|[1-9][0-9]*)");
     private static final Set<String> METADATA_HOSTS = Set.of(
             "api.github.com",
             "github.com",
@@ -39,17 +44,20 @@ public class UpdateService {
                 .connectTimeout(Duration.ofSeconds(15))
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .build();
-        objectMapper = new ObjectMapper();
+        JsonFactory jsonFactory = JsonFactory.builder()
+                .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
+                .build();
+        objectMapper = new ObjectMapper(jsonFactory);
     }
 
     public UpdateInfo checkForUpdate(String currentVersion) throws IOException, InterruptedException {
         try {
             JsonNode manifest = requestJson(STABLE_MANIFEST_URL);
             return ReleaseManifest.parse(manifest, currentVersion, Platform.distributionId());
-        } catch (IOException missingManifest) {
-            // Existing published releases predate manifests. Keep those installations
-            // updateable until the first manifest-backed release is published.
-            if (!missingManifest.getMessage().contains("HTTP 404")) {
+        } catch (HttpStatusException missingManifest) {
+            // Only a genuine missing manifest permits the legacy release API fallback.
+            // Network errors, malformed JSON and server failures must remain visible.
+            if (missingManifest.statusCode() != 404) {
                 throw missingManifest;
             }
             return parseLatestRelease(requestJson(API_BASE + "/latest"), currentVersion);
@@ -59,8 +67,7 @@ public class UpdateService {
     UpdateInfo parseLatestRelease(JsonNode release, String currentVersion) throws IOException {
         try {
             return parseRelease(release, currentVersion);
-        } catch (IOException unavailablePackage) {
-            if (release.path("tag_name").asText("").isBlank()) throw unavailablePackage;
+        } catch (NoCompatiblePackageException unavailablePackage) {
             return new UpdateInfo(currentVersion, currentVersion, null, null,
                     "No compatible Vanta package is published for this operating system and architecture yet.");
         }
@@ -68,10 +75,7 @@ public class UpdateService {
 
     public UpdateInfo getVersion(String currentVersion, String targetVersion)
             throws IOException, InterruptedException {
-        String normalized = targetVersion.trim().replaceFirst("^[vV]", "");
-        if (normalized.isBlank()) {
-            throw new IllegalArgumentException("Vanta version cannot be blank.");
-        }
+        String normalized = normalizeTargetVersion(targetVersion);
         JsonNode release = requestJson(API_BASE + "/tags/v" + normalized);
         return parseRelease(release, currentVersion);
     }
@@ -93,7 +97,7 @@ public class UpdateService {
                         && info.isDowngrade()) {
                     versions.add(info);
                 }
-            } catch (IOException ignored) {
+            } catch (NoCompatiblePackageException ignored) {
                 // A release without a complete Vanta package is not rollback-capable.
             }
         }
@@ -113,8 +117,7 @@ public class UpdateService {
                 request, HttpResponse.BodyHandlers.ofInputStream());
         try (InputStream body = response.body()) {
             if (response.statusCode() != 200) {
-                throw new IOException("GitHub returned HTTP " + response.statusCode()
-                        + " while retrieving Vanta release metadata.");
+                throw new HttpStatusException(response.statusCode());
             }
             validateMetadataResponseUri(response.uri());
             long contentLength = response.headers().firstValueAsLong("Content-Length").orElse(-1);
@@ -140,12 +143,29 @@ public class UpdateService {
         }
     }
 
-    private UpdateInfo parseRelease(JsonNode release, String currentVersion) throws IOException {
-        String latestVersion = release.path("tag_name").asText();
-        String releaseNotes = release.path("body").asText("");
-        if (latestVersion.isBlank()) {
-            throw new IOException("GitHub release did not contain a version.");
+    static String normalizeTargetVersion(String targetVersion) {
+        if (targetVersion == null) {
+            throw new IllegalArgumentException("Vanta version cannot be null.");
         }
+        String normalized = targetVersion.trim().replaceFirst("^[vV]", "");
+        if (!RELEASE_VERSION.matcher(normalized).matches()) {
+            throw new IllegalArgumentException("Invalid Vanta version: " + targetVersion);
+        }
+        return normalized;
+    }
+
+    private UpdateInfo parseRelease(JsonNode release, String currentVersion) throws IOException {
+        if (release == null || !release.isObject()) {
+            throw new IOException("GitHub returned an invalid release object.");
+        }
+        String tag = release.path("tag_name").asText("");
+        final String latestVersion;
+        try {
+            latestVersion = normalizeTargetVersion(tag);
+        } catch (IllegalArgumentException invalidVersion) {
+            throw new IOException("GitHub release contains an invalid version tag.", invalidVersion);
+        }
+        String releaseNotes = release.path("body").asText("");
         String[] assets = findUpdateAssets(release);
         return new UpdateInfo(currentVersion, latestVersion, assets[0], assets[1], releaseNotes);
     }
@@ -153,11 +173,11 @@ public class UpdateService {
     String[] findUpdateAssets(JsonNode release) throws IOException {
         JsonNode assets = release.path("assets");
         if (!assets.isArray()) {
-            throw new IOException("GitHub release did not contain any assets.");
+            throw new NoCompatiblePackageException("GitHub release did not contain any assets.");
         }
         String downloadUrl = null;
         String checksumUrl = null;
-        String version = release.path("tag_name").asText("").replaceFirst("^[vV]", "");
+        String version = normalizeTargetVersion(release.path("tag_name").asText(""));
         String expectedArchive = "Vanta-" + version + "-" + Platform.distributionId() + ".zip";
         String expectedChecksum = expectedArchive + ".sha256";
         String legacyWindowsArchive = "Vanta-" + version + ".zip";
@@ -176,11 +196,30 @@ public class UpdateService {
             }
         }
         if (downloadUrl == null || downloadUrl.isBlank()) {
-            throw new IOException("No Vanta application ZIP was found in the selected GitHub release.");
+            throw new NoCompatiblePackageException("No Vanta application ZIP was found in the selected GitHub release.");
         }
         if (checksumUrl == null || checksumUrl.isBlank()) {
-            throw new IOException("No SHA-256 checksum was found for the selected Vanta release.");
+            throw new NoCompatiblePackageException("No SHA-256 checksum was found for the selected Vanta release.");
         }
         return new String[]{downloadUrl, checksumUrl};
+    }
+
+    static final class HttpStatusException extends IOException {
+        private final int statusCode;
+
+        HttpStatusException(int statusCode) {
+            super("GitHub returned HTTP " + statusCode + " while retrieving Vanta release metadata.");
+            this.statusCode = statusCode;
+        }
+
+        int statusCode() {
+            return statusCode;
+        }
+    }
+
+    static final class NoCompatiblePackageException extends IOException {
+        NoCompatiblePackageException(String message) {
+            super(message);
+        }
     }
 }
