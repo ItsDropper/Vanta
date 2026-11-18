@@ -37,6 +37,11 @@ jobs:
           java-version: '21'
           cache: gradle
 
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: Validate release manifest tooling (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
