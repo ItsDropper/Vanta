@@ -87,6 +87,12 @@ class InstalledModScannerTest {
                 mandatory=false
                 versionRange="[2.0,)"
                 side="CLIENT"
+
+                [[dependencies.forge_example]]
+                modId="multi_range_api"
+                mandatory=true
+                versionRange="[1.0,2.0),[3.0,4.0)"
+                side="BOTH"
                 """);
         InstalledMod mod = new InstalledModScanner().scanFile(file);
         assertNotNull(mod);
@@ -95,6 +101,8 @@ class InstalledModScannerTest {
         assertFalse(mod.getDependencies().get(0).isOptional());
         assertTrue(mod.getDependencies().get(1).isOptional());
         assertEquals(">=2.0", mod.getDependencies().get(1).getVersionConstraint());
+        assertEquals(">=1.0 <2.0 || >=3.0 <4.0",
+                mod.getDependencies().get(2).getVersionConstraint());
     }
 
     @Test void readsNeoForgeDedicatedDescriptorAndIncompatibilities() throws Exception {
