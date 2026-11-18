@@ -31,22 +31,19 @@ class ReleaseManifestTest {
                   "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-linux-x64.zip",
                   "size_bytes": 234567,
                   "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                }
-,
+                },
                 "linux-aarch64": {
                   "file_name": "Vanta-1.3.3-linux-aarch64.zip",
                   "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-linux-aarch64.zip",
                   "size_bytes": 234567,
                   "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                }
-,
+                },
                 "macos-x64": {
                   "file_name": "Vanta-1.3.3-macos-x64.zip",
                   "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-macos-x64.zip",
                   "size_bytes": 234567,
                   "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
-                }
-,
+                },
                 "macos-aarch64": {
                   "file_name": "Vanta-1.3.3-macos-aarch64.zip",
                   "download_url": "https://github.com/ItsDropper/Vanta/releases/download/v1.3.3/Vanta-1.3.3-macos-aarch64.zip",
@@ -109,8 +106,8 @@ class ReleaseManifestTest {
 
     @Test
     void rejectsUnknownManifestFields() {
-        String altered = MANIFEST.replace("\\"channel\\": \\"stable\\",",
-                "\\"channel\\": \\"stable\\", \\"unsigned_extension\\": true,");
+        String altered = MANIFEST.replace("\"channel\": \"stable\",",
+                "\"channel\": \"stable\", \"unsigned_extension\": true,");
         assertThrows(IOException.class,
                 () -> ReleaseManifest.parse(read(altered), "1.3.2", "windows-x64"));
     }
@@ -118,8 +115,8 @@ class ReleaseManifestTest {
     @Test
     void validatesArtifactsForOtherPlatformsToo() {
         String altered = MANIFEST.replace(
-                "\\"sha256\\": \\"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\\"",
-                "\\"sha256\\": \\"not-a-digest\\"");
+                "\"sha256\": \"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"",
+                "\"sha256\": \"not-a-digest\"");
         assertThrows(IOException.class,
                 () -> ReleaseManifest.parse(read(altered), "1.3.2", "windows-x64"));
     }
