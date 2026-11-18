@@ -437,7 +437,8 @@ public class LauncherView {
         notifications.showProgress("Repairing Vanta", "Checking the latest compatible release...");
         notifications.setProgress(-1.0);
         new UpdateChecker().check().thenAccept(updateInfo -> UiExecutor.shared().dispatchToUi(() -> {
-            if (updateInfo.getDownloadUrl() == null || updateInfo.getChecksumUrl() == null) {
+            if (updateInfo.getDownloadUrl() == null
+                    || (updateInfo.getSha256() == null && updateInfo.getChecksumUrl() == null)) {
                 notifications.error("Application repair unavailable",
                         updateInfo.getReleaseNotes() == null || updateInfo.getReleaseNotes().isBlank()
                                 ? "No compatible verified Vanta package is published."
