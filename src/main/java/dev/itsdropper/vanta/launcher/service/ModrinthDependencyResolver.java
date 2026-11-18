@@ -661,31 +661,31 @@ private boolean resolveDependencies(
          * ---------------------------------------------------------
          */
 
-        InstalledMod fabricMetadata =
+        InstalledMod loaderMetadata =
                 readModMetadata(version);
 
-        if (fabricMetadata == null) {
+        if (loaderMetadata == null) {
             return true;
         }
 
-        List<DependencyRequirement> fabricDependencies =
-                fabricMetadata.getDependencies();
+        List<DependencyRequirement> metadataDependencies =
+                loaderMetadata.getDependencies();
 
-        if (fabricDependencies == null
-                || fabricDependencies.isEmpty()) {
+        if (metadataDependencies == null
+                || metadataDependencies.isEmpty()) {
 
             return true;
         }
 
         System.out.println(
                 "[Vanta DEBUG] Inspecting loader metadata dependencies for "
-                        + fabricMetadata.getModId()
+                        + loaderMetadata.getModId()
                         + " "
-                        + fabricMetadata.getVersion()
+                        + loaderMetadata.getVersion()
         );
 
         for (DependencyRequirement requirement :
-                fabricDependencies) {
+                metadataDependencies) {
 
             if (requirement == null
                     || requirement.isOptional()
@@ -695,7 +695,7 @@ private boolean resolveDependencies(
                 continue;
             }
 
-            String fabricDependencyModId =
+            String dependencyModId =
                     requirement.getModId();
 
             String constraint =
@@ -703,7 +703,7 @@ private boolean resolveDependencies(
 
             System.out.println(
                     "[Vanta DEBUG]   loader metadata dependency: "
-                            + fabricDependencyModId
+                            + dependencyModId
                             + " ["
                             + constraint
                             + "]"
@@ -715,7 +715,7 @@ private boolean resolveDependencies(
              */
             if (isEnvironmentDependencySatisfied(
                     instance,
-                    fabricDependencyModId,
+                    dependencyModId,
                     constraint
             )) {
 
@@ -728,7 +728,7 @@ private boolean resolveDependencies(
              */
             if (isProvidedByFabricApi(
                     resolved,
-                    fabricDependencyModId,
+                    dependencyModId,
                     constraint
             )) {
 
@@ -742,7 +742,7 @@ private boolean resolveDependencies(
             ModrinthVersion resolvedDependency =
                     findResolvedModDependency(
                             resolved,
-                            fabricDependencyModId
+                            dependencyModId
                     );
 
             if (resolvedDependency != null) {
@@ -766,7 +766,7 @@ private boolean resolveDependencies(
 
                 System.out.println(
                         "[Vanta DEBUG]   Existing loader metadata dependency "
-                                + fabricDependencyModId
+                                + dependencyModId
                                 + " "
                                 + dependencyMetadata.getVersion()
                                 + " satisfies="
@@ -789,7 +789,7 @@ private boolean resolveDependencies(
             String dependencyProjectId =
                     findModrinthProjectForModId(
                             instance,
-                            fabricDependencyModId
+                            dependencyModId
                     );
 
             if (dependencyProjectId == null
@@ -797,7 +797,7 @@ private boolean resolveDependencies(
 
                 System.out.println(
                         "[Vanta DEBUG]   Could not find Modrinth project for mod "
-                                + fabricDependencyModId
+                                + dependencyModId
                 );
 
                 return false;
@@ -807,7 +807,7 @@ private boolean resolveDependencies(
                     resolveModDependency(
                             instance,
                             dependencyProjectId,
-                            fabricDependencyModId,
+                            dependencyModId,
                             constraint,
                             resolved,
                             resolving
@@ -817,7 +817,7 @@ private boolean resolveDependencies(
 
                 System.out.println(
                         "[Vanta DEBUG]   FAILED loader metadata dependency: "
-                                + fabricDependencyModId
+                                + dependencyModId
                                 + " ["
                                 + constraint
                                 + "]"
@@ -1017,12 +1017,12 @@ private boolean isEnvironmentDependencySatisfied(
 
 private ModrinthVersion findResolvedModDependency(
             Map<String, ModrinthVersion> resolved,
-            String fabricModId
+            String dependencyModId
     ) throws IOException {
 
         if (resolved == null
-                || fabricModId == null
-                || fabricModId.isBlank()) {
+                || dependencyModId == null
+                || dependencyModId.isBlank()) {
 
             return null;
         }
@@ -1045,7 +1045,7 @@ private ModrinthVersion findResolvedModDependency(
                 continue;
             }
 
-            if (fabricModId.equals(
+            if (dependencyModId.equals(
                     metadata.getModId()
             )) {
 
@@ -1058,19 +1058,19 @@ private ModrinthVersion findResolvedModDependency(
 
 private String findModrinthProjectForModId(
             Instance instance,
-            String fabricModId
+            String dependencyModId
     ) throws IOException, InterruptedException {
 
-        if (fabricModId == null || fabricModId.isBlank()) {
+        if (dependencyModId == null || dependencyModId.isBlank()) {
             return null;
         }
 
-        if ("fabric".equalsIgnoreCase(fabricModId)) {
-            modIdProjectCache.put(fabricModId, "P7dR8mSH");
+        if ("fabric".equalsIgnoreCase(dependencyModId)) {
+            modIdProjectCache.put(dependencyModId, "P7dR8mSH");
             return "P7dR8mSH";
         }
 
-        String cached = modIdProjectCache.get(fabricModId);
+        String cached = modIdProjectCache.get(dependencyModId);
         if (cached != null) {
             return cached;
         }
@@ -1082,7 +1082,7 @@ private String findModrinthProjectForModId(
          */
         List<ModrinthSearchHit> hits =
                 client.search(
-                        fabricModId,
+                        dependencyModId,
                         ModrinthContentType.MOD,
                         normalizeLoader(instance.getLoader()),
                         instance.getMinecraftVersion()
@@ -1104,10 +1104,10 @@ private String findModrinthProjectForModId(
                     InstalledMod metadata = readModMetadata(version);
 
                     if (metadata != null
-                            && fabricModId.equals(metadata.getModId())) {
+                            && dependencyModId.equals(metadata.getModId())) {
 
                         modIdProjectCache.put(
-                                fabricModId,
+                                dependencyModId,
                                 projectId
                         );
 
@@ -1117,7 +1117,7 @@ private String findModrinthProjectForModId(
             }
         }
 
-        if (!fabricModId.startsWith("fabric-")) {
+        if (!dependencyModId.startsWith("fabric-")) {
             return null;
         }
 
@@ -1163,10 +1163,10 @@ private String findModrinthProjectForModId(
 
                 if (installedModScanner.containsFabricModId(
                         tempFile,
-                        fabricModId
+                        dependencyModId
                 )) {
                     modIdProjectCache.put(
-                            fabricModId,
+                            dependencyModId,
                             "P7dR8mSH"
                     );
                     return "P7dR8mSH";
@@ -1182,7 +1182,7 @@ private String findModrinthProjectForModId(
 private boolean resolveModDependency(
             Instance instance,
             String projectId,
-            String fabricModId,
+            String dependencyModId,
             String constraint,
             Map<String, ModrinthVersion> resolved,
             Set<String> resolving
@@ -1190,8 +1190,8 @@ private boolean resolveModDependency(
 
         if (projectId == null
                 || projectId.isBlank()
-                || fabricModId == null
-                || fabricModId.isBlank()) {
+                || dependencyModId == null
+                || dependencyModId.isBlank()) {
 
             return false;
         }
@@ -1200,8 +1200,8 @@ private boolean resolveModDependency(
          * Prevent circular dependency resolution.
          */
         String resolveKey =
-                "fabric:"
-                        + fabricModId;
+                "metadata:"
+                        + dependencyModId;
 
         if (!resolving.add(resolveKey)) {
             return true;
@@ -1240,7 +1240,7 @@ private boolean resolveModDependency(
                  * Fabric API is a provider JAR containing many internal
                  * Fabric API modules. Those module IDs are NOT the JAR's
                  * own fabric.mod.json ID, so comparing metadata.getModId()
-                 * directly against fabricDependencyModId incorrectly
+                 * directly against dependencyModId incorrectly
                  * rejects every Fabric API candidate.
                  *
                  * For Fabric API, inspect the actual JAR for the requested
@@ -1287,14 +1287,14 @@ private boolean resolveModDependency(
                         }
                     }
 
-                    String moduleVersion = modules.get(fabricModId);
+                    String moduleVersion = modules.get(dependencyModId);
                     if (moduleVersion == null) {
                         continue;
                     }
 
                     System.out.println(
                             "[Vanta DEBUG] Fabric API provides "
-                                    + fabricModId + " " + moduleVersion
+                                    + dependencyModId + " " + moduleVersion
                                     + " via " + candidate.getVersionNumber()
                     );
 
@@ -1303,13 +1303,13 @@ private boolean resolveModDependency(
                     if (!matchesFabricModuleConstraint(moduleVersion, constraint)) {
                         System.out.println(
                                 "[Vanta DEBUG] Rejected Fabric API module "
-                                        + fabricModId + " " + moduleVersion
+                                        + dependencyModId + " " + moduleVersion
                                         + " [" + constraint + "]"
                         );
                         continue;
                     }
 
-                } else if (!fabricModId.equals(metadata.getModId())) {
+                } else if (!dependencyModId.equals(metadata.getModId())) {
                     continue;
                 } else if (!matchesModVersionConstraint(
                         metadata.getVersion(), constraint)) {
@@ -1318,7 +1318,7 @@ private boolean resolveModDependency(
                             "[Vanta DEBUG] Rejected loader metadata dependency candidate "
                                     + candidate.getVersionNumber()
                                     + " for "
-                                    + fabricModId
+                                    + dependencyModId
                                     + " ["
                                     + constraint
                                     + "]"
@@ -1347,7 +1347,7 @@ private boolean resolveModDependency(
 
                         if (existingModules != null) {
                             String existingModuleVersion =
-                                    existingModules.get(fabricModId);
+                                    existingModules.get(dependencyModId);
 
                             if (existingModuleVersion != null
                                     && matchesFabricModuleConstraint(
@@ -1357,7 +1357,7 @@ private boolean resolveModDependency(
                                 System.out.println(
                                         "[Vanta DEBUG] Existing Fabric API "
                                                 + "provides "
-                                                + fabricModId + " "
+                                                + dependencyModId + " "
                                                 + existingModuleVersion
                                                 + " via "
                                                 + existing.getVersionNumber()
@@ -1373,7 +1373,7 @@ private boolean resolveModDependency(
                             readModMetadata(existing);
 
                     if (existingMetadata != null
-                            && fabricModId.equals(existingMetadata.getModId())
+                            && dependencyModId.equals(existingMetadata.getModId())
                             && existingMetadata.getVersion() != null
                             && matchesModVersionConstraint(
                             existingMetadata.getVersion(),
@@ -1440,7 +1440,7 @@ private boolean resolveModDependency(
 
                 System.out.println(
                         "[Vanta DEBUG] Resolved loader metadata dependency "
-                                + fabricModId
+                                + dependencyModId
                                 + " -> "
                                 + candidate.getVersionNumber()
                 );
@@ -2511,14 +2511,14 @@ private InstalledMod findInstalledDependencyMod(
             }
         }
 
-        String fabricModId =
+        String dependencyModId =
                 findModId(
                         instance,
                         projectId
                 );
 
-        if (fabricModId == null
-                || fabricModId.isBlank()) {
+        if (dependencyModId == null
+                || dependencyModId.isBlank()) {
 
             return null;
         }
@@ -2526,7 +2526,7 @@ private InstalledMod findInstalledDependencyMod(
         for (InstalledMod installed :
                 installedModScanner.scan(instance)) {
 
-            if (fabricModId.equals(
+            if (dependencyModId.equals(
                     installed.getModId()
             )) {
 
@@ -2791,13 +2791,13 @@ private String normalizeModrinthVersion(
 
 private boolean isProvidedByFabricApi(
             Map<String, ModrinthVersion> resolved,
-            String fabricDependencyModId,
+            String dependencyModId,
             String constraint
     ) throws IOException, InterruptedException {
 
         if (resolved == null
-                || fabricDependencyModId == null
-                || fabricDependencyModId.isBlank()) {
+                || dependencyModId == null
+                || dependencyModId.isBlank()) {
             return false;
         }
 
@@ -2805,7 +2805,7 @@ private boolean isProvidedByFabricApi(
          * "fabric" is Fabric's special dependency and is provided by
          * Fabric API. Other IDs must not be assumed to be API modules.
          */
-        if (!"fabric".equalsIgnoreCase(fabricDependencyModId)) {
+        if (!"fabric".equalsIgnoreCase(dependencyModId)) {
             return false;
         }
 
