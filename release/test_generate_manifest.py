@@ -129,6 +129,20 @@ class GenerateManifestTest(unittest.TestCase):
         self.assertNotEqual(0, result.returncode)
         self.assertIn("unsafe zip entry path", result.stderr.lower())
 
+
+    def test_rejects_case_colliding_zip_entries(self):
+        archive = self.assets / "Vanta-1.3.3-windows-x64.zip"
+        with zipfile.ZipFile(archive, "w") as package:
+            for entry in REQUIRED_FILES["windows-x64"]:
+                package.writestr(entry, b"fixture")
+            package.writestr("vanta.exe", b"case collision")
+        checksum = hashlib.sha256(archive.read_bytes()).hexdigest()
+        (self.assets / (archive.name + ".sha256")).write_text(
+            f"{checksum}  {archive.name}\n", encoding="utf-8"
+        )
+        result = self.run_generator()
+        self.assertNotEqual(0, result.returncode)
+        self.assertIn("case-colliding", result.stderr.lower())
     def test_rejects_incomplete_application_image(self):
         archive = self.assets / "Vanta-1.3.3-windows-x64.zip"
         with zipfile.ZipFile(archive, "w") as package:
