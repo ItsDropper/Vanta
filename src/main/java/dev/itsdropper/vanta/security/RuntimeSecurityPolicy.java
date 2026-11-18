@@ -98,10 +98,13 @@ public final class RuntimeSecurityPolicy {
         finally{Files.deleteIfExists(tmp);}
     }
     static List<Rule> parseAndVerify(byte[] payload,byte[] signature,Clock clock)throws Exception{
-        if(payload==null||payload.length==0||payload.length>LIMIT)throw new IOException("Invalid policy size");
         byte[] raw=Base64.getDecoder().decode(PUBLIC_KEY),encoded=new byte[PREFIX.length+raw.length];
         System.arraycopy(PREFIX,0,encoded,0,PREFIX.length);System.arraycopy(raw,0,encoded,PREFIX.length,raw.length);
         PublicKey key=KeyFactory.getInstance("Ed25519").generatePublic(new X509EncodedKeySpec(encoded));
+        return parseAndVerify(payload,signature,clock,key);
+    }
+    static List<Rule> parseAndVerify(byte[] payload,byte[] signature,Clock clock,PublicKey key)throws Exception{
+        if(payload==null||payload.length==0||payload.length>LIMIT)throw new IOException("Invalid policy size");
         Signature verifier=Signature.getInstance("Ed25519");verifier.initVerify(key);verifier.update(payload);
         if(signature==null||!verifier.verify(signature))throw new IOException("Invalid policy signature");
         JsonNode root=JSON.readTree(payload);
