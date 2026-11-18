@@ -3,6 +3,8 @@ package dev.itsdropper.vanta.launcher.update;
 import java.io.IOException;
 import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
+import java.nio.channels.OverlappingFileLockException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -81,6 +83,48 @@ public final class UpdateTransaction {
         deleteTree(stagingRoot);
         Files.deleteIfExists(healthMarker);
         Files.deleteIfExists(journal);
+    }
+
+    /** Exclusive cross-process lock for one installation's update/recovery work. */
+    public static InstallationLock acquireInstallationLock(Path applicationRoot) throws IOException {
+        Path app = applicationRoot.toAbsolutePath().normalize();
+        Path parent = app.getParent();
+        if (parent == null) throw new IOException("Application installation has no parent directory.");
+        Path lockPath = parent.resolve(app.getFileName() + ".update.lock");
+        FileChannel channel = FileChannel.open(lockPath,
+                StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        try {
+            FileLock lock;
+            try {
+                lock = channel.tryLock();
+            } catch (OverlappingFileLockException alreadyLocked) {
+                lock = null;
+            }
+            if (lock == null) throw new IOException("Another Vanta update or recovery is already active.");
+            return new InstallationLock(channel, lock);
+        } catch (IOException | RuntimeException failure) {
+            channel.close();
+            throw failure;
+        }
+    }
+
+    public static final class InstallationLock implements AutoCloseable {
+        private final FileChannel channel;
+        private final FileLock lock;
+
+        private InstallationLock(FileChannel channel, FileLock lock) {
+            this.channel = channel;
+            this.lock = lock;
+        }
+
+        @Override
+        public void close() throws IOException {
+            try {
+                if (lock.isValid()) lock.release();
+            } finally {
+                channel.close();
+            }
+        }
     }
 
     public static boolean isHealthInvocation(String[] args) {
