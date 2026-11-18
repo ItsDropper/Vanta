@@ -22,7 +22,7 @@ public final class UpdaterWorkspaceCleanup {
     }
 
     public static void schedule(Path workspace, long updaterPid, long updaterStartTime) {
-        if (updaterPid <= 0 || !isManagedWorkspace(workspace)) {
+        if (updaterPid <= 0 || updaterStartTime <= 0 || !isManagedWorkspace(workspace)) {
             return;
         }
 
@@ -46,12 +46,10 @@ public final class UpdaterWorkspaceCleanup {
     }
 
     private static boolean matchesStartTime(ProcessHandle process, long expectedStartTime) {
-        if (expectedStartTime <= 0) {
-            return process.isAlive();
-        }
+        if (expectedStartTime <= 0) return false;
         return process.info().startInstant()
                 .map(start -> start.toEpochMilli() == expectedStartTime)
-                .orElse(process.isAlive());
+                .orElse(false);
     }
 
     static void writeOwner(Path workspace, ProcessHandle updater) throws IOException {
@@ -60,6 +58,7 @@ public final class UpdaterWorkspaceCleanup {
         }
         long startTime = updater.info().startInstant()
                 .map(java.time.Instant::toEpochMilli).orElse(-1L);
+        if (startTime <= 0) throw new IOException("Operating system did not provide a stable updater process identity.");
         Files.writeString(workspace.resolve(OWNER_FILE),
                 updater.pid() + System.lineSeparator() + startTime + System.lineSeparator());
     }
