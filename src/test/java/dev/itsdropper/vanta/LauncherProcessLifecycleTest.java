@@ -66,13 +66,14 @@ class LauncherProcessLifecycleTest {
             backgroundWorker.setDaemon(false);
             backgroundWorker.start();
 
-            LauncherProcessLifecycle.exit(() -> {
+            LauncherProcessLifecycle.registerCleanup(() -> {
                 try {
                     Files.writeString(Path.of(args[0]), "cleaned");
                 } catch (Exception failure) {
                     throw new IllegalStateException(failure);
                 }
             });
+            LauncherProcessLifecycle.exit();
         }
     }
 }
