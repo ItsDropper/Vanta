@@ -7,8 +7,10 @@ import argparse
 import hashlib
 import json
 import re
+import stat
+import zipfile
 from datetime import datetime, timezone
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from urllib.parse import quote
 
 from jsonschema import Draft202012Validator, FormatChecker
@@ -29,6 +31,55 @@ def sha256(path: Path) -> str:
             digest.update(chunk)
     return digest.hexdigest()
 
+
+
+PLATFORM_REQUIRED_FILES = {
+    "windows-x64": ("Vanta.exe", "runtime/bin/java.dll", "runtime/lib/modules", "app/Vanta.cfg"),
+    "linux-x64": ("bin/Vanta", "lib/runtime/lib/modules", "lib/app/Vanta.cfg"),
+    "linux-aarch64": ("bin/Vanta", "lib/runtime/lib/modules", "lib/app/Vanta.cfg"),
+    "macos-x64": ("Contents/MacOS/Vanta", "Contents/runtime/lib/modules", "Contents/app/Vanta.cfg"),
+    "macos-aarch64": ("Contents/MacOS/Vanta", "Contents/runtime/lib/modules", "Contents/app/Vanta.cfg"),
+}
+MAX_ARCHIVE_ENTRIES = 100_000
+MAX_UNCOMPRESSED_BYTES = 2 * 1024 * 1024 * 1024
+
+
+def validate_archive(path: Path, platform: str) -> None:
+    try:
+        with zipfile.ZipFile(path) as archive:
+            entries = archive.infolist()
+            if not entries or len(entries) > MAX_ARCHIVE_ENTRIES:
+                raise SystemExit(f"Invalid ZIP entry count in {path.name}: {len(entries)}")
+            total_uncompressed = 0
+            names: set[str] = set()
+            regular_files: set[str] = set()
+            for entry in entries:
+                name = entry.filename
+                normalized = PurePosixPath(name)
+                if (not name or name.startswith("/") or "\\\\" in name
+                        or any(part in ("", ".", "..") for part in normalized.parts)):
+                    raise SystemExit(f"Unsafe ZIP entry path in {path.name}: {name!r}")
+                if name in names:
+                    raise SystemExit(f"Duplicate ZIP entry in {path.name}: {name}")
+                names.add(name)
+                if entry.flag_bits & 0x1:
+                    raise SystemExit(f"Encrypted ZIP entries are not supported: {name}")
+                mode = (entry.external_attr >> 16) & 0o170000
+                if stat.S_ISLNK(mode):
+                    raise SystemExit(f"Symbolic links are not allowed in release archives: {name}")
+                total_uncompressed += entry.file_size
+                if total_uncompressed > MAX_UNCOMPRESSED_BYTES:
+                    raise SystemExit(f"Uncompressed release archive is too large: {path.name}")
+                if not entry.is_dir():
+                    regular_files.add(name)
+            missing = sorted(set(PLATFORM_REQUIRED_FILES[platform]) - regular_files)
+            if missing:
+                raise SystemExit(f"{path.name} is missing required application image files: " + ", ".join(missing))
+            corrupt_entry = archive.testzip()
+            if corrupt_entry is not None:
+                raise SystemExit(f"Corrupt ZIP entry in {path.name}: {corrupt_entry}")
+    except zipfile.BadZipFile as invalid_archive:
+        raise SystemExit(f"Invalid ZIP archive: {path.name}") from invalid_archive
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -60,6 +111,7 @@ def main() -> None:
         platform = match.group("platform")
         if platform in artifacts:
             raise SystemExit(f"Duplicate platform artifact: {platform}")
+        validate_archive(archive, platform)
         size = archive.stat().st_size
         if size <= 0 or size > MAX_ARTIFACT_BYTES:
             raise SystemExit(f"Invalid artifact size for {archive.name}: {size}")
