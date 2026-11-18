@@ -33,16 +33,17 @@ public class Main extends Application {
             TelemetryService.installUncaughtExceptionHandler();
         }
 
-        // Keep the JavaFX application alive when the launcher window is
-        // hidden while Minecraft is running.
-        javafx.application.Platform.setImplicitExit(false);
-
         stage.initStyle(screenshotMode ? StageStyle.UNDECORATED : StageStyle.TRANSPARENT);
 
         if (screenshotMode) {
             startScreenshotCapture(stage, arguments);
             return;
         }
+
+        // Keep Vanta alive while its window is intentionally hidden during a
+        // Minecraft session. LauncherProcessLifecycle explicitly terminates
+        // the JVM when the user closes the launcher window.
+        javafx.application.Platform.setImplicitExit(false);
 
         RuntimeSecurityPolicy.getInstance().initialize();
 
