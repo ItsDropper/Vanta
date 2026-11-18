@@ -95,12 +95,15 @@ class UpdateTransactionTest {
 
         private Fixture() throws Exception {
             createImage(application, "old");
-            createImage(staging, "new");
             Files.createDirectories(workspace);
         }
 
         private UpdateTransaction begin() throws Exception {
-            return UpdateTransaction.begin(application, staging, backup, healthMarker);
+            UpdateTransaction transaction = UpdateTransaction.begin(
+                    application, staging, backup, healthMarker);
+            createImage(staging, "new");
+            transaction.markStaged();
+            return transaction;
         }
 
         private Path journal() {
