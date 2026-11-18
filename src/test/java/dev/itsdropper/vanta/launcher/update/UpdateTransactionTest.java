@@ -90,6 +90,20 @@ class UpdateTransactionTest {
         assertFalse(Files.exists(f.journal()));
     }
 
+    @Test
+    void installationLockRejectsConcurrentUpdaterInSameProcess() throws Exception {
+        Fixture f = new Fixture();
+        try (UpdateTransaction.InstallationLock ignored =
+                     UpdateTransaction.acquireInstallationLock(f.application)) {
+            assertThrows(java.io.IOException.class,
+                    () -> UpdateTransaction.acquireInstallationLock(f.application));
+        }
+        try (UpdateTransaction.InstallationLock ignored =
+                     UpdateTransaction.acquireInstallationLock(f.application)) {
+            assertNotNull(ignored);
+        }
+    }
+
     private final class Fixture {
         private final Path application = temporaryDirectory.resolve("Vanta");
         private final Path staging = temporaryDirectory.resolve("Vanta.update");
