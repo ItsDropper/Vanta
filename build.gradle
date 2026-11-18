@@ -185,7 +185,9 @@ tasks.register('platformAppImage', Exec) {
                         'jdk.localedata',
                         'jdk.unsupported',
                         'javafx.controls'
-                ].join(',')
+                ].join(','),
+                '--jlink-options',
+                '--strip-debug --no-man-pages --no-header-files --compress=2'
         ]
         if (hostIsX64) {
             jpackageArguments.addAll(['--java-options', '-XX:-UseBASE64Intrinsics'])
