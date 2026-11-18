@@ -167,6 +167,13 @@ public class Main extends Application {
             loadingScreen.finish(() -> {
                 scene.setRoot(readyLauncher.getRoot());
                 stage.setScene(scene);
+                try {
+                    dev.itsdropper.vanta.launcher.update.UpdateTransaction.acknowledgeHealthyStartup(
+                            getParameters().getRaw().toArray(String[]::new));
+                } catch (java.io.IOException healthFailure) {
+                    System.err.println("[Vanta Update Health] Could not publish startup acknowledgement: "
+                            + healthFailure.getMessage());
+                }
             });
         };
 
@@ -239,6 +246,17 @@ public class Main extends Application {
                     java.util.Arrays.copyOfRange(args, 1, args.length)
             );
             return;
+        }
+
+        if (!dev.itsdropper.vanta.launcher.update.UpdateTransaction.isHealthInvocation(args)) {
+            try {
+                dev.itsdropper.vanta.launcher.update.UpdateTransaction.recoverBeforeLaunch(
+                        dev.itsdropper.vanta.launcher.update.ApplicationLocator.getApplicationDirectory());
+            } catch (java.io.IOException recoveryFailure) {
+                System.err.println("[Vanta Update Recovery] " + recoveryFailure.getMessage());
+                recoveryFailure.printStackTrace();
+                return;
+            }
         }
 
         dev.itsdropper.vanta.launcher.update.UpdaterWorkspaceCleanup.scheduleStaleWorkspaceSweep();
