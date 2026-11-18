@@ -66,11 +66,11 @@ jobs:
         if: runner.os != 'Windows'
         run: |
           chmod +x ./gradlew
-          ./gradlew test distZip distTar platformImageChecksum
+          ./gradlew test distZip distTar platformImageChecksum updaterJarChecksum
 
       - name: Run tests and build portable distributions (Windows)
         if: runner.os == 'Windows'
-        run: .\\gradlew.bat test distZip distTar platformImageChecksum
+        run: .\\gradlew.bat test distZip distTar platformImageChecksum updaterJarChecksum
 
       - name: Report runtime and application image footprint (Linux/macOS)
         if: runner.os != 'Windows'
@@ -208,7 +208,7 @@ jobs:
 
       - name: Run tests and build x64 application image
         shell: pwsh
-        run: .\\gradlew.bat test platformImageChecksum
+        run: .\\gradlew.bat test platformImageChecksum updaterJarChecksum
 
       - name: Verify emulated x64 application image
         shell: pwsh
