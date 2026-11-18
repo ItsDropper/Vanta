@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -19,7 +18,7 @@ import java.util.regex.Pattern;
 final class ReleaseManifest {
     private static final int SUPPORTED_SCHEMA_VERSION = 1;
     private static final Pattern VERSION = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+");
-    private static final Pattern SHA256 = Pattern.compile("(?i)[0-9a-f]{64}");
+    private static final Pattern SHA256 = Pattern.compile("[0-9a-f]{64}");
     private static final long MAX_ARTIFACT_BYTES = 1024L * 1024 * 1024;
     private static final Set<String> PLATFORMS = Set.of(
             "windows-x64", "linux-x64", "linux-aarch64", "macos-x64", "macos-aarch64");
@@ -70,7 +69,7 @@ final class ReleaseManifest {
 
         String releaseNotesUrl = requiredText(manifest, "release_notes_url");
         URI releaseNotesUri = validateGitHubUrl(releaseNotesUrl, "release notes");
-        if (!("/ItsDropper/Vanta/releases/tag/v" + version).equals(releaseNotesUri.getPath())) {
+        if (!("/ItsDropper/Vanta/releases/tag/v" + version).equals(releaseNotesUri.getRawPath())) {
             throw new IOException("The release notes URL does not match the declared release version.");
         }
         if (UpdateInfo.compareVersions(minimumVersion, version) > 0) {
@@ -92,11 +91,11 @@ final class ReleaseManifest {
         String downloadUrl = requiredText(artifact, "download_url");
         URI downloadUri = validateGitHubUrl(downloadUrl, "artifact");
         String expectedPath = "/ItsDropper/Vanta/releases/download/v" + version + "/" + fileName;
-        if (!expectedPath.equals(downloadUri.getPath())) {
+        if (!expectedPath.equals(downloadUri.getRawPath())) {
             throw new IOException("The release artifact URL does not match its declared version and filename.");
         }
 
-        String sha256 = requiredText(artifact, "sha256").toLowerCase(Locale.ROOT);
+        String sha256 = requiredText(artifact, "sha256");
         if (!SHA256.matcher(sha256).matches()) {
             throw new IOException("The release manifest contains an invalid SHA-256 digest.");
         }
@@ -185,6 +184,7 @@ final class ReleaseManifest {
                 || !"github.com".equalsIgnoreCase(uri.getHost())
                 || uri.getUserInfo() != null
                 || uri.getFragment() != null
+                || uri.getQuery() != null
                 || (uri.getPort() != -1 && uri.getPort() != 443)) {
             throw new IOException("The release manifest " + description + " URL is not a trusted GitHub HTTPS URL.");
         }
