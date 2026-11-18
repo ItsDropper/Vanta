@@ -48,6 +48,26 @@ class UpdaterWorkspaceCleanupTest {
     }
 
     @Test
+    void staleSweepRemovesAbandonedWorkspacesButPreservesActiveUpdater() throws Exception {
+        Path root = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater");
+        Files.createDirectories(root);
+        Path stale = root.resolve("session-stale-test-" + UUID.randomUUID());
+        Files.createDirectories(stale);
+        Files.setLastModifiedTime(stale, java.nio.file.attribute.FileTime.fromMillis(1));
+
+        Path active = root.resolve("session-active-test-" + UUID.randomUUID());
+        Files.createDirectories(active);
+        UpdaterWorkspaceCleanup.writeOwner(active, ProcessHandle.current());
+        Files.setLastModifiedTime(active, java.nio.file.attribute.FileTime.fromMillis(1));
+
+        UpdaterWorkspaceCleanup.cleanupStaleWorkspaces();
+
+        assertFalse(Files.exists(stale), "Abandoned workspaces older than one day should be removed");
+        assertTrue(Files.exists(active), "A workspace owned by a live updater must be preserved");
+        UpdaterWorkspaceCleanup.deleteWorkspace(active);
+    }
+
+    @Test
     void scheduledCleanupWaitsUntilUpdaterProcessHasExited() throws Exception {
         Path root = Path.of(System.getProperty("java.io.tmpdir"), "Vanta-updater");
         Path workspace = root.resolve("session-test-" + UUID.randomUUID());
