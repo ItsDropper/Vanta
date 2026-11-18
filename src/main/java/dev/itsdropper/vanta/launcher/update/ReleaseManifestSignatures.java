@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 final class ReleaseManifestSignatures {
     private static final int MAX_SIGNATURE_BYTES = 16 * 1024;
     private static final byte[] DOMAIN_PREFIX =
-            "VANTA-RELEASE-MANIFEST-V1\\n".getBytes(StandardCharsets.US_ASCII);
+            "VANTA-RELEASE-MANIFEST-V1\n".getBytes(StandardCharsets.US_ASCII);
     private static final Pattern KEY_ID = Pattern.compile("[a-z0-9][a-z0-9._-]{2,63}");
     private static final ObjectMapper JSON = new ObjectMapper(JsonFactory.builder()
             .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
