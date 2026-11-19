@@ -15,6 +15,8 @@ The model:
 
 The bundled corpus currently contains 66 synthetic, labelled examples across all 22 actionable failure categories. It is a starting dataset, not a claim of broad real-world accuracy. Add new examples only after reviewing their label and checking the case for private data.
 
+A running Minecraft process is never terminated or marked crashed because a log line matches a diagnostic signature. Live output is collected as evidence only. Vanta runs crash classification only after the child process has terminated and `waitFor()` returns a non-zero exit code; a zero exit remains successful even if the output contains crash-like text. Failures before a child process is created remain launcher/startup errors and are not assigned a game-crash diagnosis.
+
 ## Local case collection
 
 The queue is stored at `%AppData%/Vanta/crash-case-review/cases.json` on Windows, and under the platform-specific Vanta data directory on macOS/Linux.
