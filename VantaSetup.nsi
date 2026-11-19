@@ -45,6 +45,7 @@ Var WORK_DIR
 Var ZIP_PATH
 Var HASH_PATH
 Var VERSION_PATH
+Var PREVIOUS_DIR
 
 Section "Vanta"
   StrCpy $WORK_DIR "$TEMP\VantaInstaller"
@@ -81,6 +82,7 @@ Section "Vanta"
 
   StrCpy $ZIP_PATH "$WORK_DIR\Vanta-$APP_VERSION.zip"
   StrCpy $HASH_PATH "$ZIP_PATH.sha256"
+  StrCpy $PREVIOUS_DIR "$INSTDIR.previous"
   DetailPrint "Downloading Vanta $APP_VERSION..."
   nsExec::ExecToLog '"$SYSDIR\curl.exe" -L -sS --fail --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 300 -o "$ZIP_PATH" "https://github.com/ItsDropper/Vanta/releases/download/v$APP_VERSION/Vanta-$APP_VERSION.zip"'
   Pop $0
@@ -116,9 +118,9 @@ Section "Vanta"
   IfFileExists "$WORK_DIR\staged\updater\VantaUpdater.jar" 0 InvalidPackage
 
   ; Keep a rollback copy until the new installation passes final validation.
-  RMDir /r "$WORK_DIR\previous"
+  RMDir /r "$PREVIOUS_DIR"
   IfFileExists "$INSTDIR\Vanta.exe" 0 NoPreviousInstall
-  Rename "$INSTDIR" "$WORK_DIR\previous"
+  Rename "$INSTDIR" "$PREVIOUS_DIR"
   IfErrors InstallFailure
 NoPreviousInstall:
   CreateDirectory "$INSTDIR"
@@ -136,7 +138,7 @@ NoPreviousInstall:
   CreateShortcut "$SMPROGRAMS\Vanta\Vanta.lnk" "$INSTDIR\Vanta.exe" "" "$INSTDIR\Vanta.exe" 0
   CreateShortcut "$DESKTOP\Vanta.lnk" "$INSTDIR\Vanta.exe" "" "$INSTDIR\Vanta.exe" 0
   WriteUninstaller "$INSTDIR\Uninstall.exe"
-  RMDir /r "$WORK_DIR\previous"
+  RMDir /r "$PREVIOUS_DIR"
   RMDir /r "$WORK_DIR"
   Goto InstallComplete
 
@@ -157,8 +159,8 @@ InvalidPackage:
   Goto InstallFailure
 RestorePrevious:
   RMDir /r "$INSTDIR"
-  IfFileExists "$WORK_DIR\previous\Vanta.exe" 0 InstallFailure
-  Rename "$WORK_DIR\previous" "$INSTDIR"
+  IfFileExists "$PREVIOUS_DIR\Vanta.exe" 0 InstallFailure
+  Rename "$PREVIOUS_DIR" "$INSTDIR"
   MessageBox MB_ICONSTOP "Vanta installation failed. The previous installation was restored."
   Goto InstallFailure
 InstallFailure:
