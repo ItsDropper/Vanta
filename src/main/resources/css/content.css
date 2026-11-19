@@ -5,11 +5,11 @@
 
 .mod-icon-box {
     -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
 
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
 
     -fx-min-width: 52px;
     -fx-pref-width: 52px;
@@ -24,11 +24,11 @@
 .mod-details-header,
 .mod-details-card {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
+    -fx-background-radius: 8px;
 
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 14px;
+    -fx-border-radius: 8px;
 }
 
 .mod-details-card {
@@ -39,7 +39,7 @@
 .mod-details-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 30px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .mod-details-author {
@@ -55,26 +55,26 @@
 .mod-details-stat-value {
     -fx-text-fill: -vantatext;
     -fx-font-size: 22px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .mod-details-stat-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 
 .mod-details-card .settings-section-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .mod-details-card .instance-setting-label {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .mod-details-card .mod-details-info-value {
@@ -92,7 +92,7 @@
 
     -fx-text-fill: -vantasuccess;
     -fx-font-size: 11px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 
     -fx-padding: 10px 16px;
 
@@ -124,10 +124,10 @@
 
 .mod-details-header-container {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 14px;
+    -fx-border-radius: 8px;
 }
 
 .mod-details-header-container .instance-play-button {
@@ -145,10 +145,10 @@
 
 .modrinth-popup {
     -fx-background-color: -vantabg;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-padding: 18px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 24, 0.18, 0, 8);
 }
@@ -156,12 +156,12 @@
 .modrinth-popup-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 14px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .modrinth-popup-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 
 .modrinth-popup .separator .line {
@@ -197,26 +197,26 @@
 .modrinth-version-name {
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .modrinth-version-meta {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 9px;
+    -fx-font-size: 11px;
 }
 
 .modrinth-version-type {
     -fx-background-color: -vantaaccentsoft;
     -fx-background-radius: 5px;
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 8px;
-    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-padding: 4px 6px;
 }
 
 .modrinth-version-downloads {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 9px;
+    -fx-font-size: 11px;
 }
 
 .global-mod-description {
@@ -231,8 +231,8 @@
     -fx-border-color: -vantaaccenthover;
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-padding: 9px 14px;
     -fx-cursor: hand;
 }
@@ -247,8 +247,8 @@
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-padding: 9px 14px;
     -fx-cursor: hand;
 }
@@ -264,8 +264,8 @@
     -fx-border-color: -vantaaccent;
     -fx-border-radius: 7px;
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 9px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-padding: 6px 9px;
     -fx-cursor: hand;
 }
@@ -278,17 +278,17 @@
 
 .mod-details-description-card {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 14px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.22), 18, 0.08, 0, 5);
+    -fx-border-radius: 8px;
+    -fx-effect: none;
 }
 
 .mod-details-description-card .settings-section-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
-    -fx-font-weight: 900;
+    -fx-font-weight: 600;
 }
 
 .mod-details-markdown,
@@ -310,8 +310,8 @@
     -fx-border-color: derive(-vantadanger, -45%);
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-padding: 9px 14px;
     -fx-cursor: hand;
 }
@@ -328,7 +328,7 @@
 }
 .global-mods-page .page-title, .instance-mods-page .page-title {
     -fx-font-size: 34px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .global-mods-page .page-subtitle, .instance-mods-page .page-subtitle {
     -fx-font-size: 12px;
@@ -347,7 +347,7 @@
 }
 .global-mods-page .create-field:focused, .instance-mods-page .instances-search:focused {
     -fx-border-color: -vantaaccent;
-    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -82%), 12, .1, 0, 0);
+    -fx-effect: none;
 }
 .global-mods-page .create-combo {
     -fx-background-color: -vantasurface;
@@ -377,14 +377,14 @@
 }
 .global-mods-page .instance-name, .instance-mods-page .instance-name {
     -fx-font-size: 14px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 .global-mods-page .global-mod-description {
     -fx-font-size: 11px;
     -fx-text-fill: -vantamuted;
 }
 .global-mods-page .instance-loader, .instance-mods-page .instance-loader {
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
     -fx-text-fill: -vantamuted;
 }
 .instance-mods-page .instance-tabs {
@@ -409,9 +409,9 @@
 }
 .modrinth-popup {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-padding: 18px;
 }
 
@@ -429,7 +429,7 @@
     -fx-background-radius: 7px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
     -fx-padding: 9px 14px;
     -fx-cursor: hand;
 }
@@ -443,9 +443,9 @@
 }
 .global-mods-page .modrinth-filter-sidebar {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-padding: 14px;
 }
 .global-mods-page .modrinth-filter-sidebar .titled-pane {
@@ -465,7 +465,7 @@
 }
 .global-mods-page .modrinth-filter-sidebar .check-box {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .modrinth-tag-chip {
     -fx-background-color: -vantasurfaceraised;
@@ -473,7 +473,7 @@
     -fx-border-color: -vantaborder;
     -fx-border-radius: 6px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 9px;
+    -fx-font-size: 11px;
     -fx-padding: 4px 7px;
 }
 .modrinth-browser-toolbar .modrinth-current-page,
@@ -501,14 +501,14 @@
 }
 .global-mods-page .modrinth-content-segments {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 999px;
+    -fx-background-radius: 6px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 999px;
+    -fx-border-radius: 6px;
     -fx-padding: 4px;
     -fx-max-width: 520px;
 }
 .global-mods-page .modrinth-content-segment {
-    -fx-background-radius: 999px;
+    -fx-background-radius: 6px;
     -fx-padding: 8px 16px;
     -fx-font-size: 12px;
 }
@@ -529,7 +529,7 @@
 }
 .global-mods-page .modrinth-filter-sidebar > .titled-pane > .title > .text {
     -fx-font-size: 13px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
     -fx-fill: -vantatext;
 }
 .global-mods-page .modrinth-filter-sidebar > .titled-pane > .content {
@@ -630,14 +630,14 @@
     -fx-min-height: 34px;
     -fx-pref-height: 34px;
     -fx-min-width: 34px;
-    -fx-background-radius: 999px;
-    -fx-border-radius: 999px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
 }
 .global-mods-page .modrinth-project-card {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-padding: 14px 16px;
 }
@@ -647,7 +647,7 @@
 }
 .global-mods-page .modrinth-project-title {
     -fx-font-size: 15px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
     -fx-text-fill: -vantatext;
 }
 .global-mods-page .modrinth-project-author {
@@ -681,9 +681,9 @@
 }
 .global-mods-page .modrinth-result-skeleton {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-opacity: .65;
 }
 
@@ -712,7 +712,7 @@
 .global-mods-page .modrinth-filter-check {
     -fx-text-fill: transparent;
     -fx-font-size: 12px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .global-mods-page .modrinth-filter-option:hover .modrinth-filter-check {
     -fx-text-fill: -vantaaccent;
@@ -766,7 +766,7 @@
     -fx-border-radius: 5px;
     -fx-border-width: 1px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
     -fx-padding: 4px 8px;
 }
 .mod-details-tags .modrinth-environment-chip {
@@ -776,7 +776,7 @@
     -fx-background-color: derive(-vantaaccent, -88%);
 }
 .mod-details-tags .modrinth-loader-chip .text {
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 .mod-details-markdown {
     -fx-spacing: 12px;
@@ -793,7 +793,7 @@
 .mod-details-markdown .mod-description-bold {
     -fx-fill: -vantatext;
     -fx-font-size: 13px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .mod-details-markdown .mod-description-italic {
     -fx-fill: -vantatext;
@@ -803,20 +803,20 @@
 .mod-details-markdown .mod-description-h1 {
     -fx-text-fill: -vantatext;
     -fx-font-size: 25px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
     -fx-padding: 14px 0 4px 0;
 }
 .mod-details-markdown .mod-description-h2 {
     -fx-text-fill: -vantatext;
     -fx-font-size: 20px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
     -fx-padding: 12px 0 3px 0;
 }
 .mod-details-markdown .mod-description-h3,
 .mod-details-markdown .mod-description-heading {
     -fx-text-fill: -vantatext;
     -fx-font-size: 16px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
     -fx-padding: 9px 0 2px 0;
 }
 .mod-details-markdown .mod-description-code {
@@ -858,7 +858,7 @@
    ============================================================ */
 .vanta-consistent-page { -fx-spacing: 20px; }
 .vanta-consistent-page .page-title {
-    -fx-font-size: 28px; -fx-font-weight: 800; -fx-text-fill: -vantatext;
+    -fx-font-size: 28px; -fx-font-weight: 600; -fx-text-fill: -vantatext;
 }
 .vanta-consistent-page .page-subtitle {
     -fx-font-size: 12px; -fx-text-fill: -vantamuted;
@@ -869,7 +869,7 @@
 .vanta-consistent-page .primary-button,
 .vanta-consistent-page .secondary-button {
     -fx-min-height: 36px; -fx-background-radius: 9px; -fx-border-radius: 9px;
-    -fx-font-size: 11px; -fx-font-weight: 700; -fx-padding: 8px 13px;
+    -fx-font-size: 11px; -fx-font-weight: 600; -fx-padding: 8px 13px;
 }
 .vanta-consistent-page .text-field,
 .vanta-consistent-page .combo-box-base,
@@ -896,8 +896,8 @@
 }
 .instance-mods-page .instance-list { -fx-spacing: 9px; -fx-padding: 2px 2px 12px 2px; }
 .instance-mods-page .instance-card {
-    -fx-background-color: -vantasurface; -fx-background-radius: 12px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 12px;
+    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 8px;
     -fx-border-width: 1px; -fx-padding: 14px 16px;
 }
 .instance-mods-page .instance-card:hover {
@@ -910,8 +910,8 @@
     -fx-hgap: 14px; -fx-vgap: 14px; -fx-padding: 2px 2px 14px 2px;
 }
 .screenshots-page .screenshot-card {
-    -fx-background-color: -vantasurface; -fx-background-radius: 13px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 13px;
+    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 8px;
     -fx-border-width: 1px; -fx-padding: 9px;
 }
 .screenshots-page .screenshot-card:hover {
@@ -929,9 +929,9 @@
 .instance-mods-page .mods-page-header { -fx-spacing: 14px; }
 .instance-mods-page .mods-toolbar {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-padding: 11px;
     -fx-hgap: 8px;
@@ -943,7 +943,7 @@
     -fx-min-width: 190px;
 }
 .instance-mods-page .instance-tabs { -fx-spacing: 4px; }
-.instance-mods-page .instance-tabs .button { -fx-font-size: 10px; }
+.instance-mods-page .instance-tabs .button { -fx-font-size: 11px; }
 .screenshots-page { -fx-spacing: 16px; }
 .screenshots-page .screenshots-toolbar {
     -fx-background-color: -vantasurface;
@@ -986,22 +986,22 @@
 
 .global-mods-page .vanta-empty-state {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
     -fx-border-width: 1px 1px 1px 3px;
-    -fx-border-radius: 14px;
+    -fx-border-radius: 8px;
     -fx-padding: 32px;
 }
 
 .global-mods-page .vanta-empty-state-icon {
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 30px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .global-mods-page .vanta-empty-state-title {
     -fx-font-size: 21px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .global-mods-page .vanta-empty-state-description {

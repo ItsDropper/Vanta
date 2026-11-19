@@ -41,19 +41,16 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
     public DownloadCenterView(boolean screenshotPreview) {
         getStyleClass().addAll("page", "download-center-page");
         setSpacing(18);
-        setPadding(new Insets(8, 8, 8, 8));
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
         setMinWidth(0);
 
-        Label eyebrow = new Label(Localization.text("downloads.activity"));
-        eyebrow.getStyleClass().add("download-eyebrow");
-        VantaUI.styleText(eyebrow, VantaUI.TextRole.EYEBROW);
         PageHeader pageHeader = new PageHeader(
                 "Download Center",
                 "One place to track installs, libraries, mods, assets and updates.",
                 "page-title",
                 "page-subtitle"
         );
-        VBox heading = new VBox(8, eyebrow, pageHeader);
+        VBox heading = new VBox(8, pageHeader);
 
         FlowPane stats = new FlowPane(10, 10,
                 statCard("In progress", activeCount, "download-stat-active"),

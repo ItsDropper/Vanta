@@ -15,13 +15,13 @@
 .sidebar-logo {
     -fx-text-fill: -vantatext;
     -fx-font-size: 24px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .sidebar-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 .sidebar-button {
@@ -31,7 +31,7 @@
     -fx-text-fill: -vantamuted;
 
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 
     -fx-padding: 12px 14px;
 }
@@ -62,10 +62,10 @@
 
 .login-window {
     -fx-background-color: -vantabg;
-    -fx-background-radius: 16px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 16px;
+    -fx-border-radius: 8px;
 }
 
 
@@ -76,7 +76,7 @@
 .login-logo {
     -fx-text-fill: -vantatext;
     -fx-font-size: 17px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
     }
 
 
@@ -87,7 +87,7 @@
 .login-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 25px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 
@@ -117,30 +117,22 @@
 
 .verification-code {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
 
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
 
     -fx-text-fill: -vantatext;
 
     -fx-font-size: 26px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 
     -fx-padding: 13px 20px;
 
     -fx-alignment: CENTER;
 
-    -fx-effect:
-            dropshadow(
-                    gaussian,
-                    rgba(0, 0, 0, 0.35),
-                    14,
-                    0.15,
-                    0,
-                    4
-            );
+    -fx-effect: none;
 }
 
 
@@ -187,9 +179,9 @@
 
 .login-window {
     -fx-background-color: -vantabg;
-    -fx-background-radius: 14px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 14px;
+    -fx-border-radius: 8px;
 }
 
 .login-title-bar {
@@ -201,8 +193,8 @@
 
 .login-title-bar-text {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     }
 
 .login-title-bar-close {
@@ -220,21 +212,21 @@
 .login-logo {
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 13px;
-    -fx-font-weight: 900;
+    -fx-font-weight: 600;
     }
 
 .login-step {
     -fx-background-color: -vantaaccentsoft;
     -fx-background-radius: 6px;
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 9px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-padding: 5px 8px;
 }
 
 .login-title {
     -fx-font-size: 24px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .login-subtitle {
@@ -281,7 +273,7 @@
     -fx-pref-height: 40px;
     -fx-max-height: 40px;
 
-    -fx-background-radius: 12px 12px 0 0;
+    -fx-background-radius: 8px 8px 0 0;
 
     -fx-padding: 0 5px 0 12px;
 }
@@ -411,7 +403,7 @@
     -fx-text-fill: -vantatext;
 
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 
@@ -419,7 +411,7 @@
 
 .account-switcher-arrow {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 
 
@@ -456,8 +448,8 @@
 .account-popup-header {
     -fx-text-fill: -vantamuted;
 
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 
     -fx-padding: 1px 4px 6px 4px;
 }
@@ -503,7 +495,7 @@
     -fx-text-fill: -vantatext;
 
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 
@@ -512,8 +504,8 @@
 .account-popup-active {
     -fx-text-fill: -vantasuccess;
 
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 
@@ -582,8 +574,8 @@
 
     -fx-text-fill: -vantasuccess;
 
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 
     -fx-padding: 0 11px;
 
@@ -622,21 +614,21 @@
 }
 .command-palette-panel {
     -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 18px;
+    -fx-background-radius: 8px;
     -fx-border-color: derive(-vantaborder, 15%);
-    -fx-border-radius: 18px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.48), 34, 0.16, 0, 12);
 }
 .command-palette-eyebrow {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 9px;
-    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     }
 .command-palette-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 21px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .command-palette-search {
     -fx-background-color: -vantasurface;
@@ -665,16 +657,16 @@
 .command-result-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .command-result-description {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .command-result-shortcut {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 10px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .command-palette-empty {
     -fx-text-fill: -vantamuted;
@@ -693,12 +685,12 @@
     -fx-background-radius: 5px;
     -fx-padding: 3px 6px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 9px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .command-palette-hint {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 9px;
+    -fx-font-size: 11px;
 }
 
 .command-palette-scroll,
@@ -726,13 +718,13 @@
 
 /* Deluxe presentation: give the command surface a distinct layered treatment. */
 .overengineered-ui .command-palette-panel {
-    -fx-background-color: linear-gradient(to bottom right, derive(-vantasurfaceraised, 12%), -vantasurfaceraised 48%, derive(-vantabg, 8%));
+    -fx-background-color: -vantasurface;
     -fx-border-color: derive(-vantaaccent, -58%), derive(-vantaborder, 22%);
     -fx-border-width: 1px;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.58), 42, 0.2, 0, 16);
 }
 .overengineered-ui .command-palette-search {
-    -fx-background-color: linear-gradient(to bottom, derive(-vantasurface, 8%), -vantasurface);
+    -fx-background-color: -vantasurface;
     -fx-border-color: derive(-vantaborder, 24%);
     -fx-border-width: 1px;
 }
@@ -742,17 +734,15 @@
 }
 .overengineered-ui .command-result-selected,
 .overengineered-ui .command-result:hover {
-    -fx-background-color: linear-gradient(to right, derive(-vantaaccent, -78%), derive(-vantaaccent, -88%));
+    -fx-background-color: -vantasurface;
     -fx-border-color: derive(-vantaaccent, -35%);
-    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -72%), 10, 0.12, 0, 2);
+    -fx-effect: none;
 }
 
 
 .vanta-loading {
     -fx-background-color:
-        linear-gradient(to bottom,
-            -vantabg 0%,
-            -vantabg 100%);
+        -vantasurface;
     -fx-background-radius: 14px;
 }
 
@@ -762,28 +752,28 @@
 
 .loading-mark {
     -fx-fill: -vantaaccent;
-    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -35%), 10, 0.18, 0, 0);
+    -fx-effect: none;
 }
 
 .loading-logo {
     -fx-text-fill: -vantatext;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
     -fx-font-size: 28px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
     }
 
 .loading-subtitle {
     -fx-text-fill: -vantamuted;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
-    -fx-font-size: 9px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     }
 
 .loading-status {
     -fx-padding: 14px 0 2px 0;
     -fx-text-fill: -vantamuted;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
-    -fx-font-size: 9px;
+    -fx-font-size: 11px;
     -fx-font-weight: 600;
     }
 
@@ -803,13 +793,13 @@
     -fx-background-color: -vantaaccent;
     -fx-background-radius: 4px;
     -fx-border-radius: 4px;
-    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -35%), 7, 0.18, 0, 0);
+    -fx-effect: none;
 }
 
 
 /* Vanta navigation rail: quieter, sharper, and visually separate from content. */
 .sidebar {
-    -fx-background-color: linear-gradient(to bottom, -vantasurface, -vantabg);
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 10px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
@@ -817,16 +807,16 @@
 }
 .sidebar-logo {
     -fx-font-size: 25px;
-    -fx-font-weight: 900;
+    -fx-font-weight: 600;
     }
 .sidebar-subtitle {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 8px;
+    -fx-font-size: 11px;
     }
 .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 8px;
-    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     }
 .sidebar-button {
     -fx-background-color: transparent;
@@ -849,8 +839,8 @@
 }
 .sidebar-build {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 8px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     }
 
 /* Navigation rail — fixed-width desktop hierarchy. */
@@ -865,19 +855,19 @@
 .sidebar-logo {
     -fx-text-fill: -vantatext;
     -fx-font-size: 23px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
     }
 
 .sidebar-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 9px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     }
 
 .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 9px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     }
 
 .sidebar-button {
@@ -913,8 +903,8 @@
 
 .sidebar-build {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 9px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     }
 
 .sidebar-compact {
@@ -925,28 +915,28 @@
    The active destination is the only persistent accent; everything else stays quiet. */
 .root .sidebar {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
 }
 
 .root .sidebar .sidebar-logo {
     -fx-text-fill: -vantatext;
     -fx-font-size: 25px;
-    -fx-font-weight: 900;
+    -fx-font-weight: 600;
 }
 
 .root .sidebar .sidebar-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
     -fx-font-weight: 600;
 }
 
 .root .sidebar .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 10px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-padding: 0 0 2px 2px;
 }
 
@@ -984,7 +974,7 @@
     -fx-border-color: transparent transparent transparent -vantaaccent;
     -fx-border-width: 0 0 0 3px;
     -fx-text-fill: -vantaaccent;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .root .sidebar .sidebar-button.sidebar-button-active:focused {
@@ -994,7 +984,7 @@
 
 .root .sidebar .sidebar-build {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 9px;
+    -fx-font-size: 11px;
     -fx-font-weight: 600;
 }
 

@@ -56,7 +56,7 @@ public final class CrashCaseReviewView extends VBox {
         getStyleClass().addAll("page", "vanta-consistent-page");
         setFillWidth(true);
         setSpacing(18);
-        setPadding(new Insets(24));
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
         Button back = new Button(Localization.text("common.backArrow"));
         back.getStyleClass().add("secondary-button");

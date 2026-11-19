@@ -177,15 +177,11 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         contentBox.paddingProperty().bind(
                 Bindings.createObjectBinding(() -> {
                     double width = getWidth();
-                    double horizontalPadding = width < 900
-                            ? 20
-                            : width < 1200
-                                    ? 28
-                                    : 36;
+                    double horizontalPadding = dev.itsdropper.vanta.ui.ResponsiveLayout.gutter(width);
                     return new Insets(
                             24,
                             horizontalPadding,
-                            28,
+                            24,
                             horizontalPadding
                     );
                 }, widthProperty())

@@ -6,7 +6,7 @@
 .root,
 .launcher {
     -fx-background-color: -vantabg;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-font-family: "Inter", "Segoe UI", sans-serif;
 }
 
@@ -22,7 +22,7 @@
 .page-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 32px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .page-subtitle {
@@ -35,8 +35,8 @@
 .settings-section-title,
 .instances-count {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 .footer-label {
@@ -53,7 +53,7 @@
     -fx-text-fill: -vantabg;
 
     -fx-font-size: 11px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 
     -fx-padding: 11px 17px;
 
@@ -100,7 +100,7 @@
     -fx-text-fill: -vantadanger;
 
     -fx-font-size: 11px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 
     -fx-padding: 11px 17px;
 
@@ -155,7 +155,7 @@
     -fx-text-fill: -vantatext;
 
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 
     -fx-padding: 11px 17px;
 
@@ -181,7 +181,7 @@
 }
 
 .instance-settings-button {
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 
     -fx-padding: 9px 13px;
 
@@ -209,7 +209,7 @@
     -fx-text-fill: -vantadanger;
 
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 
     -fx-padding: 11px 17px;
 
@@ -292,14 +292,14 @@
 
 .card-title {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 .card-main {
     -fx-text-fill: -vantatext;
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .card-secondary {
@@ -313,14 +313,14 @@
 
 .create-section-title {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 .create-label {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 

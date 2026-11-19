@@ -3,12 +3,12 @@
  * Original selector definitions retained in source order for compatibility.
  */
 
-.accounts-page{-fx-background-color:-vantabg}.accounts-scroll,.accounts-scroll>.viewport{-fx-background-color:transparent;-fx-border-color:transparent}.accounts-scroll{-fx-padding:0}.accounts-header{-fx-padding:2px 0 0 0}.accounts-title{-fx-text-fill:-vantatext;-fx-font-size:30px;-fx-font-weight:900}.accounts-subtitle{-fx-text-fill:-vantamuted;-fx-font-size:13px}.accounts-hero{-fx-background-color:linear-gradient(to bottom right,-vantasurfaceraised,-vantasurface);-fx-background-radius:18px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:18px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.32),26,.12,0,8);-fx-min-height:152px}.accounts-hero-head-frame{-fx-background-color:-vantasurfaceraised;-fx-background-radius:16px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:16px;-fx-alignment:CENTER}.accounts-hero-head{-fx-effect:dropshadow(gaussian,rgba(0,0,0,.35),10,.15,0,4)}.accounts-head-fallback,.accounts-card-head-fallback{-fx-text-fill:-vantamuted;-fx-font-size:22px;-fx-font-weight:900}.accounts-eyebrow{-fx-text-fill:-vantamuted;-fx-font-size:9px;-fx-font-weight:900;-fx-font-size:26px;-fx-font-weight:900}.accounts-status-pill{-fx-background-radius:999px;-fx-padding:5px 9px;-fx-font-size:8px;-fx-font-weight:900}.accounts-status-connected{-fx-background-color:derive(-vantasuccess, -84%);-fx-text-fill:-vantasuccess}.accounts-status-disconnected{-fx-background-color:derive(-vantadanger, -82%);-fx-text-fill:-vantadanger}.accounts-hero-uuid{-fx-text-fill:-vantasubtle;-fx-font-size:9px;-fx-font-family:"Consolas"}.accounts-primary-button,.accounts-secondary-button,.accounts-danger-button,.accounts-card-use{-fx-min-height:36px;-fx-pref-height:36px;-fx-background-radius:8px;-fx-border-radius:8px;-fx-border-width:1px;-fx-padding:0 13px;-fx-font-size:9px;-fx-font-weight:900;-fx-cursor:hand}.accounts-primary-button{-fx-background-color:-vantaaccent;-fx-border-color:-vantaaccenthover;-fx-text-fill:white}.accounts-primary-button:hover{-fx-background-color:-vantaaccenthover;-fx-border-color:derive(-vantaaccent, 22%)}.accounts-secondary-button{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaborder;-fx-text-fill:-vantatext}.accounts-secondary-button:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:derive(-vantaborder, 20%)}.accounts-danger-button{-fx-background-color:derive(-vantadanger, -82%);-fx-border-color:derive(-vantadanger, -45%);-fx-text-fill:-vantadanger}.accounts-danger-button:hover{-fx-background-color:derive(-vantadanger, -70%);-fx-border-color:-vantadanger}.accounts-section{-fx-background-color:-vantasurface;-fx-background-radius:16px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:16px;-fx-padding:20px}.accounts-section-title{-fx-text-fill:-vantatext;-fx-font-size:17px;-fx-font-weight:900}.accounts-section-count{-fx-text-fill:-vantamuted;-fx-font-size:10px}.accounts-privacy{-fx-text-fill:-vantamuted;-fx-font-size:9px}.accounts-grid{-fx-background-color:transparent}.accounts-card{-fx-background-color:-vantasurface;-fx-background-radius:13px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:13px;-fx-padding:15px;-fx-pref-width:360px;-fx-max-width:520px}.accounts-card:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:derive(-vantaborder, 20%)}.accounts-card-active{-fx-background-color:-vantaaccentsoft;-fx-border-color:-vantaaccent;-fx-effect:dropshadow(gaussian,-vantaaccentsoft,16,.1,0,4)}.accounts-card-head-frame{-fx-background-color:-vantasurfaceraised;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:10px;-fx-alignment:CENTER}.accounts-card-name{-fx-text-fill:-vantatext;-fx-font-size:13px;-fx-font-weight:800}.accounts-card-uuid{-fx-text-fill:-vantamuted;-fx-font-size:8px;-fx-font-family:"Consolas"}.accounts-card-active-label,.accounts-card-saved-label{-fx-background-radius:999px;-fx-padding:5px 8px;-fx-font-size:8px;-fx-font-weight:900}.accounts-card-active-label{-fx-background-color:-vantaaccentsoft;-fx-text-fill:-vantaaccent}.accounts-card-saved-label{-fx-background-color:-vantasurfaceraised;-fx-text-fill:-vantamuted}.accounts-card-use{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaborder;-fx-text-fill:-vantatext}.accounts-card-use:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:-vantaaccent}.accounts-card-hint{-fx-text-fill:-vantamuted;-fx-font-size:9px}.accounts-empty{-fx-background-color:-vantasurface;-fx-background-radius:13px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:13px;-fx-padding:28px;-fx-min-height:180px}.accounts-empty-icon{-fx-background-color:-vantaaccentsoft;-fx-background-radius:12px;-fx-text-fill:-vantaaccent;-fx-font-size:22px;-fx-font-weight:900;-fx-padding:8px 15px}.accounts-empty-title{-fx-text-fill:-vantatext;-fx-font-size:15px;-fx-font-weight:800}.accounts-empty-text{-fx-text-fill:-vantamuted;-fx-font-size:10px}.accounts-error,.accounts-busy{-fx-background-radius:8px;-fx-padding:9px 12px;-fx-font-size:10px}.accounts-error{-fx-background-color:derive(-vantadanger, -84%);-fx-border-color:derive(-vantadanger, -45%);-fx-border-width:1px;-fx-border-radius:8px;-fx-text-fill:-vantadanger}.accounts-busy{-fx-background-color:-vantaaccentsoft;-fx-border-color:-vantaaccent;-fx-border-width:1px;-fx-border-radius:8px;-fx-text-fill:-vantaaccent}
+.accounts-page{-fx-background-color:-vantabg}.accounts-scroll,.accounts-scroll>.viewport{-fx-background-color:transparent;-fx-border-color:transparent}.accounts-scroll{-fx-padding:0}.accounts-header{-fx-padding:2px 0 0 0}.accounts-title{-fx-text-fill:-vantatext;-fx-font-size:30px;-fx-font-weight:600}.accounts-subtitle{-fx-text-fill:-vantamuted;-fx-font-size:13px}.accounts-hero{-fx-background-color:-vantasurface;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-effect: none;-fx-min-height:152px}.accounts-hero-head-frame{-fx-background-color:-vantasurfaceraised;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-alignment:CENTER}.accounts-hero-head{-fx-effect: none}.accounts-head-fallback,.accounts-card-head-fallback{-fx-text-fill:-vantamuted;-fx-font-size:22px;-fx-font-weight:600}.accounts-eyebrow{-fx-text-fill:-vantamuted;-fx-font-size:11px;-fx-font-weight:600;-fx-font-size:26px;-fx-font-weight:600}.accounts-status-pill{-fx-background-radius:6px;-fx-padding:5px 9px;-fx-font-size:11px;-fx-font-weight:600}.accounts-status-connected{-fx-background-color:derive(-vantasuccess, -84%);-fx-text-fill:-vantasuccess}.accounts-status-disconnected{-fx-background-color:derive(-vantadanger, -82%);-fx-text-fill:-vantadanger}.accounts-hero-uuid{-fx-text-fill:-vantasubtle;-fx-font-size:11px;-fx-font-family:"Consolas"}.accounts-primary-button,.accounts-secondary-button,.accounts-danger-button,.accounts-card-use{-fx-min-height:36px;-fx-pref-height:36px;-fx-background-radius:8px;-fx-border-radius:8px;-fx-border-width:1px;-fx-padding:0 13px;-fx-font-size:11px;-fx-font-weight:600;-fx-cursor:hand}.accounts-primary-button{-fx-background-color:-vantaaccent;-fx-border-color:-vantaaccenthover;-fx-text-fill:white}.accounts-primary-button:hover{-fx-background-color:-vantaaccenthover;-fx-border-color:derive(-vantaaccent, 22%)}.accounts-secondary-button{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaborder;-fx-text-fill:-vantatext}.accounts-secondary-button:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:derive(-vantaborder, 20%)}.accounts-danger-button{-fx-background-color:derive(-vantadanger, -82%);-fx-border-color:derive(-vantadanger, -45%);-fx-text-fill:-vantadanger}.accounts-danger-button:hover{-fx-background-color:derive(-vantadanger, -70%);-fx-border-color:-vantadanger}.accounts-section{-fx-background-color:-vantasurface;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-padding:20px}.accounts-section-title{-fx-text-fill:-vantatext;-fx-font-size:17px;-fx-font-weight:600}.accounts-section-count{-fx-text-fill:-vantamuted;-fx-font-size:11px}.accounts-privacy{-fx-text-fill:-vantamuted;-fx-font-size:11px}.accounts-grid{-fx-background-color:transparent}.accounts-card{-fx-background-color:-vantasurface;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-padding:15px;-fx-pref-width:360px;-fx-max-width:520px}.accounts-card:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:derive(-vantaborder, 20%)}.accounts-card-active{-fx-background-color:-vantaaccentsoft;-fx-border-color:-vantaaccent;-fx-effect: none}.accounts-card-head-frame{-fx-background-color:-vantasurfaceraised;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:10px;-fx-alignment:CENTER}.accounts-card-name{-fx-text-fill:-vantatext;-fx-font-size:13px;-fx-font-weight:600}.accounts-card-uuid{-fx-text-fill:-vantamuted;-fx-font-size:11px;-fx-font-family:"Consolas"}.accounts-card-active-label,.accounts-card-saved-label{-fx-background-radius:6px;-fx-padding:5px 8px;-fx-font-size:11px;-fx-font-weight:600}.accounts-card-active-label{-fx-background-color:-vantaaccentsoft;-fx-text-fill:-vantaaccent}.accounts-card-saved-label{-fx-background-color:-vantasurfaceraised;-fx-text-fill:-vantamuted}.accounts-card-use{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaborder;-fx-text-fill:-vantatext}.accounts-card-use:hover{-fx-background-color:-vantasurfacehover;-fx-border-color:-vantaaccent}.accounts-card-hint{-fx-text-fill:-vantamuted;-fx-font-size:11px}.accounts-empty{-fx-background-color:-vantasurface;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-padding:28px;-fx-min-height:180px}.accounts-empty-icon{-fx-background-color:-vantaaccentsoft;-fx-background-radius:8px;-fx-text-fill:-vantaaccent;-fx-font-size:22px;-fx-font-weight:600;-fx-padding:8px 15px}.accounts-empty-title{-fx-text-fill:-vantatext;-fx-font-size:15px;-fx-font-weight:600}.accounts-empty-text{-fx-text-fill:-vantamuted;-fx-font-size:11px}.accounts-error,.accounts-busy{-fx-background-radius:8px;-fx-padding:9px 12px;-fx-font-size:11px}.accounts-error{-fx-background-color:derive(-vantadanger, -84%);-fx-border-color:derive(-vantadanger, -45%);-fx-border-width:1px;-fx-border-radius:8px;-fx-text-fill:-vantadanger}.accounts-busy{-fx-background-color:-vantaaccentsoft;-fx-border-color:-vantaaccent;-fx-border-width:1px;-fx-border-radius:8px;-fx-text-fill:-vantaaccent}
 /* Skin editor: independently toggleable Minecraft outer layers. */
 .skin-layer-toggle {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 10px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-cursor: hand;
 }
 .skin-layer-toggle .box {
@@ -32,29 +32,29 @@
 }
 .download-eyebrow {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 10px;
-    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .download-stats {
     -fx-spacing: 10px;
 }
 .download-stat-card {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-min-height: 82px;
 }
 .download-stat-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 9px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .download-stat-value {
     -fx-text-fill: -vantatext;
     -fx-font-size: 24px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .download-stat-active .download-stat-value { -fx-text-fill: -vantaaccent; }
 .download-stat-complete .download-stat-value { -fx-text-fill: -vantasuccess; }
@@ -66,7 +66,7 @@
 .download-section-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 14px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .download-scroll, .download-scroll > .viewport {
     -fx-background-color: transparent;
@@ -82,9 +82,9 @@
 }
 .download-task-card, .download-empty-card {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
 }
 .download-task-card:hover {
@@ -93,17 +93,17 @@
 .download-task-name {
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 .download-task-source {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .download-status {
     -fx-padding: 5px 8px;
     -fx-background-radius: 6px;
-    -fx-font-size: 8px;
-    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .download-status-downloading {
     -fx-text-fill: -vantaaccent;
@@ -137,11 +137,11 @@
 }
 .download-task-detail {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .download-task-error {
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .download-empty-card {
     -fx-alignment: center;
@@ -150,12 +150,12 @@
 .download-empty-icon {
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 38px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .download-empty-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 15px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .download-empty-body {
     -fx-text-fill: -vantamuted;
@@ -169,13 +169,13 @@
 }
 .server-eyebrow {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .server-heading {
     -fx-text-fill: -vantatext;
     -fx-font-size: 29px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .server-subtitle {
     -fx-text-fill: -vantamuted;
@@ -196,13 +196,13 @@
     -fx-alignment: center-left;
     -fx-padding: 0 4px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .server-list-header .label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .server-profile-list {
     -fx-background-color: transparent;
@@ -225,11 +225,11 @@
 .server-profile-name {
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 .server-profile-meta {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .server-empty {
     -fx-text-fill: -vantamuted;
@@ -239,7 +239,7 @@
 .server-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 22px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .server-status-row {
     -fx-background-color: -vantasurface;
@@ -251,7 +251,7 @@
 .server-status-label {
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 .server-status-dot {
     -fx-text-fill: -vantasubtle;
@@ -275,8 +275,8 @@
 .server-action {
     -fx-background-radius: 8px;
     -fx-padding: 8px 11px;
-    -fx-font-size: 10px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
     -fx-cursor: hand;
 }
 .server-primary {
@@ -308,23 +308,23 @@
 .server-panel {
     -fx-background-color: -vantasurface;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
     -fx-padding: 15px;
 }
 .server-section-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .server-section-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .server-field-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .server-input, .server-spinner {
     -fx-background-color: -vantabg;
@@ -342,7 +342,7 @@
 }
 .server-eula {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .server-console {
     -fx-control-inner-background: -vantabg;
@@ -351,7 +351,7 @@
     -fx-highlight-fill: -vantaaccentsoft;
     -fx-highlight-text-fill: white;
     -fx-font-family: "Cascadia Mono", "Consolas", monospace;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .server-scroll, .server-scroll > .viewport {
     -fx-background-color: transparent;
@@ -366,23 +366,23 @@
 /* State Center: a diagnostic workspace with clear health hierarchy. */
 .state-center { -fx-spacing: 18px; }
 .state-center .state-hero {
-    -fx-background-color: linear-gradient(to right, -vantasurface, -vantaaccentsoft 70%, -vantasurfacehover);
-    -fx-background-radius: 12px;
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-padding: 22px;
 }
 .state-center .state-hero-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 25px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .state-center .state-hero-subtitle { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
 .state-center .state-section-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 .state-center .state-list-card {
     -fx-background-color: -vantasurface;
@@ -399,10 +399,10 @@
     -fx-padding: 13px 15px;
 }
 .state-center .state-card:hover { -fx-background-color: -vantasurfacehover; -fx-border-color: -vantaaccent; }
-.state-center .state-instance-name { -fx-font-size: 13px; -fx-font-weight: 700; }
+.state-center .state-instance-name { -fx-font-size: 13px; -fx-font-weight: 600; }
 .state-center .state-instance-detail, .state-center .state-instance-summary {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .state-center .state-shared-row {
     -fx-background-color: -vantasurfaceraised;
@@ -411,13 +411,13 @@
 }
 .state-center .state-refresh-button, .state-center .state-repair-button {
     -fx-background-radius: 6px;
-    -fx-font-size: 9px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 /* Server Manager: split-pane control room with a distinct console surface. */
 .server-manager { -fx-background-color: transparent; }
-.server-manager .server-heading { -fx-font-size: 34px; -fx-font-weight: 800; }
+.server-manager .server-heading { -fx-font-size: 34px; -fx-font-weight: 600; }
 .server-manager .server-subtitle { -fx-text-fill: -vantamuted; }
 .server-manager .server-sidebar {
     -fx-background-color: -vantasurface;
@@ -495,10 +495,10 @@
 
 /* Accounts and skin editor share identity controls, not identical page layouts. */
 .accounts-page .accounts-hero, .skin-changer-page .accounts-hero {
-    -fx-background-color: linear-gradient(to bottom right, -vantasurfaceraised, -vantasurface);
-    -fx-background-radius: 12px;
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-effect: null;
 }
@@ -523,7 +523,7 @@
 }
 .accounts-page .accounts-hero-name { -fx-font-size: 30px; }
 .skin-changer-page .accounts-hero { -fx-padding: 20px; }
-.skin-changer-page .accounts-card-name { -fx-font-size: 14px; -fx-font-weight: 800; }
+.skin-changer-page .accounts-card-name { -fx-font-size: 14px; -fx-font-weight: 600; }
 .skin-changer-page .accounts-subtitle { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
 .skin-changer-page .skin-layer-toggle { -fx-font-size: 11px; }
 .skin-changer-page .accounts-primary-button, .skin-changer-page .accounts-card-use {
@@ -537,11 +537,11 @@
 .create-instance-type-page { -fx-spacing: 23px; }
 .create-instance-type-page .create-type-header { -fx-spacing: 8px; }
 .create-instance-type-page .create-type-eyebrow {
-    -fx-text-fill: -vantaaccent; -fx-font-size: 10px; -fx-font-weight: 800;
+    -fx-text-fill: -vantaaccent; -fx-font-size: 11px; -fx-font-weight: 600;
 }
 .create-instance-type-page .create-type-content { -fx-spacing: 13px; }
 .create-instance-type-page .create-type-section-label {
-    -fx-text-fill: -vantamuted; -fx-font-size: 10px; -fx-font-weight: 800;
+    -fx-text-fill: -vantamuted; -fx-font-size: 11px; -fx-font-weight: 600;
 }
 .create-instance-type-page .create-type-grid { -fx-padding: 2px; }
 .create-instance-type-page .create-type-option {
@@ -556,15 +556,15 @@
 .create-instance-type-page .create-type-option:pressed { -fx-background-color: -vantasurfacehover; -fx-translate-y: 0; }
 .create-instance-type-page .create-type-option-layout { -fx-spacing: 15px; }
 .create-instance-type-page .create-type-number {
-    -fx-text-fill: -vantamuted; -fx-font-size: 10px; -fx-font-weight: 800;
+    -fx-text-fill: -vantamuted; -fx-font-size: 11px; -fx-font-weight: 600;
     -fx-padding: 5px 7px; -fx-background-color: -vantabg; -fx-background-radius: 5px;
 }
 .create-instance-type-page .create-type-icon {
-    -fx-text-fill: -vantaaccent; -fx-font-size: 20px; -fx-font-weight: 700; -fx-min-width: 30px; -fx-alignment: center;
+    -fx-text-fill: -vantaaccent; -fx-font-size: 20px; -fx-font-weight: 600; -fx-min-width: 30px; -fx-alignment: center;
 }
-.create-instance-type-page .create-type-option-title { -fx-text-fill: -vantatext; -fx-font-size: 16px; -fx-font-weight: 800; }
+.create-instance-type-page .create-type-option-title { -fx-text-fill: -vantatext; -fx-font-size: 16px; -fx-font-weight: 600; }
 .create-instance-type-page .create-type-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; -fx-line-spacing: 2px; }
-.create-instance-type-page .create-type-option-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 9px; -fx-font-weight: 700; }
+.create-instance-type-page .create-type-option-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 11px; -fx-font-weight: 600; }
 .create-instance-type-page .create-type-option-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 21px; -fx-padding: 0 2px 1px 8px; }
 .create-instance-type-page .create-type-option:hover .create-type-option-arrow { -fx-text-fill: -vantaaccent; }
 .create-instance-type-page .create-type-footer { -fx-padding: 2px 0 0 0; }
@@ -574,13 +574,13 @@
 /* Instance creation: focused form surfaces and stronger field hierarchy. */
 .create-instance-page { -fx-spacing: 22px; }
 .create-instance-page .create-instance-panel {
-    -fx-background-color: -vantasurface; -fx-background-radius: 13px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 13px; -fx-border-width: 1px;
+    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-padding: 26px; -fx-spacing: 17px;
 }
-.create-instance-page .create-panel-title { -fx-font-size: 17px; -fx-font-weight: 800; -fx-text-fill: -vantatext; }
+.create-instance-page .create-panel-title { -fx-font-size: 17px; -fx-font-weight: 600; -fx-text-fill: -vantatext; }
 .create-instance-page .create-panel-subtitle { -fx-font-size: 11px; -fx-text-fill: -vantamuted; }
-.create-instance-page .create-label { -fx-font-size: 10px; -fx-font-weight: 800; }
+.create-instance-page .create-label { -fx-font-size: 11px; -fx-font-weight: 600; }
 .create-instance-page .create-field, .create-instance-page .create-combo {
     -fx-min-height: 46px; -fx-pref-height: 46px; -fx-background-color: -vantabg;
     -fx-background-radius: 8px; -fx-border-color: -vantaborder; -fx-border-radius: 8px;
@@ -591,36 +591,36 @@
 }
 .create-instance-page .create-status {
     -fx-background-color: -vantabg; -fx-background-radius: 7px;
-    -fx-padding: 9px 11px; -fx-font-size: 10px;
+    -fx-padding: 9px 11px; -fx-font-size: 11px;
 }
-.create-instance-page .primary-button { -fx-min-width: 150px; -fx-font-weight: 800; }
+.create-instance-page .primary-button { -fx-min-width: 150px; -fx-font-weight: 600; }
 
 /* Import: make the file format and next action unmistakable. */
 .import-instance-page { -fx-spacing: 22px; }
 .import-instance-page .import-instance-panel {
-    -fx-background-color: -vantasurface; -fx-background-radius: 14px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 14px; -fx-border-width: 1px;
+    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-spacing: 20px; -fx-padding: 30px;
 }
 .import-instance-page .import-intro { -fx-spacing: 11px; -fx-alignment: center-left; }
 .import-instance-page .import-drop-glyph {
-    -fx-background-color: -vantaaccentsoft; -fx-background-radius: 14px;
-    -fx-text-fill: -vantaaccent; -fx-font-size: 31px; -fx-font-weight: 800;
+    -fx-background-color: -vantaaccentsoft; -fx-background-radius: 8px;
+    -fx-text-fill: -vantaaccent; -fx-font-size: 31px; -fx-font-weight: 600;
     -fx-padding: 7px 18px;
 }
-.import-instance-page .import-panel-eyebrow { -fx-font-size: 18px; -fx-font-weight: 800; -fx-text-fill: -vantatext; }
+.import-instance-page .import-panel-eyebrow { -fx-font-size: 18px; -fx-font-weight: 600; -fx-text-fill: -vantatext; }
 .import-instance-page .import-panel-description { -fx-font-size: 12px; -fx-line-spacing: 3px; -fx-text-fill: -vantamuted; }
 .import-instance-page .import-format-badge {
     -fx-background-color: -vantabg; -fx-background-radius: 5px;
     -fx-border-color: -vantaborder; -fx-border-radius: 5px;
-    -fx-text-fill: -vantaaccent; -fx-font-size: 9px; -fx-font-weight: 900;
+    -fx-text-fill: -vantaaccent; -fx-font-size: 11px; -fx-font-weight: 600;
     -fx-padding: 6px 9px;
 }
-.import-instance-page .import-primary-action { -fx-min-width: 190px; -fx-min-height: 44px; -fx-font-weight: 800; }
+.import-instance-page .import-primary-action { -fx-min-width: 190px; -fx-min-height: 44px; -fx-font-weight: 600; }
 .import-instance-page .import-progress-row { -fx-min-height: 30px; }
 .import-instance-page .import-status {
     -fx-background-color: -vantabg; -fx-background-radius: 7px;
-    -fx-padding: 10px 12px; -fx-font-size: 10px;
+    -fx-padding: 10px 12px; -fx-font-size: 11px;
 }
 
 /* Preset library: each preset is a deliberate selectable product card. */
@@ -639,29 +639,29 @@
 .instance-preset-page .preset-choice-content { -fx-spacing: 16px; }
 .instance-preset-page .preset-choice-icon {
     -fx-background-color: -vantaaccentsoft; -fx-background-radius: 10px;
-    -fx-text-fill: -vantaaccent; -fx-font-size: 20px; -fx-font-weight: 800;
+    -fx-text-fill: -vantaaccent; -fx-font-size: 20px; -fx-font-weight: 600;
     -fx-padding: 10px 13px; -fx-min-width: 43px; -fx-alignment: center;
 }
-.instance-preset-page .create-option-title { -fx-text-fill: -vantatext; -fx-font-size: 15px; -fx-font-weight: 800; }
+.instance-preset-page .create-option-title { -fx-text-fill: -vantatext; -fx-font-size: 15px; -fx-font-weight: 600; }
 .instance-preset-page .create-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
-.instance-preset-page .preset-choice-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 9px; -fx-font-weight: 800; }
+.instance-preset-page .preset-choice-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 11px; -fx-font-weight: 600; }
 .instance-preset-page .preset-choice-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 22px; }
 .instance-preset-page .preset-choice-card:hover .preset-choice-arrow { -fx-text-fill: -vantaaccent; }
 
 /* Preset configuration: distinct overview, environment, contents and naming. */
 .preset-configuration-page { -fx-spacing: 18px; }
 .preset-configuration-page .preset-configuration-panel {
-    -fx-background-color: -vantasurface; -fx-background-radius: 13px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 13px; -fx-border-width: 1px;
+    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-spacing: 17px; -fx-padding: 22px;
 }
 .preset-configuration-page .preset-config-content { -fx-spacing: 17px; }
 .preset-configuration-page .preset-config-hero {
-    -fx-background-color: linear-gradient(to right, -vantasurfaceraised, -vantasurface);
+    -fx-background-color: -vantasurface;
     -fx-background-radius: 9px; -fx-border-color: -vantaborder;
     -fx-border-radius: 9px; -fx-padding: 17px;
 }
-.preset-configuration-page .preset-config-hero .card-title { -fx-font-size: 19px; -fx-font-weight: 800; }
+.preset-configuration-page .preset-config-hero .card-title { -fx-font-size: 19px; -fx-font-weight: 600; }
 .preset-configuration-page .preset-config-section {
     -fx-background-color: -vantabg; -fx-background-radius: 9px;
     -fx-border-color: -vantaborder; -fx-border-radius: 9px;
@@ -670,9 +670,9 @@
 .preset-configuration-page .preset-environment-value {
     -fx-background-color: -vantasurfaceraised; -fx-background-radius: 7px;
     -fx-border-color: -vantaborder; -fx-border-radius: 7px;
-    -fx-padding: 11px 13px; -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-weight: 800;
+    -fx-padding: 11px 13px; -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-weight: 600;
 }
-.preset-configuration-page .create-label { -fx-font-size: 10px; -fx-font-weight: 800; }
+.preset-configuration-page .create-label { -fx-font-size: 11px; -fx-font-weight: 600; }
 .preset-configuration-page .create-field, .preset-configuration-page .create-combo {
     -fx-min-height: 44px; -fx-pref-height: 44px; -fx-background-color: -vantasurface;
     -fx-border-color: -vantaborder; -fx-border-radius: 7px; -fx-background-radius: 7px;
@@ -693,9 +693,9 @@
 .repair-page .repair-page-header { -fx-spacing: 11px; }
 .repair-page .repair-issue-section {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
-    -fx-border-radius: 14px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-padding: 20px;
     -fx-spacing: 14px;
@@ -727,8 +727,8 @@
 .server-manager { -fx-spacing: 18px; }
 .server-manager .server-page-header { -fx-spacing: 7px; }
 .server-manager .server-sidebar {
-    -fx-background-radius: 13px;
-    -fx-border-radius: 13px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
 }
@@ -739,8 +739,8 @@
     -fx-padding: 11px 12px;
 }
 .server-manager .server-panel {
-    -fx-background-radius: 12px;
-    -fx-border-radius: 12px;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
     -fx-border-width: 1px;
 }
 .server-manager .server-console {
@@ -795,10 +795,10 @@
 
 .server-manager .server-sidebar {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
 }
 
 .server-manager .server-detail {
@@ -807,10 +807,10 @@
 
 .server-manager .server-detail .vanta-empty-state {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
     -fx-border-width: 1px 1px 1px 3px;
-    -fx-border-radius: 14px;
+    -fx-border-radius: 8px;
     -fx-padding: 36px;
 }
 
@@ -821,7 +821,7 @@
 
 .server-manager .server-detail .vanta-empty-state-title {
     -fx-font-size: 22px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 .server-manager .server-detail .vanta-empty-state-description {
@@ -865,6 +865,6 @@
     -fx-highlight-fill: -vantaaccentsoft;
     -fx-highlight-text-fill: -vantatext;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 .crash-lab-page .settings-card { -fx-min-width: 0; }

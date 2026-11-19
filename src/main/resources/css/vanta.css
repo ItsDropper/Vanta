@@ -1921,3 +1921,160 @@
 .vanta-ui-root .page-header-copy {
     -fx-spacing: 2px;
 }
+
+/* ============================================================
+   12  TYPE SCALE ENFORCEMENT
+   One page-title size, one empty-state size. Selectors are doubled
+   (.page …) so they outrank the page-scoped legacy rules.
+   ============================================================ */
+
+.vanta-ui-root .page-title,
+.vanta-ui-root .page .page-title,
+.vanta-ui-root .page .accounts-title,
+.vanta-ui-root .page .settings-page-title,
+.vanta-ui-root .settings-shell .settings-page-title,
+.vanta-ui-root .page .home-title,
+.vanta-ui-root .page .mod-details-title,
+.vanta-ui-root .page .server-heading,
+.vanta-ui-root .page .server-title,
+.vanta-ui-root .server-manager .server-heading,
+.vanta-ui-root .server-manager .server-title,
+.vanta-ui-root .page .state-hero-title,
+.vanta-ui-root .state-center .state-hero-title,
+.vanta-ui-root .page .onboarding-title,
+.vanta-ui-root .global-mods-page .page-title,
+.vanta-ui-root .instance-mods-page .page-title,
+.vanta-ui-root .vanta-consistent-page .page-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .page .accounts-subtitle,
+.vanta-ui-root .page .settings-page-subtitle {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .accounts-page .accounts-hero-name,
+.vanta-ui-root .accounts-hero-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .download-stat-value,
+.vanta-ui-root .download-center-page .download-stat-value {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 18px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .global-mods-page .vanta-empty-state-title,
+.vanta-ui-root .server-manager .server-detail .vanta-empty-state-title,
+.vanta-ui-root .vanta-empty-state-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .global-mods-page .vanta-empty-state-icon,
+.vanta-ui-root .server-manager .server-detail .vanta-empty-state-icon,
+.vanta-ui-root .vanta-empty-state-icon,
+.vanta-ui-root .download-empty-icon,
+.vanta-ui-root .accounts-empty-icon {
+    -fx-font-size: 22px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .accounts-empty-icon {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 8px;
+    -fx-text-fill: -vantamuted;
+    -fx-border-color: -vantaline;
+    -fx-border-radius: 8px;
+}
+
+/* Eyebrows and count pills: plain quiet text, never a filled pill. */
+.vanta-ui-root .vanta-type-eyebrow,
+.vanta-ui-root .instances-count {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
+}
+
+/* Cards with a 3 px accent edge (legacy "callout" look) become plain cards. */
+.vanta-ui-root .settings-card,
+.vanta-ui-root .page .settings-card,
+.vanta-ui-root .server-manager .server-detail .vanta-empty-state,
+.vanta-ui-root .server-manager .server-empty-card,
+.vanta-ui-root .state-center .state-card,
+.vanta-ui-root .state-center .state-hero {
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .state-center .state-hero {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}
+
+/* Metadata that was 8–10 px is now a legible 11 px; keep it quiet. */
+.vanta-ui-root .accounts-card-uuid,
+.vanta-ui-root .accounts-hero-uuid,
+.vanta-ui-root .accounts-privacy,
+.vanta-ui-root .accounts-section-count,
+.vanta-ui-root .accounts-empty-text,
+.vanta-ui-root .accounts-card-hint {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+/* Accent preset and quick-size chips: calm, even weight. */
+.vanta-ui-root .accent-preset,
+.vanta-ui-root .memory-preset,
+.vanta-ui-root .instance-memory-preset {
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+}
+
+/* Server Manager and State Center empty states and section labels. */
+.vanta-ui-root .server-manager .server-detail .vanta-empty-state {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-padding: 32px;
+}
+
+.vanta-ui-root .server-manager .server-detail .vanta-empty-state-icon {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 22px;
+}
+
+.vanta-ui-root .state-center .state-section-title {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .state-center .state-list-card,
+.vanta-ui-root .state-center .state-hero {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+}

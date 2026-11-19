@@ -24,14 +24,12 @@ public class CreateInstanceTypeView extends VBox {
         this.onModrinth = onModrinth;
 
         getStyleClass().addAll("page", "vanta-consistent-page", "create-instance-type-page");
-        setPadding(new Insets(30, 36, 30, 36));
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
         setSpacing(24);
 
-        Label eyebrow = new Label(Localization.text("createType.title"));
-        eyebrow.getStyleClass().add("create-type-eyebrow");
         PageHeader header = new PageHeader(Localization.text("createType.heading"),
                 Localization.text("createType.subtitle"), "page-title", "page-subtitle");
-        VBox heading = new VBox(9, eyebrow, header);
+        VBox heading = new VBox(9, header);
         heading.getStyleClass().add("create-type-header");
         heading.setMaxWidth(900);
 

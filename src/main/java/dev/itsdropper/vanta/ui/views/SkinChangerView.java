@@ -103,9 +103,8 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         );
         header.getStyleClass().addAll("accounts-header", "skin-page-header");
         header.paddingProperty().bind(Bindings.createObjectBinding(() -> {
-            double horizontal = header.getWidth() < 600 ? 16
-                    : header.getWidth() < 900 ? 24 : 38;
-            return new Insets(VantaUI.spacing(7), horizontal, 0, horizontal);
+            double horizontal = dev.itsdropper.vanta.ui.ResponsiveLayout.gutter(header.getWidth());
+            return new Insets(24, horizontal, 0, horizontal);
         }, header.widthProperty()));
 
         previewCard = new VBox(VantaUI.spacing(2));
@@ -222,9 +221,8 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         body.setAlignment(Pos.TOP_CENTER);
         body.setMaxWidth(Double.MAX_VALUE);
         body.paddingProperty().bind(Bindings.createObjectBinding(() -> {
-            double horizontal = body.getWidth() < 600 ? 16
-                    : body.getWidth() < 900 ? 24 : 38;
-            return new Insets(VantaUI.spacing(6), horizontal, VantaUI.spacing(9), horizontal);
+            double horizontal = dev.itsdropper.vanta.ui.ResponsiveLayout.gutter(body.getWidth());
+            return new Insets(24, horizontal, 32, horizontal);
         }, body.widthProperty()));
 
         ScrollPane scroll = new ScrollPane(new VBox(header, body));

@@ -15,11 +15,16 @@ public final class ResponsiveLayout {
     private ResponsiveLayout() {
     }
 
+    /** Horizontal page gutter for a given page width; shared by every top-level page. */
+    public static double gutter(double width) {
+        return width < 600 ? 16 : width < 900 ? 20 : 28;
+    }
+
     public static void bindPagePadding(Region region) {
         region.paddingProperty().bind(Bindings.createObjectBinding(() -> {
             double width = region.getWidth();
-            double horizontal = width < 600 ? 16 : width < 900 ? 24 : 36;
-            double vertical = width < 600 ? 18 : width < 900 ? 24 : 30;
+            double horizontal = width < 600 ? 16 : width < 900 ? 20 : 28;
+            double vertical = width < 600 ? 16 : 24;
             return new Insets(vertical, horizontal, vertical, horizontal);
         }, region.widthProperty()));
     }

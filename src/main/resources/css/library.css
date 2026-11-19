@@ -9,8 +9,8 @@
 
 .instances-count {
     -fx-text-fill: -vantasuccess;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 
@@ -73,7 +73,7 @@
 .instance-name {
     -fx-text-fill: -vantatext;
     -fx-font-size: 15px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .instance-version {
@@ -87,16 +87,16 @@
 
     -fx-text-fill: -vantaaccent;
 
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 
     -fx-padding: 4px 8px;
 }
 
 .instance-ready {
     -fx-text-fill: -vantasuccess;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 
@@ -113,8 +113,8 @@
     -fx-border-radius: 7px;
 
     -fx-text-fill: -vantabg;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 
     -fx-padding: 0 14px;
 
@@ -174,8 +174,8 @@
     -fx-border-radius: 7px;
 
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
-    -fx-font-weight: 700;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 
     -fx-padding: 0 12px;
 
@@ -208,7 +208,7 @@
 
     -fx-text-fill: -vantamuted;
     -fx-font-size: 18px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 
     -fx-padding: 0;
 
@@ -318,7 +318,7 @@
 .instance-empty-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 18px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .instance-empty-description {
@@ -333,17 +333,17 @@
 
 .create-instance-panel {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
 
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
 }
 
 .create-instance-panel .card-title {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 800;
+    -fx-font-weight: 600;
 }
 
 
@@ -354,7 +354,7 @@
 .create-label {
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .create-field,
@@ -443,7 +443,7 @@
 .create-option-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .create-option-description {
@@ -454,7 +454,7 @@
 .create-option-arrow {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .create-option:hover .create-option-arrow {
@@ -467,11 +467,11 @@
 
 .delete-dialog {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
 
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
 
     -fx-padding: 22px;
 }
@@ -479,7 +479,7 @@
 .delete-dialog-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .delete-dialog-message {
@@ -497,8 +497,8 @@
     -fx-border-radius: 7px;
 
     -fx-text-fill: -vantatext;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 
     -fx-padding: 9px 16px;
 
@@ -520,8 +520,8 @@
     -fx-border-radius: 7px;
 
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 
     -fx-padding: 9px 16px;
 
@@ -598,12 +598,12 @@
 .preset-environment-value {
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .preset-environment-secondary {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 
 
@@ -691,14 +691,14 @@
 
 .repair-issue-type {
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 9px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 .repair-issue-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 14px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .repair-issue-details {
@@ -722,7 +722,7 @@
 
 .repair-status {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
+    -fx-font-size: 11px;
 }
 
 /* =============================================================
@@ -800,8 +800,8 @@
 
 .screenshot-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 
@@ -814,7 +814,7 @@
 .screenshot-dialog-name {
     -fx-text-fill: -vantatext;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .screenshot-preview-container {
@@ -886,8 +886,8 @@
 
 .screenshot-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 .screenshot-dialog {
@@ -897,7 +897,7 @@
 .screenshot-dialog-name {
     -fx-text-fill: -vantatext;
     -fx-font-size: 13px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .screenshot-preview-container {
@@ -932,16 +932,16 @@
 
 .screenshot-delete-dialog {
     -fx-background-color: -vantabg;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
 }
 
 .screenshot-delete-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 16px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .screenshot-delete-description {
@@ -952,7 +952,7 @@
 .screenshot-delete-file {
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 
@@ -962,10 +962,10 @@
 
 .vanta-dialog {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
     -fx-padding: 4px;
 }
 
@@ -979,7 +979,7 @@
 .delete-dialog .header-panel .label {
     -fx-text-fill: -vantatext;
     -fx-font-size: 15px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .vanta-dialog .content,
@@ -1070,15 +1070,15 @@
 
 
 /* Instance management popups */
-.instance-action-popup{-fx-background-color:-vantabg;-fx-background-radius:14px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:14px;-fx-padding:20px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.38),24,.15,0,8)}
-.instance-action-title{-fx-text-fill:-vantatext;-fx-font-size:14px;-fx-font-weight:900}
-.instance-action-subtitle{-fx-text-fill:-vantamuted;-fx-font-size:10px}
+.instance-action-popup{-fx-background-color:-vantabg;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-padding:20px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.38),24,.15,0,8)}
+.instance-action-title{-fx-text-fill:-vantatext;-fx-font-size:14px;-fx-font-weight:600}
+.instance-action-subtitle{-fx-text-fill:-vantamuted;-fx-font-size:11px}
 .instance-action-field{-fx-background-color:-vantabg;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-radius:8px;-fx-text-fill:-vantatext;-fx-prompt-text-fill:-vantamuted;-fx-padding:10px 12px;-fx-min-height:40px}
 .instance-action-field:focused{-fx-border-color:-vantaaccent}
-.instance-icon-choice{-fx-background-color:-vantasurface;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-radius:10px;-fx-text-fill:-vantatext;-fx-font-size:20px;-fx-font-weight:800;-fx-min-width:38px;-fx-pref-width:38px;-fx-min-height:38px;-fx-pref-height:38px;-fx-cursor:hand}
+.instance-icon-choice{-fx-background-color:-vantasurface;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-radius:10px;-fx-text-fill:-vantatext;-fx-font-size:20px;-fx-font-weight:600;-fx-min-width:38px;-fx-pref-width:38px;-fx-min-height:38px;-fx-pref-height:38px;-fx-cursor:hand}
 .instance-icon-choice:hover{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaaccent}
 .instance-card-compact{-fx-min-height:62px}
-.instance-card-compact .instance-playtime{-fx-font-size:9px}
+.instance-card-compact .instance-playtime{-fx-font-size:11px}
 
 
 /* Instance library controls */
@@ -1136,21 +1136,21 @@
 
 .settings-section-title {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 10px;
-    -fx-font-weight: 800;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 
 .instance-setting-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 10px;
-    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 
 .instance-setting-value {
     -fx-text-fill: -vantatext;
     -fx-font-size: 15px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .instance-directory {
@@ -1170,17 +1170,17 @@
 
 .instance-settings-danger-card {
     -fx-background-color: derive(-vantadanger, -82%);
-    -fx-background-radius: 13px;
+    -fx-background-radius: 8px;
 
     -fx-border-color: derive(-vantadanger, -45%);
     -fx-border-width: 1px;
-    -fx-border-radius: 13px;
+    -fx-border-radius: 8px;
 }
 
 .instance-settings-danger-title {
     -fx-text-fill: -vantadanger;
     -fx-font-size: 12px;
-    -fx-font-weight: bold;
+    -fx-font-weight: 600;
 }
 
 .instance-settings-danger-description {
@@ -1229,20 +1229,20 @@
 }
 .instances-page .instance-card .instance-icon-box {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 8px;
     -fx-border-color: derive(-vantaborder, 12%);
 }
 .instances-page .instance-card .instance-name {
     -fx-font-size: 16px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 .instances-page .instance-card .instance-version { -fx-font-size: 11px; }
 .instances-page .instance-card .instance-play-button {
     -fx-background-color: -vantaaccent;
     -fx-text-fill: -vantaaccentforeground;
     -fx-background-radius: 6px;
-    -fx-font-size: 10px;
-    -fx-font-weight: 900;
+    -fx-font-size: 11px;
+    -fx-font-weight: 600;
 }
 .instances-page .instance-card .instance-play-button:hover { -fx-background-color: -vantaaccenthover; }
 .instances-page .instance-card .instance-settings-button {
@@ -1264,7 +1264,7 @@
 .instances-page .instances-count {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 
 .instances-page .instances-toolbar {

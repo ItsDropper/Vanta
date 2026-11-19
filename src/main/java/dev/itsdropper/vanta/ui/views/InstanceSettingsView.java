@@ -559,8 +559,9 @@ public class InstanceSettingsView extends VBox {
                         directoryCard
                 );
 
+        // The page already carries the shared gutter.
         content.setPadding(
-                new Insets(36)
+                new Insets(8, 0, 24, 0)
         );
 
         content.setFillWidth(
@@ -615,7 +616,7 @@ public class InstanceSettingsView extends VBox {
         );
 
         footer.setPadding(
-                new Insets(0, 36, 24, 36)
+                new Insets(0, 0, 0, 0)
         );
 
         footer.getStyleClass().add(

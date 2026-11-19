@@ -79,8 +79,8 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         content.paddingProperty().bind(
                 Bindings.createObjectBinding(() -> {
                     double width = getWidth();
-                    double horizontal = width < 620 ? 16 : width < 900 ? 24 : 38;
-                    return new Insets(VantaUI.spacing(6), horizontal, VantaUI.spacing(7), horizontal);
+                    double horizontal = dev.itsdropper.vanta.ui.ResponsiveLayout.gutter(width);
+                    return new Insets(24, horizontal, 24, horizontal);
                 }, widthProperty())
         );
 
