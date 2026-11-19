@@ -50,6 +50,21 @@ class LaunchHistoryRepositoryTest {
     }
 
     @Test
+    void doesNotRunCrashDiagnosisWhenLauncherFailsBeforeAChildProcessExists() throws Exception {
+        LaunchHistoryRepository repository = new LaunchHistoryRepository(
+                temporaryDirectory.resolve("pre-process-failure.json"));
+        String id = repository.begin(instance("pre-process", "Pre-process failure"));
+        var record = repository.finish(id, LaunchHistoryRepository.Outcome.FAILED,
+                "Minecraft could not be started",
+                "UnsupportedClassVersionError: class file version 69, runtime only recognizes up to 65",
+                null);
+        assertEquals(LaunchHistoryRepository.Outcome.FAILED, record.outcome());
+        assertNull(record.exitCode());
+        assertNull(record.failureCategory(),
+                "A launcher-side failure without a child process exit must not be diagnosed as a game crash.");
+    }
+
+    @Test
     void recordsSuccessfulAndUserStoppedRunsAsDifferentOutcomes() throws Exception {
         LaunchHistoryRepository repository = new LaunchHistoryRepository(
                 temporaryDirectory.resolve("history.json"));
