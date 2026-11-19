@@ -71,7 +71,7 @@ class LaunchHistoryRepositoryTest {
         String successful = repository.begin(instance("one", "One"));
         repository.transition(successful, LaunchHistoryRepository.Outcome.RUNNING, "Started");
         repository.finish(successful, LaunchHistoryRepository.Outcome.SUCCEEDED,
-                "Exited normally", "Minecraft shutdown complete", 0);
+                "Exited normally", "UnsupportedClassVersionError appeared in an earlier diagnostic line; Minecraft shutdown complete", 0);
 
         String stopped = repository.begin(instance("two", "Two"));
         repository.transition(stopped, LaunchHistoryRepository.Outcome.RUNNING, "Started");
@@ -86,6 +86,8 @@ class LaunchHistoryRepositoryTest {
                 .findFirst().orElseThrow();
         assertEquals(LaunchHistoryRepository.Outcome.STOPPED, stoppedRecord.outcome());
         assertEquals(LaunchHistoryRepository.Outcome.SUCCEEDED, successfulRecord.outcome());
+        assertNull(successfulRecord.failureCategory(),
+                "A zero exit code must remain successful even when process output contains crash-like signatures.");
         assertTrue(stoppedRecord.terminal());
         assertTrue(successfulRecord.terminal());
     }
