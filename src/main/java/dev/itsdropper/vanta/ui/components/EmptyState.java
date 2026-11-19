@@ -26,7 +26,7 @@ public final class EmptyState extends VBox {
         if (icon != null && !icon.isBlank()) {
             IconView.Type type = switch (icon) {
                 case "⌁" -> IconView.Type.ACTIVITY;
-                case "⌕", "\u2315" -> IconView.Type.SEARCH;
+                case "⌕" -> IconView.Type.SEARCH;
                 case "▤", "▦" -> IconView.Type.INSTANCES;
                 default -> IconView.Type.PACKAGE;
             };

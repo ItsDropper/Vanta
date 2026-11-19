@@ -1662,8 +1662,7 @@ public class GlobalModsView extends VBox {
                     "⌕",
                     null,
                     Localization.text("modrinth.emptyTitle"),
-                    Localization.text("modrinth.emptyDescription"),
-                    Localization.text("modrinth.emptyHint")
+                    Localization.text("modrinth.emptyDescription")
             ));
             statusLabel.setText(Localization.text("modrinth.showingResults")
                     .replace("{start}", "0").replace("{end}", "0")
