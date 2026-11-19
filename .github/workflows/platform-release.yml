@@ -77,6 +77,61 @@ jobs:
           path: build/distributions/Vanta-*.zip*
           if-no-files-found: error
           retention-days: 7
+      - name: Build legacy Windows ZIP and NSIS installer
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          .\gradlew.bat --no-daemon updaterJarChecksum "-PvantaVersion=$env:VANTA_VERSION"
+          $ErrorActionPreference = 'Stop'
+          $stage = Join-Path $env:RUNNER_TEMP 'VantaLegacyStage'
+          $assets = Join-Path $env:GITHUB_WORKSPACE 'legacy-assets'
+          Remove-Item $stage -Recurse -Force -ErrorAction SilentlyContinue
+          Remove-Item $assets -Recurse -Force -ErrorAction SilentlyContinue
+          New-Item -ItemType Directory -Path $stage, $assets -Force | Out-Null
+
+          $image = Join-Path $env:GITHUB_WORKSPACE 'build/packages/Vanta'
+          if (-not (Test-Path (Join-Path $image 'Vanta.exe') -PathType Leaf)) {
+            throw "The Windows jpackage image is missing Vanta.exe."
+          }
+          Copy-Item (Join-Path $image '*') $stage -Recurse -Force
+          $updater = @(Get-ChildItem 'build/updater/VantaUpdater-*.jar' -File)
+          if ($updater.Count -ne 1) { throw "Expected exactly one standalone updater JAR." }
+          $updaterDirectory = Join-Path $stage 'updater'
+          New-Item -ItemType Directory -Path $updaterDirectory -Force | Out-Null
+          Copy-Item $updater[0].FullName (Join-Path $updaterDirectory 'VantaUpdater.jar')
+
+          # Preserve the exact archive name and root layout used by old launchers.
+          $legacyZip = Join-Path $assets "Vanta-$env:VANTA_VERSION.zip"
+          Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $legacyZip -CompressionLevel Optimal
+          $legacyHash = (Get-FileHash -LiteralPath $legacyZip -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$legacyHash  Vanta-$env:VANTA_VERSION.zip" | Set-Content "$legacyZip.sha256" -NoNewline
+
+          choco install nsis --version=3.12 --yes --no-progress
+          $makensis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
+          if (-not (Test-Path $makensis -PathType Leaf)) { throw "NSIS 3.12 makensis.exe was not installed." }
+          & $makensis "/DAPP_VERSION=$env:VANTA_VERSION" '.\VantaSetup.nsi'
+          if ($LASTEXITCODE -ne 0) { throw "NSIS installer compilation failed with exit code $LASTEXITCODE." }
+          if (-not (Test-Path '.\VantaSetup.exe' -PathType Leaf)) { throw "NSIS did not produce VantaSetup.exe." }
+          Copy-Item '.\VantaSetup.exe' $assets
+
+          $archive = [System.IO.Compression.ZipFile]::OpenRead($legacyZip)
+          try {
+            $required = @('Vanta.exe', 'runtime/lib/modules', 'app/Vanta.cfg', 'updater/VantaUpdater.jar')
+            $names = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\','/') })
+            foreach ($entry in $required) {
+              if ($names -notcontains $entry) { throw "Legacy ZIP is missing required entry: $entry" }
+            }
+          } finally { $archive.Dispose() }
+          Write-Host "Legacy Windows package and installer validated."
+
+      - name: Upload legacy Windows compatibility assets
+        if: runner.os == 'Windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: vanta-legacy-windows
+          path: legacy-assets/*
+          if-no-files-found: error
+          retention-days: 7
 
   updater:
     if: ${{ github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
@@ -195,6 +250,43 @@ jobs:
           python3 release/verify_manifest.py \
             --manifest release-assets/manifest.json \
             --signature release-assets/manifest.sig
+      - name: Add and verify legacy Windows compatibility assets
+        uses: actions/download-artifact@v4
+        with:
+          name: vanta-legacy-windows
+          path: release-assets
+
+      - name: Validate legacy ZIP, checksum and installer
+        shell: python
+        run: |
+          import hashlib
+          import zipfile
+          from pathlib import Path
+
+          version = "${${ env.VANTA_VERSION }}"
+          root = Path("release-assets")
+          archive = root / f"Vanta-{version}.zip"
+          checksum = root / f"Vanta-{version}.zip.sha256"
+          installer = root / "VantaSetup.exe"
+          for path in (archive, checksum, installer):
+              if not path.is_file() or path.stat().st_size == 0:
+                  raise SystemExit(f"Missing or empty legacy Windows release asset: {path.name}")
+          fields = checksum.read_text(encoding="utf-8").strip().split()
+          if len(fields) != 2 or fields[1].lstrip("*") != archive.name:
+              raise SystemExit("Legacy ZIP checksum sidecar has an invalid filename.")
+          actual = hashlib.sha256(archive.read_bytes()).hexdigest()
+          if actual != fields[0].lower():
+              raise SystemExit("Legacy Windows ZIP SHA-256 checksum mismatch.")
+          with zipfile.ZipFile(archive) as package:
+              names = set(package.namelist())
+              required = {"Vanta.exe", "runtime/lib/modules", "app/Vanta.cfg", "updater/VantaUpdater.jar"}
+              missing = required - names
+              if missing:
+                  raise SystemExit("Legacy ZIP is missing: " + ", ".join(sorted(missing)))
+              corrupt = package.testzip()
+              if corrupt:
+                  raise SystemExit(f"Legacy ZIP contains a corrupt entry: {corrupt}")
+          print(f"Validated {archive.name}, its SHA-256 sidecar and {installer.name}.")
 
       - name: Upload validated release bundle
         uses: actions/upload-artifact@v4
