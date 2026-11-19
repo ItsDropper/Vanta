@@ -1333,10 +1333,6 @@
    ============================================================ */
 
 /* Home */
-.vanta-ui-root .home-page {
-    -fx-padding: 28px 32px 28px 32px;
-}
-
 .vanta-ui-root .home-minecraft-title {
     -fx-text-fill: -vantatext;
     -fx-font-size: 22px;
@@ -1706,4 +1702,222 @@
 .vanta-ui-root .home-playing-button .vanta-icon.vanta-icon-solid {
     -fx-fill: -vantadanger;
     -fx-stroke: transparent;
+}
+
+/* ============================================================
+   11  SCREEN LAYOUT REFINEMENTS
+   Higher-specificity selectors so these beat the legacy page rules.
+   ============================================================ */
+
+/* Counts and meta labels are information, not accents. */
+.vanta-ui-root .instances-page .instances-count,
+.vanta-ui-root .instances-count {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
+}
+
+.vanta-ui-root .instances-more-button {
+    -fx-min-width: 32px;
+    -fx-pref-width: 32px;
+    -fx-max-width: 32px;
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .instances-more-button > .arrow-button {
+    -fx-padding: 0;
+    -fx-pref-width: 0;
+    -fx-min-width: 0;
+    -fx-max-width: 0;
+    -fx-opacity: 0;
+}
+
+.vanta-ui-root .instances-page .instance-list {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
+    -fx-border-radius: 8px;
+}
+
+.vanta-ui-root .instances-page .instance-empty {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+/* Modrinth browser: segmented control, search and filters. */
+.vanta-ui-root .global-mods-page .modrinth-content-segments {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
+    -fx-border-radius: 8px;
+    -fx-padding: 3px;
+}
+
+.vanta-ui-root .global-mods-page .modrinth-content-segment {
+    -fx-background-radius: 6px;
+    -fx-padding: 5px 14px;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .modrinth-browser-toolbar .modrinth-search-row,
+.vanta-ui-root .global-mods-page .modrinth-search-row {
+    -fx-background-color: -vantabg;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantalinestrong;
+    -fx-border-radius: 6px;
+    -fx-padding: 0 10px;
+}
+
+.vanta-ui-root .modrinth-browser-toolbar .modrinth-search-field,
+.vanta-ui-root .global-mods-page .modrinth-search-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+    -fx-padding: 0;
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .modrinth-browser-toolbar .modrinth-search-field:focused,
+.vanta-ui-root .global-mods-page .modrinth-search-field:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.vanta-ui-root .global-mods-page .modrinth-controls-row .combo-box,
+.vanta-ui-root .modrinth-small-combo {
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+}
+
+.vanta-ui-root .modrinth-small-combo .list-cell {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-padding: 0 0 0 4px;
+}
+
+.vanta-ui-root .global-mods-page .modrinth-controls-row .modrinth-page-button,
+.vanta-ui-root .modrinth-browser-toolbar .modrinth-page-button {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-max-height: 28px;
+    -fx-background-radius: 6px;
+    -fx-border-radius: 6px;
+    -fx-padding: 0 8px;
+}
+
+.vanta-ui-root .modrinth-browser-toolbar .modrinth-current-page,
+.vanta-ui-root .modrinth-page-button.modrinth-current-page {
+    -fx-background-color: -vantaaccentwash;
+    -fx-border-color: -vantaaccentline;
+    -fx-text-fill: -vantaaccent;
+}
+
+.vanta-ui-root .global-mods-page .modrinth-layout-button {
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+    -fx-padding: 0 8px;
+}
+
+/* Filter groups: a list of quiet sections, not a stack of bordered boxes. */
+.vanta-ui-root .modrinth-filter-sidebar > .titled-pane,
+.vanta-ui-root .global-mods-page .modrinth-filter-sidebar > .titled-pane {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .modrinth-filter-sidebar > .titled-pane > .title {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 8px 2px;
+}
+
+.vanta-ui-root .modrinth-filter-sidebar > .titled-pane > .title > .text {
+    -fx-fill: -vantatext;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+}
+
+.vanta-ui-root .modrinth-filter-sidebar > .titled-pane > .title > .arrow-button > .arrow {
+    -fx-background-color: -vantamuted;
+}
+
+.vanta-ui-root .modrinth-filter-sidebar > .titled-pane > .content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0 0 8px 0;
+}
+
+.vanta-ui-root .modrinth-filter-sidebar .check-box {
+    -fx-font-size: 12px;
+}
+
+/* Crash Lab: one framed card per concern, flat inset text inside. */
+.vanta-ui-root .crash-lab-page .crash-lab-timeline {
+    -fx-min-width: 280px;
+}
+
+.vanta-ui-root .crash-lab-page .list-view {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-control-inner-background: transparent;
+}
+
+.vanta-ui-root .crash-lab-page .list-cell {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-padding: 10px 8px;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+}
+
+.vanta-ui-root .crash-lab-page .list-cell:filled:hover {
+    -fx-background-color: -vantahover;
+}
+
+.vanta-ui-root .crash-lab-page .list-cell:filled:selected,
+.vanta-ui-root .crash-lab-page .list-cell:filled:selected:focused {
+    -fx-background-color: -vantaaccentwash;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .crash-lab-page .crash-lab-evidence,
+.vanta-ui-root .crash-lab-page .crash-lab-evidence .content {
+    -fx-background-color: -vantaframe;
+    -fx-control-inner-background: -vantaframe;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .crash-lab-page .crash-lab-evidence {
+    -fx-border-color: -vantaline;
+    -fx-border-radius: 6px;
+}
+
+.vanta-ui-root .crash-lab-page .crash-lab-evidence:focused {
+    -fx-border-color: -vantaaccent;
+}
+
+/* Settings cards share the flat card treatment everywhere. */
+.vanta-ui-root .settings-card {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
+    -fx-border-radius: 8px;
+    -fx-padding: 16px;
+}
+
+.vanta-ui-root .page-header-copy {
+    -fx-spacing: 2px;
 }

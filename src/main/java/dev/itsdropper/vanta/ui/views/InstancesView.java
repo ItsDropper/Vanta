@@ -8,6 +8,9 @@ import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
@@ -191,17 +194,36 @@ public class InstancesView extends VBox {
                 Localization.text("instances.importVPackHelp")));
         importVPackButton.setOnAction(event -> importVPack());
 
+        // Backup and transfer actions live in one menu so the header stays on a
+        // single row. The buttons above remain the source of each action's
+        // handler and accessible description; the menu items mirror them.
+        MenuItem backupItem = mirrorAsMenuItem(backupButton);
+        MenuItem restoreItem = mirrorAsMenuItem(restoreButton);
+        MenuItem verifyItem = mirrorAsMenuItem(verifyBackupButton);
+        MenuItem exportItem = mirrorAsMenuItem(exportVPackButton);
+        MenuItem importItem = mirrorAsMenuItem(importVPackButton);
+
+        MenuButton transferMenu = new MenuButton(
+                null,
+                dev.itsdropper.vanta.ui.components.IconView.create(
+                        dev.itsdropper.vanta.ui.components.IconView.Type.MORE, 18)
+        );
+        transferMenu.getStyleClass().addAll("secondary-button", "instances-more-button");
+        transferMenu.setAccessibleText("Backup and transfer actions");
+        transferMenu.setTooltip(new javafx.scene.control.Tooltip("Backup, restore and transfer"));
+        transferMenu.getItems().addAll(
+                backupItem, restoreItem, verifyItem,
+                new SeparatorMenuItem(),
+                exportItem, importItem
+        );
+
         PageHeader headerTop = new PageHeader(
                 "Instances",
                 "Manage your Minecraft installations.",
                 "page-title",
                 "page-subtitle",
                 countLabel,
-                backupButton,
-                restoreButton,
-                verifyBackupButton,
-                exportVPackButton,
-                importVPackButton,
+                transferMenu,
                 createButton
         );
 
@@ -1335,6 +1357,14 @@ public class InstancesView extends VBox {
                     isThisInstance
             );
         }
+    }
+
+    /** A menu item that runs the same action and mirrors the disabled state of a button. */
+    private static MenuItem mirrorAsMenuItem(Button source) {
+        MenuItem item = new MenuItem(source.getText());
+        item.setOnAction(event -> source.fire());
+        item.disableProperty().bind(source.disabledProperty());
+        return item;
     }
 
     // =============================================================

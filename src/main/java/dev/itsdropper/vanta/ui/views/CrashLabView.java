@@ -61,12 +61,6 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
         ResponsiveLayout.bindPagePadding(this);
         setSpacing(VantaUI.spacing(4));
 
-        PageHeader header = new PageHeader(
-                Localization.text("crashLab.title"),
-                Localization.text("crashLab.description"),
-                "page-title",
-                "page-subtitle");
-
         Button refresh = new Button(Localization.text("common.refresh"));
         refresh.getStyleClass().add("secondary-button");
         refresh.setOnAction(event -> refresh());
@@ -76,8 +70,13 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
         reviewCases.setOnAction(event -> {
             if (onReviewCases != null) onReviewCases.run();
         });
-        HBox actions = new HBox(8, refresh, reviewCases);
-        actions.setAlignment(Pos.CENTER_RIGHT);
+        PageHeader header = new PageHeader(
+                Localization.text("crashLab.title"),
+                Localization.text("crashLab.description"),
+                "page-title",
+                "page-subtitle",
+                refresh,
+                reviewCases);
 
         search.setPromptText(Localization.text("crashLab.search"));
         search.setAccessibleText(Localization.text("crashLab.searchAccessible"));
@@ -112,9 +111,10 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
 
         VBox timelineCard = new VBox(10,
                 sectionTitle(Localization.text("crashLab.timeline")), search, timeline);
-        timelineCard.getStyleClass().add("settings-card");
+        timelineCard.getStyleClass().addAll("settings-card", "crash-lab-timeline");
         timelineCard.setMinWidth(280);
-        timelineCard.setPrefWidth(360);
+        timelineCard.setPrefWidth(340);
+        timelineCard.setMaxWidth(380);
         VBox.setVgrow(timeline, Priority.ALWAYS);
 
         details.setPrefRowCount(7);
@@ -151,7 +151,7 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
 
         status.setWrapText(true);
         status.getStyleClass().add("muted");
-        getChildren().addAll(header, actions, workspace, status);
+        getChildren().addAll(header, workspace, status);
         VBox.setVgrow(workspace, Priority.ALWAYS);
     }
 

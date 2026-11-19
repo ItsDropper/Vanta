@@ -70,7 +70,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         searchField.setPromptText(searchPrompt);
         searchField.setAccessibleText(searchPrompt);
         searchField.getStyleClass().addAll("create-field", "modrinth-search-field");
-        searchField.setPrefHeight(42);
+        searchField.setPrefHeight(32);
         HBox.setHgrow(searchField, Priority.ALWAYS);
 
         HBox searchRow = new HBox(10, searchIcon, searchField);
@@ -86,11 +86,12 @@ public final class ModrinthBrowserToolbar extends VBox {
         );
         sortBox.setValue(Localization.text("modrinth.sortRelevance"));
         sortBox.getStyleClass().addAll("create-combo", "modrinth-small-combo", "modrinth-control-dropdown");
-        sortBox.setPrefWidth(190);
+        sortBox.setMinWidth(210);
+        sortBox.setPrefWidth(220);
         sortBox.setButtonCell(new javafx.scene.control.ListCell<>() {
             @Override protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "" : Localization.text("modrinth.sortBy") + ": " + item + "  ▾");
+                setText(empty || item == null ? "" : fieldLabel(Localization.text("modrinth.sortBy")) + " " + item);
             }
         });
         sortBox.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
@@ -103,11 +104,12 @@ public final class ModrinthBrowserToolbar extends VBox {
         limitBox.getItems().setAll(5, 10, 15, 20, 50, 100);
         limitBox.setValue(20);
         limitBox.getStyleClass().addAll("create-combo", "modrinth-small-combo", "modrinth-control-dropdown");
-        limitBox.setPrefWidth(105);
+        limitBox.setMinWidth(110);
+        limitBox.setPrefWidth(120);
         limitBox.setButtonCell(new javafx.scene.control.ListCell<>() {
             @Override protected void updateItem(Integer item, boolean empty) {
                 super.updateItem(item, empty);
-                setText(empty || item == null ? "" : Localization.text("modrinth.view") + ": " + item + "  ▾");
+                setText(empty || item == null ? "" : fieldLabel(Localization.text("modrinth.view")) + " " + item);
             }
         });
         limitBox.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
@@ -143,7 +145,7 @@ public final class ModrinthBrowserToolbar extends VBox {
         }) {
             button.getStyleClass().addAll("secondary-button", "modrinth-page-button");
             button.setMinWidth(30);
-            button.setPrefHeight(30);
+            button.setPrefHeight(28);
         }
         currentPageButton.getStyleClass().add("modrinth-current-page");
         previousButton.setAccessibleText(Localization.text("modrinth.previousPage"));
@@ -303,6 +305,15 @@ public final class ModrinthBrowserToolbar extends VBox {
         } catch (NumberFormatException ignored) {
             jumpField.setStyle("-fx-border-color: -vantadanger;");
         }
+    }
+
+    /** Field labels are stored with or without a trailing colon; show exactly one. */
+    private static String fieldLabel(String label) {
+        String trimmed = label == null ? "" : label.trim();
+        while (trimmed.endsWith(":") || trimmed.endsWith("\u00a0:")) {
+            trimmed = trimmed.substring(0, trimmed.length() - 1).trim();
+        }
+        return trimmed + ":";
     }
 
     private void updateLayoutButton() {

@@ -1,4 +1,6 @@
-/* Vanta home — a workspace for the next session, not a marketing dashboard. */
+/* Vanta home — the next session, not a marketing dashboard.
+ * Colours come from the theme tokens; shared control and type styling lives in vanta.css.
+ */
 
 .home-page {
     -fx-background-color: transparent;
@@ -6,26 +8,15 @@
 
 .home-page .home-header {
     -fx-alignment: center-left;
-    -fx-padding: 2px 0 4px 0;
-}
-
-.home-page .home-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 30px;
-    -fx-font-weight: 800;
-}
-
-.home-page .home-account-label {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px;
+    -fx-padding: 0 0 4px 0;
 }
 
 .home-page .home-launch-indicator {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-padding: 0 14px 0 0;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
+    -fx-padding: 0 12px 0 0;
+    -fx-font-size: 12px;
+    -fx-font-weight: 500;
 }
 
 .home-page .home-status-ready { -fx-text-fill: -vantasuccess; }
@@ -34,94 +25,71 @@
 .home-page .home-status-error { -fx-text-fill: -vantadanger; }
 
 .home-page .home-featured-section,
-.home-page .home-featured-container {
+.home-page .home-featured-container,
+.home-page .home-activity-layout,
+.home-page .home-recent-list,
+.home-page .home-server-list {
     -fx-background-color: transparent;
 }
 
 .home-page .home-featured-loading {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 13px;
-    -fx-padding: 32px;
+    -fx-padding: 24px;
 }
 
+/* Featured instance: one card, accent edge marks "continue here". */
 .home-page .home-featured-card {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
-    -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
-    -fx-border-width: 1px 1px 1px 3px;
-    -fx-border-radius: 14px;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline -vantaline -vantaline -vantaaccent;
+    -fx-border-width: 1px 1px 1px 2px;
+    -fx-border-radius: 8px;
 }
 
 .home-page .home-featured-card:hover {
     -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
 }
 
 .home-page .home-featured-icon-frame {
     -fx-background-color: -vantabg;
-    -fx-background-radius: 12px;
-    -fx-border-color: -vantaborder;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-radius: 8px;
 }
 
-.home-page .home-featured-eyebrow,
-.home-page .home-empty-eyebrow {
-    -fx-text-fill: -vantaaccent;
+.home-page .home-featured-eyebrow {
+    -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 
 .home-page .home-featured-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 28px;
-    -fx-font-weight: 800;
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
 }
 
 .home-page .home-featured-meta {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 13px;
-    -fx-font-weight: 600;
+    -fx-font-weight: 400;
 }
 
 .home-page .home-featured-playtime {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-}
-
-.home-page .home-featured-play-button {
-    -fx-background-color: -vantaaccent;
-    -fx-background-radius: 8px;
-    -fx-border-color: transparent;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-text-fill: -vantaaccentforeground;
-    -fx-font-size: 13px;
-    -fx-font-weight: 800;
-    -fx-padding: 0 24px;
-    -fx-cursor: hand;
-}
-
-.home-page .home-featured-play-button:hover {
-    -fx-background-color: -vantaaccenthover;
-}
-
-.home-page .home-featured-play-button:focused {
-    -fx-border-color: -vantatext;
-}
-
-.home-page .home-activity-layout {
-    -fx-background-color: transparent;
+    -fx-font-size: 12px;
 }
 
 .home-page .home-recent-section {
-    -fx-spacing: 9px;
+    -fx-spacing: 8px;
 }
 
 .home-page .home-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 16px;
-    -fx-font-weight: 700;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
 }
 
 .home-page .home-section-subtitle {
@@ -129,45 +97,40 @@
     -fx-font-size: 12px;
 }
 
-.home-page .home-recent-list,
-.home-page .home-server-list {
-    -fx-background-color: transparent;
-}
-
 .home-page .home-recent-card,
 .home-page .home-server-card {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
     -fx-border-width: 1px;
-    -fx-border-radius: 10px;
+    -fx-border-radius: 8px;
 }
 
 .home-page .home-recent-card:hover,
 .home-page .home-server-card:hover {
     -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: derive(-vantaaccent, -32%);
+    -fx-border-color: -vantalinestrong;
 }
 
 .home-page .home-recent-icon {
     -fx-background-color: -vantabg;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantaline;
     -fx-border-width: 1px;
-    -fx-border-radius: 8px;
+    -fx-border-radius: 6px;
 }
 
 .home-page .home-recent-name,
 .home-page .home-server-name {
     -fx-text-fill: -vantatext;
     -fx-font-size: 13px;
-    -fx-font-weight: 700;
+    -fx-font-weight: 600;
 }
 
 .home-page .home-recent-meta,
 .home-page .home-server-meta {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .home-page .home-recent-playtime,
@@ -178,34 +141,33 @@
 
 .home-page .home-recent-card .home-recent-play,
 .home-page .home-server-card .home-recent-play {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-background-radius: 7px;
-    -fx-border-color: derive(-vantaaccent, -38%);
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
     -fx-border-width: 1px;
-    -fx-border-radius: 7px;
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-    -fx-padding: 0 15px;
+    -fx-border-radius: 6px;
+    -fx-text-fill: -vantaaccentforeground;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 0 14px;
 }
 
 .home-page .home-recent-card .home-recent-play:hover,
 .home-page .home-server-card .home-recent-play:hover {
-    -fx-background-color: -vantaaccent;
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-background-color: -vantaaccenthover;
 }
 
 .home-page .home-recent-card .home-recent-stop,
 .home-page .home-server-card .home-recent-stop {
-    -fx-background-color: derive(-vantadanger, -84%);
-    -fx-background-radius: 7px;
-    -fx-border-color: derive(-vantadanger, -48%);
+    -fx-background-color: -vantadangerwash;
+    -fx-background-radius: 6px;
+    -fx-border-color: -vantadangerline;
     -fx-border-width: 1px;
-    -fx-border-radius: 7px;
+    -fx-border-radius: 6px;
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-    -fx-padding: 0 15px;
+    -fx-font-size: 12px;
+    -fx-font-weight: 600;
+    -fx-padding: 0 14px;
 }
 
 .home-page .home-recent-servers-card {
@@ -215,30 +177,32 @@
     -fx-padding: 0;
 }
 
+/* First run and load failure: a plain surface with one action. */
 .home-page .home-empty-card,
 .home-page .home-load-error-card {
     -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
-    -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
-    -fx-border-width: 1px 1px 1px 3px;
-    -fx-border-radius: 14px;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
 }
 
 .home-page .home-empty-title,
 .home-page .home-load-error-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 26px;
-    -fx-font-weight: 800;
+    -fx-font-size: 16px;
+    -fx-font-weight: 600;
 }
 
 .home-page .home-empty-description,
 .home-page .home-load-error-description {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
 }
 
 .home-page .home-load-error-card {
-    -fx-padding: 28px;
+    -fx-padding: 24px;
 }
 
 .home-page .home-content-scroll,
@@ -246,60 +210,11 @@
     -fx-background-color: transparent;
 }
 
-.home-page .home-content-scroll > .scroll-bar:vertical > .thumb {
-    -fx-background-color: -vantaborder;
-    -fx-background-radius: 5px;
-}
-
 .home-page .primary-button:focused,
 .home-page .secondary-button:focused,
 .home-page .home-featured-play-button:focused,
 .home-page .home-recent-play:focused,
 .home-page .home-recent-stop:focused {
-    -fx-border-color: -vantatext;
-    -fx-border-width: 2px;
-}
-
-/* First-run home: let the Minecraft landscape carry the visual identity. */
-.home-page .home-empty-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 16px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 16px;
-}
-
-.home-page .home-empty-backdrop {
-    -fx-background-radius: 16px;
-}
-
-.home-page .home-empty-card .home-empty-eyebrow {
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
-
-.home-page .home-empty-card .home-empty-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 32px;
-    -fx-font-weight: 800;
-}
-
-.home-page .home-empty-card .home-empty-description {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px;
-    -fx-line-spacing: 3px;
-}
-
-.home-page .home-empty-card .primary-button {
-    -fx-min-height: 46px;
-    -fx-padding: 0 22px;
-    -fx-background-radius: 8px;
-    -fx-font-size: 12px;
-    -fx-font-weight: 700;
-}
-
-.home-page .home-empty-card .primary-button:focused {
     -fx-border-color: -vantatext;
     -fx-border-width: 2px;
 }

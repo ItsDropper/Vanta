@@ -1281,8 +1281,10 @@
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-font-size: 13px;
-    -fx-padding: 10px 14px;
-    -fx-min-height: 44px;
+    -fx-padding: 0 10px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
 }
 
 .instances-page .instances-toolbar .instance-sort-field {
@@ -1291,12 +1293,14 @@
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
-    -fx-min-height: 44px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
 }
 
 .instances-page .instances-toolbar .button {
-    -fx-min-height: 40px;
-    -fx-padding: 0 14px;
+    -fx-min-height: 32px;
+    -fx-padding: 0 12px;
 }
 
 .instances-page .instances-scroll,
@@ -1321,15 +1325,15 @@
 }
 
 .instances-page .instance-empty-icon {
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 32px;
-    -fx-font-weight: 700;
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 24px;
+    -fx-font-weight: 500;
 }
 
 .instances-page .instance-empty-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 21px;
-    -fx-font-weight: 800;
+    -fx-font-size: 15px;
+    -fx-font-weight: 600;
 }
 
 .instances-page .instance-empty-description {
