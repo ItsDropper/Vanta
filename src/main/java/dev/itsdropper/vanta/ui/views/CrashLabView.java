@@ -256,6 +256,7 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
                     .append(record.failureCategory());
         }
         if (record.outcome() == LaunchHistoryRepository.Outcome.FAILED
+                && record.exitCode() != null && record.exitCode() != 0
                 && !record.sanitizedLog().isBlank()) {
             List<RepairDiagnosis> diagnoses = RepairDiagnosticEngine.diagnose(record.sanitizedLog());
             if (!diagnoses.isEmpty()) {
