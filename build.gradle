@@ -239,7 +239,7 @@ tasks.register('platformAppImage', Exec) {
 
     doLast {
         File imageRoot = packageOutput.get().asFile.toPath().resolve(macHost ? 'Vanta.app' : 'Vanta').toFile()
-        File updaterDirectory = releaseMac
+        File updaterDirectory = macHost
                 ? new File(imageRoot, 'Contents/app/updater')
                 : new File(imageRoot, 'updater')
         updaterDirectory.mkdirs()
