@@ -94,7 +94,9 @@ Section "Vanta"
     Goto DownloadError
 
   DetailPrint "Verifying downloaded package..."
-  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "$expected=(Get-Content -LiteralPath ''$HASH_PATH'' -Raw).Trim().Split()[0].ToLowerInvariant(); $actual=(Get-FileHash -LiteralPath ''$ZIP_PATH'' -Algorithm SHA256).Hash.ToLowerInvariant(); if ($expected -notmatch ''^[a-f0-9]{64}'
+  SetOutPath "$PLUGINSDIR"
+  File /oname=Verify-VantaChecksum.ps1 "release\verify_installer_checksum.ps1"
+  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Verify-VantaChecksum.ps1" -Archive "$ZIP_PATH" -Checksum "$HASH_PATH"'
   Pop $0
   StrCmp $0 "0" +2
     Goto ChecksumFailed
