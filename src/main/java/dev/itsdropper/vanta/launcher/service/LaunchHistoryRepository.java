@@ -305,7 +305,8 @@ public final class LaunchHistoryRepository {
                 String evidence = diagnosticText == null
                         ? current.sanitizedLog()
                         : sanitizeEvidence(diagnosticText);
-                List<RepairDiagnosis> diagnoses = outcome == Outcome.FAILED && !evidence.isBlank()
+                List<RepairDiagnosis> diagnoses = outcome == Outcome.FAILED
+                        && exitCode != null && exitCode != 0 && !evidence.isBlank()
                         ? RepairDiagnosticEngine.diagnose(evidence) : List.of();
                 FailureCategory category = outcome == Outcome.FAILED
                         ? diagnoses.stream()
