@@ -238,7 +238,9 @@ tasks.register('platformAppImage', Exec) {
 
     doLast {
         File imageRoot = packageOutput.get().asFile.toPath().resolve(releaseImageName).toFile()
-        File updaterDirectory = new File(imageRoot, 'updater')
+        File updaterDirectory = releaseMac
+                ? new File(imageRoot, 'Contents/app/updater')
+                : new File(imageRoot, 'updater')
         updaterDirectory.mkdirs()
         copy {
             from tasks.named('updaterJar').get().archiveFile.get().asFile
@@ -281,6 +283,17 @@ tasks.register('platformImageZip', Zip) {
     // directly into the staging directory and verifies that directory as
     // the application image (including the Vanta.app Contents/ tree on macOS).
     from(layout.buildDirectory.dir("packages/${releaseImageName}"))
+    doLast {
+        def archive = new java.util.zip.ZipFile(archiveFile.get().asFile)
+        try {
+            def updaterPath = releaseMac ? 'Contents/app/updater/VantaUpdater.jar' : 'updater/VantaUpdater.jar'
+            if (archive.getEntry(updaterPath) == null) {
+                throw new GradleException("Platform release archive is missing ${updaterPath}.")
+            }
+        } finally {
+            archive.close()
+        }
+    }
 }
 
 tasks.register('platformImageChecksum') {
