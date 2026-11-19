@@ -24,22 +24,22 @@ public final class EmptyState extends VBox {
         VantaUI.applySurface(this, VantaUI.SurfaceRole.CARD);
 
         if (icon != null && !icon.isBlank()) {
-            Label iconLabel = new Label(icon);
-            iconLabel.getStyleClass().add("vanta-empty-state-icon");
-            iconLabel.setAccessibleText("");
-            getChildren().add(iconLabel);
-        }
-
-        if (eyebrow != null && !eyebrow.isBlank()) {
-            Label eyebrowLabel = new Label(eyebrow);
-            VantaUI.styleText(eyebrowLabel, VantaUI.TextRole.EYEBROW);
-            eyebrowLabel.getStyleClass().add("vanta-empty-state-eyebrow");
-            getChildren().add(eyebrowLabel);
+            IconView.Type type = switch (icon) {
+                case "⌁" -> IconView.Type.ACTIVITY;
+                case "⌕", "\u2315" -> IconView.Type.SEARCH;
+                case "▤", "▦" -> IconView.Type.INSTANCES;
+                default -> IconView.Type.PACKAGE;
+            };
+            Node iconNode = IconView.create(type, 20);
+            iconNode.getStyleClass().add("vanta-empty-state-icon");
+            getChildren().add(iconNode);
         }
 
         Label titleLabel = new Label(title == null ? "" : title);
         titleLabel.setWrapText(true);
         titleLabel.setMaxWidth(Double.MAX_VALUE);
+        titleLabel.setAlignment(Pos.CENTER);
+        titleLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         titleLabel.getStyleClass().add("vanta-empty-state-title");
         VantaUI.styleText(titleLabel, VantaUI.TextRole.SECTION_TITLE);
 
@@ -47,6 +47,7 @@ public final class EmptyState extends VBox {
         descriptionLabel.setWrapText(true);
         descriptionLabel.setMaxWidth(520);
         descriptionLabel.setAlignment(Pos.CENTER);
+        descriptionLabel.setTextAlignment(javafx.scene.text.TextAlignment.CENTER);
         descriptionLabel.getStyleClass().add("vanta-empty-state-description");
         VantaUI.styleText(descriptionLabel, VantaUI.TextRole.MUTED);
 

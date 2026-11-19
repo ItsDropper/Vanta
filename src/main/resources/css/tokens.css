@@ -268,7 +268,7 @@
 /* ---------- home ---------- */
 
 .home-page {
-    -fx-padding: 30px 32px 32px 32px;
+    -fx-padding: 0;
 }
 
 .home-header {
@@ -1065,7 +1065,7 @@
 .home-header,
 .instances-page > .header,
 .accounts-page > .header {
-    -fx-padding: 2px 2px 0 2px;
+    -fx-padding: 0;
 }
 
 .home-header {

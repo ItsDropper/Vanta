@@ -95,13 +95,7 @@ public class InstancesView extends VBox {
                 "instances-page"
         );
 
-        paddingProperty().bind(
-                Bindings.createObjectBinding(() -> {
-                    double width = getWidth();
-                    double horizontal = width < 850 ? 20 : width < 1100 ? 28 : 36;
-                    return new Insets(VantaUI.spacing(7), horizontal, VantaUI.spacing(6), horizontal);
-                }, widthProperty())
-        );
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
         setSpacing(VantaUI.spacing(5));
 
@@ -302,7 +296,7 @@ public class InstancesView extends VBox {
         scrollPane.setFitToWidth(
                 true
         );
-        scrollPane.setFitToHeight(screenshotPreview);
+        scrollPane.setFitToHeight(false);
 
         scrollPane.setHbarPolicy(
                 ScrollPane.ScrollBarPolicy.NEVER
@@ -1381,9 +1375,8 @@ public class InstancesView extends VBox {
     // =============================================================
 
     private HBox createEmptyState() {
-        Label icon = new Label("▦");
+        javafx.scene.Node icon = dev.itsdropper.vanta.ui.components.IconView.create(dev.itsdropper.vanta.ui.components.IconView.Type.INSTANCES, 22);
         icon.getStyleClass().add("instance-empty-icon");
-        icon.setAccessibleText("");
 
         Label title = new Label(Localization.text("instances.yourLibrary"));
         title.getStyleClass().add("instance-empty-title");

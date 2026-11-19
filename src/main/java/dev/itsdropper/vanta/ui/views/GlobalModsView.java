@@ -512,7 +512,7 @@ public class GlobalModsView extends VBox {
                     "Choose a content type, search by name, then narrow the results by loader and game version."
             ));
             results.setAlignment(Pos.CENTER);
-            results.setMinHeight(520);
+            results.setMinHeight(320);
             resultsScrollPane.setFitToHeight(true);
             statusLabel.setText(Localization.text("globalMods.previewNotice"));
             statusLabel.setVisible(false);
@@ -1660,6 +1660,7 @@ public class GlobalModsView extends VBox {
         if (projects == null || projects.isEmpty()) {
             results.getChildren().add(new EmptyState(
                     "⌕",
+                    null,
                     Localization.text("modrinth.emptyTitle"),
                     Localization.text("modrinth.emptyDescription"),
                     Localization.text("modrinth.emptyHint")

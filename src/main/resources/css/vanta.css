@@ -2104,3 +2104,26 @@
 .vanta-ui-root .instance-progress-dialog .instance-progress-body {
     -fx-padding: 24px;
 }
+
+/* Empty states: quiet outline icon, one title, one line of help. */
+.vanta-ui-root .vanta-empty-state-icon {
+    -fx-text-fill: -vantasubtle;
+}
+
+.vanta-ui-root .vanta-empty-state-icon .vanta-icon,
+.vanta-ui-root .vanta-empty-state .vanta-icon {
+    -fx-stroke: -vantasubtle;
+}
+
+.vanta-ui-root .instances-page .instance-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.vanta-ui-root .instances-page .instance-empty {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 8px;
+    -fx-border-color: -vantaline;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+}
