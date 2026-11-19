@@ -56,6 +56,7 @@ public class InstancesView extends VBox {
     private final Label statusLabel;
     private final Label countLabel;
     private Button backupButton;
+    private Button refreshButton;
 
     private final Consumer<Instance> onInstanceSettings;
     private final Runnable onCreateInstance;
@@ -227,11 +228,12 @@ public class InstancesView extends VBox {
                 createButton
         );
 
-        Button refreshButton = new Button(Localization.text("common.refresh"));
+        refreshButton = new Button(Localization.text("common.refresh"));
         refreshButton.getStyleClass().add("secondary-button");
         refreshButton.setAccessibleText(Localization.text("instances.refreshAccessible"));
         refreshButton.setTooltip(new javafx.scene.control.Tooltip(Localization.text("instances.rescan")));
         refreshButton.setOnAction(event -> refresh());
+        refreshButton.setTooltip(new javafx.scene.control.Tooltip(Localization.text("instances.refreshTooltip")));
 
         searchField.setMinWidth(180);
         searchField.setPrefWidth(360);
@@ -374,6 +376,7 @@ public class InstancesView extends VBox {
 
         long requestId = ++refreshRequestId;
         statusLabel.setText(Localization.text("instances.scanning"));
+        refreshButton.setDisable(true);
 
         UiExecutor.shared().execute(() -> {
             List<Instance> instances;
@@ -386,6 +389,7 @@ public class InstancesView extends VBox {
                     // A failed rescan must not erase the last successfully loaded list.
                     // Keep existing cards and the real count visible so a transient filesystem
                     // error cannot make the user's instances appear to have disappeared.
+                    refreshButton.setDisable(false);
                     statusLabel.setText(loadedInstances.isEmpty()
                             ? Localization.text("instances.scanFailed")
                             : Localization.text("instances.refreshFailed"));
@@ -396,6 +400,7 @@ public class InstancesView extends VBox {
             UiExecutor.shared().dispatchToUi(() -> {
                 if (requestId != refreshRequestId) return;
 
+                refreshButton.setDisable(false);
                 loadedInstances = List.copyOf(instances);
                 updateCount(loadedInstances.size());
 
@@ -1016,8 +1021,8 @@ public class InstancesView extends VBox {
         }
 
         renderInstances(filtered);
-        statusLabel.setText(filtered.size() + " of " + loadedInstances.size()
-                + " instance" + (loadedInstances.size() == 1 ? "" : "s") + " shown");
+        statusLabel.setText(String.format(Locale.ROOT,
+                Localization.text("instances.filteredStatus"), filtered.size(), loadedInstances.size()));
     }
 
     private static String safeLower(String value) {
@@ -1068,8 +1073,9 @@ public class InstancesView extends VBox {
         title.getStyleClass().add("instance-empty-title");
         VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
 
-        Label description = new Label("No instance matches \"" + (query == null ? "" : query.trim())
-                + "\". Try a name, Minecraft version, or loader.");
+        Label description = new Label(String.format(Locale.ROOT,
+                Localization.text("instances.searchNoMatchDescription"),
+                query == null ? "" : query.trim()));
         description.setWrapText(true);
         description.getStyleClass().add("instance-empty-description");
         VantaUI.styleText(description, VantaUI.TextRole.MUTED);
