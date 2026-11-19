@@ -12,8 +12,8 @@ REQUIRED_FILES = {
     "windows-x64": ("Vanta.exe", "runtime/bin/java.dll", "runtime/lib/modules", "app/Vanta.cfg"),
     "linux-x64": ("bin/Vanta", "lib/runtime/lib/modules", "lib/app/Vanta.cfg"),
     "linux-aarch64": ("bin/Vanta", "lib/runtime/lib/modules", "lib/app/Vanta.cfg"),
-    "macos-x64": ("Contents/MacOS/Vanta", "Contents/runtime/lib/modules", "Contents/app/Vanta.cfg"),
-    "macos-aarch64": ("Contents/MacOS/Vanta", "Contents/runtime/lib/modules", "Contents/app/Vanta.cfg"),
+    "macos-x64": ("Contents/MacOS/Vanta", "Contents/runtime/Contents/Home/lib/modules", "Contents/app/Vanta.cfg"),
+    "macos-aarch64": ("Contents/MacOS/Vanta", "Contents/runtime/Contents/Home/lib/modules", "Contents/app/Vanta.cfg"),
 }
 
 PLATFORMS = (
