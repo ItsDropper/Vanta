@@ -158,7 +158,7 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         instanceScroll.setFitToHeight(true);
         instanceList.getChildren().setAll(new EmptyState(
                 "⌁",
-                "ENVIRONMENT HEALTH",
+                "Environment health",
                 "No scan results yet",
                 "Run a scan to inspect installed instances, missing files, configuration drift and repairable issues."
         ));

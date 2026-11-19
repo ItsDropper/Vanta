@@ -36,12 +36,9 @@ public final class InstanceCreationProgressDialog {
   this.loader=loader==null?"Vanilla":loader;
   // Match Main: transparent native window + transparent JavaFX scene lets
   // the rounded DialogPane surface define the visible window boundary.
-  dialog.initStyle(StageStyle.TRANSPARENT);
+  dialog.initStyle(StageStyle.UNDECORATED);
   if(owner!=null)dialog.initOwner(owner);
-  dialog.setOnShowing(event -> {
-   Scene scene=dialog.getDialogPane().getScene();
-   if(scene!=null)scene.setFill(Color.TRANSPARENT);
-  });
+  dialog.setOnShowing(event -> {Scene scene=dialog.getDialogPane().getScene();if(scene!=null)scene.setFill(Color.web("#141A22"));});
   dialog.setTitle(Localization.text("instanceProgress.title"));dialog.setHeaderText(null);dialog.setResizable(false);
   dialog.getDialogPane().getStyleClass().add("instance-progress-dialog");
   dialog.getDialogPane().getStylesheets().add(
@@ -70,7 +67,7 @@ public final class InstanceCreationProgressDialog {
   VBox header=new VBox(9,heading,subtitle,identity);
   VBox stages=new VBox(stageList);
   VBox content=new VBox(18,header,stages,current);
-  content.setPadding(new Insets(24));
+  content.getStyleClass().add("instance-progress-body");content.setPadding(new Insets(24));
   content.setPrefWidth(480);
   dialog.getDialogPane().setContent(content);
   dialog.getDialogPane().setPrefWidth(530);

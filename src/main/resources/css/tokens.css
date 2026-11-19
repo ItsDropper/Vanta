@@ -1849,7 +1849,7 @@
 .state-hero{-fx-min-height:118px;-fx-padding:24px}
 .state-hero-title{-fx-font-size:20px}
 .state-hero-subtitle{-fx-font-size:11px}
-.state-progress-label{-fx-text-fill:#667487;-fx-font-size:11px;-fx-font-weight:600;-fx-pref-height:7px;-fx-min-height:7px;-fx-max-height:7px}
+.state-progress-label{-fx-text-fill:#667487;-fx-font-size:11px;-fx-font-weight:600}
 .state-progress > .track{-fx-background-color:#202a36;-fx-background-radius:5px}
 .state-progress > .bar{-fx-background-color:-vantaaccent;-fx-background-radius:5px}
 .state-refresh-button{-fx-min-height:36px;-fx-pref-height:36px;-fx-padding:0 13px;-fx-cursor:hand}
