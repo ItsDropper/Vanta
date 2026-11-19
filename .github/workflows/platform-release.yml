@@ -263,7 +263,7 @@ jobs:
           import zipfile
           from pathlib import Path
 
-          version = "${${ env.VANTA_VERSION }}"
+          version = "${{ env.VANTA_VERSION }}"
           root = Path("release-assets")
           archive = root / f"Vanta-{version}.zip"
           checksum = root / f"Vanta-{version}.zip.sha256"
