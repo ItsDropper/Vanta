@@ -21,6 +21,7 @@ VIFileVersion "${APP_VERSION}.0"
 VIAddVersionKey "ProductName" "Vanta"
 VIAddVersionKey "CompanyName" "ItsDropper"
 VIAddVersionKey "FileDescription" "Vanta Minecraft Launcher"
+VIAddVersionKey "FileVersion" "${APP_VERSION}"
 VIAddVersionKey "LegalCopyright" "Copyright © 2026 ItsDropper"
 
 !define MUI_ABORTWARNING
