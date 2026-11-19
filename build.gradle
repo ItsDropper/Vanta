@@ -142,7 +142,7 @@ tasks.register('updaterJarChecksum') {
 
 
 tasks.register('platformAppImage', Exec) {
-    dependsOn tasks.named('installDist')
+    dependsOn tasks.named('installDist'), tasks.named('updaterJar')
 
     def packageName = 'Vanta'
     // jpackage accepts only one to three numeric components. Keep the full
@@ -236,6 +236,20 @@ tasks.register('platformAppImage', Exec) {
         commandLine(jpackageArguments)
     }
 
+    doLast {
+        File imageRoot = packageOutput.get().asFile.toPath().resolve(releaseImageName).toFile()
+        File updaterDirectory = new File(imageRoot, 'updater')
+        updaterDirectory.mkdirs()
+        copy {
+            from tasks.named('updaterJar').get().archiveFile.get().asFile
+            into updaterDirectory
+            rename { 'VantaUpdater.jar' }
+        }
+        File bundledUpdater = new File(updaterDirectory, 'VantaUpdater.jar')
+        if (!bundledUpdater.isFile() || bundledUpdater.length() == 0) {
+            throw new GradleException('The platform image is missing updater/VantaUpdater.jar.')
+        }
+    }
 }
 
 def releaseHostOs = System.getProperty('os.name', '').toLowerCase(java.util.Locale.ROOT)
