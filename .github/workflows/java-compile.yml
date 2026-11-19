@@ -130,8 +130,12 @@ jobs:
           & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256"
           if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid archive.' }
           Set-Content -LiteralPath $testArchive -Value 'tampered fixture' -NoNewline
-          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256"
-          if ($LASTEXITCODE -eq 0) { throw 'Checksum verifier accepted a modified archive.' }
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256" 2>$null
+          $negativeExitCode = $LASTEXITCODE
+          if ($negativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive.' }
+          # The negative test must fail, but that expected native exit code must
+          # not become the exit code of this otherwise-successful PowerShell step.
+          $global:LASTEXITCODE = 0
           Remove-Item $testDirectory -Recurse -Force
           Write-Host 'NSIS installer compiled and checksum verifier passed positive/negative tests.'
 
