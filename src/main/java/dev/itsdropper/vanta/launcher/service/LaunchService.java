@@ -65,7 +65,6 @@ public class LaunchService {
 
     private LaunchFailure lastFailure;
 
-    private boolean failureHandled;
 
     private long launchStartedAtMillis;
 
@@ -155,7 +154,6 @@ public class LaunchService {
 
         failedInstance = null;
 
-        failureHandled = false;
         beginHistory(instance);
 
         try {
@@ -379,9 +377,6 @@ public class LaunchService {
 
                             recordServerConnection(line);
 
-                            checkForRepairableFailure(
-                                    process
-                            );
                         }
 
                     } catch (Exception e) {
@@ -421,215 +416,6 @@ public class LaunchService {
                     Integer.parseInt(matcher.group(2))
             );
         } catch (Exception ignored) {
-        }
-    }
-
-    private void checkForRepairableFailure(
-            Process process
-    ) {
-
-        synchronized (this) {
-
-            if (minecraftProcess != process) {
-                return;
-            }
-
-            if (failureHandled) {
-                return;
-            }
-
-            /*
-             * Live repair detection must use only this process's output.
-             * latest.log and crash-reports may be left over from previous
-             * launches; using them here can falsely classify this launch and
-             * forcibly terminate a healthy Minecraft process.
-             */
-            String output =
-                    getRecentOutput();
-
-            /*
-             * ---------------------------------------------------------
-             * FIRST: Look for specific Fabric/mod resolution errors.
-             *
-             * This parser must always get first access to the complete
-             * Fabric Loader failure because the generic diagnostic engine
-             * can incorrectly classify an early dependency line before
-             * Fabric has printed the actual solution.
-             * ---------------------------------------------------------
-             */
-
-            List<RepairView.RepairIssue> issues =
-                    LaunchFailureParser.parse(
-                            output
-                    );
-
-            if (!issues.isEmpty()) {
-
-                RepairView.RepairIssue issue =
-                        issues.get(0);
-
-                failureHandled = true;
-
-                System.out.println(
-                        "[Vanta Repair] Specific failure detected: "
-                                + issue.title()
-                );
-
-                System.out.println(
-                        "[Vanta Repair] "
-                                + issue.type()
-                );
-
-                if (issue.details() != null
-                        && !issue.details().isBlank()) {
-
-                    System.out.println(
-                            "[Vanta Repair] Details: "
-                                    + issue.details()
-                    );
-                }
-
-                /*
-                 * Preserve the failed instance before the
-                 * process monitor clears runningInstance.
-                 */
-                failedInstance =
-                        runningInstance;
-
-                String description =
-                        issue.details();
-
-                if (description == null
-                        || description.isBlank()) {
-
-                    description =
-                            issue.title();
-                }
-
-                lastFailure =
-                        new LaunchFailure(
-                                issue.title(),
-                                description,
-                                output
-                        );
-
-                /*
-                 * Stop Minecraft immediately.
-                 *
-                 * Vanta already understands this failure, so there is
-                 * no reason to leave the Fabric error screen open.
-                 */
-                process.destroyForcibly();
-
-                setState(
-                        LaunchState.ERROR
-                );
-
-                return;
-            }
-
-            /*
-             * ---------------------------------------------------------
-             * IMPORTANT:
-             *
-             * Fabric Loader prints mod-resolution errors over multiple
-             * lines. The generic diagnostic engine can detect an early
-             * line such as:
-             *
-             *   Fabric API requires Java 25
-             *
-             * before Fabric has printed the actual mod/Minecraft
-             * incompatibility.
-             *
-             * Do NOT allow the generic engine to claim the failure while
-             * Fabric is still producing its detailed resolution output.
-             * ---------------------------------------------------------
-             */
-
-            boolean fabricModResolutionFailure =
-                    output.contains(
-                            "Mod resolution failed"
-                    )
-                            || output.contains(
-                            "Incompatible mods found!"
-                    );
-
-            if (fabricModResolutionFailure) {
-                return;
-            }
-
-            /*
-             * ---------------------------------------------------------
-             * SECOND: Fall back to the generic diagnostic engine.
-             *
-             * This handles failures that LaunchFailureParser does not
-             * specifically understand.
-             * ---------------------------------------------------------
-             */
-
-            List<RepairDiagnosis> diagnoses =
-                    RepairDiagnosticEngine.diagnose(
-                            output
-                    );
-
-            RepairDiagnosis diagnosis =
-                    findActionableDiagnosis(
-                            diagnoses
-                    );
-
-            if (diagnosis == null) {
-                return;
-            }
-
-            failureHandled = true;
-
-            System.out.println(
-                    "[Vanta Repair] Known failure detected: "
-                            + diagnosis.title()
-            );
-
-            System.out.println(
-                    "[Vanta Repair] "
-                            + diagnosis.category()
-                            + " | "
-                            + diagnosis.confidence()
-            );
-
-            if (!diagnosis.evidence().isBlank()) {
-
-                System.out.println(
-                        "[Vanta Repair] Evidence: "
-                                + diagnosis.evidence()
-                );
-            }
-
-            failedInstance =
-                    runningInstance;
-
-            String description =
-                    diagnosis.description();
-
-            if (description == null
-                    || description.isBlank()) {
-
-                description =
-                        diagnosis.evidence();
-            }
-
-            lastFailure =
-                    new LaunchFailure(
-                            diagnosis.title(),
-                            description,
-                            diagnosis.evidence().isBlank()
-                                    ? output
-                                    : diagnosis.evidence()
-                    );
-
-            process.destroyForcibly();
-
-            setState(
-                    LaunchState.ERROR
-            );
         }
     }
 
@@ -825,6 +611,28 @@ public class LaunchService {
         }
     }
 
+    private LaunchFailure classifyExitedFailure(int exitCode, String processOutput) {
+        List<RepairView.RepairIssue> specificIssues = LaunchFailureParser.parse(processOutput);
+        if (!specificIssues.isEmpty()) {
+            RepairView.RepairIssue issue = specificIssues.get(0);
+            String description = issue.details() == null || issue.details().isBlank()
+                    ? issue.title() : issue.details();
+            return new LaunchFailure(issue.title(), description, processOutput);
+        }
+
+        RepairDiagnosis diagnosis = findActionableDiagnosis(RepairDiagnosticEngine.diagnose(processOutput));
+        if (diagnosis != null) {
+            String description = diagnosis.description() == null || diagnosis.description().isBlank()
+                    ? diagnosis.evidence() : diagnosis.description();
+            return new LaunchFailure(diagnosis.title(), description,
+                    diagnosis.evidence().isBlank() ? processOutput : diagnosis.evidence());
+        }
+
+        return new LaunchFailure("Minecraft exited with code " + exitCode,
+                "Minecraft terminated with a non-zero exit code (" + exitCode
+                        + "). The available process output did not identify a specific cause.", processOutput);
+    }
+
     private void monitorProcess(
             Process process
     ) {
@@ -855,7 +663,7 @@ public class LaunchService {
                             startedAt = launchStartedAtMillis;
                             previousCrashReports = crashReportsBeforeLaunch;
                             intentionalClose = state == LaunchState.CLOSING;
-                            diagnosticContext = !intentionalClose && (exitCode != 0 || failureHandled)
+                            diagnosticContext = !intentionalClose && exitCode != 0
                                     ? collectDiagnosticContext(processOutput)
                                     : collectSuccessfulLaunchEvidence(processOutput);
 
@@ -867,26 +675,13 @@ public class LaunchService {
                             runningInstance = null;
                             runningServerTarget = null;
 
-                            /*
-                             * A recognized failure may already have moved
-                             * the UI to ERROR and terminated the child.
-                             * Still inspect its fresh crash report below.
-                             */
-                            if (!failureHandled) {
-                                if (exitCode != 0) {
-                                    if (lastFailure == null) {
-                                        lastFailure = new LaunchFailure(
-                                                "Minecraft exited with code " + exitCode,
-                                                "Minecraft exited with a non-zero code (" + exitCode
-                                                        + "). This does not by itself confirm a Minecraft crash. "
-                                                        + "No specific failure was identified from the current process output.",
-                                                processOutput
-                                        );
-                                    }
-                                    setState(LaunchState.ERROR);
-                                } else {
-                                    setState(LaunchState.IDLE);
-                                }
+                            // Logs are evidence, never a reason to terminate a live game.
+                            // Classification is permitted only after waitFor() and a non-zero exit.
+                            if (exitCode != 0 && !intentionalClose) {
+                                lastFailure = classifyExitedFailure(exitCode, processOutput);
+                                setState(LaunchState.ERROR);
+                            } else {
+                                setState(LaunchState.IDLE);
                             }
                             LaunchHistoryRepository.Outcome outcome = intentionalClose
                                     ? LaunchHistoryRepository.Outcome.STOPPED
@@ -988,7 +783,7 @@ public class LaunchService {
             }
             LaunchHistoryRepository.Outcome outcome = state == LaunchState.CLOSING
                     ? LaunchHistoryRepository.Outcome.STOPPED
-                    : state == LaunchState.ERROR || (exitCode != null && exitCode != 0)
+                    : exitCode != null && exitCode != 0
                     ? LaunchHistoryRepository.Outcome.FAILED
                     : exitCode != null
                     ? LaunchHistoryRepository.Outcome.SUCCEEDED
