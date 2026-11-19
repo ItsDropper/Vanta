@@ -376,6 +376,7 @@ public class InstancesView extends VBox {
 
         long requestId = ++refreshRequestId;
         statusLabel.setText(Localization.text("instances.scanning"));
+        refreshButton.setText(Localization.text("instances.refreshing"));
         refreshButton.setDisable(true);
 
         UiExecutor.shared().execute(() -> {
@@ -389,6 +390,7 @@ public class InstancesView extends VBox {
                     // A failed rescan must not erase the last successfully loaded list.
                     // Keep existing cards and the real count visible so a transient filesystem
                     // error cannot make the user's instances appear to have disappeared.
+                    refreshButton.setText(Localization.text("common.refresh"));
                     refreshButton.setDisable(false);
                     statusLabel.setText(loadedInstances.isEmpty()
                             ? Localization.text("instances.scanFailed")
@@ -400,6 +402,7 @@ public class InstancesView extends VBox {
             UiExecutor.shared().dispatchToUi(() -> {
                 if (requestId != refreshRequestId) return;
 
+                refreshButton.setText(Localization.text("common.refresh"));
                 refreshButton.setDisable(false);
                 loadedInstances = List.copyOf(instances);
                 updateCount(loadedInstances.size());
