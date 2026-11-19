@@ -173,6 +173,7 @@ tasks.register('platformAppImage', Exec) {
     // destination. Declare the actual inputs so changed application/runtime
     // contents correctly invalidate the image.
     inputs.dir(packageInput)
+    inputs.file(tasks.named('updaterJar').flatMap { it.archiveFile })
     inputs.files(javafxModuleJars)
     inputs.property('jpackageVersion', jpackageVersion)
     inputs.property('javaHome', javaHome)
