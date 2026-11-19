@@ -7,11 +7,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Stable version to package (without leading v)
+        description: Stable version to build and publish (without leading v)
         required: true
         type: string
       mode:
-        description: Dry-run validates and signs without publishing; publish creates the GitHub Release
+        description: Dry-run only validates; publish creates the version tag and public GitHub Release
         required: true
         type: choice
         options:
@@ -328,5 +328,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.validate.outputs.version }}
+          target_commitish: ${{ github.sha }}
           generate_release_notes: true
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
           files: release-assets/*
