@@ -109,6 +109,32 @@ jobs:
             $zip.Dispose()
           }
 
+      - name: Compile NSIS installer and test checksum verifier
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          choco install nsis --version=3.12 --yes --no-progress
+          $makensis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
+          if (!(Test-Path $makensis -PathType Leaf)) { throw 'NSIS 3.12 was not installed.' }
+          & $makensis '/DAPP_VERSION=1.0.0' '.\VantaSetup.nsi'
+          if ($LASTEXITCODE -ne 0) { throw "NSIS compilation failed: $LASTEXITCODE" }
+          if (!(Test-Path '.\VantaSetup.exe' -PathType Leaf)) { throw 'Installer output is missing.' }
+
+          $testDirectory = Join-Path $env:RUNNER_TEMP 'vanta-checksum-test'
+          New-Item -ItemType Directory -Path $testDirectory -Force | Out-Null
+          $testArchive = Join-Path $testDirectory 'Vanta-test.zip'
+          Set-Content -LiteralPath $testArchive -Value 'valid fixture' -NoNewline
+          $hash = (Get-FileHash -LiteralPath $testArchive -Algorithm SHA256).Hash.ToLowerInvariant()
+          Set-Content -LiteralPath "$testArchive.sha256" -Value "$hash  Vanta-test.zip" -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256"
+          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid archive.' }
+          Set-Content -LiteralPath $testArchive -Value 'tampered fixture' -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256"
+          if ($LASTEXITCODE -eq 0) { throw 'Checksum verifier accepted a modified archive.' }
+          Remove-Item $testDirectory -Recurse -Force
+          Write-Host 'NSIS installer compiled and checksum verifier passed positive/negative tests.'
+
       - name: Verify Linux application image layout
         if: runner.os == 'Linux'
         run: |
