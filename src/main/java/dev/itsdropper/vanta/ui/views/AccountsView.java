@@ -126,12 +126,12 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         StackPane headFrame = new StackPane();
         headFrame.getStyleClass().add("accounts-hero-head-frame");
-        headFrame.setMinSize(104, 104);
-        headFrame.setPrefSize(104, 104);
-        headFrame.setMaxSize(104, 104);
+        headFrame.setMinSize(64, 64);
+        headFrame.setPrefSize(64, 64);
+        headFrame.setMaxSize(64, 64);
 
-        heroHead.setFitWidth(88);
-        heroHead.setFitHeight(88);
+        heroHead.setFitWidth(56);
+        heroHead.setFitHeight(56);
         heroHead.setPreserveRatio(false);
         heroHead.setSmooth(false);
         heroHead.getStyleClass().add("accounts-hero-head");
@@ -167,12 +167,12 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         heroUuid.setWrapText(true);
 
         statusRow.getChildren().addAll(heroStatus, heroUuid);
-        identity.getChildren().addAll(eyebrow, heroUsername, statusRow);
+        identity.getChildren().addAll(heroUsername, statusRow);
 
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        VBox actions = new VBox(VantaUI.spacing(2));
+        HBox actions = new HBox(VantaUI.spacing(2));
         actions.setAlignment(Pos.CENTER_RIGHT);
 
         addAccountButton.getStyleClass().add("accounts-primary-button");
@@ -183,9 +183,8 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         refreshButton.setOnAction(event -> refresh());
         signOutButton.setOnAction(event -> logout());
 
-        HBox topActions = new HBox(VantaUI.spacing(2), addAccountButton, refreshButton);
-        topActions.setAlignment(Pos.CENTER_RIGHT);
-        actions.getChildren().addAll(topActions, signOutButton);
+        HBox topActions = actions;
+        actions.getChildren().addAll(refreshButton, signOutButton, addAccountButton);
 
         content.getChildren().addAll(identityRow, spacer, actions);
 
@@ -239,8 +238,8 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
         errorLabel.setVisible(false);
         errorLabel.setManaged(false);
 
-        accountList.setHgap(VantaUI.spacing(3));
-        accountList.setVgap(VantaUI.spacing(3));
+        accountList.setHgap(0);
+        accountList.setVgap(0);
         accountList.prefWrapLengthProperty().bind(accountList.widthProperty());
         accountList.setMaxWidth(Double.MAX_VALUE);
         accountList.getStyleClass().add("accounts-grid");
@@ -335,19 +334,18 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
     }
 
 
-    private VBox createAccountCard(Account account, boolean active) {
+    private HBox createAccountCard(Account account, boolean active) {
 
-        VBox card = new VBox(VantaUI.spacing(3));
+        HBox card = new HBox(VantaUI.spacing(3));
+        card.setAlignment(Pos.CENTER_LEFT);
         card.setMinWidth(0);
         card.setMaxWidth(Double.MAX_VALUE);
-        card.setPadding(new Insets(VantaUI.spacing(4)));
-        VantaUI.applySurface(card, VantaUI.SurfaceRole.CARD);
+        card.setPadding(new Insets(12, 8, 12, 12));
         card.prefWidthProperty().bind(
                 Bindings.createDoubleBinding(() -> {
                     double width = accountList.getWidth();
                     if (width <= 1) return 360.0;
-                    if (width < 700) return Math.max(0, width - 2);
-                    return Math.min(520, (width - accountList.getHgap()) / 2.0);
+                    return Math.max(0, width - 2);
                 }, accountList.widthProperty())
         );
         card.getStyleClass().add("accounts-card");
@@ -361,13 +359,13 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
         StackPane headFrame = new StackPane();
         headFrame.getStyleClass().add("accounts-card-head-frame");
-        headFrame.setMinSize(54, 54);
-        headFrame.setPrefSize(54, 54);
-        headFrame.setMaxSize(54, 54);
+        headFrame.setMinSize(40, 40);
+        headFrame.setPrefSize(40, 40);
+        headFrame.setMaxSize(40, 40);
 
         ImageView head = new ImageView();
-        head.setFitWidth(44);
-        head.setFitHeight(44);
+        head.setFitWidth(32);
+        head.setFitHeight(32);
         head.setPreserveRatio(false);
         head.setSmooth(false);
 
@@ -402,23 +400,17 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
                         : "accounts-card-saved-label"
         );
 
-        top.getChildren().addAll(headFrame, identity, spacer, state);
-
-        HBox actions = new HBox(VantaUI.spacing(2));
-        actions.setAlignment(Pos.CENTER_RIGHT);
-
-        if (!active) {
+        top.getChildren().addAll(headFrame, identity, spacer);
+        if (active) {
+            top.getChildren().add(state);
+        } else {
             Button use = new Button(Localization.text("accounts.use"));
             use.getStyleClass().add("accounts-card-use");
             use.setOnAction(event -> switchAccount(account));
-            actions.getChildren().add(use);
-        } else {
-            Label activeHint = new Label(Localization.text("accounts.selectedForLaunch"));
-            activeHint.getStyleClass().add("accounts-card-hint");
-            actions.getChildren().add(activeHint);
+            top.getChildren().add(use);
         }
-
-        card.getChildren().addAll(top, actions);
+        card.getChildren().add(top);
+        HBox.setHgrow(top, Priority.ALWAYS);
 
         AccountSkinService.loadHead(account, image -> {
             head.setImage(image);
@@ -430,13 +422,9 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
 
     private VBox createEmptyCard() {
 
-        VBox empty = new VBox(8);
-        empty.setAlignment(Pos.CENTER);
-        empty.setPrefHeight(180);
+        VBox empty = new VBox(4);
+        empty.setAlignment(Pos.CENTER_LEFT);
         empty.getStyleClass().add("accounts-empty");
-
-        Label icon = new Label("+");
-        icon.getStyleClass().add("accounts-empty-icon");
 
         Label title = new Label(Localization.text("accounts.emptyTitle"));
         title.getStyleClass().add("accounts-empty-title");
@@ -445,12 +433,9 @@ public class AccountsView extends VBox implements dev.itsdropper.vanta.ui.Launch
                 Localization.text("accounts.emptyDescription")
         );
         text.getStyleClass().add("accounts-empty-text");
+        text.setWrapText(true);
 
-        Button add = new Button(Localization.text("accounts.connect"));
-        add.getStyleClass().add("accounts-primary-button");
-        add.setOnAction(event -> login());
-
-        empty.getChildren().addAll(icon, title, text, add);
+        empty.getChildren().addAll(title, text);
         return empty;
     }
 

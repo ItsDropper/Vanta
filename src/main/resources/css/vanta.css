@@ -2369,3 +2369,132 @@
 .vanta-ui-root .mod-details-markdown .mod-description-h2 { -fx-font-size: 16px; }
 .vanta-ui-root .mod-details-markdown .mod-description-h3,
 .vanta-ui-root .mod-details-markdown .mod-description-heading { -fx-font-size: 14px; }
+
+/* ============================================================
+   19. Accounts
+   Active account as an open header, saved accounts as rows.
+   ============================================================ */
+.vanta-ui-root .accounts-page .accounts-hero {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+    -fx-padding: 0 0 20px 0;
+}
+
+.vanta-ui-root .accounts-page .accounts-hero-head-frame,
+.vanta-ui-root .accounts-page .accounts-card-head-frame {
+    -fx-background-color: -vantasurface;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.vanta-ui-root .accounts-page .accounts-hero-name {
+    -fx-font-size: 18px;
+    -fx-font-family: "Poppins SemiBold";
+}
+
+.vanta-ui-root .accounts-page .accounts-status-pill {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-font-size: 12px;
+    -fx-font-family: "Poppins Medium";
+}
+
+.vanta-ui-root .accounts-page .accounts-status-pill.accounts-status-connected {
+    -fx-text-fill: -vantasuccess;
+}
+
+.vanta-ui-root .accounts-page .accounts-status-pill.accounts-status-disconnected {
+    -fx-text-fill: -vantasubtle;
+}
+
+.vanta-ui-root .accounts-page .accounts-hero-uuid,
+.vanta-ui-root .accounts-page .accounts-card-uuid {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-family: "Poppins";
+}
+
+/* Refresh and sign out are quiet text actions; only Add account is filled. */
+.vanta-ui-root .accounts-page .accounts-secondary-button,
+.vanta-ui-root .accounts-page .accounts-danger-button,
+.vanta-ui-root .accounts-page .accounts-card-use {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 6px;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-family: "Poppins Medium";
+    -fx-padding: 0 12px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+}
+
+.vanta-ui-root .accounts-page .accounts-secondary-button:hover,
+.vanta-ui-root .accounts-page .accounts-card-use:hover {
+    -fx-background-color: -vantahover;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-ui-root .accounts-page .accounts-danger-button {
+    -fx-text-fill: -vantadanger;
+}
+
+.vanta-ui-root .accounts-page .accounts-danger-button:hover {
+    -fx-background-color: -vantadangerwash;
+}
+
+.vanta-ui-root .accounts-page .accounts-secondary-button:disabled,
+.vanta-ui-root .accounts-page .accounts-danger-button:disabled {
+    -fx-opacity: 0.4;
+}
+
+/* Saved accounts */
+.vanta-ui-root .accounts-page .accounts-section {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+}
+
+.vanta-ui-root .accounts-page .accounts-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+}
+
+.vanta-ui-root .accounts-page .accounts-card:hover {
+    -fx-background-color: -vantahover;
+}
+
+.vanta-ui-root .accounts-page .accounts-card-active-label,
+.vanta-ui-root .accounts-page .accounts-card-saved-label {
+    -fx-background-color: transparent;
+    -fx-padding: 0 12px 0 0;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .accounts-page .accounts-card-active-label {
+    -fx-text-fill: -vantaaccent;
+}
+
+.vanta-ui-root .accounts-page .accounts-empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 4px 0;
+    -fx-min-height: 0;
+}
+
+.vanta-ui-root .accounts-page .accounts-empty-title {
+    -fx-font-size: 13px;
+    -fx-font-family: "Poppins Medium";
+}
