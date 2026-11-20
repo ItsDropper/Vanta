@@ -38,7 +38,7 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     private final Label comparisonStats = new Label();
     private final Label processStartupStats = new Label();
     private final CheckBox cacheEnabled = new CheckBox(Localization.text("experimental.performance.enableCache"));
-    private final Button refreshSession = new Button(Localization.text("experimental.auth.refresh"));
+    private final Button refreshSession = secondaryButton(Localization.text("experimental.auth.refresh"));
     private final Runnable healthListener = () -> UiExecutor.shared().dispatchToUi(this::refreshStatus);
     private final Timeline ticker = new Timeline(new KeyFrame(Duration.seconds(1), event -> refreshMetrics()));
 
@@ -85,12 +85,12 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         });
         Label benchmarkMethod = new Label(Localization.text("experimental.performance.benchmarkMethod"));
         benchmarkMethod.setWrapText(true);
-        Button clearCache = new Button(Localization.text("experimental.performance.clearCache"));
+        Button clearCache = secondaryButton(Localization.text("experimental.performance.clearCache"));
         clearCache.setOnAction(event -> {
             ClasspathBuilder.clearCache();
             refreshMetrics();
         });
-        Button resetSamples = new Button(Localization.text("experimental.performance.resetSamples"));
+        Button resetSamples = secondaryButton(Localization.text("experimental.performance.resetSamples"));
         resetSamples.setOnAction(event -> {
             LaunchPerformanceTracker.clear();
             refreshMetrics();
@@ -139,6 +139,12 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         refreshStatus();
         refreshMetrics();
         ticker.setCycleCount(Timeline.INDEFINITE);
+    }
+
+    private static Button secondaryButton(String text) {
+        Button button = new Button(text);
+        button.getStyleClass().add("secondary-button");
+        return button;
     }
 
     private void refreshSession() {
