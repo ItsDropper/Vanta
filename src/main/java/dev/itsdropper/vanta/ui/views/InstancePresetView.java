@@ -158,7 +158,7 @@ public class InstancePresetView extends VBox {
                 Double.MAX_VALUE
         );
 
-        button.setPrefHeight(132);
+        button.setPrefHeight(88);
 
         Label title =
                 new Label(
