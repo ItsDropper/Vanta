@@ -15,9 +15,7 @@
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-padding: 0 12px 0 0;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 .home-page .home-status-ready { -fx-text-fill: -vantasuccess; }
 .home-page .home-status-running { -fx-text-fill: -vantaaccent; }
@@ -61,21 +59,15 @@
 
 .home-page .home-featured-eyebrow {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .home-page .home-featured-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 20px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 20px; -fx-font-family: "Poppins SemiBold";}
 
 .home-page .home-featured-meta {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px;
-    -fx-font-weight: 400;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins";}
 
 .home-page .home-featured-playtime {
     -fx-text-fill: -vantasubtle;
@@ -88,9 +80,7 @@
 
 .home-page .home-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .home-page .home-section-subtitle {
     -fx-text-fill: -vantamuted;
@@ -123,9 +113,7 @@
 .home-page .home-recent-name,
 .home-page .home-server-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .home-page .home-recent-meta,
 .home-page .home-server-meta {
@@ -148,9 +136,8 @@
     -fx-border-radius: 6px;
     -fx-text-fill: -vantaaccentforeground;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-padding: 0 14px;
-}
+    
+    -fx-padding: 0 14px; -fx-font-family: "Poppins Medium";}
 
 .home-page .home-recent-card .home-recent-play:hover,
 .home-page .home-server-card .home-recent-play:hover {
@@ -166,9 +153,8 @@
     -fx-border-radius: 6px;
     -fx-text-fill: -vantadanger;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-padding: 0 14px;
-}
+    
+    -fx-padding: 0 14px; -fx-font-family: "Poppins Medium";}
 
 .home-page .home-recent-servers-card {
     -fx-background-color: transparent;
@@ -190,9 +176,7 @@
 .home-page .home-empty-title,
 .home-page .home-load-error-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 16px; -fx-font-family: "Poppins SemiBold";}
 
 .home-page .home-empty-description,
 .home-page .home-load-error-description {

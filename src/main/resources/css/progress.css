@@ -24,16 +24,14 @@
 }
 .instance-progress-dialog .label {
     -fx-text-fill: #e6edf7;
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-family: "Poppins";
 }
 .instance-progress-heading {
     -fx-padding: 0 0 1px 0;
 }
 .instance-progress-headline {
     -fx-text-fill: #f4f7fc;
-    -fx-font-size: 18px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 18px; -fx-font-family: "Poppins SemiBold";}
 .instance-progress-subtitle {
     -fx-text-fill: #91a1b5;
     -fx-font-size: 12px;
@@ -47,9 +45,8 @@
     -fx-border-radius: 9px;
     -fx-text-fill: #b9cbea;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 9px 12px;
-}
+    
+    -fx-padding: 9px 12px; -fx-font-family: "Poppins Medium";}
 .instance-progress-stage-list {
     -fx-background-color: #0a1018;
     -fx-background-radius: 8px;
@@ -68,13 +65,9 @@
 }
 .instance-progress-stage-title {
     -fx-text-fill: #aab8ca;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 .instance-progress-marker {
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins Medium";}
 .instance-progress-stage.progress-pending .instance-progress-stage-title,
 .instance-progress-stage.progress-pending .instance-progress-marker {
     -fx-text-fill: #64748a;
@@ -118,9 +111,7 @@
 }
 .instance-progress-current-label {
     -fx-text-fill: #88a9d2;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .instance-progress-detail {
     -fx-text-fill: #c4cfde;
     -fx-font-size: 11px;
@@ -145,10 +136,9 @@
     -fx-border-radius: 8px;
     -fx-text-fill: #e0eaf8;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 9px 19px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 .instance-progress-dialog .button:hover {
     -fx-background-color: #263b55;
     -fx-border-color: #5b88bd;

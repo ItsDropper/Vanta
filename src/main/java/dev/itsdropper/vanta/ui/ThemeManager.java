@@ -44,6 +44,7 @@ public final class ThemeManager {
     private static final Map<String, Theme> THEMES = new LinkedHashMap<>();
 
     static {
+        VantaFonts.ensureLoaded();
         register(new Theme("Vanta", "#4C8DFF", "#0E1218", "#141A22", "#1A212B", "#222B37", "#2E3846",
                 "#EDF1F7", "#9AA6B6", "#7A8696", "#F0707D", "#4CC38A"));
         register(new Theme("Midnight", "#7C9CFF", "#090B12", "#121622", "#181E2C", "#222A3A", "#2B3447",

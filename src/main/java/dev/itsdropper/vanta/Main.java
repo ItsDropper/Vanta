@@ -26,6 +26,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) {
+        dev.itsdropper.vanta.ui.VantaFonts.ensureLoaded();
         Localization.initializeFromSettings();
         List<String> arguments = getParameters().getRaw();
         boolean screenshotMode = isScreenshotCapture(arguments);

@@ -46,7 +46,7 @@
     -vantasuccesswash: derive(-vantasuccess, -86%);
     -vantascrim: rgba(3, 5, 9, 0.62);
 
-    -fx-font-family: "Inter", "Segoe UI", "SF Pro Text", sans-serif;
+    -fx-font-family: "Poppins";
     -fx-focus-color: -vantaaccent;
     -fx-faint-focus-color: transparent;
     -fx-selection-bar: -vantaaccentwash;
@@ -95,9 +95,7 @@
 
 .vanta-ui-root .title-bar-brand {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 700;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .title-bar-button,
 .vanta-ui-root .title-bar-close {
@@ -151,12 +149,11 @@
     -fx-border-radius: 6px;
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 0 12px;
     -fx-min-height: 28px;
     -fx-pref-height: 28px;
-    -fx-max-height: 28px;
-}
+    -fx-max-height: 28px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .title-bar-update:hover {
     -fx-background-color: derive(-vantaaccentwash, 12%);
@@ -182,9 +179,7 @@
 
 .vanta-ui-root .account-switcher-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 
 /* Sidebar: part of the frame, not a floating card. */
 
@@ -199,9 +194,7 @@
 
 .vanta-ui-root .sidebar .sidebar-logo {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 14px;
-    -fx-font-weight: 700;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .sidebar .sidebar-mark {
     -fx-fill: -vantaaccent;
@@ -209,16 +202,13 @@
 
 .vanta-ui-root .sidebar .sidebar-subtitle {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .sidebar .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 10px;
-    -fx-font-weight: 600;
-    -fx-padding: 0 0 0 10px;
-}
+    
+    -fx-padding: 0 0 0 10px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .sidebar .sidebar-button {
     -vantaicon: -vantamuted;
@@ -230,12 +220,11 @@
     -fx-border-radius: 6px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 13px;
-    -fx-font-weight: 500;
+    
     -fx-padding: 0 10px;
     -fx-min-height: 34px;
     -fx-pref-height: 34px;
-    -fx-graphic-text-gap: 10px;
-}
+    -fx-graphic-text-gap: 10px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .sidebar .sidebar-button:hover {
     -vantaicon: -vantatext;
@@ -255,9 +244,7 @@
     -fx-border-color: transparent;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
-    -fx-text-fill: -vantatext;
-    -fx-font-weight: 600;
-}
+    -fx-text-fill: -vantatext; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .sidebar .sidebar-button:focused,
 .vanta-ui-root .sidebar .sidebar-button.sidebar-button-active:focused {
@@ -268,9 +255,8 @@
 .vanta-ui-root .sidebar .sidebar-build {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
-    -fx-font-weight: 500;
-    -fx-padding: 0 0 0 10px;
-}
+    
+    -fx-padding: 0 0 0 10px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .sidebar.sidebar-compact .sidebar-button {
     -fx-padding: 0;
@@ -301,17 +287,13 @@
 .vanta-ui-root .page-header-title,
 .vanta-ui-root .vanta-type-page-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 20px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 20px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .page-subtitle,
 .vanta-ui-root .page-header-subtitle,
 .vanta-ui-root .home-account-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px;
-    -fx-font-weight: 400;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins";}
 
 .vanta-ui-root .vanta-type-section-title,
 .vanta-ui-root .section-title,
@@ -321,15 +303,11 @@
 .vanta-ui-root .download-section-title,
 .vanta-ui-root .server-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .vanta-type-body {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 400;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins";}
 
 .vanta-ui-root .vanta-type-muted,
 .vanta-ui-root .home-section-subtitle,
@@ -337,16 +315,12 @@
 .vanta-ui-root .server-section-subtitle,
 .vanta-ui-root .settings-card-description {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    -fx-font-weight: 400;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins";}
 
 .vanta-ui-root .vanta-type-metadata,
 .vanta-ui-root .footer-label {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 /* Eyebrows and small-caps labels: quiet, never accent-coloured. */
 .vanta-ui-root .vanta-type-eyebrow,
@@ -368,15 +342,11 @@
 .vanta-ui-root .settings-section-title,
 .vanta-ui-root .instances-count {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .card-main {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .vanta-type-monospace,
 .vanta-ui-root .diagnostic-log,
@@ -392,7 +362,7 @@
 
 .vanta-ui-root .button {
     -fx-cursor: hand;
-    -fx-font-family: "Inter", "Segoe UI", "SF Pro Text", sans-serif;
+    -fx-font-family: "Poppins";
 }
 
 .vanta-ui-root .button:disabled {
@@ -417,13 +387,12 @@
     -fx-border-radius: 6px;
     -fx-text-fill: -vantaaccentforeground;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 0 14px;
     -fx-min-height: 32px;
     -fx-pref-height: 32px;
     -fx-max-height: 32px;
-    -fx-effect: none;
-}
+    -fx-effect: none; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .primary-button:hover,
 .vanta-ui-root .instance-create-button:hover,
@@ -476,12 +445,11 @@
     -fx-border-radius: 6px;
     -fx-text-fill: -vantatext;
     -fx-font-size: 12px;
-    -fx-font-weight: 500;
+    
     -fx-padding: 0 12px;
     -fx-min-height: 32px;
     -fx-pref-height: 32px;
-    -fx-max-height: 32px;
-}
+    -fx-max-height: 32px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .secondary-button:hover,
 .vanta-ui-root .settings-back-button:hover,
@@ -517,9 +485,7 @@
     -fx-background-radius: 6px;
     -fx-border-color: transparent;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .vanta-button-quiet:hover,
 .vanta-ui-root .instance-menu-button:hover,
@@ -542,9 +508,7 @@
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .danger-button:hover,
 .vanta-ui-root .server-danger:hover,
@@ -675,9 +639,7 @@
 .vanta-ui-root .instance-setting-label,
 .vanta-ui-root .settings-info-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .check-box,
 .vanta-ui-root .radio-button,
@@ -745,9 +707,7 @@
 
 .vanta-ui-root .tab-pane .tab-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .tab-pane .tab:selected .tab-label {
     -fx-text-fill: -vantatext;
@@ -880,9 +840,7 @@
 .vanta-ui-root .modrinth-project-title,
 .vanta-ui-root .server-profile-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .instance-version,
 .vanta-ui-root .home-recent-meta,
@@ -897,9 +855,7 @@
 .vanta-ui-root .create-type-option-meta,
 .vanta-ui-root .create-type-option-description {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    -fx-font-weight: 400;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins";}
 
 .vanta-ui-root .instance-ready,
 .vanta-ui-root .home-card-status,
@@ -908,9 +864,7 @@
 .vanta-ui-root .connected-label,
 .vanta-ui-root .home-status-ready {
     -fx-text-fill: -vantasuccess;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .disconnected-label {
     -fx-text-fill: -vantasubtle;
@@ -933,9 +887,8 @@
     -fx-border-radius: 4px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 500;
-    -fx-padding: 2px 7px;
-}
+    
+    -fx-padding: 2px 7px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .accounts-status-connected {
     -fx-text-fill: -vantasuccess;
@@ -988,9 +941,7 @@
 
 .vanta-ui-root .table-view .column-header .label {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 /* ============================================================
    7  OVERLAYS
@@ -1119,9 +1070,7 @@
 
 .vanta-ui-root .command-result-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .command-result-description,
 .vanta-ui-root .command-palette-hint,
@@ -1154,9 +1103,7 @@
 
 .vanta-ui-root .notification-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .notification-message {
     -fx-text-fill: -vantamuted;
@@ -1235,9 +1182,7 @@
 .vanta-ui-root .instance-progress-headline,
 .instance-progress-headline {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .instance-progress-subtitle,
 .vanta-ui-root .instance-progress-detail,
@@ -1246,9 +1191,7 @@
 .instance-progress-detail,
 .instance-progress-current-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    -fx-font-weight: 400;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins";}
 
 .vanta-ui-root .instance-progress-identity,
 .instance-progress-identity {
@@ -1335,9 +1278,7 @@
 /* Home */
 .vanta-ui-root .home-minecraft-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 22px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 22px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .home-launch-card {
     -fx-padding: 24px;
@@ -1345,9 +1286,7 @@
 
 .vanta-ui-root .home-card-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .home-card-description,
 .vanta-ui-root .home-launch-status,
@@ -1363,9 +1302,7 @@
 .vanta-ui-root .instance-empty-title,
 .vanta-ui-root .accounts-empty-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .home-empty-description,
 .vanta-ui-root .download-empty-body,
@@ -1391,21 +1328,15 @@
 
 .vanta-ui-root .vanta-empty-state-icon {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 28px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 28px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .vanta-empty-state-eyebrow {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .vanta-empty-state-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .vanta-empty-state-description {
     -fx-text-fill: -vantamuted;
@@ -1420,9 +1351,7 @@
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .settings-shell .settings-nav-button:hover {
     -fx-background-color: -vantahover;
@@ -1435,15 +1364,11 @@
     -fx-border-color: transparent;
     -fx-border-width: 1px;
     -fx-border-radius: 6px;
-    -fx-text-fill: -vantatext;
-    -fx-font-weight: 600;
-}
+    -fx-text-fill: -vantatext; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .settings-card-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .instance-setting-value,
 .vanta-ui-root .settings-info-value {
@@ -1485,9 +1410,7 @@
     -fx-background-radius: 6px;
     -fx-border-color: transparent;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .modrinth-content-segment:hover,
 .vanta-ui-root .modrinth-layout-button:hover,
@@ -1536,9 +1459,7 @@
 .vanta-ui-root .state-hero-title,
 .vanta-ui-root .server-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 20px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 20px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .state-hero-subtitle,
 .vanta-ui-root .server-subtitle {
@@ -1562,9 +1483,7 @@
 
 .vanta-ui-root .download-stat-value {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 18px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 18px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .download-stat-label,
 .vanta-ui-root .download-task-source {
@@ -1574,9 +1493,7 @@
 
 .vanta-ui-root .download-task-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins Medium";}
 
 /* Onboarding and sign-in */
 .vanta-ui-root .onboarding-overlay {
@@ -1595,9 +1512,7 @@
 .vanta-ui-root .onboarding-title,
 .vanta-ui-root .login-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 20px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 20px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .onboarding-subtitle,
 .vanta-ui-root .onboarding-feature-description,
@@ -1609,9 +1524,7 @@
 
 .vanta-ui-root .onboarding-feature-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .login-title-bar {
     -fx-background-color: transparent;
@@ -1626,7 +1539,7 @@
     -fx-text-fill: -vantatext;
     -fx-font-family: "JetBrains Mono", "Cascadia Code", "Consolas", "Menlo", monospace;
     -fx-font-size: 22px;
-    -fx-font-weight: 600;
+    -fx-font-weight: normal;
     -fx-effect: none;
 }
 
@@ -1713,9 +1626,7 @@
 .vanta-ui-root .instances-page .instances-count,
 .vanta-ui-root .instances-count {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 12px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .instances-more-button {
     -fx-min-width: 32px;
@@ -1843,9 +1754,7 @@
 
 .vanta-ui-root .modrinth-filter-sidebar > .titled-pane > .title > .text {
     -fx-fill: -vantatext;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .modrinth-filter-sidebar > .titled-pane > .title > .arrow-button > .arrow {
     -fx-background-color: -vantamuted;
@@ -1946,9 +1855,7 @@
 .vanta-ui-root .instance-mods-page .page-title,
 .vanta-ui-root .vanta-consistent-page .page-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 20px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 20px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .page .accounts-subtitle,
 .vanta-ui-root .page .settings-page-subtitle {
@@ -1959,33 +1866,25 @@
 .vanta-ui-root .accounts-page .accounts-hero-name,
 .vanta-ui-root .accounts-hero-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 18px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 18px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .download-stat-value,
 .vanta-ui-root .download-center-page .download-stat-value {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 18px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 18px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .global-mods-page .vanta-empty-state-title,
 .vanta-ui-root .server-manager .server-detail .vanta-empty-state-title,
 .vanta-ui-root .vanta-empty-state-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .global-mods-page .vanta-empty-state-icon,
 .vanta-ui-root .server-manager .server-detail .vanta-empty-state-icon,
 .vanta-ui-root .vanta-empty-state-icon,
 .vanta-ui-root .download-empty-icon,
 .vanta-ui-root .accounts-empty-icon {
-    -fx-font-size: 22px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 22px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .accounts-empty-icon {
     -fx-background-color: -vantabg;
@@ -2004,9 +1903,7 @@
     -fx-border-width: 0;
     -fx-padding: 0;
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 /* Cards with a 3 px accent edge (legacy "callout" look) become plain cards. */
 .vanta-ui-root .settings-card,
@@ -2042,10 +1939,9 @@
 .vanta-ui-root .memory-preset,
 .vanta-ui-root .instance-memory-preset {
     -fx-font-size: 12px;
-    -fx-font-weight: 500;
+    
     -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
-}
+    -fx-border-radius: 6px; -fx-font-family: "Poppins Medium";}
 
 /* Server Manager and State Center empty states and section labels. */
 .vanta-ui-root .server-manager .server-detail .vanta-empty-state {
@@ -2069,9 +1965,7 @@
     -fx-border-width: 0;
     -fx-padding: 0;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-ui-root .state-center .state-list-card,
 .vanta-ui-root .state-center .state-hero {
@@ -2097,9 +1991,7 @@
     -fx-min-height: -1;
     -fx-max-height: -1;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .vanta-ui-root .instance-progress-dialog .instance-progress-body {
     -fx-padding: 24px;
@@ -2127,3 +2019,22 @@
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 }
+
+/* ============================================================
+   14. Typeface: Poppins, weight by role
+   Body Regular, labels and controls Medium, titles SemiBold.
+   ============================================================ */
+.root,
+.vanta-ui-root {
+    -fx-font-family: "Poppins";
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .button,
+.vanta-ui-root .menu-button,
+.vanta-ui-root .toggle-button,
+.vanta-ui-root .check-box,
+.vanta-ui-root .tab .tab-label {
+    -fx-font-family: "Poppins Medium";
+}
+

@@ -38,9 +38,7 @@
 
 .mod-details-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 30px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 30px; -fx-font-family: "Poppins SemiBold";}
 
 .mod-details-author {
     -fx-text-fill: -vantamuted;
@@ -54,28 +52,20 @@
 
 .mod-details-stat-value {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 22px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 22px; -fx-font-family: "Poppins SemiBold";}
 
 .mod-details-stat-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 
 .mod-details-card .settings-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .mod-details-card .instance-setting-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .mod-details-card .mod-details-info-value {
     -fx-text-fill: -vantatext;
@@ -92,7 +82,7 @@
 
     -fx-text-fill: -vantasuccess;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
     -fx-padding: 10px 16px;
 
@@ -106,8 +96,7 @@
     -fx-pref-height: 38px;
     -fx-max-height: 38px;
 
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .mod-details-header .instance-play-button:hover {
     -fx-background-color: -vantaaccenthover;
@@ -155,9 +144,7 @@
 
 .modrinth-popup-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
 
 .modrinth-popup-subtitle {
     -fx-text-fill: -vantamuted;
@@ -196,9 +183,7 @@
 
 .modrinth-version-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .modrinth-version-meta {
     -fx-text-fill: -vantamuted;
@@ -210,9 +195,8 @@
     -fx-background-radius: 5px;
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 4px 6px;
-}
+    
+    -fx-padding: 4px 6px; -fx-font-family: "Poppins Medium";}
 
 .modrinth-version-downloads {
     -fx-text-fill: -vantasubtle;
@@ -232,10 +216,9 @@
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 9px 14px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .modrinth-popup-primary:hover {
     -fx-background-color: -vantaaccenthover;
@@ -248,10 +231,9 @@
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 9px 14px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .modrinth-popup-secondary:hover {
     -fx-background-color: -vantasurfacehover;
@@ -265,10 +247,9 @@
     -fx-border-radius: 7px;
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 6px 9px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .modrinth-version-install:hover {
     -fx-background-color: -vantaaccent;
@@ -287,9 +268,7 @@
 
 .mod-details-description-card .settings-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 
 .mod-details-markdown,
 .mod-details-markdown .label,
@@ -311,10 +290,9 @@
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 9px 14px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .modrinth-popup-danger:hover {
     -fx-background-color: derive(-vantadanger, -70%);
@@ -327,9 +305,7 @@
     -fx-spacing: 22px;
 }
 .global-mods-page .page-title, .instance-mods-page .page-title {
-    -fx-font-size: 34px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 34px; -fx-font-family: "Poppins SemiBold";}
 .global-mods-page .page-subtitle, .instance-mods-page .page-subtitle {
     -fx-font-size: 12px;
     -fx-text-fill: -vantamuted;
@@ -376,9 +352,7 @@
     -fx-border-color: -vantaaccent;
 }
 .global-mods-page .instance-name, .instance-mods-page .instance-name {
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
 .global-mods-page .global-mod-description {
     -fx-font-size: 11px;
     -fx-text-fill: -vantamuted;
@@ -429,10 +403,9 @@
     -fx-background-radius: 7px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 9px 14px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 .global-mods-page .modrinth-content-segment:hover {
     -fx-background-color: -vantasurfaceraised;
     -fx-text-fill: -vantatext;
@@ -529,9 +502,8 @@
 }
 .global-mods-page .modrinth-filter-sidebar > .titled-pane > .title > .text {
     -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    -fx-fill: -vantatext;
-}
+    
+    -fx-fill: -vantatext; -fx-font-family: "Poppins SemiBold";}
 .global-mods-page .modrinth-filter-sidebar > .titled-pane > .content {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
@@ -647,9 +619,8 @@
 }
 .global-mods-page .modrinth-project-title {
     -fx-font-size: 15px;
-    -fx-font-weight: 600;
-    -fx-text-fill: -vantatext;
-}
+    
+    -fx-text-fill: -vantatext; -fx-font-family: "Poppins SemiBold";}
 .global-mods-page .modrinth-project-author {
     -fx-font-size: 11px;
     -fx-text-fill: -vantamuted;
@@ -711,9 +682,7 @@
 }
 .global-mods-page .modrinth-filter-check {
     -fx-text-fill: transparent;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 .global-mods-page .modrinth-filter-option:hover .modrinth-filter-check {
     -fx-text-fill: -vantaaccent;
 }
@@ -775,9 +744,7 @@
 .mod-details-tags .modrinth-loader-chip {
     -fx-background-color: derive(-vantaaccent, -88%);
 }
-.mod-details-tags .modrinth-loader-chip .text {
-    -fx-font-weight: 600;
-}
+.mod-details-tags .modrinth-loader-chip .text { -fx-font-family: "Poppins Medium";}
 .mod-details-markdown {
     -fx-spacing: 12px;
 }
@@ -792,9 +759,7 @@
 }
 .mod-details-markdown .mod-description-bold {
     -fx-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins Medium";}
 .mod-details-markdown .mod-description-italic {
     -fx-fill: -vantatext;
     -fx-font-size: 13px;
@@ -803,22 +768,19 @@
 .mod-details-markdown .mod-description-h1 {
     -fx-text-fill: -vantatext;
     -fx-font-size: 25px;
-    -fx-font-weight: 600;
-    -fx-padding: 14px 0 4px 0;
-}
+    
+    -fx-padding: 14px 0 4px 0; -fx-font-family: "Poppins SemiBold";}
 .mod-details-markdown .mod-description-h2 {
     -fx-text-fill: -vantatext;
     -fx-font-size: 20px;
-    -fx-font-weight: 600;
-    -fx-padding: 12px 0 3px 0;
-}
+    
+    -fx-padding: 12px 0 3px 0; -fx-font-family: "Poppins SemiBold";}
 .mod-details-markdown .mod-description-h3,
 .mod-details-markdown .mod-description-heading {
     -fx-text-fill: -vantatext;
     -fx-font-size: 16px;
-    -fx-font-weight: 600;
-    -fx-padding: 9px 0 2px 0;
-}
+    
+    -fx-padding: 9px 0 2px 0; -fx-font-family: "Poppins SemiBold";}
 .mod-details-markdown .mod-description-code {
     -fx-fill: -vantaaccent;
     -fx-font-family: "JetBrains Mono";
@@ -858,8 +820,7 @@
    ============================================================ */
 .vanta-consistent-page { -fx-spacing: 20px; }
 .vanta-consistent-page .page-title {
-    -fx-font-size: 28px; -fx-font-weight: 600; -fx-text-fill: -vantatext;
-}
+    -fx-font-size: 28px;  -fx-text-fill: -vantatext; -fx-font-family: "Poppins SemiBold";}
 .vanta-consistent-page .page-subtitle {
     -fx-font-size: 12px; -fx-text-fill: -vantamuted;
 }
@@ -869,8 +830,7 @@
 .vanta-consistent-page .primary-button,
 .vanta-consistent-page .secondary-button {
     -fx-min-height: 36px; -fx-background-radius: 9px; -fx-border-radius: 9px;
-    -fx-font-size: 11px; -fx-font-weight: 600; -fx-padding: 8px 13px;
-}
+    -fx-font-size: 11px;  -fx-padding: 8px 13px; -fx-font-family: "Poppins Medium";}
 .vanta-consistent-page .text-field,
 .vanta-consistent-page .combo-box-base,
 .vanta-consistent-page .text-area {
@@ -921,8 +881,7 @@
     -fx-background-color: -vantabg; -fx-background-radius: 8px;
 }
 .screenshots-page .screenshot-name {
-    -fx-text-fill: -vantatext; -fx-font-size: 11px; -fx-font-weight: 600;
-}
+    -fx-text-fill: -vantatext; -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
  
 
 /* Instance content and screenshot surfaces: compact, aligned toolbars. */
@@ -995,14 +954,10 @@
 
 .global-mods-page .vanta-empty-state-icon {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 30px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 30px; -fx-font-family: "Poppins SemiBold";}
 
 .global-mods-page .vanta-empty-state-title {
-    -fx-font-size: 21px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 21px; -fx-font-family: "Poppins SemiBold";}
 
 .global-mods-page .vanta-empty-state-description {
     -fx-font-size: 13px;

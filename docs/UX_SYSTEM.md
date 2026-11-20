@@ -92,3 +92,16 @@ The capture includes one PNG per sidebar destination plus nested production view
 - Respect the user's animation setting even after controls have been created.
 - Newly inserted controls should receive the same interaction behavior as controls present at first render.
 - Pause view-specific polling when a view is detached, and ignore stale asynchronous refresh results.
+
+
+## Typeface
+
+Vanta ships Poppins (SIL Open Font License, `src/main/resources/fonts/OFL.txt`) and registers it in `VantaFonts`.
+JavaFX chooses a weight by family name, so stylesheets never use numeric `-fx-font-weight`:
+
+| Role | Family |
+| --- | --- |
+| Body, descriptions, inputs | `"Poppins"` (Regular) |
+| Buttons, labels, navigation, list item names | `"Poppins Medium"` |
+| Page and section titles, emphasis | `"Poppins SemiBold"` |
+| Technical text (logs, paths) | monospace, unchanged |

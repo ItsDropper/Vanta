@@ -92,9 +92,7 @@
 .page-title,
 .settings-page-title,
 .home-title,
-.accounts-title {
-    -fx-font-weight: 600;
-}
+.accounts-title { -fx-font-family: "Poppins SemiBold";}
 
 .page-subtitle,
 .settings-page-subtitle,
@@ -140,7 +138,7 @@
  */
 
 .root {
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
+    -fx-font-family: "Poppins";
     -fx-font-smoothing-type: lcd;
 }
 
@@ -168,9 +166,7 @@
 }
 
 .sidebar-logo {
-    -fx-font-size: 24px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 24px; -fx-font-family: "Poppins SemiBold";}
 
 .sidebar-subtitle,
 .sidebar-section-label {
@@ -184,9 +180,8 @@
     -fx-border-width: 0 0 0 2px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-padding: 10px 12px;
-}
+    
+    -fx-padding: 10px 12px; -fx-font-family: "Poppins Medium";}
 
 .sidebar-button:hover {
     -fx-background-color: -vantasurfaceraised;
@@ -211,9 +206,7 @@
 }
 
 .home-title {
-    -fx-font-size: 28px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 28px; -fx-font-family: "Poppins SemiBold";}
 
 .home-account-label {
     -fx-font-size: 12px;
@@ -226,9 +219,7 @@
 .home-featured-section-eyebrow,
 .home-featured-eyebrow,
 .home-empty-eyebrow {
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .home-featured-section-subtitle,
 .home-section-subtitle {
@@ -257,9 +248,7 @@
 }
 
 .home-featured-title {
-    -fx-font-size: 28px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 28px; -fx-font-family: "Poppins SemiBold";}
 
 .home-featured-meta {
     -fx-font-size: 12px;
@@ -271,10 +260,9 @@
     -fx-border-color: transparent;
     -fx-text-fill: #FFFFFF;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 0 22px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins SemiBold";}
 
 .home-featured-play-button:hover {
     -fx-background-color: -vantaaccenthover;
@@ -291,9 +279,7 @@
 }
 
 .home-section-title {
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 
 .home-recent-card,
 .home-server-card,
@@ -315,9 +301,7 @@
 
 .home-recent-name,
 .home-server-name {
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .home-recent-meta,
 .home-server-meta {
@@ -326,9 +310,7 @@
 
 .home-load-error-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 17px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 17px; -fx-font-family: "Poppins SemiBold";}
 
 .home-load-error-description {
     -fx-text-fill: -vantamuted;
@@ -349,7 +331,7 @@
  */
 
 .root {
-    -fx-font-family: "Segoe UI Variable", "Segoe UI", "Inter", sans-serif;
+    -fx-font-family: "Poppins";
     -fx-font-smoothing-type: lcd;
     -fx-focus-color: -vantaaccent;
     -fx-faint-focus-color: derive(-vantaaccent, 78%);
@@ -375,9 +357,7 @@
 /* Typography: fewer competing sizes, stronger hierarchy, readable secondary text. */
 .page-title, .home-title, .accounts-title, .settings-page-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 26px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 26px; -fx-font-family: "Poppins SemiBold";}
 
 .page-subtitle, .settings-page-subtitle, .accounts-subtitle,
 .home-account-label, .home-section-subtitle {
@@ -387,9 +367,7 @@
 
 .settings-section-title, .home-section-title, .create-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .footer-label, .sidebar-build, .home-recent-status {
     -fx-text-fill: -vantasubtle;
@@ -408,24 +386,21 @@
 .sidebar-logo {
     -fx-text-fill: -vantatext;
     -fx-font-size: 23px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: 1.4px;
-}
+    
+    -fx-letter-spacing: 1.4px; -fx-font-family: "Poppins SemiBold";}
 
 .sidebar-subtitle {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: 0.8px;
-}
+    
+    -fx-letter-spacing: 0.8px; -fx-font-family: "Poppins SemiBold";}
 
 .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-letter-spacing: 1px;
-    -fx-padding: 0 0 2px 0;
-}
+    -fx-padding: 0 0 2px 0; -fx-font-family: "Poppins Medium";}
 
 .sidebar-button {
     -fx-background-color: transparent;
@@ -434,10 +409,9 @@
     -fx-border-width: 1px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 9px 11px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .sidebar-button:hover {
     -fx-background-color: -vantasurfaceraised;
@@ -452,9 +426,7 @@
     -fx-background-color: -vantaaccentsoft;
     -fx-border-color: -vantaaccent;
     -fx-border-width: 0 0 0 3px;
-    -fx-text-fill: -vantatext;
-    -fx-font-weight: 600;
-}
+    -fx-text-fill: -vantatext; -fx-font-family: "Poppins Medium";}
 
 .title-bar {
     -fx-background-color: -vantabg;
@@ -467,9 +439,8 @@
 .title-bar-brand {
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: 1.2px;
-}
+    
+    -fx-letter-spacing: 1.2px; -fx-font-family: "Poppins SemiBold";}
 
 .title-bar-button, .title-bar-close {
     -fx-background-color: transparent;
@@ -494,9 +465,8 @@
     -fx-border-radius: 7px;
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 0 11px;
-}
+    
+    -fx-padding: 0 11px; -fx-font-family: "Poppins SemiBold";}
 .title-bar-update:hover {
     -fx-background-color: -vantasurfaceraised;
     -fx-border-color: -vantaaccent;
@@ -505,12 +475,11 @@
 
 /* Buttons: clear primary action, quiet secondary actions, explicit destructive states. */
 .button {
-    -fx-font-family: "Segoe UI Variable", "Segoe UI", "Inter", sans-serif;
+    
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
+    
     -fx-background-insets: 0;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .primary-button, .instance-create-button, .instance-play-button, .home-play-button {
     -fx-background-color: -vantaaccent;
@@ -518,9 +487,8 @@
     -fx-border-color: transparent;
     -fx-text-fill: white;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
-    -fx-padding: 10px 16px;
-}
+    
+    -fx-padding: 10px 16px; -fx-font-family: "Poppins Medium";}
 
 .primary-button:hover, .instance-create-button:hover,
 .instance-play-button:hover, .home-play-button:hover {
@@ -605,9 +573,7 @@
 .home-account-label { -fx-font-size: 12px; }
 .home-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 .home-section-subtitle { -fx-font-size: 12px; }
 .home-recent-section { -fx-spacing: 10px; }
 .home-recent-card {
@@ -627,9 +593,7 @@
 }
 .home-recent-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 .home-recent-meta { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
 .home-recent-playtime { -fx-text-fill: -vantasubtle; -fx-font-size: 11px; }
 .home-recent-play {
@@ -637,9 +601,8 @@
     -fx-background-radius: 7px;
     -fx-text-fill: white;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 8px 12px;
-}
+    
+    -fx-padding: 8px 12px; -fx-font-family: "Poppins Medium";}
 .home-recent-play:hover { -fx-background-color: -vantaaccenthover; }
 .home-recent-stop {
     -fx-background-color: derive(-vantadanger, -78%);
@@ -647,9 +610,7 @@
     -fx-border-color: derive(-vantadanger, -45%);
     -fx-border-radius: 7px;
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .home-recent-servers-card { -fx-padding: 18px; }
 .home-recent-servers-card:hover { -fx-border-color: derive(-vantaborder, 12%); }
 .home-recent-status { -fx-font-size: 11px; }
@@ -730,14 +691,11 @@
 .home-empty-eyebrow {
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-letter-spacing: 1px;
-}
+    
+    -fx-letter-spacing: 1px; -fx-font-family: "Poppins Medium";}
 .home-empty-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 19px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 19px; -fx-font-family: "Poppins SemiBold";}
 .home-empty-description {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
@@ -750,9 +708,7 @@
     -fx-border-color: -vantaborder;
     -fx-border-radius: 999px;
     -fx-padding: 7px 10px;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .home-status-ready { -fx-text-fill: -vantasuccess; }
 .home-status-running {
     -fx-text-fill: -vantasuccess;
@@ -769,9 +725,7 @@
 
 .notification-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
 .notification-message {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
@@ -829,9 +783,7 @@
 }
 .home-server-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 .home-server-meta {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
@@ -844,9 +796,7 @@
     -fx-border-color: transparent;
     -fx-text-fill: -vantamuted;
     -fx-padding: 10px 12px;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 .settings-nav-button:hover {
     -fx-background-color: -vantasurfaceraised;
     -fx-text-fill: -vantatext;
@@ -959,9 +909,7 @@
     -fx-background-radius: 6px;
     -fx-padding: 5px 9px;
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 /* Instance library: compact, theme-aware cards with deliberate hierarchy. */
 .instance-card {
@@ -991,9 +939,7 @@
 }
 .instance-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
 .instance-version, .instance-playtime {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
@@ -1003,22 +949,18 @@
     -fx-background-radius: 6px;
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 4px 7px;
-}
+    
+    -fx-padding: 4px 7px; -fx-font-family: "Poppins Medium";}
 .instance-ready {
     -fx-text-fill: -vantasuccess;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .instance-play-button {
     -fx-background-color: -vantaaccent;
     -fx-background-radius: 8px;
     -fx-text-fill: white;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 0 14px;
-}
+    
+    -fx-padding: 0 14px; -fx-font-family: "Poppins Medium";}
 .instance-play-button:hover { -fx-background-color: -vantaaccenthover; }
 .instance-playing-button {
     -fx-background-color: -vantasurfacehover;
@@ -1034,9 +976,7 @@
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .instance-settings-button:hover {
     -fx-background-color: -vantasurfacehover;
     -fx-border-color: derive(-vantaborder, 22%);
@@ -1227,9 +1167,7 @@
 }
 .settings-compact-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .settings-compact-navigation .combo-box {
     -fx-background-color: -vantasurfaceraised;
     -fx-background-radius: 8px;
@@ -1398,9 +1336,7 @@
 }
 .overengineered-state {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .overengineered-ui .notification,
 .overengineered-ui .tooltip,
 .overengineered-ui .dialog-pane {
@@ -1447,9 +1383,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.48), 24, 0.2, 0, 8);
 }
 .overengineered-ui .notification-title {
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 .overengineered-ui .notification-accent {
     -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -42%), 9, 0.2, 0, 0);
 }
@@ -1463,9 +1397,7 @@
     -fx-border-radius: 10px;
 }
 .notification-title {
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 .notification-message {
     -fx-font-size: 11px;
     -fx-line-spacing: 0;
@@ -1511,19 +1443,17 @@
 .settings-shell .settings-nav-group {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
     -fx-letter-spacing: 1.5px;
-    -fx-padding: 15px 9px 5px 9px;
-}
+    -fx-padding: 15px 9px 5px 9px; -fx-font-family: "Poppins Medium";}
 .settings-shell .settings-nav-button {
     -fx-background-color: transparent;
     -fx-background-radius: 6px;
     -fx-border-color: transparent;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 10px 11px;
-}
+    
+    -fx-padding: 10px 11px; -fx-font-family: "Poppins Medium";}
 .settings-shell .settings-nav-button:hover {
     -fx-background-color: -vantasurfaceraised;
     -fx-text-fill: #edf3ee;
@@ -1549,12 +1479,12 @@
     -fx-border-width: 1px;
     -fx-padding: 19px;
 }
-.settings-shell .settings-card-title { -fx-font-size: 15px; -fx-font-weight: 600; }
+.settings-shell .settings-card-title { -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 .settings-shell .settings-card-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
-.settings-shell .settings-info-label { -fx-text-fill: -vantatext; -fx-font-size: 11px; -fx-font-weight: 600; }
+.settings-shell .settings-info-label { -fx-text-fill: -vantatext; -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .settings-shell .settings-info-value { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
 .settings-shell .settings-checkbox { -fx-text-fill: #d6e0d8; -fx-font-size: 11px; }
-.settings-shell .settings-page-title { -fx-font-size: 31px; -fx-font-weight: 600; }
+.settings-shell .settings-page-title { -fx-font-size: 31px; -fx-font-family: "Poppins SemiBold";}
 .settings-shell .settings-page-subtitle { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
 .settings-shell .settings-compact-navigation {
     -fx-background-color: -vantasurface;

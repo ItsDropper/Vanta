@@ -14,15 +14,11 @@
 
 .sidebar-logo {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 24px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 24px; -fx-font-family: "Poppins SemiBold";}
 
 .sidebar-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .sidebar-button {
     -fx-background-color: transparent;
@@ -31,10 +27,9 @@
     -fx-text-fill: -vantamuted;
 
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
-    -fx-padding: 12px 14px;
-}
+    -fx-padding: 12px 14px; -fx-font-family: "Poppins Medium";}
 
 .sidebar-button:hover {
     -fx-background-color: -vantasurfacehover;
@@ -75,9 +70,7 @@
 
 .login-logo {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 17px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 17px; -fx-font-family: "Poppins SemiBold";}
 
 
 /* =========================================================
@@ -86,9 +79,7 @@
 
 .login-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 25px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 25px; -fx-font-family: "Poppins SemiBold";}
 
 
 /* =========================================================
@@ -126,14 +117,13 @@
     -fx-text-fill: -vantatext;
 
     -fx-font-size: 26px;
-    -fx-font-weight: 600;
+    
 
     -fx-padding: 13px 20px;
 
     -fx-alignment: CENTER;
 
-    -fx-effect: none;
-}
+    -fx-effect: none; -fx-font-family: "Poppins SemiBold";}
 
 
 /* =========================================================
@@ -193,9 +183,7 @@
 
 .login-title-bar-text {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .login-title-bar-close {
     -fx-background-color: transparent;
@@ -211,23 +199,18 @@
 
 .login-logo {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 13px; -fx-font-family: "Poppins Medium";}
 
 .login-step {
     -fx-background-color: -vantaaccentsoft;
     -fx-background-radius: 6px;
     -fx-text-fill: -vantaaccent;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 5px 8px;
-}
+    
+    -fx-padding: 5px 8px; -fx-font-family: "Poppins Medium";}
 
 .login-title {
-    -fx-font-size: 24px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 24px; -fx-font-family: "Poppins SemiBold";}
 
 .login-subtitle {
     -fx-text-fill: -vantamuted;
@@ -402,9 +385,7 @@
 .account-switcher-name {
     -fx-text-fill: -vantatext;
 
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 
 /* Arrow */
@@ -449,10 +430,9 @@
     -fx-text-fill: -vantamuted;
 
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
-    -fx-padding: 1px 4px 6px 4px;
-}
+    -fx-padding: 1px 4px 6px 4px; -fx-font-family: "Poppins Medium";}
 
 
 /* =========================================================
@@ -494,9 +474,7 @@
 .account-popup-username {
     -fx-text-fill: -vantatext;
 
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 
 /* Active */
@@ -504,9 +482,7 @@
 .account-popup-active {
     -fx-text-fill: -vantasuccess;
 
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 
 /* =========================================================
@@ -547,9 +523,7 @@
 .account-popup-plus {
     -fx-text-fill: -vantamuted;
 
-    -fx-font-size: 17px;
-    -fx-font-weight: normal;
-}
+    -fx-font-size: 17px; -fx-font-family: "Poppins";}
 
 .account-popup-add-text {
     -fx-text-fill: -vantamuted;
@@ -575,7 +549,7 @@
     -fx-text-fill: -vantasuccess;
 
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
     -fx-padding: 0 11px;
 
@@ -589,8 +563,7 @@
     -fx-border-width: 1px;
     -fx-border-radius: 7px;
 
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins SemiBold";}
 
 .title-bar-update:hover {
     -fx-background-color: -vantasurface;
@@ -622,14 +595,10 @@
 }
 .command-palette-eyebrow {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .command-palette-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 21px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 21px; -fx-font-family: "Poppins SemiBold";}
 .command-palette-search {
     -fx-background-color: -vantasurface;
     -fx-text-fill: -vantatext;
@@ -656,18 +625,14 @@
 }
 .command-result-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 .command-result-description {
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
 }
 .command-result-shortcut {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .command-palette-empty {
     -fx-text-fill: -vantamuted;
     -fx-padding: 18px 10px;
@@ -685,9 +650,7 @@
     -fx-background-radius: 5px;
     -fx-padding: 3px 6px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .command-palette-hint {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
@@ -757,25 +720,19 @@
 
 .loading-logo {
     -fx-text-fill: -vantatext;
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
-    -fx-font-size: 28px;
-    -fx-font-weight: 600;
-    }
+    
+    -fx-font-size: 28px; -fx-font-family: "Poppins SemiBold";}
 
 .loading-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .loading-status {
     -fx-padding: 14px 0 2px 0;
     -fx-text-fill: -vantamuted;
-    -fx-font-family: "Inter", "Segoe UI", sans-serif;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .loading-progress-track {
     -fx-pref-width: 280px;
@@ -806,26 +763,21 @@
     -fx-border-width: 1px;
 }
 .sidebar-logo {
-    -fx-font-size: 25px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 25px; -fx-font-family: "Poppins SemiBold";}
 .sidebar-subtitle {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
     }
 .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-background-radius: 6px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 10px 11px;
-}
+    
+    -fx-padding: 10px 11px; -fx-font-family: "Poppins Medium";}
 .sidebar-button:hover {
     -fx-background-color: -vantasurfaceraised;
     -fx-text-fill: -vantatext;
@@ -839,9 +791,7 @@
 }
 .sidebar-build {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 /* Navigation rail — fixed-width desktop hierarchy. */
 .sidebar {
@@ -854,21 +804,15 @@
 
 .sidebar-logo {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 23px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 23px; -fx-font-family: "Poppins SemiBold";}
 
 .sidebar-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .sidebar-button {
     -fx-background-color: transparent;
@@ -878,11 +822,10 @@
     -fx-border-radius: 6px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 11px 12px;
     -fx-min-height: 42px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .sidebar-button:hover {
     -fx-background-color: -vantasurfacehover;
@@ -903,9 +846,7 @@
 
 .sidebar-build {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    }
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .sidebar-compact {
     -fx-background-radius: 8px;
@@ -923,22 +864,17 @@
 
 .root .sidebar .sidebar-logo {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 25px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 25px; -fx-font-family: "Poppins SemiBold";}
 
 .root .sidebar .sidebar-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .root .sidebar .sidebar-section-label {
     -fx-text-fill: -vantasubtle;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
-    -fx-padding: 0 0 2px 2px;
-}
+    
+    -fx-padding: 0 0 2px 2px; -fx-font-family: "Poppins Medium";}
 
 .root .sidebar .sidebar-button {
     -fx-background-color: transparent;
@@ -948,11 +884,10 @@
     -fx-border-radius: 8px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
-    -fx-font-weight: 600;
+    
     -fx-padding: 10px 12px;
     -fx-min-height: 42px;
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .root .sidebar .sidebar-button:hover {
     -fx-background-color: -vantasurfacehover;
@@ -973,9 +908,7 @@
     -fx-background-color: -vantaaccentsoft;
     -fx-border-color: transparent transparent transparent -vantaaccent;
     -fx-border-width: 0 0 0 3px;
-    -fx-text-fill: -vantaaccent;
-    -fx-font-weight: 600;
-}
+    -fx-text-fill: -vantaaccent; -fx-font-family: "Poppins Medium";}
 
 .root .sidebar .sidebar-button.sidebar-button-active:focused {
     -fx-border-color: -vantaaccent;
@@ -984,9 +917,7 @@
 
 .root .sidebar .sidebar-build {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .root .sidebar.sidebar-compact .sidebar-logo {
     -fx-font-size: 23px;

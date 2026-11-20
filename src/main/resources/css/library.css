@@ -9,9 +9,7 @@
 
 .instances-count {
     -fx-text-fill: -vantasuccess;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 
 /* =============================================================
@@ -72,9 +70,7 @@
 
 .instance-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 
 .instance-version {
     -fx-text-fill: -vantamuted;
@@ -88,16 +84,13 @@
     -fx-text-fill: -vantaaccent;
 
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
-    -fx-padding: 4px 8px;
-}
+    -fx-padding: 4px 8px; -fx-font-family: "Poppins Medium";}
 
 .instance-ready {
     -fx-text-fill: -vantasuccess;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 
 /* =============================================================
@@ -114,12 +107,11 @@
 
     -fx-text-fill: -vantabg;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
     -fx-padding: 0 14px;
 
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .instance-play-button:hover {
     -fx-background-color: -vantaaccenthover;
@@ -175,12 +167,11 @@
 
     -fx-text-fill: -vantamuted;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
     -fx-padding: 0 12px;
 
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .instance-settings-button:hover {
     -fx-background-color: -vantasurfacehover;
@@ -208,14 +199,13 @@
 
     -fx-text-fill: -vantamuted;
     -fx-font-size: 18px;
-    -fx-font-weight: 600;
+    
 
     -fx-padding: 0;
 
     -fx-alignment: center;
 
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins SemiBold";}
 
 .instance-menu-button:hover {
     -fx-background-color: -vantasurfacehover;
@@ -317,9 +307,7 @@
 
 .instance-empty-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 18px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 18px; -fx-font-family: "Poppins SemiBold";}
 
 .instance-empty-description {
     -fx-text-fill: -vantamuted;
@@ -342,9 +330,7 @@
 
 .create-instance-panel .card-title {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 
 /* =============================================================
@@ -353,9 +339,7 @@
 
 .create-label {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .create-field,
 .create-combo {
@@ -442,9 +426,7 @@
 
 .create-option-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .create-option-description {
     -fx-text-fill: -vantamuted;
@@ -453,9 +435,7 @@
 
 .create-option-arrow {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 16px; -fx-font-family: "Poppins SemiBold";}
 
 .create-option:hover .create-option-arrow {
     -fx-text-fill: -vantatext;
@@ -478,9 +458,7 @@
 
 .delete-dialog-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 16px; -fx-font-family: "Poppins SemiBold";}
 
 .delete-dialog-message {
     -fx-text-fill: -vantamuted;
@@ -498,12 +476,11 @@
 
     -fx-text-fill: -vantatext;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
     -fx-padding: 9px 16px;
 
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .delete-dialog-cancel:hover {
     -fx-background-color: -vantasurfacehover;
@@ -521,12 +498,11 @@
 
     -fx-text-fill: -vantadanger;
     -fx-font-size: 11px;
-    -fx-font-weight: 600;
+    
 
     -fx-padding: 9px 16px;
 
-    -fx-cursor: hand;
-}
+    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
 
 .delete-dialog-delete:hover {
     -fx-background-color: derive(-vantadanger, -70%);
@@ -597,9 +573,7 @@
 
 .preset-environment-value {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 .preset-environment-secondary {
     -fx-text-fill: -vantamuted;
@@ -691,15 +665,11 @@
 
 .repair-issue-type {
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .repair-issue-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 14px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
 
 .repair-issue-details {
     -fx-text-fill: -vantamuted;
@@ -800,9 +770,7 @@
 
 .screenshot-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 
 /* Screenshot preview window */
@@ -813,9 +781,7 @@
 
 .screenshot-dialog-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .screenshot-preview-container {
     -fx-background-color: -vantabg;
@@ -886,9 +852,7 @@
 
 .screenshot-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 .screenshot-dialog {
     -fx-background-color: -vantabg;
@@ -896,9 +860,7 @@
 
 .screenshot-dialog-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 13px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
 
 .screenshot-preview-container {
     -fx-background-color: -vantabg;
@@ -940,9 +902,7 @@
 
 .screenshot-delete-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 16px; -fx-font-family: "Poppins SemiBold";}
 
 .screenshot-delete-description {
     -fx-text-fill: -vantamuted;
@@ -951,9 +911,7 @@
 
 .screenshot-delete-file {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
 
 
 /* =============================================================
@@ -978,9 +936,7 @@
 .vanta-dialog .header-panel .label,
 .delete-dialog .header-panel .label {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 
 .vanta-dialog .content,
 .delete-dialog .content {
@@ -1071,11 +1027,11 @@
 
 /* Instance management popups */
 .instance-action-popup{-fx-background-color:-vantabg;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-padding:20px;-fx-effect:dropshadow(gaussian,rgba(0,0,0,.38),24,.15,0,8)}
-.instance-action-title{-fx-text-fill:-vantatext;-fx-font-size:14px;-fx-font-weight:600}
+.instance-action-title{-fx-text-fill:-vantatext;-fx-font-size:14px; -fx-font-family: "Poppins SemiBold";}
 .instance-action-subtitle{-fx-text-fill:-vantamuted;-fx-font-size:11px}
 .instance-action-field{-fx-background-color:-vantabg;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-radius:8px;-fx-text-fill:-vantatext;-fx-prompt-text-fill:-vantamuted;-fx-padding:10px 12px;-fx-min-height:40px}
 .instance-action-field:focused{-fx-border-color:-vantaaccent}
-.instance-icon-choice{-fx-background-color:-vantasurface;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-radius:10px;-fx-text-fill:-vantatext;-fx-font-size:20px;-fx-font-weight:600;-fx-min-width:38px;-fx-pref-width:38px;-fx-min-height:38px;-fx-pref-height:38px;-fx-cursor:hand}
+.instance-icon-choice{-fx-background-color:-vantasurface;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-radius:10px;-fx-text-fill:-vantatext;-fx-font-size:20px;-fx-min-width:38px;-fx-pref-width:38px;-fx-min-height:38px;-fx-pref-height:38px;-fx-cursor:hand; -fx-font-family: "Poppins SemiBold";}
 .instance-icon-choice:hover{-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaaccent}
 .instance-card-compact{-fx-min-height:62px}
 .instance-card-compact .instance-playtime{-fx-font-size:11px}
@@ -1136,22 +1092,16 @@
 
 .settings-section-title {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
 
 
 .instance-setting-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .instance-setting-value {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 
 .instance-directory {
     -fx-text-fill: -vantamuted;
@@ -1179,9 +1129,7 @@
 
 .instance-settings-danger-title {
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 12px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
 
 .instance-settings-danger-description {
     -fx-text-fill: -vantamuted;
@@ -1233,17 +1181,13 @@
     -fx-border-color: derive(-vantaborder, 12%);
 }
 .instances-page .instance-card .instance-name {
-    -fx-font-size: 16px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 16px; -fx-font-family: "Poppins SemiBold";}
 .instances-page .instance-card .instance-version { -fx-font-size: 11px; }
 .instances-page .instance-card .instance-play-button {
     -fx-background-color: -vantaaccent;
     -fx-text-fill: -vantaaccentforeground;
     -fx-background-radius: 6px;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 .instances-page .instance-card .instance-play-button:hover { -fx-background-color: -vantaaccenthover; }
 .instances-page .instance-card .instance-settings-button {
     -fx-background-color: transparent;
@@ -1263,9 +1207,7 @@
 
 .instances-page .instances-count {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .instances-page .instances-toolbar {
     -fx-background-color: transparent;
@@ -1326,15 +1268,11 @@
 
 .instances-page .instance-empty-icon {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 24px;
-    -fx-font-weight: 500;
-}
+    -fx-font-size: 24px; -fx-font-family: "Poppins Medium";}
 
 .instances-page .instance-empty-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 15px;
-    -fx-font-weight: 600;
-}
+    -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 
 .instances-page .instance-empty-description {
     -fx-text-fill: -vantamuted;
