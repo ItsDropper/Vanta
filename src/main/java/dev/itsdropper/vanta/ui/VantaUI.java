@@ -99,6 +99,15 @@ public final class VantaUI {
         return label;
     }
 
+    /** Quiet "Back" action with an outline arrow; used at the top of detail screens. */
+    public static Button backButton() {
+        Button button = new Button(Localization.text("common.back"));
+        button.setGraphic(dev.itsdropper.vanta.ui.components.IconView.create(
+                dev.itsdropper.vanta.ui.components.IconView.Type.ARROW_LEFT, 14));
+        button.getStyleClass().add("back-button");
+        return button;
+    }
+
     public static Button styleButton(Button button, ButtonVariant variant) {
         Objects.requireNonNull(button, "button");
         Objects.requireNonNull(variant, "variant");

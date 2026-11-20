@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.VantaUI;
+
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
@@ -133,9 +135,7 @@ public class ContentBrowserView extends VBox {
         // =========================================================
 
         Button backButton =
-                new Button(
-                        Localization.text("common.backArrow")
-                );
+                VantaUI.backButton();
 
         backButton.getStyleClass().add(
                 "secondary-button"
@@ -217,12 +217,8 @@ public class ContentBrowserView extends VBox {
                         )
         );
 
-        FlowPane typeNavigation = new FlowPane(
-                10, 8,
-                modsButton,
-                packsButton,
-                shadersButton
-        );
+        HBox typeNavigation = new HBox(20, modsButton, packsButton, shadersButton);
+        typeNavigation.getStyleClass().add("instance-tabs");
         typeNavigation.setAlignment(Pos.CENTER_LEFT);
         typeNavigation.setMaxWidth(Double.MAX_VALUE);
 
@@ -460,75 +456,14 @@ public class ContentBrowserView extends VBox {
     // =============================================================
 
     private void updateTypeButtons() {
-
-        modsButton.getStyleClass().remove(
-                "primary-button"
-        );
-
-        modsButton.getStyleClass().remove(
-                "secondary-button"
-        );
-
-        packsButton.getStyleClass().remove(
-                "primary-button"
-        );
-
-        packsButton.getStyleClass().remove(
-                "secondary-button"
-        );
-
-        shadersButton.getStyleClass().remove(
-                "primary-button"
-        );
-
-        shadersButton.getStyleClass().remove(
-                "secondary-button"
-        );
-
-        if (contentType ==
-                ModrinthContentType.MOD) {
-
-            modsButton.getStyleClass().add(
-                    "primary-button"
-            );
-
-            packsButton.getStyleClass().add(
-                    "secondary-button"
-            );
-
-            shadersButton.getStyleClass().add(
-                    "secondary-button"
-            );
-
-        } else if (contentType ==
-                ModrinthContentType.RESOURCE_PACK) {
-
-            modsButton.getStyleClass().add(
-                    "secondary-button"
-            );
-
-            packsButton.getStyleClass().add(
-                    "primary-button"
-            );
-
-            shadersButton.getStyleClass().add(
-                    "secondary-button"
-            );
-
-        } else {
-
-            modsButton.getStyleClass().add(
-                    "secondary-button"
-            );
-
-            packsButton.getStyleClass().add(
-                    "secondary-button"
-            );
-
-            shadersButton.getStyleClass().add(
-                    "primary-button"
-            );
+        for (Button tab : new Button[]{modsButton, packsButton, shadersButton}) {
+            tab.getStyleClass().removeAll("content-tab", "content-tab-active");
+            tab.getStyleClass().add("content-tab");
         }
+        Button active = contentType == ModrinthContentType.MOD
+                ? modsButton
+                : contentType == ModrinthContentType.RESOURCE_PACK ? packsButton : shadersButton;
+        active.getStyleClass().add("content-tab-active");
     }
 
     // =============================================================

@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.VantaUI;
+
 import dev.itsdropper.vanta.launcher.repair.CrashCaseRepository;
 import dev.itsdropper.vanta.launcher.repair.FailureCategory;
 import dev.itsdropper.vanta.ui.Localization;
@@ -58,7 +60,7 @@ public final class CrashCaseReviewView extends VBox {
         setSpacing(18);
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
-        Button back = new Button(Localization.text("common.backArrow"));
+        Button back = VantaUI.backButton();
         back.getStyleClass().add("secondary-button");
         back.setOnAction(event -> this.onBack.run());
 

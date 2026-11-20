@@ -208,7 +208,7 @@ public class GlobalModsView extends VBox {
         versionsButton.setOnAction(event -> showVersionPicker());
         contentTypeBox.setVisible(false);
         contentTypeBox.setManaged(false);
-        HBox contentTypeSegments = new HBox(6);
+        HBox contentTypeSegments = new HBox(20);
         contentTypeSegments.getStyleClass().add("modrinth-content-segments");
         for (ModrinthContentType type : List.of(
                 ModrinthContentType.MOD,
@@ -226,10 +226,7 @@ public class GlobalModsView extends VBox {
             };
             Button segment = new Button(label);
             segment.getStyleClass().add("modrinth-content-segment");
-            segment.setMinWidth(92);
-            segment.setPrefWidth(112);
-            segment.setMaxWidth(Double.MAX_VALUE);
-            HBox.setHgrow(segment, Priority.ALWAYS);
+            segment.setMinWidth(javafx.scene.layout.Region.USE_PREF_SIZE);
             segment.setOnAction(event -> contentTypeBox.setValue(type));
             contentTypeButtons.put(type, segment);
             contentTypeSegments.getChildren().add(segment);

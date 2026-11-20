@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.VantaUI;
+
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
@@ -101,9 +103,7 @@ public class BrowseModsView extends VBox {
         // =========================================================
 
         Button backButton =
-                new Button(
-                        Localization.text("common.backArrow")
-                );
+                VantaUI.backButton();
 
         backButton.getStyleClass().add(
                 "secondary-button"

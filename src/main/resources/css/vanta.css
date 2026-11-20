@@ -2240,3 +2240,75 @@
     -fx-font-size: 12px;
     -fx-font-family: "Poppins";
 }
+
+/* ============================================================
+   17. Modrinth: tabs, back action, filters
+   ============================================================ */
+.vanta-ui-root .back-button {
+    -vantaicon: -vantamuted;
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-family: "Poppins Medium";
+    -fx-padding: 0 10px 0 6px;
+    -fx-graphic-text-gap: 6px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+}
+
+.vanta-ui-root .back-button:hover {
+    -vantaicon: -vantatext;
+    -fx-text-fill: -vantatext;
+    -fx-background-color: -vantahover;
+}
+
+.vanta-ui-root .page .back-button.secondary-button,
+.vanta-ui-root .page .back-button.settings-back-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.vanta-ui-root .page .back-button.secondary-button:hover,
+.vanta-ui-root .page .back-button.settings-back-button:hover {
+    -fx-background-color: -vantahover;
+}
+
+.vanta-ui-root .global-mods-page .modrinth-content-segments {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+    -fx-padding: 0;
+    -fx-spacing: 20px;
+}
+
+.vanta-ui-root .global-mods-page .modrinth-content-segment {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2px 0;
+    -fx-border-radius: 0;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+    -fx-font-family: "Poppins Medium";
+    -fx-padding: 8px 2px;
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-max-height: 34px;
+}
+
+.vanta-ui-root .global-mods-page .modrinth-content-segment:hover {
+    -fx-text-fill: -vantatext;
+    -fx-background-color: transparent;
+}
+
+.vanta-ui-root .global-mods-page .modrinth-content-segment.modrinth-content-segment-selected {
+    -fx-text-fill: -vantatext;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaaccent transparent;
+}

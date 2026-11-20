@@ -1,5 +1,7 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.VantaUI;
+
 import dev.itsdropper.vanta.ui.Localization;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -68,9 +70,7 @@ public class ScreenshotsView extends VBox {
         // =========================================================
 
         Button backButton =
-                new Button(
-                        Localization.text("common.backArrow")
-                );
+                VantaUI.backButton();
 
         backButton.getStyleClass().add(
                 "secondary-button"
