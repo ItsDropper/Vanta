@@ -2312,3 +2312,60 @@
     -fx-background-color: transparent;
     -fx-border-color: transparent transparent -vantaaccent transparent;
 }
+
+/* ============================================================
+   18. Content details: an open page, not stacked panels
+   ============================================================ */
+.vanta-ui-root .mod-details-header,
+.vanta-ui-root .mod-details-card,
+.vanta-ui-root .mod-details-description-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .mod-details-card {
+    -fx-padding: 16px 0;
+}
+
+.vanta-ui-root .mod-details-title {
+    -fx-font-size: 22px;
+}
+
+.vanta-ui-root .mod-details-author {
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .mod-details-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantamuted;
+}
+
+.vanta-ui-root .mod-details-stat-value {
+    -fx-font-size: 15px;
+}
+
+.vanta-ui-root .mod-details-stat-label {
+    -fx-font-size: 11px;
+    -fx-font-family: "Poppins";
+    -fx-text-fill: -vantamuted;
+}
+
+.vanta-ui-root .mod-details-markdown .mod-description-text,
+.vanta-ui-root .mod-details-markdown .mod-description-bold,
+.vanta-ui-root .mod-details-markdown .mod-description-italic {
+    -fx-font-size: 13px;
+}
+
+.vanta-ui-root .mod-details-markdown .mod-description-paragraph {
+    -fx-pref-wrap-length: 720px;
+    -fx-vgap: 5px;
+}
+
+.vanta-ui-root .mod-details-markdown .mod-description-h1 { -fx-font-size: 18px; }
+.vanta-ui-root .mod-details-markdown .mod-description-h2 { -fx-font-size: 16px; }
+.vanta-ui-root .mod-details-markdown .mod-description-h3,
+.vanta-ui-root .mod-details-markdown .mod-description-heading { -fx-font-size: 14px; }
