@@ -38,6 +38,9 @@ public final class PageHeader extends HBox {
         subtitleLabel.getStyleClass().addAll("page-header-subtitle", subtitleStyleClass);
         VantaUI.styleText(subtitleLabel, VantaUI.TextRole.MUTED);
         subtitleLabel.setWrapText(true);
+        boolean hasSubtitle = subtitle != null && !subtitle.isBlank();
+        subtitleLabel.setVisible(hasSubtitle);
+        subtitleLabel.setManaged(hasSubtitle);
 
         VBox copy = new VBox(VantaUI.spacing(1), titleLabel, subtitleLabel);
         copy.getStyleClass().add("page-header-copy");

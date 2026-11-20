@@ -802,7 +802,28 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 LauncherSettings.setAutoOpenBrowserEnabled(autoOpenBrowser.isSelected())
         );
 
+        javafx.scene.control.ComboBox<String> startPage = new javafx.scene.control.ComboBox<>();
+        startPage.getItems().addAll("Home", "Instances", "Mods");
+        startPage.setValue(LauncherSettings.getStartPage());
+        startPage.setAccessibleText("Page shown when Vanta opens");
+        startPage.setOnAction(event -> LauncherSettings.setStartPage(startPage.getValue()));
+        HBox startPageRow = new HBox(8, new Label("Open on"), startPage);
+        startPageRow.setAlignment(Pos.CENTER_LEFT);
+        startPageRow.getStyleClass().add("settings-inline-row");
+
+        CheckBox rememberWindow = new CheckBox("Remember window size and position");
+        rememberWindow.setSelected(LauncherSettings.isRememberWindowBoundsEnabled());
+        rememberWindow.getStyleClass().add("settings-checkbox");
+        rememberWindow.setTooltip(new javafx.scene.control.Tooltip(
+                "Reopen Vanta at the size and position it had when you closed it."
+        ));
+        rememberWindow.setOnAction(event ->
+                LauncherSettings.setRememberWindowBoundsEnabled(rememberWindow.isSelected())
+        );
+
         behavior.getChildren().addAll(
+                startPageRow,
+                rememberWindow,
                 animations,
                 updates,
                 autoUpdate,
@@ -2228,7 +2249,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             reset.setOnAction(event -> resetCurrentSection());
             content.getChildren().add(new PageHeader(
                     title,
-                    subtitle,
+                    "",
                     "settings-page-title",
                     "settings-page-subtitle",
                     reset
@@ -2238,7 +2259,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         content.getChildren().add(new PageHeader(
                 title,
-                subtitle,
+                "",
                 "settings-page-title",
                 "settings-page-subtitle"
         ));
@@ -2274,6 +2295,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 LauncherSettings.setDiscordShowLoaderEnabled(true);
             }
             case "General" -> {
+                LauncherSettings.setStartPage("Home");
+                LauncherSettings.setRememberWindowBoundsEnabled(false);
                 LauncherSettings.setAnimationsEnabled(true);
                 LauncherSettings.setUpdateChecksEnabled(true);
                 LauncherSettings.setAutoUpdateOnLaunchEnabled(false);
@@ -2345,11 +2368,12 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("settings-card-title");
 
-        Label descriptionLabel = new Label(description);
-        descriptionLabel.getStyleClass().add("settings-card-description");
-        descriptionLabel.setWrapText(true);
+        // Descriptions stay available as help on the title instead of printing a paragraph per section.
+        if (description != null && !description.isBlank()) {
+            titleLabel.setTooltip(new javafx.scene.control.Tooltip(description));
+        }
 
-        card.getChildren().addAll(titleLabel, descriptionLabel);
+        card.getChildren().add(titleLabel);
         return card;
     }
 
@@ -2371,8 +2395,15 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         parent.getChildren().add(row);
     }
 
+    private static String sentenceCase(String text) {
+        if (text == null || text.length() < 2 || !text.equals(text.toUpperCase(java.util.Locale.ROOT))) {
+            return text;
+        }
+        return text.charAt(0) + text.substring(1).toLowerCase(java.util.Locale.ROOT);
+    }
+
     private Button actionButton(String text, Runnable action) {
-        Button button = new Button(text);
+        Button button = new Button(sentenceCase(text));
         button.getStyleClass().add("secondary-button");
         button.setOnAction(event -> action.run());
         return button;

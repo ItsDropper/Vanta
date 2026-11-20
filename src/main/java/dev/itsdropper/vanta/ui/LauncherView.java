@@ -352,7 +352,11 @@ public class LauncherView {
         if (!screenshotMode) {
             environmentGuardianService.start();
             TelemetryService.track("launcher_started");
-            showPage(Sidebar.Page.HOME);
+            showPage(switch (LauncherSettings.getStartPage()) {
+                case "Instances" -> Sidebar.Page.INSTANCES;
+                case "Mods" -> Sidebar.Page.MODS;
+                default -> Sidebar.Page.HOME;
+            });
             loadAccount();
             settingsView.refreshDebugAccess();
             if (LauncherSettings.isUpdateChecksEnabled()

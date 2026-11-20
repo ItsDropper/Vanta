@@ -2498,3 +2498,60 @@
     -fx-font-size: 13px;
     -fx-font-family: "Poppins Medium";
 }
+
+/* ============================================================
+   20. Settings: flat sections, one option per row
+   ============================================================ */
+.vanta-ui-root .settings-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+    -fx-padding: 4px 0 20px 0;
+    -fx-spacing: 2px;
+    -fx-max-width: 760px;
+}
+
+.vanta-ui-root .settings-card .settings-card-title {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-family: "Poppins SemiBold";
+    -fx-padding: 12px 0 6px 0;
+}
+
+.vanta-ui-root .settings-card .settings-checkbox,
+.vanta-ui-root .settings-card .settings-inline-row {
+    -fx-padding: 9px 0;
+    -fx-max-width: infinity;
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-font-family: "Poppins";
+}
+
+.vanta-ui-root .settings-card .settings-inline-row .label {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 13px;
+    -fx-min-width: 120px;
+}
+
+.vanta-ui-root .settings-card .settings-info-label {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .settings-card .settings-info-value {
+    -fx-text-fill: -vantatext;
+    -fx-font-size: 12px;
+}
+
+.vanta-ui-root .settings-page-title {
+    -fx-font-size: 20px;
+}
+
+.vanta-ui-root .settings-nav-group {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 11px;
+    -fx-font-family: "Poppins Medium";
+    -fx-padding: 14px 0 4px 10px;
+}

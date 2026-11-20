@@ -252,6 +252,33 @@ public final class LauncherSettings {
     public static void setShowPlaytimeEnabled(boolean value) { setBoolean("showPlaytime", value); }
     public static boolean isCompactInstancesEnabled() { return getBoolean("compactInstances", false); }
     public static void setCompactInstancesEnabled(boolean value) { setBoolean("compactInstances", value); }
+    /** Page shown when Vanta opens: "Home", "Instances" or "Mods". */
+    public static String getStartPage() {
+        String value = getString("startPage", "Home");
+        return "Instances".equals(value) || "Mods".equals(value) ? value : "Home";
+    }
+    public static void setStartPage(String value) {
+        setString("startPage", "Instances".equals(value) || "Mods".equals(value) ? value : "Home");
+    }
+
+    public static boolean isRememberWindowBoundsEnabled() { return getBoolean("rememberWindowBounds", false); }
+    public static void setRememberWindowBoundsEnabled(boolean value) { setBoolean("rememberWindowBounds", value); }
+    public static boolean isWindowMaximized() { return getBoolean("windowMaximized", false); }
+    public static void setWindowMaximized(boolean value) { setBoolean("windowMaximized", value); }
+    public static boolean hasWindowBounds() { return load().containsKey("windowWidth"); }
+    public static int getWindowX() { return getInt("windowX", 0, -32000, 32000); }
+    public static int getWindowY() { return getInt("windowY", 0, -32000, 32000); }
+    public static int getWindowWidth() { return getInt("windowWidth", 1440, 320, 20000); }
+    public static int getWindowHeight() { return getInt("windowHeight", 900, 240, 20000); }
+    public static void setWindowBounds(int x, int y, int width, int height) {
+        Properties properties = load();
+        properties.setProperty("windowX", Integer.toString(x));
+        properties.setProperty("windowY", Integer.toString(y));
+        properties.setProperty("windowWidth", Integer.toString(width));
+        properties.setProperty("windowHeight", Integer.toString(height));
+        save(properties);
+    }
+
     public static boolean isStateScanOnOpenEnabled() { return getBoolean("stateScanOnOpen", true); }
     public static void setStateScanOnOpenEnabled(boolean value) { setBoolean("stateScanOnOpen", value); }
     public static boolean isNotificationsEnabled() { return getBoolean("notificationsEnabled", true); }
