@@ -2038,3 +2038,7 @@
     -fx-font-family: "Poppins Medium";
 }
 
+
+.vanta-ui-root .preset-choice-icon .vanta-icon { -fx-stroke: -vantaaccent; }
+.vanta-ui-root .preset-choice-arrow .vanta-icon { -fx-stroke: -vantasubtle; }
+.vanta-ui-root .preset-choice-card:hover .preset-choice-arrow .vanta-icon { -fx-stroke: -vantaaccent; }

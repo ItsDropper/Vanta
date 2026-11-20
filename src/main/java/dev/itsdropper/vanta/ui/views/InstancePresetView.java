@@ -187,9 +187,13 @@ public class InstancePresetView extends VBox {
 
         details.getStyleClass().add("preset-choice-meta");
 
-        Label symbol = new Label("✦");
+        javafx.scene.layout.StackPane symbol = new javafx.scene.layout.StackPane(
+                dev.itsdropper.vanta.ui.components.IconView.create(dev.itsdropper.vanta.ui.components.IconView.Type.PACKAGE, 18));
         symbol.getStyleClass().add("preset-choice-icon");
-        Label arrow = new Label("→");
+        symbol.setMinSize(40, 40);
+        symbol.setMaxSize(40, 40);
+        javafx.scene.layout.StackPane arrow = new javafx.scene.layout.StackPane(
+                dev.itsdropper.vanta.ui.components.IconView.create(dev.itsdropper.vanta.ui.components.IconView.Type.ARROW_RIGHT, 16));
         arrow.getStyleClass().add("preset-choice-arrow");
         VBox text = new VBox(7, title, description, details);
         HBox card = new HBox(18, symbol, text, arrow);

@@ -590,9 +590,8 @@
 .instance-preset-page .preset-choice-card:focused { -fx-border-color: -vantaaccent; }
 .instance-preset-page .preset-choice-content { -fx-spacing: 16px; }
 .instance-preset-page .preset-choice-icon {
-    -fx-background-color: -vantaaccentsoft; -fx-background-radius: 10px;
-    -fx-text-fill: -vantaaccent; -fx-font-size: 20px; 
-    -fx-padding: 10px 13px; -fx-min-width: 43px; -fx-alignment: center; -fx-font-family: "Poppins SemiBold";}
+    -fx-background-color: -vantaaccentsoft; -fx-background-radius: 8px;
+    -fx-alignment: center;}
 .instance-preset-page .create-option-title { -fx-text-fill: -vantatext; -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
 .instance-preset-page .create-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
 .instance-preset-page .preset-choice-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
