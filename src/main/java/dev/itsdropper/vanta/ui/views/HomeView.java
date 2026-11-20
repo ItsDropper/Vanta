@@ -304,6 +304,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         accountLabel.setText(Localization.text("home.accountFallback"));
         launchStatusLabel.setText(Localization.text("home.preview"));
         recentList.getChildren().clear();
+        recentStatus.setManaged(true);
+        recentStatus.setVisible(true);
         recentStatus.setText(Localization.text("home.previewRecentInstances"));
         recentServersList.getChildren().clear();
         recentServersStatus.setText(Localization.text("home.previewRecentServers"));
@@ -364,6 +366,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (request != instanceRefreshSequence.get()) return;
                     recentList.getChildren().clear();
+                    recentStatus.setManaged(true);
+                    recentStatus.setVisible(true);
                     recentStatus.setText(Localization.text("home.recentLoadFailed"));
                     featuredContainer.getChildren().setAll(createInstanceLoadErrorCard());
                 });
@@ -374,6 +378,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
     private void renderRecentInstances(List<Instance> instances) {
         recentList.getChildren().clear();
+        recentStatus.setManaged(true);
+        recentStatus.setVisible(true);
         featuredContainer.getChildren().clear();
         playtimeLabels.clear();
         displayedInstances.clear();
@@ -404,10 +410,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             recentList.getChildren().add(createRecentCard(instance));
         }
 
-        recentStatus.setText(
-                recent.size() + " recently played instance"
-                        + (recent.size() == 1 ? "" : "s")
-        );
+        // The instance cards already communicate the recent-played content.
+        // A separate count consumes vertical space and can collide with cards
+        // in a windowed layout, so only show this label for loading/empty/error states.
+        recentStatus.setText("");
+        recentStatus.setVisible(false);
+        recentStatus.setManaged(false);
     }
 
     private void updatePlaytimeLabels() {
