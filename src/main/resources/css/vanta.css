@@ -2042,3 +2042,57 @@
 .vanta-ui-root .preset-choice-icon .vanta-icon { -fx-stroke: -vantaaccent; }
 .vanta-ui-root .preset-choice-arrow .vanta-icon { -fx-stroke: -vantasubtle; }
 .vanta-ui-root .preset-choice-card:hover .preset-choice-arrow .vanta-icon { -fx-stroke: -vantaaccent; }
+
+/* ============================================================
+   15. Rows, not boxes
+   Lists read as hairline-separated rows on the sheet. Boxes are kept
+   for one featured item per screen and for forms. Accent appears only
+   on navigation state, the primary action, focus and real progress.
+   ============================================================ */
+.vanta-ui-root .page .instance-card,
+.vanta-ui-root .page .modrinth-project-card,
+.vanta-ui-root .page .home-recent-card,
+.vanta-ui-root .page .home-server-card,
+.vanta-ui-root .page .preset-choice-card {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-border-radius: 0;
+    -fx-effect: none;
+}
+
+.vanta-ui-root .page .instance-card:hover,
+.vanta-ui-root .page .modrinth-project-card:hover,
+.vanta-ui-root .page .home-recent-card:hover,
+.vanta-ui-root .page .home-server-card:hover,
+.vanta-ui-root .page .preset-choice-card:hover {
+    -fx-background-color: -vantahover;
+    -fx-border-color: transparent transparent -vantaline transparent;
+}
+
+.vanta-ui-root .page .instance-card:focused,
+.vanta-ui-root .page .modrinth-project-card:focused,
+.vanta-ui-root .page .preset-choice-card:focused {
+    -fx-background-color: -vantahover;
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+/* Section labels: plain, quiet, sentence case. */
+.vanta-ui-root .vanta-type-eyebrow,
+.vanta-ui-root .settings-section-title,
+.vanta-ui-root .home-section-title {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-family: "Poppins Medium";
+}
+
+/* Frames inside forms drop to a single hairline; no nested boxes. */
+.vanta-ui-root .page .settings-card .settings-card,
+.vanta-ui-root .page .instance-settings-card .instance-settings-card {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
