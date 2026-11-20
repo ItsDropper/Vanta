@@ -85,12 +85,7 @@ public class InstanceCard extends StackPane {
 
         content.setSpacing(VantaUI.spacing(4));
 
-        content.setPadding(new Insets(
-                VantaUI.spacing(4),
-                VantaUI.spacing(5),
-                VantaUI.spacing(4),
-                VantaUI.spacing(5)
-        ));
+        content.setPadding(new Insets(12, 8, 12, 12));
 
         content.setAlignment(
                 Pos.CENTER_LEFT
@@ -223,17 +218,7 @@ public class InstanceCard extends StackPane {
                 90
         );
 
-        playButton.setMinHeight(
-                34
-        );
-
-        playButton.setPrefHeight(
-                34
-        );
-
-        playButton.setMaxHeight(
-                34
-        );
+        playButton.setMinHeight(32);playButton.setPrefHeight(32);playButton.setMaxHeight(32);
 
         playButton.setOnAction(
                 event -> {
@@ -249,9 +234,9 @@ public class InstanceCard extends StackPane {
         // ---------------------------------------------------------
 
         settingsButton =
-                new Button(
-                        Localization.text("instanceCard.options")
-                );
+                new Button();
+        settingsButton.setGraphic(IconView.create(IconView.Type.SETTINGS, 16));
+        settingsButton.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
 
         settingsButton.getStyleClass().add(
                 "instance-settings-button"
@@ -259,29 +244,9 @@ public class InstanceCard extends StackPane {
         settingsButton.setAccessibleText(Localization.text("instanceCard.optionsForPrefix") + instance.getName());
         settingsButton.setTooltip(new Tooltip(Localization.text("instanceCard.optionsAccessible")));
 
-        settingsButton.setMinWidth(
-                82
-        );
+        settingsButton.setMinWidth(32);settingsButton.setPrefWidth(32);settingsButton.setMaxWidth(32);
 
-        settingsButton.setPrefWidth(
-                82
-        );
-
-        settingsButton.setMaxWidth(
-                82
-        );
-
-        settingsButton.setMinHeight(
-                34
-        );
-
-        settingsButton.setPrefHeight(
-                34
-        );
-
-        settingsButton.setMaxHeight(
-                34
-        );
+        settingsButton.setMinHeight(32);settingsButton.setPrefHeight(32);settingsButton.setMaxHeight(32);
 
         settingsButton.setOnAction(
                 event -> {
@@ -311,14 +276,7 @@ public class InstanceCard extends StackPane {
         /*
          * Reserve space for the vertical menu button.
          */
-        right.setPadding(
-                new Insets(
-                        0,
-                        42,
-                        0,
-                        0
-                )
-        );
+        right.setPadding(Insets.EMPTY);
 
         // ---------------------------------------------------------
         // CONTENT
@@ -347,12 +305,8 @@ public class InstanceCard extends StackPane {
                 ));
                 statusLabel.setVisible(false);
                 statusLabel.setManaged(false);
-                settingsButton.setText("⚙");
-                settingsButton.setMinWidth(36);
-                settingsButton.setPrefWidth(36);
-                settingsButton.setMaxWidth(36);
                 right.setSpacing(7);
-                right.setPadding(new Insets(0, 34, 0, 0));
+                right.setPadding(Insets.EMPTY);
             } else {
                 content.setSpacing(VantaUI.spacing(4));
                 content.setPadding(new Insets(
@@ -361,12 +315,8 @@ public class InstanceCard extends StackPane {
                 ));
                 statusLabel.setVisible(true);
                 statusLabel.setManaged(true);
-                settingsButton.setText(Localization.text("instanceCard.options"));
-                settingsButton.setMinWidth(82);
-                settingsButton.setPrefWidth(82);
-                settingsButton.setMaxWidth(82);
                 right.setSpacing(10);
-                right.setPadding(new Insets(0, 42, 0, 0));
+                right.setPadding(Insets.EMPTY);
             }
         });
 
@@ -380,9 +330,9 @@ public class InstanceCard extends StackPane {
         // ---------------------------------------------------------
 
         menuButton =
-                new Button(
-                        "⋮"
-                );
+                new Button();
+        menuButton.setGraphic(IconView.create(IconView.Type.MORE, 16));
+        menuButton.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
 
         menuButton.getStyleClass().add(
                 "instance-menu-button"
@@ -450,10 +400,8 @@ public class InstanceCard extends StackPane {
         // BUILD
         // ---------------------------------------------------------
 
-        getChildren().addAll(
-                content,
-                menuButton
-        );
+        right.getChildren().add(menuButton);
+        getChildren().add(content);
 
         update();
         updateIcon();

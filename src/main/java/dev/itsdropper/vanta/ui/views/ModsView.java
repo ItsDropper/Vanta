@@ -134,38 +134,17 @@ public class ModsView extends VBox {
         // =========================================================
 
         Button allButton =
-                new Button(Localization.text("mods.all"), IconView.create(IconView.Type.PACKAGE, 16));
-        allButton.getStyleClass().add("secondary-button");
+                new Button(Localization.text("mods.all"));
+        allButton.getStyleClass().add("content-tab");
 
-        Button modsButton =
-                new Button(
-                        Localization.text("contentBrowser.mods"),
-                        IconView.create(IconView.Type.PACKAGE, 16)
-                );
+        Button modsButton = new Button(Localization.text("contentBrowser.mods"));
+        modsButton.getStyleClass().addAll("content-tab", "content-tab-active");
 
-        modsButton.getStyleClass().add(
-                "primary-button"
-        );
+        Button packsButton = new Button(Localization.text("contentBrowser.packs"));
+        packsButton.getStyleClass().add("content-tab");
 
-        Button packsButton =
-                new Button(
-                        Localization.text("contentBrowser.packs"),
-                        IconView.create(IconView.Type.PACKAGE, 16)
-                );
-
-        packsButton.getStyleClass().add(
-                "secondary-button"
-        );
-
-        Button shadersButton =
-                new Button(
-                        Localization.text("contentBrowser.shaders"),
-                        IconView.create(IconView.Type.SHIELD, 16)
-                );
-
-        shadersButton.getStyleClass().add(
-                "secondary-button"
-        );
+        Button shadersButton = new Button(Localization.text("contentBrowser.shaders"));
+        shadersButton.getStyleClass().add("content-tab");
 
         Button browseButton =
                 new Button(
@@ -290,6 +269,19 @@ public class ModsView extends VBox {
         navigation.setAlignment(Pos.CENTER_LEFT);
         navigation.getStyleClass().add("instance-tabs");
 
+        javafx.scene.control.MenuButton moreMenu = new javafx.scene.control.MenuButton(
+                null, IconView.create(IconView.Type.MORE, 18));
+        moreMenu.getStyleClass().addAll("secondary-button", "instances-more-button");
+        moreMenu.setAccessibleText("More content actions");
+        moreMenu.setTooltip(new Tooltip("Refresh, open folder, screenshots and instance settings"));
+        moreMenu.getItems().addAll(
+                mirrorAsMenuItem(refreshButton),
+                mirrorAsMenuItem(folderButton),
+                new javafx.scene.control.SeparatorMenuItem(),
+                mirrorAsMenuItem(screenshotsButton),
+                mirrorAsMenuItem(settingsButton)
+        );
+
         FlowPane actions =
                 new FlowPane(
                         8,
@@ -297,10 +289,7 @@ public class ModsView extends VBox {
                         searchField,
                         browseButton,
                         updateButton,
-                        folderButton,
-                        refreshButton,
-                        screenshotsButton,
-                        settingsButton
+                        moreMenu
                 );
         actions.setAlignment(Pos.CENTER_LEFT);
         actions.getStyleClass().add("page-action-row");
@@ -463,6 +452,13 @@ public class ModsView extends VBox {
     // SHOW CONTENT
     // =============================================================
 
+    private static javafx.scene.control.MenuItem mirrorAsMenuItem(Button source) {
+        javafx.scene.control.MenuItem item = new javafx.scene.control.MenuItem(source.getText());
+        item.setOnAction(event -> source.fire());
+        item.disableProperty().bind(source.disabledProperty());
+        return item;
+    }
+
     private void showContent(
             ContentType type,
             Button allButton,
@@ -505,19 +501,10 @@ public class ModsView extends VBox {
             boolean selected
     ) {
 
-        button.getStyleClass().remove(
-                "primary-button"
-        );
-
-        button.getStyleClass().remove(
-                "secondary-button"
-        );
-
-        button.getStyleClass().add(
-                selected
-                        ? "primary-button"
-                        : "secondary-button"
-        );
+        button.getStyleClass().remove("content-tab-active");
+        if (selected) {
+            button.getStyleClass().add("content-tab-active");
+        }
     }
 
     // =============================================================
@@ -856,12 +843,11 @@ public class ModsView extends VBox {
             transition.play();
         });
 
-        Button removeButton =
-                new Button(
-                        Localization.text("common.delete"),
-                        IconView.create(IconView.Type.TRASH, 15)
-                );
-        removeButton.getStyleClass().add("secondary-button");
+        Button removeButton = new Button();
+        removeButton.setGraphic(IconView.create(IconView.Type.TRASH, 16));
+        removeButton.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+        removeButton.setAccessibleText(Localization.text("common.delete"));
+        removeButton.getStyleClass().add("icon-button");
         removeButton.setTooltip(new Tooltip(Localization.text("mods.removeTooltip")));
         removeButton.setOnAction(event -> {
             if (!LauncherSettings.isConfirmRemovalsEnabled()) {
@@ -941,10 +927,10 @@ public class ModsView extends VBox {
 
         card.setPadding(
                 new Insets(
-                        16,
-                        18,
-                        16,
-                        18
+                        12,
+                        8,
+                        12,
+                        12
                 )
         );
 
@@ -1043,14 +1029,12 @@ public class ModsView extends VBox {
                 Priority.ALWAYS
         );
 
-        Button removeButton =
-                new Button(
-                        Localization.text("common.delete")
-                );
-
-        removeButton.getStyleClass().add(
-                "secondary-button"
-        );
+        Button removeButton = new Button();
+        removeButton.setGraphic(IconView.create(IconView.Type.TRASH, 16));
+        removeButton.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+        removeButton.setAccessibleText(Localization.text("common.delete"));
+        removeButton.setTooltip(new Tooltip(Localization.text("common.delete")));
+        removeButton.getStyleClass().add("icon-button");
 
         removeButton.setOnAction(
                 event ->
@@ -1078,10 +1062,10 @@ public class ModsView extends VBox {
 
         card.setPadding(
                 new Insets(
-                        16,
-                        18,
-                        16,
-                        18
+                        12,
+                        8,
+                        12,
+                        12
                 )
         );
 

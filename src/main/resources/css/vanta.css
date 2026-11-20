@@ -2096,3 +2096,147 @@
     -fx-background-color: transparent;
     -fx-border-width: 0;
 }
+
+/* ============================================================
+   16. Instance rows
+   Icon, name over one line of metadata, then actions. Only Play is filled.
+   ============================================================ */
+.vanta-ui-root .instance-card .instance-icon-box {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+}
+
+.vanta-ui-root .instance-card .instance-name {
+    -fx-font-size: 14px;
+}
+
+.vanta-ui-root .instance-card .instance-version,
+.vanta-ui-root .instance-card .instance-playtime {
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-family: "Poppins";
+}
+
+.vanta-ui-root .instance-card .instance-loader {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-family: "Poppins";
+}
+
+.vanta-ui-root .instance-card .instance-ready {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-size: 12px;
+    -fx-font-family: "Poppins";
+}
+
+.vanta-ui-root .instance-card .instance-settings-button,
+.vanta-ui-root .instance-card .instance-menu-button {
+    -vantaicon: -vantamuted;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 6px;
+    -fx-padding: 0;
+    -fx-min-width: 32px;
+    -fx-pref-width: 32px;
+    -fx-max-width: 32px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+}
+
+.vanta-ui-root .instance-card .instance-settings-button:hover,
+.vanta-ui-root .instance-card .instance-menu-button:hover {
+    -vantaicon: -vantatext;
+    -fx-background-color: -vantaselected;
+}
+
+.vanta-ui-root .instance-card .instance-play-button {
+    -fx-min-width: 80px;
+    -fx-pref-width: 80px;
+    -fx-max-width: 80px;
+}
+
+/* Content type tabs: text with an accent underline on the active one. */
+.vanta-ui-root .instance-tabs {
+    -fx-spacing: 20px;
+    -fx-border-color: transparent transparent -vantaline transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.vanta-ui-root .content-tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-border-color: transparent;
+    -fx-border-width: 0 0 2px 0;
+    -fx-border-radius: 0;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 13px;
+    -fx-font-family: "Poppins Medium";
+    -fx-padding: 8px 2px;
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-max-height: 34px;
+}
+
+.vanta-ui-root .content-tab:hover {
+    -fx-text-fill: -vantatext;
+    -fx-background-color: transparent;
+}
+
+.vanta-ui-root .content-tab.content-tab-active {
+    -fx-text-fill: -vantatext;
+    -fx-border-color: transparent transparent -vantaaccent transparent;
+}
+
+.vanta-ui-root .content-tab:focused {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+/* Icon-only quiet button (row actions such as delete). */
+.vanta-ui-root .icon-button {
+    -vantaicon: -vantamuted;
+    -fx-background-color: transparent;
+    -fx-background-radius: 6px;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-min-width: 32px;
+    -fx-pref-width: 32px;
+    -fx-max-width: 32px;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
+    -fx-max-height: 32px;
+}
+
+.vanta-ui-root .icon-button:hover {
+    -vantaicon: -vantadanger;
+    -fx-background-color: -vantadangerwash;
+}
+
+/* Installed content rows share the instance row look. */
+.vanta-ui-root .instance-mods-page .instance-list {
+    -fx-spacing: 0;
+}
+
+.vanta-ui-root .instance-mods-page .mod-icon-box {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+}
+
+.vanta-ui-root .instance-mods-page .instance-loader {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0;
+    -fx-text-fill: -vantamuted;
+    -fx-font-size: 12px;
+    -fx-font-family: "Poppins";
+}
