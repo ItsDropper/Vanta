@@ -125,9 +125,7 @@ public class CreateInstanceView extends VBox {
 
         getStyleClass().addAll("page", "vanta-consistent-page", "create-instance-page");
 
-        setPadding(
-                new Insets(32, 36, 36, 36)
-        );
+        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
 
         setSpacing(
                 20
