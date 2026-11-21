@@ -23,6 +23,7 @@ import javafx.scene.layout.VBox;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
 import dev.itsdropper.vanta.launcher.instance.LoaderCompatibilityService;
+import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
