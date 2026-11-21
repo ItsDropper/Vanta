@@ -32,6 +32,7 @@ import dev.itsdropper.vanta.launcher.state.SharedState;
 import dev.itsdropper.vanta.launcher.state.InstanceStateEngine;
 import dev.itsdropper.vanta.launcher.instance.InstanceRepairService;
 import dev.itsdropper.vanta.launcher.instance.SharedResourceRepairService;
+import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.components.PageHeader;
@@ -1015,6 +1016,9 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         UiExecutor.shared().execute(() -> {
             try {
                 environmentLockfileService.write(instance);
+                recordEnvironmentActivity(instance,
+                        LaunchHistoryRepository.Outcome.ENVIRONMENT_BASELINE_SAVED,
+                        "Saved environment baseline for future drift checks");
                 UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     captureButton.setText(Localization.text("state.updateBaseline"));
@@ -1062,6 +1066,13 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             try {
                 EnvironmentLockfile baseline = environmentLockfileService.readBaseline(instance);
                 EnvironmentDriftReport report = environmentLockfileService.compare(instance, baseline);
+                recordEnvironmentActivity(instance,
+                        report.isClean()
+                                ? LaunchHistoryRepository.Outcome.ENVIRONMENT_CHECK_CLEAN
+                                : LaunchHistoryRepository.Outcome.ENVIRONMENT_DRIFT_DETECTED,
+                        report.isClean()
+                                ? "Environment matches its saved baseline"
+                                : "Detected " + report.changes().size() + " environment changes against baseline");
                 UiExecutor.shared().dispatchToUi(() -> {
                     captureButton.setDisable(false);
                     compareButton.setDisable(false);
@@ -1085,6 +1096,21 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
                 });
             }
         });
+    }
+
+    private static void recordEnvironmentActivity(
+            Instance instance,
+            LaunchHistoryRepository.Outcome outcome,
+            String message
+    ) {
+        try {
+            new LaunchHistoryRepository().recordActivity(instance, outcome, message);
+        } catch (java.io.IOException | RuntimeException failure) {
+            // Timeline persistence is ancillary; it must never make a successful
+            // baseline capture or read-only drift check appear to have failed.
+            System.err.println("[Vanta Timeline] Could not record environment activity: "
+                    + failure.getClass().getSimpleName());
+        }
     }
 
     private void showEnvironmentDrift(Instance instance, EnvironmentDriftReport report) {
