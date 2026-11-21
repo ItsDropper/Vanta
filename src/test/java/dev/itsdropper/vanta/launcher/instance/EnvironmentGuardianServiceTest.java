@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher.instance;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -24,14 +25,11 @@ class EnvironmentGuardianServiceTest {
         Instance running = createInstance("running");
         Path backupRoot = temporaryDirectory.resolve("automatic-backups");
 
-        EnvironmentGuardianService service = service(
-                backupRoot,
-                List.of(stopped, running),
-                instance -> instance.getId().equals("running"),
-                24,
-                3,
-                InstanceBackupService::createBackup
-        );
+        java.util.List<LaunchHistoryRepository.Outcome> recorded = new java.util.ArrayList<>();
+        EnvironmentGuardianService service = new EnvironmentGuardianService(
+                backupRoot, () -> List.of(stopped, running), instance -> instance.getId().equals("running"),
+                () -> true, () -> 24, () -> 3, InstanceBackupService::createBackup,
+                (instance, outcome, message) -> recorded.add(outcome));
 
         List<EnvironmentGuardianService.BackupResult> results = service.runOnce();
 
@@ -44,6 +42,7 @@ class EnvironmentGuardianServiceTest {
         assertTrue(Files.isRegularFile(created.archive()));
         assertTrue(InstanceBackupService.verifyBackup(created.archive()).entryCount() >= 2);
         assertEquals(EnvironmentGuardianService.Status.SKIPPED_RUNNING, skipped.status());
+        assertEquals(List.of(LaunchHistoryRepository.Outcome.BACKUP_CREATED), recorded);
         assertFalse(Files.exists(backupRoot.resolve("running")));
     }
 
