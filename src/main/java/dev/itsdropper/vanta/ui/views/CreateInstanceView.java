@@ -371,10 +371,10 @@ public class CreateInstanceView extends VBox {
                 92
         );
 
-        backButton.setOnAction(
-                event ->
-                        onBack.run()
-        );
+        backButton.setOnAction(event -> {
+            cancelLoaderCheck();
+            onBack.run();
+        });
 
         createButton =
                 new Button(
@@ -407,9 +407,10 @@ public class CreateInstanceView extends VBox {
                 "secondary-button"
         );
 
-        browseModpacksButton.setOnAction(
-                event -> onBrowseModpacks.run()
-        );
+        browseModpacksButton.setOnAction(event -> {
+            cancelLoaderCheck();
+            onBrowseModpacks.run();
+        });
 
         FlowPane actions = new FlowPane(
                 12, 8,
@@ -654,6 +655,14 @@ public class CreateInstanceView extends VBox {
         } catch (java.util.concurrent.RejectedExecutionException overloaded) {
             handleLoaderCheckFailure(requestId);
         }
+    }
+
+    private void cancelLoaderCheck() {
+        loaderCheckId.incrementAndGet();
+        Future<?> check = activeLoaderCheck;
+        activeLoaderCheck = null;
+        loaderChecksRunning = false;
+        if (check != null) check.cancel(true);
     }
 
     private void handleLoaderCheckFailure(int requestId) {
