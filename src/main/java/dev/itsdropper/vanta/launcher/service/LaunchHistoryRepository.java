@@ -52,7 +52,8 @@ public final class LaunchHistoryRepository {
     public enum Outcome {
         PREPARING, STARTING, RUNNING, STOPPING, SUCCEEDED, FAILED, STOPPED,
         INSTANCE_DUPLICATED, VERSION_CHANGED, LOADER_CHANGED, MOD_INSTALLED, MOD_REMOVED, MOD_UPDATED,
-        BACKUP_CREATED, BACKUP_RESTORED, RECOVERY_CREATED, RECOVERY_RESTORED, REPAIRED
+        BACKUP_CREATED, BACKUP_RESTORED, RECOVERY_CREATED, RECOVERY_RESTORED, REPAIRED,
+        ENVIRONMENT_BASELINE_SAVED, ENVIRONMENT_CHECK_CLEAN, ENVIRONMENT_DRIFT_DETECTED
     }
 
     public record Event(long timestampEpochMillis, Outcome outcome, String message) {
@@ -256,7 +257,8 @@ public final class LaunchHistoryRepository {
     private static boolean isActivityOutcome(Outcome outcome) {
         return switch (outcome) {
             case INSTANCE_DUPLICATED, VERSION_CHANGED, LOADER_CHANGED, MOD_INSTALLED, MOD_REMOVED, MOD_UPDATED,
-                    BACKUP_CREATED, BACKUP_RESTORED, RECOVERY_CREATED, RECOVERY_RESTORED, REPAIRED -> true;
+                    BACKUP_CREATED, BACKUP_RESTORED, RECOVERY_CREATED, RECOVERY_RESTORED, REPAIRED,
+                    ENVIRONMENT_BASELINE_SAVED, ENVIRONMENT_CHECK_CLEAN, ENVIRONMENT_DRIFT_DETECTED -> true;
             default -> false;
         };
     }
