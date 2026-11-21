@@ -48,10 +48,34 @@ public class CreateInstanceTypeView extends VBox {
         right.setHgrow(Priority.ALWAYS);
         grid.getColumnConstraints().setAll(left, right);
 
-        grid.add(option("01", "✦", "custom", "create-option-custom", onCustom), 0, 0);
-        grid.add(option("02", "↗", "import", "create-option-import", onImport), 1, 0);
-        grid.add(option("03", "▦", "preset", "create-option-preset", onPreset), 0, 1);
-        grid.add(option("04", "⌕", "modrinth", "create-option-modrinth", onModrinth), 1, 1);
+        java.util.List<Button> options = java.util.List.of(
+                option("01", "✦", "custom", "create-option-custom", onCustom),
+                option("02", "↗", "import", "create-option-import", onImport),
+                option("03", "▦", "preset", "create-option-preset", onPreset),
+                option("04", "⌕", "modrinth", "create-option-modrinth", onModrinth)
+        );
+        options.forEach(grid.getChildren()::add);
+        Runnable adaptGrid = () -> {
+            boolean narrow = grid.getWidth() < 620;
+            ColumnConstraints full = new ColumnConstraints();
+            full.setPercentWidth(100);
+            full.setHgrow(Priority.ALWAYS);
+            if (narrow) {
+                grid.getColumnConstraints().setAll(full);
+                for (int index = 0; index < options.size(); index++) {
+                    GridPane.setColumnIndex(options.get(index), 0);
+                    GridPane.setRowIndex(options.get(index), index);
+                }
+            } else {
+                grid.getColumnConstraints().setAll(left, right);
+                for (int index = 0; index < options.size(); index++) {
+                    GridPane.setColumnIndex(options.get(index), index % 2);
+                    GridPane.setRowIndex(options.get(index), index / 2);
+                }
+            }
+        };
+        grid.widthProperty().addListener((observable, oldWidth, newWidth) -> adaptGrid.run());
+        adaptGrid.run();
 
         VBox content = new VBox(14, section, grid);
         content.getStyleClass().add("create-type-content");
