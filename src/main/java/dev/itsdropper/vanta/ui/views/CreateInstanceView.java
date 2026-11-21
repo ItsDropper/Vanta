@@ -21,20 +21,8 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import dev.itsdropper.vanta.launcher.instance.FabricInstaller;
-import dev.itsdropper.vanta.launcher.instance.BabricInstaller;
-import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
-import dev.itsdropper.vanta.launcher.instance.LiteLoaderInstaller;
-import dev.itsdropper.vanta.launcher.instance.ModLoaderInstaller;
-import dev.itsdropper.vanta.launcher.instance.ForgeInstaller;
-import dev.itsdropper.vanta.launcher.instance.NeoForgeInstaller;
-import dev.itsdropper.vanta.launcher.instance.OrnitheInstaller;
-import dev.itsdropper.vanta.launcher.instance.LegacyFabricInstaller;
-import dev.itsdropper.vanta.launcher.instance.QuiltInstaller;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
-import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
-import dev.itsdropper.vanta.launcher.instance.RiftInstaller;
-import dev.itsdropper.vanta.launcher.instance.SteinInstaller;
+import dev.itsdropper.vanta.launcher.instance.LoaderCompatibilityService;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
@@ -45,6 +33,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -65,49 +54,23 @@ public class CreateInstanceView extends VBox {
     private final ComboBox<String> versionBox;
     private final ComboBox<String> loaderBox;
     private final Set<String> availableLoaders = new HashSet<>();
+    private final Set<String> failedLoaders = new HashSet<>();
 
     private final Button createButton;
     private final Button backButton;
 
     private final Label statusLabel;
     private final Button retryVersionsButton;
+    private final Button retryLoadersButton;
 
     private final Runnable onBack;
     private final Runnable onCreated;
     private final Runnable onBrowseModpacks;
 
-    /*
-     * Every version change gets a new check ID.
-     *
-     * If the user changes versions quickly, an older Fabric
-     * check is ignored when it finishes.
-     */
     private final AtomicInteger manifestRequestId = new AtomicInteger();
-
-    private final AtomicInteger fabricCheckId =
-            new AtomicInteger();
-
-    private volatile boolean fabricCheckRunning;
-    private final AtomicInteger forgeCheckId = new AtomicInteger();
-    private volatile boolean forgeCheckRunning;
-    private final AtomicInteger quiltCheckId = new AtomicInteger();
-    private volatile boolean quiltCheckRunning;
-    private final AtomicInteger neoForgeCheckId = new AtomicInteger();
-    private volatile boolean neoForgeCheckRunning;
-    private final AtomicInteger ornitheCheckId = new AtomicInteger();
-    private volatile boolean ornitheCheckRunning;
-    private final AtomicInteger legacyFabricCheckId = new AtomicInteger();
-    private volatile boolean legacyFabricCheckRunning;
-    private final AtomicInteger babricCheckId = new AtomicInteger();
-    private volatile boolean babricCheckRunning;
-    private final AtomicInteger liteLoaderCheckId = new AtomicInteger();
-    private volatile boolean liteLoaderCheckRunning;
-    private final AtomicInteger modLoaderCheckId = new AtomicInteger();
-    private volatile boolean modLoaderCheckRunning;
-    private final AtomicInteger riftCheckId = new AtomicInteger();
-    private volatile boolean riftCheckRunning;
-    private final AtomicInteger vantaLoaderCheckId = new AtomicInteger();
-    private volatile boolean vantaLoaderCheckRunning;
+    private final AtomicInteger loaderCheckId = new AtomicInteger();
+    private volatile boolean loaderChecksRunning;
+    private volatile Future<?> activeLoaderCheck;
 
     public CreateInstanceView(
             Runnable onBack,
@@ -279,12 +242,25 @@ public class CreateInstanceView extends VBox {
                 if (empty || item == null) {
                     setText(null);
                     setDisable(false);
-                } else {
-                    boolean available = availableLoaders.contains(item);
-                    String label = "ModLoader".equals(item) ? "Risugami's ModLoader" : item;
-                    setText(available ? label : label + Localization.text("createInstance.unavailableSuffix"));
-                    setDisable(!available);
+                    setTooltip(null);
+                    return;
                 }
+
+                boolean available = availableLoaders.contains(item);
+                boolean checkFailed = failedLoaders.contains(item);
+                String label = "ModLoader".equals(item) ? "Risugami's ModLoader" : item;
+                if (available) {
+                    setText(label);
+                    setTooltip(null);
+                } else if (checkFailed) {
+                    setText(label + Localization.text("createInstance.checkFailedSuffix"));
+                    setTooltip(new javafx.scene.control.Tooltip(
+                            Localization.text("createInstance.loaderChecksFailed")));
+                } else {
+                    setText(label + Localization.text("createInstance.unavailableSuffix"));
+                    setTooltip(null);
+                }
+                setDisable(!available);
             }
         });
         loaderBox.setButtonCell(new ListCell<>() {
@@ -360,8 +336,15 @@ public class CreateInstanceView extends VBox {
         retryVersionsButton.setVisible(false);
         retryVersionsButton.setManaged(false);
 
+        retryLoadersButton = new Button(Localization.text("common.retry"));
+        retryLoadersButton.getStyleClass().add("secondary-button");
+        retryLoadersButton.setAccessibleText(Localization.text("createInstance.retryLoaderChecks"));
+        retryLoadersButton.setOnAction(event -> checkLoaderAvailability(versionBox.getValue()));
+        retryLoadersButton.setVisible(false);
+        retryLoadersButton.setManaged(false);
+
         statusLabel.setMinWidth(0);
-        FlowPane statusRow = new FlowPane(10, 8, statusLabel, retryVersionsButton);
+        FlowPane statusRow = new FlowPane(10, 8, statusLabel, retryVersionsButton, retryLoadersButton);
         statusRow.setAlignment(Pos.CENTER_LEFT);
         statusRow.setMaxWidth(Double.MAX_VALUE);
 
@@ -547,12 +530,12 @@ public class CreateInstanceView extends VBox {
                     retryVersionsButton.setVisible(false);
                     retryVersionsButton.setManaged(false);
                     String preferredVersion = LauncherSettings.getDefaultMinecraftVersion();
+                    statusLabel.setText(Localization.text("createInstance.versionsLoaded"));
                     if (!preferredVersion.isBlank() && availableVersions.contains(preferredVersion)) {
                         versionBox.getSelectionModel().select(preferredVersion);
                     } else {
                         versionBox.getSelectionModel().selectFirst();
                     }
-                    statusLabel.setText(Localization.text("createInstance.versionsLoaded"));
                 });
             } catch (Throwable ex) {
                 ex.printStackTrace();
@@ -576,219 +559,118 @@ public class CreateInstanceView extends VBox {
     // =============================================================
 
     private void checkLoaderAvailability(String minecraftVersion) {
+        int requestId = loaderCheckId.incrementAndGet();
+        Future<?> previousCheck = activeLoaderCheck;
+        if (previousCheck != null) previousCheck.cancel(true);
+        activeLoaderCheck = null;
+        String previouslySelectedLoader = loaderBox.getValue();
+        availableLoaders.clear();
+        failedLoaders.clear();
+        availableLoaders.add("Vanilla");
+        loaderBox.getItems().setAll(
+                "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
+                "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
+                "LiteLoader", "ModLoader", "Rift", "Stein", "VantaLoader"
+        );
+        loaderBox.getSelectionModel().select("Vanilla");
+        loaderBox.setDisable(true);
+        createButton.setDisable(true);
+        retryLoadersButton.setVisible(false);
+        retryLoadersButton.setManaged(false);
 
         if (minecraftVersion == null || minecraftVersion.isBlank()) {
+            loaderChecksRunning = false;
+            loaderBox.setDisable(false);
+            createButton.setDisable(false);
+            statusLabel.setText(Localization.text("createInstance.validationVersion"));
             return;
         }
 
-        int fabricId = fabricCheckId.incrementAndGet();
-        int forgeId = forgeCheckId.incrementAndGet();
-        int quiltId = quiltCheckId.incrementAndGet();
-        int neoForgeId = neoForgeCheckId.incrementAndGet();
-        int ornitheId = ornitheCheckId.incrementAndGet();
-        int legacyFabricId = legacyFabricCheckId.incrementAndGet();
-        int babricId = babricCheckId.incrementAndGet();
-        int liteLoaderId = liteLoaderCheckId.incrementAndGet();
-        int modLoaderId = modLoaderCheckId.incrementAndGet();
-        int riftId = riftCheckId.incrementAndGet();
-        int vantaLoaderId = vantaLoaderCheckId.incrementAndGet();
-        fabricCheckRunning = true;
-        forgeCheckRunning = true;
-        quiltCheckRunning = true;
-        neoForgeCheckRunning = true;
-        ornitheCheckRunning = true;
-        legacyFabricCheckRunning = true;
-        babricCheckRunning = true;
-        liteLoaderCheckRunning = true;
-        modLoaderCheckRunning = true;
-        riftCheckRunning = true;
-        vantaLoaderCheckRunning = true;
+        loaderChecksRunning = true;
+        statusLabel.setText(
+                Localization.text("createInstance.checkingLoadersPrefix") + minecraftVersion + "..."
+        );
 
-        UiExecutor.shared().dispatchToUi(() -> {
-            loaderBox.getItems().setAll(
-                    "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
-                    "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
-                    "LiteLoader", "ModLoader", "Rift", "Stein", "VantaLoader"
-            );
-            loaderBox.getSelectionModel().select("Vanilla");
-            loaderBox.setDisable(true);
-            createButton.setDisable(true);
-            statusLabel.setText(Localization.text("createInstance.checkingLoadersPrefix") + minecraftVersion + "...");
+        activeLoaderCheck = UiExecutor.shared().execute(() -> {
+            try {
+                LoaderCompatibilityService.Report report =
+                        LoaderCompatibilityService.checkMinecraftVersion(minecraftVersion);
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId != loaderCheckId.get()) return;
+                    activeLoaderCheck = null;
+
+                    availableLoaders.clear();
+                    availableLoaders.addAll(report.availableLoaders());
+                    failedLoaders.clear();
+                    failedLoaders.addAll(report.failedLoaders());
+
+                    loaderBox.getItems().setAll(
+                            "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
+                            "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
+                            "LiteLoader", "ModLoader", "Rift", "Stein", "VantaLoader"
+                    );
+
+                    String preferredLoader = LauncherSettings.getDefaultLoader();
+                    String loaderToSelect = availableLoaders.contains(previouslySelectedLoader)
+                            ? previouslySelectedLoader
+                            : availableLoaders.contains(preferredLoader) ? preferredLoader : "Vanilla";
+                    loaderBox.getSelectionModel().select(loaderToSelect);
+
+                    loaderBox.setDisable(false);
+                    createButton.setDisable(false);
+                    loaderChecksRunning = false;
+
+                    boolean hasAnyModLoader = availableLoaders.stream()
+                            .anyMatch(loader -> !"Vanilla".equals(loader));
+                    if (report.hasFailures()) {
+                        statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
+                        retryLoadersButton.setVisible(true);
+                        retryLoadersButton.setManaged(true);
+                    } else if (!hasAnyModLoader) {
+                        statusLabel.setText(
+                                Localization.text("createInstance.noLoadersPrefix")
+                                        + minecraftVersion
+                                        + Localization.text("createInstance.vanillaOnlySuffix")
+                        );
+                    } else {
+                        statusLabel.setText(
+                                Localization.text("createInstance.loadersCheckedPrefix")
+                                        + minecraftVersion + "."
+                        );
+                    }
+                    loaderBox.requestLayout();
+                });
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId != loaderCheckId.get()) return;
+                    activeLoaderCheck = null;
+                    loaderChecksRunning = false;
+                    loaderBox.setDisable(false);
+                    createButton.setDisable(false);
+                    failedLoaders.addAll(loaderBox.getItems().stream()
+                            .filter(loader -> !"Vanilla".equals(loader)).toList());
+                    loaderBox.requestLayout();
+                    statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
+                    retryLoadersButton.setVisible(true);
+                    retryLoadersButton.setManaged(true);
+                });
+            } catch (RuntimeException failure) {
+                UiExecutor.shared().dispatchToUi(() -> {
+                    if (requestId != loaderCheckId.get()) return;
+                    activeLoaderCheck = null;
+                    loaderChecksRunning = false;
+                    loaderBox.setDisable(false);
+                    createButton.setDisable(false);
+                    failedLoaders.addAll(loaderBox.getItems().stream()
+                            .filter(loader -> !"Vanilla".equals(loader)).toList());
+                    loaderBox.requestLayout();
+                    statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
+                    retryLoadersButton.setVisible(true);
+                    retryLoadersButton.setManaged(true);
+                });
+            }
         });
-
-        UiExecutor.shared().execute(() -> {
-            boolean fabricAvailable = false;
-            boolean forgeAvailable = false;
-            boolean quiltAvailable = false;
-            boolean neoForgeAvailable = false;
-            boolean ornitheAvailable = false;
-            boolean legacyFabricAvailable = false;
-            boolean babricAvailable = false;
-            boolean nilLoaderAvailable = false;
-            boolean liteLoaderAvailable = false;
-            boolean modLoaderAvailable = false;
-            boolean riftAvailable = false;
-            boolean vantaLoaderAvailable = false;
-
-            try {
-                FabricInstaller.findLatestLoaderVersion(minecraftVersion);
-                fabricAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                ForgeInstaller.findLatestLoaderVersion(minecraftVersion);
-                forgeAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                QuiltInstaller.findLatestLoaderVersion(minecraftVersion);
-                quiltAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                NeoForgeInstaller.findLatestLoaderVersion(minecraftVersion);
-                neoForgeAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                OrnitheInstaller.findLatestLoaderVersion(minecraftVersion);
-                ornitheAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                LegacyFabricInstaller.findLatestLoaderVersion(minecraftVersion);
-                legacyFabricAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                BabricInstaller.findLatestLoaderVersion(minecraftVersion);
-                babricAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                NilLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
-                nilLoaderAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                LiteLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
-                liteLoaderAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                ModLoaderInstaller.findLatestLoaderVersion(minecraftVersion);
-                modLoaderAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            try {
-                RiftInstaller.findLatestLoaderVersion(minecraftVersion);
-                riftAvailable = true;
-            } catch (Throwable ignored) {
-            }
-
-            final boolean fabric = fabricAvailable;
-            final boolean forge = forgeAvailable;
-            final boolean quilt = quiltAvailable;
-            final boolean neoForge = neoForgeAvailable;
-            final boolean ornithe = ornitheAvailable;
-            final boolean legacyFabric = legacyFabricAvailable;
-            final boolean babric = babricAvailable;
-            final boolean nilLoader = nilLoaderAvailable;
-            final boolean liteLoader = liteLoaderAvailable;
-            final boolean modLoader = modLoaderAvailable;
-            final boolean rift = riftAvailable;
-            // Compatibility is a local Java/Minecraft baseline check. Do not
-            // hide a compatible loader just because GitHub is temporarily
-            // unavailable; release lookup happens when the user creates it.
-            vantaLoaderAvailable = VantaLoaderInstaller.supportsMinecraftVersion(minecraftVersion);
-            final boolean vantaLoader = vantaLoaderAvailable;
-            final boolean stein = SteinInstaller.supportsMinecraftVersion(minecraftVersion);
-
-            UiExecutor.shared().dispatchToUi(() -> {
-                if (fabricId != fabricCheckId.get() || forgeId != forgeCheckId.get()
-                        || quiltId != quiltCheckId.get() || neoForgeId != neoForgeCheckId.get()
-                        || ornitheId != ornitheCheckId.get()
-                        || legacyFabricId != legacyFabricCheckId.get()
-                        || babricId != babricCheckId.get()
-                        || liteLoaderId != liteLoaderCheckId.get()
-                        || modLoaderId != modLoaderCheckId.get()
-                        || riftId != riftCheckId.get()
-                        || vantaLoaderId != vantaLoaderCheckId.get()) {
-                    return;
-                }
-
-                availableLoaders.clear();
-                availableLoaders.add("Vanilla");
-                if (fabric) availableLoaders.add("Fabric");
-                if (forge) availableLoaders.add("Forge");
-                if (quilt) availableLoaders.add("Quilt");
-                if (neoForge) availableLoaders.add("NeoForge");
-                if (ornithe) availableLoaders.add("Ornithe");
-                if (legacyFabric) availableLoaders.add("Legacy Fabric");
-                if (babric) availableLoaders.add("Babric");
-                if (nilLoader) availableLoaders.add("NilLoader");
-                if (liteLoader) availableLoaders.add("LiteLoader");
-                if (modLoader) availableLoaders.add("ModLoader");
-                if (rift) availableLoaders.add("Rift");
-                if (stein) availableLoaders.add("Stein");
-                if (vantaLoader) availableLoaders.add("VantaLoader");
-
-                fabricCheckRunning = false;
-                forgeCheckRunning = false;
-                quiltCheckRunning = false;
-                neoForgeCheckRunning = false;
-                ornitheCheckRunning = false;
-                legacyFabricCheckRunning = false;
-                babricCheckRunning = false;
-                liteLoaderCheckRunning = false;
-                modLoaderCheckRunning = false;
-                riftCheckRunning = false;
-                vantaLoaderCheckRunning = false;
-                loaderBox.getItems().setAll(
-                        "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
-                        "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
-                        "LiteLoader", "ModLoader", "Rift", "Stein", "VantaLoader"
-                );
-
-                // Keep unsupported loaders visible but prevent selecting them.
-                loaderBox.getSelectionModel().select("Vanilla");
-
-                String preferredLoader = LauncherSettings.getDefaultLoader();
-                if (loaderBox.getItems().contains(preferredLoader)) {
-                    loaderBox.getSelectionModel().select(preferredLoader);
-                } else {
-                    loaderBox.getSelectionModel().select("Vanilla");
-                }
-
-                if (fabric || forge || quilt || neoForge || ornithe || legacyFabric || babric || nilLoader || liteLoader || modLoader || rift || stein || vantaLoader) {
-                    statusLabel.setText(Localization.text("createInstance.loadersCheckedPrefix") + minecraftVersion + ".");
-                } else {
-                    statusLabel.setText(Localization.text("createInstance.noLoadersPrefix") + minecraftVersion + Localization.text("createInstance.vanillaOnlySuffix"));
-                }
-
-                loaderBox.setDisable(false);
-
-                // Keep every implemented loader discoverable. Incompatible
-                // entries remain visible but are disabled by the cell factory.
-                if (loaderBox.getValue() == null
-                        || !availableLoaders.contains(loaderBox.getValue())) {
-                    loaderBox.getSelectionModel().select("Vanilla");
-                }
-
-                createButton.setDisable(false);
-            });
-        });
-
     }
 
     // =============================================================
@@ -797,10 +679,7 @@ public class CreateInstanceView extends VBox {
 
     private void createInstance() {
 
-        if (fabricCheckRunning || forgeCheckRunning || quiltCheckRunning
-                || neoForgeCheckRunning || ornitheCheckRunning || legacyFabricCheckRunning
-                || babricCheckRunning || liteLoaderCheckRunning || modLoaderCheckRunning
-                || riftCheckRunning || vantaLoaderCheckRunning) {
+        if (loaderChecksRunning) {
 
             statusLabel.setText(
                     Localization.text("createInstance.checkingLoaders")
@@ -852,6 +731,13 @@ public class CreateInstanceView extends VBox {
                     Localization.text("createInstance.validationLoader")
             );
 
+            return;
+        }
+
+        if (failedLoaders.contains(loader)) {
+            statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
+            retryLoadersButton.setVisible(true);
+            retryLoadersButton.setManaged(true);
             return;
         }
 
