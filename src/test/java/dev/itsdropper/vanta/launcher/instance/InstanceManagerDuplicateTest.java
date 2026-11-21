@@ -77,4 +77,52 @@ class InstanceManagerDuplicateTest {
         assertThrows(IOException.class,
                 () -> InstanceManager.copyInstanceFiles(sourceLink, target));
     }
+    @Test
+    void atomicallyClaimsUniqueDirectoriesForRepeatedNames() throws Exception {
+        Path root = temporaryDirectory.resolve("instances");
+        Path first = InstanceManager.claimInstanceDirectory(root, "My Modpack");
+        Path second = InstanceManager.claimInstanceDirectory(root, "My Modpack");
+        Path third = InstanceManager.claimInstanceDirectory(root, "My Modpack");
+
+        assertEquals("my-modpack", first.getFileName().toString());
+        assertEquals("my-modpack-2", second.getFileName().toString());
+        assertEquals("my-modpack-3", third.getFileName().toString());
+        assertTrue(Files.isDirectory(first));
+        assertTrue(Files.isDirectory(second));
+        assertTrue(Files.isDirectory(third));
+    }
+
+    @Test
+    void safelyNormalizesNamesAndBoundsDirectoryComponentLength() throws Exception {
+        Path root = temporaryDirectory.resolve("instances");
+        Path punctuation = InstanceManager.claimInstanceDirectory(root, "!!!");
+        Path longName = InstanceManager.claimInstanceDirectory(root, "A".repeat(300));
+
+        assertEquals("instance", punctuation.getFileName().toString());
+        assertTrue(longName.getFileName().toString().length() <= 80);
+    }
+
+    @Test
+    void concurrentClaimsNeverReturnTheSameDirectory() throws Exception {
+        Path root = temporaryDirectory.resolve("instances");
+        java.util.concurrent.ExecutorService executor =
+                java.util.concurrent.Executors.newFixedThreadPool(8);
+        try {
+            java.util.List<java.util.concurrent.Future<Path>> claims = new java.util.ArrayList<>();
+            for (int i = 0; i < 24; i++) {
+                claims.add(executor.submit(() -> InstanceManager.claimInstanceDirectory(root, "Concurrent")));
+            }
+
+            java.util.Set<Path> unique = new java.util.HashSet<>();
+            for (var claim : claims) {
+                unique.add(claim.get(10, java.util.concurrent.TimeUnit.SECONDS));
+            }
+
+            assertEquals(24, unique.size());
+            for (Path path : unique) assertTrue(Files.isDirectory(path));
+        } finally {
+            executor.shutdownNow();
+        }
+    }
+
 }

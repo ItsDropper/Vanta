@@ -161,83 +161,58 @@ public class InstanceManager {
             );
         }
 
-        String id =
-                createId(name);
+        Path directory = claimInstanceDirectory(
+                MinecraftLocator.getInstancesDirectory(),
+                name
+        );
+        String id = directory.getFileName().toString();
 
-        Path directory =
-                MinecraftLocator
-                        .getInstancesDirectory()
-                        .resolve(id);
+        try {
+            /*
+             * Mark the instance as incomplete immediately. If Vanta crashes,
+             * loses power, or is force-closed during installation, normal
+             * discovery will ignore it and explicit repair can recover it.
+             */
+            markInstallationStarted(directory);
 
-        if (Files.exists(directory)) {
+            createDirectory(directory, "mods");
+            createDirectory(directory, "config");
+            createDirectory(directory, "resourcepacks");
+            createDirectory(directory, "shaderpacks");
+            createDirectory(directory, "saves");
+            createDirectory(directory, "logs");
+            createDirectory(directory, "screenshots");
+            createDirectory(directory, "natives");
 
-            throw new IllegalStateException(
-                    "An instance with this ID already exists."
+            Instance instance = new Instance(
+                    id,
+                    name.trim(),
+                    minecraftVersion.trim(),
+                    loader.trim(),
+                    loaderVersion,
+                    directory
             );
+
+            saveInstance(instance);
+
+            InstanceSettings defaults = new InstanceSettings();
+            defaults.setRamMb(LauncherSettings.getDefaultRamMb());
+            defaults.setWidth(LauncherSettings.getDefaultWidth());
+            defaults.setHeight(LauncherSettings.getDefaultHeight());
+            defaults.setFullscreen(LauncherSettings.isDefaultFullscreen());
+            defaults.setJavaPath(LauncherSettings.getDefaultJavaPath());
+            defaults.setJavaArguments(LauncherSettings.getDefaultJavaArguments());
+            saveSettings(instance, defaults);
+
+            return instance;
+        } catch (IOException | RuntimeException failure) {
+            try {
+                deleteInstanceQuietly(directory);
+            } catch (RuntimeException cleanupFailure) {
+                failure.addSuppressed(cleanupFailure);
+            }
+            throw failure;
         }
-
-        Files.createDirectories(
-                directory
-        );
-
-        /*
-         * Mark the instance as incomplete immediately.
-         *
-         * If Vanta crashes, loses power, or is force-closed
-         * during installation, discoverInstances() will ignore
-         * this directory on the next startup.
-         */
-        markInstallationStarted(
-                directory
-        );
-
-        // ---------------------------------------------------------
-        // INSTANCE DIRECTORIES
-        // ---------------------------------------------------------
-
-        createDirectory(directory, "mods");
-        createDirectory(directory, "config");
-        createDirectory(directory, "resourcepacks");
-        createDirectory(directory, "shaderpacks");
-        createDirectory(directory, "saves");
-        createDirectory(directory, "logs");
-        createDirectory(directory, "screenshots");
-        createDirectory(directory, "natives");
-
-        // ---------------------------------------------------------
-        // INSTANCE
-        // ---------------------------------------------------------
-
-        Instance instance =
-                new Instance(
-                        id,
-                        name,
-                        minecraftVersion,
-                        loader,
-                        loaderVersion,
-                        directory
-                );
-
-        saveInstance(instance);
-
-        // ---------------------------------------------------------
-        // DEFAULT SETTINGS
-        // ---------------------------------------------------------
-
-        InstanceSettings defaults = new InstanceSettings();
-        defaults.setRamMb(LauncherSettings.getDefaultRamMb());
-        defaults.setWidth(LauncherSettings.getDefaultWidth());
-        defaults.setHeight(LauncherSettings.getDefaultHeight());
-        defaults.setFullscreen(LauncherSettings.isDefaultFullscreen());
-        defaults.setJavaPath(LauncherSettings.getDefaultJavaPath());
-        defaults.setJavaArguments(LauncherSettings.getDefaultJavaArguments());
-
-        saveSettings(
-                instance,
-                defaults
-        );
-
-        return instance;
     }
 
     // =============================================================
@@ -677,51 +652,58 @@ public class InstanceManager {
     // ID
     // =============================================================
 
-    private static String createId(
-            String name
-    ) {
-
-        String id =
-                name
-                        .trim()
-                        .toLowerCase()
-                        .replaceAll(
-                                "[^a-z0-9]+",
-                                "-"
-                        )
-                        .replaceAll(
-                                "^-+|-+$",
-                                ""
-                        );
-
-        if (id.isBlank()) {
-            id = "instance";
-        }
-
-        String base =
-                id;
-
+    private static String createId(String name) {
+        String base = baseId(name);
+        String id = base;
         int counter = 2;
+        Path instances = MinecraftLocator.getInstancesDirectory();
+        while (Files.exists(instances.resolve(id))) {
+            id = base + "-" + counter++;
+        }
+        return id;
+    }
 
-        Path instances =
-                MinecraftLocator
-                        .getInstancesDirectory();
+    private static String baseId(String name) {
+        String id = name == null ? "" : name.trim().toLowerCase(java.util.Locale.ROOT)
+                .replaceAll("[^a-z0-9]+", "-")
+                .replaceAll("^-+|-+$", "");
+        if (id.isBlank()) id = "instance";
+        // Keep directory names comfortably below platform path-component limits,
+        // leaving room for numeric collision suffixes.
+        if (id.length() > 80) id = id.substring(0, 80).replaceAll("-+$", "");
+        return id.isBlank() ? "instance" : id;
+    }
 
-        while (
-                Files.exists(
-                        instances.resolve(id)
-                )
-        ) {
+    /**
+     * Atomically reserves a unique instance directory. The old check-then-create
+     * sequence could race when two creation requests used the same name, causing
+     * both requests to select the same directory and merge their installation
+     * writes. Files.createDirectory is the atomic claim; collisions are retried.
+     */
+    static Path claimInstanceDirectory(Path instancesDirectory, String name) throws IOException {
+        if (instancesDirectory == null) throw new IllegalArgumentException("Instances directory is required.");
+        if (name == null || name.isBlank()) throw new IllegalArgumentException("Instance name cannot be empty.");
 
-            id =
-                    base
-                            + "-"
-                            + counter;
-
-            counter++;
+        Path root = instancesDirectory.toAbsolutePath().normalize();
+        Files.createDirectories(root);
+        if (Files.isSymbolicLink(root) || !Files.isDirectory(root, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Instances directory is not a safe directory.");
         }
 
-        return id;
+        String base = baseId(name);
+        for (int attempt = 1; attempt <= 10_000; attempt++) {
+            String id = attempt == 1 ? base : base + "-" + attempt;
+            Path candidate = root.resolve(id).normalize();
+            if (!candidate.startsWith(root)) throw new IOException("Instance destination escapes the instances directory.");
+            try {
+                Files.createDirectory(candidate);
+                return candidate;
+            } catch (java.nio.file.FileAlreadyExistsException collision) {
+                // A concurrent creation may claim the candidate after it was
+                // calculated. Retry with the next deterministic suffix.
+            }
+        }
+        throw new IOException("Could not allocate a unique instance directory after 10,000 attempts.");
     }
 
     // =============================================================
