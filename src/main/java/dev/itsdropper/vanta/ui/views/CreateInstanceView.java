@@ -71,6 +71,7 @@ public class CreateInstanceView extends VBox {
     private final AtomicInteger manifestRequestId = new AtomicInteger();
     private final AtomicInteger loaderCheckId = new AtomicInteger();
     private volatile boolean loaderChecksRunning;
+    private volatile boolean loaderCheckCompleted;
     private volatile Future<?> activeLoaderCheck;
 
     public CreateInstanceView(
@@ -564,7 +565,7 @@ public class CreateInstanceView extends VBox {
         Future<?> previousCheck = activeLoaderCheck;
         if (previousCheck != null) previousCheck.cancel(true);
         activeLoaderCheck = null;
-        String previouslySelectedLoader = loaderBox.getValue();
+        String previouslySelectedLoader = loaderCheckCompleted ? loaderBox.getValue() : null;
         availableLoaders.clear();
         failedLoaders.clear();
         availableLoaders.add("Vanilla");
@@ -605,6 +606,7 @@ public class CreateInstanceView extends VBox {
                     availableLoaders.addAll(report.availableLoaders());
                     failedLoaders.clear();
                     failedLoaders.addAll(report.failedLoaders());
+                    loaderCheckCompleted = true;
 
                     loaderBox.getItems().setAll(
                             "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
@@ -659,6 +661,7 @@ public class CreateInstanceView extends VBox {
 
         activeLoaderCheck = null;
         loaderChecksRunning = false;
+        loaderCheckCompleted = true;
         loaderBox.setDisable(false);
         createButton.setDisable(false);
         failedLoaders.clear();
