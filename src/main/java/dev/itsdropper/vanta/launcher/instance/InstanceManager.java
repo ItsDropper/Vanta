@@ -207,8 +207,8 @@ public class InstanceManager {
             return instance;
         } catch (IOException | RuntimeException failure) {
             try {
-                deleteInstanceQuietly(directory);
-            } catch (RuntimeException cleanupFailure) {
+                deleteInstanceTree(directory);
+            } catch (IOException cleanupFailure) {
                 failure.addSuppressed(cleanupFailure);
             }
             throw failure;
@@ -593,12 +593,19 @@ public class InstanceManager {
     }
 
     private static void deleteInstanceQuietly(Path directory) {
-        if (!Files.exists(directory)) return;
+        try {
+            deleteInstanceTree(directory);
+        } catch (IOException ignored) {
+        }
+    }
+
+    private static void deleteInstanceTree(Path directory) throws IOException {
+        if (directory == null || !Files.exists(directory, java.nio.file.LinkOption.NOFOLLOW_LINKS)) return;
         try (var stream = Files.walk(directory)) {
-            stream.sorted(Comparator.reverseOrder()).forEach(path -> {
-                try { Files.deleteIfExists(path); } catch (IOException ignored) { }
-            });
-        } catch (IOException ignored) { }
+            for (Path path : stream.sorted(Comparator.reverseOrder()).toList()) {
+                Files.deleteIfExists(path);
+            }
+        }
     }
 
     // =============================================================
