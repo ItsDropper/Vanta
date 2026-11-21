@@ -185,6 +185,33 @@ class LaunchHistoryRepositoryTest {
     }
 
     @Test
+    void recordsEnvironmentBaselineAndDriftChecksAsTimelineActivities() throws Exception {
+        Path store = temporaryDirectory.resolve("environment-activities.json");
+        LaunchHistoryRepository repository = new LaunchHistoryRepository(store);
+        Instance instance = instance("environment", "Environment");
+
+        var baseline = repository.recordActivity(instance,
+                LaunchHistoryRepository.Outcome.ENVIRONMENT_BASELINE_SAVED,
+                "Saved environment baseline for future drift checks");
+        var cleanCheck = repository.recordActivity(instance,
+                LaunchHistoryRepository.Outcome.ENVIRONMENT_CHECK_CLEAN,
+                "Environment matches its saved baseline");
+        var driftCheck = repository.recordActivity(instance,
+                LaunchHistoryRepository.Outcome.ENVIRONMENT_DRIFT_DETECTED,
+                "Detected 3 environment changes against baseline");
+
+        List<LaunchHistoryRepository.LaunchRecord> persisted =
+                new LaunchHistoryRepository(store).list();
+        assertEquals(3, persisted.size());
+        assertTrue(persisted.stream().anyMatch(record -> record.id().equals(baseline.id())
+                && record.outcome() == LaunchHistoryRepository.Outcome.ENVIRONMENT_BASELINE_SAVED));
+        assertTrue(persisted.stream().anyMatch(record -> record.id().equals(cleanCheck.id())
+                && record.outcome() == LaunchHistoryRepository.Outcome.ENVIRONMENT_CHECK_CLEAN));
+        assertTrue(persisted.stream().anyMatch(record -> record.id().equals(driftCheck.id())
+                && record.outcome() == LaunchHistoryRepository.Outcome.ENVIRONMENT_DRIFT_DETECTED));
+    }
+
+    @Test
     void preservesUuidShapedStableInstanceIds() throws Exception {
         String instanceId = "123e4567-e89b-12d3-a456-426614174000";
         LaunchHistoryRepository repository = new LaunchHistoryRepository(
