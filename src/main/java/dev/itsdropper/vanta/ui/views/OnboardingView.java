@@ -150,10 +150,10 @@ public class OnboardingView extends BorderPane {
                 Localization.text("onboarding.organizationBody")
         );
 
-        addFeature(box, "1", "Instances", "Each instance has its own mods, resource packs, shaders, worlds, screenshots, logs and settings.");
-        addFeature(box, "2", "Content", "Use Browse Content to install from Modrinth. Installed content can then be enabled, disabled or removed per instance.");
-        addFeature(box, "3", "Launch", "Vanta resolves the selected instance's Minecraft version, loader, libraries and settings before starting it.");
-        addFeature(box, "4", "Repair", "If a dependency is missing or damaged, use the instance repair flow instead of manually deleting random files.");
+        addFeature(box, "1", Localization.text("onboarding.feature.instancesTitle"), Localization.text("onboarding.feature.instancesDescription"));
+        addFeature(box, "2", Localization.text("onboarding.feature.contentTitle"), Localization.text("onboarding.feature.contentDescription"));
+        addFeature(box, "3", Localization.text("onboarding.feature.launchTitle"), Localization.text("onboarding.feature.launchDescription"));
+        addFeature(box, "4", Localization.text("onboarding.feature.repairTitle"), Localization.text("onboarding.feature.repairDescription"));
 
         Label path = new Label(
                 Localization.text("onboarding.instanceTip")
@@ -211,9 +211,9 @@ public class OnboardingView extends BorderPane {
                 Localization.text("onboarding.readyBody")
         );
 
-        addFeature(box, "1", "Create your first instance", "Pick a Minecraft version and loader. Vanta creates the isolated folder structure for you.");
-        addFeature(box, "2", "Open Browse Content", "Install compatible mods, resource packs or shaders from Modrinth for that instance.");
-        addFeature(box, "3", "Tune it in Settings", "Set RAM, resolution, fullscreen, Java arguments and Minecraft arguments for an individual instance.");
+        addFeature(box, "1", Localization.text("onboarding.feature.firstInstanceTitle"), Localization.text("onboarding.feature.firstInstanceDescription"));
+        addFeature(box, "2", Localization.text("onboarding.feature.browseTitle"), Localization.text("onboarding.feature.browseDescription"));
+        addFeature(box, "3", Localization.text("onboarding.feature.settingsTitle"), Localization.text("onboarding.feature.settingsDescription"));
 
         Label telemetryTitle = new Label(Localization.text("onboarding.privacyTitle"));
         telemetryTitle.getStyleClass().add("onboarding-feature-title");
