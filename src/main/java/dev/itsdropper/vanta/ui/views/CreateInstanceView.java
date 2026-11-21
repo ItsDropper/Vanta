@@ -661,7 +661,6 @@ public class CreateInstanceView extends VBox {
 
         activeLoaderCheck = null;
         loaderChecksRunning = false;
-        loaderCheckCompleted = true;
         loaderBox.setDisable(false);
         createButton.setDisable(false);
         failedLoaders.clear();
