@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher.instance;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
+import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.io.IOException;
@@ -53,6 +54,11 @@ public final class EnvironmentGuardianService implements AutoCloseable {
         void create(Instance instance, Path destination) throws IOException;
     }
 
+    @FunctionalInterface
+    interface ActivityRecorder {
+        void record(Instance instance, LaunchHistoryRepository.Outcome outcome, String message) throws IOException;
+    }
+
     private final Path backupRoot;
     private final Supplier<List<Instance>> instanceSupplier;
     private final Predicate<Instance> runningPredicate;
@@ -60,6 +66,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
     private final IntSupplier intervalHours;
     private final IntSupplier retentionCount;
     private final BackupCreator backupCreator;
+    private final ActivityRecorder activityRecorder;
     private final ScheduledExecutorService scheduler;
     private final AtomicBoolean cycleRunning = new AtomicBoolean(false);
     private final AtomicBoolean started = new AtomicBoolean(false);
@@ -80,7 +87,8 @@ public final class EnvironmentGuardianService implements AutoCloseable {
                 LauncherSettings::isAutomaticBackupsEnabled,
                 LauncherSettings::getAutomaticBackupIntervalHours,
                 LauncherSettings::getAutomaticBackupRetention,
-                InstanceBackupService::createBackup
+                InstanceBackupService::createBackup,
+                (instance, outcome, message) -> new LaunchHistoryRepository().recordActivity(instance, outcome, message)
         );
     }
 
@@ -93,6 +101,21 @@ public final class EnvironmentGuardianService implements AutoCloseable {
             IntSupplier retentionCount,
             BackupCreator backupCreator
     ) {
+        this(backupRoot, instanceSupplier, runningPredicate, enabled, intervalHours, retentionCount,
+                backupCreator, (instance, outcome, message) ->
+                        new LaunchHistoryRepository().recordActivity(instance, outcome, message));
+    }
+
+    EnvironmentGuardianService(
+            Path backupRoot,
+            Supplier<List<Instance>> instanceSupplier,
+            Predicate<Instance> runningPredicate,
+            BooleanSupplier enabled,
+            IntSupplier intervalHours,
+            IntSupplier retentionCount,
+            BackupCreator backupCreator,
+            ActivityRecorder activityRecorder
+    ) {
         this.backupRoot = java.util.Objects.requireNonNull(backupRoot, "backupRoot")
                 .toAbsolutePath().normalize();
         this.instanceSupplier = java.util.Objects.requireNonNull(instanceSupplier, "instanceSupplier");
@@ -101,6 +124,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
         this.intervalHours = java.util.Objects.requireNonNull(intervalHours, "intervalHours");
         this.retentionCount = java.util.Objects.requireNonNull(retentionCount, "retentionCount");
         this.backupCreator = java.util.Objects.requireNonNull(backupCreator, "backupCreator");
+        this.activityRecorder = java.util.Objects.requireNonNull(activityRecorder, "activityRecorder");
         this.scheduler = Executors.newSingleThreadScheduledExecutor(task -> {
             Thread thread = new Thread(task, "vanta-environment-guardian");
             thread.setDaemon(true);
@@ -174,6 +198,7 @@ public final class EnvironmentGuardianService implements AutoCloseable {
                         message += " Retention cleanup could not finish: " + safeMessage(cleanupFailure);
                     }
                     results.add(new BackupResult(instance.getId(), Status.CREATED, destination, message));
+                    recordBackupActivity(instance);
                 } catch (Exception failure) {
                     String message = safeMessage(failure);
                     System.err.println("[Environment Guardian] Backup failed for "
@@ -184,6 +209,17 @@ public final class EnvironmentGuardianService implements AutoCloseable {
             return List.copyOf(results);
         } finally {
             cycleRunning.set(false);
+        }
+    }
+
+    private void recordBackupActivity(Instance instance) {
+        try {
+            activityRecorder.record(instance, LaunchHistoryRepository.Outcome.BACKUP_CREATED,
+                    "Automatic backup created and integrity-verified.");
+        } catch (IOException | RuntimeException failure) {
+            // Timeline persistence is ancillary; a verified backup remains successful.
+            System.err.println("[Environment Guardian] Timeline recording failed: "
+                    + failure.getClass().getSimpleName());
         }
     }
 
