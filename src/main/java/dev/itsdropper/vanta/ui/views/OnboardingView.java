@@ -116,7 +116,9 @@ public class OnboardingView extends BorderPane {
     private void showStep() {
         stepLabel.setText(Localization.text("onboarding.stepPrefix") + (step + 1) + Localization.text("onboarding.stepSuffix"));
         backButton.setDisable(step == 0);
-        nextButton.setText(step == 3 ? Localization.text("onboarding.finish") : Localization.text("onboarding.next"));
+        nextButton.setVisible(step != 3);
+        nextButton.setManaged(step != 3);
+        nextButton.setText(Localization.text("onboarding.next"));
 
         Node page = switch (step) {
             case 0 -> welcomePage();
