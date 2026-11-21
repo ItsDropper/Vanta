@@ -12,8 +12,12 @@ public final class QuiltInstaller {
     public static String findLatestLoaderVersion(String minecraftVersion) throws Exception {
         requireSegment(minecraftVersion, "Minecraft version");
         JsonNode versions = DownloadUtil.downloadJson(META_URL + minecraftVersion);
-        if (versions == null || !versions.isArray() || versions.isEmpty()) {
-            throw new IllegalStateException("No Quilt Loader versions found for Minecraft " + minecraftVersion + ".");
+        if (versions == null || !versions.isArray()) {
+            throw new java.io.IOException("Quilt Meta returned an invalid loader-version response.");
+        }
+        if (versions.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No Quilt Loader versions found for Minecraft " + minecraftVersion + ".");
         }
 
         String fallback = null;
@@ -37,7 +41,8 @@ public final class QuiltInstaller {
         }
         if (latestStable != null) return latestStable;
         if (fallback != null) return fallback;
-        throw new IllegalStateException("Quilt Meta returned no valid loader versions for Minecraft " + minecraftVersion + ".");
+        throw new java.io.IOException(
+                "Quilt Meta returned malformed loader-version metadata for Minecraft " + minecraftVersion + ".");
     }
 
     private static int compareNumericVersions(String left, String right) {

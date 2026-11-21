@@ -75,14 +75,12 @@ public class FabricInstaller {
         JsonNode versions =
                 DownloadUtil.downloadJson(url);
 
-        if (versions == null
-                || !versions.isArray()
-                || versions.isEmpty()) {
-
-            throw new IllegalStateException(
-                    "No Fabric Loader versions found for Minecraft "
-                            + minecraftVersion
-            );
+        if (versions == null || !versions.isArray()) {
+            throw new java.io.IOException("Fabric Meta returned an invalid loader-version response.");
+        }
+        if (versions.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No Fabric Loader versions found for Minecraft " + minecraftVersion + ".");
         }
 
         /*
@@ -146,11 +144,8 @@ public class FabricInstaller {
             }
         }
 
-        throw new IllegalStateException(
-                "Fabric Loader metadata contained no valid loader "
-                        + "versions for Minecraft "
-                        + minecraftVersion
-        );
+        throw new java.io.IOException(
+                "Fabric Meta returned malformed loader-version metadata for Minecraft " + minecraftVersion + ".");
     }
 
     // =============================================================

@@ -139,7 +139,7 @@ public final class LoaderCompatibilityService {
             return version == null || version.isBlank()
                     ? new Result(Status.UNSUPPORTED, null)
                     : new Result(Status.AVAILABLE, version);
-        } catch (IllegalArgumentException | IllegalStateException unsupported) {
+        } catch (IllegalArgumentException unsupported) {
             if (hasIOExceptionCause(unsupported)) {
                 return new Result(Status.CHECK_FAILED, null);
             }

@@ -76,4 +76,12 @@ class LoaderCompatibilityServiceTest {
                         new LoaderCompatibilityService.Result(
                                 LoaderCompatibilityService.Status.AVAILABLE, "1.0")));
     }
+
+    @Test
+    void malformedMetadataIsRetryableRatherThanUnsupported() {
+        var result = LoaderCompatibilityService.evaluate(() -> {
+            throw new IllegalStateException("Loader metadata is malformed.");
+        });
+        assertEquals(LoaderCompatibilityService.Status.CHECK_FAILED, result.status());
+    }
 }

@@ -591,7 +591,8 @@ public class CreateInstanceView extends VBox {
                 Localization.text("createInstance.checkingLoadersPrefix") + minecraftVersion + "..."
         );
 
-        activeLoaderCheck = UiExecutor.shared().execute(() -> {
+        try {
+            activeLoaderCheck = UiExecutor.shared().execute(() -> {
             try {
                 LoaderCompatibilityService.Report report =
                         LoaderCompatibilityService.checkMinecraftVersion(minecraftVersion);
@@ -642,35 +643,30 @@ public class CreateInstanceView extends VBox {
                 });
             } catch (InterruptedException interrupted) {
                 Thread.currentThread().interrupt();
-                UiExecutor.shared().dispatchToUi(() -> {
-                    if (requestId != loaderCheckId.get()) return;
-                    activeLoaderCheck = null;
-                    loaderChecksRunning = false;
-                    loaderBox.setDisable(false);
-                    createButton.setDisable(false);
-                    failedLoaders.addAll(loaderBox.getItems().stream()
-                            .filter(loader -> !"Vanilla".equals(loader)).toList());
-                    loaderBox.requestLayout();
-                    statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
-                    retryLoadersButton.setVisible(true);
-                    retryLoadersButton.setManaged(true);
-                });
+                UiExecutor.shared().dispatchToUi(() -> handleLoaderCheckFailure(requestId));
             } catch (RuntimeException failure) {
-                UiExecutor.shared().dispatchToUi(() -> {
-                    if (requestId != loaderCheckId.get()) return;
-                    activeLoaderCheck = null;
-                    loaderChecksRunning = false;
-                    loaderBox.setDisable(false);
-                    createButton.setDisable(false);
-                    failedLoaders.addAll(loaderBox.getItems().stream()
-                            .filter(loader -> !"Vanilla".equals(loader)).toList());
-                    loaderBox.requestLayout();
-                    statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
-                    retryLoadersButton.setVisible(true);
-                    retryLoadersButton.setManaged(true);
-                });
+                UiExecutor.shared().dispatchToUi(() -> handleLoaderCheckFailure(requestId));
             }
-        });
+            });
+        } catch (java.util.concurrent.RejectedExecutionException overloaded) {
+            handleLoaderCheckFailure(requestId);
+        }
+    }
+
+    private void handleLoaderCheckFailure(int requestId) {
+        if (requestId != loaderCheckId.get()) return;
+
+        activeLoaderCheck = null;
+        loaderChecksRunning = false;
+        loaderBox.setDisable(false);
+        createButton.setDisable(false);
+        failedLoaders.clear();
+        failedLoaders.addAll(loaderBox.getItems().stream()
+                .filter(loader -> !"Vanilla".equals(loader)).toList());
+        loaderBox.requestLayout();
+        statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
+        retryLoadersButton.setVisible(true);
+        retryLoadersButton.setManaged(true);
     }
 
     // =============================================================

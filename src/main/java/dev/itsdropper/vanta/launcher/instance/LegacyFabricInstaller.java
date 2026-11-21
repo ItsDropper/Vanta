@@ -23,9 +23,12 @@ public final class LegacyFabricInstaller {
     public static String findLatestLoaderVersion(String minecraftVersion) throws Exception {
         String gameVersion = encodeSegment(minecraftVersion, "Minecraft version");
         JsonNode versions = DownloadUtil.downloadJson(META_URL + gameVersion);
-        if (versions == null || !versions.isArray() || versions.isEmpty()) {
-            throw new IllegalStateException(
-                    "No Legacy Fabric Loader versions found for Minecraft " + minecraftVersion + ".");
+        if (versions == null || !versions.isArray()) {
+            throw new java.io.IOException("LegacyFabric Meta returned an invalid loader-version response.");
+        }
+        if (versions.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No LegacyFabric Loader versions found for Minecraft " + minecraftVersion + ".");
         }
 
         String fallback = null;
@@ -52,8 +55,8 @@ public final class LegacyFabricInstaller {
         if (fallback != null) {
             return fallback;
         }
-        throw new IllegalStateException(
-                "Legacy Fabric Meta returned no valid loader versions for Minecraft " + minecraftVersion + ".");
+        throw new java.io.IOException(
+                "LegacyFabric Meta returned malformed loader-version metadata for Minecraft " + minecraftVersion + ".");
     }
 
     public static JsonNode downloadProfile(String minecraftVersion, String loaderVersion) throws Exception {

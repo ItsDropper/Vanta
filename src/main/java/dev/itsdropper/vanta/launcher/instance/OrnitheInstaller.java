@@ -21,8 +21,11 @@ public final class OrnitheInstaller {
     public static String findLatestLoaderVersion(String minecraftVersion) throws Exception {
         String gameVersion = encodeSegment(minecraftVersion, "Minecraft version");
         JsonNode versions = DownloadUtil.downloadJson(META_URL + gameVersion);
-        if (versions == null || !versions.isArray() || versions.isEmpty()) {
-            throw new IllegalStateException(
+        if (versions == null || !versions.isArray()) {
+            throw new java.io.IOException("Ornithe Meta returned an invalid loader-version response.");
+        }
+        if (versions.isEmpty()) {
+            throw new IllegalArgumentException(
                     "No Ornithe Loader versions found for Minecraft " + minecraftVersion + ".");
         }
 
@@ -50,8 +53,8 @@ public final class OrnitheInstaller {
         if (fallback != null) {
             return fallback;
         }
-        throw new IllegalStateException(
-                "Ornithe Meta returned no valid loader versions for Minecraft " + minecraftVersion + ".");
+        throw new java.io.IOException(
+                "Ornithe Meta returned malformed loader-version metadata for Minecraft " + minecraftVersion + ".");
     }
 
     public static JsonNode downloadProfile(String minecraftVersion, String loaderVersion) throws Exception {
