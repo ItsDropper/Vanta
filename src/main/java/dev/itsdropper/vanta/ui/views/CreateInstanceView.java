@@ -566,6 +566,7 @@ public class CreateInstanceView extends VBox {
         Future<?> previousCheck = activeLoaderCheck;
         if (previousCheck != null) previousCheck.cancel(true);
         activeLoaderCheck = null;
+
         String previouslySelectedLoader = loaderCheckCompleted ? loaderBox.getValue() : null;
         availableLoaders.clear();
         failedLoaders.clear();
@@ -595,66 +596,82 @@ public class CreateInstanceView extends VBox {
         );
 
         try {
-            activeLoaderCheck = UiExecutor.shared().execute(() -> {
-            try {
-                LoaderCompatibilityService.Report report =
-                        LoaderCompatibilityService.checkMinecraftVersion(minecraftVersion);
-                UiExecutor.shared().dispatchToUi(() -> {
-                    if (requestId != loaderCheckId.get()) return;
-                    activeLoaderCheck = null;
-
-                    availableLoaders.clear();
-                    availableLoaders.addAll(report.availableLoaders());
-                    failedLoaders.clear();
-                    failedLoaders.addAll(report.failedLoaders());
-                    loaderCheckCompleted = true;
-
-                    loaderBox.getItems().setAll(
-                            "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
-                            "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
-                            "LiteLoader", "ModLoader", "Rift", "Stein", "VantaLoader"
-                    );
-
-                    String preferredLoader = LauncherSettings.getDefaultLoader();
-                    String loaderToSelect = availableLoaders.contains(previouslySelectedLoader)
-                            ? previouslySelectedLoader
-                            : availableLoaders.contains(preferredLoader) ? preferredLoader : "Vanilla";
-                    loaderBox.getSelectionModel().select(loaderToSelect);
-
-                    loaderBox.setDisable(false);
-                    createButton.setDisable(false);
-                    loaderChecksRunning = false;
-
-                    boolean hasAnyModLoader = availableLoaders.stream()
-                            .anyMatch(loader -> !"Vanilla".equals(loader));
-                    if (report.hasFailures()) {
-                        statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
-                        retryLoadersButton.setVisible(true);
-                        retryLoadersButton.setManaged(true);
-                    } else if (!hasAnyModLoader) {
-                        statusLabel.setText(
-                                Localization.text("createInstance.noLoadersPrefix")
-                                        + minecraftVersion
-                                        + Localization.text("createInstance.vanillaOnlySuffix")
-                        );
-                    } else {
-                        statusLabel.setText(
-                                Localization.text("createInstance.loadersCheckedPrefix")
-                                        + minecraftVersion + "."
-                        );
-                    }
-                    loaderBox.requestLayout();
-                });
-            } catch (InterruptedException interrupted) {
-                Thread.currentThread().interrupt();
-                UiExecutor.shared().dispatchToUi(() -> handleLoaderCheckFailure(requestId));
-            } catch (RuntimeException failure) {
-                UiExecutor.shared().dispatchToUi(() -> handleLoaderCheckFailure(requestId));
-            }
-            });
+            activeLoaderCheck = UiExecutor.shared().execute(() ->
+                    runLoaderCompatibilityCheck(requestId, minecraftVersion, previouslySelectedLoader));
         } catch (java.util.concurrent.RejectedExecutionException overloaded) {
             handleLoaderCheckFailure(requestId);
         }
+    }
+
+    private void runLoaderCompatibilityCheck(
+            int requestId,
+            String minecraftVersion,
+            String previouslySelectedLoader
+    ) {
+        try {
+            LoaderCompatibilityService.Report report =
+                    LoaderCompatibilityService.checkMinecraftVersion(minecraftVersion);
+            UiExecutor.shared().dispatchToUi(() ->
+                    applyLoaderCompatibilityReport(
+                            requestId, minecraftVersion, previouslySelectedLoader, report));
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            UiExecutor.shared().dispatchToUi(() -> handleLoaderCheckFailure(requestId));
+        } catch (RuntimeException failure) {
+            UiExecutor.shared().dispatchToUi(() -> handleLoaderCheckFailure(requestId));
+        }
+    }
+
+    private void applyLoaderCompatibilityReport(
+            int requestId,
+            String minecraftVersion,
+            String previouslySelectedLoader,
+            LoaderCompatibilityService.Report report
+    ) {
+        if (requestId != loaderCheckId.get()) return;
+
+        activeLoaderCheck = null;
+        availableLoaders.clear();
+        availableLoaders.addAll(report.availableLoaders());
+        failedLoaders.clear();
+        failedLoaders.addAll(report.failedLoaders());
+        loaderCheckCompleted = true;
+
+        loaderBox.getItems().setAll(
+                "Vanilla", "Fabric", "Quilt", "Forge", "NeoForge",
+                "Ornithe", "Legacy Fabric", "Babric", "NilLoader",
+                "LiteLoader", "ModLoader", "Rift", "Stein", "VantaLoader"
+        );
+
+        String preferredLoader = LauncherSettings.getDefaultLoader();
+        String loaderToSelect = availableLoaders.contains(previouslySelectedLoader)
+                ? previouslySelectedLoader
+                : availableLoaders.contains(preferredLoader) ? preferredLoader : "Vanilla";
+        loaderBox.getSelectionModel().select(loaderToSelect);
+
+        loaderBox.setDisable(false);
+        createButton.setDisable(false);
+        loaderChecksRunning = false;
+
+        boolean hasAnyModLoader = availableLoaders.stream()
+                .anyMatch(loader -> !"Vanilla".equals(loader));
+        if (report.hasFailures()) {
+            statusLabel.setText(Localization.text("createInstance.loaderChecksFailed"));
+            retryLoadersButton.setVisible(true);
+            retryLoadersButton.setManaged(true);
+        } else if (!hasAnyModLoader) {
+            statusLabel.setText(
+                    Localization.text("createInstance.noLoadersPrefix")
+                            + minecraftVersion
+                            + Localization.text("createInstance.vanillaOnlySuffix")
+            );
+        } else {
+            statusLabel.setText(
+                    Localization.text("createInstance.loadersCheckedPrefix")
+                            + minecraftVersion + "."
+            );
+        }
+        loaderBox.requestLayout();
     }
 
     private void cancelLoaderCheck() {
