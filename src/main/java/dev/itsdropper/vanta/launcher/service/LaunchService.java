@@ -196,7 +196,9 @@ public class LaunchService {
 
             try {
                 launchData = buildLaunchData(instance, server);
+                logEnvironmentDiagnostics(instance, launchData);
             } catch (Exception buildFailure) {
+                logEnvironmentDiagnostics(instance, null);
                 /*
                  * A launch can fail before Minecraft even starts when
                  * an instance has a missing/corrupt core file. Repair
@@ -304,6 +306,27 @@ public class LaunchService {
                     getRecentOutput().isBlank() ? buildDetails(e) : getRecentOutput(), null);
 
             throw e;
+        }
+    }
+
+    private void logEnvironmentDiagnostics(Instance instance, LaunchData launchData) {
+        try {
+            dev.itsdropper.vanta.launcher.environment.EnvironmentDiagnosticService.Report report =
+                    new dev.itsdropper.vanta.launcher.environment.EnvironmentDiagnosticService()
+                            .inspect(instance, launchData);
+            for (dev.itsdropper.vanta.launcher.environment.EnvironmentDiagnosticService.Diagnostic diagnostic
+                    : report.diagnostics()) {
+                if (diagnostic.severity()
+                        == dev.itsdropper.vanta.launcher.environment.EnvironmentDiagnosticService.Severity.INFO) {
+                    continue;
+                }
+                System.err.println("[Vanta Environment] " + diagnostic.severity()
+                        + " [" + diagnostic.code() + "] " + diagnostic.message());
+            }
+        } catch (RuntimeException diagnosticFailure) {
+            // Diagnostics must never replace the launch pipeline's authoritative validation or repair result.
+            System.err.println("[Vanta Environment] Diagnostic pass failed: "
+                    + diagnosticFailure.getClass().getSimpleName());
         }
     }
 
