@@ -220,6 +220,7 @@ public class LaunchService {
                         .repair(instance);
 
                 launchData = buildLaunchData(instance, server);
+                logEnvironmentDiagnostics(instance, launchData);
 
                 System.out.println(
                         "[Vanta Repair] Instance repair completed successfully."
