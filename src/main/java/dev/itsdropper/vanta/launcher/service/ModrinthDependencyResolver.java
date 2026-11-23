@@ -10,9 +10,21 @@ import java.util.*;
 public final class ModrinthDependencyResolver {
     private final ModrinthClient client;
     private final InstalledModScanner installedModScanner;
-    private final Map<String, InstalledMod> modMetadataCache = new HashMap<>();
-    private final Map<String, String> modIdProjectCache = new HashMap<>();
-    private final Map<String, Map<String, String>> fabricApiModuleCache = new HashMap<>();
+    /*
+     * Resolution uses shared caches because candidate prefetch and metadata
+     * inspection reuse results throughout one graph. The public resolution
+     * entry point is synchronized so two graphs cannot clear or mix these
+     * caches while either graph is in progress. Concurrent maps are still
+     * required: root candidate prefetch populates the version cache from
+     * multiple worker threads, and metadata inspection is also exposed as a
+     * public operation.
+     */
+    private final Map<String, InstalledMod> modMetadataCache =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, String> modIdProjectCache =
+            new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, Map<String, String>> fabricApiModuleCache =
+            new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, List<ModrinthVersion>> versionCache =
             new java.util.concurrent.ConcurrentHashMap<>();
     private boolean fastResolution = true;
@@ -23,7 +35,7 @@ public final class ModrinthDependencyResolver {
         this.installedModScanner = installedModScanner;
     }
 
-    public void clearCaches() {
+    public synchronized void clearCaches() {
         modMetadataCache.clear();
         modIdProjectCache.clear();
         fabricApiModuleCache.clear();
@@ -34,7 +46,7 @@ public final class ModrinthDependencyResolver {
         return ModrinthLoaderIds.normalize(loader);
     }
 
-public List<ModrinthService.ResolvedMod> resolveModGraph(
+public synchronized List<ModrinthService.ResolvedMod> resolveModGraph(
             Instance instance,
             List<ModrinthProject> rootProjects,
             String requiredProjectId,
