@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.environment;
 
-import dev.itsdropper.vanta.launcher.ClasspathBuilder;
+import dev.itsdropper.vanta.launcher.LaunchData;
 import dev.itsdropper.vanta.launcher.VersionReader;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.VersionManifest;
@@ -47,6 +47,11 @@ public final class EnvironmentDiagnosticService {
     }
 
     public Report inspect(Instance instance) {
+        return inspect(instance, null);
+    }
+
+    /** Adds checks against the exact resolved launch artifacts without resolving them a second time. */
+    public Report inspect(Instance instance, LaunchData launchData) {
         List<Diagnostic> findings = new ArrayList<>();
         if (instance == null) {
             findings.add(error("INSTANCE_MISSING", "No instance was supplied.", false));
@@ -117,20 +122,26 @@ public final class EnvironmentDiagnosticService {
         if (manifest.libraries == null) {
             findings.add(error("LIBRARY_METADATA_MISSING",
                     "Minecraft version metadata does not contain a library list.", true));
-        } else {
-            try {
-                List<Path> classpath = ClasspathBuilder.build(instance);
-                List<Path> missing = classpath.stream()
-                        .filter(path -> !Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
-                        .toList();
-                if (!missing.isEmpty()) {
-                    findings.add(error("CLASSPATH_ARTIFACT_MISSING",
-                            missing.size() + " required classpath artifact(s) are missing.", true));
+        }
+        if (launchData != null) {
+            List<Path> resolvedArtifacts = new ArrayList<>();
+            if (launchData.classpath != null) resolvedArtifacts.addAll(launchData.classpath);
+            if (launchData.nativeJars != null) resolvedArtifacts.addAll(launchData.nativeJars);
+            List<Path> missing = resolvedArtifacts.stream()
+                    .filter(path -> path == null || !Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS))
+                    .toList();
+            if (!missing.isEmpty()) {
+                findings.add(error("CLASSPATH_ARTIFACT_MISSING",
+                        missing.size() + " resolved classpath/native artifact(s) are missing.", true));
+            }
+            if (launchData.javaPath != null && !launchData.javaPath.isBlank()) {
+                Path configuredJava = Path.of(launchData.javaPath).toAbsolutePath().normalize();
+                if (Files.isSymbolicLink(configuredJava)
+                        || !Files.isRegularFile(configuredJava, LinkOption.NOFOLLOW_LINKS)
+                        || !Files.isExecutable(configuredJava)) {
+                    findings.add(error("CONFIGURED_JAVA_INVALID",
+                            "The instance's configured Java executable is missing or not executable.", false));
                 }
-            } catch (RuntimeException failure) {
-                findings.add(error("DEPENDENCY_RESOLUTION_FAILED",
-                        "Required Minecraft or loader libraries could not be resolved: "
-                                + safeMessage(failure), true));
             }
         }
 
