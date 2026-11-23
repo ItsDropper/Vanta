@@ -152,6 +152,29 @@ public final class EnvironmentDiagnosticService {
                     "The Minecraft client JAR is missing, empty, or not a regular file.", true));
         }
 
+        String loader = instance.getLoader() == null ? "" : instance.getLoader().replaceAll("[^A-Za-z0-9]", "");
+        if (loader.equalsIgnoreCase("NilLoader")) {
+            Path agent = dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller.agentPath(instance);
+            if (!dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller.hasAgentEntrypoint(agent)) {
+                findings.add(error("LOADER_AGENT_INVALID",
+                        "NilLoader's Java agent is missing or invalid.", true));
+            }
+        } else if (loader.equalsIgnoreCase("VantaLoader")) {
+            Path mappings = minecraft.resolve("client_mappings.txt");
+            Path agent = dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller.agentPath(instance);
+            if (!Files.isRegularFile(mappings, LinkOption.NOFOLLOW_LINKS)
+                    || !dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller.isValidAgentJar(agent)) {
+                findings.add(error("LOADER_RUNTIME_INVALID",
+                        "VantaLoader's agent or official client mappings are missing or invalid.", true));
+            }
+        } else if (loader.equalsIgnoreCase("ModLoader")) {
+            Path bootstrapClass = root.resolve("modloader-bootstrap").resolve("ModLoader.class");
+            if (!Files.isRegularFile(bootstrapClass, LinkOption.NOFOLLOW_LINKS)) {
+                findings.add(error("LOADER_BOOTSTRAP_MISSING",
+                        "The ModLoader bootstrap class is missing.", true));
+            }
+        }
+
         if (manifest.javaVersion != null && manifest.javaVersion.majorVersion > 0) {
             findings.add(new Diagnostic("JAVA_REQUIREMENT",
                     Severity.INFO,
