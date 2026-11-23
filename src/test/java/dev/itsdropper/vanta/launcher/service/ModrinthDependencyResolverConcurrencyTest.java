@@ -1,15 +1,15 @@
 package dev.itsdropper.vanta.launcher.service;
 
-import dev.itsdropper.vanta.launcher.instance.InstalledMod;
-import dev.itsdropper.vanta.launcher.modrinth.ModrinthVersion;
+import dev.itsdropper.vanta.launcher.modrinth.InstalledModScanner;
+import dev.itsdropper.vanta.launcher.modrinth.ModrinthClient;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ModrinthDependencyResolverConcurrencyTest {
@@ -33,19 +33,20 @@ class ModrinthDependencyResolverConcurrencyTest {
 
     @Test
     void cachesUsedByConcurrentPrefetchAreConcurrentMaps() throws Exception {
-        assertConcurrentCache("versionCache");
-        assertConcurrentCache("modMetadataCache");
-        assertConcurrentCache("modIdProjectCache");
-        assertConcurrentCache("fabricApiModuleCache");
+        ModrinthDependencyResolver resolver =
+                new ModrinthDependencyResolver(new ModrinthClient(), new InstalledModScanner());
+
+        assertConcurrentCache(resolver, "versionCache");
+        assertConcurrentCache(resolver, "modMetadataCache");
+        assertConcurrentCache(resolver, "modIdProjectCache");
+        assertConcurrentCache(resolver, "fabricApiModuleCache");
     }
 
-    private void assertConcurrentCache(String fieldName) throws Exception {
+    private void assertConcurrentCache(ModrinthDependencyResolver resolver, String fieldName)
+            throws Exception {
         Field field = ModrinthDependencyResolver.class.getDeclaredField(fieldName);
-        assertTrue(ConcurrentMap.class.isAssignableFrom(field.getType())
-                        || ConcurrentMap.class.isAssignableFrom(
-                                field.getType().getInterfaces().length == 0
-                                        ? field.getType()
-                                        : field.getType().getInterfaces()[0]),
+        field.setAccessible(true);
+        assertInstanceOf(ConcurrentMap.class, field.get(resolver),
                 fieldName + " must support concurrent access.");
     }
 }
