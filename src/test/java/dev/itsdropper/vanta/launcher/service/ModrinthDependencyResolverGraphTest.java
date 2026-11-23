@@ -129,4 +129,49 @@ class ModrinthDependencyResolverGraphTest {
 
         assertTrue(failure.getMessage().contains("Could not resolve compatible dependency graph"));
     }
+    @Test
+    void circularRequiredDependenciesTerminateAndReturnOneVersionPerProject() throws Exception {
+        ModrinthVersion a = version("a", "a-v1", "1.0.0",
+                "[{\"project_id\":\"b\",\"version_id\":\"b-v1\",\"dependency_type\":\"required\"}]");
+        ModrinthVersion b = version("b", "b-v1", "1.0.0",
+                "[{\"project_id\":\"a\",\"version_id\":\"a-v1\",\"dependency_type\":\"required\"}]");
+        ModrinthClient client = new ModrinthClient() {
+            @Override
+            public List<ModrinthVersion> getVersions(String projectId) {
+                return switch (projectId) {
+                    case "a" -> List.of(a);
+                    case "b" -> List.of(b);
+                    default -> List.of();
+                };
+            }
+        };
+        ModrinthDependencyResolver resolver =
+                new ModrinthDependencyResolver(client, new InstalledModScanner());
+
+        List<ModrinthService.ResolvedMod> graph = resolver.resolveModGraph(
+                instance(), List.of(project("a")), null, List.of());
+
+        assertEquals(2, graph.size());
+        assertEquals(2, graph.stream().map(ModrinthService.ResolvedMod::projectId).distinct().count());
+    }
+
+    @Test
+    void unavailableOptionalDependencyDoesNotBlockRootInstall() throws Exception {
+        ModrinthVersion app = version("app", "app-v1", "1.0.0",
+                "[{\"project_id\":\"optional-library\",\"version_id\":null,\"dependency_type\":\"optional\"}]");
+        ModrinthClient client = new ModrinthClient() {
+            @Override
+            public List<ModrinthVersion> getVersions(String projectId) {
+                return projectId.equals("app") ? List.of(app) : List.of();
+            }
+        };
+        ModrinthDependencyResolver resolver =
+                new ModrinthDependencyResolver(client, new InstalledModScanner());
+
+        List<ModrinthService.ResolvedMod> graph = resolver.resolveModGraph(
+                instance(), List.of(project("app")), null, List.of());
+
+        assertEquals(1, graph.size());
+        assertEquals("app", graph.get(0).projectId());
+    }
 }
