@@ -22,6 +22,14 @@ class MinecraftSecurityUpdateServiceTest {
     }
 
     @Test
+    void requiresMojangsPatchedFreetypeBuild() {
+        assertTrue(MinecraftSecurityUpdateService.isPatchedFreeTypeVersion("3.4.3-mojang-2.15.0"));
+        assertTrue(MinecraftSecurityUpdateService.isPatchedFreeTypeVersion("3.4.3-mojang-2.16.0"));
+        assertFalse(MinecraftSecurityUpdateService.isPatchedFreeTypeVersion("3.4.3"));
+        assertFalse(MinecraftSecurityUpdateService.isPatchedFreeTypeVersion("3.4.3-mojang-2.14.3"));
+    }
+
+    @Test
     void rebasesOfficialLwjglLibrariesWithoutRemovingLoaderLibraries() throws Exception {
         ObjectNode instance = (ObjectNode) JSON.readTree("""
                 {
