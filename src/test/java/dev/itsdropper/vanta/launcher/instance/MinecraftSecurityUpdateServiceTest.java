@@ -18,8 +18,11 @@ class MinecraftSecurityUpdateServiceTest {
         assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("1.8.9"));
         assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("b1.7.3"));
         assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("a1.2.6"));
+        assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("23w51a"));
+        assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("24w02a"));
         assertTrue(MinecraftSecurityUpdateService.requiresModernFontEngine("1.20.5"));
         assertTrue(MinecraftSecurityUpdateService.requiresModernFontEngine("1.21.11"));
+        assertTrue(MinecraftSecurityUpdateService.requiresModernFontEngine("24w03a"));
         assertTrue(MinecraftSecurityUpdateService.requiresModernFontEngine("26.3"));
         assertTrue(MinecraftSecurityUpdateService.requiresModernFontEngine("26.4-snapshot-10"));
     }
