@@ -15,6 +15,9 @@ class MinecraftSecurityUpdateServiceTest {
     @Test
     void identifiesMinecraftVersionsThatUseTheModernFontEngine() {
         assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("1.20.4"));
+        assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("1.8.9"));
+        assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("b1.7.3"));
+        assertFalse(MinecraftSecurityUpdateService.requiresModernFontEngine("a1.2.6"));
         assertTrue(MinecraftSecurityUpdateService.requiresModernFontEngine("1.20.5"));
         assertTrue(MinecraftSecurityUpdateService.requiresModernFontEngine("1.21.11"));
         assertTrue(MinecraftSecurityUpdateService.requiresModernFontEngine("26.3"));
@@ -55,7 +58,7 @@ class MinecraftSecurityUpdateServiceTest {
         assertEquals(4, libraries.size());
         assertEquals("org.lwjgl:lwjgl:3.4.3", libraries.get(0).path("name").asText());
         assertEquals("net.fabricmc:fabric-loader:0.18.1", libraries.get(1).path("name").asText());
-        assertEquals("org.lwjgl:lwjgl-freetype:3.4.4", libraries.get(2).path("name").asText());
+        assertEquals("org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0", libraries.get(2).path("name").asText());
         assertEquals("com.example:loader-addon:1.0.0", libraries.get(3).path("name").asText());
         assertFalse(libraries.toString().contains("lwjgl-freetype:3.4.3"));
         assertTrue(libraries.toString().contains("com.example:loader-addon:1.0.0"));
@@ -73,7 +76,7 @@ class MinecraftSecurityUpdateServiceTest {
                 }
                 """);
         JsonNode official = JSON.readTree("""
-                [{"name":"org.lwjgl:lwjgl-freetype:3.4.4"}]
+                [{"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0"}]
                 """);
 
         MinecraftSecurityUpdateService.replaceFreetypeLibraries(instance, official);
@@ -81,7 +84,7 @@ class MinecraftSecurityUpdateServiceTest {
         JsonNode libraries = instance.path("libraries");
         assertEquals(3, libraries.size());
         assertEquals("net.fabricmc:fabric-loader:0.18.1", libraries.get(0).path("name").asText());
-        assertEquals("org.lwjgl:lwjgl-freetype:3.4.4", libraries.get(1).path("name").asText());
+        assertEquals("org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0", libraries.get(1).path("name").asText());
         assertEquals("com.example:loader-addon:1.0.0", libraries.get(2).path("name").asText());
     }
 }
