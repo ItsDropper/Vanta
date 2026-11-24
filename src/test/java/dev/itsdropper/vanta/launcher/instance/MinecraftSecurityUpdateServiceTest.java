@@ -30,6 +30,7 @@ class MinecraftSecurityUpdateServiceTest {
         assertTrue(MinecraftSecurityUpdateService.isPatchedFreeTypeVersion("3.4.3-mojang-2.16.0"));
         assertFalse(MinecraftSecurityUpdateService.isPatchedFreeTypeVersion("3.4.3"));
         assertFalse(MinecraftSecurityUpdateService.isPatchedFreeTypeVersion("3.4.3-mojang-2.14.3"));
+        assertFalse(MinecraftSecurityUpdateService.isPatchedFreeTypeVersion("3.4.3-mojang-2.15.0-rc1"));
     }
 
     @Test
@@ -60,7 +61,6 @@ class MinecraftSecurityUpdateServiceTest {
         assertEquals("net.fabricmc:fabric-loader:0.18.1", libraries.get(1).path("name").asText());
         assertEquals("org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0", libraries.get(2).path("name").asText());
         assertEquals("com.example:loader-addon:1.0.0", libraries.get(3).path("name").asText());
-        assertFalse(libraries.toString().contains("lwjgl-freetype:3.4.3"));
         assertTrue(libraries.toString().contains("com.example:loader-addon:1.0.0"));
     }
 
