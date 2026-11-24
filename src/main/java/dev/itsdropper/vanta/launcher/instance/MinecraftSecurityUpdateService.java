@@ -58,11 +58,11 @@ public final class MinecraftSecurityUpdateService {
         byte[] previousBase = Files.isRegularFile(baseFile) ? Files.readAllBytes(baseFile) : null;
 
         ObjectNode merged = readObject(versionFile);
-        replaceLwjglLibraries(merged, official.path("libraries"));
+        replaceFreetypeLibraries(merged, official.path("libraries"));
 
         ObjectNode base = previousBase == null ? null : readObject(baseFile);
         if (base != null) {
-            replaceLwjglLibraries(base, official.path("libraries"));
+            replaceFreetypeLibraries(base, official.path("libraries"));
         }
 
         try {
@@ -123,16 +123,16 @@ public final class MinecraftSecurityUpdateService {
             throw new IllegalStateException("Mojang returned incomplete or mismatched metadata for "
                     + expectedVersion + "; refusing to launch.");
         }
-        boolean hasLwjgl = false;
+        boolean hasFreetype = false;
         for (JsonNode library : metadata.path("libraries")) {
-            if (isLwjglLibrary(library)) {
-                hasLwjgl = true;
+            if (isFreetypeLibrary(library)) {
+                hasFreetype = true;
                 validateDownloadIntegrityMetadata(library);
             }
         }
-        if (!hasLwjgl) {
+        if (!hasFreetype) {
             throw new IllegalStateException("Mojang metadata for " + expectedVersion
-                    + " contains no official LWJGL dependencies; refusing to launch.");
+                    + " contains no official FreeType dependency; refusing to launch.");
         }
 
         JsonNode freetype = findLibrary(metadata.path("libraries"), "org.lwjgl:lwjgl-freetype");
@@ -179,7 +179,7 @@ public final class MinecraftSecurityUpdateService {
         return (ObjectNode) node;
     }
 
-    static void replaceLwjglLibraries(ObjectNode metadata, JsonNode officialLibraries) {
+    static void replaceFreetypeLibraries(ObjectNode metadata, JsonNode officialLibraries) {
         JsonNode existing = metadata.path("libraries");
         if (!existing.isArray()) {
             throw new IllegalStateException("Instance metadata has no library array.");
@@ -188,7 +188,7 @@ public final class MinecraftSecurityUpdateService {
         int insertionIndex = -1;
         List<JsonNode> retained = new ArrayList<>();
         for (JsonNode library : existing) {
-            if (isLwjglLibrary(library)) {
+            if (isFreetypeLibrary(library)) {
                 if (insertionIndex < 0) {
                     insertionIndex = retained.size();
                 }
@@ -199,7 +199,7 @@ public final class MinecraftSecurityUpdateService {
 
         List<JsonNode> officialLwjgl = new ArrayList<>();
         for (JsonNode library : officialLibraries) {
-            if (isLwjglLibrary(library)) {
+            if (isFreetypeLibrary(library)) {
                 officialLwjgl.add(library.deepCopy());
             }
         }
@@ -217,9 +217,9 @@ public final class MinecraftSecurityUpdateService {
         metadata.set("libraries", result);
     }
 
-    private static boolean isLwjglLibrary(JsonNode library) {
+    private static boolean isFreetypeLibrary(JsonNode library) {
         String name = library == null ? "" : library.path("name").asText("");
-        return name.startsWith("org.lwjgl:");
+        return name.startsWith("org.lwjgl:lwjgl-freetype:");
     }
 
     static boolean isPatchedFreeTypeVersion(String lwjglVersion) {
