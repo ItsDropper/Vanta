@@ -51,9 +51,11 @@ public class MinecraftVersionResolver {
             );
         }
 
-        String host = java.net.URI.create(metadataUrl).getHost();
-        if (!"piston-meta.mojang.com".equalsIgnoreCase(host)
-                && !"launchermeta.mojang.com".equalsIgnoreCase(host)) {
+        java.net.URI metadataUri = java.net.URI.create(metadataUrl);
+        String host = metadataUri.getHost();
+        if (!"https".equalsIgnoreCase(metadataUri.getScheme())
+                || (!"piston-meta.mojang.com".equalsIgnoreCase(host)
+                && !"launchermeta.mojang.com".equalsIgnoreCase(host))) {
             throw new IllegalStateException(
                     "Minecraft version metadata does not come from Mojang's official metadata host."
             );
