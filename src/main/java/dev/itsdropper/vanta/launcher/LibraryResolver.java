@@ -145,14 +145,28 @@ public final class LibraryResolver {
      */
     public static Library.Artifact findNativeArtifact(Library library) {
         if (library == null || !isAllowedOnCurrentPlatform(library)
-                || library.downloads == null || library.downloads.classifiers == null
-                || library.downloads.classifiers.isEmpty()) {
+                || library.downloads == null) {
             return null;
         }
 
-        Map<String, Library.Artifact> classifiers = library.downloads.classifiers;
         String osName = getOperatingSystem();
         String architecture = getArchitecture();
+        Map<String, Library.Artifact> classifiers = library.downloads.classifiers;
+
+        // Newer Mojang manifests can represent each native classifier as a
+        // separate library entry whose downloads.artifact is the native JAR,
+        // rather than grouping it under downloads.classifiers.
+        if (classifiers == null || classifiers.isEmpty()) {
+            if (library.downloads.artifact == null || library.name == null || library.name.isBlank()) {
+                return null;
+            }
+            MavenCoordinate coordinate = parseCoordinate(library.name);
+            if (coordinate.classifier == null
+                    || !isSeparateNativeClassifierApplicable(coordinate.classifier, osName, architecture)) {
+                return null;
+            }
+            return library.downloads.artifact;
+        }
 
         if (library.natives != null && !library.natives.isEmpty()) {
             String nativeClassifier = findNativeClassifierFromMap(library.natives, osName);
@@ -239,6 +253,53 @@ public final class LibraryResolver {
         }
 
         return null;
+    }
+
+    static boolean isSeparateNativeClassifierApplicable(
+            String classifier,
+            String osName,
+            String architecture
+    ) {
+        if (classifier == null || classifier.isBlank()
+                || osName == null || architecture == null) {
+            return false;
+        }
+
+        String normalized = classifier.toLowerCase(Locale.ROOT);
+        boolean osMatches = switch (osName) {
+            case "windows" -> normalized.contains("natives-windows")
+                    || normalized.contains("windows-natives");
+            case "linux" -> normalized.contains("natives-linux")
+                    || normalized.contains("linux-natives");
+            case "osx" -> normalized.contains("natives-osx")
+                    || normalized.contains("natives-macos")
+                    || normalized.contains("natives-mac")
+                    || normalized.contains("osx-natives")
+                    || normalized.contains("macos-natives");
+            default -> false;
+        };
+        if (!osMatches) {
+            return false;
+        }
+
+        if (normalized.contains("arm64") || normalized.contains("aarch64")) {
+            return "arm64".equals(architecture);
+        }
+        if (normalized.contains("arm32")) {
+            return "arm32".equals(architecture);
+        }
+        if (normalized.contains("x86_64") || normalized.contains("amd64")
+                || normalized.endsWith("-64")) {
+            return "64".equals(architecture);
+        }
+        if (normalized.contains("x86") || normalized.contains("i386")
+                || normalized.endsWith("-32")) {
+            return "32".equals(architecture);
+        }
+
+        // Mojang's unsuffixed native classifiers are the default x86-64
+        // binaries. Do not accidentally load them on ARM or 32-bit systems.
+        return "64".equals(architecture);
     }
 
     private static String findModernNativeClassifier(
