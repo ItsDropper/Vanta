@@ -110,6 +110,12 @@ public final class MinecraftSecurityUpdateService {
                 || normalized.startsWith("inf-")) {
             return false;
         }
+        // The FreeType pipeline first appeared in snapshot 24w03a.
+        if (normalized.matches("\\d{2}w\\d{2}[a-z]")) {
+            int year = Integer.parseInt(normalized.substring(0, 2));
+            int week = Integer.parseInt(normalized.substring(3, 5));
+            return year > 24 || (year == 24 && week >= 3);
+        }
         String[] parts = version.split("[.-]");
         try {
             int major = Integer.parseInt(parts[0]);
