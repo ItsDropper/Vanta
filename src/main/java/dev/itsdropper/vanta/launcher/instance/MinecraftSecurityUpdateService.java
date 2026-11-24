@@ -75,7 +75,7 @@ public final class MinecraftSecurityUpdateService {
             // Downloads are verified against the SHA-1 values in Mojang's
             // metadata. NativeExtractor publishes a clean staged directory,
             // removing stale native binaries from the previous LWJGL version.
-            MinecraftFileInstaller.installLibraries(merged);
+            MinecraftFileInstaller.installLibraries(freetypeOnlyMetadata(merged));
             NativeInstaller.extract(instance, merged);
 
             JsonNode freetype = findLibrary(official.path("libraries"), "org.lwjgl:lwjgl-freetype");
@@ -177,6 +177,21 @@ public final class MinecraftSecurityUpdateService {
                 || !sha1.matches("(?i)[0-9a-f]{40}")) {
             throw new IllegalStateException("Mojang FreeType artifact is missing a trusted URL, path, or SHA-1: " + name);
         }
+    }
+
+    private static ObjectNode freetypeOnlyMetadata(JsonNode metadata) {
+        ObjectNode result = JSON.createObjectNode();
+        ArrayNode libraries = JSON.createArrayNode();
+        for (JsonNode library : metadata.path("libraries")) {
+            if (isFreetypeLibrary(library)) {
+                libraries.add(library.deepCopy());
+            }
+        }
+        if (libraries.isEmpty()) {
+            throw new IllegalStateException("Updated instance metadata lost its patched FreeType libraries.");
+        }
+        result.set("libraries", libraries);
+        return result;
     }
 
     private static ObjectNode readObject(Path file) throws IOException {
