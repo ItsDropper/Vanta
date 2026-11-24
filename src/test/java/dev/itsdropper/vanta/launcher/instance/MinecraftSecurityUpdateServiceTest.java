@@ -30,7 +30,7 @@ class MinecraftSecurityUpdateServiceTest {
     }
 
     @Test
-    void rebasesOfficialLwjglLibrariesWithoutRemovingLoaderLibraries() throws Exception {
+    void rebasesOfficialFreetypeLibraryWithoutRemovingOtherDependencies() throws Exception {
         ObjectNode instance = (ObjectNode) JSON.readTree("""
                 {
                   "libraries": [
@@ -49,16 +49,15 @@ class MinecraftSecurityUpdateServiceTest {
                 ]
                 """);
 
-        MinecraftSecurityUpdateService.replaceLwjglLibraries(instance, official);
+        MinecraftSecurityUpdateService.replaceFreetypeLibraries(instance, official);
 
         JsonNode libraries = instance.path("libraries");
-        assertEquals(5, libraries.size());
-        assertEquals("org.lwjgl:lwjgl:3.4.4", libraries.get(0).path("name").asText());
-        assertEquals("org.lwjgl:lwjgl-freetype:3.4.4", libraries.get(1).path("name").asText());
-        assertEquals("org.lwjgl:lwjgl-glfw:3.4.4", libraries.get(2).path("name").asText());
-        assertEquals("net.fabricmc:fabric-loader:0.18.1", libraries.get(3).path("name").asText());
-        assertEquals("com.example:loader-addon:1.0.0", libraries.get(4).path("name").asText());
-        assertFalse(libraries.toString().contains("3.4.3"));
+        assertEquals(4, libraries.size());
+        assertEquals("org.lwjgl:lwjgl:3.4.3", libraries.get(0).path("name").asText());
+        assertEquals("net.fabricmc:fabric-loader:0.18.1", libraries.get(1).path("name").asText());
+        assertEquals("org.lwjgl:lwjgl-freetype:3.4.4", libraries.get(2).path("name").asText());
+        assertEquals("com.example:loader-addon:1.0.0", libraries.get(3).path("name").asText());
+        assertFalse(libraries.toString().contains("lwjgl-freetype:3.4.3"));
         assertTrue(libraries.toString().contains("com.example:loader-addon:1.0.0"));
     }
 
