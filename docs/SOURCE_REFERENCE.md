@@ -110,79 +110,79 @@ src/
 
 ## `src/main/resources`
 
-### `dev/itsdropper/vanta/i18n/messages.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages.properties`
 
 **Overview.** Default localization bundle used when no explicit locale-specific bundle is selected. Contains the baseline message-key set.
 
-### `dev/itsdropper/vanta/i18n/messages_de.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_de.properties`
 
 **Overview.** German localization bundle. Message keys are consumed by the Localization resource-bundle layer.
 
-### `dev/itsdropper/vanta/i18n/messages_en.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_en.properties`
 
 **Overview.** English localization bundle and primary English translation source.
 
-### `dev/itsdropper/vanta/i18n/messages_es.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_es.properties`
 
 **Overview.** Spanish localization bundle.
 
-### `dev/itsdropper/vanta/i18n/messages_fi.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_fi.properties`
 
 **Overview.** Finnish localization bundle.
 
-### `dev/itsdropper/vanta/i18n/messages_fr.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_fr.properties`
 
 **Overview.** French localization bundle.
 
-### `dev/itsdropper/vanta/i18n/messages_it.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_it.properties`
 
 **Overview.** Italian localization bundle.
 
-### `dev/itsdropper/vanta/i18n/messages_nl.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_nl.properties`
 
 **Overview.** Dutch localization bundle.
 
-### `dev/itsdropper/vanta/i18n/messages_pt_PT.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_pt_PT.properties`
 
 **Overview.** European Portuguese localization bundle; locale suffix distinguishes it from Brazilian Portuguese.
 
-### `dev/itsdropper/vanta/i18n/messages_sv.properties`
+### `src/main/resources/dev/itsdropper/vanta/i18n/messages_sv.properties`
 
 **Overview.** Swedish localization bundle.
 
-### `dev/itsdropper/vanta/launcher/repair/crash-cases.tsv`
+### `src/main/resources/dev/itsdropper/vanta/launcher/repair/crash-cases.tsv`
 
 **Overview.** Versioned tab-separated labelled crash corpus loaded by DeterministicCrashModel. Labels/categories and sanitized examples are training data; edits should preserve schema, balance, deduplication and privacy checks enforced by CrashCorpusQualityTest.
 
-### `fonts/OFL.txt`
+### `src/main/resources/fonts/OFL.txt`
 
 **Overview.** SIL Open Font License text accompanying the bundled Poppins font files; retain with redistributed font assets.
 
-### `fonts/Poppins-Light.ttf`
+### `src/main/resources/fonts/Poppins-Light.ttf`
 
 **Overview.** Bundled Poppins Light font face used by the launcher font registration layer.
 
-### `fonts/Poppins-Medium.ttf`
+### `src/main/resources/fonts/Poppins-Medium.ttf`
 
 **Overview.** Bundled Poppins Medium font face used for medium-weight typography.
 
-### `fonts/Poppins-Regular.ttf`
+### `src/main/resources/fonts/Poppins-Regular.ttf`
 
 **Overview.** Bundled Poppins Regular font face used for default typography.
 
-### `fonts/Poppins-SemiBold.ttf`
+### `src/main/resources/fonts/Poppins-SemiBold.ttf`
 
 **Overview.** Bundled Poppins SemiBold font face used for semibold typography.
 
-### `images/home-background.png`
+### `src/main/resources/images/home-background.png`
 
 **Overview.** Raster home-screen background resource. It is a visual asset rather than executable logic.
 
-### `release-trusted-keys.json`
+### `src/main/resources/release-trusted-keys.json`
 
 **Overview.** Pinned release-signing trust store consumed by release manifest signature verification. Key IDs must map to trusted public keys; unknown signers are rejected.
 
-### `version.properties`
+### `src/main/resources/version.properties`
 
 **Overview.** Packaged application version resource read by update/version services; keep synchronized with release/build versioning.
 
