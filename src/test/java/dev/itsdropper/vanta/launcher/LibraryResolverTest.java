@@ -38,6 +38,24 @@ class LibraryResolverTest {
         }
     }
 
+    @Test
+    void selectsStandaloneMojangNativeArtifactsForTheMatchingPlatformAndArchitecture() {
+        assertEquals(true, LibraryResolver.isSeparateNativeClassifierApplicable(
+                "natives-windows", "windows", "64"));
+        assertEquals(false, LibraryResolver.isSeparateNativeClassifierApplicable(
+                "natives-windows", "windows", "arm64"));
+        assertEquals(true, LibraryResolver.isSeparateNativeClassifierApplicable(
+                "natives-windows-arm64", "windows", "arm64"));
+        assertEquals(false, LibraryResolver.isSeparateNativeClassifierApplicable(
+                "natives-windows-arm64", "windows", "64"));
+        assertEquals(true, LibraryResolver.isSeparateNativeClassifierApplicable(
+                "natives-linux", "linux", "64"));
+        assertEquals(false, LibraryResolver.isSeparateNativeClassifierApplicable(
+                "natives-linux", "windows", "64"));
+        assertEquals(false, LibraryResolver.isSeparateNativeClassifierApplicable(
+                "natives-windows", "windows", "32"));
+    }
+
     private static void restoreProperty(String name, String value) {
         if (value == null) System.clearProperty(name);
         else System.setProperty(name, value);
