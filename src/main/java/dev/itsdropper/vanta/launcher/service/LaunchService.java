@@ -223,6 +223,9 @@ public class LaunchService {
                 dev.itsdropper.vanta.launcher.instance.InstanceRepairService
                         .repair(instance);
 
+                // Repair can reinstall version metadata and native files. Re-run
+                // the security gate after repair so this retry cannot bypass it.
+                MinecraftSecurityUpdateService.refreshBeforeLaunch(instance);
                 launchData = buildLaunchData(instance, server);
                 logEnvironmentDiagnostics(instance, launchData);
 
