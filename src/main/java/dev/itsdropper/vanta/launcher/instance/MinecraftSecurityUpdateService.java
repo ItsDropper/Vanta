@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Refreshes Mojang-owned LWJGL metadata immediately before launching modern
+ * Refreshes Mojang-owned FreeType metadata immediately before launching modern
  * Minecraft instances. Mojang can publish security fixes by changing a
  * version JSON without changing the Minecraft version number; relying on
  * installation-time metadata would leave existing instances stale.
@@ -28,9 +28,9 @@ public final class MinecraftSecurityUpdateService {
     }
 
     /**
-     * Refresh the official LWJGL dependency set and install it before the
+     * Refresh the official FreeType dependency and install it before the
      * launch classpath is built. Loader-specific metadata and libraries are
-     * retained; only the Mojang-owned org.lwjgl group is rebased.
+     * retained; only Mojang's org.lwjgl:lwjgl-freetype artifacts are rebased.
      *
      * This is deliberately synchronous. A background refresh that completes
      * after process creation leaves the first launch exposed and only protects
@@ -102,6 +102,14 @@ public final class MinecraftSecurityUpdateService {
         if (version == null || version.isBlank()) {
             throw new IllegalArgumentException("Minecraft version is required for security validation.");
         }
+        String normalized = version.toLowerCase(java.util.Locale.ROOT);
+        // Pre-1.0 Alpha/Beta/Classic/Indev/Infdev identifiers are not
+        // affected; they predate Minecraft's FreeType font pipeline.
+        if (normalized.startsWith("a") || normalized.startsWith("b")
+                || normalized.startsWith("c") || normalized.startsWith("rd-")
+                || normalized.startsWith("inf-")) {
+            return false;
+        }
         String[] parts = version.split("[.-]");
         try {
             int major = Integer.parseInt(parts[0]);
@@ -160,14 +168,14 @@ public final class MinecraftSecurityUpdateService {
 
     private static void validateArtifact(JsonNode artifact, String name) {
         if (!artifact.isObject()) {
-            throw new IllegalStateException("Mojang LWJGL artifact metadata is invalid: " + name);
+            throw new IllegalStateException("Mojang FreeType artifact metadata is invalid: " + name);
         }
         String path = artifact.path("path").asText();
         String url = artifact.path("url").asText();
         String sha1 = artifact.path("sha1").asText();
         if (path.isBlank() || url.isBlank() || !url.startsWith("https://")
                 || !sha1.matches("(?i)[0-9a-f]{40}")) {
-            throw new IllegalStateException("Mojang LWJGL artifact is missing a trusted URL, path, or SHA-1: " + name);
+            throw new IllegalStateException("Mojang FreeType artifact is missing a trusted URL, path, or SHA-1: " + name);
         }
     }
 
@@ -197,20 +205,20 @@ public final class MinecraftSecurityUpdateService {
             }
         }
 
-        List<JsonNode> officialLwjgl = new ArrayList<>();
+        List<JsonNode> officialFreetype = new ArrayList<>();
         for (JsonNode library : officialLibraries) {
             if (isFreetypeLibrary(library)) {
-                officialLwjgl.add(library.deepCopy());
+                officialFreetype.add(library.deepCopy());
             }
         }
-        if (officialLwjgl.isEmpty()) {
-            throw new IllegalStateException("Mojang metadata contains no LWJGL libraries.");
+        if (officialFreetype.isEmpty()) {
+            throw new IllegalStateException("Mojang metadata contains no FreeType libraries.");
         }
 
         if (insertionIndex < 0) {
             insertionIndex = retained.size();
         }
-        retained.addAll(insertionIndex, officialLwjgl);
+        retained.addAll(insertionIndex, officialFreetype);
 
         ArrayNode result = JSON.createArrayNode();
         retained.forEach(result::add);
