@@ -134,6 +134,15 @@ public final class MinecraftSecurityUpdateService {
             throw new IllegalStateException("Mojang metadata for " + expectedVersion
                     + " contains no official LWJGL dependencies; refusing to launch.");
         }
+
+        JsonNode freetype = findLibrary(metadata.path("libraries"), "org.lwjgl:lwjgl-freetype");
+        String coordinate = freetype == null ? "" : freetype.path("name").asText("");
+        String[] parts = coordinate.split(":");
+        if (parts.length < 3 || !isPatchedFreeTypeVersion(parts[2])) {
+            throw new IllegalStateException("Mojang's current metadata for " + expectedVersion
+                    + " does not contain the patched FreeType 2.15.0-or-newer dependency; "
+                    + "refusing to launch with an unverified native font engine.");
+        }
     }
 
     private static void validateDownloadIntegrityMetadata(JsonNode library) {
@@ -211,6 +220,29 @@ public final class MinecraftSecurityUpdateService {
     private static boolean isLwjglLibrary(JsonNode library) {
         String name = library == null ? "" : library.path("name").asText("");
         return name.startsWith("org.lwjgl:");
+    }
+
+    static boolean isPatchedFreeTypeVersion(String lwjglVersion) {
+        if (lwjglVersion == null) {
+            return false;
+        }
+        int marker = lwjglVersion.lastIndexOf("-mojang-");
+        if (marker < 0) {
+            return false;
+        }
+        String[] version = lwjglVersion.substring(marker + "-mojang-".length()).split("\\.");
+        if (version.length != 3 || !version[0].matches("\\d+")
+                || !version[1].matches("\\d+") || !version[2].matches("\\d+")) {
+            return false;
+        }
+        try {
+            int major = Integer.parseInt(version[0]);
+            int minor = Integer.parseInt(version[1]);
+            int patch = Integer.parseInt(version[2]);
+            return major > 2 || (major == 2 && (minor > 15 || (minor == 15 && patch >= 0)));
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
     }
 
     private static JsonNode findLibrary(JsonNode libraries, String coordinatePrefix) {
