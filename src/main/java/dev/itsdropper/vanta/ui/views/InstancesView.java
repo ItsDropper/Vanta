@@ -4,19 +4,21 @@ import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 import javafx.geometry.Insets;
-import javafx.beans.binding.Bindings;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.MenuButton;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.ChoiceDialog;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Popup;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
@@ -24,6 +26,7 @@ import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -36,25 +39,48 @@ import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.launcher.service.InstanceUsageManager;
 import dev.itsdropper.vanta.launcher.service.MultiLaunchService;
+import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.InstanceCard;
 import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import dev.itsdropper.vanta.ui.kit.Badge;
+import dev.itsdropper.vanta.ui.kit.Chip;
+import dev.itsdropper.vanta.ui.kit.CoverArt;
+import dev.itsdropper.vanta.ui.kit.IconButton;
+import dev.itsdropper.vanta.ui.kit.LoaderTheme;
+import dev.itsdropper.vanta.ui.kit.SearchField;
+import dev.itsdropper.vanta.ui.kit.SegmentedControl;
 import dev.itsdropper.vanta.telemetry.TelemetryService;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * The instance library: a toolbar (search, sort, view mode, loader filter)
+ * over art-led cards in a grid, or a dense list.
+ */
 public class InstancesView extends VBox {
+
+    private static final String SORT_NAME = "Name (A–Z)";
+    private static final String SORT_RECENT = "Recently played";
+    private static final String SORT_PLAYED = "Most played";
+    private static final String SORT_VERSION = "Version (newest)";
+    private static final String SORT_LOADER = "Loader";
+
+    private static final double GRID_GAP = 16;
+    private static final double GRID_MIN_CARD = 236;
 
     private final MultiLaunchService launchService;
 
     private final VBox instanceList;
     private final Label statusLabel;
-    private final Label countLabel;
+    private final Badge countLabel;
     private Button backupButton;
     private Button refreshButton;
 
@@ -62,7 +88,14 @@ public class InstancesView extends VBox {
     private final Runnable onCreateInstance;
 
     private final TextField searchField;
-    private final ComboBox<String> sortField;
+    private final SegmentedControl<String> sortControl;
+    private final SegmentedControl<InstanceCard.Layout> viewControl;
+    private final Chip reverseChip;
+    private final FlowPane loaderChips;
+    private final ToggleGroup loaderGroup = new ToggleGroup();
+    private final VBox toolbarBox;
+    private String loaderFilter = "";
+    private boolean rebuildingChips;
 
     private List<Instance> loadedInstances =
             List.of();
@@ -84,268 +117,165 @@ public class InstancesView extends VBox {
             Consumer<Instance> onInstanceSettings,
             boolean screenshotPreview
     ) {
-        this.launchService =
-                launchService;
-
-        this.onInstanceSettings =
-                onInstanceSettings;
+        this.launchService = launchService;
+        this.onInstanceSettings = onInstanceSettings;
         this.onCreateInstance = onCreateInstance;
 
-        getStyleClass().add(
-                "instances-page"
-        );
-
+        getStyleClass().addAll("page", "instances-page");
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
+        setSpacing(20);
 
-        setSpacing(VantaUI.spacing(5));
-
-        // ---------------------------------------------------------
-        // HEADER
-        // ---------------------------------------------------------
-
-        countLabel =
-                new Label(
-                        Localization.text("instances.countZero")
-                );
-
-        countLabel.getStyleClass().add(
-                "instances-count"
-        );
-        VantaUI.styleText(countLabel, VantaUI.TextRole.EYEBROW);
-
-        Button createButton =
-                new Button(
-                        Localization.text("common.createInstance")
-                );
-
-        createButton.getStyleClass().add(
-                "instance-create-button"
-        );
-
-        createButton.setOnAction(
-                event ->
-                        onCreateInstance.run()
-        );
-
-        searchField =
-                new TextField();
-
-        searchField.setPromptText(
-                Localization.text("instances.searchPrompt")
-        );
-        searchField.setAccessibleText(Localization.text("instances.searchAccessible"));
-
-        searchField.getStyleClass().add(
-                "instance-search-field"
-        );
-
-        searchField.setPrefWidth(
-                220
-        );
-
-        searchField.textProperty().addListener(
-                (observable, oldValue, newValue) ->
-                        filterInstances(newValue)
-        );
-
-        createButton.setAccessibleText(Localization.text("instances.createAccessible"));
-        createButton.setTooltip(new javafx.scene.control.Tooltip("Create a new Minecraft instance"));
-
+        // Actions stay buttons so the menu can mirror them.
         backupButton = new Button(Localization.text("instances.backup"));
-        backupButton.getStyleClass().add("secondary-button");
         backupButton.setAccessibleText(Localization.text("instances.backupAccessible"));
-        backupButton.setTooltip(new javafx.scene.control.Tooltip(
-                Localization.text("instances.backupHelp")
-        ));
+        backupButton.setTooltip(new Tooltip(Localization.text("instances.backupHelp")));
         backupButton.setOnAction(event -> backUpInstance());
 
         Button restoreButton = new Button(Localization.text("instances.restore"));
-        restoreButton.getStyleClass().add("secondary-button");
         restoreButton.setAccessibleText(Localization.text("instances.restoreAccessible"));
-        restoreButton.setTooltip(new javafx.scene.control.Tooltip(
-                Localization.text("instances.restoreHelp")
-        ));
+        restoreButton.setTooltip(new Tooltip(Localization.text("instances.restoreHelp")));
         restoreButton.setOnAction(event -> restoreInstanceBackup());
 
         Button verifyBackupButton = new Button(Localization.text("instances.verifyBackup"));
-        verifyBackupButton.getStyleClass().add("secondary-button");
         verifyBackupButton.setAccessibleText(Localization.text("instances.verifyAccessible"));
-        verifyBackupButton.setTooltip(new javafx.scene.control.Tooltip(
-                Localization.text("instances.verifyHelp")
-        ));
+        verifyBackupButton.setTooltip(new Tooltip(Localization.text("instances.verifyHelp")));
         verifyBackupButton.setOnAction(event -> verifyInstanceBackup());
 
         Button exportVPackButton = new Button(Localization.text("instances.exportVPack"));
-        exportVPackButton.getStyleClass().add("secondary-button");
         exportVPackButton.setAccessibleText(Localization.text("instances.exportVPackAccessible"));
-        exportVPackButton.setTooltip(new javafx.scene.control.Tooltip(
-                Localization.text("instances.exportVPackHelp")));
+        exportVPackButton.setTooltip(new Tooltip(Localization.text("instances.exportVPackHelp")));
         exportVPackButton.setOnAction(event -> exportVPack());
 
         Button importVPackButton = new Button(Localization.text("instances.importVPack"));
-        importVPackButton.getStyleClass().add("secondary-button");
         importVPackButton.setAccessibleText(Localization.text("instances.importVPackAccessible"));
-        importVPackButton.setTooltip(new javafx.scene.control.Tooltip(
-                Localization.text("instances.importVPackHelp")));
+        importVPackButton.setTooltip(new Tooltip(Localization.text("instances.importVPackHelp")));
         importVPackButton.setOnAction(event -> importVPack());
 
-        // Backup and transfer actions live in one menu so the header stays on a
-        // single row. The buttons above remain the source of each action's
-        // handler and accessible description; the menu items mirror them.
-        MenuItem backupItem = mirrorAsMenuItem(backupButton);
-        MenuItem restoreItem = mirrorAsMenuItem(restoreButton);
-        MenuItem verifyItem = mirrorAsMenuItem(verifyBackupButton);
-        MenuItem exportItem = mirrorAsMenuItem(exportVPackButton);
-        MenuItem importItem = mirrorAsMenuItem(importVPackButton);
-
-        MenuButton transferMenu = new MenuButton(
-                null,
-                dev.itsdropper.vanta.ui.components.IconView.create(
-                        dev.itsdropper.vanta.ui.components.IconView.Type.MORE, 18)
-        );
-        transferMenu.getStyleClass().addAll("secondary-button", "instances-more-button");
-        transferMenu.setAccessibleText("Backup and transfer actions");
-        transferMenu.setTooltip(new javafx.scene.control.Tooltip("Backup, restore and transfer"));
-        transferMenu.getItems().addAll(
-                backupItem, restoreItem, verifyItem,
+        ContextMenu transferMenu = new ContextMenu(
+                mirrorAsMenuItem(backupButton),
+                mirrorAsMenuItem(restoreButton),
+                mirrorAsMenuItem(verifyBackupButton),
                 new SeparatorMenuItem(),
-                exportItem, importItem
+                mirrorAsMenuItem(exportVPackButton),
+                mirrorAsMenuItem(importVPackButton)
         );
+        IconButton transferButton = new IconButton(IconView.Type.MORE,
+                "Backup and transfer actions", IconButton.Style.SECONDARY);
+        transferButton.setTooltip(new Tooltip("Backup, restore and transfer"));
+        transferButton.setOnAction(event -> transferMenu.show(transferButton, Side.BOTTOM, 0, 6));
 
-        PageHeader headerTop = new PageHeader(
+        Button createButton = new Button(Localization.text("common.createInstance"));
+        createButton.setGraphic(IconView.create(IconView.Type.PLUS, 16));
+        createButton.getStyleClass().add("vanta-button-primary");
+        createButton.setAccessibleText(Localization.text("instances.createAccessible"));
+        createButton.setTooltip(new Tooltip("Create a new Minecraft instance"));
+        createButton.setOnAction(event -> onCreateInstance.run());
+
+        countLabel = Badge.mono(Localization.text("instances.countZero"));
+        countLabel.getStyleClass().add("instances-count");
+
+        PageHeader header = new PageHeader(
                 "Instances",
                 "Manage your Minecraft installations.",
                 "page-title",
                 "page-subtitle",
                 countLabel,
-                transferMenu,
+                transferButton,
                 createButton
         );
 
+        // ---------------------------------------------------------- toolbar
+        SearchField search = new SearchField(Localization.text("instances.searchPrompt"));
+        searchField = search.textField();
+        searchField.setAccessibleText(Localization.text("instances.searchAccessible"));
+        search.setMinWidth(200);
+        search.setPrefWidth(360);
+        search.textProperty().addListener((observable, oldValue, newValue) -> filterInstances(newValue));
+
+        Map<String, String> sortLabels = new LinkedHashMap<>();
+        sortLabels.put(SORT_NAME, Localization.text("instances.sortName"));
+        sortLabels.put(SORT_RECENT, Localization.text("instances.sortRecent"));
+        sortLabels.put(SORT_PLAYED, Localization.text("instances.sortPlayed"));
+        sortLabels.put(SORT_VERSION, Localization.text("instances.sortVersion"));
+        sortLabels.put(SORT_LOADER, Localization.text("instances.sortLoader"));
+        sortControl = new SegmentedControl<>(List.copyOf(sortLabels.keySet()), sortLabels::get, SORT_NAME);
+        sortControl.setAccessibleText(Localization.text("instances.sortAccessible"));
+        Tooltip.install(sortControl, new Tooltip(Localization.text("instances.sortHelp")));
+        sortControl.valueProperty().addListener((observable, was, is) -> filterInstances(searchField.getText()));
+
+        viewControl = new SegmentedControl<>(
+                List.of(InstanceCard.Layout.GRID, InstanceCard.Layout.LIST),
+                layout -> layout == InstanceCard.Layout.GRID
+                        ? Localization.text("instances.viewGrid")
+                        : Localization.text("instances.viewList"),
+                LauncherSettings.isCompactInstancesEnabled()
+                        ? InstanceCard.Layout.LIST : InstanceCard.Layout.GRID);
+        viewControl.setAccessibleText(Localization.text("instances.viewAccessible"));
+        viewControl.valueProperty().addListener((observable, was, is) -> filterInstances(searchField.getText()));
+
         refreshButton = new Button(Localization.text("common.refresh"));
-        refreshButton.getStyleClass().add("secondary-button");
+        refreshButton.getStyleClass().add("vanta-button-secondary");
         refreshButton.setAccessibleText(Localization.text("instances.refreshAccessible"));
-        refreshButton.setTooltip(new javafx.scene.control.Tooltip(Localization.text("instances.rescan")));
+        refreshButton.setTooltip(new Tooltip(Localization.text("instances.refreshTooltip")));
         refreshButton.setOnAction(event -> refresh());
-        refreshButton.setTooltip(new javafx.scene.control.Tooltip(Localization.text("instances.refreshTooltip")));
-
-        searchField.setMinWidth(180);
-        searchField.setPrefWidth(360);
-        searchField.setMaxWidth(560);
-
-        Button clearSearchButton = new Button(Localization.text("instances.clear"));
-        clearSearchButton.getStyleClass().add("secondary-button");
-        clearSearchButton.setAccessibleText(Localization.text("instances.clearAccessible"));
-        clearSearchButton.setTooltip(new javafx.scene.control.Tooltip(Localization.text("common.clearSearch")));
-        clearSearchButton.visibleProperty().bind(Bindings.isNotEmpty(searchField.textProperty()));
-        clearSearchButton.managedProperty().bind(clearSearchButton.visibleProperty());
-        clearSearchButton.setOnAction(event -> {
-            searchField.clear();
-            searchField.requestFocus();
-        });
-
-        sortField = new ComboBox<>();
-        sortField.getStyleClass().add("instance-sort-field");
-        sortField.getItems().setAll("Name (A–Z)", "Name (Z–A)", "Recently played", "Most played", "Version (newest)", "Loader");
-        sortField.setValue("Name (A–Z)");
-        sortField.setPromptText(Localization.text("instances.sort"));
-        sortField.setAccessibleText(Localization.text("instances.sortAccessible"));
-        sortField.setTooltip(new javafx.scene.control.Tooltip(Localization.text("instances.sortHelp")));
-        sortField.setMinWidth(150);
-        sortField.setPrefWidth(170);
-        sortField.setOnAction(event -> filterInstances(searchField.getText()));
 
         Button recoveryButton = new Button(Localization.text("instances.recovery"));
-        recoveryButton.getStyleClass().add("secondary-button");
+        recoveryButton.getStyleClass().add("vanta-button-secondary");
         recoveryButton.setAccessibleText(Localization.text("instances.recoveryAccessible"));
-        recoveryButton.setTooltip(new javafx.scene.control.Tooltip(
-                Localization.text("instances.recoveryHelp")
-        ));
+        recoveryButton.setTooltip(new Tooltip(Localization.text("instances.recoveryHelp")));
         recoveryButton.setOnAction(event -> manageRecoveryPoints(recoveryButton));
 
-        FlowPane searchRow = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2));
-        searchRow.getStyleClass().add("instances-toolbar");
-        searchRow.setAlignment(Pos.CENTER_LEFT);
-        searchRow.setRowValignment(javafx.geometry.VPos.CENTER);
-        searchRow.prefWrapLengthProperty().bind(searchRow.widthProperty());
-        searchRow.getChildren().addAll(searchField, clearSearchButton, sortField, refreshButton, recoveryButton);
+        FlowPane controls = new FlowPane(8, 8, search, sortControl, viewControl, refreshButton, recoveryButton);
+        controls.setAlignment(Pos.CENTER_LEFT);
+        controls.setRowValignment(javafx.geometry.VPos.CENTER);
+        controls.getStyleClass().add("instances-controls");
 
-        VBox header = new VBox(VantaUI.spacing(3), headerTop, searchRow);
-        header.getStyleClass().add("instances-header");
+        loaderChips = new FlowPane(8, 8);
+        loaderChips.setAlignment(Pos.CENTER_LEFT);
+        loaderChips.getStyleClass().add("instances-chips");
+        reverseChip = new Chip(Localization.text("instances.reverse"));
+        reverseChip.setAccessibleText(Localization.text("instances.reverseAccessible"));
+        reverseChip.selectedProperty().addListener((observable, was, is) -> filterInstances(searchField.getText()));
+        loaderGroup.selectedToggleProperty().addListener((observable, was, is) -> {
+            if (rebuildingChips) {
+                return;
+            }
+            if (is == null) {
+                // Keep one chip selected: clicking the active chip returns to All.
+                if (!loaderGroup.getToggles().isEmpty()) {
+                    loaderGroup.selectToggle(loaderGroup.getToggles().get(0));
+                }
+                return;
+            }
+            loaderFilter = is.getUserData() == null ? "" : is.getUserData().toString();
+            filterInstances(searchField.getText());
+        });
 
-        // ---------------------------------------------------------
-        // LIST
-        // ---------------------------------------------------------
+        toolbarBox = new VBox(12, controls, loaderChips);
+        toolbarBox.getStyleClass().add("instances-toolbar");
+        toolbarBox.setVisible(false);
+        toolbarBox.setManaged(false);
 
-        instanceList =
-                new VBox(
-                        0
-                );
-
-        instanceList.getStyleClass().add(
-                "instance-list"
-        );
+        // ------------------------------------------------------------- list
+        instanceList = new VBox(0);
+        instanceList.getStyleClass().add("instance-list");
         instanceList.setAlignment(Pos.TOP_CENTER);
         instanceList.setFillWidth(true);
 
-        ScrollPane scrollPane =
-                new ScrollPane(
-                        instanceList
-                );
-
-        scrollPane.setFitToWidth(
-                true
-        );
+        ScrollPane scrollPane = new ScrollPane(instanceList);
+        scrollPane.setFitToWidth(true);
         scrollPane.setFitToHeight(false);
+        scrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        scrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+        scrollPane.getStyleClass().add("instances-scroll");
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
 
-        scrollPane.setHbarPolicy(
-                ScrollPane.ScrollBarPolicy.NEVER
-        );
+        statusLabel = new Label(Localization.text("instances.scanning"));
+        statusLabel.getStyleClass().add("instances-status");
 
-        scrollPane.setVbarPolicy(
-                ScrollPane.ScrollBarPolicy.AS_NEEDED
-        );
+        getChildren().addAll(header, toolbarBox, scrollPane, statusLabel);
 
-        scrollPane.getStyleClass().add(
-                "instances-scroll"
-        );
-
-        VBox.setVgrow(
-                scrollPane,
-                Priority.ALWAYS
-        );
-
-        // ---------------------------------------------------------
-        // STATUS
-        // ---------------------------------------------------------
-
-        statusLabel =
-                new Label(
-                        Localization.text("instances.scanning")
-                );
-
-        statusLabel.getStyleClass().add(
-                "instances-status"
-        );
-        VantaUI.styleText(statusLabel, VantaUI.TextRole.MUTED);
-
-        // ---------------------------------------------------------
-        // BUILD
-        // ---------------------------------------------------------
-
-        getChildren().addAll(
-                header,
-                scrollPane,
-                statusLabel
-        );
-
-        // ---------------------------------------------------------
-        // LAUNCH LISTENER
-        // ---------------------------------------------------------
-
-        launchService.addStateListener(
-                this::onLaunchStateChanged
-        );
+        launchService.addStateListener(this::onLaunchStateChanged);
 
         if (screenshotPreview) {
             countLabel.setText(Localization.text("instances.library"));
@@ -382,8 +312,6 @@ public class InstancesView extends VBox {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (requestId != refreshRequestId) return;
                     // A failed rescan must not erase the last successfully loaded list.
-                    // Keep existing cards and the real count visible so a transient filesystem
-                    // error cannot make the user's instances appear to have disappeared.
                     refreshButton.setText(Localization.text("common.refresh"));
                     refreshButton.setDisable(false);
                     statusLabel.setText(loadedInstances.isEmpty()
@@ -400,6 +328,11 @@ public class InstancesView extends VBox {
                 refreshButton.setDisable(false);
                 loadedInstances = List.copyOf(instances);
                 updateCount(loadedInstances.size());
+                rebuildLoaderChips();
+
+                boolean hasInstances = !loadedInstances.isEmpty();
+                toolbarBox.setVisible(hasInstances);
+                toolbarBox.setManaged(hasInstances);
 
                 if (loadedInstances.isEmpty()) {
                     instanceList.getChildren().setAll(createEmptyState());
@@ -415,6 +348,42 @@ public class InstancesView extends VBox {
 
     }
 
+    /** One chip per loader present in the library, plus All. */
+    private void rebuildLoaderChips() {
+        rebuildingChips = true;
+        try {
+            loaderChips.getChildren().clear();
+            loaderGroup.getToggles().clear();
+            Map<String, String> loaders = new LinkedHashMap<>();
+            for (Instance instance : loadedInstances) {
+                loaders.putIfAbsent(LoaderTheme.key(instance.getLoader()), LoaderTheme.label(instance.getLoader()));
+            }
+            if (!loaders.containsKey(loaderFilter)) {
+                loaderFilter = "";
+            }
+            if (loaders.size() > 1) {
+                addLoaderChip(Localization.text("instances.filterAll"), "");
+                loaders.forEach((key, label) -> addLoaderChip(label, key));
+                for (var toggle : loaderGroup.getToggles()) {
+                    if (loaderFilter.equals(toggle.getUserData() == null ? "" : toggle.getUserData().toString())) {
+                        loaderGroup.selectToggle(toggle);
+                    }
+                }
+            } else {
+                loaderFilter = "";
+            }
+            loaderChips.getChildren().add(reverseChip);
+        } finally {
+            rebuildingChips = false;
+        }
+    }
+
+    private void addLoaderChip(String label, String key) {
+        Chip chip = new Chip(label);
+        chip.setUserData(key);
+        chip.setToggleGroup(loaderGroup);
+        loaderChips.getChildren().add(chip);
+    }
 
     private void manageRecoveryPoints(Button actionButton) {
         if (loadedInstances.isEmpty()) {
@@ -979,29 +948,33 @@ public class InstancesView extends VBox {
         Comparator<Instance> nameOrder = Comparator.<Instance, String>comparing(
                 instance -> safeLower(instance.getName())
         );
-        Comparator<Instance> selectedOrder = switch (sortField.getValue() == null
-                ? "Name (A–Z)" : sortField.getValue()) {
-            case "Name (Z–A)" -> nameOrder.reversed();
-            case "Recently played" -> Comparator
+        Comparator<Instance> selectedOrder = switch (sortControl.getValue() == null
+                ? SORT_NAME : sortControl.getValue()) {
+            case SORT_RECENT -> Comparator
                     .comparingLong(InstanceUsageManager::getLastPlayed)
                     .reversed()
                     .thenComparing(nameOrder);
-            case "Most played" -> Comparator
+            case SORT_PLAYED -> Comparator
                     .<Instance>comparingLong(instance -> InstanceUsageManager.getPlaytimeSeconds(instance)
                             + launchService.getSessionPlaytimeSeconds(instance))
                     .reversed()
                     .thenComparing(nameOrder);
-            case "Version (newest)" -> (left, right) -> {
+            case SORT_VERSION -> (left, right) -> {
                 int versionOrder = compareNatural(right.getMinecraftVersion(), left.getMinecraftVersion());
                 return versionOrder != 0 ? versionOrder : nameOrder.compare(left, right);
             };
-            case "Loader" -> Comparator.<Instance, String>comparing(
+            case SORT_LOADER -> Comparator.<Instance, String>comparing(
                     instance -> safeLower(instance.getDisplayLoader())
             ).thenComparing(nameOrder);
             default -> nameOrder;
         };
+        if (reverseChip.isSelected()) {
+            selectedOrder = selectedOrder.reversed();
+        }
 
         List<Instance> filtered = loadedInstances.stream()
+                .filter(instance -> loaderFilter.isEmpty()
+                        || loaderFilter.equals(LoaderTheme.key(instance.getLoader())))
                 .filter(instance ->
                         normalized.isBlank()
                                 || safeLower(instance.getName()).contains(normalized)
@@ -1063,66 +1036,93 @@ public class InstancesView extends VBox {
     }
 
     private VBox createSearchEmptyState(String query) {
-        Label icon = new Label("⌕");
-        icon.getStyleClass().add("instance-empty-icon");
-
         Label title = new Label(Localization.text("instances.noMatchesTitle"));
-        title.getStyleClass().add("instance-empty-title");
-        VantaUI.styleText(title, VantaUI.TextRole.SECTION_TITLE);
+        title.getStyleClass().add("instances-empty-title");
 
         Label description = new Label(String.format(Locale.ROOT,
                 Localization.text("instances.searchNoMatchDescription"),
                 query == null ? "" : query.trim()));
         description.setWrapText(true);
-        description.getStyleClass().add("instance-empty-description");
-        VantaUI.styleText(description, VantaUI.TextRole.MUTED);
+        description.getStyleClass().add("instances-empty-description");
 
-        Button clearButton = new Button(Localization.text("common.clearSearchUpper"));
-        clearButton.getStyleClass().add("secondary-button");
-        clearButton.setOnAction(event -> searchField.clear());
+        Button clearButton = new Button(Localization.text("instances.clear"));
+        clearButton.getStyleClass().add("vanta-button-secondary");
+        clearButton.setOnAction(event -> {
+            searchField.clear();
+            loaderGroup.getToggles().stream().findFirst().ifPresent(loaderGroup::selectToggle);
+        });
 
-        VBox empty = new VBox(VantaUI.spacing(2), icon, title, description, clearButton);
+        VBox empty = new VBox(12, title, description, clearButton);
         empty.setAlignment(Pos.CENTER);
-        empty.setPadding(new Insets(VantaUI.spacing(12)));
-        empty.getStyleClass().add("instance-empty");
+        empty.setPadding(new Insets(48, 24, 48, 24));
+        empty.getStyleClass().add("instances-empty-search");
         empty.setMaxWidth(Double.MAX_VALUE);
-        VantaUI.applySurface(empty, VantaUI.SurfaceRole.CARD);
         return empty;
     }
 
     private void updateCount(int count) {
-
-        countLabel.setText(
-                count
-                        + " INSTANCE"
-                        + (count == 1 ? "" : "S")
-        );
+        countLabel.setText(count == 1
+                ? Localization.text("instances.countOne")
+                : String.format(Locale.ROOT, Localization.text("instances.countMany"), count));
     }
 
     private void renderInstances(List<Instance> instances) {
 
-        instanceList.getChildren().clear();
+        InstanceCard.Layout layout = viewControl.getValue() == null
+                ? InstanceCard.Layout.GRID : viewControl.getValue();
+        List<InstanceCard> cards = new ArrayList<>();
 
         for (Instance instance : instances) {
-
-            InstanceCard card =
-                    new InstanceCard(
-                            instance,
-                            () -> launch(instance),
-                            () -> onInstanceSettings.accept(instance),
-                            () -> deleteInstance(instance),
-                            () -> showRenamePopup(instance),
-                            () -> showDuplicatePopup(instance),
-                            () -> showIconPopup(instance)
-                    );
-
-            if (LauncherSettings.isCompactInstancesEnabled()) card.getStyleClass().add("instance-card-compact");
-            instanceList.getChildren().add(card);
+            cards.add(new InstanceCard(
+                    instance,
+                    () -> launch(instance),
+                    () -> onInstanceSettings.accept(instance),
+                    () -> deleteInstance(instance),
+                    () -> showRenamePopup(instance),
+                    () -> showDuplicatePopup(instance),
+                    () -> showIconPopup(instance),
+                    layout
+            ));
         }
 
+        Pane container;
+        if (layout == InstanceCard.Layout.LIST) {
+            VBox rows = new VBox(6);
+            rows.getStyleClass().add("instances-rows");
+            rows.getChildren().addAll(cards);
+            container = rows;
+        } else {
+            FlowPane grid = new FlowPane(GRID_GAP, GRID_GAP);
+            grid.getStyleClass().add("instances-grid");
+            grid.setAlignment(Pos.TOP_LEFT);
+            grid.getChildren().addAll(cards);
+            grid.widthProperty().addListener((observable, was, is) -> sizeGridCards(grid));
+            container = grid;
+        }
+
+        instanceList.getChildren().setAll(container);
+        if (container instanceof FlowPane grid) {
+            sizeGridCards(grid);
+        }
         updateCards();
     }
 
+    /** Spreads the available width over as many equal columns as fit. */
+    private static void sizeGridCards(FlowPane grid) {
+        double width = grid.getWidth();
+        if (width <= 1) {
+            return;
+        }
+        int columns = Math.max(1, (int) Math.floor((width + GRID_GAP) / (GRID_MIN_CARD + GRID_GAP)));
+        double card = Math.floor((width - GRID_GAP * (columns - 1)) / columns);
+        for (Node node : grid.getChildren()) {
+            if (node instanceof Region region) {
+                region.setMinWidth(card);
+                region.setPrefWidth(card);
+                region.setMaxWidth(card);
+            }
+        }
+    }
 
     private void showRenamePopup(Instance instance) {
         showNamePopup(instance, false);
@@ -1139,7 +1139,7 @@ public class InstancesView extends VBox {
         root.getStyleClass().add("instance-action-popup");
         root.setPadding(new Insets(VantaUI.spacing(4)));
         VantaUI.applySurface(root, VantaUI.SurfaceRole.PANEL);
-        Label title = new Label(duplicate ? "DUPLICATE INSTANCE" : "RENAME INSTANCE");
+        Label title = new Label(duplicate ? "Duplicate instance" : "Rename instance");
         title.getStyleClass().add("instance-action-title");
         Label subtitle = new Label(duplicate ? "Create a complete copy with its own instance ID." : "Change the display name without moving the instance.");
         subtitle.getStyleClass().add("instance-action-subtitle");
@@ -1149,9 +1149,9 @@ public class InstancesView extends VBox {
         HBox actions = new HBox(8);
         actions.setAlignment(Pos.CENTER_RIGHT);
         Button cancel = new Button(Localization.text("common.cancel"));
-        cancel.getStyleClass().add("secondary-button");
-        Button apply = new Button(duplicate ? "DUPLICATE" : "SAVE");
-        apply.getStyleClass().add("primary-button");
+        cancel.getStyleClass().add("vanta-button-secondary");
+        Button apply = new Button(duplicate ? "Duplicate" : "Save");
+        apply.getStyleClass().add("vanta-button-primary");
         cancel.setOnAction(e -> popup.hide());
         apply.setOnAction(e -> {
             String name = field.getText() == null ? "" : field.getText().trim();
@@ -1206,7 +1206,7 @@ public class InstancesView extends VBox {
             choices.getChildren().add(button);
         }
         Button upload = new Button(Localization.text("instances.uploadPng"));
-        upload.getStyleClass().add("secondary-button");
+        upload.getStyleClass().add("vanta-button-secondary");
         upload.setOnAction(e -> {
             FileChooser chooser = new FileChooser();
             chooser.setTitle(Localization.text("instances.chooseIcon"));
@@ -1334,31 +1334,24 @@ public class InstancesView extends VBox {
         Instance runningInstance =
                 launchService.getRunningInstance();
 
-        for (
-                javafx.scene.Node node
-                : instanceList.getChildren()
-        ) {
-
-            if (!(node instanceof InstanceCard card)) {
+        for (Node container : instanceList.getChildren()) {
+            if (!(container instanceof Pane pane)) {
                 continue;
             }
+            for (Node node : pane.getChildren()) {
+                if (!(node instanceof InstanceCard card)) {
+                    continue;
+                }
 
-            Instance cardInstance =
-                    card.getInstance();
+                Instance cardInstance = card.getInstance();
 
-            boolean isThisInstance =
-                    runningInstance != null
-                            && cardInstance != null
-                            && runningInstance
-                            .getId()
-                            .equals(
-                                    cardInstance.getId()
-                            );
+                boolean isThisInstance =
+                        runningInstance != null
+                                && cardInstance != null
+                                && runningInstance.getId().equals(cardInstance.getId());
 
-            card.setLaunchState(
-                    state,
-                    isThisInstance
-            );
+                card.setLaunchState(state, isThisInstance);
+            }
         }
     }
 
@@ -1375,35 +1368,42 @@ public class InstancesView extends VBox {
     // =============================================================
 
     private HBox createEmptyState() {
-        javafx.scene.Node icon = dev.itsdropper.vanta.ui.components.IconView.create(dev.itsdropper.vanta.ui.components.IconView.Type.INSTANCES, 22);
-        icon.getStyleClass().add("instance-empty-icon");
+        CoverArt art = new CoverArt("Vanta", "vanilla").rounded(10).sized(288, 162);
 
         Label title = new Label(Localization.text("instances.yourLibrary"));
-        title.getStyleClass().add("instance-empty-title");
+        title.getStyleClass().add("instances-empty-title");
         title.setWrapText(true);
 
         Label description = new Label(Localization.text("instances.empty"));
-        description.getStyleClass().add("instance-empty-description");
+        description.getStyleClass().add("instances-empty-description");
         description.setWrapText(true);
-        description.setMaxWidth(620);
+        description.setMaxWidth(420);
 
-        VBox copy = new VBox(VantaUI.spacing(2), title, description);
-        copy.getStyleClass().add("instance-empty-copy");
+        Button createButton = new Button(Localization.text("common.createInstance"));
+        createButton.setGraphic(IconView.create(IconView.Type.PLUS, 16));
+        createButton.getStyleClass().addAll("vanta-button-primary", "button-large");
+        createButton.setAccessibleText(Localization.text("instances.createAccessible"));
+        createButton.setOnAction(event -> onCreateInstance.run());
+
+        Button importButton = new Button(Localization.text("instances.importVPack"));
+        importButton.getStyleClass().addAll("vanta-button-secondary", "button-large");
+        importButton.setAccessibleText(Localization.text("instances.importVPackAccessible"));
+        importButton.setOnAction(event -> importVPack());
+
+        HBox actions = new HBox(8, createButton, importButton);
+        actions.setAlignment(Pos.CENTER_LEFT);
+
+        VBox copy = new VBox(8, title, description, actions);
+        VBox.setMargin(actions, new Insets(8, 0, 0, 0));
         copy.setAlignment(Pos.CENTER_LEFT);
         copy.setMinWidth(0);
         HBox.setHgrow(copy, Priority.ALWAYS);
 
-        Button createButton = new Button(Localization.text("common.createInstance"));
-        createButton.getStyleClass().add("primary-button");
-        createButton.setAccessibleText(Localization.text("instances.createAccessible"));
-        createButton.setOnAction(event -> onCreateInstance.run());
-
-        HBox empty = new HBox(VantaUI.spacing(5), icon, copy, createButton);
+        HBox empty = new HBox(28, art, copy);
         empty.setAlignment(Pos.CENTER_LEFT);
-        empty.setPadding(new Insets(VantaUI.spacing(6)));
-        empty.setMinHeight(144);
+        empty.setPadding(new Insets(20));
         empty.setMaxWidth(Double.MAX_VALUE);
-        empty.getStyleClass().add("instance-empty");
+        empty.getStyleClass().add("instances-empty");
         empty.setAccessibleText(title.getText() + ". " + description.getText());
         return empty;
     }

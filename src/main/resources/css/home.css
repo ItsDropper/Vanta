@@ -1,1 +1,94 @@
-/* home.css: to be rewritten on the new design system (see tokens.css, base.css, utilities.css). */
+/* ==========================================================================
+   Home: a hero for the last played instance, a compact list of recent
+   instances and servers, and quick actions. Built from the kit; only the
+   structure unique to Home is defined here.
+   ========================================================================== */
+
+.home-content-scroll,
+.home-content-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.home-muted {
+    -fx-font-family: "Geist";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+/* ---------- hero ------------------------------------------------------------ */
+
+.home-hero {
+    -fx-background-color:
+        -v-hair-strong,
+        -v-card,
+        linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 14, 13, 13;
+}
+
+.home-hero-art {
+    -fx-padding: 8px;
+}
+
+.home-hero-name {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 22px;
+    -fx-text-fill: -vantatext;
+}
+
+.home-stat-label {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+.home-stat-value {
+    -fx-font-family: "JetBrains Mono Medium";
+    -fx-font-size: 15px;
+    -fx-text-fill: -vantatext;
+}
+
+.home-play {
+    -fx-min-width: 150px;
+}
+
+/* ---------- recent lists ---------------------------------------------------- */
+
+.home-panel {
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+}
+
+.home-row {
+    -fx-background-color: transparent;
+    -fx-background-radius: 9;
+    -fx-cursor: hand;
+}
+
+.home-row:hover {
+    -fx-background-color: -v-card-hover;
+}
+
+.home-row:focused {
+    -fx-background-color: -vantaaccent-a30, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 9, 8;
+}
+
+.home-row-name {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantatext;
+}
+
+.home-row-play {
+    -fx-min-width: 30px;
+    -fx-pref-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+}
+
+.home-panel > .home-muted {
+    -fx-padding: 6px 10px;
+}

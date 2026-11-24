@@ -3,13 +3,17 @@ package dev.itsdropper.vanta.ui.components;
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
+import javafx.animation.FadeTransition;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.AccessibleRole;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBase;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
@@ -17,8 +21,8 @@ import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
@@ -29,29 +33,43 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import javafx.util.Duration;
 
 import dev.itsdropper.vanta.launcher.instance.MrpackExporter;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.launcher.service.InstanceUsageManager;
+import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.LauncherSettings;
-import dev.itsdropper.vanta.ui.VantaUI;
+import dev.itsdropper.vanta.ui.kit.Badge;
+import dev.itsdropper.vanta.ui.kit.CoverArt;
+import dev.itsdropper.vanta.ui.kit.IconButton;
 
 import java.io.File;
 
+/**
+ * One instance in the library. In grid layout the pixel-art cover leads and
+ * the actions appear over it on hover; in list layout it is a dense row.
+ */
 public class InstanceCard extends StackPane {
 
+    public enum Layout { GRID, LIST }
+
+    private static final Color ICON_INK = Color.rgb(219, 231, 255);
+
+    private final Layout layout;
+
     private final Label nameLabel;
-    private final Label versionLabel;
-    private final Label loaderLabel;
+    private final Badge versionBadge;
+    private final Badge loaderBadge;
     private final Label playtimeLabel;
-    private final Label statusLabel;
+    private final Badge statusBadge;
     private final Canvas presetIconCanvas;
     private final ImageView customIconView;
 
     private final Button playButton;
-    private final Button settingsButton;
-    private final Button menuButton;
+    private final IconButton settingsButton;
+    private final IconButton menuButton;
 
     private Instance instance;
 
@@ -64,347 +82,247 @@ public class InstanceCard extends StackPane {
             Runnable onDuplicate,
             Runnable onIcon
     ) {
+        this(instance, onPlay, onSettings, onDelete, onRename, onDuplicate, onIcon, Layout.GRID);
+    }
 
+    public InstanceCard(
+            Instance instance,
+            Runnable onPlay,
+            Runnable onSettings,
+            Runnable onDelete,
+            Runnable onRename,
+            Runnable onDuplicate,
+            Runnable onIcon,
+            Layout layout
+    ) {
         this.instance = instance;
+        this.layout = layout;
 
-        setMaxWidth(
-                Double.MAX_VALUE
-        );
+        setMaxWidth(Double.MAX_VALUE);
+        getStyleClass().addAll("instance-card", layout == Layout.GRID ? "instance-card-grid" : "instance-card-list");
 
-        getStyleClass().add(
-                "instance-card"
-        );
-        VantaUI.applySurface(this, VantaUI.SurfaceRole.CARD);
-
-        // ---------------------------------------------------------
-        // MAIN CONTENT
-        // ---------------------------------------------------------
-
-        HBox content =
-                new HBox();
-
-        content.setSpacing(VantaUI.spacing(4));
-
-        content.setPadding(new Insets(12, 8, 12, 12));
-
-        content.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        // ---------------------------------------------------------
-        // ICON
-        // ---------------------------------------------------------
-
-        presetIconCanvas = createIconGraphic(instance.getIcon(), 30);
-        customIconView = new ImageView();
-        customIconView.setFitWidth(28);
-        customIconView.setFitHeight(28);
-        customIconView.setPreserveRatio(true);
-
-        StackPane icon = new StackPane(presetIconCanvas, customIconView);
-        icon.setAlignment(Pos.CENTER);
-
-        VBox iconBox = new VBox(icon);
-
-        iconBox.setAlignment(
-                Pos.CENTER
-        );
-
-        iconBox.getStyleClass().add(
-                "instance-icon-box"
-        );
-
-        // ---------------------------------------------------------
-        // INFORMATION
-        // ---------------------------------------------------------
-
-        nameLabel =
-                new Label();
-
-        nameLabel.getStyleClass().add(
-                "instance-name"
-        );
+        // ---------------------------------------------------------- identity
+        nameLabel = new Label();
+        nameLabel.getStyleClass().add("instance-name");
         nameLabel.setMinWidth(0);
         nameLabel.setMaxWidth(Double.MAX_VALUE);
         nameLabel.setTextOverrun(OverrunStyle.ELLIPSIS);
 
-        versionLabel =
-                new Label();
+        versionBadge = Badge.mono("");
+        loaderBadge = Badge.loader(instance.getLoader());
+        playtimeLabel = new Label();
+        playtimeLabel.getStyleClass().addAll("instance-playtime", "value-mono");
 
-        versionLabel.getStyleClass().add(
-                "instance-version"
-        );
+        statusBadge = Badge.status("", Badge.Tone.SUCCESS);
+        statusBadge.getStyleClass().add("instance-status");
+        hideStatus();
 
-        loaderLabel =
-                new Label();
+        presetIconCanvas = createIconGraphic(instance.getIcon(), 18);
+        customIconView = new ImageView();
+        customIconView.setFitWidth(18);
+        customIconView.setFitHeight(18);
+        customIconView.setPreserveRatio(true);
+        StackPane iconPlate = new StackPane(presetIconCanvas, customIconView);
+        iconPlate.getStyleClass().add("instance-icon-plate");
+        iconPlate.setMinSize(28, 28);
+        iconPlate.setPrefSize(28, 28);
+        iconPlate.setMaxSize(28, 28);
+        iconPlate.setMouseTransparent(true);
 
-        loaderLabel.getStyleClass().add(
-                "instance-loader"
-        );
-
-        playtimeLabel =
-                new Label();
-
-        playtimeLabel.getStyleClass().add(
-                "instance-playtime"
-        );
-
-        // Metadata must wrap instead of forcing the action buttons off-screen
-        // when the launcher window is narrow or the instance name is long.
-        FlowPane metadata = new FlowPane(
-                8,
-                4,
-                versionLabel,
-                loaderLabel,
-                playtimeLabel
-        );
-        metadata.setAlignment(Pos.CENTER_LEFT);
-        metadata.setMinWidth(0);
-        metadata.setMaxWidth(Double.MAX_VALUE);
-
-        VBox information =
-                new VBox(
-                        6,
-                        nameLabel,
-                        metadata
-                );
-
-        information.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        HBox.setHgrow(
-                information,
-                Priority.ALWAYS
-        );
-
-        // ---------------------------------------------------------
-        // STATUS
-        // ---------------------------------------------------------
-
-        statusLabel =
-                new Label(
-                        Localization.text("instanceCard.ready")
-                );
-
-        statusLabel.getStyleClass().add(
-                "instance-ready"
-        );
-
-        // ---------------------------------------------------------
-        // PLAY BUTTON
-        // ---------------------------------------------------------
-
-        playButton =
-                new Button(
-                        Localization.text("common.play")
-                );
-
-        playButton.getStyleClass().add(
-                "instance-play-button"
-        );
+        // ----------------------------------------------------------- actions
+        playButton = new Button(Localization.text("common.play"));
+        playButton.setGraphic(IconView.create(IconView.Type.PLAY, 14));
+        playButton.getStyleClass().addAll("vanta-button-primary", "button-compact", "instance-play-button");
         playButton.setAccessibleText(Localization.text("instanceCard.launchPrefix") + instance.getName());
         playButton.setTooltip(new Tooltip(Localization.text("instanceCard.launchAccessiblePrefix") + instance.getName()));
+        playButton.setMinWidth(Region.USE_PREF_SIZE);
+        playButton.setOnAction(event -> {
+            event.consume();
+            onPlay.run();
+        });
+        AnimationUtils.installInteractiveAnimations(playButton);
 
-        playButton.setMinWidth(
-                90
-        );
-
-        playButton.setPrefWidth(
-                90
-        );
-
-        playButton.setMaxWidth(
-                90
-        );
-
-        playButton.setMinHeight(32);playButton.setPrefHeight(32);playButton.setMaxHeight(32);
-
-        playButton.setOnAction(
-                event -> {
-
-                    event.consume();
-
-                    onPlay.run();
-                }
-        );
-
-        // ---------------------------------------------------------
-        // SETTINGS
-        // ---------------------------------------------------------
-
-        settingsButton =
-                new Button();
-        settingsButton.setGraphic(IconView.create(IconView.Type.SETTINGS, 16));
-        settingsButton.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
-
-        settingsButton.getStyleClass().add(
-                "instance-settings-button"
-        );
-        settingsButton.setAccessibleText(Localization.text("instanceCard.optionsForPrefix") + instance.getName());
+        settingsButton = new IconButton(IconView.Type.SETTINGS,
+                Localization.text("instanceCard.optionsForPrefix") + instance.getName(),
+                IconButton.Style.SECONDARY).compact();
+        settingsButton.getStyleClass().add("instance-settings-button");
         settingsButton.setTooltip(new Tooltip(Localization.text("instanceCard.optionsAccessible")));
+        settingsButton.setOnAction(event -> {
+            event.consume();
+            onSettings.run();
+        });
 
-        settingsButton.setMinWidth(32);settingsButton.setPrefWidth(32);settingsButton.setMaxWidth(32);
+        menuButton = new IconButton(IconView.Type.MORE,
+                Localization.text("instanceCard.moreActionsForPrefix") + instance.getName(),
+                IconButton.Style.SECONDARY).compact();
+        menuButton.getStyleClass().add("instance-menu-button");
+        menuButton.setTooltip(new Tooltip(Localization.text("instanceCard.moreActions")));
+        menuButton.setOnAction(event -> {
+            event.consume();
+            showMenu(menuButton, onDelete, onRename, onDuplicate, onIcon);
+        });
 
-        settingsButton.setMinHeight(32);settingsButton.setPrefHeight(32);settingsButton.setMaxHeight(32);
+        if (layout == Layout.GRID) {
+            buildGrid(iconPlate);
+        } else {
+            buildList();
+        }
 
-        settingsButton.setOnAction(
-                event -> {
-
-                    event.consume();
-
-                    onSettings.run();
-                }
-        );
-
-        // ---------------------------------------------------------
-        // RIGHT SIDE
-        // ---------------------------------------------------------
-
-        HBox right =
-                new HBox(
-                        10,
-                        statusLabel,
-                        settingsButton,
-                        playButton
-                );
-
-        right.setAlignment(
-                Pos.CENTER_RIGHT
-        );
-
-        /*
-         * Reserve space for the vertical menu button.
-         */
-        right.setPadding(Insets.EMPTY);
-
-        // ---------------------------------------------------------
-        // CONTENT
-        // ---------------------------------------------------------
-
-        content.getChildren().addAll(
-                iconBox,
-                information,
-                right
-        );
-
-        /*
-         * Keep the primary actions usable in narrow launcher windows.
-         * Secondary status text yields space before the action controls do.
-         */
-        widthProperty().addListener((observable, oldWidth, newWidth) -> {
-            double width = newWidth.doubleValue();
-
-            if (width < 520) {
-                content.setSpacing(width < 420 ? VantaUI.spacing(2) : VantaUI.spacing(3));
-                content.setPadding(new Insets(
-                        width < 420 ? VantaUI.spacing(3) : VantaUI.spacing(4),
-                        width < 420 ? VantaUI.spacing(3) : VantaUI.spacing(4),
-                        width < 420 ? VantaUI.spacing(3) : VantaUI.spacing(4),
-                        width < 420 ? VantaUI.spacing(3) : VantaUI.spacing(4)
-                ));
-                statusLabel.setVisible(false);
-                statusLabel.setManaged(false);
-                right.setSpacing(7);
-                right.setPadding(Insets.EMPTY);
-            } else {
-                content.setSpacing(VantaUI.spacing(4));
-                content.setPadding(new Insets(
-                        VantaUI.spacing(4), VantaUI.spacing(5),
-                        VantaUI.spacing(4), VantaUI.spacing(5)
-                ));
-                statusLabel.setVisible(true);
-                statusLabel.setManaged(true);
-                right.setSpacing(10);
-                right.setPadding(Insets.EMPTY);
+        // Clicking the card opens the instance; the buttons keep their own actions.
+        setCursor(javafx.scene.Cursor.HAND);
+        setFocusTraversable(true);
+        setAccessibleRole(AccessibleRole.BUTTON);
+        setAccessibleText(Localization.text("instanceCard.optionsForPrefix") + instance.getName());
+        setOnMouseClicked(event -> {
+            if (!fromButton(event.getTarget())) {
+                onSettings.run();
+            }
+        });
+        setOnKeyPressed(event -> {
+            if (event.getTarget() == this
+                    && (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE)) {
+                onSettings.run();
+                event.consume();
             }
         });
 
-        StackPane.setAlignment(
-                content,
-                Pos.CENTER
-        );
-
-        // ---------------------------------------------------------
-        // MENU BUTTON
-        // ---------------------------------------------------------
-
-        menuButton =
-                new Button();
-        menuButton.setGraphic(IconView.create(IconView.Type.MORE, 16));
-        menuButton.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
-
-        menuButton.getStyleClass().add(
-                "instance-menu-button"
-        );
-        menuButton.setAccessibleText(Localization.text("instanceCard.moreActionsForPrefix") + instance.getName());
-        menuButton.setTooltip(new Tooltip(Localization.text("instanceCard.moreActions")));
-
-        menuButton.setFocusTraversable(true);
-
-        menuButton.setMinWidth(
-                28
-        );
-
-        menuButton.setPrefWidth(
-                28
-        );
-
-        menuButton.setMaxWidth(
-                28
-        );
-
-        menuButton.setMinHeight(
-                28
-        );
-
-        menuButton.setPrefHeight(
-                28
-        );
-
-        menuButton.setMaxHeight(
-                28
-        );
-
-        menuButton.setOnAction(
-                event -> {
-
-                    event.consume();
-
-                    showMenu(
-                            menuButton,
-                            onDelete,
-                            onRename,
-                            onDuplicate,
-                            onIcon
-                    );
-                }
-        );
-
-        StackPane.setAlignment(
-                menuButton,
-                Pos.TOP_RIGHT
-        );
-
-        StackPane.setMargin(
-                menuButton,
-                new Insets(
-                        8,
-                        8,
-                        0,
-                        0
-                )
-        );
-
-        // ---------------------------------------------------------
-        // BUILD
-        // ---------------------------------------------------------
-
-        right.getChildren().add(menuButton);
-        getChildren().add(content);
-
         update();
         updateIcon();
+    }
+
+    private static boolean fromButton(Object target) {
+        Node node = target instanceof Node n ? n : null;
+        while (node != null) {
+            if (node instanceof ButtonBase) {
+                return true;
+            }
+            node = node.getParent();
+        }
+        return false;
+    }
+
+    // ================================================================ layouts
+
+    private void buildGrid(StackPane iconPlate) {
+        CoverArt cover = new CoverArt(instance.getName(), instance.getLoader()).rounded(8);
+        cover.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+
+        HBox topActions = new HBox(6, settingsButton, menuButton);
+        topActions.setAlignment(Pos.TOP_RIGHT);
+        topActions.setPickOnBounds(false);
+        StackPane.setAlignment(topActions, Pos.TOP_RIGHT);
+        StackPane.setMargin(topActions, new Insets(8));
+
+        StackPane.setAlignment(statusBadge, Pos.TOP_LEFT);
+        StackPane.setMargin(statusBadge, new Insets(8));
+
+        StackPane.setAlignment(iconPlate, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(iconPlate, new Insets(8));
+
+        StackPane.setAlignment(playButton, Pos.BOTTOM_RIGHT);
+        StackPane.setMargin(playButton, new Insets(8));
+
+        StackPane art = new StackPane(cover, iconPlate, statusBadge, topActions, playButton);
+        art.getStyleClass().add("instance-card-art");
+        art.setMinHeight(112);
+        art.setPrefHeight(112);
+        art.setMaxHeight(112);
+
+        HBox badges = new HBox(6, loaderBadge, versionBadge);
+        badges.setAlignment(Pos.CENTER_LEFT);
+
+        Region fill = new Region();
+        HBox.setHgrow(fill, Priority.ALWAYS);
+        HBox meta = new HBox(8, badges, fill, playtimeLabel);
+        meta.setAlignment(Pos.CENTER_LEFT);
+
+        VBox body = new VBox(8, nameLabel, meta);
+        body.setPadding(new Insets(10, 6, 6, 6));
+
+        VBox column = new VBox(art, body);
+        column.setPadding(new Insets(6));
+        getChildren().add(column);
+
+        reveal(topActions, playButton);
+    }
+
+    private void buildList() {
+        CoverArt thumb = new CoverArt(instance.getName(), instance.getLoader())
+                .rounded(6).sized(72, 40);
+
+        HBox identity = new HBox(14, thumb, nameLabel);
+        identity.setAlignment(Pos.CENTER_LEFT);
+        identity.setMinWidth(0);
+        HBox.setHgrow(identity, Priority.ALWAYS);
+        HBox.setHgrow(nameLabel, Priority.ALWAYS);
+
+        StackPane loaderCell = cell(loaderBadge, 150);
+        StackPane versionCell = cell(versionBadge, 88);
+        playtimeLabel.setAlignment(Pos.CENTER_RIGHT);
+        StackPane playtimeCell = cell(playtimeLabel, 84);
+        playtimeCell.setAlignment(Pos.CENTER_RIGHT);
+        StackPane statusCell = cell(statusBadge, 96);
+
+        HBox actions = new HBox(6, playButton, settingsButton, menuButton);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+
+        HBox row = new HBox(12, identity, loaderCell, versionCell, playtimeCell, statusCell, actions);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(8, 12, 8, 8));
+        getChildren().add(row);
+
+        widthProperty().addListener((observable, previous, next) -> {
+            double width = next.doubleValue();
+            boolean wide = width >= 760;
+            boolean medium = width >= 600;
+            statusCell.setVisible(wide);
+            statusCell.setManaged(wide);
+            playtimeCell.setVisible(medium && LauncherSettings.isShowPlaytimeEnabled());
+            playtimeCell.setManaged(playtimeCell.isVisible());
+            loaderCell.setVisible(medium);
+            loaderCell.setManaged(medium);
+        });
+    }
+
+    private static StackPane cell(Node node, double width) {
+        StackPane cell = new StackPane(node);
+        cell.setAlignment(Pos.CENTER_LEFT);
+        cell.setMinWidth(width);
+        cell.setPrefWidth(width);
+        cell.setMaxWidth(width);
+        return cell;
+    }
+
+    /** Fades the given nodes in while the card is hovered or holds focus. */
+    private void reveal(Node... nodes) {
+        for (Node node : nodes) {
+            node.setOpacity(0);
+        }
+        Runnable sync = () -> {
+            boolean show = isHover() || isFocused() || playButton.isFocused()
+                    || settingsButton.isFocused() || menuButton.isFocused() || getStyleClass().contains("instance-card-live");
+            for (Node node : nodes) {
+                FadeTransition fade = new FadeTransition(Duration.millis(show ? 120 : 160), node);
+                fade.setToValue(show ? 1 : 0);
+                Object previous = node.getProperties().put("reveal.fade", fade);
+                if (previous instanceof FadeTransition active) {
+                    active.stop();
+                }
+                fade.play();
+            }
+        };
+        hoverProperty().addListener((observable, was, is) -> sync.run());
+        focusedProperty().addListener((observable, was, is) -> sync.run());
+        playButton.focusedProperty().addListener((observable, was, is) -> sync.run());
+        settingsButton.focusedProperty().addListener((observable, was, is) -> sync.run());
+        menuButton.focusedProperty().addListener((observable, was, is) -> sync.run());
+        getProperties().put("reveal.sync", sync);
+    }
+
+    private void refreshReveal() {
+        if (getProperties().get("reveal.sync") instanceof Runnable sync) {
+            sync.run();
+        }
     }
 
     // =============================================================
@@ -434,7 +352,7 @@ public class InstanceCard extends StackPane {
                 );
 
         deleteItem.getStyleClass().add(
-                "instance-delete-menu-item"
+                "danger-item"
         );
 
         renameItem.setOnAction(event -> onRename.run());
@@ -611,9 +529,7 @@ public class InstanceCard extends StackPane {
         StackPane dialogRoot =
                 new StackPane();
 
-        dialogRoot.setStyle(
-                "-fx-background-color: transparent;"
-        );
+        dialogRoot.getStyleClass().add("delete-dialog-root");
 
         dialogRoot.getChildren().add(
                 dialogContent
@@ -852,7 +768,7 @@ public class InstanceCard extends StackPane {
         if (custom) {
             File file = instance.getDirectory().resolve("icon.png").toFile();
             if (file.isFile()) {
-                customIconView.setImage(new Image(file.toURI().toString(), 28, 28, true, true));
+                customIconView.setImage(new Image(file.toURI().toString(), 18, 18, true, true));
             } else {
                 customIconView.setImage(null);
                 customIconView.setVisible(false);
@@ -864,30 +780,13 @@ public class InstanceCard extends StackPane {
         }
     }
 
-    private void updateIconFromDisk() {
-        updateIcon();
-    }
-
     private void update() {
-
-        nameLabel.setText(
-                instance.getName()
-        );
-
-        versionLabel.setText(
-                "Minecraft "
-                        + instance.getMinecraftVersion()
-        );
-
-        loaderLabel.setText(
-                instance.getDisplayLoader()
-        );
-
+        nameLabel.setText(instance.getName());
+        versionBadge.setText(instance.getMinecraftVersion());
+        loaderBadge.setText(instance.getDisplayLoader());
         playtimeLabel.setText(
                 InstanceUsageManager.formatPlaytime(
-                        InstanceUsageManager.getPlaytimeSeconds(instance)
-                ) + " played"
-        );
+                        InstanceUsageManager.getPlaytimeSeconds(instance)));
         boolean showPlaytime = LauncherSettings.isShowPlaytimeEnabled();
         playtimeLabel.setVisible(showPlaytime);
         playtimeLabel.setManaged(showPlaytime);
@@ -903,8 +802,8 @@ public class InstanceCard extends StackPane {
         double s = canvas.getWidth() / 30.0;
         GraphicsContext g = canvas.getGraphicsContext2D();
         g.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        g.setStroke(javafx.scene.paint.Color.web("#dbe7ff"));
-        g.setFill(javafx.scene.paint.Color.web("#dbe7ff"));
+        g.setStroke(ICON_INK);
+        g.setFill(ICON_INK);
         g.setLineWidth(2.2 * s);
         String icon = value == null ? "SHIELD" : value.toUpperCase();
 
@@ -969,196 +868,108 @@ public class InstanceCard extends StackPane {
             LaunchService.LaunchState state,
             boolean isThisInstance
     ) {
-
         UiExecutor.shared().dispatchToUi(() -> {
+            if (state == LaunchService.LaunchState.IDLE || !isThisInstance) {
+                resetToReady();
+                return;
+            }
 
             switch (state) {
-
-                case IDLE -> {
-
-                    resetToReady();
-
-                    statusLabel.setText(
-                            Localization.text("instanceCard.ready")
-                    );
-                }
-
                 case PREPARING -> {
-
-                    if (!isThisInstance) {
-                        resetToReady();
-                        return;
-                    }
-
-                    playButton.setDisable(
-                            true
-                    );
-
-                    setPlayButtonAction("PREPARING...", "Preparing to launch " + instance.getName());
-
-                    setPlayingStyle(
-                            false
-                    );
-
-                    statusLabel.setText(
-                            Localization.text("instanceCard.preparing")
-                    );
+                    playButton.setDisable(true);
+                    setPlayButtonAction("Preparing…", "Preparing to launch " + instance.getName(), false);
+                    setPlayingStyle(false);
+                    showStatus(Localization.text("instanceCard.preparing"), Badge.Tone.ACCENT);
                 }
-
                 case STARTING -> {
-
-                    if (!isThisInstance) {
-                        resetToReady();
-                        return;
-                    }
-
-                    playButton.setDisable(
-                            true
-                    );
-
-                    setPlayButtonAction("STARTING...", "Starting Minecraft instance " + instance.getName());
-
-                    setPlayingStyle(
-                            false
-                    );
-
-                    statusLabel.setText(
-                            Localization.text("instanceCard.starting")
-                    );
+                    playButton.setDisable(true);
+                    setPlayButtonAction("Starting…", "Starting Minecraft instance " + instance.getName(), false);
+                    setPlayingStyle(false);
+                    showStatus(Localization.text("instanceCard.starting"), Badge.Tone.ACCENT);
                 }
-
                 case RUNNING -> {
-
-                    if (!isThisInstance) {
-                        resetToReady();
-                        return;
-                    }
-
-                    playButton.setDisable(
-                            false
-                    );
-
-                    setPlayButtonAction("CLOSE", "Close Minecraft instance " + instance.getName());
-
-                    setPlayingStyle(
-                            true
-                    );
-
-                    statusLabel.setText(
-                            Localization.text("instanceCard.running")
-                    );
+                    playButton.setDisable(false);
+                    setPlayButtonAction(Localization.text("instanceCard.close"), "Close Minecraft instance " + instance.getName(), false);
+                    setPlayingStyle(true);
+                    showStatus(Localization.text("instanceCard.running"), Badge.Tone.SUCCESS);
                 }
-
                 case CLOSING -> {
-
-                    if (!isThisInstance) {
-                        resetToReady();
-                        return;
-                    }
-
-                    playButton.setDisable(
-                            true
-                    );
-
-                    setPlayButtonAction("CLOSING...", "Closing Minecraft instance " + instance.getName());
-
-                    setPlayingStyle(
-                            true
-                    );
-
-                    statusLabel.setText(
-                            Localization.text("instanceCard.closing")
-                    );
+                    playButton.setDisable(true);
+                    setPlayButtonAction("Closing…", "Closing Minecraft instance " + instance.getName(), false);
+                    setPlayingStyle(true);
+                    showStatus(Localization.text("instanceCard.closing"), Badge.Tone.WARNING);
                 }
-
                 case ERROR -> {
-
-                    if (!isThisInstance) {
-                        resetToReady();
-                        return;
-                    }
-
-                    playButton.setDisable(
-                            false
-                    );
-
-                    setPlayButtonAction(Localization.text("common.play"), Localization.text("instanceCard.launchPrefix") + instance.getName());
-
-                    setPlayingStyle(
-                            false
-                    );
-
-                    statusLabel.setText(
-                            Localization.text("instanceCard.error")
-                    );
+                    playButton.setDisable(false);
+                    setPlayButtonAction(Localization.text("common.play"),
+                            Localization.text("instanceCard.launchPrefix") + instance.getName(), true);
+                    setPlayingStyle(false);
+                    showStatus(Localization.text("instanceCard.error"), Badge.Tone.DANGER);
                 }
+                default -> resetToReady();
             }
         });
     }
 
-    private void setPlayButtonAction(String text, String accessibleText) {
+    private void setPlayButtonAction(String text, String accessibleText, boolean withIcon) {
         playButton.setText(text);
+        playButton.setGraphic(withIcon || text.equals(Localization.text("common.play"))
+                ? IconView.create(IconView.Type.PLAY, 14) : null);
         playButton.setAccessibleText(accessibleText);
         playButton.setTooltip(new Tooltip(accessibleText));
     }
 
     private void resetToReady() {
-
-        playButton.setDisable(
-                false
-        );
-
-        setPlayButtonAction(Localization.text("common.play"), Localization.text("instanceCard.launchPrefix") + instance.getName());
-
-        setPlayingStyle(
-                false
-        );
-
-        statusLabel.setText(
-                Localization.text("instanceCard.ready")
-        );
+        playButton.setDisable(false);
+        setPlayButtonAction(Localization.text("common.play"),
+                Localization.text("instanceCard.launchPrefix") + instance.getName(), true);
+        setPlayingStyle(false);
+        hideStatus();
     }
 
-    private void setPlayingStyle(
-            boolean playing
-    ) {
+    private void showStatus(String text, Badge.Tone tone) {
+        statusBadge.setText(text.replaceFirst("^\\W+", ""));
+        statusBadge.getStyleClass().removeIf(style -> style.startsWith("badge-")
+                && !style.equals("badge-mono") && !style.equals("badge-dot"));
+        statusBadge.getStyleClass().add("badge-" + tone.name().toLowerCase(java.util.Locale.ROOT));
+        statusBadge.setVisible(true);
+        statusBadge.setManaged(true);
+    }
 
-        playButton.getStyleClass().remove(
-                "instance-playing-button"
-        );
+    private void hideStatus() {
+        statusBadge.setText("");
+        statusBadge.setVisible(false);
+        statusBadge.setManaged(false);
+    }
 
+    private void setPlayingStyle(boolean playing) {
+        playButton.getStyleClass().remove("instance-playing-button");
+        playButton.getStyleClass().removeAll("vanta-button-primary", "vanta-button-secondary");
         if (playing) {
-
-            playButton.getStyleClass().add(
-                    "instance-playing-button"
-            );
+            playButton.getStyleClass().addAll("vanta-button-secondary", "instance-playing-button");
+            if (!getStyleClass().contains("instance-card-live")) {
+                getStyleClass().add("instance-card-live");
+            }
+        } else {
+            playButton.getStyleClass().add("vanta-button-primary");
+            getStyleClass().remove("instance-card-live");
         }
+        refreshReveal();
     }
 
     // =============================================================
-    // GET INSTANCE
+    // GET / SET INSTANCE
     // =============================================================
 
     public Instance getInstance() {
-
         return instance;
     }
 
-    // =============================================================
-    // SET INSTANCE
-    // =============================================================
-
-    public void setInstance(
-            Instance instance
-    ) {
-
+    public void setInstance(Instance instance) {
         if (instance == null) {
             return;
         }
-
-        this.instance =
-                instance;
-
+        this.instance = instance;
         update();
     }
 
