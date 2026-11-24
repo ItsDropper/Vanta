@@ -44,7 +44,7 @@ class MinecraftSecurityUpdateServiceTest {
         JsonNode official = JSON.readTree("""
                 [
                   {"name":"org.lwjgl:lwjgl:3.4.4"},
-                  {"name":"org.lwjgl:lwjgl-freetype:3.4.4"},
+                  {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0"},
                   {"name":"org.lwjgl:lwjgl-glfw:3.4.4"}
                 ]
                 """);
@@ -62,7 +62,7 @@ class MinecraftSecurityUpdateServiceTest {
     }
 
     @Test
-    void keepsNonLwjglLibrariesAndReplacesOldLwjglGroup() throws Exception {
+    void keepsOtherLibrariesAndReplacesOnlyOldFreetype() throws Exception {
         ObjectNode instance = (ObjectNode) JSON.readTree("""
                 {
                   "libraries": [
@@ -76,7 +76,7 @@ class MinecraftSecurityUpdateServiceTest {
                 [{"name":"org.lwjgl:lwjgl-freetype:3.4.4"}]
                 """);
 
-        MinecraftSecurityUpdateService.replaceLwjglLibraries(instance, official);
+        MinecraftSecurityUpdateService.replaceFreetypeLibraries(instance, official);
 
         JsonNode libraries = instance.path("libraries");
         assertEquals(3, libraries.size());
