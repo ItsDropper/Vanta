@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Refreshes Mojang-owned LWJGL metadata immediately before launching modern
@@ -171,7 +170,7 @@ public final class MinecraftSecurityUpdateService {
         return (ObjectNode) node;
     }
 
-    private static void replaceLwjglLibraries(ObjectNode metadata, JsonNode officialLibraries) {
+    static void replaceLwjglLibraries(ObjectNode metadata, JsonNode officialLibraries) {
         JsonNode existing = metadata.path("libraries");
         if (!existing.isArray()) {
             throw new IllegalStateException("Instance metadata has no library array.");
