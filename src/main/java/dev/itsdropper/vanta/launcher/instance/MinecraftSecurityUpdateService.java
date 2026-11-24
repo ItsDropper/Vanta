@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import dev.itsdropper.vanta.launcher.VersionReader;
+import dev.itsdropper.vanta.launcher.ClasspathBuilder;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.io.IOException;
@@ -70,7 +70,7 @@ public final class MinecraftSecurityUpdateService {
             if (base != null) {
                 writeJsonAtomically(baseFile, base);
             }
-            VersionReader.clearCache();
+            ClasspathBuilder.clearCache();
 
             // Downloads are verified against the SHA-1 values in Mojang's
             // metadata. NativeExtractor publishes a clean staged directory,
