@@ -20,7 +20,7 @@ import java.util.Properties;
  */
 public final class ThemeManager {
 
-    public static final String DEFAULT_ACCENT = "#4C8DFF";
+    public static final String DEFAULT_ACCENT = "#EBB54A";
     public static final String DEFAULT_THEME = "Vanta";
 
     public record Theme(
@@ -45,8 +45,8 @@ public final class ThemeManager {
 
     static {
         VantaFonts.ensureLoaded();
-        register(new Theme("Vanta", "#4C8DFF", "#0E1218", "#141A22", "#1A212B", "#222B37", "#2E3846",
-                "#EDF1F7", "#9AA6B6", "#7A8696", "#F0707D", "#4CC38A"));
+        register(new Theme("Vanta", "#EBB54A", "#0C0D0F", "#131416", "#1A1B1E", "#232428", "#2B2C31",
+                "#ECEAE4", "#A3A19A", "#85837C", "#EF6B6B", "#4FCB8E"));
         register(new Theme("Midnight", "#7C9CFF", "#090B12", "#121622", "#181E2C", "#222A3A", "#2B3447",
                 "#F2F5FF", "#8994AA", "#646F84", "#EF8C98", "#69D9A2"));
         register(new Theme("Nord", "#88C0D0", "#0E1419", "#182127", "#202B33", "#293740", "#354651",
@@ -164,6 +164,10 @@ public final class ThemeManager {
                 "-vantaaccentsoft: " + soft + ";" +
                 "-vantaaccenthover: " + accentHover + ";" +
                 "-vantaaccentrgb: " + rgb + ";" +
+                "-vantaaccent-a10: rgba(" + rgb + ",0.10);" +
+                "-vantaaccent-a18: rgba(" + rgb + ",0.18);" +
+                "-vantaaccent-a30: rgba(" + rgb + ",0.30);" +
+                "-vantaaccent-a55: rgba(" + rgb + ",0.55);" +
                 "-vantabg: " + background + ";" +
                 "-vantasurface: " + surface + ";" +
                 "-vantasurfaceraised: " + raised + ";" +

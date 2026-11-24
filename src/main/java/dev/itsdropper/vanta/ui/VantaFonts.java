@@ -6,13 +6,23 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Registers the bundled Poppins weights (SIL Open Font License, see /fonts/OFL.txt).
- * JavaFX selects a weight by family name, so the stylesheets use "Poppins",
- * "Poppins Light", "Poppins Medium" and "Poppins SemiBold".
+ * Registers the bundled typefaces (SIL Open Font License, see /fonts/OFL.txt).
+ *
+ * Geist carries the interface and JetBrains Mono carries technical values such
+ * as versions, sizes and paths. JavaFX selects a weight by family name, so the
+ * stylesheets use "Geist", "Geist Medium", "Geist SemiBold", "JetBrains Mono"
+ * and "JetBrains Mono Medium".
  */
 public final class VantaFonts {
+    public static final String SANS = "Geist";
+    public static final String SANS_MEDIUM = "Geist Medium";
+    public static final String SANS_SEMIBOLD = "Geist SemiBold";
+    public static final String MONO = "JetBrains Mono";
+    public static final String MONO_MEDIUM = "JetBrains Mono Medium";
+
     private static final String[] FILES = {
-            "Poppins-Light.ttf", "Poppins-Regular.ttf", "Poppins-Medium.ttf", "Poppins-SemiBold.ttf"
+            "Geist-Regular.ttf", "Geist-Medium.ttf", "Geist-SemiBold.ttf",
+            "JetBrainsMono-Regular.ttf", "JetBrainsMono-Medium.ttf"
     };
     private static boolean loaded;
 

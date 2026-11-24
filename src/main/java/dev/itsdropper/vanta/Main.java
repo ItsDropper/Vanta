@@ -64,11 +64,7 @@ public class Main extends Application {
         );
         scene.setFill(Color.TRANSPARENT);
 
-        var loadingCss = getClass().getResource("/css/shell.css");
-        if (loadingCss == null) {
-            throw new IllegalStateException("Missing CSS resource: /css/shell.css");
-        }
-        scene.getStylesheets().add(loadingCss.toExternalForm());
+        dev.itsdropper.vanta.ui.Stylesheets.addTo(scene);
 
         stage.setTitle("Vanta");
         stage.setMinWidth(1180);
@@ -133,18 +129,7 @@ public class Main extends Application {
     }
 
     private void applyLauncherStylesheets(Scene scene) {
-        String[] stylesheets = {
-                "/css/base.css", "/css/shell.css", "/css/home.css", "/css/library.css",
-                "/css/content.css", "/css/manage.css", "/css/utilities.css", "/css/tokens.css",
-                "/css/vanta.css"
-        };
-        for (String stylesheet : stylesheets) {
-            var resource = getClass().getResource(stylesheet);
-            if (resource == null) {
-                throw new IllegalStateException("Missing CSS resource: " + stylesheet);
-            }
-            scene.getStylesheets().add(resource.toExternalForm());
-        }
+        dev.itsdropper.vanta.ui.Stylesheets.addTo(scene);
     }
 
     private void initializeLauncher(

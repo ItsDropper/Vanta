@@ -634,12 +634,7 @@ public class InstanceCard extends StackPane {
         // STYLESHEETS
         // ---------------------------------------------------------
 
-        scene.getStylesheets().add(
-                getClass().getResource("/css/base.css").toExternalForm()
-        );
-        scene.getStylesheets().add(
-                getClass().getResource("/css/library.css").toExternalForm()
-        );
+        dev.itsdropper.vanta.ui.Stylesheets.addTo(scene);
 
         dialog.setScene(
                 scene

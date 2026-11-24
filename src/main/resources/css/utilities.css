@@ -1,1495 +1,452 @@
-/* Vanta darkroom design system — shared utilities and refinements.
- * Consolidated from: polish.css, ui-components.css, vanta-identity.css.
- */
+/* ==========================================================================
+   Vanta component kit
+   --------------------------------------------------------------------------
+   Styles for the reusable components in dev.itsdropper.vanta.ui.kit and for
+   the shared empty-state surface. Views compose these instead of hand-rolling
+   cards, chips and rows, which is what keeps the app looking like one product.
+   ========================================================================== */
 
-/* Vanta interface polish: consistent focus, depth and interaction feedback. */
+/* ---------- badge ---------------------------------------------------------- */
 
-.button,
-.text-field,
-.text-area,
-.combo-box-base,
-.choice-box,
-.check-box .box,
-.slider .thumb {
-    -fx-focus-color: -vantaaccent;
-    -fx-faint-focus-color: -vantaaccentsoft;
-}
-
-.button:focused,
-.text-field:focused,
-.text-area:focused,
-.combo-box-base:focused,
-.choice-box:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 1px;
-}
-
-.instance-card,
-.settings-card,
-.info-card,
-.account-card,
-.home-info-card,
-.home-launch-card,
-.home-recent-servers-card,
-.mod-details-card,
-.mod-details-header,
-.state-card,
-.accounts-card {
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-}
-
-.sidebar-button,
-.settings-nav-button,
-.title-bar-button,
-.secondary-button,
-.primary-button,
-.instance-play-button,
-.instance-menu-button,
-.modrinth-versions-button,
-.state-refresh-button {
-    -fx-background-insets: 0;
-}
-
-.sidebar-button:focused,
-.settings-nav-button:focused,
-.title-bar-button:focused,
-.instance-menu-button:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-border-radius: 8px;
-}
-
-.text-field,
-.text-area,
-.create-field,
-.create-combo,
-.search-field,
-.modrinth-search-field,
-.content-search-field,
-.instance-search-field,
-.accent-hex-field {
-    -fx-background-radius: 9px;
-    -fx-border-radius: 9px;
-    -fx-padding: 9px 12px;
-}
-
-.scroll-bar:vertical,
-.scroll-bar:horizontal {
-    -fx-background-color: transparent;
-    -fx-padding: 2px;
-}
-
-.scroll-bar .thumb {
-    -fx-background-radius: 999px;
-}
-
-.scroll-bar .increment-button,
-.scroll-bar .decrement-button {
-    -fx-background-color: transparent;
-    -fx-padding: 2px;
-}
-
-.page-title,
-.settings-page-title,
-.home-title,
-.accounts-title { -fx-font-family: "Poppins SemiBold";}
-
-.page-subtitle,
-.settings-page-subtitle,
-.accounts-subtitle {
-    -fx-line-spacing: 2px;
-}
-
-.notification {
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-padding: 12px 14px;
-}
-
-.tooltip {
-    -fx-background-radius: 7px;
-    -fx-padding: 7px 10px;
-}
-
-
-/*
- * Shared page-level layout primitives.
- * Typography remains owned by each page's semantic style classes.
- */
-.page-header {
-    -fx-alignment: center-left;
-    -fx-spacing: 16px;
-}
-.page-header-copy {
-    -fx-spacing: 5px;
-    -fx-min-width: 0;
-}
-.page-header-actions {
-    -fx-alignment: center-right;
-    -fx-spacing: 8px;
-}
-
-
-/*
- * Vanta identity layer.
- *
- * Loaded after legacy page styles so the default experience has one coherent
- * visual language without removing the user's selectable theme presets.
- */
-
-.root {
-    -fx-font-family: "Poppins";
-    -fx-font-smoothing-type: lcd;
-}
-
-.launcher {
-    -fx-background-color: -vantabg;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-.content,
-.page,
-.home-page {
-    -fx-background-color: transparent;
-}
-
-.sidebar {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-effect: none;
-}
-
-.sidebar-logo {
-    -fx-font-size: 24px; -fx-font-family: "Poppins SemiBold";}
-
-.sidebar-subtitle,
-.sidebar-section-label {
-    -fx-text-fill: -vantasubtle;
-}
-
-.sidebar-button {
-    -fx-background-color: transparent;
-    -fx-background-radius: 8px;
-    -fx-border-color: transparent;
-    -fx-border-width: 0 0 0 2px;
+.badge {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 11.5px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    
-    -fx-padding: 10px 12px; -fx-font-family: "Poppins Medium";}
-
-.sidebar-button:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -v-hair, derive(-vantasurfaceraised, 6%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 6, 5;
+    -fx-padding: 2px 8px;
 }
 
-.sidebar-button:focused {
-    -fx-border-color: transparent transparent transparent -vantaaccent;
-}
-
-.sidebar-button-active,
-.sidebar-button-active:hover {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: transparent transparent transparent -vantaaccent;
-    -fx-border-width: 0 0 0 2px;
-    -fx-text-fill: -vantatext;
-}
-
-.title-bar {
-    -fx-background-color: -vantabg;
-    -fx-border-color: transparent transparent -vantaborder transparent;
-}
-
-.home-title {
-    -fx-font-size: 28px; -fx-font-family: "Poppins SemiBold";}
-
-.home-account-label {
-    -fx-font-size: 12px;
-}
-
-.home-header {
-    -fx-padding: 0 0 8px 0;
-}
-
-.home-featured-section-eyebrow,
-.home-featured-eyebrow,
-.home-empty-eyebrow {
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-.home-featured-section-subtitle,
-.home-section-subtitle {
-    -fx-font-size: 12px;
-}
-
-.home-featured-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder -vantaborder -vantaborder -vantaaccent;
-    -fx-border-width: 1px 1px 1px 3px;
-    -fx-border-radius: 8px;
-    -fx-effect: none;
-}
-
-.home-featured-card:hover {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaborder, 18%) derive(-vantaborder, 18%) derive(-vantaborder, 18%) -vantaaccent;
-}
-
-.home-featured-icon-frame {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-}
-
-.home-featured-title {
-    -fx-font-size: 28px; -fx-font-family: "Poppins SemiBold";}
-
-.home-featured-meta {
-    -fx-font-size: 12px;
-}
-
-.home-featured-play-button {
-    -fx-background-color: -vantaaccent;
-    -fx-background-radius: 8px;
-    -fx-border-color: transparent;
-    -fx-text-fill: #FFFFFF;
-    -fx-font-size: 12px;
-    
-    -fx-padding: 0 22px;
-    -fx-cursor: hand; -fx-font-family: "Poppins SemiBold";}
-
-.home-featured-play-button:hover {
-    -fx-background-color: -vantaaccenthover;
-}
-
-.home-featured-play-button:focused,
-.primary-button:focused,
-.secondary-button:focused,
-.home-recent-play:focused,
-.home-recent-stop:focused {
-    -fx-border-color: -vantatext;
-    -fx-border-width: 1px;
-    -fx-effect: none;
-}
-
-.home-section-title {
-    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
-
-.home-recent-card,
-.home-server-card,
-.home-recent-servers-card,
-.home-empty-card,
-.home-load-error-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-.home-recent-card:hover,
-.home-server-card:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: derive(-vantaborder, 22%);
-}
-
-.home-recent-name,
-.home-server-name {
-    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
-
-.home-recent-meta,
-.home-server-meta {
+.badge-mono {
+    -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11px;
 }
 
-.home-load-error-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 17px; -fx-font-family: "Poppins SemiBold";}
+.badge-accent {
+    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
+}
 
-.home-load-error-description {
+.badge-success {
+    -fx-text-fill: -vantasuccess;
+    -fx-background-color: derive(-vantasuccess, -55%), -v-success-soft;
+}
+
+.badge-warning {
+    -fx-text-fill: -v-warning;
+    -fx-background-color: derive(-v-warning, -55%), -v-warning-soft;
+}
+
+.badge-danger {
+    -fx-text-fill: -vantadanger;
+    -fx-background-color: derive(-vantadanger, -55%), -v-danger-soft;
+}
+
+.badge-info {
+    -fx-text-fill: -v-info;
+    -fx-background-color: derive(-v-info, -55%), -v-info-soft;
+}
+
+
+.badge-neutral .badge-dot { -fx-fill: -vantasubtle; }
+.badge-accent .badge-dot { -fx-fill: -vantaaccent; }
+.badge-success .badge-dot { -fx-fill: -vantasuccess; }
+.badge-warning .badge-dot { -fx-fill: -v-warning; }
+.badge-danger .badge-dot { -fx-fill: -vantadanger; }
+.badge-info .badge-dot { -fx-fill: -v-info; }
+
+.badge-loader { -fx-text-fill: -vantatext; }
+.badge-loader-fabric .badge-dot { -fx-fill: -v-loader-fabric; }
+.badge-loader-forge .badge-dot { -fx-fill: -v-loader-forge; }
+.badge-loader-neoforge .badge-dot { -fx-fill: -v-loader-neoforge; }
+.badge-loader-quilt .badge-dot { -fx-fill: -v-loader-quilt; }
+.badge-loader-vanilla .badge-dot { -fx-fill: -v-loader-vanilla; }
+.badge-loader-other .badge-dot { -fx-fill: -vantasubtle; }
+
+/* ---------- chip (filter) -------------------------------------------------- */
+
+.chip {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-}
-
-.button:disabled {
-    -fx-opacity: 0.48;
-}
-
-
-/* Consolidated legacy UX foundation rules. */
-
-/*
- * Vanta UX foundation — final cascade layer.
- * One token-driven surface system, predictable controls, accessible focus,
- * calmer typography and consistent interaction states across every view.
- */
-
-.root {
-    -fx-font-family: "Poppins";
-    -fx-font-smoothing-type: lcd;
-    -fx-focus-color: -vantaaccent;
-    -fx-faint-focus-color: derive(-vantaaccent, 78%);
-}
-
-.launcher {
-    -fx-background-color: -vantabg;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-}
-
-.content {
-    -fx-background-color: -vantabg;
-    -fx-background-radius: 0 8px 8px 0;
-}
-
-.page {
-    -fx-background-color: transparent;
-}
-
-/* Typography: fewer competing sizes, stronger hierarchy, readable secondary text. */
-.page-title, .home-title, .accounts-title, .settings-page-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 26px; -fx-font-family: "Poppins SemiBold";}
-
-.page-subtitle, .settings-page-subtitle, .accounts-subtitle,
-.home-account-label, .home-section-subtitle {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-}
-
-.settings-section-title, .home-section-title, .create-section-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-.footer-label, .sidebar-build, .home-recent-status {
-    -fx-text-fill: -vantasubtle;
-}
-
-/* Shell and navigation. */
-.sidebar {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-padding: 20px 12px 14px 12px;
-}
-
-.sidebar-logo {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 23px;
-    
-    -fx-letter-spacing: 1.4px; -fx-font-family: "Poppins SemiBold";}
-
-.sidebar-subtitle {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    
-    -fx-letter-spacing: 0.8px; -fx-font-family: "Poppins SemiBold";}
-
-.sidebar-section-label {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    
-    -fx-letter-spacing: 1px;
-    -fx-padding: 0 0 2px 0; -fx-font-family: "Poppins Medium";}
-
-.sidebar-button {
-    -fx-background-color: transparent;
-    -fx-background-radius: 8px;
-    -fx-border-color: transparent;
-    -fx-border-width: 1px;
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 9px 11px;
-    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
-
-.sidebar-button:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
-}
-
-.sidebar-button:pressed {
-    -fx-background-color: -vantasurfacehover;
-}
-
-.sidebar-button-active, .sidebar-button-active:hover {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 0 0 0 3px;
-    -fx-text-fill: -vantatext; -fx-font-family: "Poppins Medium";}
-
-.title-bar {
-    -fx-background-color: -vantabg;
-    -fx-border-color: transparent transparent -vantaborder transparent;
-    -fx-border-width: 0 0 1px 0;
-    -fx-background-radius: 8px 8px 0 0;
-    -fx-padding: 0 8px 0 16px;
-}
-
-.title-bar-brand {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    
-    -fx-letter-spacing: 1.2px; -fx-font-family: "Poppins SemiBold";}
-
-.title-bar-button, .title-bar-close {
-    -fx-background-color: transparent;
-    -fx-background-radius: 7px;
-    -fx-border-color: transparent;
+    -fx-background-color: -v-hair-strong, transparent;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 20, 19;
+    -fx-padding: 0 12px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
     -fx-cursor: hand;
 }
 
-.title-bar-button:hover { -fx-background-color: -vantasurfaceraised; }
-.title-bar-close:hover { -fx-background-color: -vantadanger; }
-.title-bar-button SVGPath, .title-bar-close SVGPath {
-    -fx-stroke: -vantamuted;
-    -fx-stroke-width: 1.4px;
+.chip:hover {
+    -fx-text-fill: -vantatext;
+    -fx-background-color: -v-hair-strong, -v-hair;
 }
-.title-bar-button:hover SVGPath, .title-bar-close:hover SVGPath { -fx-stroke: -vantatext; }
 
-.title-bar-update {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-background-radius: 7px;
-    -fx-border-color: derive(-vantaaccent, -55%);
-    -fx-border-width: 1px;
-    -fx-border-radius: 7px;
+.chip:selected {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 0 11px; -fx-font-family: "Poppins SemiBold";}
-.title-bar-update:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaaccent;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
 }
 
-/* Buttons: clear primary action, quiet secondary actions, explicit destructive states. */
-.button {
-    
-    -fx-font-size: 12px;
-    
-    -fx-background-insets: 0;
-    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
+/* ---------- segmented control ---------------------------------------------- */
 
-.primary-button, .instance-create-button, .instance-play-button, .home-play-button {
-    -fx-background-color: -vantaaccent;
-    -fx-background-radius: 8px;
-    -fx-border-color: transparent;
-    -fx-text-fill: white;
-    -fx-font-size: 12px;
-    
-    -fx-padding: 10px 16px; -fx-font-family: "Poppins Medium";}
-
-.primary-button:hover, .instance-create-button:hover,
-.instance-play-button:hover, .home-play-button:hover {
-    -fx-background-color: -vantaaccenthover;
+.segmented {
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 9, 8;
+    -fx-padding: 3px;
 }
 
-.primary-button:pressed, .instance-create-button:pressed,
-.instance-play-button:pressed, .home-play-button:pressed {
-    -fx-background-color: derive(-vantaaccent, -12%);
+/* ---------- search field ----------------------------------------------------- */
+
+.search-field {
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 8, 7;
+    -fx-padding: 0 8px 0 12px;
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -vantaicon: -vantasubtle;
 }
 
-.primary-button:disabled, .instance-play-button:disabled, .home-play-button:disabled {
-    -fx-opacity: 0.48;
-    -fx-cursor: default;
+.search-field:hover {
+    -fx-background-color: -v-hair-strong, -v-well;
 }
 
-.secondary-button, .settings-back-button, .instance-settings-button {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-text-fill: -vantatext;
-    -fx-padding: 9px 14px;
+.search-field:focus-within {
+    -fx-background-color: -vantaaccent-a55, -v-well;
+    -vantaicon: -vantaaccent;
 }
 
-.secondary-button:hover, .settings-back-button:hover, .instance-settings-button:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: derive(-vantaborder, 20%);
-}
-
-.danger-button {
-    -fx-background-color: derive(-vantadanger, -78%);
-    -fx-background-radius: 8px;
-    -fx-border-color: derive(-vantadanger, -45%);
-    -fx-border-radius: 8px;
-    -fx-text-fill: -vantadanger;
-}
-.danger-button:hover { -fx-background-color: derive(-vantadanger, -70%); }
-
-/* Keyboard users get an obvious focus state; pointer hover stays restrained. */
-.button:focused, .text-field:focused, .text-area:focused,
-.combo-box-base:focused, .choice-box:focused, .list-view:focused,
-.table-view:focused, .check-box:focused, .radio-button:focused,
-.sidebar-button:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 1px;
-    -fx-border-radius: 7px;
-    -fx-faint-focus-color: transparent;
-}
-
-/* Consistent card language across Home, Instances, Accounts, Mods and Settings. */
-.info-card, .account-card, .account-panel, .instance-card, .instance-empty,
-.create-panel, .instance-settings-card, .mod-details-card, .mod-details-header,
-.create-instance-panel, .home-info-card, .home-launch-card, .home-recent-servers-card,
-.state-card, .accounts-card, .settings-card, .home-recent-card, .home-server-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-.info-card:hover, .account-card:hover, .instance-card:hover,
-.home-info-card:hover, .home-recent-card:hover, .home-server-card:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: derive(-vantaborder, 18%);
-}
-
-.card-title, .create-section-title, .instances-count { -fx-text-fill: -vantaaccent; }
-.card-main { -fx-text-fill: -vantatext; }
-.card-secondary { -fx-text-fill: -vantamuted; }
-
-/* Home dashboard: neutral surfaces, restrained accent, clear clickable cards. */
-.home-page { -fx-background-color: transparent; }
-.home-content-scroll, .home-content-scroll > .viewport {
+.search-field-input,
+.search-field-input:focused,
+.search-field-input:hover {
     -fx-background-color: transparent;
-    -fx-background: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-min-height: 32px;
+    -fx-pref-height: 32px;
 }
-.home-header { -fx-spacing: 5px; }
-.home-title { -fx-font-size: 28px; }
-.home-account-label { -fx-font-size: 12px; }
-.home-section-title {
+
+.search-field-clear {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 6;
+    -fx-min-width: 22px;
+    -fx-min-height: 22px;
+    -fx-pref-width: 22px;
+    -fx-pref-height: 22px;
+    -fx-padding: 0;
+}
+
+.search-field-clear:hover {
+    -fx-background-color: -v-hair-strong;
+}
+
+/* ---------- section header --------------------------------------------------- */
+
+.section-header-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 15px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-.home-section-subtitle { -fx-font-size: 12px; }
-.home-recent-section { -fx-spacing: 10px; }
-.home-recent-card {
+}
+
+.section-header-description {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -vantamuted;
+}
+
+/* ---------- card ------------------------------------------------------------- */
+
+.kit-card {
+    -fx-background-color:
+        -v-hair-strong,
+        -v-card,
+        linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 12, 11, 11;
+}
+
+.kit-card-interactive {
+    -fx-cursor: hand;
+}
+
+.kit-card-interactive:hover {
+    -fx-background-color:
+        -v-hair-strong,
+        -v-card-hover,
+        linear-gradient(to bottom, -v-gloss, transparent 55%);
+}
+
+.kit-card-interactive:focused {
+    -fx-background-color:
+        -vantaaccent-a55,
+        -v-card,
+        linear-gradient(to bottom, -v-gloss, transparent 55%);
+}
+
+/* ---------- stat tile ---------------------------------------------------------- */
+
+.stat-tile {
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 11, 10;
+}
+
+.stat-tile-label {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+.stat-tile-value {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 24px;
+    -fx-text-fill: -vantatext;
+}
+
+.stat-tile-hint {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 11px;
+    -fx-text-fill: -vantasubtle;
+}
+
+/* ---------- action tile -------------------------------------------------------- */
+
+.action-tile {
+    -fx-background-color:
+        -v-hair-strong,
+        -v-card,
+        linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 12, 11, 11;
     -fx-padding: 14px 16px;
-    -fx-spacing: 14px;
-    -fx-cursor: hand;
-}
-.home-recent-icon {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-background-radius: 10px;
-    -fx-border-color: derive(-vantaaccent, -48%);
-    -fx-border-radius: 10px;
-    -fx-min-width: 48px;
-    -fx-min-height: 48px;
-    -fx-pref-width: 48px;
-    -fx-pref-height: 48px;
-}
-.home-recent-name {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
-.home-recent-meta { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
-.home-recent-playtime { -fx-text-fill: -vantasubtle; -fx-font-size: 11px; }
-.home-recent-play {
-    -fx-background-color: -vantaaccent;
-    -fx-background-radius: 7px;
-    -fx-text-fill: white;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 8px 12px; -fx-font-family: "Poppins Medium";}
-.home-recent-play:hover { -fx-background-color: -vantaaccenthover; }
-.home-recent-stop {
-    -fx-background-color: derive(-vantadanger, -78%);
-    -fx-background-radius: 7px;
-    -fx-border-color: derive(-vantadanger, -45%);
-    -fx-border-radius: 7px;
-    -fx-text-fill: -vantadanger;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.home-recent-servers-card { -fx-padding: 18px; }
-.home-recent-servers-card:hover { -fx-border-color: derive(-vantaborder, 12%); }
-.home-recent-status { -fx-font-size: 11px; }
-
-/* Inputs should look and behave as a family, not a collection of unrelated widgets. */
-.text-field, .text-area, .create-field, .search-field, .modrinth-search-field,
-.content-search-field, .instance-search-field, .accent-hex-field {
-    -fx-background-color: -vantasurface;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantasubtle;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-padding: 9px 11px;
-    -fx-highlight-fill: -vantaaccentsoft;
-    -fx-highlight-text-fill: -vantatext;
-}
-.text-area .content { -fx-background-color: -vantasurface; }
-.combo-box-base, .choice-box {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-}
-.combo-box-base .list-cell, .choice-box .label { -fx-text-fill: -vantatext; }
-.combo-box-popup .list-view, .menu-item {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
-}
-.combo-box-popup .list-cell:hover, .menu-item:focused {
-    -fx-background-color: -vantaaccentsoft;
-}
-
-/* Scrollbars, separators, and status indicators are present but never dominant. */
-.scroll-pane, .scroll-pane > .viewport { -fx-background-color: transparent; }
-.scroll-bar:vertical, .scroll-bar:horizontal {
-    -fx-background-color: transparent;
-    -fx-padding: 2px;
-}
-.scroll-bar .track { -fx-background-color: transparent; }
-.scroll-bar .thumb {
-    -fx-background-color: derive(-vantaborder, 20%);
-    -fx-background-radius: 999px;
-}
-.scroll-bar .thumb:hover { -fx-background-color: -vantamuted; }
-.scroll-bar .increment-button, .scroll-bar .decrement-button {
-    -fx-background-color: transparent;
-    -fx-padding: 2px;
-}
-.separator .line { -fx-border-color: -vantaborder; }
-.progress-bar > .track { -fx-background-color: -vantasurfaceraised; }
-.progress-bar > .bar { -fx-background-color: -vantaaccent; }
-.progress-indicator { -fx-progress-color: -vantaaccent; }
-
-/* Notifications and tooltips use the same material, radius and border language. */
-.notification, .tooltip {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 10px;
-    -fx-background-radius: 10px;
-    -fx-text-fill: -vantatext;
-}
-.tooltip { -fx-padding: 7px 10px; }
-
-/* Reduce motion is handled in Java; this layer does not add CSS animation. */
-
-/* Empty states explain the next action instead of leaving a dead-end screen. */
-.home-empty-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-border-style: dashed;
-}
-.home-empty-eyebrow {
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    
-    -fx-letter-spacing: 1px; -fx-font-family: "Poppins Medium";}
-.home-empty-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 19px; -fx-font-family: "Poppins SemiBold";}
-.home-empty-description {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    -fx-line-spacing: 3px;
-}
-
-.home-launch-indicator {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 999px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 999px;
-    -fx-padding: 7px 10px;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.home-status-ready { -fx-text-fill: -vantasuccess; }
-.home-status-running {
-    -fx-text-fill: -vantasuccess;
-    -fx-border-color: derive(-vantasuccess, -50%);
-}
-.home-status-progress {
-    -fx-text-fill: -vantaaccent;
-    -fx-border-color: derive(-vantaaccent, -50%);
-}
-.home-status-error {
-    -fx-text-fill: -vantadanger;
-    -fx-border-color: derive(-vantadanger, -50%);
-}
-
-.notification-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
-.notification-message {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-}
-.notification-message-error { -fx-text-fill: -vantadanger; }
-.notification-accent-progress { -fx-fill: -vantaaccent; }
-.notification-accent-success { -fx-fill: -vantasuccess; }
-.notification-accent-error { -fx-fill: -vantadanger; }
-.notification-close {
-    -fx-background-color: transparent;
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 18px;
-    -fx-padding: 0;
-}
-.notification-close:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-text-fill: -vantatext;
-}
-
-/* Popup surfaces inherit the same theme tokens as the main window. */
-.account-switcher {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-}
-.account-switcher:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: derive(-vantaborder, 18%);
-}
-.account-switcher-name, .account-popup-username { -fx-text-fill: -vantatext; }
-.account-switcher-arrow, .account-popup-header { -fx-text-fill: -vantamuted; }
-.account-popup {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-}
-.account-popup-account:hover, .account-popup-add:hover {
-    -fx-background-color: -vantasurfaceraised;
-}
-.account-popup-account.active, .account-popup-account.active:hover {
-    -fx-background-color: -vantaaccentsoft;
-}
-.account-popup-active, .account-popup-plus { -fx-text-fill: -vantaaccent; }
-.account-popup-add-text { -fx-text-fill: -vantamuted; }
-.account-popup-separator { -fx-background-color: -vantaborder; }
-
-.home-server-card {
-    -fx-padding: 12px 14px;
-    -fx-spacing: 14px;
-    -fx-cursor: hand;
-}
-.home-server-name {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
-.home-server-meta {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-}
-
-/* Settings navigation shares the exact active-state treatment used by the sidebar. */
-.settings-nav-button {
-    -fx-background-color: transparent;
-    -fx-background-radius: 8px;
-    -fx-border-color: transparent;
-    -fx-text-fill: -vantamuted;
-    -fx-padding: 10px 12px;
-    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
-.settings-nav-button:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
-}
-.settings-nav-button.selected, .settings-nav-button.selected:hover {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 0 0 0 3px;
-    -fx-text-fill: -vantatext;
-}
-
-.account-switcher:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-faint-focus-color: transparent;
-}
-
-/* Dialogs, settings controls, content-browser rows and state surfaces. */
-.theme-selector-popup, .combo-box-popup .list-view,
-.dialog-pane, .dialog-pane.vanta-dialog {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-}
-.dialog-pane .header-panel, .dialog-pane.vanta-dialog .header-panel {
-    -fx-background-color: -vantasurfaceraised;
-}
-.dialog-pane .content, .dialog-pane.vanta-dialog .content,
-.dialog-pane.vanta-dialog .button-bar {
-    -fx-background-color: -vantasurface;
-}
-.dialog-pane .label, .dialog-pane.vanta-dialog .label {
-    -fx-text-fill: -vantatext;
-}
-.dialog-pane .dialog-scroll, .dialog-pane.vanta-dialog .dialog-scroll,
-.dialog-pane.vanta-dialog .dialog-scroll > .viewport {
-    -fx-background-color: -vantabg;
-}
-.settings-navigation { -fx-background-color: -vantasurface; }
-.settings-card, .state-hero, .state-list-card, .onboarding-page,
-.onboarding-feature, .instance-empty, .instance-settings-card {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-}
-.accent-picker, .accent-preset, .verification-code,
-.instance-search-field, .instances-search, .instance-playtime,
-.instance-icon-box, .mod-icon-box {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
-}
-.instance-search-field:focused {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaaccent;
-}
-.account-sign-out-button {
-    -fx-background-color: derive(-vantadanger, -78%);
-    -fx-border-color: derive(-vantadanger, -45%);
-    -fx-text-fill: -vantadanger;
-}
-.modrinth-versions-button, .modrinth-version-row, .state-refresh-button {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
-    -fx-text-fill: -vantatext;
-}
-.modrinth-versions-button:hover, .modrinth-version-row:hover {
-    -fx-background-color: -vantasurfacehover;
-}
-.state-refresh-button:hover {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
-}
-.list-cell:hover, .table-row-cell:hover, .tree-cell:hover {
-    -fx-background-color: -vantasurfaceraised;
-}
-.mod-toggle-enabled {
-    -fx-background-color: derive(-vantasuccess, -68%);
-    -fx-text-fill: -vantasuccess;
-}
-.mod-toggle-disabled {
-    -fx-background-color: derive(-vantadanger, -68%);
-    -fx-text-fill: -vantadanger;
-}
-
-/* Override legacy fixed-width primary-button rules where copy is longer. */
-.home-header .primary-button {
-    -fx-min-width: 148px;
-    -fx-pref-width: 148px;
-    -fx-max-width: 148px;
-}
-.home-empty-card .primary-button {
-    -fx-min-width: 178px;
-    -fx-pref-width: 178px;
-    -fx-max-width: 178px;
-}
-
-
-/* Instance library toolbar and count are part of the same surface system. */
-.instances-toolbar {
+    -fx-pref-height: -1;
     -fx-alignment: center-left;
-    -fx-spacing: 10px;
-    -fx-padding: 8px;
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 10px;
 }
-.instances-count {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-background-radius: 6px;
-    -fx-padding: 5px 9px;
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
-/* Instance library: compact, theme-aware cards with deliberate hierarchy. */
-.instance-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
+.action-tile:hover {
+    -fx-background-color:
+        -v-hair-strong,
+        -v-card-hover,
+        linear-gradient(to bottom, -v-gloss, transparent 55%);
 }
-.instance-card:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: derive(-vantaaccent, -48%);
-}
-.instance-card.selected-instance {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
-}
-.instance-card-compact {
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
-}
-.instance-icon-box {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
-    -fx-background-radius: 11px;
-    -fx-border-radius: 11px;
-}
-.instance-name {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 14px; -fx-font-family: "Poppins SemiBold";}
-.instance-version, .instance-playtime {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-}
-.instance-loader {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-background-radius: 6px;
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 4px 7px; -fx-font-family: "Poppins Medium";}
-.instance-ready {
-    -fx-text-fill: -vantasuccess;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.instance-play-button {
-    -fx-background-color: -vantaaccent;
-    -fx-background-radius: 8px;
-    -fx-text-fill: white;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 0 14px; -fx-font-family: "Poppins Medium";}
-.instance-play-button:hover { -fx-background-color: -vantaaccenthover; }
-.instance-playing-button {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-text-fill: -vantatext;
-}
-.instance-settings-button {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.instance-settings-button:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: derive(-vantaborder, 22%);
-    -fx-text-fill: -vantatext;
-}
-.instance-menu-button { -fx-text-fill: -vantasubtle; }
-.instance-menu-button:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: -vantaborder;
-    -fx-text-fill: -vantatext;
-}
-.instance-search-field {
-    -fx-background-color: -vantabg;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantasubtle;
-}
-.instance-search-field:focused { -fx-border-color: -vantaaccent; }
 
+.action-tile:armed {
+    -fx-translate-y: 0.5px;
+}
 
+.action-tile-plate {
+    -fx-background-color: -v-hair, derive(-vantasurfaceraised, 8%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 10, 9;
+    -vantaicon: -vantatext;
+}
 
-/* Accounts: align the account manager with the active launcher theme. */
-.accounts-hero, .accounts-section, .accounts-card, .accounts-empty {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-    -fx-effect: none;
+.action-tile:hover .action-tile-plate {
+    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
+    -vantaicon: -vantaaccent;
 }
-.accounts-hero {
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-}
-.accounts-section, .accounts-card, .accounts-empty {
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-}
-.accounts-hero-name, .accounts-section-title, .accounts-card-name,
-.accounts-empty-title {
+
+.action-tile-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 14px;
     -fx-text-fill: -vantatext;
 }
-.accounts-subtitle, .accounts-hero-uuid, .accounts-section-count,
-.accounts-privacy, .accounts-card-uuid, .accounts-card-hint,
-.accounts-empty-text {
+
+.action-tile-description {
+    -fx-font-family: "Geist";
+    -fx-font-size: 12.5px;
     -fx-text-fill: -vantamuted;
 }
-.accounts-hero-head-frame, .accounts-card-head-frame {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
-}
-.accounts-card:hover, .accounts-empty:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: derive(-vantaborder, 18%);
-}
-.accounts-card-active {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
-    -fx-effect: none;
-}
-.accounts-primary-button {
-    -fx-background-color: -vantaaccent;
-    -fx-border-color: -vantaaccent;
-    -fx-text-fill: white;
-}
-.accounts-primary-button:hover {
-    -fx-background-color: -vantaaccenthover;
-    -fx-border-color: -vantaaccenthover;
-}
-.accounts-secondary-button, .accounts-card-use {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
-    -fx-text-fill: -vantatext;
-}
-.accounts-secondary-button:hover, .accounts-card-use:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: derive(-vantaborder, 20%);
-}
-.accounts-danger-button {
-    -fx-background-color: derive(-vantadanger, -78%);
-    -fx-border-color: derive(-vantadanger, -45%);
-    -fx-text-fill: -vantadanger;
-}
-.accounts-danger-button:hover {
-    -fx-background-color: derive(-vantadanger, -70%);
+
+.action-tile-chevron {
+    -vantaicon: -vantasubtle;
 }
 
-/* Final compatibility layer: legacy view styles must obey the active theme. */
-.root {
-    /* The scene root is a host surface, not a themed content panel. */
-    -fx-background-color: transparent;
-}
-.launcher {
-    -fx-background-color: -vantabg;
-}
-.create-label, .create-status, .form-label, .field-label {
-    -fx-text-fill: -vantamuted;
-}
-.create-field, .create-combo, .create-field:hover, .create-combo:hover,
-.create-field:focused, .create-combo:focused {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantasubtle;
-}
-.create-combo .list-cell, .create-combo .list-cell:filled {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
-}
-.create-combo .list-cell:hover, .create-combo .list-cell:filled:selected {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-text-fill: -vantatext;
-}
-.slider .track { -fx-background-color: -vantaborder; }
-.slider .thumb { -fx-background-color: -vantaaccent; }
-.slider .thumb:hover { -fx-background-color: -vantaaccenthover; }
-.danger-button {
-    -fx-background-color: derive(-vantadanger, -78%);
-    -fx-border-color: derive(-vantadanger, -45%);
-    -fx-text-fill: -vantadanger;
-}
-.danger-button:hover {
-    -fx-background-color: derive(-vantadanger, -70%);
-    -fx-border-color: -vantadanger;
-}
-.notification-progress, .notification-progress > .track {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-control-inner-background: -vantasurfaceraised;
-}
-.notification-progress > .bar { -fx-background-color: -vantaaccent; }
-
-/* Semantic color migration for screens that still have legacy palette rules. */
-.page-title, .settings-page-title, .accounts-title, .home-card-title,
-.login-title, .instance-setting-value, .mod-details-title,
-.modrinth-project-title, .modrinth-version-title {
-    -fx-text-fill: -vantatext;
-}
-.page-subtitle, .footer-label, .home-card-eyebrow, .home-card-description,
-.login-subtitle, .login-instruction, .login-status,
-.instance-setting-label, .instance-directory, .server-eula,
-.modrinth-project-author, .modrinth-project-description {
-    -fx-text-fill: -vantamuted;
-}
-.settings-section-title, .create-section-title, .home-card-eyebrow {
-    -fx-text-fill: -vantaaccent;
-}
-.home-card-status, .state-status-healthy, .accounts-status-connected {
-    -fx-text-fill: -vantasuccess;
-}
-.selected-instance, .selected-instance:hover {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
-}
-.instance-settings-danger-card {
-    -fx-background-color: derive(-vantadanger, -82%);
-    -fx-border-color: derive(-vantadanger, -48%);
-}
-.verification-code {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
-    -fx-text-fill: -vantatext;
-}
-.login-instruction, .login-subtitle { -fx-text-fill: -vantamuted; }
-.server-console {
-    -fx-control-inner-background: -vantabg;
-    -fx-background-color: -vantabg;
-    -fx-text-fill: -vantatext;
-    -fx-highlight-fill: -vantaaccentsoft;
-    -fx-highlight-text-fill: -vantatext;
-}
-.modrinth-popup-danger {
-    -fx-background-color: derive(-vantadanger, -78%);
-    -fx-border-color: derive(-vantadanger, -45%);
-    -fx-text-fill: -vantadanger;
-}
-.modrinth-popup-danger:hover {
-    -fx-background-color: derive(-vantadanger, -70%);
-    -fx-border-color: -vantadanger;
+.action-tile:hover .action-tile-chevron {
+    -vantaicon: -vantatext;
 }
 
-/* Settings switches from a fixed sidebar to a compact section picker. */
-.settings-compact-navigation {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 12px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 12px;
-    -fx-border-width: 1px;
-    -fx-padding: 10px 12px;
+/* ---------- instance plate ----------------------------------------------------- */
+
+.plate {
+    -fx-background-color: -v-hair, derive(-vantasurfaceraised, 8%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 11, 10;
 }
-.settings-compact-label {
+
+.plate-fabric  { -fx-background-color: rgba(217,199,160,0.28), rgba(217,199,160,0.12); }
+.plate-forge   { -fx-background-color: rgba(127,156,201,0.30), rgba(127,156,201,0.13); }
+.plate-neoforge{ -fx-background-color: rgba(240,138,75,0.30),  rgba(240,138,75,0.13); }
+.plate-quilt   { -fx-background-color: rgba(181,139,232,0.30), rgba(181,139,232,0.13); }
+.plate-vanilla { -fx-background-color: rgba(127,196,127,0.28), rgba(127,196,127,0.12); }
+
+.plate .vanta-icon { -fx-stroke: -vantatext; }
+.plate-fabric .vanta-icon  { -fx-stroke: -v-loader-fabric; }
+.plate-forge .vanta-icon   { -fx-stroke: -v-loader-forge; }
+.plate-neoforge .vanta-icon{ -fx-stroke: -v-loader-neoforge; }
+.plate-quilt .vanta-icon   { -fx-stroke: -v-loader-quilt; }
+.plate-vanilla .vanta-icon { -fx-stroke: -v-loader-vanilla; }
+
+/* ---------- key / value ---------------------------------------------------------- */
+
+.key-value-row {
+    -fx-padding: 9px 0;
+    -fx-border-color: transparent transparent -v-hair transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.key-value-key {
+    -fx-font-size: 13px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.settings-compact-navigation .combo-box {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
 }
-.settings-compact-navigation .combo-box .list-cell {
+
+/* ---------- callout -------------------------------------------------------------- */
+
+.callout {
+    -fx-padding: 12px 14px;
+    -fx-background-color: -v-hair-strong, -v-info-soft;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 10, 9;
+    -vantaicon: -v-info;
+}
+
+.callout-success {
+    -fx-background-color: derive(-vantasuccess, -55%), -v-success-soft;
+    -vantaicon: -vantasuccess;
+}
+
+.callout-warning {
+    -fx-background-color: derive(-v-warning, -55%), -v-warning-soft;
+    -vantaicon: -v-warning;
+}
+
+.callout-danger {
+    -fx-background-color: derive(-vantadanger, -55%), -v-danger-soft;
+    -vantaicon: -vantadanger;
+}
+
+.callout-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 13px;
     -fx-text-fill: -vantatext;
 }
-.settings-compact-navigation .combo-box .arrow {
+
+.callout-message {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: derive(-vantatext, -18%);
+}
+
+/* ---------- switch ----------------------------------------------------------------- */
+
+.switch {
+    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 20, 19;
+    -fx-padding: 0 2px;
+    -fx-cursor: hand;
+}
+
+.switch:hover {
+    -fx-background-color: rgba(255,255,255,0.18), -v-well;
+}
+
+.switch:on {
+    -fx-background-color: -vantaaccent, -vantaaccent;
+}
+
+.switch:focused {
+    -fx-border-color: -vantaaccent-a55;
+    -fx-border-width: 2px;
+    -fx-border-radius: 20px;
+    -fx-border-insets: -2px;
+}
+
+.switch-thumb {
     -fx-background-color: -vantamuted;
+    -fx-background-radius: 20;
+    -fx-min-width: 14px;
+    -fx-min-height: 14px;
+    -fx-pref-width: 14px;
+    -fx-pref-height: 14px;
+    -fx-max-width: 14px;
+    -fx-max-height: 14px;
 }
-.settings-compact-navigation .combo-box-popup .list-view {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
+
+.switch:on .switch-thumb {
+    -fx-background-color: -vantaaccentforeground;
 }
-.settings-compact-navigation .combo-box-popup .list-cell {
-    -fx-background-color: -vantasurfaceraised;
+
+/* ---------- setting row --------------------------------------------------------------- */
+
+.setting-row {
+    -fx-padding: 14px 0;
+    -fx-border-color: transparent transparent -v-hair transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.setting-row-clickable {
+    -fx-cursor: hand;
+}
+
+.setting-row-title {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13.5px;
     -fx-text-fill: -vantatext;
 }
-.settings-compact-navigation .combo-box-popup .list-cell:hover,
-.settings-compact-navigation .combo-box-popup .list-cell:selected {
-    -fx-background-color: -vantaaccentsoft;
+
+.setting-row-description {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -vantamuted;
 }
 
-.onboarding-scroll,
-.onboarding-scroll > .viewport {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-    -fx-border-color: transparent;
-}
-.onboarding-scroll { -fx-padding: 0; }
+/* ---------- form field -------------------------------------------------------------------- */
 
-.sidebar-compact .sidebar-button {
-    -fx-padding: 10px 8px;
-    -fx-alignment: center;
-    -fx-background-radius: 10px;
-}
-.sidebar-compact .sidebar-logo {
-    -fx-font-size: 22px;
-    -fx-alignment: center;
+.form-field-label {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -vantamuted;
 }
 
-
-/* Popup windows have their own scene roots; use explicit safe fallbacks here
-   rather than unresolved looked-up colors outside the launcher scene graph. */
-.context-menu {
-    -fx-background-color: #151A22;
-    -fx-border-color: #293443;
-    -fx-border-width: 1px;
-    -fx-background-radius: 9px;
-    -fx-border-radius: 9px;
-    -fx-padding: 5px;
-}
-.context-menu .menu-item {
-    -fx-background-color: transparent;
-    -fx-padding: 8px 12px;
-}
-.context-menu .menu-item .label {
-    -fx-text-fill: #F4F7FB;
-}
-.context-menu .menu-item:focused,
-.context-menu .menu-item:hover {
-    -fx-background-color: #202936;
-    -fx-background-radius: 6px;
+.form-field-hint {
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantasubtle;
 }
 
-/* Deluxe presentation mode. It is opt-in and scoped to themed launcher roots. */
-.overengineered-ui .sidebar {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaaccent, -58%), -vantaborder;
-    -fx-border-width: 1px;
-    -fx-effect: none;
-}
-.overengineered-ui .sidebar-logo {
-    -fx-text-fill: -vantasurface;
-    -fx-effect: none;
-}
-.overengineered-ui .sidebar-button {
-    -fx-background-radius: 11px;
-    -fx-padding: 11px 12px;
-}
-.overengineered-ui .sidebar-button:hover {
-    -fx-border-color: derive(-vantaaccent, -48%);
-    -fx-effect: none;
-}
-.overengineered-ui .sidebar-button-active,
-.overengineered-ui .sidebar-button-active:hover {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 0 0 0 4px;
-    -fx-effect: none;
-}
-.overengineered-ui .title-bar {
-    -fx-background-color: -vantasurface;
-}
-.overengineered-ui .settings-card,
-.overengineered-ui .info-card,
-.overengineered-ui .account-card,
-.overengineered-ui .accounts-card,
-.overengineered-ui .accounts-hero,
-.overengineered-ui .accounts-section,
-.overengineered-ui .instance-card,
-.overengineered-ui .home-info-card,
-.overengineered-ui .home-launch-card,
-.overengineered-ui .home-recent-servers-card,
-.overengineered-ui .state-card,
-.overengineered-ui .state-list-card,
-.overengineered-ui .mod-details-card,
-.overengineered-ui .mod-details-header,
-.overengineered-ui .create-panel,
-.overengineered-ui .instance-settings-card {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaborder, 18%);
-    -fx-border-width: 1px;
-    -fx-effect: none;
-}
-.overengineered-ui .instance-card:hover,
-.overengineered-ui .account-card:hover,
-.overengineered-ui .accounts-card:hover,
-.overengineered-ui .home-info-card:hover,
-.overengineered-ui .state-card:hover {
-    -fx-border-color: derive(-vantaaccent, 5%);
-    -fx-effect: none;
-}
-.overengineered-ui .primary-button,
-.overengineered-ui .instance-create-button,
-.overengineered-ui .instance-play-button,
-.overengineered-ui .home-play-button,
-.overengineered-ui .accounts-primary-button {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaaccent, 28%);
-    -fx-border-width: 1px;
-    -fx-border-radius: 9px;
-    -fx-background-radius: 9px;
-    -fx-effect: none;
-}
-.overengineered-ui .primary-button:hover,
-.overengineered-ui .instance-create-button:hover,
-.overengineered-ui .instance-play-button:hover,
-.overengineered-ui .home-play-button:hover,
-.overengineered-ui .accounts-primary-button:hover {
-    -fx-background-color: -vantasurface;
-    -fx-effect: none;
-}
-.overengineered-ui .secondary-button,
-.overengineered-ui .settings-back-button,
-.overengineered-ui .instance-settings-button,
-.overengineered-ui .accounts-secondary-button {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaborder, 28%);
-    -fx-border-width: 1px;
-}
-.overengineered-ui .text-field:focused,
-.overengineered-ui .text-area:focused,
-.overengineered-ui .combo-box-base:focused,
-.overengineered-ui .search-field:focused,
-.overengineered-ui .instance-search-field:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-effect: none;
-}
-.overengineered-ui .progress-bar > .bar,
-.overengineered-ui .notification-progress > .bar {
-    -fx-background-color: -vantasurface;
-    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -38%), 8, 0.2, 0, 0);
-}
-.overengineered-state {
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.overengineered-ui .notification,
-.overengineered-ui .tooltip,
-.overengineered-ui .dialog-pane {
-    -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.4), 22, 0.18, 0, 7);
-}
-.overengineered-ui .settings-navigation,
-.overengineered-ui .settings-compact-navigation,
-.overengineered-ui .instances-toolbar {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaborder, 20%);
-    -fx-effect: none;
-}
-.overengineered-ui .accent-picker,
-.overengineered-ui .accent-preset,
-.overengineered-ui .verification-code,
-.overengineered-ui .instance-icon-box,
-.overengineered-ui .mod-icon-box {
-    -fx-background-radius: 11px;
-    -fx-border-radius: 11px;
-    -fx-border-color: derive(-vantaborder, 24%);
-}
-.overengineered-ui .check-box:selected .box {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaaccent, 28%);
-    -fx-effect: none;
-}
-.overengineered-ui .scroll-bar .thumb {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 999px;
-}
-.overengineered-ui .scroll-bar .thumb:hover {
-    -fx-background-color: -vantaaccent;
-    -fx-effect: none;
+.form-field-error {
+    -fx-text-fill: -vantadanger;
 }
 
+/* ---------- toolbar ------------------------------------------------------------------------- */
 
-.overengineered-ui .notification {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaaccent, -62%), derive(-vantaborder, 24%);
-    -fx-border-width: 1px;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.48), 24, 0.2, 0, 8);
-}
-.overengineered-ui .notification-title {
-    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
-.overengineered-ui .notification-accent {
-    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -42%), 9, 0.2, 0, 0);
-}
-
-
-/* Compact notification sizing is intentionally shared by standard and deluxe UI. */
-.notification {
-    -fx-padding: 9px 12px;
-    -fx-spacing: 6px;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
-}
-.notification-title {
-    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
-.notification-message {
-    -fx-font-size: 11px;
-    -fx-line-spacing: 0;
-}
-.notification-accent {
-    -fx-arc-width: 3px;
-    -fx-arc-height: 3px;
-}
-.notification-close {
-    -fx-font-size: 16px;
+.kit-toolbar {
     -fx-padding: 0;
 }
-.notification-progress {
-    -fx-pref-height: 4px;
-    -fx-min-height: 4px;
-    -fx-max-height: 4px;
-}
-.overengineered-ui .notification {
-    -fx-padding: 9px 12px;
-    -fx-background-radius: 11px;
-    -fx-border-radius: 11px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.38), 15, 0.16, 0, 4);
-}
-.overengineered-ui .notification-title {
-    -fx-font-size: 12px;
-}
-.overengineered-ui .notification-accent {
-    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -42%), 6, 0.16, 0, 0);
-}
 
+/* ---------- empty state ------------------------------------------------------------------- */
 
-/* Settings: a dedicated preferences workspace, not a stack of generic cards. */
-.settings-shell { -fx-background-color: transparent; }
-.settings-shell .settings-navigation {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 10px;
-    -fx-padding: 12px;
-    -fx-min-width: 190px;
-    -fx-pref-width: 210px;
-}
-.settings-shell .settings-nav-group {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    
-    -fx-letter-spacing: 1.5px;
-    -fx-padding: 15px 9px 5px 9px; -fx-font-family: "Poppins Medium";}
-.settings-shell .settings-nav-button {
-    -fx-background-color: transparent;
-    -fx-background-radius: 6px;
+.vanta-empty-state {
+    -fx-background-color:
+        -v-hair,
+        -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
     -fx-border-color: transparent;
+}
+
+.vanta-empty-state-icon .vanta-icon {
+    -fx-stroke: -vantasubtle;
+}
+
+.vanta-empty-state-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 16px;
+    -fx-text-fill: -vantatext;
+}
+
+.vanta-empty-state-description {
+    -fx-font-size: 13px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 10px 11px; -fx-font-family: "Poppins Medium";}
-.settings-shell .settings-nav-button:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: #edf3ee;
-}
-.settings-shell .settings-nav-button.selected {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
-    -fx-text-fill: -vantatext;
-}
-.settings-shell .settings-search-field {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 6px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 6px;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantasubtle;
-}
-.settings-shell .settings-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 10px;
-    -fx-border-width: 1px;
-    -fx-padding: 19px;
-}
-.settings-shell .settings-card-title { -fx-font-size: 15px; -fx-font-family: "Poppins SemiBold";}
-.settings-shell .settings-card-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
-.settings-shell .settings-info-label { -fx-text-fill: -vantatext; -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.settings-shell .settings-info-value { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
-.settings-shell .settings-checkbox { -fx-text-fill: #d6e0d8; -fx-font-size: 11px; }
-.settings-shell .settings-page-title { -fx-font-size: 31px; -fx-font-family: "Poppins SemiBold";}
-.settings-shell .settings-page-subtitle { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
-.settings-shell .settings-compact-navigation {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-    -fx-padding: 9px 12px;
 }
