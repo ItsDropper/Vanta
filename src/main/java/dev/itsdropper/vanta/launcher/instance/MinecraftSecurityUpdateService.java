@@ -102,7 +102,7 @@ public final class MinecraftSecurityUpdateService {
         if (version == null || version.isBlank()) {
             throw new IllegalArgumentException("Minecraft version is required for security validation.");
         }
-        String[] parts = version.split("[.-]", 3);
+        String[] parts = version.split("[.-]");
         try {
             int major = Integer.parseInt(parts[0]);
             int minor = parts.length > 1 ? Integer.parseInt(parts[1]) : 0;
@@ -139,7 +139,7 @@ public final class MinecraftSecurityUpdateService {
     private static void validateDownloadIntegrityMetadata(JsonNode library) {
         JsonNode downloads = library.path("downloads");
         JsonNode artifact = downloads.path("artifact");
-        if (artifact.isObject()) {
+        if (artifact.isObject() && !artifact.isEmpty()) {
             validateArtifact(artifact, library.path("name").asText());
         }
         JsonNode classifiers = downloads.path("classifiers");
