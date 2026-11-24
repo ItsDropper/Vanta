@@ -136,20 +136,17 @@ public final class MinecraftSecurityUpdateService {
             if (isFreetypeLibrary(library)) {
                 hasFreetype = true;
                 validateDownloadIntegrityMetadata(library);
+                String[] coordinate = library.path("name").asText("").split(":");
+                if (coordinate.length < 3 || !isPatchedFreeTypeVersion(coordinate[2])) {
+                    throw new IllegalStateException("Mojang's current metadata for " + expectedVersion
+                            + " contains an unpatched FreeType artifact (" + library.path("name").asText()
+                            + "); refusing to launch with an unverified native font engine.");
+                }
             }
         }
         if (!hasFreetype) {
             throw new IllegalStateException("Mojang metadata for " + expectedVersion
                     + " contains no official FreeType dependency; refusing to launch.");
-        }
-
-        JsonNode freetype = findLibrary(metadata.path("libraries"), "org.lwjgl:lwjgl-freetype");
-        String coordinate = freetype == null ? "" : freetype.path("name").asText("");
-        String[] parts = coordinate.split(":");
-        if (parts.length < 3 || !isPatchedFreeTypeVersion(parts[2])) {
-            throw new IllegalStateException("Mojang's current metadata for " + expectedVersion
-                    + " does not contain the patched FreeType 2.15.0-or-newer dependency; "
-                    + "refusing to launch with an unverified native font engine.");
         }
     }
 
