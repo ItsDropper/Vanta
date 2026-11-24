@@ -121,11 +121,16 @@ public class DownloadUtil {
     // JSON
     // =============================================================
 
-    public static JsonNode downloadJson(
-            String url
-    ) throws Exception {
+    public static JsonNode downloadJson(String url) throws Exception {
+        return downloadJson(url, null);
+    }
 
-        validateDownloadRequest(url, null);
+    /**
+     * Downloads JSON and, when supplied, verifies the exact payload against
+     * the SHA-1 published by the trusted metadata manifest before parsing it.
+     */
+    public static JsonNode downloadJson(String url, String expectedSha1) throws Exception {
+        validateDownloadRequest(url, expectedSha1);
         Exception lastException = null;
 
         for (int attempt = 1; attempt <= maxRetries(); attempt++) {
@@ -154,6 +159,13 @@ public class DownloadUtil {
                     if (declaredLength > 0) validateJsonResponseSize(declaredLength);
                     byte[] json = input.readNBytes(MAX_JSON_RESPONSE_BYTES + 1);
                     validateJsonResponseSize(json.length);
+                    if (expectedSha1 != null && !expectedSha1.isBlank()) {
+                        String actualSha1 = java.util.HexFormat.of().formatHex(
+                                MessageDigest.getInstance("SHA-1").digest(json));
+                        if (!expectedSha1.equalsIgnoreCase(actualSha1)) {
+                            throw new IOException("Downloaded metadata SHA-1 does not match Mojang's manifest.");
+                        }
+                    }
                     return MAPPER.readTree(json);
                 }
 
