@@ -93,7 +93,7 @@ public final class MinecraftSecurityUpdateService {
             if (previousBase != null) {
                 restore(baseFile, previousBase, failure);
             }
-            VersionReader.clearCache();
+            ClasspathBuilder.clearCache();
             throw failure;
         }
     }
