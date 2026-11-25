@@ -23,6 +23,7 @@ public final class Stylesheets {
 
     private static final String[] ORDER = {
             "/css/tokens.css",
+            "/css/legacy.css",
             "/css/base.css",
             "/css/utilities.css",
             "/css/shell.css",

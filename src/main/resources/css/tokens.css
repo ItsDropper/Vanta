@@ -237,3 +237,20 @@
     -fx-pref-width: 1px;
     -fx-max-width: 1px;
 }
+
+/* aliases used by the screen stylesheets */
+.root,
+.vanta-ui-root {
+    -vantaline: -v-hair;
+    -vantalinestrong: -v-hair-strong;
+    -vantahover: -vantasurfacehover;
+    -vantaaccentsoft: -vantaaccent-a18;
+    -vantaaccentwash: -vantaaccent-a10;
+    -vantaaccentline: -vantaaccent-a30;
+    -vantaselected: -vantaaccent-a18;
+    -vantaframe: -v-frame;
+    -vantascrim: -v-scrim;
+    -vantadangerwash: -v-danger-soft;
+    -vantadangerline: derive(-vantadanger, -45%);
+    -vantasuccesswash: -v-success-soft;
+}
