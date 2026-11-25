@@ -148,7 +148,7 @@ public class MinecraftVersionResolver {
 
         JsonNode manifest =
                 DownloadUtil.downloadJson(
-                        VERSION_MANIFEST_URL
+                        VERSION_MANIFEST_URL, null, "piston-meta.mojang.com"
                 );
 
         JsonNode versions =
