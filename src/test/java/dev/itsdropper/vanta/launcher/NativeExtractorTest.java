@@ -41,7 +41,7 @@ class NativeExtractorTest {
         assertThrows(IllegalStateException.class, () ->
                 NativeExtractor.safeNativeFileName("nested/../library.dll"));
         assertThrows(IllegalStateException.class, () ->
-                NativeExtractor.safeNativeFileName("nested/\u0000library.dll"));
+                NativeExtractor.safeNativeFileName("nested/" + (char) 0 + "library.dll"));
     }
 
     @Test
