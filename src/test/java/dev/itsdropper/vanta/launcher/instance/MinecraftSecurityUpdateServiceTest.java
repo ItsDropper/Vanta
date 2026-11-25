@@ -37,6 +37,46 @@ class MinecraftSecurityUpdateServiceTest {
     }
 
     @Test
+    void rejectsFreeTypeMetadataWithoutVerifiableArtifacts() throws Exception {
+        JsonNode missing = JSON.readTree("""
+                {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0","downloads":{}}
+                """);
+        assertThrows(IllegalStateException.class,
+                () -> MinecraftSecurityUpdateService.validateDownloadIntegrityMetadata(missing));
+    }
+
+    @Test
+    void rejectsFreeTypeArtifactWithUntrustedTransportOrMissingDigest() throws Exception {
+        JsonNode insecureUrl = JSON.readTree("""
+                {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0",
+                 "downloads":{"artifact":{"path":"org/lwjgl/freetype.jar",
+                 "url":"http://libraries.minecraft.net/freetype.jar",
+                 "sha1":"0123456789abcdef0123456789abcdef01234567"}}}
+                """);
+        JsonNode missingDigest = JSON.readTree("""
+                {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0",
+                 "downloads":{"artifact":{"path":"org/lwjgl/freetype.jar",
+                 "url":"https://libraries.minecraft.net/freetype.jar"}}}
+                """);
+        assertThrows(IllegalStateException.class,
+                () -> MinecraftSecurityUpdateService.validateDownloadIntegrityMetadata(insecureUrl));
+        assertThrows(IllegalStateException.class,
+                () -> MinecraftSecurityUpdateService.validateDownloadIntegrityMetadata(missingDigest));
+    }
+
+    @Test
+    void acceptsFreeTypeArtifactWithHttpsAndSha1() throws Exception {
+        JsonNode valid = JSON.readTree("""
+                {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0",
+                 "downloads":{"artifact":{"path":"org/lwjgl/freetype.jar",
+                 "url":"https://libraries.minecraft.net/freetype.jar",
+                 "sha1":"0123456789abcdef0123456789abcdef01234567"}}}
+                """);
+        assertDoesNotThrow(() ->
+                MinecraftSecurityUpdateService.validateDownloadIntegrityMetadata(valid));
+    }
+
+    @Test
     void rebasesOfficialFreetypeLibraryWithoutRemovingOtherDependencies() throws Exception {
         ObjectNode instance = (ObjectNode) JSON.readTree("""
                 {
