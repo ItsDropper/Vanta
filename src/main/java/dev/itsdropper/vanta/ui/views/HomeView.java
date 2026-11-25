@@ -9,6 +9,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.AccessibleRole;
 import javafx.scene.Node;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.OverrunStyle;
@@ -70,7 +72,9 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     private Label recentServersStatus;
     private final Label accountLabel;
     private final Label launchStatusLabel;
-    private VBox recentList;
+    private FlowPane recentList;
+    private String featuredId;
+    private final java.util.Map<String, Node> recentTiles = new java.util.LinkedHashMap<>();
     private Label recentStatus;
     private final java.util.Map<String, Label> playtimeLabels =
             new java.util.HashMap<>();
@@ -107,69 +111,20 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         accountLabel = new Label(Localization.text("home.accountChecking"));
         accountLabel.getStyleClass().add("page-header-subtitle");
 
-        VBox headerText = new VBox(2, title, accountLabel);
-        headerText.setMinWidth(0);
-        HBox.setHgrow(headerText, Priority.ALWAYS);
-
         launchStatusLabel = Badge.status(Localization.text("home.readyToPlay"), Badge.Tone.SUCCESS);
         launchStatusLabel.getStyleClass().add("home-status");
         launchStatusLabel.setAccessibleText(Localization.text("home.launchStatusReady"));
-
-        HBox header = new HBox(12, headerText, launchStatusLabel);
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.getStyleClass().add("home-header");
 
         VBox featuredSection = createFeaturedSection();
         VBox recentSection = createRecentInstancesSection();
         VBox sideColumn = createSideColumn();
 
-        HBox activityRow = new HBox(20);
-        activityRow.setMaxWidth(Double.MAX_VALUE);
-        activityRow.getStyleClass().add("home-activity-row");
-        VBox activityStack = new VBox(20);
-        activityStack.setFillWidth(true);
-
-        recentSection.setMinWidth(0);
-        sideColumn.setMinWidth(0);
-        recentSection.setMaxWidth(Double.MAX_VALUE);
-        sideColumn.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(recentSection, Priority.ALWAYS);
-        HBox.setHgrow(sideColumn, Priority.ALWAYS);
-
-        StackPane activity = new StackPane();
-        activity.setAlignment(Pos.TOP_LEFT);
-        boolean[] stacked = {true};
-        activityStack.getChildren().setAll(recentSection, sideColumn);
-        activity.getChildren().setAll(activityStack);
-        activity.widthProperty().addListener((observable, previous, next) -> {
-            boolean stack = next.doubleValue() < 820;
-            if (stack == stacked[0]) {
-                return;
-            }
-            stacked[0] = stack;
-            activityStack.getChildren().clear();
-            activityRow.getChildren().clear();
-            recentSection.prefWidthProperty().unbind();
-            sideColumn.prefWidthProperty().unbind();
-            if (stack) {
-                recentSection.setPrefWidth(Region.USE_COMPUTED_SIZE);
-                sideColumn.setPrefWidth(Region.USE_COMPUTED_SIZE);
-                activityStack.getChildren().setAll(recentSection, sideColumn);
-                activity.getChildren().setAll(activityStack);
-            } else {
-                activityRow.getChildren().setAll(recentSection, sideColumn);
-                recentSection.prefWidthProperty().bind(activityRow.widthProperty().multiply(0.6).subtract(10));
-                sideColumn.prefWidthProperty().bind(activityRow.widthProperty().multiply(0.4).subtract(10));
-                activity.getChildren().setAll(activityRow);
-            }
-        });
-
-        VBox contentBox = new VBox(20, header, featuredSection, activity);
+        VBox contentBox = new VBox(28, featuredSection, recentSection, sideColumn);
         contentBox.setFillWidth(true);
         contentBox.paddingProperty().bind(
                 Bindings.createObjectBinding(() -> {
                     double gutter = dev.itsdropper.vanta.ui.ResponsiveLayout.gutter(getWidth());
-                    return new Insets(24, gutter, 24, gutter);
+                    return new Insets(20, gutter, 24, gutter);
                 }, widthProperty())
         );
         contentBox.setMaxWidth(Double.MAX_VALUE);
@@ -213,39 +168,20 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private VBox createRecentInstancesSection() {
-        recentList = new VBox(2);
-        recentList.setFillWidth(true);
+        recentList = new FlowPane(14, 14);
         recentList.setMinHeight(0);
-        recentList.getStyleClass().add("home-list");
+        recentList.getStyleClass().add("home-tiles");
 
         recentStatus = new Label(Localization.text("home.instancesLoading"));
         recentStatus.getStyleClass().add("home-muted");
         recentStatus.setWrapText(true);
 
-        VBox card = new VBox(8, recentList, recentStatus);
-        card.getStyleClass().add("home-panel");
-        card.setPadding(new Insets(8));
-
-        VBox section = new VBox(12, new SectionHeader(Localization.text("home.recentTitle")), card);
+        VBox section = new VBox(12, new SectionHeader(Localization.text("home.recentTitle")), recentList, recentStatus);
         section.setFillWidth(true);
         return section;
     }
 
     private VBox createSideColumn() {
-        ActionTile create = new ActionTile(
-                IconView.Type.PLUS,
-                Localization.text("common.createInstance"),
-                Localization.text("home.createInstanceTooltip"),
-                () -> {
-                    if (onCreateInstance != null) {
-                        onCreateInstance.run();
-                    }
-                });
-        create.setAccessibleText(Localization.text("home.createInstanceAccessible"));
-        create.setMinHeight(68);
-        create.setPrefHeight(68);
-        create.setMaxHeight(68);
-
         recentServersList = new VBox(2);
         recentServersList.setFillWidth(true);
         recentServersList.setMinHeight(0);
@@ -260,7 +196,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         serverCard.setPadding(new Insets(8));
 
         VBox column = new VBox(12,
-                create,
                 new SectionHeader(Localization.text("home.serversTitle")),
                 serverCard);
         column.setFillWidth(true);
@@ -356,7 +291,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
         List<Instance> recent = instances.stream()
                 .filter(instance -> InstanceUsageManager.getLastPlayed(instance) > 0)
-                .limit(5)
+                .limit(6)
                 .toList();
 
         // A newly installed library still gets a useful featured launch surface.
@@ -370,14 +305,14 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             return;
         }
 
-        Instance featured = recent.get(0);
-        featuredContainer.getChildren().setAll(createFeaturedInstanceCard(featured));
-
-        // The featured instance leads the list too, so the list stays useful
-        // when only one instance exists.
+        recentTiles.clear();
         for (Instance instance : recent) {
-            recentList.getChildren().add(createRecentRow(instance));
+            Node tile = createRecentTile(instance);
+            recentTiles.put(instance.getId(), tile);
+            recentList.getChildren().add(tile);
         }
+        recentList.getChildren().add(createNewTile());
+        selectFeatured(recent.get(0));
 
         recentStatus.setText("");
         recentStatus.setVisible(false);
@@ -418,33 +353,78 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
     // ------------------------------------------------------------ hero
 
-    /** Hero shell: copy on the left, the pixel-art cover on the right at 16:9. */
-    private HBox heroShell(CoverArt art, VBox copy) {
-        StackPane artFrame = new StackPane(art);
-        artFrame.getStyleClass().add("home-hero-art");
+    /** Hero shell: the instance photo fills the panel, copy sits on a scrim at the bottom left. */
+    private StackPane heroShell(CoverArt art, VBox copy) {
         art.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-        art.rounded(8);
 
-        HBox hero = new HBox(copy, artFrame);
+        Region scrim = new Region();
+        scrim.getStyleClass().add("home-hero-scrim");
+        scrim.setMouseTransparent(true);
+
+        StackPane hero = new StackPane(art, scrim, copy, launchStatusLabel);
         hero.getStyleClass().add("home-hero");
-        hero.setAlignment(Pos.CENTER_LEFT);
+        hero.setMinHeight(340);
+        hero.setPrefHeight(340);
+        hero.setMaxHeight(340);
         hero.setMaxWidth(Double.MAX_VALUE);
 
-        artFrame.prefWidthProperty().bind(Bindings.createDoubleBinding(
-                () -> Math.max(300, Math.min(hero.getWidth() * 0.56, 760)),
-                hero.widthProperty()));
-        artFrame.prefHeightProperty().bind(artFrame.prefWidthProperty().multiply(9.0 / 16.0));
-        artFrame.setMinWidth(300);
-        artFrame.setMaxWidth(Region.USE_PREF_SIZE);
-        artFrame.setMaxHeight(Region.USE_PREF_SIZE);
-        artFrame.setMinHeight(Region.USE_PREF_SIZE);
+        copy.setMaxWidth(560);
+        copy.setMaxHeight(Region.USE_PREF_SIZE);
+        StackPane.setAlignment(copy, Pos.BOTTOM_LEFT);
+        StackPane.setAlignment(launchStatusLabel, Pos.TOP_RIGHT);
+        StackPane.setMargin(launchStatusLabel, new Insets(16));
 
-        copy.setMinWidth(0);
-        HBox.setHgrow(copy, Priority.ALWAYS);
+        Rectangle clip = new Rectangle();
+        clip.setArcWidth(28);
+        clip.setArcHeight(28);
+        clip.widthProperty().bind(hero.widthProperty());
+        clip.heightProperty().bind(hero.heightProperty());
+        hero.setClip(clip);
         return hero;
     }
 
-    private HBox createFeaturedInstanceCard(Instance instance) {
+    private void selectFeatured(Instance instance) {
+        featuredId = instance.getId();
+        playtimeLabels.clear();
+        displayedInstances.clear();
+        featuredContainer.getChildren().setAll(createFeaturedInstanceCard(instance));
+        recentTiles.forEach((id, tile) -> {
+            tile.getStyleClass().remove("home-tile-selected");
+            if (id.equals(featuredId)) {
+                tile.getStyleClass().add("home-tile-selected");
+            }
+        });
+    }
+
+    private Node createNewTile() {
+        Label plus = new Label("+");
+        plus.getStyleClass().add("home-tile-new-plus");
+        Label text = new Label(Localization.text("common.createInstance"));
+        text.getStyleClass().add("home-tile-name");
+        VBox box = new VBox(6, plus, text);
+        box.setAlignment(Pos.CENTER);
+        StackPane tile = new StackPane(box);
+        tile.getStyleClass().addAll("home-tile", "home-tile-new");
+        tile.setMinSize(232, 130);
+        tile.setPrefSize(232, 130);
+        tile.setMaxSize(232, 130);
+        tile.setFocusTraversable(true);
+        tile.setAccessibleRole(AccessibleRole.BUTTON);
+        tile.setAccessibleText(Localization.text("home.createInstanceAccessible"));
+        Runnable open = () -> {
+            if (onCreateInstance != null) onCreateInstance.run();
+        };
+        tile.setOnMouseClicked(event -> open.run());
+        tile.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
+                open.run();
+                event.consume();
+            }
+        });
+        return tile;
+    }
+
+    private StackPane createFeaturedInstanceCard(Instance instance) {
         CoverArt art = new CoverArt(instance.getName(), instance.getLoader());
 
         HBox badges = new HBox(6,
@@ -489,7 +469,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         VBox.setVgrow(fill, Priority.ALWAYS);
         VBox copy = new VBox(14, badges, name, stats, fill, play);
         copy.setAlignment(Pos.TOP_LEFT);
-        copy.setPadding(new Insets(24));
+        copy.setPadding(new Insets(28));
         copy.getStyleClass().add("home-hero-copy");
         play.setMinWidth(150);
         play.setMaxWidth(Region.USE_PREF_SIZE);
@@ -521,7 +501,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         return callout;
     }
 
-    private HBox createFirstInstanceCard() {
+    private StackPane createFirstInstanceCard() {
         CoverArt art = new CoverArt("Vanta", "vanilla");
 
         Label title = new Label(Localization.text("home.emptyTitle"));
@@ -553,30 +533,24 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
     // ------------------------------------------------------------ rows
 
-    private HBox createRecentRow(Instance instance) {
-        CoverArt thumb = new CoverArt(instance.getName(), instance.getLoader())
-                .rounded(6).sized(72, 40);
+    private StackPane createRecentTile(Instance instance) {
+        CoverArt art = new CoverArt(instance.getName(), instance.getLoader()).rounded(12).sized(232, 130);
+
+        Region shade = new Region();
+        shade.getStyleClass().add("home-tile-shade");
+        shade.setMouseTransparent(true);
+        shade.setMaxHeight(84);
 
         Label name = new Label(instance.getName());
-        name.getStyleClass().add("home-row-name");
+        name.getStyleClass().add("home-tile-name");
         name.setTextOverrun(OverrunStyle.ELLIPSIS);
-        name.setMinWidth(0);
-
+        name.setMaxWidth(200);
         Label version = new Label(instance.getMinecraftVersion());
-        version.getStyleClass().add("value-mono");
-        Badge loader = Badge.loader(instance.getLoader());
-        HBox meta = new HBox(8, loader, version);
-        meta.setAlignment(Pos.CENTER_LEFT);
-
-        VBox info = new VBox(4, name, meta);
-        info.setAlignment(Pos.CENTER_LEFT);
-        info.setMinWidth(0);
-        HBox.setHgrow(info, Priority.ALWAYS);
-
-        Label playtime = new Label(playtimeText(instance));
-        playtime.getStyleClass().add("value-mono");
-        playtimeLabels.put(instance.getId(), playtime);
-        displayedInstances.put(instance.getId(), instance);
+        version.getStyleClass().add("home-tile-version");
+        VBox caption = new VBox(1, name, version);
+        caption.setPadding(new Insets(0, 12, 11, 12));
+        caption.setMouseTransparent(true);
+        caption.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 
         boolean running = launchService.isRunning(instance);
         String verb = running ? "Close " : "Launch ";
@@ -584,36 +558,47 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 running ? IconView.Type.CLOSE : IconView.Type.PLAY,
                 verb + instance.getName(),
                 running ? IconButton.Style.DANGER : IconButton.Style.SECONDARY);
-        play.getStyleClass().add("home-row-play");
+        play.getStyleClass().add("home-tile-play");
         play.setOnAction(event -> launchOrCloseInstance(instance));
         AnimationUtils.installInteractiveAnimations(play);
 
-        HBox row = new HBox(14, thumb, info, playtime, play);
-        row.setAlignment(Pos.CENTER_LEFT);
-        row.setPadding(new Insets(8, 10, 8, 8));
-        row.setMinWidth(0);
-        row.setMaxWidth(Double.MAX_VALUE);
-        row.getStyleClass().add("home-row");
+        Region ring = new Region();
+        ring.getStyleClass().add("home-tile-ring");
+        ring.setMouseTransparent(true);
 
-        // The row is a secondary hit target; the explicit button stays primary.
-        row.setAccessibleRole(AccessibleRole.BUTTON);
-        row.setAccessibleText(Localization.text("home.launchOrClosePrefix") + instance.getName());
-        row.setFocusTraversable(true);
-        row.setOnMouseClicked(event -> {
+        StackPane tile = new StackPane(art, shade, caption, play, ring);
+        tile.getStyleClass().add("home-tile");
+        tile.setMinSize(232, 130);
+        tile.setPrefSize(232, 130);
+        tile.setMaxSize(232, 130);
+        StackPane.setAlignment(shade, Pos.BOTTOM_CENTER);
+        StackPane.setAlignment(caption, Pos.BOTTOM_LEFT);
+        StackPane.setAlignment(play, Pos.TOP_RIGHT);
+        StackPane.setMargin(play, new Insets(8));
+
+        tile.setAccessibleRole(AccessibleRole.BUTTON);
+        tile.setAccessibleText("Show " + instance.getName());
+        tile.setFocusTraversable(true);
+        tile.setOnMouseClicked(event -> {
             if (event.getTarget() == play || play.isHover()) {
                 return;
             }
-            launchOrCloseInstance(instance);
-        });
-        row.setOnKeyPressed(event -> {
-            if (event.getTarget() == row
-                    && (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE)) {
+            if (event.getClickCount() >= 2) {
                 launchOrCloseInstance(instance);
+            } else {
+                selectFeatured(instance);
+            }
+        });
+        tile.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE) {
+                selectFeatured(instance);
                 event.consume();
             }
         });
-        return row;
+        return tile;
     }
+
+    // ------------------------------------------------------------ actions
 
     private void launchOrCloseInstance(Instance instance) {
         if (instance == null) {

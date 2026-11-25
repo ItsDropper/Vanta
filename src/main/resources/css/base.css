@@ -18,7 +18,7 @@
     -fx-text-fill: -vantatext;
 }
 
-.text {
+.text-flow > .text {
     -fx-fill: -vantatext;
 }
 

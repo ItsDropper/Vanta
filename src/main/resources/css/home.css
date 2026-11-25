@@ -18,22 +18,28 @@
 /* ---------- hero ------------------------------------------------------------ */
 
 .home-hero {
-    -fx-background-color:
-        -v-hair-strong,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
-    -fx-background-insets: 0, 1, 1;
-    -fx-background-radius: 14, 13, 13;
+    -fx-background-color: -v-well;
+    -fx-background-radius: 14;
 }
 
-.home-hero-art {
-    -fx-padding: 8px;
+.home-hero-scrim {
+    -fx-background-color:
+        linear-gradient(to right, rgba(8, 9, 11, 0.82) 0%, rgba(8, 9, 11, 0.55) 38%, transparent 72%),
+        linear-gradient(to top, rgba(8, 9, 11, 0.55) 0%, transparent 45%);
 }
 
 .home-hero-name {
     -fx-font-family: "Geist SemiBold";
-    -fx-font-size: 22px;
-    -fx-text-fill: -vantatext;
+    -fx-font-size: 40px;
+    -fx-text-fill: white;
+}
+
+.home-hero .home-stat-label {
+    -fx-text-fill: rgba(236, 234, 228, 0.72);
+}
+
+.home-hero .home-stat-value {
+    -fx-text-fill: white;
 }
 
 .home-stat-label {
@@ -49,10 +55,90 @@
 }
 
 .home-play {
-    -fx-min-width: 150px;
+    -fx-min-width: 160px;
 }
 
-/* ---------- recent lists ---------------------------------------------------- */
+/* ---------- instance tiles -------------------------------------------------- */
+
+.home-tile {
+    -fx-cursor: hand;
+    -fx-background-color: -v-well;
+    -fx-background-radius: 12;
+}
+
+.home-tile-shade {
+    -fx-background-color: linear-gradient(to top, rgba(8, 9, 11, 0.86), transparent);
+    -fx-background-radius: 0 0 12 12;
+}
+
+.home-tile-name {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 15px;
+    -fx-text-fill: white;
+}
+
+.home-tile-version {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(236, 234, 228, 0.72);
+}
+
+.home-tile-ring {
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+    -fx-border-color: -v-hair-strong;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12;
+}
+
+.home-tile:hover .home-tile-ring {
+    -fx-border-color: -vantaaccent-a55;
+    -fx-border-width: 2px;
+}
+
+.home-tile-selected .home-tile-ring,
+.home-tile-selected:hover .home-tile-ring {
+    -fx-border-color: -vantaaccent;
+    -fx-border-width: 2px;
+}
+
+.home-tile:focused .home-tile-ring {
+    -fx-border-color: -vantatext;
+    -fx-border-width: 2px;
+}
+
+.home-tile-play {
+    -fx-opacity: 0;
+}
+
+.home-tile:hover .home-tile-play,
+.home-tile:focused .home-tile-play {
+    -fx-opacity: 1;
+}
+
+.home-tile-new {
+    -fx-background-color: -v-hair, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+}
+
+.home-tile-new:hover {
+    -fx-background-color: -vantaaccent-a30, -v-card-hover;
+}
+
+.home-tile-new-plus {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 26px;
+    -fx-text-fill: -vantaaccent;
+}
+
+.home-tile-new .home-tile-name {
+    -fx-text-fill: -vantatext;
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+}
+
+/* ---------- servers --------------------------------------------------------- */
 
 .home-panel {
     -fx-background-color: -v-hair, -v-well;

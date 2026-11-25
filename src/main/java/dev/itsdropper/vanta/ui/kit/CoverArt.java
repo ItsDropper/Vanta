@@ -39,15 +39,69 @@ public final class CoverArt extends StackPane {
     private final DoubleProperty corner = new SimpleDoubleProperty(0);
     private final Rectangle clip = new Rectangle();
 
+    /** The bundled world screenshot, decoded once. Null if the resource is missing. */
+    private static final Image PHOTO = loadPhoto();
+
+    /** Crop centres and zoom (fraction of image width) so each seed frames a different part. */
+    private static final double[][] CROPS = {
+            {0.47, 0.55, 0.46}, {0.72, 0.78, 0.50}, {0.25, 0.70, 0.52},
+            {0.70, 0.22, 0.48}, {0.50, 0.50, 1.00}, {0.78, 0.70, 0.44},
+            {0.35, 0.80, 0.46}, {0.50, 0.55, 0.40}, {0.50, 0.62, 0.75}
+    };
+
+    private static Image loadPhoto() {
+        try (java.io.InputStream stream = CoverArt.class.getResourceAsStream("/images/home-background.png")) {
+            if (stream == null) {
+                return null;
+            }
+            Image image = new Image(stream);
+            return image.isError() ? null : image;
+        } catch (Exception ignored) {
+            return null;
+        }
+    }
+
+    private static int tint(String loader) {
+        return switch (loader) {
+            case "fabric" -> 0x29E8B26A;
+            case "forge" -> 0x336C8DBB;
+            case "neoforge" -> 0x33E4803F;
+            case "quilt" -> 0x339A7CE8;
+            default -> 0x00000000;
+        };
+    }
+
     public CoverArt(String seed, String loader) {
         getStyleClass().add("cover-art");
-        ImageView view = new ImageView(image(seed, loader));
-        view.setSmooth(false);
+        ImageView view;
+        if (PHOTO != null) {
+            view = new ImageView(PHOTO);
+            view.setSmooth(true);
+            double[] crop = CROPS[Math.floorMod((seed == null ? "" : seed).hashCode(), CROPS.length)];
+            Runnable frame = () -> frame(view, crop);
+            widthProperty().addListener((o, a, b) -> frame.run());
+            heightProperty().addListener((o, a, b) -> frame.run());
+            frame.run();
+        } else {
+            view = new ImageView(image(seed, loader));
+            view.setSmooth(false);
+        }
         view.setPreserveRatio(false);
         view.fitWidthProperty().bind(widthProperty());
         view.fitHeightProperty().bind(heightProperty());
         view.setMouseTransparent(true);
         getChildren().add(view);
+
+        int argb = PHOTO != null ? tint(LoaderTheme.key(loader)) : 0;
+        if (argb != 0) {
+            Region wash = new Region();
+            wash.setMouseTransparent(true);
+            wash.setBackground(new javafx.scene.layout.Background(new javafx.scene.layout.BackgroundFill(
+                    javafx.scene.paint.Color.rgb((argb >> 16) & 255, (argb >> 8) & 255, argb & 255,
+                            ((argb >>> 24) & 255) / 255.0),
+                    javafx.scene.layout.CornerRadii.EMPTY, javafx.geometry.Insets.EMPTY)));
+            getChildren().add(wash);
+        }
 
         clip.widthProperty().bind(widthProperty());
         clip.heightProperty().bind(heightProperty());
@@ -55,6 +109,27 @@ public final class CoverArt extends StackPane {
         clip.arcHeightProperty().bind(corner.multiply(2));
         setClip(clip);
         setMinSize(0, 0);
+    }
+
+    private void frame(ImageView view, double[] crop) {
+        double w = getWidth();
+        double h = getHeight();
+        double iw = PHOTO.getWidth();
+        double ih = PHOTO.getHeight();
+        if (w <= 0 || h <= 0) {
+            view.setViewport(new javafx.geometry.Rectangle2D(0, 0, iw, ih));
+            return;
+        }
+        double ratio = w / h;
+        double vw = Math.min(iw, crop[2] * iw);
+        double vh = vw / ratio;
+        if (vh > ih) {
+            vh = ih;
+            vw = vh * ratio;
+        }
+        double x = Math.max(0, Math.min(iw - vw, crop[0] * iw - vw / 2));
+        double y = Math.max(0, Math.min(ih - vh, crop[1] * ih - vh / 2));
+        view.setViewport(new javafx.geometry.Rectangle2D(x, y, vw, vh));
     }
 
     /** Rounds the picture's corners (radius in pixels). */
