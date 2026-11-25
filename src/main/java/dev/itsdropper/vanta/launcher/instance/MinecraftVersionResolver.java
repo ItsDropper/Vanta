@@ -61,7 +61,7 @@ public class MinecraftVersionResolver {
             );
         }
 
-        JsonNode metadata = DownloadUtil.downloadJson(metadataUrl, expectedSha1);
+        JsonNode metadata = DownloadUtil.downloadJson(metadataUrl, expectedSha1, host);
         if (metadata == null || !minecraftVersion.equals(metadata.path("id").asText())) {
             throw new IllegalStateException(
                     "Downloaded Minecraft metadata does not match the requested version."
@@ -80,7 +80,7 @@ public class MinecraftVersionResolver {
 
         JsonNode manifest =
                 DownloadUtil.downloadJson(
-                        VERSION_MANIFEST_URL
+                        VERSION_MANIFEST_URL, null, "piston-meta.mojang.com"
                 );
 
         JsonNode versions =
@@ -119,7 +119,7 @@ public class MinecraftVersionResolver {
     public static java.util.List<String> getAllVersions()
             throws Exception {
 
-        JsonNode manifest = DownloadUtil.downloadJson(VERSION_MANIFEST_URL);
+        JsonNode manifest = DownloadUtil.downloadJson(VERSION_MANIFEST_URL, null, "piston-meta.mojang.com");
         JsonNode versions = manifest.get("versions");
 
         if (versions == null || !versions.isArray()) {
