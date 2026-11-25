@@ -1928,6 +1928,9 @@
 .create-instance-type-page .create-type-option {
     -fx-background-color: -vantasurface; -fx-background-radius: 11px;
     -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
+    /* Override the global .button 34px preferred height. The graphic is a
+       two-row card and must have enough vertical room for all of its copy. */
+    -fx-min-height: 174px; -fx-pref-height: 190px;
     -fx-padding: 0; -fx-alignment: center-left; -fx-cursor: hand; -fx-effect: null;
 }
 
@@ -2032,6 +2035,9 @@
 .instance-preset-page .preset-choice-card {
     -fx-background-color: -vantasurface; -fx-background-radius: 11px;
     -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
+    /* The shared button stylesheet defaults to 34px; preset rows need their
+       own height so the wrapped description and metadata stay inside. */
+    -fx-min-height: 104px; -fx-pref-height: 112px;
     -fx-padding: 15px 18px; -fx-cursor: hand; -fx-alignment: center-left;
 }
 
