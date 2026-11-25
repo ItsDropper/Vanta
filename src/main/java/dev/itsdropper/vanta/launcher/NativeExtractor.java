@@ -90,7 +90,7 @@ public class NativeExtractor {
         }
     }
 
-    private static String safeNativeFileName(String entryName) {
+    static String safeNativeFileName(String entryName) {
         if (entryName == null || entryName.isBlank()
                 || entryName.indexOf('\\0') >= 0
                 || entryName.indexOf(':') >= 0) {
