@@ -42,7 +42,6 @@ public class NativeExtractor {
              ZipInputStream zip = new ZipInputStream(input)) {
             ZipEntry entry;
             while ((entry = zip.getNextEntry()) != null) {
-                try {
                     if (++entryCount > MAX_ARCHIVE_ENTRIES) {
                         throw new IllegalStateException("Native archive contains too many entries.");
                     }
@@ -68,9 +67,6 @@ public class NativeExtractor {
                     if (entry.getSize() >= 0 && entryBytes != entry.getSize()) {
                         throw new IllegalStateException("Native archive entry size does not match its directory record.");
                     }
-                } finally {
-                    zip.closeEntry();
-                }
             }
         }
     }
@@ -95,6 +91,11 @@ public class NativeExtractor {
                 || entryName.indexOf('\\0') >= 0
                 || entryName.indexOf(':') >= 0) {
             throw new IllegalStateException("Native archive contains an invalid native filename.");
+        }
+        if (entryName.startsWith("/") || entryName.startsWith("\\\\")
+                || java.util.Arrays.stream(entryName.split("[/\\\\\\\\]", -1))
+                .anyMatch(segment -> segment.equals(".") || segment.equals(".."))) {
+            throw new IllegalStateException("Native archive contains a path traversal entry.");
         }
         int separator = Math.max(entryName.lastIndexOf('/'), entryName.lastIndexOf('\\\\'));
         String fileName = entryName.substring(separator + 1);
