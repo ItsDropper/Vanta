@@ -999,60 +999,12 @@
     -fx-border-radius: 6px;
 }
 
-.global-mods-page .modrinth-project-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-    -fx-border-width: 1px;
-    -fx-padding: 14px 16px;
-}
-
-.global-mods-page .modrinth-project-card:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: derive(-vantaaccent, -20%);
-}
-
-.global-mods-page .modrinth-project-title {
-    -fx-font-size: 15px;
-    
-    -fx-text-fill: -vantatext; -fx-font-family: "Geist SemiBold";}
-
-.global-mods-page .modrinth-project-author {
-    -fx-font-size: 11px;
-    -fx-text-fill: -vantamuted;
-}
-
-.global-mods-page .modrinth-project-description {
-    -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
-}
-
-.global-mods-page .modrinth-project-stats {
-    -fx-padding: 0 4px;
-}
-
-.global-mods-page .modrinth-stat-icon {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-}
-
-.global-mods-page .modrinth-stat-value {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-}
-
 .global-mods-page .modrinth-environment-chip {
     -fx-text-fill: -vantatext;
 }
 
 .global-mods-page .modrinth-loader-chip {
     -fx-background-color: derive(-vantaaccent, -88%);
-}
-
-.global-mods-page .modrinth-project-grid-card {
-    -fx-min-height: 210px;
-    -fx-pref-height: 220px;
 }
 
 .global-mods-page .modrinth-result-skeleton {

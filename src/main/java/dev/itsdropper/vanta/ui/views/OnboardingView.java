@@ -21,6 +21,8 @@ import javafx.scene.layout.VBox;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.ui.AnimationUtils;
+import dev.itsdropper.vanta.ui.components.IconView;
+import dev.itsdropper.vanta.ui.kit.CoverArt;
 import dev.itsdropper.vanta.ui.OnboardingManager;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
@@ -39,6 +41,7 @@ public class OnboardingView extends BorderPane {
     private final CheckBox usageTelemetry = new CheckBox(Localization.text("onboarding.usageOptIn"));
     private final CheckBox crashTelemetry = new CheckBox(Localization.text("onboarding.crashOptIn"));
 
+    private final VBox stepList = new VBox();
     private int step = 0;
 
     public OnboardingView(
@@ -57,58 +60,76 @@ public class OnboardingView extends BorderPane {
 
         getStyleClass().add("onboarding-page");
         setMinWidth(0);
-        setPrefWidth(820);
-        setMaxWidth(900);
+        setPrefWidth(940);
+        setMaxWidth(980);
         setMinHeight(0);
-        setPrefHeight(560);
-        setMaxHeight(620);
-        dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
+        setPrefHeight(580);
+        setMaxHeight(640);
 
-        Label logo = new Label("VANTA");
+        // Left rail: the world photo, the wordmark and the four steps.
+        CoverArt backdrop = new CoverArt("Vanta", "vanilla");
+        backdrop.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        Region railScrim = new Region();
+        railScrim.getStyleClass().add("onboarding-rail-scrim");
+        railScrim.setMouseTransparent(true);
+
+        Label logo = new Label("Vanta");
         logo.getStyleClass().add("onboarding-logo");
 
+        stepList.setSpacing(6);
+        VBox railContent = new VBox(32, logo, stepList);
+        railContent.setPadding(new Insets(32, 28, 28, 28));
+        railContent.setAlignment(Pos.TOP_LEFT);
+
+        StackPane rail = new StackPane(backdrop, railScrim, railContent);
+        rail.getStyleClass().add("onboarding-rail");
+        rail.setPrefWidth(236);
+        rail.setMinWidth(236);
+        rail.setMaxWidth(236);
+        StackPane.setAlignment(railContent, Pos.TOP_LEFT);
+        setLeft(rail);
+
         stepLabel.getStyleClass().add("onboarding-step");
-
-        HBox top = new HBox(14, logo, stepLabel);
-        top.setAlignment(Pos.CENTER_LEFT);
-
-        setTop(top);
 
         pageContainer.getStyleClass().add("onboarding-content");
         pageContainer.setMinWidth(0);
         pageContainer.setMaxWidth(Double.MAX_VALUE);
+        pageContainer.setAlignment(Pos.TOP_LEFT);
         ScrollPane onboardingScroll = new ScrollPane(pageContainer);
         onboardingScroll.setFitToWidth(true);
         onboardingScroll.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
         onboardingScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         onboardingScroll.getStyleClass().add("onboarding-scroll");
-        setCenter(onboardingScroll);
+        VBox.setVgrow(onboardingScroll, Priority.ALWAYS);
 
         Label hint = new Label(
                 Localization.text("onboarding.changeLater")
         );
         hint.getStyleClass().add("onboarding-hint");
+        hint.setWrapText(true);
+        HBox.setHgrow(hint, Priority.ALWAYS);
+        hint.setMaxWidth(Double.MAX_VALUE);
 
-        Region spacer = new Region();
-        HBox.setHgrow(spacer, Priority.ALWAYS);
-
-        backButton.getStyleClass().add("secondary-button");
-        nextButton.getStyleClass().add("primary-button");
+        backButton.getStyleClass().add("vanta-button-secondary");
+        nextButton.getStyleClass().addAll("vanta-button-primary", "button-large");
 
         backButton.setOnAction(event -> previous());
         nextButton.setOnAction(event -> next());
 
-        HBox footer = new HBox(
-                12,
-                backButton,
-                spacer,
-                hint,
-                nextButton
-        );
-        footer.setAlignment(Pos.CENTER);
-        footer.setPadding(new Insets(24, 0, 0, 0));
+        HBox footer = new HBox(10, hint, backButton, nextButton);
+        footer.setAlignment(Pos.CENTER_RIGHT);
+        footer.getStyleClass().add("onboarding-footer");
 
-        setBottom(footer);
+        VBox main = new VBox(onboardingScroll, footer);
+        main.getStyleClass().add("onboarding-main");
+        setCenter(main);
+
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+        clip.setArcWidth(32);
+        clip.setArcHeight(32);
+        clip.widthProperty().bind(widthProperty());
+        clip.heightProperty().bind(heightProperty());
+        setClip(clip);
 
         showStep();
     }
@@ -127,8 +148,40 @@ public class OnboardingView extends BorderPane {
             default -> readyPage();
         };
 
+        renderSteps();
         pageContainer.getChildren().setAll(page);
         AnimationUtils.slideFadeIn(page, step == 0 ? 24 : 30);
+    }
+
+    private void renderSteps() {
+        String[] names = {
+                Localization.text("onboarding.rail.welcome"),
+                Localization.text("onboarding.rail.how"),
+                Localization.text("onboarding.rail.account"),
+                Localization.text("onboarding.rail.ready")
+        };
+        stepList.getChildren().clear();
+        for (int i = 0; i < names.length; i++) {
+            Label name = new Label(names[i]);
+            name.getStyleClass().add("onboarding-rail-label");
+            Node marker;
+            if (i < step) {
+                marker = IconView.create(IconView.Type.CHECK, 14);
+            } else {
+                Region dot = new Region();
+                dot.getStyleClass().add("onboarding-rail-dot");
+                marker = dot;
+            }
+            StackPane markerBox = new StackPane(marker);
+            markerBox.setMinSize(18, 18);
+            markerBox.setPrefSize(18, 18);
+            HBox row = new HBox(10, markerBox, name);
+            row.setAlignment(Pos.CENTER_LEFT);
+            row.getStyleClass().add("onboarding-rail-step");
+            row.getStyleClass().add(i < step ? "done" : i == step ? "active" : "todo");
+            row.setAccessibleText(names[i] + (i == step ? ", current step" : i < step ? ", done" : ""));
+            stepList.getChildren().add(row);
+        }
     }
 
     private Node welcomePage() {
@@ -142,7 +195,8 @@ public class OnboardingView extends BorderPane {
         line.setWrapText(true);
         line.setMaxWidth(680);
 
-        box.getChildren().add(line);
+        CoverArt banner = new CoverArt("Vanta welcome", "fabric").rounded(14).sized(540, 220);
+        box.getChildren().addAll(line, banner);
         return box;
     }
 
@@ -152,10 +206,10 @@ public class OnboardingView extends BorderPane {
                 Localization.text("onboarding.organizationBody")
         );
 
-        addFeature(box, "1", Localization.text("onboarding.feature.instancesTitle"), Localization.text("onboarding.feature.instancesDescription"));
-        addFeature(box, "2", Localization.text("onboarding.feature.contentTitle"), Localization.text("onboarding.feature.contentDescription"));
-        addFeature(box, "3", Localization.text("onboarding.feature.launchTitle"), Localization.text("onboarding.feature.launchDescription"));
-        addFeature(box, "4", Localization.text("onboarding.feature.repairTitle"), Localization.text("onboarding.feature.repairDescription"));
+        addFeature(box, IconView.Type.INSTANCES, Localization.text("onboarding.feature.instancesTitle"), Localization.text("onboarding.feature.instancesDescription"));
+        addFeature(box, IconView.Type.MODS, Localization.text("onboarding.feature.contentTitle"), Localization.text("onboarding.feature.contentDescription"));
+        addFeature(box, IconView.Type.PLAY, Localization.text("onboarding.feature.launchTitle"), Localization.text("onboarding.feature.launchDescription"));
+        addFeature(box, IconView.Type.SHIELD, Localization.text("onboarding.feature.repairTitle"), Localization.text("onboarding.feature.repairDescription"));
 
         Label path = new Label(
                 Localization.text("onboarding.instanceTip")
@@ -185,7 +239,7 @@ public class OnboardingView extends BorderPane {
                         : "connected-label"
         );
 
-        connectButton.getStyleClass().add("primary-button");
+        connectButton.getStyleClass().add("vanta-button-primary");
         connectButton.setAccessibleText(Localization.text("onboarding.connectPrompt"));
         connectButton.setGraphic(null);
         connectButton.setDisable(account != null);
@@ -213,9 +267,9 @@ public class OnboardingView extends BorderPane {
                 Localization.text("onboarding.readyBody")
         );
 
-        addFeature(box, "1", Localization.text("onboarding.feature.firstInstanceTitle"), Localization.text("onboarding.feature.firstInstanceDescription"));
-        addFeature(box, "2", Localization.text("onboarding.feature.browseTitle"), Localization.text("onboarding.feature.browseDescription"));
-        addFeature(box, "3", Localization.text("onboarding.feature.settingsTitle"), Localization.text("onboarding.feature.settingsDescription"));
+        addFeature(box, IconView.Type.PLUS, Localization.text("onboarding.feature.firstInstanceTitle"), Localization.text("onboarding.feature.firstInstanceDescription"));
+        addFeature(box, IconView.Type.SEARCH, Localization.text("onboarding.feature.browseTitle"), Localization.text("onboarding.feature.browseDescription"));
+        addFeature(box, IconView.Type.SETTINGS, Localization.text("onboarding.feature.settingsTitle"), Localization.text("onboarding.feature.settingsDescription"));
 
         Label telemetryTitle = new Label(Localization.text("onboarding.privacyTitle"));
         telemetryTitle.getStyleClass().add("onboarding-feature-title");
@@ -237,7 +291,7 @@ public class OnboardingView extends BorderPane {
         actions.setAlignment(Pos.CENTER_LEFT);
 
         Button create = new Button(Localization.text("onboarding.createInstance"));
-        create.getStyleClass().add("primary-button");
+        create.getStyleClass().add("vanta-button-primary");
         create.setOnAction(event -> {
             saveTelemetryConsent();
             OnboardingManager.markCompleted();
@@ -246,7 +300,7 @@ public class OnboardingView extends BorderPane {
         });
 
         Button finish = new Button(Localization.text("onboarding.explore"));
-        finish.getStyleClass().add("secondary-button");
+        finish.getStyleClass().add("vanta-button-secondary");
         finish.setOnAction(event -> {
             saveTelemetryConsent();
             OnboardingManager.markCompleted();
@@ -268,15 +322,19 @@ public class OnboardingView extends BorderPane {
         subtitleLabel.setWrapText(true);
         subtitleLabel.setMaxWidth(700);
 
-        VBox box = new VBox(18, titleLabel, subtitleLabel);
+        VBox box = new VBox(16, titleLabel, subtitleLabel);
+        box.setPadding(new Insets(36, 40, 12, 40));
         box.setAlignment(Pos.CENTER_LEFT);
-        box.setMaxWidth(760);
+        box.setMaxWidth(620);
         return box;
     }
 
-    private void addFeature(VBox parent, String number, String title, String description) {
-        Label numberLabel = new Label(number);
-        numberLabel.getStyleClass().add("onboarding-feature-number");
+    private void addFeature(VBox parent, IconView.Type icon, String title, String description) {
+        StackPane numberLabel = new StackPane(IconView.create(icon, 18));
+        numberLabel.getStyleClass().add("onboarding-feature-icon");
+        numberLabel.setMinSize(40, 40);
+        numberLabel.setPrefSize(40, 40);
+        numberLabel.setMaxSize(40, 40);
 
         Label titleLabel = new Label(title);
         titleLabel.getStyleClass().add("onboarding-feature-title");
@@ -287,6 +345,7 @@ public class OnboardingView extends BorderPane {
 
         VBox text = new VBox(3, titleLabel, descriptionLabel);
         HBox row = new HBox(14, numberLabel, text);
+        HBox.setHgrow(text, Priority.ALWAYS);
         row.getStyleClass().add("onboarding-feature");
         row.setAlignment(Pos.CENTER_LEFT);
         parent.getChildren().add(row);

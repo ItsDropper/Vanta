@@ -30,41 +30,50 @@ public final class ModrinthProjectCard extends VBox {
             boolean grid,
             Runnable onOpen
     ) {
-        super(10);
+        super(12);
         title.getStyleClass().add("modrinth-project-title");
         author.getStyleClass().add("modrinth-project-author");
         description.getStyleClass().add("modrinth-project-description");
         description.setWrapText(true);
         description.setMaxHeight(42);
 
-        HBox titleLine = new HBox(7, title, author);
+        HBox titleLine = new HBox(8, title, author);
         titleLine.setAlignment(Pos.CENTER_LEFT);
         VBox information = new VBox(5, titleLine, description, tags);
         HBox.setHgrow(information, Priority.ALWAYS);
 
-        VBox stats = new VBox(5,
-                statLine("⇩", compactNumber(downloads)),
-                statLine("♥", compactNumber(followers)),
-                statLine("◷", updated == null ? "" : updated));
+        HBox stats = new HBox(14,
+                statLine(IconView.Type.DOWNLOAD, compactNumber(downloads)),
+                statLine(IconView.Type.STAR, compactNumber(followers)),
+                statLine(IconView.Type.CLOCK, updated == null ? "" : updated));
         stats.getStyleClass().add("modrinth-project-stats");
-        stats.setAlignment(Pos.CENTER_RIGHT);
+        stats.setAlignment(Pos.CENTER_LEFT);
 
-        setPadding(new Insets(14, 16, 14, 16));
-        getStyleClass().addAll("instance-card", "modrinth-project-card");
+        setPadding(new Insets(16));
+        getStyleClass().add("modrinth-project-card");
 
         if (grid) {
-            HBox heading = new HBox(12, icon, information, menuButton);
-            heading.setAlignment(Pos.TOP_LEFT);
-            HBox footer = new HBox(12, stats, new Region(), installButton);
-            HBox.setHgrow(footer.getChildren().get(1), Priority.ALWAYS);
+            VBox names = new VBox(2, title, author);
+            names.setAlignment(Pos.CENTER_LEFT);
+            names.setMinWidth(0);
+            HBox.setHgrow(names, Priority.ALWAYS);
+            HBox heading = new HBox(12, icon, names, menuButton);
+            heading.setAlignment(Pos.CENTER_LEFT);
+            description.setMaxHeight(40);
+            Region grow = new Region();
+            VBox.setVgrow(grow, Priority.ALWAYS);
+            Region footerSpace = new Region();
+            HBox.setHgrow(footerSpace, Priority.ALWAYS);
+            HBox footer = new HBox(10, stats, footerSpace, installButton);
             footer.setAlignment(Pos.CENTER_LEFT);
-            getChildren().addAll(heading, footer);
+            getChildren().addAll(heading, description, tags, grow, footer);
             getStyleClass().add("modrinth-project-grid-card");
         } else {
-            HBox actions = new HBox(7, menuButton, installButton);
+            HBox actions = new HBox(8, menuButton, installButton);
             actions.setAlignment(Pos.CENTER_RIGHT);
             VBox right = new VBox(8, stats, actions);
             right.setAlignment(Pos.CENTER_RIGHT);
+            stats.setAlignment(Pos.CENTER_RIGHT);
             HBox row = new HBox(14, icon, information, right);
             row.setAlignment(Pos.CENTER_LEFT);
             HBox.setHgrow(information, Priority.ALWAYS);
@@ -82,8 +91,8 @@ public final class ModrinthProjectCard extends VBox {
         }
     }
 
-    private HBox statLine(String symbol, String value) {
-        Label icon = new Label(symbol);
+    private HBox statLine(IconView.Type symbol, String value) {
+        javafx.scene.Node icon = IconView.create(symbol, 13);
         icon.getStyleClass().add("modrinth-stat-icon");
         Label text = new Label(value);
         text.getStyleClass().add("modrinth-stat-value");

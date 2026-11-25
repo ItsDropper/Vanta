@@ -1,1 +1,42 @@
-/* browse.css: to be written on the new design system (see tokens.css, base.css, utilities.css). */
+/* ==========================================================================
+   Browse: Modrinth result cards, tags and stats.
+   ========================================================================== */
+
+.modrinth-project-card {
+    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 12, 11, 11;
+    -fx-cursor: hand;
+}
+
+.modrinth-project-card:hover {
+    -fx-background-color: -vantaaccent-a30, -v-card-hover, linear-gradient(to bottom, -v-gloss, transparent 55%);
+}
+
+.modrinth-project-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 15px;
+    -fx-text-fill: -vantatext;
+}
+
+.modrinth-project-author {
+    -fx-font-family: "Geist";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantasubtle;
+}
+
+.modrinth-project-description {
+    -fx-font-family: "Geist";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantamuted;
+}
+
+.modrinth-project-stats .modrinth-stat-value {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+.modrinth-stat-icon {
+    -fx-stroke: -vantasubtle;
+}

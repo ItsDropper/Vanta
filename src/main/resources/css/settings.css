@@ -1,1 +1,148 @@
-/* settings.css: to be written on the new design system (see tokens.css, base.css, utilities.css). */
+/* ==========================================================================
+   Settings, onboarding and experimental. Settings pages still use the shared
+   screen styles; onboarding is the two-pane card defined here.
+   ========================================================================== */
+
+.onboarding-overlay {
+    -fx-background-color: -v-scrim;
+    -fx-alignment: center;
+}
+
+.onboarding-page {
+    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 16, 15;
+}
+
+.onboarding-rail-scrim {
+    -fx-background-color:
+        linear-gradient(to bottom, rgba(8, 9, 11, 0.45), rgba(8, 9, 11, 0.86));
+}
+
+.onboarding-logo {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 22px;
+    -fx-text-fill: white;
+}
+
+.onboarding-rail-step {
+    -fx-padding: 6 0;
+}
+
+.onboarding-rail-label {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 14px;
+    -fx-text-fill: rgba(236, 234, 228, 0.55);
+}
+
+.onboarding-rail-dot {
+    -fx-background-color: rgba(236, 234, 228, 0.35);
+    -fx-background-radius: 99;
+    -fx-min-width: 7px;
+    -fx-min-height: 7px;
+    -fx-pref-width: 7px;
+    -fx-pref-height: 7px;
+    -fx-max-width: 7px;
+    -fx-max-height: 7px;
+}
+
+.onboarding-rail-step.active .onboarding-rail-label {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 16px;
+    -fx-text-fill: white;
+}
+
+.onboarding-rail-step.active .onboarding-rail-dot {
+    -fx-background-color: -vantaaccent;
+    -fx-min-width: 9px;
+    -fx-min-height: 9px;
+    -fx-pref-width: 9px;
+    -fx-pref-height: 9px;
+    -fx-max-width: 9px;
+    -fx-max-height: 9px;
+}
+
+.onboarding-rail-step.done .onboarding-rail-label {
+    -fx-text-fill: rgba(236, 234, 228, 0.8);
+}
+
+.onboarding-rail-step.done .vanta-icon {
+    -fx-stroke: -vantaaccent;
+}
+
+.onboarding-main,
+.onboarding-scroll,
+.onboarding-scroll > .viewport,
+.onboarding-content {
+    -fx-background-color: transparent;
+}
+
+.onboarding-scroll {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+
+.onboarding-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 30px;
+    -fx-text-fill: -vantatext;
+}
+
+.onboarding-subtitle,
+.onboarding-body {
+    -fx-font-family: "Geist";
+    -fx-font-size: 14px;
+    -fx-text-fill: -vantamuted;
+}
+
+.onboarding-hint {
+    -fx-font-family: "Geist";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantasubtle;
+}
+
+.onboarding-footer {
+    -fx-padding: 16 28 20 40;
+    -fx-background-color: -v-hair, -v-page;
+    -fx-background-insets: 0 0 0 0, 1 0 0 0;
+}
+
+.onboarding-feature {
+    -fx-background-color: -v-hair, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-padding: 14;
+}
+
+.onboarding-feature-icon {
+    -fx-background-color: -vantaaccent-a18;
+    -fx-background-radius: 10;
+}
+
+.onboarding-feature-icon .vanta-icon {
+    -fx-stroke: -vantaaccent;
+}
+
+.onboarding-feature-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 14px;
+    -fx-text-fill: -vantatext;
+}
+
+.onboarding-feature-description {
+    -fx-font-family: "Geist";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantamuted;
+}
+
+.onboarding-account-status {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantamuted;
+}
+
+.connected-label {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantasuccess;
+}
