@@ -2378,3 +2378,53 @@
     -fx-font-size: 11px;
     -fx-line-spacing: 2px;
 }
+
+.button.accent-swatch {
+    -fx-background-color: -v-hair-strong;
+    -fx-background-insets: 0;
+    -fx-background-radius: 99;
+    -fx-padding: 5;
+    -fx-cursor: hand;
+}
+.button.accent-swatch:hover { -fx-background-color: -vantatext; }
+.button.accent-swatch:focused {
+    -fx-border-color: -vantaaccent-a55;
+    -fx-border-width: 2px;
+    -fx-border-radius: 99;
+    -fx-border-insets: -2px;
+}
+.button.accent-swatch-dot { -fx-stroke: transparent; }
+
+.settings-navigation {
+    -fx-padding: 14 10;
+    -fx-spacing: 2;
+}
+.settings-nav-group {
+    -fx-text-fill: -vantasubtle;
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-padding: 14 10 4 10;
+}
+.button.settings-nav-button {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-alignment: center-left;
+    -fx-text-fill: -vantamuted;
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-padding: 8 12;
+    -fx-cursor: hand;
+}
+.button.settings-nav-button:hover {
+    -fx-background-color: -v-hair;
+    -fx-text-fill: -vantatext;
+}
+.button.settings-nav-button-active,
+.button.settings-nav-button.active,
+.button.settings-nav-button:selected {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 8, 7;
+    -fx-text-fill: -vantatext;
+}
+.button.settings-nav-button.selected { -fx-background-color: -v-hair-strong, -v-card; -fx-background-insets: 0, 1; -fx-background-radius: 8, 7; -fx-text-fill: -vantatext; }

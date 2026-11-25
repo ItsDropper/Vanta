@@ -547,3 +547,35 @@
 .minecraft-backdrop {
     -fx-background-radius: 12;
 }
+
+.button.sidebar-group-toggle {
+    -fx-alignment: center-left;
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantasubtle;
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+
+.button.sidebar-group-toggle:hover {
+    -fx-text-fill: -vantatext;
+}
+
+.button.sidebar-group-toggle:focused {
+    -fx-border-color: -vantaaccent-a55;
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+    -fx-border-insets: -1px;
+}
+
+.sidebar-chevron {
+    -fx-stroke: -vantasubtle;
+    -fx-stroke-width: 1.4px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
+.sidebar-group-body {
+    -fx-padding: 0;
+}
