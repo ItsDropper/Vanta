@@ -65,6 +65,26 @@ class MinecraftSecurityUpdateServiceTest {
     }
 
     @Test
+    void rejectsFreeTypeArtifactPathsThatEscapeTheLibrariesDirectory() throws Exception {
+        JsonNode parentTraversal = JSON.readTree("""
+                {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0",
+                 "downloads":{"artifact":{"path":"../../outside/freetype.jar",
+                 "url":"https://libraries.minecraft.net/freetype.jar",
+                 "sha1":"0123456789abcdef0123456789abcdef01234567"}}}
+                """);
+        JsonNode drivePath = JSON.readTree("""
+                {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0",
+                 "downloads":{"artifact":{"path":"C:/outside/freetype.jar",
+                 "url":"https://libraries.minecraft.net/freetype.jar",
+                 "sha1":"0123456789abcdef0123456789abcdef01234567"}}}
+                """);
+        assertThrows(IllegalStateException.class,
+                () -> MinecraftSecurityUpdateService.validateDownloadIntegrityMetadata(parentTraversal));
+        assertThrows(IllegalStateException.class,
+                () -> MinecraftSecurityUpdateService.validateDownloadIntegrityMetadata(drivePath));
+    }
+
+    @Test
     void acceptsFreeTypeArtifactWithHttpsAndSha1() throws Exception {
         JsonNode valid = JSON.readTree("""
                 {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0",
