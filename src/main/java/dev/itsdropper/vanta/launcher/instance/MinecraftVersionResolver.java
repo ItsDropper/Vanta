@@ -40,18 +40,34 @@ public class MinecraftVersionResolver {
             );
         }
 
-        JsonNode url =
-                version.get("url");
+        JsonNode url = version.get("url");
+        String metadataUrl = url == null ? "" : url.asText("");
+        String expectedSha1 = version.path("sha1").asText("");
 
-        if (url == null) {
+        if (metadataUrl.isBlank()
+                || !expectedSha1.matches("(?i)[0-9a-f]{40}")) {
             throw new IllegalStateException(
-                    "Minecraft version metadata URL is missing."
+                    "Minecraft version metadata URL or manifest SHA-1 is missing."
             );
         }
 
-        return DownloadUtil.downloadJson(
-                url.asText()
-        );
+        java.net.URI metadataUri = java.net.URI.create(metadataUrl);
+        String host = metadataUri.getHost();
+        if (!"https".equalsIgnoreCase(metadataUri.getScheme())
+                || (!"piston-meta.mojang.com".equalsIgnoreCase(host)
+                && !"launchermeta.mojang.com".equalsIgnoreCase(host))) {
+            throw new IllegalStateException(
+                    "Minecraft version metadata does not come from Mojang's official metadata host."
+            );
+        }
+
+        JsonNode metadata = DownloadUtil.downloadJson(metadataUrl, expectedSha1, host);
+        if (metadata == null || !minecraftVersion.equals(metadata.path("id").asText())) {
+            throw new IllegalStateException(
+                    "Downloaded Minecraft metadata does not match the requested version."
+            );
+        }
+        return metadata;
     }
 
 
@@ -64,7 +80,7 @@ public class MinecraftVersionResolver {
 
         JsonNode manifest =
                 DownloadUtil.downloadJson(
-                        VERSION_MANIFEST_URL
+                        VERSION_MANIFEST_URL, null, "piston-meta.mojang.com"
                 );
 
         JsonNode versions =
@@ -103,7 +119,7 @@ public class MinecraftVersionResolver {
     public static java.util.List<String> getAllVersions()
             throws Exception {
 
-        JsonNode manifest = DownloadUtil.downloadJson(VERSION_MANIFEST_URL);
+        JsonNode manifest = DownloadUtil.downloadJson(VERSION_MANIFEST_URL, null, "piston-meta.mojang.com");
         JsonNode versions = manifest.get("versions");
 
         if (versions == null || !versions.isArray()) {
@@ -132,7 +148,7 @@ public class MinecraftVersionResolver {
 
         JsonNode manifest =
                 DownloadUtil.downloadJson(
-                        VERSION_MANIFEST_URL
+                        VERSION_MANIFEST_URL, null, "piston-meta.mojang.com"
                 );
 
         JsonNode versions =

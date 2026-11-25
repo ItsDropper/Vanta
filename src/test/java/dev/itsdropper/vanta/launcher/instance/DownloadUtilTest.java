@@ -9,6 +9,25 @@ import static org.junit.jupiter.api.Assertions.*;
 class DownloadUtilTest {
 
     @Test
+    void trustedMetadataRedirectsMustStayOnTheExactHttpsOrigin() throws Exception {
+        assertDoesNotThrow(() -> DownloadUtil.validateFinalResponseUri(
+                java.net.URI.create("https://piston-meta.mojang.com/version.json"),
+                "piston-meta.mojang.com"));
+        assertThrows(IOException.class, () -> DownloadUtil.validateFinalResponseUri(
+                java.net.URI.create("https://attacker.example/version.json"),
+                "piston-meta.mojang.com"));
+        assertThrows(IOException.class, () -> DownloadUtil.validateFinalResponseUri(
+                java.net.URI.create("http://piston-meta.mojang.com/version.json"),
+                "piston-meta.mojang.com"));
+        assertThrows(IOException.class, () -> DownloadUtil.validateFinalResponseUri(
+                java.net.URI.create("https://user@piston-meta.mojang.com/version.json"),
+                "piston-meta.mojang.com"));
+        assertThrows(IOException.class, () -> DownloadUtil.validateFinalResponseUri(
+                java.net.URI.create("https://piston-meta.mojang.com:8443/version.json"),
+                "piston-meta.mojang.com"));
+    }
+
+    @Test
     void acceptsExactSegmentByteRange() throws Exception {
         assertDoesNotThrow(() ->
                 DownloadUtil.validateContentRange("bytes 0-99/400", 0, 99, 400));

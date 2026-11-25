@@ -19,6 +19,32 @@ class NativeExtractorTest {
     Path temporaryDirectory;
 
     @Test
+    void rejectsNativeArchiveResourceExhaustionLimits() {
+        assertDoesNotThrow(() -> NativeExtractor.validateDeclaredEntrySize(
+                NativeExtractor.MAX_ENTRY_BYTES));
+        assertThrows(IllegalStateException.class, () ->
+                NativeExtractor.validateDeclaredEntrySize(NativeExtractor.MAX_ENTRY_BYTES + 1));
+        assertDoesNotThrow(() -> NativeExtractor.validateExpandedSizes(
+                NativeExtractor.MAX_ENTRY_BYTES, NativeExtractor.MAX_ARCHIVE_EXPANDED_BYTES));
+        assertThrows(IllegalStateException.class, () ->
+                NativeExtractor.validateExpandedSizes(
+                        NativeExtractor.MAX_ENTRY_BYTES + 1, NativeExtractor.MAX_ARCHIVE_EXPANDED_BYTES));
+        assertThrows(IllegalStateException.class, () ->
+                NativeExtractor.validateExpandedSizes(
+                        1, NativeExtractor.MAX_ARCHIVE_EXPANDED_BYTES + 1));
+    }
+
+    @Test
+    void rejectsUnsafeNativeArchiveFilenames() {
+        assertThrows(IllegalStateException.class, () ->
+                NativeExtractor.safeNativeFileName("C:/outside/library.dll"));
+        assertThrows(IllegalStateException.class, () ->
+                NativeExtractor.safeNativeFileName("nested/../library.dll"));
+        assertThrows(IllegalStateException.class, () ->
+                NativeExtractor.safeNativeFileName("nested/" + (char) 0 + "library.dll"));
+    }
+
+    @Test
     void extractsLinuxSharedObjectsIncludingVersionedNames() throws Exception {
         String previous = System.getProperty("os.name");
         try {

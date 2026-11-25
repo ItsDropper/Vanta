@@ -5,6 +5,7 @@ import dev.itsdropper.vanta.launcher.LaunchDataBuilder;
 import dev.itsdropper.vanta.launcher.MinecraftLauncher;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityUpdateService;
 import dev.itsdropper.vanta.launcher.repair.FailureCategory;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosis;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine;
@@ -195,6 +196,9 @@ public class LaunchService {
             LaunchData launchData;
 
             try {
+                // Refresh Mojang's version metadata and security-sensitive LWJGL
+                // artifacts before constructing the classpath or starting Java.
+                MinecraftSecurityUpdateService.refreshBeforeLaunch(instance);
                 launchData = buildLaunchData(instance, server);
                 logEnvironmentDiagnostics(instance, launchData);
             } catch (Exception buildFailure) {
@@ -219,6 +223,9 @@ public class LaunchService {
                 dev.itsdropper.vanta.launcher.instance.InstanceRepairService
                         .repair(instance);
 
+                // Repair can reinstall version metadata and native files. Re-run
+                // the security gate after repair so this retry cannot bypass it.
+                MinecraftSecurityUpdateService.refreshBeforeLaunch(instance);
                 launchData = buildLaunchData(instance, server);
                 logEnvironmentDiagnostics(instance, launchData);
 

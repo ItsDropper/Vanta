@@ -1,108 +1,109 @@
 package dev.itsdropper.vanta.launcher;
 
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+/**
+ * Extracts platform-native binaries from verified library archives.
+ *
+ * Archive limits are deliberately conservative: native dependency archives
+ * should be small, and a corrupt or hostile archive must not be able to exhaust
+ * disk space or keep the launcher busy decompressing unbounded data.
+ */
 public class NativeExtractor {
+    static final int MAX_ARCHIVE_ENTRIES = 4_096;
+    static final long MAX_ENTRY_BYTES = 128L * 1024 * 1024;
+    static final long MAX_ARCHIVE_EXPANDED_BYTES = 512L * 1024 * 1024;
+    private static final int COPY_BUFFER_BYTES = 32 * 1024;
 
-    public static void extract(
-            Path nativeJar,
-            Path outputFolder
-    ) throws Exception {
-
+    public static void extract(Path nativeJar, Path outputFolder) throws Exception {
         if (nativeJar == null) {
-            throw new IllegalArgumentException(
-                    "Native JAR cannot be null."
-            );
+            throw new IllegalArgumentException("Native JAR cannot be null.");
         }
-
         if (!Files.isRegularFile(nativeJar)) {
-            throw new IllegalStateException(
-                    "Native JAR does not exist: "
-                            + nativeJar
-            );
+            throw new IllegalStateException("Native JAR does not exist: " + nativeJar);
         }
+        if (outputFolder == null || Files.isSymbolicLink(outputFolder)) {
+            throw new IllegalArgumentException("Native output directory must be a real directory.");
+        }
+        Files.createDirectories(outputFolder);
 
-        Files.createDirectories(
-                outputFolder
-        );
-
-        try (InputStream input =
-                     Files.newInputStream(nativeJar);
-             ZipInputStream zip =
-                     new ZipInputStream(input)) {
-
+        long expandedBytes = 0L;
+        int entryCount = 0;
+        byte[] buffer = new byte[COPY_BUFFER_BYTES];
+        try (InputStream input = Files.newInputStream(nativeJar);
+             ZipInputStream zip = new ZipInputStream(input)) {
             ZipEntry entry;
-
             while ((entry = zip.getNextEntry()) != null) {
-
-                try {
-
-                    if (entry.isDirectory()) {
-                        continue;
+                    if (++entryCount > MAX_ARCHIVE_ENTRIES) {
+                        throw new IllegalStateException("Native archive contains too many entries.");
                     }
+                    validateDeclaredEntrySize(entry.getSize());
+                    String name = entry.getName();
+                    boolean nativeFile = !entry.isDirectory()
+                            && name != null && isNativeFileForCurrentPlatform(name);
+                    Path output = nativeFile ? outputFolder.resolve(safeNativeFileName(name)) : null;
 
-                    String name =
-                            entry.getName();
-
-                    if (name == null || !isNativeFileForCurrentPlatform(name)) {
-                        continue;
+                    long entryBytes = 0L;
+                    try (OutputStream out = nativeFile
+                            ? Files.newOutputStream(output, StandardOpenOption.CREATE,
+                                    StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE)
+                            : OutputStream.nullOutputStream()) {
+                        int read;
+                        while ((read = zip.read(buffer)) != -1) {
+                            entryBytes += read;
+                            expandedBytes += read;
+                            validateExpandedSizes(entryBytes, expandedBytes);
+                            out.write(buffer, 0, read);
+                        }
                     }
-
-                    /*
-                     * Only extract the filename itself.
-                     *
-                     * Native libraries are loaded from one
-                     * flat directory, so directory structure
-                     * inside the JAR is not needed.
-                     */
-                    Path fileName =
-                            Path.of(name)
-                                    .getFileName();
-
-                    if (fileName == null) {
-                        continue;
+                    if (entry.getSize() >= 0 && entryBytes != entry.getSize()) {
+                        throw new IllegalStateException("Native archive entry size does not match its directory record.");
                     }
-
-                    String dllName =
-                            fileName.toString();
-
-                    /*
-                     * Extra safety: make absolutely sure the
-                     * resulting filename cannot contain path
-                     * separators.
-                     */
-                    if (dllName.contains("/")
-                            || dllName.contains("\\")) {
-
-                        throw new IllegalStateException(
-                                "Unsafe native library name: "
-                                        + name
-                        );
-                    }
-
-                    Path output =
-                            outputFolder.resolve(
-                                    dllName
-                            );
-
-                    Files.copy(
-                            zip,
-                            output,
-                            StandardCopyOption.REPLACE_EXISTING
-                    );
-
-                } finally {
-
-                    zip.closeEntry();
-                }
             }
         }
+    }
+
+    static void validateDeclaredEntrySize(long size) {
+        if (size > MAX_ENTRY_BYTES) {
+            throw new IllegalStateException("Native archive entry exceeds the permitted uncompressed size.");
+        }
+    }
+
+    static void validateExpandedSizes(long entryBytes, long archiveBytes) {
+        if (entryBytes > MAX_ENTRY_BYTES) {
+            throw new IllegalStateException("Native archive entry exceeded the permitted uncompressed size.");
+        }
+        if (archiveBytes > MAX_ARCHIVE_EXPANDED_BYTES) {
+            throw new IllegalStateException("Native archive exceeded the permitted total uncompressed size.");
+        }
+    }
+
+    static String safeNativeFileName(String entryName) {
+        if (entryName == null || entryName.isBlank()
+                || entryName.indexOf(0) >= 0
+                || entryName.indexOf(':') >= 0) {
+            throw new IllegalStateException("Native archive contains an invalid native filename.");
+        }
+        String normalized = entryName.replace((char) 92, '/');
+        if (normalized.startsWith("/")
+                || java.util.Arrays.stream(normalized.split("/", -1))
+                .anyMatch(segment -> segment.equals(".") || segment.equals(".."))) {
+            throw new IllegalStateException("Native archive contains a path traversal entry.");
+        }
+        String fileName = normalized.substring(normalized.lastIndexOf('/') + 1);
+        if (fileName.isBlank() || fileName.equals(".") || fileName.equals("..")
+                || fileName.chars().anyMatch(Character::isISOControl)) {
+            throw new IllegalStateException("Native archive contains an unsafe native filename.");
+        }
+        return fileName;
     }
 
     private static boolean isNativeFileForCurrentPlatform(String name) {
