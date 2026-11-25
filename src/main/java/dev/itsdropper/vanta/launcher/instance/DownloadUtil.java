@@ -122,7 +122,7 @@ public class DownloadUtil {
     // =============================================================
 
     public static JsonNode downloadJson(String url) throws Exception {
-        return downloadJson(url, null);
+        return downloadJson(url, null, null);
     }
 
     /**
@@ -130,7 +130,22 @@ public class DownloadUtil {
      * the SHA-1 published by the trusted metadata manifest before parsing it.
      */
     public static JsonNode downloadJson(String url, String expectedSha1) throws Exception {
+        return downloadJson(url, expectedSha1, null);
+    }
+
+    /**
+     * Downloads JSON while requiring the final response to remain on the
+     * specified HTTPS origin. This is used for security-sensitive Mojang
+     * manifests: automatic redirects must not silently transfer trust to a
+     * different host.
+     */
+    public static JsonNode downloadJson(
+            String url, String expectedSha1, String expectedResponseHost
+    ) throws Exception {
         validateDownloadRequest(url, expectedSha1);
+        if (expectedResponseHost != null && expectedResponseHost.isBlank()) {
+            throw new IllegalArgumentException("Expected response host cannot be blank.");
+        }
         Exception lastException = null;
 
         for (int attempt = 1; attempt <= maxRetries(); attempt++) {
@@ -152,6 +167,9 @@ public class DownloadUtil {
                     try { response.body().close(); } catch (IOException ignored) { }
                     throw new DownloadHttpException(response.statusCode(),
                             response.headers().firstValue("Retry-After").orElse(null));
+                }
+                if (expectedResponseHost != null) {
+                    validateFinalResponseUri(response.uri(), expectedResponseHost);
                 }
 
                 long declaredLength = response.headers().firstValueAsLong("Content-Length").orElse(-1L);
@@ -737,6 +755,17 @@ public class DownloadUtil {
         }
         if (failure instanceof InterruptedException) return false;
         return failure instanceof IOException;
+    }
+
+    static void validateFinalResponseUri(URI finalUri, String expectedHost) throws IOException {
+        if (finalUri == null || expectedHost == null || expectedHost.isBlank()
+                || !"https".equalsIgnoreCase(finalUri.getScheme())
+                || finalUri.getHost() == null
+                || !expectedHost.equalsIgnoreCase(finalUri.getHost())
+                || finalUri.getUserInfo() != null
+                || (finalUri.getPort() != -1 && finalUri.getPort() != 443)) {
+            throw new IOException("Security-sensitive metadata redirected outside its trusted HTTPS origin.");
+        }
     }
 
     static void validateJsonResponseSize(long size) throws IOException {
