@@ -193,7 +193,7 @@ public final class MinecraftSecurityUpdateService {
         } catch (IllegalArgumentException invalid) {
             throw new IllegalStateException("Mojang FreeType artifact URL is invalid: " + name, invalid);
         }
-        String normalizedPath = path.replace('\\\\', '/');
+        String normalizedPath = path.replace((char) 92, '/');
         boolean unsafePath = normalizedPath.startsWith("/")
                 || normalizedPath.contains(":")
                 || java.util.Arrays.stream(normalizedPath.split("/", -1))
