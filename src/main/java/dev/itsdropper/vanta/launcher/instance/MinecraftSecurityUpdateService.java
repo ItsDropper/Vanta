@@ -156,16 +156,27 @@ public final class MinecraftSecurityUpdateService {
         }
     }
 
-    private static void validateDownloadIntegrityMetadata(JsonNode library) {
+    static void validateDownloadIntegrityMetadata(JsonNode library) {
         JsonNode downloads = library.path("downloads");
+        boolean hasVerifiedArtifact = false;
         JsonNode artifact = downloads.path("artifact");
         if (artifact.isObject() && !artifact.isEmpty()) {
             validateArtifact(artifact, library.path("name").asText());
+            hasVerifiedArtifact = true;
         }
         JsonNode classifiers = downloads.path("classifiers");
-        if (classifiers.isObject()) {
-            classifiers.fields().forEachRemaining(entry -> validateArtifact(
-                    entry.getValue(), library.path("name").asText() + ":" + entry.getKey()));
+        if (classifiers.isObject() && !classifiers.isEmpty()) {
+            var entries = classifiers.fields();
+            while (entries.hasNext()) {
+                var entry = entries.next();
+                validateArtifact(entry.getValue(),
+                        library.path("name").asText() + ":" + entry.getKey());
+                hasVerifiedArtifact = true;
+            }
+        }
+        if (!hasVerifiedArtifact) {
+            throw new IllegalStateException("Mojang FreeType metadata contains no verifiable artifacts: "
+                    + library.path("name").asText("<unnamed library>"));
         }
     }
 
@@ -176,9 +187,17 @@ public final class MinecraftSecurityUpdateService {
         String path = artifact.path("path").asText();
         String url = artifact.path("url").asText();
         String sha1 = artifact.path("sha1").asText();
-        if (path.isBlank() || url.isBlank() || !url.startsWith("https://")
+        java.net.URI artifactUri;
+        try {
+            artifactUri = java.net.URI.create(url);
+        } catch (IllegalArgumentException invalid) {
+            throw new IllegalStateException("Mojang FreeType artifact URL is invalid: " + name, invalid);
+        }
+        if (path.isBlank() || !"https".equalsIgnoreCase(artifactUri.getScheme())
+                || artifactUri.getHost() == null || artifactUri.getUserInfo() != null
+                || (artifactUri.getPort() != -1 && artifactUri.getPort() != 443)
                 || !sha1.matches("(?i)[0-9a-f]{40}")) {
-            throw new IllegalStateException("Mojang FreeType artifact is missing a trusted URL, path, or SHA-1: " + name);
+            throw new IllegalStateException("Mojang FreeType artifact is missing a trusted HTTPS URL, path, or SHA-1: " + name);
         }
     }
 
