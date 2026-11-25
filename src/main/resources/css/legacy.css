@@ -682,9 +682,8 @@
     -fx-border-color: -vantaaccenthover;
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 9px 14px;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 16px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .modrinth-popup-primary:hover {
@@ -697,9 +696,8 @@
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 9px 14px;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 16px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .modrinth-popup-secondary:hover {
@@ -750,9 +748,8 @@
     -fx-border-color: derive(-vantadanger, -45%);
     -fx-border-radius: 8px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 9px 14px;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 16px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .modrinth-popup-danger:hover {
@@ -829,20 +826,19 @@
 }
 
 .global-mods-page .modrinth-content-segments {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 10px;
-    -fx-padding: 5px;
+    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 11, 10;
+    -fx-padding: 4px;
+    -fx-spacing: 2px;
 }
 
 .global-mods-page .modrinth-content-segment {
     -fx-background-color: transparent;
     -fx-background-radius: 7px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 9px 14px;
+    -fx-font-size: 13px;
+    -fx-padding: 8px 16px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .global-mods-page .modrinth-content-segment:hover {
@@ -851,8 +847,9 @@
 }
 
 .global-mods-page .modrinth-content-segment-selected {
+    -fx-font-family: "Geist SemiBold";
     -fx-background-color: -vantaaccent;
-    -fx-text-fill: white;
+    -fx-text-fill: -vantaaccentforeground;
 }
 
 .global-mods-page .modrinth-filter-sidebar {
@@ -876,7 +873,7 @@
 .modrinth-browser-toolbar .modrinth-current-page,
 .modrinth-page-button.modrinth-current-page {
     -fx-background-color: -vantaaccent;
-    -fx-text-fill: white;
+    -fx-text-fill: -vantaaccentforeground;
     -fx-border-color: -vantaaccent;
 }
 
@@ -959,7 +956,7 @@
 
 .global-mods-page .modrinth-filter-option:selected {
     -fx-background-color: derive(-vantaaccent, -68%);
-    -fx-text-fill: white;
+    -fx-text-fill: -vantaaccentforeground;
 }
 
 .global-mods-page .modrinth-filter-empty {
@@ -1087,7 +1084,7 @@
 
 .global-mods-page .modrinth-filter-option-selected {
     -fx-background-color: derive(-vantaaccent, -68%);
-    -fx-text-fill: white;
+    -fx-text-fill: -vantaaccentforeground;
 }
 
 .global-mods-page .modrinth-filter-check {
@@ -1099,7 +1096,7 @@
 }
 
 .global-mods-page .modrinth-filter-option-selected .modrinth-filter-check {
-    -fx-text-fill: white;
+    -fx-text-fill: -vantaaccentforeground;
 }
 
 .global-mods-page .modrinth-filter-content > .dialog-instance-checkbox {
@@ -1627,7 +1624,7 @@
 
 .server-primary {
     -fx-background-color: -vantaaccent;
-    -fx-text-fill: white;
+    -fx-text-fill: -vantaaccentforeground;
 }
 
 .server-primary:hover {
@@ -2428,3 +2425,27 @@
     -fx-text-fill: -vantatext;
 }
 .button.settings-nav-button.selected { -fx-background-color: -v-hair-strong, -v-card; -fx-background-insets: 0, 1; -fx-background-radius: 8, 7; -fx-text-fill: -vantatext; }
+
+.instance-tabs {
+    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 11, 10;
+    -fx-padding: 4;
+    -fx-spacing: 2;
+}
+.button.content-tab {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8;
+    -fx-text-fill: -vantamuted;
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-padding: 7 16;
+    -fx-cursor: hand;
+}
+.button.content-tab:hover { -fx-background-color: -v-hair; -fx-text-fill: -vantatext; }
+.button.content-tab-active,
+.button.content-tab-active:hover {
+    -fx-background-color: -vantaaccent;
+    -fx-text-fill: -vantaaccentforeground;
+    -fx-font-family: "Geist SemiBold";
+}
