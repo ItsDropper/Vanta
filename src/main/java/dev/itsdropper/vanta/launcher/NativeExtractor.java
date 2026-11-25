@@ -88,19 +88,18 @@ public class NativeExtractor {
 
     static String safeNativeFileName(String entryName) {
         if (entryName == null || entryName.isBlank()
-                || entryName.indexOf('\\0') >= 0
+                || entryName.indexOf(0) >= 0
                 || entryName.indexOf(':') >= 0) {
             throw new IllegalStateException("Native archive contains an invalid native filename.");
         }
-        if (entryName.startsWith("/") || entryName.startsWith("\\\\")
-                || java.util.Arrays.stream(entryName.split("[/\\\\\\\\]", -1))
+        String normalized = entryName.replace((char) 92, '/');
+        if (normalized.startsWith("/")
+                || java.util.Arrays.stream(normalized.split("/", -1))
                 .anyMatch(segment -> segment.equals(".") || segment.equals(".."))) {
             throw new IllegalStateException("Native archive contains a path traversal entry.");
         }
-        int separator = Math.max(entryName.lastIndexOf('/'), entryName.lastIndexOf('\\\\'));
-        String fileName = entryName.substring(separator + 1);
+        String fileName = normalized.substring(normalized.lastIndexOf('/') + 1);
         if (fileName.isBlank() || fileName.equals(".") || fileName.equals("..")
-                || fileName.contains("/") || fileName.contains("\\\\")
                 || fileName.chars().anyMatch(Character::isISOControl)) {
             throw new IllegalStateException("Native archive contains an unsafe native filename.");
         }
