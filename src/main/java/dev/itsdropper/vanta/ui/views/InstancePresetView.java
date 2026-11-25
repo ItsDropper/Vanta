@@ -158,25 +158,20 @@ public class InstancePresetView extends VBox {
                 Double.MAX_VALUE
         );
 
-        button.setPrefHeight(88);
+        button.setMinHeight(104);
+        button.setPrefHeight(112);
+        button.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+        button.setAccessibleText(preset.getName() + ". " + preset.getDescription());
 
-        Label title =
-                new Label(
-                        preset.getName()
-                );
+        Label title = new Label(preset.getName());
+        title.setWrapText(true);
+        title.setMaxWidth(Double.MAX_VALUE);
+        title.getStyleClass().add("create-option-title");
 
-        title.getStyleClass().add(
-                "create-option-title"
-        );
-
-        Label description =
-                new Label(
-                        preset.getDescription()
-                );
-
-        description.getStyleClass().add(
-                "create-option-description"
-        );
+        Label description = new Label(preset.getDescription());
+        description.setWrapText(true);
+        description.setMaxWidth(Double.MAX_VALUE);
+        description.getStyleClass().add("create-option-description");
 
         java.util.List<String> versions = preset.getMinecraftVersions();
         java.util.List<String> mods = preset.getMods();
@@ -195,15 +190,27 @@ public class InstancePresetView extends VBox {
         javafx.scene.layout.StackPane arrow = new javafx.scene.layout.StackPane(
                 dev.itsdropper.vanta.ui.components.IconView.create(dev.itsdropper.vanta.ui.components.IconView.Type.ARROW_RIGHT, 16));
         arrow.getStyleClass().add("preset-choice-arrow");
-        VBox text = new VBox(7, title, description, details);
-        HBox card = new HBox(18, symbol, text, arrow);
-        card.setAlignment(Pos.CENTER_LEFT);
+        details.setWrapText(true);
+        details.setMaxWidth(Double.MAX_VALUE);
+
+        VBox text = new VBox(6, title, description, details);
+        text.setAlignment(Pos.CENTER_LEFT);
+        text.setMinWidth(0);
+        text.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(text, Priority.ALWAYS);
+
+        HBox card = new HBox(16, symbol, text, arrow);
+        card.setAlignment(Pos.CENTER_LEFT);
+        card.setMinWidth(0);
+        card.setMaxWidth(Double.MAX_VALUE);
         card.getStyleClass().add("preset-choice-content");
 
-        text.setAlignment(
-                Pos.CENTER_LEFT
-        );
+        // JavaFX buttons otherwise size a graphic from its preferred content
+        // width. Long preset descriptions then push the arrow outside the
+        // card or force the text column to collapse. Size the graphic to the
+        // actual button content area and let the text wrap within it.
+        card.prefWidthProperty().bind(button.widthProperty().subtract(36));
+        card.maxWidthProperty().bind(button.widthProperty().subtract(36));
 
         button.setGraphic(card);
 
