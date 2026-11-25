@@ -193,11 +193,16 @@ public final class MinecraftSecurityUpdateService {
         } catch (IllegalArgumentException invalid) {
             throw new IllegalStateException("Mojang FreeType artifact URL is invalid: " + name, invalid);
         }
-        if (path.isBlank() || !"https".equalsIgnoreCase(artifactUri.getScheme())
+        String normalizedPath = path.replace('\\\\', '/');
+        boolean unsafePath = normalizedPath.startsWith("/")
+                || normalizedPath.contains(":")
+                || java.util.Arrays.stream(normalizedPath.split("/", -1))
+                .anyMatch(segment -> segment.isBlank() || segment.equals(".") || segment.equals(".."));
+        if (unsafePath || !"https".equalsIgnoreCase(artifactUri.getScheme())
                 || artifactUri.getHost() == null || artifactUri.getUserInfo() != null
                 || (artifactUri.getPort() != -1 && artifactUri.getPort() != 443)
                 || !sha1.matches("(?i)[0-9a-f]{40}")) {
-            throw new IllegalStateException("Mojang FreeType artifact is missing a trusted HTTPS URL, path, or SHA-1: " + name);
+            throw new IllegalStateException("Mojang FreeType artifact is missing a safe relative path, trusted HTTPS URL, or SHA-1: " + name);
         }
     }
 
