@@ -7,16 +7,14 @@ import javafx.animation.Timeline;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.Cursor;
 import javafx.scene.AccessibleRole;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.control.OverrunStyle;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -36,17 +34,30 @@ import dev.itsdropper.vanta.launcher.service.ServerHistoryManager;
 import dev.itsdropper.vanta.launcher.service.ServerTarget;
 import dev.itsdropper.vanta.launcher.service.LaunchService;
 import dev.itsdropper.vanta.ui.AnimationUtils;
-import dev.itsdropper.vanta.ui.VantaUI;
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.components.IconView;
-import dev.itsdropper.vanta.ui.components.InstanceCard;
-import dev.itsdropper.vanta.ui.components.MinecraftBackdrop;
+import dev.itsdropper.vanta.ui.kit.ActionTile;
+import dev.itsdropper.vanta.ui.kit.Badge;
+import dev.itsdropper.vanta.ui.kit.Callout;
+import dev.itsdropper.vanta.ui.kit.CoverArt;
+import dev.itsdropper.vanta.ui.kit.IconButton;
+import dev.itsdropper.vanta.ui.kit.SectionHeader;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
+/**
+ * Home: a pixel-art hero for the last played instance with one Play action,
+ * a compact list of recent instances, and quick actions.
+ */
 public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.LauncherViewLifecycle {
+
+    private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("MMM d");
 
     private final AccountService accountService;
     private final MultiLaunchService launchService;
@@ -59,7 +70,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     private Label recentServersStatus;
     private final Label accountLabel;
     private final Label launchStatusLabel;
-    private FlowPane recentList;
+    private VBox recentList;
     private Label recentStatus;
     private final java.util.Map<String, Label> playtimeLabels =
             new java.util.HashMap<>();
@@ -91,103 +102,77 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         getStyleClass().addAll("page", "home-page");
 
         Label title = new Label(Localization.text("home.title"));
-        title.getStyleClass().add("home-title");
-        VantaUI.styleText(title, VantaUI.TextRole.PAGE_TITLE);
+        title.getStyleClass().add("page-header-title");
 
         accountLabel = new Label(Localization.text("home.accountChecking"));
-        accountLabel.getStyleClass().add("home-account-label");
-        VantaUI.styleText(accountLabel, VantaUI.TextRole.MUTED);
+        accountLabel.getStyleClass().add("page-header-subtitle");
 
-        VBox headerText = new VBox(4, title, accountLabel);
-        HBox header = new HBox(16);
+        VBox headerText = new VBox(2, title, accountLabel);
+        headerText.setMinWidth(0);
+        HBox.setHgrow(headerText, Priority.ALWAYS);
+
+        launchStatusLabel = Badge.status(Localization.text("home.readyToPlay"), Badge.Tone.SUCCESS);
+        launchStatusLabel.getStyleClass().add("home-status");
+        launchStatusLabel.setAccessibleText(Localization.text("home.launchStatusReady"));
+
+        HBox header = new HBox(12, headerText, launchStatusLabel);
         header.setAlignment(Pos.CENTER_LEFT);
         header.getStyleClass().add("home-header");
 
-        launchStatusLabel = new Label(Localization.text("home.readyToPlay"));
-        launchStatusLabel.getStyleClass().addAll("home-launch-indicator", "home-status-ready");
-        launchStatusLabel.setAccessibleText(Localization.text("home.launchStatusReady"));
-
-        Button createInstanceButton = new Button(Localization.text("home.newInstance"));
-        createInstanceButton.getStyleClass().add("primary-button");
-        AnimationUtils.installInteractiveAnimations(createInstanceButton);
-        createInstanceButton.setMinHeight(40);
-        createInstanceButton.setAccessibleText(Localization.text("home.createInstanceAccessible"));
-        createInstanceButton.setTooltip(new Tooltip(Localization.text("home.createInstanceTooltip")));
-        createInstanceButton.setOnAction(event -> {
-            if (this.onCreateInstance != null) this.onCreateInstance.run();
-        });
-        Region headerSpacer = new Region();
-        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
-        header.getChildren().addAll(
-                headerText,
-                headerSpacer,
-                launchStatusLabel,
-                createInstanceButton
-        );
-
         VBox featuredSection = createFeaturedSection();
         VBox recentSection = createRecentInstancesSection();
-        VBox serverCard = createRecentServersCard();
+        VBox sideColumn = createSideColumn();
 
-        VBox activityLayout = new VBox(22);
-        activityLayout.setMaxWidth(Double.MAX_VALUE);
-        activityLayout.getStyleClass().add("home-activity-layout");
-
-        HBox activityRow = new HBox(28, recentSection, serverCard);
+        HBox activityRow = new HBox(20);
         activityRow.setMaxWidth(Double.MAX_VALUE);
         activityRow.getStyleClass().add("home-activity-row");
+        VBox activityStack = new VBox(20);
+        activityStack.setFillWidth(true);
+
         recentSection.setMinWidth(0);
-        serverCard.setMinWidth(0);
+        sideColumn.setMinWidth(0);
         recentSection.setMaxWidth(Double.MAX_VALUE);
-        serverCard.setMaxWidth(Double.MAX_VALUE);
+        sideColumn.setMaxWidth(Double.MAX_VALUE);
         HBox.setHgrow(recentSection, Priority.ALWAYS);
-        HBox.setHgrow(serverCard, Priority.ALWAYS);
+        HBox.setHgrow(sideColumn, Priority.ALWAYS);
 
-        boolean[] stackedActivity = {true};
-        Runnable updateActivityLayout = () -> {
-            boolean stack = activityLayout.getWidth() < 860;
-            if (stack == stackedActivity[0]) return;
-            stackedActivity[0] = stack;
-
-            if (stack) {
-                activityRow.getChildren().clear();
-                recentSection.prefWidthProperty().unbind();
-                serverCard.prefWidthProperty().unbind();
-                recentSection.setPrefWidth(Region.USE_COMPUTED_SIZE);
-                serverCard.setPrefWidth(Region.USE_COMPUTED_SIZE);
-                activityLayout.getChildren().setAll(recentSection, serverCard);
-            } else {
-                activityLayout.getChildren().clear();
-                activityRow.getChildren().setAll(recentSection, serverCard);
-                recentSection.prefWidthProperty().bind(activityRow.widthProperty().multiply(0.59).subtract(14));
-                serverCard.prefWidthProperty().bind(activityRow.widthProperty().multiply(0.41).subtract(14));
-                activityLayout.getChildren().setAll(activityRow);
+        StackPane activity = new StackPane();
+        activity.setAlignment(Pos.TOP_LEFT);
+        boolean[] stacked = {true};
+        activityStack.getChildren().setAll(recentSection, sideColumn);
+        activity.getChildren().setAll(activityStack);
+        activity.widthProperty().addListener((observable, previous, next) -> {
+            boolean stack = next.doubleValue() < 820;
+            if (stack == stacked[0]) {
+                return;
             }
-        };
-        activityLayout.widthProperty().addListener((observable, previousWidth, nextWidth) -> updateActivityLayout.run());
-        activityLayout.getChildren().setAll(recentSection, serverCard);
+            stacked[0] = stack;
+            activityStack.getChildren().clear();
+            activityRow.getChildren().clear();
+            recentSection.prefWidthProperty().unbind();
+            sideColumn.prefWidthProperty().unbind();
+            if (stack) {
+                recentSection.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                sideColumn.setPrefWidth(Region.USE_COMPUTED_SIZE);
+                activityStack.getChildren().setAll(recentSection, sideColumn);
+                activity.getChildren().setAll(activityStack);
+            } else {
+                activityRow.getChildren().setAll(recentSection, sideColumn);
+                recentSection.prefWidthProperty().bind(activityRow.widthProperty().multiply(0.6).subtract(10));
+                sideColumn.prefWidthProperty().bind(activityRow.widthProperty().multiply(0.4).subtract(10));
+                activity.getChildren().setAll(activityRow);
+            }
+        });
 
-        VBox contentBox = new VBox(
-                30,
-                header,
-                featuredSection,
-                activityLayout
-        );
+        VBox contentBox = new VBox(20, header, featuredSection, activity);
         contentBox.setFillWidth(true);
         contentBox.paddingProperty().bind(
                 Bindings.createObjectBinding(() -> {
-                    double width = getWidth();
-                    double horizontalPadding = dev.itsdropper.vanta.ui.ResponsiveLayout.gutter(width);
-                    return new Insets(
-                            24,
-                            horizontalPadding,
-                            24,
-                            horizontalPadding
-                    );
+                    double gutter = dev.itsdropper.vanta.ui.ResponsiveLayout.gutter(getWidth());
+                    return new Insets(24, gutter, 24, gutter);
                 }, widthProperty())
         );
         contentBox.setMaxWidth(Double.MAX_VALUE);
-        contentBox.setMaxHeight(Double.MAX_VALUE);
 
         ScrollPane homeScroll = new ScrollPane(contentBox);
         homeScroll.setFitToWidth(true);
@@ -196,20 +181,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         homeScroll.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
         homeScroll.setPannable(false);
         homeScroll.getStyleClass().add("home-content-scroll");
-        homeScroll.setManaged(true);
 
         getChildren().add(homeScroll);
         StackPane.setAlignment(homeScroll, Pos.TOP_LEFT);
 
-        // Home content is a single interactive hierarchy.
-        // Keeping the header inside the ScrollPane prevents an overlay node
-        // from ever sitting above the recent-instance controls.
-
-         playtimeTimer = new Timeline(
-                new KeyFrame(
-                        Duration.seconds(1),
-                        event -> updatePlaytimeLabels()
-                )
+        playtimeTimer = new Timeline(
+                new KeyFrame(Duration.seconds(1), event -> updatePlaytimeLabels())
         );
         playtimeTimer.setCycleCount(Timeline.INDEFINITE);
         sceneProperty().addListener((observable, previousScene, nextScene) -> {
@@ -219,90 +196,82 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 playtimeTimer.play();
             }
         });
-
     }
+
+    // ------------------------------------------------------------ sections
 
     private VBox createFeaturedSection() {
         Label loading = new Label(Localization.text("home.libraryLoading"));
-        loading.getStyleClass().add("home-featured-loading");
+        loading.getStyleClass().add("home-muted");
         featuredContainer.getStyleClass().add("home-featured-container");
         featuredContainer.getChildren().setAll(loading);
-        featuredContainer.setMinHeight(240);
+        featuredContainer.setMinHeight(260);
 
         VBox section = new VBox(featuredContainer);
-        section.getStyleClass().add("home-featured-section");
         section.setFillWidth(true);
         return section;
     }
 
     private VBox createRecentInstancesSection() {
-        Label recentTitle = new Label(Localization.text("home.recentTitle"));
-        recentTitle.getStyleClass().add("home-section-title");
-
-        Label recentSubtitle = new Label(Localization.text("home.recentSubtitle"));
-        recentSubtitle.getStyleClass().add("home-section-subtitle");
-
-        recentList = new FlowPane();
-        recentList.setHgap(10);
-        recentList.setVgap(10);
-        recentList.prefWrapLengthProperty().bind(recentList.widthProperty());
-        recentList.setMaxWidth(Double.MAX_VALUE);
+        recentList = new VBox(2);
+        recentList.setFillWidth(true);
         recentList.setMinHeight(0);
-        recentList.getStyleClass().add("home-recent-list");
+        recentList.getStyleClass().add("home-list");
 
         recentStatus = new Label(Localization.text("home.instancesLoading"));
-        recentStatus.getStyleClass().add("home-recent-status");
+        recentStatus.getStyleClass().add("home-muted");
+        recentStatus.setWrapText(true);
 
-        VBox section = new VBox(
-                8,
-                recentTitle,
-                recentSubtitle,
-                recentList,
-                recentStatus
-        );
+        VBox card = new VBox(8, recentList, recentStatus);
+        card.getStyleClass().add("home-panel");
+        card.setPadding(new Insets(8));
+
+        VBox section = new VBox(12, new SectionHeader(Localization.text("home.recentTitle")), card);
         section.setFillWidth(true);
-        section.getStyleClass().add("home-recent-section");
         return section;
     }
 
-    private VBox createRecentServersCard() {
-        VBox card = new VBox(10);
-        card.getStyleClass().add("home-recent-servers-card");
+    private VBox createSideColumn() {
+        ActionTile create = new ActionTile(
+                IconView.Type.PLUS,
+                Localization.text("common.createInstance"),
+                Localization.text("home.createInstanceTooltip"),
+                () -> {
+                    if (onCreateInstance != null) {
+                        onCreateInstance.run();
+                    }
+                });
+        create.setAccessibleText(Localization.text("home.createInstanceAccessible"));
+        create.setMinHeight(68);
+        create.setPrefHeight(68);
+        create.setMaxHeight(68);
 
-        Label title = new Label(Localization.text("home.serversTitle"));
-        title.getStyleClass().add("home-section-title");
-
-        Label subtitle = new Label(Localization.text("home.serversSubtitle"));
-        subtitle.getStyleClass().add("home-section-subtitle");
-
-        recentServersList = new VBox(8);
+        recentServersList = new VBox(2);
         recentServersList.setFillWidth(true);
-        recentServersList.setMaxWidth(Double.MAX_VALUE);
         recentServersList.setMinHeight(0);
-        recentServersList.getStyleClass().add("home-server-list");
+        recentServersList.getStyleClass().add("home-list");
 
         recentServersStatus = new Label(Localization.text("home.noServerHistory"));
-        recentServersStatus.getStyleClass().add("home-recent-status");
+        recentServersStatus.getStyleClass().add("home-muted");
+        recentServersStatus.setWrapText(true);
 
-        card.getChildren().addAll(
-                title,
-                subtitle,
-                recentServersList,
-                recentServersStatus
-        );
+        VBox serverCard = new VBox(8, recentServersList, recentServersStatus);
+        serverCard.getStyleClass().add("home-panel");
+        serverCard.setPadding(new Insets(8));
 
-        return card;
+        VBox column = new VBox(12,
+                create,
+                new SectionHeader(Localization.text("home.serversTitle")),
+                serverCard);
+        column.setFillWidth(true);
+        column.setPadding(Insets.EMPTY);
+        return column;
     }
 
-    /**
-     * Refresh dashboard data whenever the user returns to Home. Instance
-     * creation, imports and repairs can change the library without a launch
-     * state transition, so relying only on launch listeners leaves stale UI.
-     */
     /** Fills the dashboard with stable explanatory content for CI screenshots. */
     public void prepareScreenshotPreview() {
         accountLabel.setText(Localization.text("home.accountFallback"));
-        launchStatusLabel.setText(Localization.text("home.preview"));
+        setLaunchBadge(Localization.text("home.preview"), Badge.Tone.NEUTRAL);
         recentList.getChildren().clear();
         recentStatus.setManaged(true);
         recentStatus.setVisible(true);
@@ -310,8 +279,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         recentServersList.getChildren().clear();
         recentServersStatus.setText(Localization.text("home.previewRecentServers"));
 
-        // Use the same actionable first-run state shown to a real empty library.
-        // Screenshot mode must not invent a Minecraft installation or imply one exists.
+        // Same actionable first-run state a real empty library shows; screenshot
+        // mode must not invent a Minecraft installation.
         featuredContainer.getChildren().setAll(createFirstInstanceCard());
     }
 
@@ -347,6 +316,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         serverRefreshSequence.incrementAndGet();
     }
 
+    // ------------------------------------------------------------ instances
+
     public void refreshRecentInstances() {
         long request = instanceRefreshSequence.incrementAndGet();
         UiExecutor.shared().execute(() -> {
@@ -373,7 +344,6 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 });
             }
         });
-
     }
 
     private void renderRecentInstances(List<Instance> instances) {
@@ -385,10 +355,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         displayedInstances.clear();
 
         List<Instance> recent = instances.stream()
-                .filter(instance ->
-                        InstanceUsageManager.getLastPlayed(instance) > 0
-                )
-                .limit(3)
+                .filter(instance -> InstanceUsageManager.getLastPlayed(instance) > 0)
+                .limit(5)
                 .toList();
 
         // A newly installed library still gets a useful featured launch surface.
@@ -405,360 +373,246 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         Instance featured = recent.get(0);
         featuredContainer.getChildren().setAll(createFeaturedInstanceCard(featured));
 
-        List<Instance> secondary = recent.stream().skip(1).toList();
-        for (Instance instance : secondary) {
-            recentList.getChildren().add(createRecentCard(instance));
+        // The featured instance leads the list too, so the list stays useful
+        // when only one instance exists.
+        for (Instance instance : recent) {
+            recentList.getChildren().add(createRecentRow(instance));
         }
 
-        // The instance cards already communicate the recent-played content.
-        // A separate count consumes vertical space and can collide with cards
-        // in a windowed layout, so only show this label for loading/empty/error states.
         recentStatus.setText("");
         recentStatus.setVisible(false);
         recentStatus.setManaged(false);
     }
 
     private void updatePlaytimeLabels() {
-        for (java.util.Map.Entry<String, Label> entry
-                : playtimeLabels.entrySet()) {
-
+        for (java.util.Map.Entry<String, Label> entry : playtimeLabels.entrySet()) {
             Instance instance = displayedInstances.get(entry.getKey());
             if (instance == null) {
                 continue;
             }
-
-            long seconds =
-                    InstanceUsageManager.getPlaytimeSeconds(instance)
-                            + launchService.getSessionPlaytimeSeconds(instance);
-
-            entry.getValue().setText(
-                    InstanceUsageManager.formatPlaytime(seconds)
-                            + " played"
-            );
+            entry.getValue().setText(playtimeText(instance));
         }
     }
 
-    private VBox createInstanceLoadErrorCard() {
-        Label eyebrow = new Label(Localization.text("home.libraryUnavailable"));
-        eyebrow.getStyleClass().add("home-empty-eyebrow");
+    private String playtimeText(Instance instance) {
+        return InstanceUsageManager.formatPlaytime(
+                InstanceUsageManager.getPlaytimeSeconds(instance)
+                        + launchService.getSessionPlaytimeSeconds(instance));
+    }
 
-        Label title = new Label(Localization.text("home.libraryLoadFailedTitle"));
-        title.getStyleClass().add("home-load-error-title");
+    private String lastPlayedText(Instance instance) {
+        long millis = InstanceUsageManager.getLastPlayed(instance);
+        if (millis <= 0) {
+            return Localization.text("home.neverPlayed");
+        }
+        LocalDate day = Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate today = LocalDate.now();
+        if (day.equals(today)) {
+            return Localization.text("home.today");
+        }
+        if (day.equals(today.minusDays(1))) {
+            return Localization.text("home.yesterday");
+        }
+        return SHORT_DATE.format(day);
+    }
 
-        Label description = new Label(
-                Localization.text("home.libraryLoadFailedBody")
-        );
-        description.setWrapText(true);
-        description.setMaxWidth(480);
-        description.getStyleClass().add("home-load-error-description");
+    // ------------------------------------------------------------ hero
 
+    /** Hero shell: copy on the left, the pixel-art cover on the right at 16:9. */
+    private HBox heroShell(CoverArt art, VBox copy) {
+        StackPane artFrame = new StackPane(art);
+        artFrame.getStyleClass().add("home-hero-art");
+        art.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        art.rounded(8);
+
+        HBox hero = new HBox(copy, artFrame);
+        hero.getStyleClass().add("home-hero");
+        hero.setAlignment(Pos.CENTER_LEFT);
+        hero.setMaxWidth(Double.MAX_VALUE);
+
+        artFrame.prefWidthProperty().bind(Bindings.createDoubleBinding(
+                () -> Math.max(300, Math.min(hero.getWidth() * 0.56, 760)),
+                hero.widthProperty()));
+        artFrame.prefHeightProperty().bind(artFrame.prefWidthProperty().multiply(9.0 / 16.0));
+        artFrame.setMinWidth(300);
+        artFrame.setMaxWidth(Region.USE_PREF_SIZE);
+        artFrame.setMaxHeight(Region.USE_PREF_SIZE);
+        artFrame.setMinHeight(Region.USE_PREF_SIZE);
+
+        copy.setMinWidth(0);
+        HBox.setHgrow(copy, Priority.ALWAYS);
+        return hero;
+    }
+
+    private HBox createFeaturedInstanceCard(Instance instance) {
+        CoverArt art = new CoverArt(instance.getName(), instance.getLoader());
+
+        HBox badges = new HBox(6,
+                Badge.loader(instance.getLoader()),
+                Badge.mono(instance.getMinecraftVersion()));
+        badges.setAlignment(Pos.CENTER_LEFT);
+
+        Label name = new Label(instance.getName());
+        name.getStyleClass().add("home-hero-name");
+        name.setWrapText(true);
+        name.setMinWidth(0);
+        name.setMaxHeight(64);
+
+        Label playtime = new Label(playtimeText(instance));
+        playtime.getStyleClass().add("home-stat-value");
+        playtimeLabels.put(instance.getId(), playtime);
+        displayedInstances.put(instance.getId(), instance);
+
+        Label lastPlayed = new Label(lastPlayedText(instance));
+        lastPlayed.getStyleClass().add("home-stat-value");
+
+        HBox stats = new HBox(32,
+                stat(Localization.text("home.statPlaytime"), playtime),
+                stat(Localization.text("home.statLastPlayed"), lastPlayed));
+        stats.setAlignment(Pos.CENTER_LEFT);
+
+        boolean running = launchService.isRunning(instance);
+        Button play = new Button(running ? Localization.text("home.closeGame") : Localization.text("common.play"));
+        if (running) {
+            play.getStyleClass().addAll("vanta-button-secondary", "button-large", "home-play");
+        } else {
+            play.setGraphic(IconView.create(IconView.Type.PLAY, 16));
+            play.getStyleClass().addAll("vanta-button-primary", "button-large", "home-play");
+        }
+        String verb = running ? "Close " : "Launch ";
+        play.setAccessibleText(verb + instance.getName());
+        play.setTooltip(new Tooltip(verb + instance.getName()));
+        play.setOnAction(event -> launchOrCloseInstance(instance));
+        AnimationUtils.installInteractiveAnimations(play);
+
+        Region fill = new Region();
+        VBox.setVgrow(fill, Priority.ALWAYS);
+        VBox copy = new VBox(14, badges, name, stats, fill, play);
+        copy.setAlignment(Pos.TOP_LEFT);
+        copy.setPadding(new Insets(24));
+        copy.getStyleClass().add("home-hero-copy");
+        play.setMinWidth(150);
+        play.setMaxWidth(Region.USE_PREF_SIZE);
+        return heroShell(art, copy);
+    }
+
+    private VBox stat(String label, Label value) {
+        Label key = new Label(label);
+        key.getStyleClass().add("home-stat-label");
+        VBox box = new VBox(2, key, value);
+        box.setAlignment(Pos.CENTER_LEFT);
+        return box;
+    }
+
+    private Node createInstanceLoadErrorCard() {
         Button retry = new Button(Localization.text("common.retry"));
-        retry.getStyleClass().add("secondary-button");
-        retry.setMinHeight(38);
+        retry.getStyleClass().add("vanta-button-secondary");
         retry.setAccessibleText(Localization.text("home.retryInstancesAccessible"));
         retry.setOnAction(event -> refreshRecentInstances());
         AnimationUtils.installInteractiveAnimations(retry);
 
-        VBox card = new VBox(12, eyebrow, title, description, retry);
-        card.setPadding(new Insets(24));
-        card.setMinWidth(0);
-        card.setMaxWidth(Double.MAX_VALUE);
-        card.prefWidthProperty().bind(
-                Bindings.createDoubleBinding(
-                        () -> Math.max(0, featuredContainer.getWidth() - 2),
-                        featuredContainer.widthProperty()
-                )
-        );
-        card.getStyleClass().add("home-load-error-card");
-        return card;
+        Callout callout = new Callout(
+                Callout.Tone.DANGER,
+                Localization.text("home.libraryLoadFailedTitle"),
+                Localization.text("home.libraryLoadFailedBody"),
+                retry);
+        callout.setMaxWidth(Double.MAX_VALUE);
+        StackPane.setAlignment(callout, Pos.TOP_LEFT);
+        return callout;
     }
 
-    private StackPane createFirstInstanceCard() {
+    private HBox createFirstInstanceCard() {
+        CoverArt art = new CoverArt("Vanta", "vanilla");
+
         Label title = new Label(Localization.text("home.emptyTitle"));
-        title.getStyleClass().add("home-empty-title");
+        title.getStyleClass().add("home-hero-name");
         title.setWrapText(true);
 
-        Label description = new Label(
-                Localization.text("home.emptyDescription")
-        );
+        Label description = new Label(Localization.text("home.emptyDescription"));
         description.setWrapText(true);
-        description.setMaxWidth(520);
-        description.getStyleClass().add("home-empty-description");
-
-        VBox copy = new VBox(6, title, description);
-        copy.setAlignment(Pos.CENTER_LEFT);
-        copy.setMaxWidth(560);
+        description.getStyleClass().add("home-muted");
 
         Button create = new Button(Localization.text("common.createInstance"));
-        create.getStyleClass().add("primary-button");
-        AnimationUtils.installInteractiveAnimations(create);
+        create.setGraphic(IconView.create(IconView.Type.PLUS, 16));
+        create.getStyleClass().addAll("vanta-button-primary", "button-large", "home-play");
         create.setAccessibleText(Localization.text("home.createInstanceAccessible"));
         create.setTooltip(new Tooltip(Localization.text("home.createInstanceTooltip")));
         create.setOnAction(event -> {
             if (onCreateInstance != null) onCreateInstance.run();
         });
+        AnimationUtils.installInteractiveAnimations(create);
 
-        VBox content = new VBox(16, copy, create);
-        content.setAlignment(Pos.CENTER_LEFT);
-        content.setPadding(new Insets(24));
-        content.setMaxWidth(640);
-
-        StackPane card = new StackPane(content);
-        card.getStyleClass().add("home-empty-card");
-        card.setAlignment(Pos.CENTER_LEFT);
-        card.setMinWidth(0);
-        card.setMaxWidth(Double.MAX_VALUE);
-        card.prefWidthProperty().bind(
-                Bindings.createDoubleBinding(
-                        () -> Math.max(0, featuredContainer.getWidth() - 2),
-                        featuredContainer.widthProperty()
-                )
-        );
-        return card;
+        Region fill = new Region();
+        VBox.setVgrow(fill, Priority.ALWAYS);
+        VBox copy = new VBox(12, title, description, fill, create);
+        copy.setPadding(new Insets(24));
+        create.setMaxWidth(Region.USE_PREF_SIZE);
+        description.setMaxWidth(380);
+        return heroShell(art, copy);
     }
 
-    private double responsiveCardWidth(FlowPane list) {
-        double width = list.getWidth();
+    // ------------------------------------------------------------ rows
 
-        if (width <= 1) {
-            return 420;
-        }
-
-        if (width < 680) {
-            return Math.max(0, width - 2);
-        }
-
-        return Math.max(0, (width - list.getHgap()) / 2.0);
-    }
-
-    private StackPane createFeaturedInstanceCard(Instance instance) {
-        StackPane card = new StackPane();
-        card.getStyleClass().add("home-featured-card");
-        card.setMinHeight(220);
-        card.setMaxWidth(Double.MAX_VALUE);
-
-        HBox layout = new HBox(24);
-        layout.setAlignment(Pos.CENTER_LEFT);
-
-        VBox compactLayout = new VBox(16);
-        compactLayout.setFillWidth(true);
-
-        layout.setPadding(new Insets(26, 30, 26, 30));
-
-        StackPane iconFrame = new StackPane();
-        iconFrame.getStyleClass().add("home-featured-icon-frame");
-        iconFrame.setMinSize(104, 104);
-        iconFrame.setPrefSize(104, 104);
-        iconFrame.setMaxSize(104, 104);
-
-        if (Localization.text("home.custom").equalsIgnoreCase(instance.getIcon())
-                && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
-            ImageView customIcon = new ImageView(new Image(
-                    instance.getDirectory().resolve("icon.png").toUri().toString(),
-                    88, 88, true, true
-            ));
-            customIcon.fitWidthProperty().bind(iconFrame.widthProperty().subtract(16));
-            customIcon.fitHeightProperty().bind(iconFrame.heightProperty().subtract(16));
-            customIcon.setPreserveRatio(true);
-            iconFrame.getChildren().add(customIcon);
-        } else {
-            iconFrame.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 76));
-        }
-
-        VBox information = new VBox(10);
-        information.setAlignment(Pos.CENTER_LEFT);
-        information.setMinWidth(0);
-        HBox.setHgrow(information, Priority.ALWAYS);
-
-        Label eyebrow = new Label(Localization.text("home.featuredInstance"));
-        eyebrow.getStyleClass().add("home-featured-eyebrow");
+    private HBox createRecentRow(Instance instance) {
+        CoverArt thumb = new CoverArt(instance.getName(), instance.getLoader())
+                .rounded(6).sized(72, 40);
 
         Label name = new Label(instance.getName());
-        name.getStyleClass().add("home-featured-title");
+        name.getStyleClass().add("home-row-name");
+        name.setTextOverrun(OverrunStyle.ELLIPSIS);
         name.setMinWidth(0);
-        name.setWrapText(true);
 
-        Label metadata = new Label(
-                "MINECRAFT " + instance.getMinecraftVersion()
-                        + "   /   " + instance.getDisplayLoader()
-        );
-        metadata.getStyleClass().add("home-featured-meta");
-        metadata.setMinWidth(0);
-        metadata.setWrapText(true);
+        Label version = new Label(instance.getMinecraftVersion());
+        version.getStyleClass().add("value-mono");
+        Badge loader = Badge.loader(instance.getLoader());
+        HBox meta = new HBox(8, loader, version);
+        meta.setAlignment(Pos.CENTER_LEFT);
 
-        Label playtime = new Label(
-                InstanceUsageManager.formatPlaytime(
-                        InstanceUsageManager.getPlaytimeSeconds(instance)
-                                + launchService.getSessionPlaytimeSeconds(instance)
-                ) + " PLAYED"
-        );
-        playtime.getStyleClass().add("home-featured-playtime");
-        playtimeLabels.put(instance.getId(), playtime);
-        displayedInstances.put(instance.getId(), instance);
-
-        information.getChildren().addAll(eyebrow, name, metadata, playtime);
-
-        boolean running = launchService.isRunning(instance);
-        Button play = new Button(running ? Localization.text("home.closeGame") : Localization.text("home.playNow"));
-        play.getStyleClass().add("home-featured-play-button");
-        play.setMinWidth(142);
-        play.setMinHeight(48);
-        play.setAccessibleText((running ? "Close " : "Launch ") + instance.getName());
-        play.setTooltip(new Tooltip((running ? "Close " : "Launch ") + instance.getName()));
-        play.setOnAction(event -> launchOrCloseInstance(instance));
-        AnimationUtils.installInteractiveAnimations(play);
-
-        VBox action = new VBox(8, play);
-        action.setAlignment(Pos.CENTER_RIGHT);
-
-        layout.getChildren().addAll(iconFrame, information, action);
-
-        // Replace the empty featured panel with a local, asset-free landscape.
-        MinecraftBackdrop backdrop = new MinecraftBackdrop();
-        backdrop.setOpacity(0.92);
-        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
-        clip.widthProperty().bind(card.widthProperty());
-        clip.heightProperty().bind(card.heightProperty());
-        clip.setArcWidth(22);
-        clip.setArcHeight(22);
-        card.setClip(clip);
-        card.getChildren().addAll(backdrop, layout);
-
-        // The launch action moves below the instance identity on narrow windows.
-        // This preserves readable metadata instead of squeezing it between the
-        // icon and a permanently wide action button.
-        layout.widthProperty().addListener((observable, previousWidth, nextWidth) -> {
-            boolean compact = nextWidth.doubleValue() < 620;
-            if (compact && card.getChildren().contains(layout)) {
-                layout.getChildren().remove(action);
-                compactLayout.getChildren().setAll(layout, action);
-                compactLayout.setPadding(new Insets(18));
-                action.setAlignment(Pos.CENTER_LEFT);
-                card.getChildren().setAll(compactLayout);
-                iconFrame.setMinSize(76, 76);
-                iconFrame.setPrefSize(76, 76);
-                iconFrame.setMaxSize(76, 76);
-            } else if (!compact && card.getChildren().contains(compactLayout)) {
-                compactLayout.getChildren().clear();
-                layout.getChildren().setAll(iconFrame, information, action);
-                layout.setPadding(new Insets(26, 30, 26, 30));
-                action.setAlignment(Pos.CENTER_RIGHT);
-                card.getChildren().setAll(layout);
-                iconFrame.setMinSize(104, 104);
-                iconFrame.setPrefSize(104, 104);
-                iconFrame.setMaxSize(104, 104);
-            }
-        });
-        return card;
-    }
-
-    private HBox createRecentCard(Instance instance) {
-        StackPane icon = new StackPane();
-        icon.getStyleClass().add("home-recent-icon");
-        ImageView customIcon = new ImageView();
-        customIcon.setFitWidth(30);
-        customIcon.setFitHeight(30);
-        customIcon.setPreserveRatio(true);
-        if (Localization.text("home.custom").equalsIgnoreCase(instance.getIcon())
-                && instance.getDirectory().resolve("icon.png").toFile().isFile()) {
-            customIcon.setImage(new Image(instance.getDirectory().resolve("icon.png").toUri().toString(), 30, 30, true, true));
-            icon.getChildren().add(customIcon);
-        } else {
-            icon.getChildren().add(InstanceCard.createIconGraphic(instance.getIcon(), 30));
-        }
-
-        Label name = new Label(instance.getName());
-        name.getStyleClass().add("home-recent-name");
-
-        Label metadata = new Label(
-                instance.getMinecraftVersion()
-                        + " • "
-                        + instance.getDisplayLoader()
-        );
-        metadata.getStyleClass().add("home-recent-meta");
-
-        Label playtime = new Label(
-                InstanceUsageManager.formatPlaytime(
-                        InstanceUsageManager.getPlaytimeSeconds(instance)
-                                + launchService.getSessionPlaytimeSeconds(instance)
-                )
-                        + " played"
-        );
-        playtimeLabels.put(instance.getId(), playtime);
-        displayedInstances.put(instance.getId(), instance);
-        playtime.getStyleClass().add("home-recent-playtime");
-
-        VBox info = new VBox(4, name, metadata, playtime);
+        VBox info = new VBox(4, name, meta);
+        info.setAlignment(Pos.CENTER_LEFT);
+        info.setMinWidth(0);
         HBox.setHgrow(info, Priority.ALWAYS);
 
-        Button play = new Button(
-                instance != null && launchService.isRunning(instance)
-                        ? "CLOSE"
-                        : "PLAY"
-        );
-        play.getStyleClass().add(
-                launchService.isRunning(instance)
-                        ? "home-recent-stop"
-                        : "home-recent-play"
-        );
-        play.setMinWidth(92);
-        play.setPrefWidth(92);
-        play.setMinHeight(36);
-        play.setPrefHeight(36);
-        play.setMaxHeight(36);
-        play.setCursor(Cursor.HAND);
-        play.setPickOnBounds(true);
-        play.setFocusTraversable(true);
-        play.setAccessibleText(
-                (launchService.isRunning(instance) ? "Close " : "Launch ")
-                        + instance.getName()
-        );
-        play.setTooltip(new Tooltip(
-                (launchService.isRunning(instance) ? "Close " : "Launch ")
-                        + instance.getName()
-        ));
-        play.setDisable(false);
-        play.setMouseTransparent(false);
+        Label playtime = new Label(playtimeText(instance));
+        playtime.getStyleClass().add("value-mono");
+        playtimeLabels.put(instance.getId(), playtime);
+        displayedInstances.put(instance.getId(), instance);
 
-        play.setDisable(instance == null);
-
+        boolean running = launchService.isRunning(instance);
+        String verb = running ? "Close " : "Launch ";
+        IconButton play = new IconButton(
+                running ? IconView.Type.CLOSE : IconView.Type.PLAY,
+                verb + instance.getName(),
+                running ? IconButton.Style.DANGER : IconButton.Style.SECONDARY);
+        play.getStyleClass().add("home-row-play");
         play.setOnAction(event -> launchOrCloseInstance(instance));
-
         AnimationUtils.installInteractiveAnimations(play);
-        HBox card = new HBox(14, icon, info, play);
-        card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(14, 16, 14, 16));
-        card.setMinWidth(0);
-        card.prefWidthProperty().bind(
-                Bindings.createDoubleBinding(
-                        () -> responsiveCardWidth(recentList),
-                        recentList.widthProperty()
-                )
-        );
-        card.setMaxWidth(Double.MAX_VALUE);
-        card.setPickOnBounds(true);
-        card.setMouseTransparent(false);
-        card.getStyleClass().add("home-recent-card");
 
-        // The card is a secondary hit target; the explicit button remains primary.
-        card.setAccessibleRole(AccessibleRole.BUTTON);
-        card.setAccessibleText(Localization.text("home.launchOrClosePrefix") + instance.getName());
-        card.setFocusTraversable(true);
-        card.setOnMouseClicked(event -> {
+        HBox row = new HBox(14, thumb, info, playtime, play);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(8, 10, 8, 8));
+        row.setMinWidth(0);
+        row.setMaxWidth(Double.MAX_VALUE);
+        row.getStyleClass().add("home-row");
+
+        // The row is a secondary hit target; the explicit button stays primary.
+        row.setAccessibleRole(AccessibleRole.BUTTON);
+        row.setAccessibleText(Localization.text("home.launchOrClosePrefix") + instance.getName());
+        row.setFocusTraversable(true);
+        row.setOnMouseClicked(event -> {
             if (event.getTarget() == play || play.isHover()) {
                 return;
             }
             launchOrCloseInstance(instance);
         });
-        card.setOnKeyPressed(event -> {
-            if (event.getTarget() == card
+        row.setOnKeyPressed(event -> {
+            if (event.getTarget() == row
                     && (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE)) {
                 launchOrCloseInstance(instance);
                 event.consume();
             }
         });
-
-        return card;
+        return row;
     }
 
     private void launchOrCloseInstance(Instance instance) {
@@ -796,15 +650,14 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         });
     }
 
+    // ------------------------------------------------------------ servers
+
     public void refreshRecentServers() {
         long request = serverRefreshSequence.incrementAndGet();
         UiExecutor.shared().execute(() -> {
             try {
-                List<Instance> instances =
-                        InstanceManager.discoverInstances();
-
-                List<ServerHistoryEntry> history =
-                        ServerHistoryManager.getRecent();
+                List<Instance> instances = InstanceManager.discoverInstances();
+                List<ServerHistoryEntry> history = ServerHistoryManager.getRecent();
 
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (request != serverRefreshSequence.get()) return;
@@ -815,13 +668,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (request != serverRefreshSequence.get()) return;
                     recentServersList.getChildren().clear();
-                    recentServersStatus.setText(
-                            Localization.text("home.serversLoadFailed")
-                    );
+                    recentServersStatus.setVisible(true);
+                    recentServersStatus.setManaged(true);
+                    recentServersStatus.setText(Localization.text("home.serversLoadFailed"));
                 });
             }
         });
-
     }
 
     private void renderRecentServers(
@@ -830,14 +682,12 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     ) {
         recentServersList.getChildren().clear();
 
-        List<ServerHistoryEntry> recent = history.stream()
-                .limit(5)
-                .toList();
+        List<ServerHistoryEntry> recent = history.stream().limit(5).toList();
 
         if (recent.isEmpty()) {
-            recentServersStatus.setText(
-                    Localization.text("home.serversEmpty")
-            );
+            recentServersStatus.setVisible(true);
+            recentServersStatus.setManaged(true);
+            recentServersStatus.setText(Localization.text("home.serversEmpty"));
             return;
         }
 
@@ -847,52 +697,50 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
             Instance instance = instances.stream()
                     .filter(candidate ->
                             entry.getInstanceId() != null
-                                    && candidate.getId().equals(entry.getInstanceId())
-                    )
+                                    && candidate.getId().equals(entry.getInstanceId()))
                     .findFirst()
                     .orElseGet(() -> instances.stream()
                             .filter(candidate ->
-                                    candidate.getName().equalsIgnoreCase(
-                                            entry.getInstanceName()
-                                    )
-                            )
+                                    candidate.getName().equalsIgnoreCase(entry.getInstanceName()))
                             .findFirst()
                             .orElse(null));
 
-            recentServersList.getChildren().add(
-                    createRecentServerCard(instance, entry)
-            );
+            recentServersList.getChildren().add(createRecentServerRow(instance, entry));
             rendered++;
         }
 
         if (rendered == 0) {
-            recentServersStatus.setText(
-                    Localization.text("home.serversUnavailable")
-            );
+            recentServersStatus.setVisible(true);
+            recentServersStatus.setManaged(true);
+            recentServersStatus.setText(Localization.text("home.serversUnavailable"));
             return;
         }
 
-        recentServersStatus.setText(
-                rendered + " recent server"
-                        + (rendered == 1 ? "" : "s")
-        );
+        recentServersStatus.setText("");
+        recentServersStatus.setVisible(false);
+        recentServersStatus.setManaged(false);
     }
 
-    private HBox createRecentServerCard(
+    private HBox createRecentServerRow(
             Instance instance,
             ServerHistoryEntry server
     ) {
         Label name = new Label(server.getDisplayName());
-        name.getStyleClass().add("home-server-name");
+        name.getStyleClass().add("home-row-name");
+        name.setTextOverrun(OverrunStyle.ELLIPSIS);
+        name.setMinWidth(0);
 
         Label metadata = new Label(
                 instance != null
                         ? "Using " + instance.getName()
-                        : Localization.text("home.instanceMissingTitle")
-        );
-        metadata.getStyleClass().add("home-server-meta");
+                        : Localization.text("home.instanceMissingTitle"));
+        metadata.getStyleClass().add("home-muted");
+        metadata.setTextOverrun(OverrunStyle.ELLIPSIS);
+        metadata.setMinWidth(0);
 
-        VBox info = new VBox(3, name, metadata);
+        VBox info = new VBox(2, name, metadata);
+        info.setAlignment(Pos.CENTER_LEFT);
+        info.setMinWidth(0);
         HBox.setHgrow(info, Priority.ALWAYS);
 
         boolean instanceAvailable = instance != null;
@@ -904,60 +752,46 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                         && runningTarget.host().equalsIgnoreCase(server.getHost())
                         && runningTarget.port() == server.getPort();
 
-        Button play = new Button(
-                serverRunning ? "CLOSE" : "PLAY"
-        );
-        play.getStyleClass().add(
-                serverRunning
-                        ? "home-recent-stop"
-                        : "home-recent-play"
-        );
-        play.setMinWidth(84);
-        play.setPickOnBounds(true);
-        play.setMouseTransparent(false);
-        play.setCursor(Cursor.HAND);
-        play.setDisable(!instanceAvailable);
         String serverActionDescription = !instanceAvailable
                 ? Localization.text("home.instanceMissingPrefix") + server.getDisplayName() + Localization.text("home.instanceMissingSuffix")
                 : (serverRunning ? Localization.text("home.closeMinecraftPrefix") : Localization.text("home.joinPrefix"))
                         + server.getDisplayName()
                         + (serverRunning ? "" : Localization.text("home.usingPrefix") + instance.getName());
-        play.setAccessibleText(serverActionDescription);
-        play.setTooltip(new Tooltip(serverActionDescription));
 
+        IconButton play = new IconButton(
+                serverRunning ? IconView.Type.CLOSE : IconView.Type.PLAY,
+                serverActionDescription,
+                serverRunning ? IconButton.Style.DANGER : IconButton.Style.SECONDARY);
+        play.getStyleClass().add("home-row-play");
+        play.setDisable(!instanceAvailable);
         play.setOnAction(event -> launchServer(instance, server));
-
         AnimationUtils.installInteractiveAnimations(play);
-        HBox card = new HBox(14, info, play);
-        card.setAlignment(Pos.CENTER_LEFT);
-        card.setPadding(new Insets(12, 14, 12, 14));
-        card.setMinWidth(0);
-        card.prefWidthProperty().bind(recentServersList.widthProperty());
-        card.setMaxWidth(Double.MAX_VALUE);
-        card.getStyleClass().add("home-server-card");
 
-        card.setPickOnBounds(true);
-        card.setMouseTransparent(false);
+        HBox row = new HBox(12, info, play);
+        row.setAlignment(Pos.CENTER_LEFT);
+        row.setPadding(new Insets(8, 10, 8, 12));
+        row.setMinWidth(0);
+        row.setMaxWidth(Double.MAX_VALUE);
+        row.getStyleClass().add("home-row");
 
-        card.setAccessibleRole(AccessibleRole.BUTTON);
-        card.setAccessibleText(Localization.text("home.joinPrefix") + server.getDisplayName()
+        row.setAccessibleRole(AccessibleRole.BUTTON);
+        row.setAccessibleText(Localization.text("home.joinPrefix") + server.getDisplayName()
                 + (instanceAvailable ? Localization.text("home.usingPrefix") + instance.getName() : Localization.text("home.unavailableSuffix")));
-        card.setFocusTraversable(instanceAvailable);
-        card.setOnMouseClicked(event -> {
-            if (event.getTarget() == play || instance == null) {
+        row.setFocusTraversable(instanceAvailable);
+        row.setOnMouseClicked(event -> {
+            if (event.getTarget() == play || play.isHover() || instance == null) {
                 return;
             }
             launchServer(instance, server);
         });
-        card.setOnKeyPressed(event -> {
-            if (event.getTarget() == card && instanceAvailable
+        row.setOnKeyPressed(event -> {
+            if (event.getTarget() == row && instanceAvailable
                     && (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE)) {
                 launchServer(instance, server);
                 event.consume();
             }
         });
-
-        return card;
+        return row;
     }
 
     private void launchServer(Instance instance, ServerHistoryEntry server) {
@@ -986,6 +820,8 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         });
     }
 
+    // ------------------------------------------------------------ account and status
+
     public void refreshAccount() {
         setAccount(accountService.getCurrentAccount());
     }
@@ -1003,41 +839,43 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         UiExecutor.shared().dispatchToUi(() -> setAccount(account));
     }
 
+    private void setLaunchBadge(String text, Badge.Tone tone) {
+        launchStatusLabel.setText(text);
+        launchStatusLabel.getStyleClass().removeIf(style -> style.startsWith("badge-")
+                && !style.equals("badge-mono") && !style.equals("badge-dot"));
+        launchStatusLabel.getStyleClass().add("badge-" + tone.name().toLowerCase(java.util.Locale.ROOT));
+    }
+
     private void updateLaunchStatus(LaunchService.LaunchState state) {
         String label;
-        String style;
+        Badge.Tone tone;
         switch (state) {
             case PREPARING, STARTING -> {
                 label = Localization.text("home.starting");
-                style = "home-status-progress";
+                tone = Badge.Tone.ACCENT;
             }
             case RUNNING -> {
                 label = Localization.text("home.running");
-                style = "home-status-running";
+                tone = Badge.Tone.SUCCESS;
             }
             case CLOSING -> {
                 label = Localization.text("home.closing");
-                style = "home-status-progress";
+                tone = Badge.Tone.WARNING;
             }
             case ERROR -> {
                 label = Localization.text("home.launchFailed");
-                style = "home-status-error";
+                tone = Badge.Tone.DANGER;
             }
             case IDLE -> {
-                label = "READY TO PLAY";
-                style = "home-status-ready";
+                label = Localization.text("home.readyToPlay");
+                tone = Badge.Tone.SUCCESS;
             }
             default -> {
                 label = Localization.text("home.vantaReady");
-                style = "home-status-ready";
+                tone = Badge.Tone.SUCCESS;
             }
         }
-        launchStatusLabel.setText(label);
-        launchStatusLabel.getStyleClass().removeAll(
-                "home-status-ready", "home-status-progress",
-                "home-status-running", "home-status-error"
-        );
-        launchStatusLabel.getStyleClass().add(style);
+        setLaunchBadge(label, tone);
         launchStatusLabel.setAccessibleText(Localization.text("home.launchStatusPrefix") + label.toLowerCase());
     }
 
@@ -1050,7 +888,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                             ? LaunchService.LaunchState.ERROR
                             : aggregateState
             );
-            // Preparation/closing events only affect the status chip.
+            // Preparation/closing events only affect the status badge.
             // Avoid rescanning the instance directory for every transition.
             if (state == LaunchService.LaunchState.RUNNING
                     || state == LaunchService.LaunchState.IDLE

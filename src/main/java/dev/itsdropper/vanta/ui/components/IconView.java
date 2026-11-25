@@ -50,7 +50,17 @@ public final class IconView {
         SKIN,
         TERMINAL,
         EXPERIMENTAL,
-        ACTIVITY
+        ACTIVITY,
+        ALERT,
+        INFO,
+        CLOCK,
+        LIST_VIEW,
+        EXTERNAL,
+        SORT,
+        STAR,
+        SERVER,
+        IMAGE,
+        BOLT
     }
 
     private static final Set<Type> SOLID = EnumSet.of(Type.PLAY, Type.PAUSE, Type.MORE);
@@ -148,6 +158,26 @@ public final class IconView {
                     "M9.5 4h5M10.5 4v5.2L5.5 17.5A1.8 1.8 0 0 0 7 20h10a1.8 1.8 0 0 0 1.5-2.5L13.5 9.2V4M8 14.5h8";
             case ACTIVITY ->
                     "M3.5 12H7l2.5-6 4 12 2.5-6h4.5";
+            case ALERT ->
+                    "M10.3 4.6 3 17.5A2 2 0 0 0 4.7 20.5h14.6A2 2 0 0 0 21 17.5L13.7 4.6a2 2 0 0 0-3.4 0zM12 9.5v4M12 17v.01";
+            case INFO ->
+                    "M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17zM12 11v5.5M12 7.8v.01";
+            case CLOCK ->
+                    "M12 20.5a8.5 8.5 0 1 0 0-17 8.5 8.5 0 0 0 0 17zM12 7.5V12l3 2";
+            case LIST_VIEW ->
+                    "M4 6.5h16M4 12h16M4 17.5h16";
+            case EXTERNAL ->
+                    "M13.5 4.5h6v6M19.5 4.5 11 13M17 14v4.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 18.5v-9A1.5 1.5 0 0 1 6.5 8H11";
+            case SORT ->
+                    "M7 4.5v15M7 19.5 3.5 16M7 19.5 10.5 16M17 19.5v-15M17 4.5 13.5 8M17 4.5 20.5 8";
+            case STAR ->
+                    "M12 4l2.4 5 5.5.7-4 3.8 1 5.5L12 16.4 7.1 19l1-5.5-4-3.8 5.5-.7z";
+            case SERVER ->
+                    "M4.5 5h15v5.5h-15zM4.5 13.5h15V19h-15zM8 8v.01M8 16.2v.01";
+            case IMAGE ->
+                    "M5 4.5h14A1.5 1.5 0 0 1 20.5 6v12a1.5 1.5 0 0 1-1.5 1.5H5A1.5 1.5 0 0 1 3.5 18V6A1.5 1.5 0 0 1 5 4.5zM3.5 16l5-5 4.5 4.5 3-3 4.5 4.5M15.5 9.5v.01";
+            case BOLT ->
+                    "M13 3.5 5.5 13.5H12L11 20.5l7.5-10H12z";
         };
     }
 }

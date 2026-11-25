@@ -38,13 +38,10 @@ public final class InstanceCreationProgressDialog {
   // the rounded DialogPane surface define the visible window boundary.
   dialog.initStyle(StageStyle.UNDECORATED);
   if(owner!=null)dialog.initOwner(owner);
-  dialog.setOnShowing(event -> {Scene scene=dialog.getDialogPane().getScene();if(scene!=null)scene.setFill(Color.web("#141A22"));});
+  dialog.setOnShowing(event -> {Scene scene=dialog.getDialogPane().getScene();if(scene!=null)scene.setFill(Color.TRANSPARENT);});
   dialog.setTitle(Localization.text("instanceProgress.title"));dialog.setHeaderText(null);dialog.setResizable(false);
   dialog.getDialogPane().getStyleClass().add("instance-progress-dialog");
-  dialog.getDialogPane().getStylesheets().add(
-          InstanceCreationProgressDialog.class.getResource("/css/progress.css").toExternalForm());
-  dialog.getDialogPane().getStylesheets().add(
-          InstanceCreationProgressDialog.class.getResource("/css/vanta.css").toExternalForm());
+  dev.itsdropper.vanta.ui.Stylesheets.addTo(dialog.getDialogPane());
   dev.itsdropper.vanta.ui.ThemeManager.apply(dialog.getDialogPane(), dev.itsdropper.vanta.ui.ThemeManager.loadAccent());
   ButtonType closeType=new ButtonType(Localization.text("common.close"),ButtonBar.ButtonData.CANCEL_CLOSE);
   dialog.getDialogPane().getButtonTypes().setAll(closeType);

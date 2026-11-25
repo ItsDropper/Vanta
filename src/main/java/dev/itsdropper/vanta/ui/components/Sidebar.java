@@ -14,7 +14,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.SVGPath;
 
 import java.io.InputStream;
@@ -109,7 +108,6 @@ public class Sidebar extends VBox {
 
         SVGPath mark = new SVGPath();
         mark.setContent("M3 4h4.2L12 14.2 16.8 4H21L13.9 20h-3.8z");
-        mark.setFill(Color.web("#4C8DFF"));
         mark.getStyleClass().add("sidebar-mark");
         StackPane markBox = new StackPane(mark);
         markBox.setMinSize(24, 24);
@@ -145,10 +143,7 @@ public class Sidebar extends VBox {
         addButton(Page.MODS);
 
         addGroupGap();
-        addButton(Page.STATE);
-        addButton(Page.CRASH_LAB);
-        addButton(Page.SERVERS);
-        addButton(Page.DOWNLOADS);
+        addToolsGroup();
 
         addGroupGap();
         addButton(Page.SKIN);
@@ -251,7 +246,53 @@ public class Sidebar extends VBox {
         getChildren().add(gap);
     }
 
+    private static final java.util.List<Page> TOOL_PAGES =
+            java.util.List.of(Page.STATE, Page.CRASH_LAB, Page.SERVERS, Page.DOWNLOADS);
+
+    private VBox toolsBody;
+    private Button toolsToggle;
+    private SVGPath toolsChevron;
+    private boolean toolsOpen;
+
+    private void addToolsGroup() {
+        toolsChevron = new SVGPath();
+        toolsChevron.setContent("M2 3.5 L5 6.5 L8 3.5");
+        toolsChevron.getStyleClass().add("sidebar-chevron");
+        toolsChevron.setFill(null);
+
+        toolsToggle = new Button("Tools", toolsChevron);
+        toolsToggle.setContentDisplay(ContentDisplay.RIGHT);
+        toolsToggle.setGraphicTextGap(6);
+        toolsToggle.setMaxWidth(Double.MAX_VALUE);
+        toolsToggle.setAlignment(Pos.CENTER_LEFT);
+        toolsToggle.getStyleClass().add("sidebar-group-toggle");
+        toolsToggle.setAccessibleText("Tools. Toggle group.");
+        toolsToggle.setOnAction(event -> setToolsOpen(!toolsOpen));
+
+        toolsBody = new VBox(2);
+        toolsBody.getStyleClass().add("sidebar-group-body");
+        TOOL_PAGES.forEach(page -> addButton(page, toolsBody));
+
+        getChildren().addAll(toolsToggle, toolsBody);
+        setToolsOpen(false);
+    }
+
+    private void setToolsOpen(boolean open) {
+        toolsOpen = open;
+        boolean show = open || compact;
+        toolsBody.setVisible(show);
+        toolsBody.setManaged(show);
+        toolsChevron.setRotate(open ? 0 : -90);
+        toolsToggle.setVisible(!compact);
+        toolsToggle.setManaged(!compact);
+        toolsToggle.setAccessibleText("Tools, " + (open ? "expanded" : "collapsed"));
+    }
+
     private void addButton(Page page) {
+        addButton(page, null);
+    }
+
+    private void addButton(Page page, VBox container) {
 
         Button button =
                 new Button(
@@ -301,9 +342,11 @@ public class Sidebar extends VBox {
                 }
         );
 
-        getChildren().add(
-                button
-        );
+        if (container != null) {
+            container.getChildren().add(button);
+        } else {
+            getChildren().add(button);
+        }
     }
 
     /**
@@ -315,6 +358,9 @@ public class Sidebar extends VBox {
             return;
         }
         this.compact = compact;
+        if (toolsBody != null) {
+            setToolsOpen(toolsOpen);
+        }
 
         if (compact) {
             getStyleClass().add("sidebar-compact");
@@ -377,6 +423,10 @@ public class Sidebar extends VBox {
                     .remove(
                             "sidebar-button-active"
                     );
+        }
+
+        if (toolsBody != null && TOOL_PAGES.contains(selectedPage) && !toolsOpen) {
+            setToolsOpen(true);
         }
 
         Button selectedButton =

@@ -1,943 +1,581 @@
-/* Vanta darkroom design system — application shell.
- * Consolidated from: sidebar.css, login.css, title-bar.css, command-palette.css, loading.css.
- * Original selector definitions retained in source order for compatibility.
- */
+/* ==========================================================================
+   Vanta shell
+   --------------------------------------------------------------------------
+   Everything that frames the pages: the window, title bar, sidebar, command
+   palette, account menu, sign-in window, loading screen and notifications.
+   ========================================================================== */
 
-.sidebar {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 14px;
+/* ---------- window ---------------------------------------------------------- */
 
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 14px;
+.launcher {
+    -fx-background-color: -v-frame;
+    -fx-background-radius: 12;
+    -fx-border-color: -v-hair-strong;
+    -fx-border-radius: 12;
+    -fx-border-width: 1;
+    -fx-font-family: "Geist";
 }
 
-.sidebar-logo {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 24px; -fx-font-family: "Poppins SemiBold";}
-
-.sidebar-subtitle {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-.sidebar-button {
+.content {
     -fx-background-color: transparent;
-    -fx-background-radius: 10px;
-
-    -fx-text-fill: -vantamuted;
-
-    -fx-font-size: 11px;
-    
-
-    -fx-padding: 12px 14px; -fx-font-family: "Poppins Medium";}
-
-.sidebar-button:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-text-fill: -vantatext;
 }
 
-.sidebar-button:pressed {
-    -fx-background-color: -vantasurfaceraised;
+/* The page sheet: one inset panel that every view lives on. */
+.app-content {
+    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
 }
 
-.sidebar-button-active,
-.sidebar-button-active:hover {
-    -fx-background-color: -vantaaccentsoft;
-
-    -fx-border-color: transparent transparent transparent -vantaaccent;
-    -fx-border-width: 0 0 0 3px;
-    -fx-border-radius: 10px;
-
-    -fx-text-fill: -vantatext;
-}
-
-/* =========================================================
-   VANTA LOGIN WINDOW
-   ========================================================= */
-
-.login-window {
-    -fx-background-color: -vantabg;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-
-/* =========================================================
-   LOGO
-   ========================================================= */
-
-.login-logo {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 17px; -fx-font-family: "Poppins SemiBold";}
-
-
-/* =========================================================
-   TITLE
-   ========================================================= */
-
-.login-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 25px; -fx-font-family: "Poppins SemiBold";}
-
-
-/* =========================================================
-   SUBTITLE
-   ========================================================= */
-
-.login-subtitle {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px;
-}
-
-
-/* =========================================================
-   INSTRUCTIONS
-   ========================================================= */
-
-.login-instruction {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-}
-
-
-/* =========================================================
-   VERIFICATION CODE
-   ========================================================= */
-
-.verification-code {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-
-    -fx-text-fill: -vantatext;
-
-    -fx-font-size: 26px;
-    
-
-    -fx-padding: 13px 20px;
-
-    -fx-alignment: CENTER;
-
-    -fx-effect: none; -fx-font-family: "Poppins SemiBold";}
-
-
-/* =========================================================
-   CODE HOVER / FOCUS
-   ========================================================= */
-
-.verification-code:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: -vantaborder;
-}
-
-.verification-code:focused {
-    -fx-border-color: -vantaaccent;
-}
-
-
-/* =========================================================
-   STATUS
-   ========================================================= */
-
-.login-status {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-}
-
-
-/* =========================================================
-   SUCCESS / ACTIVE STATUS
-   ========================================================= */
-
-.login-status.active {
-    -fx-text-fill: -vantasuccess;
-}
-
-.login-status.error {
-    -fx-text-fill: -vantadanger;
-}
-
-
-/* =========================================================
-   MODERN LOGIN SURFACE
-   ========================================================= */
-
-.login-window {
-    -fx-background-color: -vantabg;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-}
-
-.login-title-bar {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: transparent transparent -vantaborder transparent;
-    -fx-border-width: 0 0 1px 0;
-    -fx-padding: 10px 12px 10px 16px;
-}
-
-.login-title-bar-text {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-.login-title-bar-close {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-text-fill: -vantamuted;
-    -fx-padding: 5px 8px;
-}
-
-.login-title-bar-close:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-text-fill: -vantatext;
-}
-
-.login-logo {
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 13px; -fx-font-family: "Poppins Medium";}
-
-.login-step {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-background-radius: 6px;
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 5px 8px; -fx-font-family: "Poppins Medium";}
-
-.login-title {
-    -fx-font-size: 24px; -fx-font-family: "Poppins SemiBold";}
-
-.login-subtitle {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-}
-
-.login-instruction {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
-}
-
-.verification-code {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-    -fx-background-radius: 10px;
-    -fx-border-radius: 10px;
-    -fx-font-size: 25px;
-    -fx-padding: 12px 18px;
-}
-
-.secondary-button {
-    -fx-min-height: 40px;
-}
-
-.primary-button {
-    -fx-min-height: 40px;
-}
-
-.login-status {
-    -fx-text-fill: -vantamuted;
-    -fx-padding: 3px 0 0 0;
-}
-
-
-/* =========================================================
-   VANTA TITLE BAR
-   ========================================================= */
+/* ---------- title bar ---------------------------------------------------------- */
 
 .title-bar {
-    -fx-background-color: -vantabg;
-
-    -fx-min-height: 40px;
-    -fx-pref-height: 40px;
-    -fx-max-height: 40px;
-
-    -fx-background-radius: 8px 8px 0 0;
-
-    -fx-padding: 0 5px 0 12px;
+    -fx-padding: 8px 10px 6px 12px;
+    -fx-spacing: 4px;
+    -fx-min-height: 46px;
+    -fx-alignment: center-right;
 }
-
-
-/* =========================================================
-   WINDOW BUTTONS
-   ========================================================= */
 
 .title-bar-button,
 .title-bar-close {
-
     -fx-background-color: transparent;
-
-    -fx-min-width: 44px;
-    -fx-pref-width: 44px;
-    -fx-max-width: 44px;
-
-    -fx-min-height: 32px;
-    -fx-pref-height: 32px;
-    -fx-max-height: 32px;
-
+    -fx-background-insets: 0;
+    -fx-background-radius: 7;
+    -fx-min-width: 36px;
+    -fx-pref-width: 36px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
     -fx-padding: 0;
-
-    -fx-background-radius: 6px;
+    -fx-cursor: hand;
 }
 
+.title-bar-button:hover {
+    -fx-background-color: -v-hair-strong;
+}
 
-/* =========================================================
-   NORMAL ICONS
-   ========================================================= */
+.title-bar-close:hover {
+    -fx-background-color: -vantadanger;
+}
+
+.title-bar-button:focused,
+.title-bar-close:focused {
+    -fx-border-width: 0;
+}
 
 .title-bar-button SVGPath,
 .title-bar-close SVGPath {
-
     -fx-fill: transparent;
-
     -fx-stroke: -vantamuted;
-
-    -fx-stroke-width: 1.25px;
-
-    -fx-stroke-line-cap: ROUND;
-
-    -fx-stroke-line-join: ROUND;
+    -fx-stroke-width: 1.3px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
 }
 
-
-/* =========================================================
-   HOVER
-   ========================================================= */
-
-.title-bar-button:hover {
-
-    -fx-background-color: -vantasurfacehover;
-}
-
-.title-bar-button:hover SVGPath {
-
-    -fx-stroke: -vantatext;
-}
-
-
-/* =========================================================
-   CLOSE
-   ========================================================= */
-
-.title-bar-close:hover {
-
-    -fx-background-color: -vantadanger;
-}
-
+.title-bar-button:hover SVGPath,
 .title-bar-close:hover SVGPath {
-
     -fx-stroke: -vantatext;
 }
 
-
-/* =========================================================
-   PRESS
-   ========================================================= */
-
-.title-bar-button:pressed {
-
-    -fx-background-color: -vantasurfaceraised;
+.title-bar-update {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 20, 19;
+    -fx-padding: 0 12px;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-cursor: hand;
 }
 
-.title-bar-close:pressed {
-
-    -fx-background-color: -vantadanger;
+.title-bar-update:hover {
+    -fx-background-color: -vantaaccent-a55, -vantaaccent-a18;
 }
 
-/* =========================================================
-   ACCOUNT SWITCHER
-   ========================================================= */
+/* ---------- account chip ---------------------------------------------------------- */
 
 .account-switcher {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-
+    -fx-background-color: -v-hair, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 9, 8;
+    -fx-padding: 0 10px 0 6px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
+    -fx-spacing: 8px;
+    -fx-alignment: center-left;
     -fx-cursor: hand;
 }
 
 .account-switcher:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -v-hair-strong, -v-card-hover;
 }
-
-.account-switcher:pressed {
-    -fx-background-color: -vantasurfaceraised;
-}
-
-
-/* Player head */
 
 .account-switcher-head {
-    -fx-background-radius: 4px;
+    -fx-background-radius: 6;
 }
-
-
-/* Username */
 
 .account-switcher-name {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12.5px;
     -fx-text-fill: -vantatext;
-
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-
-/* Arrow */
+}
 
 .account-switcher-arrow {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 9px;
+    -fx-text-fill: -vantasubtle;
 }
 
-
-/* =========================================================
-   ACCOUNT POPUP
-   ========================================================= */
+.account-switcher-busy {
+    -fx-opacity: 0.6;
+}
 
 .account-popup {
-    -fx-background-color: -vantabg;
-
-    -fx-background-radius: 11px;
-
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 11px;
-
-    -fx-min-width: 270px;
-    -fx-pref-width: 270px;
-
-    -fx-effect:
-            dropshadow(
-                    gaussian,
-                    rgba(0, 0, 0, 0.55),
-                    22,
-                    0.18,
-                    0,
-                    7
-            );
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-padding: 6px;
+    -fx-spacing: 2px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 28, 0.1, 0, 10);
 }
 
-
-/* Header */
-
 .account-popup-header {
-    -fx-text-fill: -vantamuted;
-
-    -fx-font-size: 11px;
-    
-
-    -fx-padding: 1px 4px 6px 4px; -fx-font-family: "Poppins Medium";}
-
-
-/* =========================================================
-   ACCOUNT ROW
-   ========================================================= */
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantasubtle;
+    -fx-padding: 8px 10px 4px 10px;
+}
 
 .account-popup-account {
     -fx-background-color: transparent;
-
-    -fx-background-radius: 8px;
-
-    -fx-padding: 7px;
-
+    -fx-background-radius: 8;
+    -fx-padding: 8px 10px;
+    -fx-spacing: 10px;
+    -fx-alignment: center-left;
     -fx-cursor: hand;
 }
 
 .account-popup-account:hover {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-hair-strong;
 }
-
-.account-popup-account.active {
-    -fx-background-color: -vantasurface;
-}
-
-.account-popup-account.active:hover {
-    -fx-background-color: -vantasurfacehover;
-}
-
-
-/* Head */
-
-.account-popup-head {
-    -fx-background-radius: 5px;
-}
-
-
-/* Username */
-
-.account-popup-username {
-    -fx-text-fill: -vantatext;
-
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-
-
-/* Active */
 
 .account-popup-active {
-    -fx-text-fill: -vantasuccess;
+    -fx-background-color: -vantaaccent-a10;
+}
 
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
+.account-popup-username {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantatext;
+}
 
-
-/* =========================================================
-   SEPARATOR
-   ========================================================= */
+.account-popup-head {
+    -fx-background-radius: 6;
+}
 
 .account-popup-separator {
-    -fx-background-color: -vantasurfacehover;
-
+    -fx-background-color: -v-hair;
     -fx-min-height: 1px;
     -fx-pref-height: 1px;
     -fx-max-height: 1px;
-
-    -fx-margin: 3px 0;
 }
-
-
-/* =========================================================
-   ADD ACCOUNT
-   ========================================================= */
 
 .account-popup-add {
     -fx-background-color: transparent;
-
-    -fx-background-radius: 8px;
-
-    -fx-padding: 8px;
-
+    -fx-background-radius: 8;
+    -fx-padding: 8px 10px;
+    -fx-spacing: 10px;
+    -fx-alignment: center-left;
     -fx-cursor: hand;
-
-    -fx-alignment: CENTER_LEFT;
 }
 
 .account-popup-add:hover {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-hair-strong;
 }
 
 .account-popup-plus {
-    -fx-text-fill: -vantamuted;
-
-    -fx-font-size: 17px; -fx-font-family: "Poppins";}
+    -fx-font-size: 16px;
+    -fx-text-fill: -vantaaccent;
+}
 
 .account-popup-add-text {
-    -fx-text-fill: -vantamuted;
-
-    -fx-font-size: 11px;
-}
-
-.account-popup-add:hover .account-popup-plus {
-    -fx-text-fill: -vantasuccess;
-}
-
-.account-popup-add:hover .account-popup-add-text {
-    -fx-text-fill: -vantatext;
-}
-
-/* =========================================================
-   UPDATE BUTTON
-   ========================================================= */
-
-.title-bar-update {
-    -fx-background-color: -vantasurface;
-
-    -fx-text-fill: -vantasuccess;
-
-    -fx-font-size: 11px;
-    
-
-    -fx-padding: 0 11px;
-
-    -fx-min-height: 28px;
-    -fx-pref-height: 28px;
-    -fx-max-height: 28px;
-
-    -fx-background-radius: 7px;
-
-    -fx-border-color: -vantaaccentsoft;
-    -fx-border-width: 1px;
-    -fx-border-radius: 7px;
-
-    -fx-cursor: hand; -fx-font-family: "Poppins SemiBold";}
-
-.title-bar-update:hover {
-    -fx-background-color: -vantasurface;
-
-    -fx-text-fill: -vantasuccess;
-
-    -fx-border-color: -vantaborder;
-}
-
-.title-bar-update:pressed {
-    -fx-background-color: -vantasurfacehover;
-
-    -fx-border-color: -vantaborder;
-}
-
-.command-palette-overlay {
-    -fx-background-color: transparent;
-}
-.command-palette-scrim {
-    -fx-fill: rgba(3, 6, 12, 0.76);
-}
-.command-palette-panel {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 8px;
-    -fx-border-color: derive(-vantaborder, 15%);
-    -fx-border-radius: 8px;
-    -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.48), 34, 0.16, 0, 12);
-}
-.command-palette-eyebrow {
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.command-palette-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 21px; -fx-font-family: "Poppins SemiBold";}
-.command-palette-search {
-    -fx-background-color: -vantasurface;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantasubtle;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 9px;
-    -fx-background-radius: 9px;
-    -fx-padding: 13px 14px;
+    -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-}
-.command-palette-search:focused { -fx-border-color: -vantaaccent; }
-.command-palette-results { -fx-spacing: 4px; }
-.command-result {
-    -fx-background-color: transparent;
-    -fx-background-radius: 9px;
-    -fx-border-color: transparent;
-    -fx-padding: 10px 12px;
-    -fx-cursor: hand;
-}
-.command-result:hover, .command-result-selected {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: derive(-vantaaccent, -50%);
-    -fx-border-radius: 9px;
-}
-.command-result-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 12px; -fx-font-family: "Poppins SemiBold";}
-.command-result-description {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
 }
-.command-result-shortcut {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.command-palette-empty {
-    -fx-text-fill: -vantamuted;
-    -fx-padding: 18px 10px;
-    -fx-font-size: 12px;
+
+/* ---------- sidebar ------------------------------------------------------------------ */
+
+.sidebar {
+    -fx-background-color: -v-frame;
+    -fx-spacing: 2px;
 }
-.command-palette-footer {
-    -fx-border-color: -vantaborder transparent transparent transparent;
-    -fx-border-width: 1px 0 0 0;
-    -fx-padding: 12px 0 0 0;
-}
-.command-palette-key {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 5px;
-    -fx-background-radius: 5px;
-    -fx-padding: 3px 6px;
+
+.sidebar-logo {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 16px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.command-palette-hint {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
 }
 
-.command-palette-scroll,
-.command-palette-scroll > .viewport {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-    -fx-border-color: transparent;
-}
-.command-palette-scroll {
-    -fx-padding: 0;
-    -fx-max-height: 360px;
-}
-.command-palette-scroll .scroll-bar:vertical {
-    -fx-background-color: transparent;
-    -fx-padding: 0 0 0 4px;
-}
-.command-palette-scroll .scroll-bar:vertical .thumb {
-    -fx-background-color: -vantaborder;
-    -fx-background-radius: 99px;
-}
-.command-palette-scroll .scroll-bar:vertical .thumb:hover {
-    -fx-background-color: -vantamuted;
-}
-
-
-/* Deluxe presentation: give the command surface a distinct layered treatment. */
-.overengineered-ui .command-palette-panel {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaaccent, -58%), derive(-vantaborder, 22%);
-    -fx-border-width: 1px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.58), 42, 0.2, 0, 16);
-}
-.overengineered-ui .command-palette-search {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaborder, 24%);
-    -fx-border-width: 1px;
-}
-.overengineered-ui .command-palette-search:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-effect: dropshadow(gaussian, derive(-vantaaccent, -58%), 14, 0.2, 0, 0);
-}
-.overengineered-ui .command-result-selected,
-.overengineered-ui .command-result:hover {
-    -fx-background-color: -vantasurface;
-    -fx-border-color: derive(-vantaaccent, -35%);
-    -fx-effect: none;
-}
-
-
-.vanta-loading {
-    -fx-background-color:
-        -vantasurface;
-    -fx-background-radius: 14px;
-}
-
-.loading-content {
-    -fx-translate-y: 2px;
-}
-
-.loading-mark {
+.sidebar-mark {
     -fx-fill: -vantaaccent;
-    -fx-effect: none;
 }
-
-.loading-logo {
-    -fx-text-fill: -vantatext;
-    
-    -fx-font-size: 28px; -fx-font-family: "Poppins SemiBold";}
-
-.loading-subtitle {
-    -fx-text-fill: -vantamuted;
-    
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-.loading-status {
-    -fx-padding: 14px 0 2px 0;
-    -fx-text-fill: -vantamuted;
-    
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-
-.loading-progress-track {
-    -fx-pref-width: 280px;
-    -fx-max-width: 280px;
-    -fx-pref-height: 4px;
-    -fx-max-height: 4px;
-    -fx-background-color: -vantaborder;
-    -fx-background-radius: 4px;
-    -fx-border-radius: 4px;
-}
-
-.loading-progress-fill {
-    -fx-pref-height: 4px;
-    -fx-max-height: 4px;
-    -fx-background-color: -vantaaccent;
-    -fx-background-radius: 4px;
-    -fx-border-radius: 4px;
-    -fx-effect: none;
-}
-
-
-/* Vanta navigation rail: quieter, sharper, and visually separate from content. */
-.sidebar {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 10px;
-    -fx-border-width: 1px;
-}
-.sidebar-logo {
-    -fx-font-size: 25px; -fx-font-family: "Poppins SemiBold";}
-.sidebar-subtitle {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-    }
-.sidebar-section-label {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-.sidebar-button {
-    -fx-background-color: transparent;
-    -fx-background-radius: 6px;
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    
-    -fx-padding: 10px 11px; -fx-font-family: "Poppins Medium";}
-.sidebar-button:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
-}
-.sidebar-button-active, .sidebar-button-active:hover {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: transparent transparent transparent -vantaaccent;
-    -fx-border-width: 0 0 0 2px;
-    -fx-border-radius: 6px;
-    -fx-text-fill: -vantatext;
-}
-.sidebar-build {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-
-/* Navigation rail — fixed-width desktop hierarchy. */
-.sidebar {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-.sidebar-logo {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 23px; -fx-font-family: "Poppins SemiBold";}
-
-.sidebar-subtitle {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-.sidebar-section-label {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
 
 .sidebar-button {
     -fx-background-color: transparent;
-    -fx-background-radius: 6px;
-    -fx-border-color: transparent;
-    -fx-border-width: 0 0 0 2px;
-    -fx-border-radius: 6px;
+    -fx-background-insets: 0;
+    -fx-background-radius: 9;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    
-    -fx-padding: 11px 12px;
-    -fx-min-height: 42px;
-    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-padding: 0 12px;
+    -fx-min-height: 36px;
+    -fx-pref-height: 36px;
+    -fx-alignment: center-left;
+    -fx-cursor: hand;
+    -vantaicon: -vantasubtle;
+}
 
 .sidebar-button:hover {
-    -fx-background-color: -vantasurfacehover;
+    -fx-background-color: -v-hair;
     -fx-text-fill: -vantatext;
+    -vantaicon: -vantamuted;
+}
+
+.sidebar-button:armed {
+    -fx-translate-y: 0;
 }
 
 .sidebar-button:focused {
-    -fx-border-color: transparent transparent transparent -vantaaccent;
+    -fx-border-color: -vantaaccent-a55;
+    -fx-border-width: 2px;
+    -fx-border-radius: 10px;
+    -fx-border-insets: -1px;
 }
 
 .sidebar-button-active,
 .sidebar-button-active:hover {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: transparent transparent transparent -vantaaccent;
-    -fx-border-width: 0 0 0 2px;
-    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -v-hair-strong, derive(-vantasurfaceraised, 2%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 9, 8;
+    -fx-text-fill: -vantatext;
+    -vantaicon: -vantaaccent;
+}
+
+.sidebar-button .vanta-icon,
+.sidebar-button:hover .vanta-icon {
+    -fx-stroke: -vantaicon;
+}
+
+.sidebar-compact .sidebar-button {
+    -fx-padding: 0;
+    -fx-alignment: center;
 }
 
 .sidebar-build {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-
-.sidebar-compact {
-    -fx-background-radius: 8px;
-}
-
-/* Vanta navigation rail.
-   The active destination is the only persistent accent; everything else stays quiet. */
-.root .sidebar {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-.root .sidebar .sidebar-logo {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 25px; -fx-font-family: "Poppins SemiBold";}
-
-.root .sidebar .sidebar-subtitle {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-.root .sidebar .sidebar-section-label {
-    -fx-text-fill: -vantasubtle;
+    -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11px;
-    
-    -fx-padding: 0 0 2px 2px; -fx-font-family: "Poppins Medium";}
+    -fx-text-fill: -vantasubtle;
+    -fx-padding: 8px 12px 0 12px;
+}
 
-.root .sidebar .sidebar-button {
+/* ---------- command palette -------------------------------------------------------------- */
+
+.command-palette-overlay {
     -fx-background-color: transparent;
-    -fx-background-radius: 8px;
-    -fx-border-color: transparent;
-    -fx-border-width: 0 0 0 3px;
-    -fx-border-radius: 8px;
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-    
-    -fx-padding: 10px 12px;
-    -fx-min-height: 42px;
-    -fx-cursor: hand; -fx-font-family: "Poppins Medium";}
+}
 
-.root .sidebar .sidebar-button:hover {
-    -fx-background-color: -vantasurfacehover;
+.command-palette-scrim {
+    -fx-background-color: -v-scrim;
+}
+
+.command-palette-panel {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.65), 40, 0.1, 0, 16);
+}
+
+.command-palette-eyebrow {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantasubtle;
+}
+
+.command-palette-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 15px;
     -fx-text-fill: -vantatext;
 }
 
-.root .sidebar .sidebar-button:pressed {
-    -fx-background-color: -vantasurfaceraised;
-}
-
-.root .sidebar .sidebar-button:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 1px;
-}
-
-.root .sidebar .sidebar-button.sidebar-button-active,
-.root .sidebar .sidebar-button.sidebar-button-active:hover {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: transparent transparent transparent -vantaaccent;
-    -fx-border-width: 0 0 0 3px;
-    -fx-text-fill: -vantaaccent; -fx-font-family: "Poppins Medium";}
-
-.root .sidebar .sidebar-button.sidebar-button-active:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 1px;
-}
-
-.root .sidebar .sidebar-build {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px; -fx-font-family: "Poppins Medium";}
-
-.root .sidebar.sidebar-compact .sidebar-logo {
-    -fx-font-size: 23px;
-}
-
-.root .sidebar.sidebar-compact .sidebar-button {
-    -fx-padding: 10px 0;
+.command-palette-search {
+    -fx-font-size: 15px;
     -fx-min-height: 44px;
-    -fx-background-radius: 10px;
-    -fx-border-width: 0;
+    -fx-pref-height: 44px;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0 16px;
+    -fx-border-color: transparent transparent -v-hair transparent;
 }
 
-.root .sidebar.sidebar-compact .sidebar-button:focused,
-.root .sidebar.sidebar-compact .sidebar-button.sidebar-button-active:focused {
-    -fx-border-color: -vantaaccent;
-    -fx-border-width: 1px;
+.command-palette-search:focused {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent -vantaaccent-a55 transparent;
 }
 
-.root .sidebar.sidebar-compact .sidebar-button.sidebar-button-active,
-.root .sidebar.sidebar-compact .sidebar-button.sidebar-button-active:hover {
-    -fx-border-width: 0;
-    -fx-background-color: -vantaaccentsoft;
+.command-palette-scroll,
+.command-palette-results {
+    -fx-background-color: transparent;
+    -fx-padding: 6px;
+    -fx-spacing: 2px;
+}
+
+.command-result {
+    -fx-background-color: transparent;
+    -fx-background-radius: 9;
+    -fx-padding: 9px 12px;
+    -fx-spacing: 12px;
+    -fx-alignment: center-left;
+    -fx-cursor: hand;
+}
+
+.command-result:hover,
+.command-result-selected {
+    -fx-background-color: -v-hair-strong;
+}
+
+.command-result-selected {
+    -fx-background-color: -vantaaccent-a10;
+}
+
+.command-result-title {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13.5px;
+    -fx-text-fill: -vantatext;
+}
+
+.command-result-description {
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+.command-result-shortcut,
+.command-palette-key {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 11px;
+    -fx-text-fill: -vantasubtle;
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 5, 4;
+    -fx-padding: 2px 6px;
+}
+
+.command-palette-empty,
+.command-palette-hint {
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantamuted;
+    -fx-padding: 18px;
+}
+
+.command-palette-footer {
+    -fx-padding: 10px 16px;
+    -fx-spacing: 14px;
+    -fx-border-color: -v-hair transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+}
+
+/* ---------- sign-in window ------------------------------------------------------------------ */
+
+.login-window {
+    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
+}
+
+.login-title-bar {
+    -fx-padding: 8px 10px 0 16px;
+    -fx-min-height: 40px;
+}
+
+.login-title-bar-text {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -vantamuted;
+}
+
+.login-title-bar-close {
+    -fx-background-color: transparent;
+    -fx-background-radius: 7;
+    -fx-min-width: 30px;
+    -fx-min-height: 26px;
+    -fx-padding: 0;
+}
+
+.login-title-bar-close:hover {
+    -fx-background-color: -vantadanger;
+}
+
+.login-logo,
+.loading-mark {
+    -fx-fill: -vantaaccent;
+}
+
+.login-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 22px;
+    -fx-text-fill: -vantatext;
+}
+
+.login-subtitle,
+.login-instruction {
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantamuted;
+}
+
+.login-step {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantaaccent;
+}
+
+.login-status {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -vantamuted;
+}
+
+.verification-code {
+    -fx-font-family: "JetBrains Mono Medium";
+    -fx-font-size: 30px;
+    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-padding: 14px 22px;
+}
+
+/* ---------- loading screen --------------------------------------------------------------------- */
+
+.vanta-loading {
+    -fx-background-color: -v-frame;
+    -fx-background-radius: 12;
+    -fx-border-color: -v-hair-strong;
+    -fx-border-radius: 12;
+}
+
+.loading-content {
+    -fx-spacing: 14px;
+    -fx-alignment: center;
+}
+
+.loading-logo {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 26px;
+    -fx-text-fill: -vantatext;
+}
+
+.loading-subtitle {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -vantasubtle;
+}
+
+.loading-status {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 11px;
+    -fx-text-fill: -vantamuted;
+}
+
+.loading-progress-track {
+    -fx-background-color: -v-hair;
+    -fx-background-radius: 3;
+}
+
+.loading-progress-fill {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 3;
+}
+
+/* ---------- notifications ------------------------------------------------------------------------ */
+
+.notification-accent,
+.notification-accent-progress {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 3;
+}
+
+.notification-accent-success {
+    -fx-background-color: -vantasuccess;
+}
+
+.notification-accent-error {
+    -fx-background-color: -vantadanger;
+}
+
+.notification-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantatext;
+}
+
+.notification-message {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -vantamuted;
+}
+
+.notification-message-error {
+    -fx-text-fill: derive(-vantadanger, 25%);
+}
+
+.notification-close {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-text-fill: -vantasubtle;
+    -fx-min-width: 24px;
+    -fx-min-height: 24px;
+    -fx-padding: 0;
+}
+
+.notification-close:hover {
+    -fx-background-color: -v-hair-strong;
+    -fx-text-fill: -vantatext;
+}
+
+.notification-progress > .bar {
+    -fx-background-color: -vantaaccent;
+}
+
+/* ---------- backdrop ------------------------------------------------------------------------------- */
+
+.minecraft-backdrop {
+    -fx-background-radius: 12;
+}
+
+.button.sidebar-group-toggle {
+    -fx-alignment: center-left;
+    -fx-background-color: transparent;
+    -fx-text-fill: -vantasubtle;
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-padding: 6 12;
+    -fx-cursor: hand;
+}
+
+.button.sidebar-group-toggle:hover {
+    -fx-text-fill: -vantatext;
+}
+
+.button.sidebar-group-toggle:focused {
+    -fx-border-color: -vantaaccent-a55;
+    -fx-border-width: 2px;
+    -fx-border-radius: 8px;
+    -fx-border-insets: -1px;
+}
+
+.sidebar-chevron {
+    -fx-stroke: -vantasubtle;
+    -fx-stroke-width: 1.4px;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: round;
+}
+
+.sidebar-group-body {
+    -fx-padding: 0;
 }

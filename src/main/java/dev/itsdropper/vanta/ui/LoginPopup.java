@@ -388,45 +388,7 @@ public class LoginPopup {
             // CSS
             // -----------------------------------------------------
 
-            URL loginCss =
-                    LoginPopup.class.getResource(
-                            "/css/shell.css"
-                    );
-
-            if (loginCss == null) {
-
-                throw new IllegalStateException(
-                        "Could not find /css/shell.css"
-                );
-            }
-
-            scene.getStylesheets().add(
-                    loginCss.toExternalForm()
-            );
-
-            URL buttonsCss =
-                    LoginPopup.class.getResource(
-                            "/css/base.css"
-                    );
-
-            if (buttonsCss != null) {
-
-                scene.getStylesheets().add(
-                        buttonsCss.toExternalForm()
-                );
-            }
-
-            URL designCss =
-                    LoginPopup.class.getResource(
-                            "/css/vanta.css"
-                    );
-
-            if (designCss != null) {
-
-                scene.getStylesheets().add(
-                        designCss.toExternalForm()
-                );
-            }
+            Stylesheets.addTo(scene);
 
             // -----------------------------------------------------
             // SHOW

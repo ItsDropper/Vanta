@@ -1,204 +1,94 @@
-/* Vanta home — the next session, not a marketing dashboard.
- * Colours come from the theme tokens; shared control and type styling lives in vanta.css.
- */
+/* ==========================================================================
+   Home: a hero for the last played instance, a compact list of recent
+   instances and servers, and quick actions. Built from the kit; only the
+   structure unique to Home is defined here.
+   ========================================================================== */
 
-.home-page {
+.home-content-scroll,
+.home-content-scroll > .viewport {
     -fx-background-color: transparent;
 }
 
-.home-page .home-header {
-    -fx-alignment: center-left;
-    -fx-padding: 0 0 4px 0;
-}
-
-.home-page .home-launch-indicator {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-padding: 0 12px 0 0;
-    -fx-font-size: 12px; -fx-font-family: "Poppins Medium";}
-
-.home-page .home-status-ready { -fx-text-fill: -vantasuccess; }
-.home-page .home-status-running { -fx-text-fill: -vantaaccent; }
-.home-page .home-status-progress { -fx-text-fill: -vantamuted; }
-.home-page .home-status-error { -fx-text-fill: -vantadanger; }
-
-.home-page .home-featured-section,
-.home-page .home-featured-container,
-.home-page .home-activity-layout,
-.home-page .home-recent-list,
-.home-page .home-server-list {
-    -fx-background-color: transparent;
-}
-
-.home-page .home-featured-loading {
+.home-muted {
+    -fx-font-family: "Geist";
+    -fx-font-size: 12px;
     -fx-text-fill: -vantamuted;
+}
+
+/* ---------- hero ------------------------------------------------------------ */
+
+.home-hero {
+    -fx-background-color:
+        -v-hair-strong,
+        -v-card,
+        linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 14, 13, 13;
+}
+
+.home-hero-art {
+    -fx-padding: 8px;
+}
+
+.home-hero-name {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 22px;
+    -fx-text-fill: -vantatext;
+}
+
+.home-stat-label {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+.home-stat-value {
+    -fx-font-family: "JetBrains Mono Medium";
+    -fx-font-size: 15px;
+    -fx-text-fill: -vantatext;
+}
+
+.home-play {
+    -fx-min-width: 150px;
+}
+
+/* ---------- recent lists ---------------------------------------------------- */
+
+.home-panel {
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+}
+
+.home-row {
+    -fx-background-color: transparent;
+    -fx-background-radius: 9;
+    -fx-cursor: hand;
+}
+
+.home-row:hover {
+    -fx-background-color: -v-card-hover;
+}
+
+.home-row:focused {
+    -fx-background-color: -vantaaccent-a30, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 9, 8;
+}
+
+.home-row-name {
+    -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-padding: 24px;
-}
-
-/* Featured instance: one card, accent edge marks "continue here". */
-.home-page .home-featured-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaline -vantaline -vantaline -vantaaccent;
-    -fx-border-width: 1px 1px 1px 2px;
-    -fx-border-radius: 8px;
-}
-
-.home-page .home-featured-card:hover {
-    -fx-background-color: -vantasurfaceraised;
-}
-
-.home-page .home-featured-icon-frame {
-    -fx-background-color: -vantabg;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaline;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-.home-page .home-featured-eyebrow {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px; -fx-font-family: "Poppins SemiBold";}
-
-.home-page .home-featured-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 20px; -fx-font-family: "Poppins SemiBold";}
-
-.home-page .home-featured-meta {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px; -fx-font-family: "Poppins";}
-
-.home-page .home-featured-playtime {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 12px;
 }
 
-.home-page .home-recent-section {
-    -fx-spacing: 8px;
+.home-row-play {
+    -fx-min-width: 30px;
+    -fx-pref-width: 30px;
+    -fx-min-height: 30px;
+    -fx-pref-height: 30px;
 }
 
-.home-page .home-section-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
-
-.home-page .home-section-subtitle {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-}
-
-.home-page .home-recent-card,
-.home-page .home-server-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaline;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-.home-page .home-recent-card:hover,
-.home-page .home-server-card:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantalinestrong;
-}
-
-.home-page .home-recent-icon {
-    -fx-background-color: -vantabg;
-    -fx-background-radius: 6px;
-    -fx-border-color: -vantaline;
-    -fx-border-width: 1px;
-    -fx-border-radius: 6px;
-}
-
-.home-page .home-recent-name,
-.home-page .home-server-name {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 13px; -fx-font-family: "Poppins SemiBold";}
-
-.home-page .home-recent-meta,
-.home-page .home-server-meta {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 12px;
-}
-
-.home-page .home-recent-playtime,
-.home-page .home-recent-status {
-    -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
-}
-
-.home-page .home-recent-card .home-recent-play,
-.home-page .home-server-card .home-recent-play {
-    -fx-background-color: -vantaaccent;
-    -fx-background-radius: 6px;
-    -fx-border-color: transparent;
-    -fx-border-width: 1px;
-    -fx-border-radius: 6px;
-    -fx-text-fill: -vantaaccentforeground;
-    -fx-font-size: 12px;
-    
-    -fx-padding: 0 14px; -fx-font-family: "Poppins Medium";}
-
-.home-page .home-recent-card .home-recent-play:hover,
-.home-page .home-server-card .home-recent-play:hover {
-    -fx-background-color: -vantaaccenthover;
-}
-
-.home-page .home-recent-card .home-recent-stop,
-.home-page .home-server-card .home-recent-stop {
-    -fx-background-color: -vantadangerwash;
-    -fx-background-radius: 6px;
-    -fx-border-color: -vantadangerline;
-    -fx-border-width: 1px;
-    -fx-border-radius: 6px;
-    -fx-text-fill: -vantadanger;
-    -fx-font-size: 12px;
-    
-    -fx-padding: 0 14px; -fx-font-family: "Poppins Medium";}
-
-.home-page .home-recent-servers-card {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-border-width: 0;
-    -fx-padding: 0;
-}
-
-/* First run and load failure: a plain surface with one action. */
-.home-page .home-empty-card,
-.home-page .home-load-error-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaline;
-    -fx-border-width: 1px;
-    -fx-border-radius: 8px;
-}
-
-.home-page .home-empty-title,
-.home-page .home-load-error-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 16px; -fx-font-family: "Poppins SemiBold";}
-
-.home-page .home-empty-description,
-.home-page .home-load-error-description {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 13px;
-    -fx-line-spacing: 2px;
-}
-
-.home-page .home-load-error-card {
-    -fx-padding: 24px;
-}
-
-.home-page .home-content-scroll,
-.home-page .home-content-scroll > .viewport {
-    -fx-background-color: transparent;
-}
-
-.home-page .primary-button:focused,
-.home-page .secondary-button:focused,
-.home-page .home-featured-play-button:focused,
-.home-page .home-recent-play:focused,
-.home-page .home-recent-stop:focused {
-    -fx-border-color: -vantatext;
-    -fx-border-width: 2px;
+.home-panel > .home-muted {
+    -fx-padding: 6px 10px;
 }

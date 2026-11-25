@@ -408,7 +408,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         accentHexField = new TextField(accentColor);
         accentHexField.getStyleClass().add("accent-hex-field");
-        accentHexField.setPromptText("#4C8DFF");
+        accentHexField.setPromptText("#EBB54A");
         accentHexField.setPrefWidth(110);
         accentHexField.setAccessibleText("Accent color hexadecimal value");
 
@@ -444,6 +444,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
         FlowPane presets = new FlowPane(8, 8);
         presets.setPrefWrapLength(560);
+        addPreset(presets, "Gilt", "#EBB54A");
         addPreset(presets, "Blue", "#4C8DFF");
         addPreset(presets, "Cyan", "#42C6E8");
         addPreset(presets, "Emerald", "#4FD18B");
@@ -613,9 +614,14 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
     }
 
     private void addPreset(FlowPane container, String name, String hex) {
-        Button button = new Button(name);
-        button.getStyleClass().add("accent-preset");
-        button.setStyle("-vanta-preset-color: " + hex + ";");
+        Button button = new Button();
+        javafx.scene.shape.Circle dot = new javafx.scene.shape.Circle(9, Color.web(hex));
+        dot.getStyleClass().add("accent-swatch-dot");
+        button.setGraphic(dot);
+        button.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+        button.setTooltip(new javafx.scene.control.Tooltip(name + "  " + hex));
+        button.setAccessibleText(name);
+        button.getStyleClass().add("accent-swatch");
         button.setOnAction(event -> setAccent(hex));
         container.getChildren().add(button);
     }
