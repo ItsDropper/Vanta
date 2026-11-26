@@ -56,6 +56,30 @@ class VantaBundleResolverTest {
         assertEquals("required-project", result.mods().get(0).projectId());
     }
 
+
+    @Test
+    void installsGitHubReleaseComponentOnlyWhenItsOptionalBundleIsSelected() throws Exception {
+        VantaBundleManifest manifest = new VantaBundleManifest(1, "vanta-client", "1.0.0",
+                java.util.List.of("1.21.11"), "fabric", java.util.List.of(
+                new VantaBundleManifest.Bundle("core", "Core", "Required core.", true, true,
+                        java.util.List.of(new VantaBundleManifest.Mod("fabric-api", null, true, true))),
+                new VantaBundleManifest.Bundle("vanta-client", "Vanta Client", "Optional client.", false, false,
+                        java.util.List.of(new VantaBundleManifest.Mod("vanta-client", null, true, true,
+                                new VantaBundleManifest.GitHubRelease("ItsDropper/Vanta-Client", "dropperutils-"))))
+        ));
+
+        VantaBundleResolver.Resolution defaultSelection =
+                resolver.resolve(manifest, "1.21.11", "fabric", Set.of("core"), Set.of());
+        assertEquals(1, defaultSelection.mods().size());
+
+        VantaBundleResolver.Resolution optedIn =
+                resolver.resolve(manifest, "1.21.11", "fabric", Set.of("core", "vanta-client"), Set.of());
+        assertEquals(2, optedIn.mods().size());
+        VantaBundleResolver.ResolvedMod client = optedIn.mods().get(1);
+        assertEquals("vanta-client", client.projectId());
+        assertEquals("ItsDropper/Vanta-Client", client.githubRelease().repository());
+    }
+
     @Test
     void rejectsSelectingModsFromDisabledBundles() {
         IOException failure = assertThrows(IOException.class, () -> resolver.resolve(
