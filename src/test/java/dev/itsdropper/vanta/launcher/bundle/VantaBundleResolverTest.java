@@ -61,6 +61,43 @@ class VantaBundleResolverTest {
         assertTrue(failure.getMessage().contains("Unknown bundle selected"));
     }
 
+
+    @Test
+    void rejectsConflictingPinnedVersionsForSharedProject() {
+        VantaBundleManifest conflicting = new VantaBundleManifest(1, "vanta-client", "1.0.0",
+                java.util.List.of("1.21.11"), "fabric", java.util.List.of(
+                new VantaBundleManifest.Bundle("core", "Vanta Core", "Required foundation.",
+                        true, true, java.util.List.of(
+                        new VantaBundleManifest.Mod("shared-project", "version-a", true, true))),
+                new VantaBundleManifest.Bundle("performance", "Performance", "Optional optimizations.",
+                        false, true, java.util.List.of(
+                        new VantaBundleManifest.Mod("shared-project", "version-b", false, true)))
+        ));
+
+        IOException failure = assertThrows(IOException.class, () -> resolver.resolve(
+                conflicting, "1.21.11", "fabric", null, null));
+        assertTrue(failure.getMessage().contains("Conflicting pinned versions"));
+    }
+
+    @Test
+    void requiredFlagWinsWhenProjectIsSharedAcrossBundles() throws Exception {
+        VantaBundleManifest shared = new VantaBundleManifest(1, "vanta-client", "1.0.0",
+                java.util.List.of("1.21.11"), "fabric", java.util.List.of(
+                new VantaBundleManifest.Bundle("core", "Vanta Core", "Required foundation.",
+                        true, true, java.util.List.of(
+                        new VantaBundleManifest.Mod("shared-project", "same-version", false, true))),
+                new VantaBundleManifest.Bundle("performance", "Performance", "Optional optimizations.",
+                        false, true, java.util.List.of(
+                        new VantaBundleManifest.Mod("shared-project", "same-version", true, true)))
+        ));
+
+        VantaBundleResolver.Resolution result = resolver.resolve(
+                shared, "1.21.11", "fabric", null, null);
+
+        assertEquals(1, result.mods().size());
+        assertTrue(result.mods().get(0).required());
+    }
+
     private static VantaBundleManifest manifest() {
         return new VantaBundleManifest(1, "vanta-client", "1.0.0",
                 java.util.List.of("1.21.11"), "fabric", java.util.List.of(
