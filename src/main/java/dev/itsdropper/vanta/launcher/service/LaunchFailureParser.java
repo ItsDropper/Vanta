@@ -12,7 +12,8 @@ public class LaunchFailureParser {
 
     private static final Pattern MISSING_DEPENDENCY =
             Pattern.compile(
-                    "Mod '([^']+)' \\(([^)]+)\\).*?requires version (.+?) of ([^,]+), which is missing!"
+                    "Mod '([^']+)' \\(([^)]+)\\).*?requires version (.+?) of ([^,]+), which is missing!",
+                    Pattern.CASE_INSENSITIVE
             );
 
     private static final Pattern WRONG_VERSION =
@@ -53,7 +54,8 @@ public class LaunchFailureParser {
     private static final Pattern MISSING_DEPENDENCY_ANY_VERSION =
             Pattern.compile(
                     "Mod '([^']+)' \\(([^)]+)\\).*?"
-                            + "requires any version of ([^,]+), which is missing!"
+                            + "requires (?:any version of )?([^,]+), which is missing!",
+                    Pattern.CASE_INSENSITIVE
             );
 
     public static List<RepairView.RepairIssue> parse(
