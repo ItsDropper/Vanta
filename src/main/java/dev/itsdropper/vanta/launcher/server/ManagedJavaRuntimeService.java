@@ -84,6 +84,7 @@ final class ManagedJavaRuntimeService {
         try {
             Process process = new ProcessBuilder(executable.trim(), "-version")
                     .redirectErrorStream(true).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
             String output;
             try (InputStream input = process.getInputStream()) {
                 output = new String(input.readNBytes(16 * 1024), java.nio.charset.StandardCharsets.UTF_8);
@@ -210,6 +211,7 @@ final class ManagedJavaRuntimeService {
 
     private static void extractTarGz(Path archive, Path destination) throws IOException {
         Process listing = new ProcessBuilder("tar", "-tzf", archive.toString()).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(listing);
         String entries;
         try (InputStream input = listing.getInputStream()) {
             entries = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
@@ -230,6 +232,7 @@ final class ManagedJavaRuntimeService {
         }
         Process extraction = new ProcessBuilder("tar", "-xzf", archive.toString(), "-C", root.toString())
                 .redirectErrorStream(true).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(extraction);
         String output;
         try (InputStream input = extraction.getInputStream()) {
             output = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
