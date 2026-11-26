@@ -46,6 +46,26 @@ class InstalledModScannerTest {
     }
 
     @Test
+    void recognizesFabricApiAsProviderOfLegacyFabricDependencyId() throws Exception {
+        Path mods = temporaryDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path requesting = jar("requesting.jar", "fabric.mod.json", """
+                {"schemaVersion":1,"id":"legacy_consumer","version":"1.0.0",
+                 "depends":{"fabric":"*"}}
+                """);
+        Files.move(requesting, mods.resolve("requesting.jar"));
+        Path fabricApi = jar("fabric-api.jar", "fabric.mod.json", """
+                {"schemaVersion":1,"id":"fabric-api","version":"0.141.0+1.21.11"}
+                """);
+        Files.move(fabricApi, mods.resolve("fabric-api.jar"));
+        Instance instance = new Instance("test", "Test", "1.21.11",
+                "fabric", "0.19.5", temporaryDirectory);
+
+        assertTrue(new InstalledModScanner()
+                .findMissingRequiredDependencies(instance).isEmpty());
+    }
+
+    @Test
     void ignoresOptionalDependenciesAndRecognizesInstalledDependencies() throws Exception {
         Path mods = temporaryDirectory.resolve("mods");
         Files.createDirectories(mods);
