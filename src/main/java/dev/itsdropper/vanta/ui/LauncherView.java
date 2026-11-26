@@ -960,16 +960,16 @@ public class LauncherView {
                     notifications.updateProgress("Installing profile mods and dependencies...");
                     modrinth.installResolvedGraph(instance, graph);
                 }
-                List<String> managedProjects = new ArrayList<>(graph.stream()
+                List<String> managedProjectIds = new ArrayList<>(graph.stream()
                         .map(ModrinthService.ResolvedMod::projectId).distinct().toList());
                 for (VantaBundleResolver.ResolvedMod mod : releaseMods) {
                     notifications.updateProgress("Installing latest " + mod.projectId() + "...");
                     GitHubReleaseModInstaller.InstalledArtifact installed =
                             new GitHubReleaseModInstaller().installLatest(instance, mod.githubRelease(), minecraftVersion);
-                    managedProjects.add(mod.projectId());
+                    managedProjectIds.add(mod.projectId());
                     notifications.updateProgress("Installed " + installed.fileName());
                 }
-                managedProjects = managedProjects.stream().distinct().toList();
+                List<String> managedProjects = managedProjectIds.stream().distinct().toList();
                 new VantaBundleManifestSnapshotStore().save(instance, manifest);
                 new VantaBundleStateStore().save(instance, new VantaBundleState(
                         VantaBundleState.SUPPORTED_SCHEMA_VERSION,
