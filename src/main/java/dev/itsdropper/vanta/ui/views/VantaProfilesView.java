@@ -59,13 +59,13 @@ public final class VantaProfilesView extends VBox {
         panel.setPadding(new Insets(24));
         panel.setMaxWidth(860);
 
-        Label section = new Label("Available profile");
+        Label section = new Label(Localization.text("vantaProfiles.availableProfile"));
         section.getStyleClass().add("create-panel-title");
-        Label help = new Label("Start with the built-in Vanta Fabric profile. Vanta selects compatible dependencies automatically; importing a custom manifest is optional.");
+        Label help = new Label(Localization.text("vantaProfiles.builtInHelp"));
         help.getStyleClass().add("create-panel-subtitle");
         help.setWrapText(true);
 
-        Button importButton = new Button("Import custom profile…");
+        Button importButton = new Button(Localization.text("vantaProfiles.importCustom"));
         importButton.getStyleClass().add("secondary-button");
         importButton.setOnAction(event -> chooseManifest(importButton.getScene() == null
                 ? null : importButton.getScene().getWindow()));
@@ -126,7 +126,7 @@ public final class VantaProfilesView extends VBox {
                     .loadBundled("profiles/vanta-fabric-starter.json");
             applyManifest(builtIn);
             nameField.setText("Vanta Fabric Starter");
-            status.setText("Vanta Fabric Starter · Fabric · " + builtIn.minecraftVersions().get(0)
+            status.setText(Localization.text("vantaProfiles.builtInName") + " · Fabric · " + builtIn.minecraftVersions().get(0)
                     + " · " + builtIn.bundles().size() + " feature bundle");
             createButton.setDisable(false);
         } catch (Exception failure) {
@@ -134,7 +134,7 @@ public final class VantaProfilesView extends VBox {
             bundleList.getChildren().clear();
             versionBox.getItems().clear();
             createButton.setDisable(true);
-            status.setText("The built-in Vanta profile could not be loaded. "
+            status.setText(Localization.text("vantaProfiles.builtInFailure") + " "
                     + (failure.getMessage() == null ? "" : failure.getMessage()));
         }
     }
