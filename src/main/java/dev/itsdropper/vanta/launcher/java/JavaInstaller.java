@@ -52,11 +52,11 @@ public class JavaInstaller {
         String architecture = Platform.adoptiumArchitecture();
         String metadataUrl = "https://api.adoptium.net/v3/assets/latest/" + version
                 + "/hotspot?architecture=" + architecture + "&image_type=jdk&os=" + os + "&vendor=eclipse";
-        com.fasterxml.jackson.databind.JsonNode assets =
+        dev.itsdropper.vanta.json.JsonNode assets =
                 dev.itsdropper.vanta.launcher.instance.DownloadUtil.downloadJson(metadataUrl);
-        com.fasterxml.jackson.databind.JsonNode packageInfo = assets.isArray() && !assets.isEmpty()
+        dev.itsdropper.vanta.json.JsonNode packageInfo = assets.isArray() && !assets.isEmpty()
                 ? assets.get(0).path("binary").path("package")
-                : com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.nullNode();
+                : dev.itsdropper.vanta.json.JsonNodeFactory.instance.nullNode();
         String downloadUrl = packageInfo.path("link").asText("");
         String expectedSha256 = packageInfo.path("checksum").asText("").toLowerCase(java.util.Locale.ROOT);
         if (!downloadUrl.startsWith("https://github.com/adoptium/")
