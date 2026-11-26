@@ -62,8 +62,13 @@ class VantaBundleRepositoryTest {
         assertEquals("vanta-fabric-starter", manifest.profileId());
         assertEquals("fabric", manifest.loader());
         assertTrue(manifest.minecraftVersions().contains("1.21.11"));
-        assertEquals(1, manifest.bundles().size());
+        assertEquals(2, manifest.bundles().size());
         assertEquals("fabric-api", manifest.bundles().get(0).mods().get(0).projectId());
+        VantaBundleManifest.Bundle client = manifest.bundles().get(1);
+        assertEquals("vanta-client", client.id());
+        assertFalse(client.required());
+        assertFalse(client.defaultEnabled());
+        assertEquals("ItsDropper/Vanta-Client", client.mods().get(0).githubRelease().repository());
         assertTrue(manifest.bundles().get(0).mods().get(0).required());
     }
 
