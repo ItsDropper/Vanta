@@ -144,9 +144,8 @@ public final class MinecraftSecurityUpdateService {
                 validateDownloadIntegrityMetadata(library);
                 String[] coordinate = library.path("name").asText("").split(":");
                 if (coordinate.length < 3 || !isPatchedFreeTypeVersion(coordinate[2])) {
-                    throw new IllegalStateException("Mojang's current metadata for " + expectedVersion
-                            + " contains an unpatched FreeType artifact (" + library.path("name").asText()
-                            + "); refusing to launch with an unverified native font engine.");
+                    throw new MinecraftSecurityException(
+                            expectedVersion, library.path("name").asText());
                 }
             }
         }
