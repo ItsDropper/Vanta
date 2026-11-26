@@ -23,6 +23,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 
 import dev.itsdropper.vanta.launcher.model.Instance;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleState;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleStateStore;
 import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
 import dev.itsdropper.vanta.launcher.instance.InstalledModManager;
 import dev.itsdropper.vanta.launcher.instance.InstalledModRecord;
@@ -43,6 +45,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.jar.JarFile;
@@ -59,6 +62,8 @@ public class ModsView extends VBox {
     private final Runnable onScreenshots;
 
     private final VBox contentList;
+    private final VBox profileBanner = new VBox(6);
+    private Set<String> profileManagedFilenames = Set.of();
     private final Label statusLabel;
     private final TextField searchField;
     private final Button updateModsButton;
@@ -354,12 +359,17 @@ public class ModsView extends VBox {
                 "instances-status"
         );
 
+        profileBanner.getStyleClass().add("vanta-profile-banner");
+        profileBanner.setVisible(false);
+        profileBanner.setManaged(false);
+
         // =========================================================
         // BUILD
         // =========================================================
 
         getChildren().addAll(
                 header,
+                profileBanner,
                 scrollPane,
                 statusLabel
         );
@@ -577,6 +587,8 @@ public class ModsView extends VBox {
 
         try {
 
+            refreshVantaProfileBanner();
+
             Files.createDirectories(
                     directory
             );
@@ -693,6 +705,59 @@ public class ModsView extends VBox {
         }
     }
 
+    private void refreshVantaProfileBanner() {
+        if (selectedType != ContentType.ALL && selectedType != ContentType.MODS) {
+            profileBanner.setVisible(false);
+            profileBanner.setManaged(false);
+            profileManagedFilenames = Set.of();
+            return;
+        }
+
+        try {
+            VantaBundleStateStore store = new VantaBundleStateStore();
+            VantaBundleState state = store.load(instance);
+            if (state == null) {
+                profileBanner.setVisible(false);
+                profileBanner.setManaged(false);
+                profileManagedFilenames = Set.of();
+                return;
+            }
+
+            List<InstalledModRecord> records = InstalledModManager.load(instance);
+            Set<String> registeredProjects = records.stream()
+                    .map(InstalledModRecord::getProjectId)
+                    .filter(projectId -> projectId != null && !projectId.isBlank())
+                    .collect(java.util.stream.Collectors.toSet());
+            state = store.reconcileManagedProjects(instance, registeredProjects);
+
+            Set<String> managedProjects = Set.copyOf(state.installedManagedProjectIds());
+            profileManagedFilenames = records.stream()
+                    .filter(record -> managedProjects.contains(record.getProjectId()))
+                    .map(InstalledModRecord::getFilename)
+                    .filter(filename -> filename != null && !filename.isBlank())
+                    .collect(java.util.stream.Collectors.toSet());
+
+            Label title = new Label(state.profileId() + " · v" + state.profileVersion());
+            title.getStyleClass().add("vanta-profile-banner-title");
+            Label details = new Label(state.selectedBundleIds().size() + " selected bundles · "
+                    + profileManagedFilenames.size() + " profile-managed mods");
+            details.getStyleClass().add("vanta-profile-banner-details");
+            Label ownership = new Label(
+                    "Only mods installed and tracked by this profile are managed here. Other instance content is untouched.");
+            ownership.getStyleClass().add("vanta-profile-banner-note");
+            ownership.setWrapText(true);
+            profileBanner.getChildren().setAll(title, details, ownership);
+            profileBanner.setManaged(true);
+            profileBanner.setVisible(true);
+        } catch (IOException | RuntimeException failure) {
+            profileManagedFilenames = Set.of();
+            profileBanner.setVisible(false);
+            profileBanner.setManaged(false);
+            System.err.println("[Vanta Profiles] Could not refresh instance profile state: "
+                    + failure.getClass().getSimpleName());
+        }
+    }
+
     private boolean isValidContentFile(
             Path file
     ) {
@@ -772,6 +837,11 @@ public class ModsView extends VBox {
                         title,
                         metadata
                 );
+        if (profileManagedFilenames.contains(filename)) {
+            Label profileTag = new Label("Vanta Profile");
+            profileTag.getStyleClass().add("vanta-profile-mod-tag");
+            information.getChildren().add(profileTag);
+        }
 
         HBox.setHgrow(
                 information,
