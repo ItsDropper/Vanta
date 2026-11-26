@@ -82,6 +82,13 @@ public final class CoverArt extends StackPane {
             widthProperty().addListener((o, a, b) -> frame.run());
             heightProperty().addListener((o, a, b) -> frame.run());
             frame.run();
+            // Each seed gets its own mood so repeated crops do not read as the same picture.
+            int h = Math.floorMod((seed == null ? "" : seed).hashCode() / 7, 1000);
+            javafx.scene.effect.ColorAdjust mood = new javafx.scene.effect.ColorAdjust();
+            mood.setHue(((h % 9) - 4) * 0.025);
+            mood.setBrightness(-0.04 - (h % 5) * 0.03);
+            mood.setSaturation(0.05 + (h % 4) * 0.06);
+            view.setEffect(mood);
         } else {
             view = new ImageView(image(seed, loader));
             view.setSmooth(false);

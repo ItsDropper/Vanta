@@ -213,20 +213,32 @@ public class InstanceCard extends StackPane {
         StackPane.setAlignment(topActions, Pos.TOP_RIGHT);
         StackPane.setMargin(topActions, new Insets(8));
 
-        StackPane.setAlignment(statusBadge, Pos.TOP_LEFT);
-        StackPane.setMargin(statusBadge, new Insets(8));
+        HBox topLeft = new HBox(6, iconPlate, statusBadge);
+        topLeft.setAlignment(Pos.TOP_LEFT);
+        topLeft.setPickOnBounds(false);
+        topLeft.setMaxSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+        StackPane.setAlignment(topLeft, Pos.TOP_LEFT);
+        StackPane.setMargin(topLeft, new Insets(10));
 
-        StackPane.setAlignment(iconPlate, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(iconPlate, new Insets(8));
+        Region shade = new Region();
+        shade.getStyleClass().add("home-tile-shade");
+        shade.setMouseTransparent(true);
+        shade.setMaxHeight(96);
+        StackPane.setAlignment(shade, Pos.BOTTOM_CENTER);
 
-        StackPane.setAlignment(playButton, Pos.BOTTOM_RIGHT);
-        StackPane.setMargin(playButton, new Insets(8));
+        nameLabel.getStyleClass().add("instance-card-art-name");
+        nameLabel.setMouseTransparent(true);
+        StackPane.setAlignment(nameLabel, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(nameLabel, new Insets(0, 12, 12, 14));
 
-        StackPane art = new StackPane(cover, iconPlate, statusBadge, topActions, playButton);
+        StackPane.setAlignment(playButton, Pos.CENTER);
+
+        StackPane art = new StackPane(cover, shade, topLeft, topActions, nameLabel, playButton);
         art.getStyleClass().add("instance-card-art");
-        art.setMinHeight(112);
-        art.setPrefHeight(112);
-        art.setMaxHeight(112);
+        art.setMinHeight(150);
+        art.setPrefHeight(150);
+        art.setMaxHeight(150);
+        nameLabel.maxWidthProperty().bind(art.widthProperty().subtract(28));
 
         HBox badges = new HBox(6, loaderBadge, versionBadge);
         badges.setAlignment(Pos.CENTER_LEFT);
@@ -236,7 +248,7 @@ public class InstanceCard extends StackPane {
         HBox meta = new HBox(8, badges, fill, playtimeLabel);
         meta.setAlignment(Pos.CENTER_LEFT);
 
-        VBox body = new VBox(8, nameLabel, meta);
+        VBox body = new VBox(8, meta);
         body.setPadding(new Insets(10, 6, 6, 6));
 
         VBox column = new VBox(art, body);
