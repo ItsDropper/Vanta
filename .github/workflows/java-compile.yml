@@ -214,9 +214,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
-          path: |
-            build/distributions/*
-            build/packages/*
+          # The ZIP already contains the complete jpackage image. Uploading
+          # build/packages as well duplicates the entire runtime in CI artifacts.
+          path: build/distributions/*
           if-no-files-found: error
           retention-days: 14
 
@@ -279,9 +279,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vanta-windows-arm64-x64-emulation
+          # Keep the portable archive and smoke-test evidence; the archive
+          # already contains the complete application image.
           path: |
             build/distributions/*
-            build/packages/*
             build/app-image-smoke/*
           if-no-files-found: error
           retention-days: 14
@@ -346,7 +347,11 @@ jobs:
               ;;
           esac
 
-          APP=/artifact/packages/Vanta
+          ARCHIVE="$(find /artifact -maxdepth 1 -name 'Vanta-*-linux-x64.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          APP=/tmp/vanta-linux-x64
+          mkdir -p "$APP"
+          unzip -q "$ARCHIVE" -d "$APP"
           test -x "$APP/bin/Vanta"
           test -f "$APP/lib/runtime/lib/modules"
 
