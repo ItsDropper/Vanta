@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.launcher.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.itsdropper.vanta.json.annotation.JsonCreator;
+import dev.itsdropper.vanta.json.annotation.JsonProperty;
 
 public final class ServerHistoryEntry {
 

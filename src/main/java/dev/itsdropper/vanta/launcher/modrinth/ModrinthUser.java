@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.launcher.modrinth;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import dev.itsdropper.vanta.json.annotation.JsonIgnoreProperties;
+import dev.itsdropper.vanta.json.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ModrinthUser {
