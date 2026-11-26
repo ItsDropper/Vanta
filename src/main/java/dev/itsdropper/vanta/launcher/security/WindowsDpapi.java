@@ -20,11 +20,11 @@ import java.util.List;
  * CryptUnprotectData and therefore with credentials written by previous
  * Vanta versions using JNA Platform.</p>
  */
-final class WindowsDpapi {
+public final class WindowsDpapi {
     private static final int CRYPTPROTECT_UI_FORBIDDEN = 0x1;
     private static final int MAX_BLOB_BYTES = 16 * 1024 * 1024;
 
-    private interface Crypt32 extends StdCallLibrary {
+    public interface Crypt32 extends StdCallLibrary {
         boolean CryptProtectData(DataBlob input, WString description,
                                  Pointer optionalEntropy, Pointer reserved,
                                  Pointer prompt, int flags, DataBlob output);
@@ -34,20 +34,20 @@ final class WindowsDpapi {
                                    Pointer prompt, int flags, DataBlob output);
     }
 
-    private interface Kernel32 extends StdCallLibrary {
+    public interface Kernel32 extends StdCallLibrary {
         Pointer LocalFree(Pointer memory);
         int GetLastError();
     }
 
     @Structure.FieldOrder({"cbData", "pbData"})
-    private static final class DataBlob extends Structure {
+    public static final class DataBlob extends Structure {
         public int cbData;
         public Pointer pbData;
 
-        private DataBlob() {
+        public DataBlob() {
         }
 
-        private DataBlob(Pointer data, int length) {
+        public DataBlob(Pointer data, int length) {
             cbData = length;
             pbData = data;
             write();
@@ -78,47 +78,49 @@ final class WindowsDpapi {
 
         // DPAPI allocates its output with LocalAlloc; the caller must release it with LocalFree.
         try (Memory inputMemory = new Memory(Math.max(1, input.length))) {
-            if (input.length > 0) {
-                inputMemory.write(0, input, 0, input.length);
-            }
-
-            DataBlob inputBlob = new DataBlob(inputMemory, input.length);
-            DataBlob outputBlob = new DataBlob();
-            PointerByReference description = new PointerByReference();
-
-            boolean succeeded = protect
-                    ? CRYPT32.CryptProtectData(inputBlob, new WString("Vanta account session"),
-                            null, null, null, CRYPTPROTECT_UI_FORBIDDEN, outputBlob)
-                    : CRYPT32.CryptUnprotectData(inputBlob, description,
-                            null, null, null, CRYPTPROTECT_UI_FORBIDDEN, outputBlob);
-
             try {
-                if (!succeeded) {
-                    throw new IOException("Windows DPAPI "
-                            + (protect ? "encryption" : "decryption")
-                            + " failed (Win32 error " + KERNEL32.GetLastError() + ").");
+                if (input.length > 0) {
+                    inputMemory.write(0, input, 0, input.length);
                 }
 
-                outputBlob.read();
-                if (outputBlob.cbData < 0 || outputBlob.cbData > MAX_BLOB_BYTES
-                        || (outputBlob.cbData > 0 && outputBlob.pbData == null)) {
-                    throw new IOException("Windows DPAPI returned an invalid credential buffer.");
-                }
+                DataBlob inputBlob = new DataBlob(inputMemory, input.length);
+                DataBlob outputBlob = new DataBlob();
+                PointerByReference description = new PointerByReference();
 
-                return outputBlob.cbData == 0
-                        ? new byte[0]
-                        : outputBlob.pbData.getByteArray(0, outputBlob.cbData);
+                boolean succeeded = protect
+                        ? CRYPT32.CryptProtectData(inputBlob, new WString("Vanta account session"),
+                                null, null, null, CRYPTPROTECT_UI_FORBIDDEN, outputBlob)
+                        : CRYPT32.CryptUnprotectData(inputBlob, description,
+                                null, null, null, CRYPTPROTECT_UI_FORBIDDEN, outputBlob);
+
+                try {
+                    if (!succeeded) {
+                        throw new IOException("Windows DPAPI "
+                                + (protect ? "encryption" : "decryption")
+                                + " failed (Win32 error " + KERNEL32.GetLastError() + ").");
+                    }
+
+                    outputBlob.read();
+                    if (outputBlob.cbData < 0 || outputBlob.cbData > MAX_BLOB_BYTES
+                            || (outputBlob.cbData > 0 && outputBlob.pbData == null)) {
+                        throw new IOException("Windows DPAPI returned an invalid credential buffer.");
+                    }
+
+                    return outputBlob.cbData == 0
+                            ? new byte[0]
+                            : outputBlob.pbData.getByteArray(0, outputBlob.cbData);
+                } finally {
+                    if (outputBlob.pbData != null) {
+                        KERNEL32.LocalFree(outputBlob.pbData);
+                    }
+                    if (description.getValue() != null) {
+                        KERNEL32.LocalFree(description.getValue());
+                    }
+                }
             } finally {
-                if (outputBlob.pbData != null) {
-                    KERNEL32.LocalFree(outputBlob.pbData);
-                }
-                if (description.getValue() != null) {
-                    KERNEL32.LocalFree(description.getValue());
-                }
+                // The input can contain plaintext during encryption. Clear it before releasing native memory.
+                inputMemory.clear();
             }
-        } finally {
-            // Do not leave plaintext input in the temporary native buffer.
-            // The buffer is owned by the try-with-resources block above.
         }
     }
 
