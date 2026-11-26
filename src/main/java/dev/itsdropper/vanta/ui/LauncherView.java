@@ -2059,24 +2059,7 @@ public class LauncherView {
                                             + targetVersion
                             );
 
-                            UiExecutor.shared().dispatchToUi(() -> {
-
-                                try {
-
-                                    launchService.launch(
-                                            updatedInstance
-                                    );
-
-                                } catch (Exception ex) {
-
-                                    ex.printStackTrace();
-
-                                    notifications.error(
-                                            "Minecraft still failed",
-                                            getErrorMessage(ex)
-                                    );
-                                }
-                            });
+                            launchAfterRepairAsync(updatedInstance);
 
                         } catch (Throwable ex) {
 
@@ -2181,24 +2164,7 @@ public class LauncherView {
                                 "Vanta repaired the Minecraft dependency."
                         );
 
-                        UiExecutor.shared().dispatchToUi(() -> {
-
-                            try {
-
-                                launchService.launch(
-                                        instance
-                                );
-
-                            } catch (Exception ex) {
-
-                                ex.printStackTrace();
-
-                                notifications.error(
-                                        "Minecraft still failed",
-                                        getErrorMessage(ex)
-                                );
-                            }
-                        });
+                        launchAfterRepairAsync(instance);
 
                     } catch (Throwable ex) {
 
@@ -2226,6 +2192,26 @@ public class LauncherView {
     }
 
 
+
+    /**
+     * Launch after a repair without performing installation, network, or process
+     * preparation work on the JavaFX application thread.
+     */
+    private void launchAfterRepairAsync(Instance instance) {
+        UiExecutor.shared().execute(() -> {
+            try {
+                launchService.launch(instance);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                UiExecutor.shared().dispatchToUi(() ->
+                        notifications.error(
+                                "Minecraft still failed",
+                                getErrorMessage(ex)
+                        )
+                );
+            }
+        });
+    }
 
     private void restoreRepairMetadata(Instance instance) {
         try {
