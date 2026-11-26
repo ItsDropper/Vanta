@@ -164,6 +164,17 @@ public class LaunchService {
                     LaunchState.PREPARING
             );
 
+            // Discovery is deliberately read-only. Recover any interrupted
+            // installation transaction here, immediately before using the mods.
+            if (dev.itsdropper.vanta.launcher.instance.InstanceManager.isInstallationInProgress(instance)) {
+                System.out.println("[Vanta Repair] Interrupted installation detected; rebuilding managed game files.");
+                dev.itsdropper.vanta.launcher.instance.InstanceRepairService.repair(instance);
+                if (dev.itsdropper.vanta.launcher.instance.InstanceManager.isInstallationInProgress(instance)) {
+                    throw new java.io.IOException("The interrupted installation could not be completed. Use Instance Repair before launching.");
+                }
+            }
+            dev.itsdropper.vanta.launcher.service.ModrinthInstallService.recoverPendingTransactions(instance);
+
             Account account = accountService.getCurrentAccount();
 
             if (account == null) {
