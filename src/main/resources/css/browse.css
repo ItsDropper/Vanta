@@ -40,3 +40,107 @@
 .modrinth-stat-icon {
     -fx-stroke: -vantasubtle;
 }
+
+/* ---- grid cards ---------------------------------------------------------- */
+
+.modrinth-project-grid-card {
+    -fx-padding: 14;
+    -fx-min-height: 150;
+}
+
+.modrinth-project-grid-card .modrinth-project-title {
+    -fx-font-size: 15px;
+}
+
+.modrinth-project-grid-card .modrinth-project-description {
+    -fx-font-size: 12.5px;
+    -fx-wrap-text: true;
+}
+
+/* ---- filter rail (global browser) ---------------------------------------- */
+
+.global-mods-page .modrinth-filter-sidebar {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 13, 12;
+    -fx-padding: 14;
+    -fx-spacing: 6;
+}
+
+.global-mods-page .modrinth-filter-sidebar > .settings-section-title {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 15px;
+}
+
+.global-mods-page .modrinth-filter-sidebar .titled-pane > .title {
+    -fx-background-color: transparent;
+    -fx-padding: 8 2 8 2;
+    -fx-border-color: transparent;
+}
+
+.global-mods-page .modrinth-filter-sidebar .titled-pane > .title > .text {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 13px;
+    -fx-fill: -vantatext;
+}
+
+.global-mods-page .modrinth-filter-sidebar .titled-pane > .title > .arrow-button > .arrow {
+    -fx-background-color: -vantasubtle;
+    -fx-scale-x: 0.8;
+    -fx-scale-y: 0.8;
+}
+
+.global-mods-page .modrinth-filter-sidebar .titled-pane > .content {
+    -fx-padding: 0 0 6 0;
+}
+
+.global-mods-page .modrinth-filter-option:hover {
+    -fx-background-color: -v-card-hover;
+}
+
+.global-mods-page .modrinth-filter-option-selected {
+    -fx-background-color: -vantaaccent-a18;
+    -fx-text-fill: -vantaaccent;
+}
+
+/* ---- per-instance browser chrome ---------------------------------------- */
+
+.content-browser-bar {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 13, 12;
+    -fx-padding: 8;
+    -fx-spacing: 8;
+    -fx-alignment: center-left;
+}
+
+.content-browser-bar .create-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-min-height: 38;
+}
+
+.global-mods-page .modrinth-content-segments {
+    -fx-max-width: 760;
+    -fx-spacing: 4;
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-border-color: transparent;
+}
+
+.global-mods-page .modrinth-content-segment {
+    -fx-padding: 8 18;
+}
+
+.instance-tabs {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-border-color: transparent;
+    -fx-padding: 4;
+}
+
+.instance-tabs .content-tab {
+    -fx-padding: 8 18;
+}

@@ -15,6 +15,10 @@ import javafx.scene.layout.VBox;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.repair.CrashCaseRepository;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.kit.Badge;
+import dev.itsdropper.vanta.ui.kit.Callout;
+import dev.itsdropper.vanta.ui.kit.Card;
+import dev.itsdropper.vanta.ui.kit.SectionHeader;
 
 import java.util.List;
 import java.nio.file.Files;
@@ -136,18 +140,10 @@ public class RepairView extends VBox {
 
         if (issues == null || issues.isEmpty()) {
 
-            Label empty =
-                    new Label(
-                            Localization.text("repair.noIssues")
-                    );
-
-            empty.getStyleClass().add(
-                    "repair-empty"
-            );
-
-            issueList.getChildren().add(
-                    empty
-            );
+            issueList.getChildren().add(new Callout(
+                    Callout.Tone.SUCCESS,
+                    Localization.text("repair.allClear"),
+                    Localization.text("repair.noIssues")));
 
         } else {
 
@@ -164,9 +160,7 @@ public class RepairView extends VBox {
         VBox issueSection =
                 new VBox(
                         12,
-                        createSectionTitle(
-                                "PROBLEMS FOUND"
-                        ),
+                        new SectionHeader(Localization.text("repair.problems")),
                         issueList
                 );
         issueSection.getStyleClass().add("repair-issue-section");
@@ -300,86 +294,34 @@ public class RepairView extends VBox {
     }
 
     private VBox createVerifiedFixSection(List<CrashCaseRepository.VerifiedFix> fixes) {
-        Label title = new Label(Localization.text("repair.verifiedFixesTitle"));
-        title.getStyleClass().add("settings-section-title");
-        Label description = new Label(Localization.text("repair.verifiedFixesDescription"));
-        description.setWrapText(true);
+        SectionHeader title = new SectionHeader(Localization.text("repair.verifiedFixesTitle"),
+                Localization.text("repair.verifiedFixesDescription"));
         VBox cards = new VBox(10);
         for (CrashCaseRepository.VerifiedFix fix : fixes) {
-            Label category = new Label(fix.category().name());
-            category.getStyleClass().add("repair-issue-type");
+            Badge category = new Badge(fix.category().name().replace('_', ' ').toLowerCase(), Badge.Tone.INFO);
             Label note = new Label(fix.verifiedFix());
             note.setWrapText(true);
             Label seen = new Label(Localization.text("repair.verifiedFixesSeen")
                     .formatted(fix.occurrences()));
             seen.getStyleClass().add("muted");
-            VBox card = new VBox(8, category, note, seen);
-            card.setPadding(new Insets(16));
-            card.getStyleClass().add("repair-issue-card");
+            Card card = new Card(category, note, seen).padded(16).spaced(8);
             cards.getChildren().add(card);
         }
-        return new VBox(12, title, description, cards);
+        return new VBox(12, title, cards);
     }
 
-    private VBox createIssueCard(
-            RepairIssue issue
-    ) {
-
-        Label type =
-                new Label(
-                        issue.type()
-                );
-
-        type.getStyleClass().add(
-                "repair-issue-type"
-        );
-
-        Label title =
-                new Label(
-                        issue.title()
-                );
-
-        title.setWrapText(
-                true
-        );
-
-        title.getStyleClass().add(
-                "repair-issue-title"
-        );
-
-        Label details =
-                new Label(
-                        issue.details()
-                );
-
-        details.setWrapText(
-                true
-        );
-
-        details.getStyleClass().add(
-                "repair-issue-details"
-        );
-
-        VBox card =
-                new VBox(
-                        8,
-                        type,
-                        title,
-                        details
-                );
-
-        card.setPadding(
-                new Insets(20)
-        );
-
-        card.setMaxWidth(
-                Double.MAX_VALUE
-        );
-
-        card.getStyleClass().add(
-                "repair-issue-card"
-        );
-
+    private VBox createIssueCard(RepairIssue issue) {
+        Badge type = new Badge(issue.type(), Badge.Tone.WARNING);
+        Label title = new Label(issue.title());
+        title.setWrapText(true);
+        title.getStyleClass().add("repair-issue-title");
+        Label details = new Label(issue.details());
+        details.setWrapText(true);
+        details.getStyleClass().add("repair-issue-details");
+        HBox top = new HBox(10, type);
+        top.setAlignment(Pos.CENTER_LEFT);
+        Card card = new Card(top, title, details).padded(18).spaced(8);
+        card.setMaxWidth(Double.MAX_VALUE);
         return card;
     }
 

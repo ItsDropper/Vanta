@@ -414,10 +414,7 @@ public class GlobalModsView extends VBox {
         // SEARCH RESULTS
         // =========================================================
 
-        results = new FlowPane();
-        results.setHgap(12);
-        results.setVgap(12);
-        results.setAlignment(Pos.TOP_LEFT);
+        results = new dev.itsdropper.vanta.ui.kit.CardGrid(12, 300, 3);
         results.getStyleClass().addAll("instance-list", "modrinth-list-results");
 
         resultsScrollPane =
@@ -1685,24 +1682,13 @@ public class GlobalModsView extends VBox {
     }
 
     private VBox createSizedGlobalProjectCard(ModrinthSearchHit project) {
-        VBox card = createProjectCard(project);
-        double availableWidth = resultsScrollPane.getViewportBounds().getWidth();
-        boolean grid = browserToolbar.isGridLayout();
-        card.setPrefWidth(grid ? 340 : Math.max(280, availableWidth - 28));
-        card.setMinWidth(grid ? 260 : 0);
-        return card;
+        return createProjectCard(project);
     }
 
     private void applyGlobalResultLayout(boolean grid) {
         results.getStyleClass().removeAll("modrinth-grid-results", "modrinth-list-results");
         results.getStyleClass().add(grid ? "modrinth-grid-results" : "modrinth-list-results");
-        double availableWidth = resultsScrollPane.getViewportBounds().getWidth();
-        for (javafx.scene.Node node : results.getChildren()) {
-            if (node instanceof VBox card) {
-                card.setPrefWidth(grid ? 340 : Math.max(280, availableWidth - 28));
-                card.setMinWidth(grid ? 260 : 0);
-            }
-        }
+        ((dev.itsdropper.vanta.ui.kit.CardGrid) results).setGrid(grid);
     }
 
     // =============================================================

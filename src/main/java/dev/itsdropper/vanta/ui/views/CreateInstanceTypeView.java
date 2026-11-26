@@ -1,7 +1,12 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.ui.Localization;
+import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.components.PageHeader;
+import dev.itsdropper.vanta.ui.kit.CoverArt;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Rectangle;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -33,28 +38,26 @@ public class CreateInstanceTypeView extends VBox {
         heading.getStyleClass().add("create-type-header");
         heading.setMaxWidth(900);
 
-        Label section = new Label(Localization.text("createType.section"));
-        section.getStyleClass().add("create-type-section-label");
         GridPane grid = new GridPane();
         grid.getStyleClass().add("create-type-grid");
         grid.setHgap(16);
         grid.setVgap(16);
         grid.setMaxWidth(1040);
         ColumnConstraints left = new ColumnConstraints();
-        left.setHgrow(Priority.ALWAYS);
+        left.setPercentWidth(50);
         left.setFillWidth(true);
         left.setMinWidth(0);
         ColumnConstraints right = new ColumnConstraints();
-        right.setHgrow(Priority.ALWAYS);
+        right.setPercentWidth(50);
         right.setFillWidth(true);
         right.setMinWidth(0);
         grid.getColumnConstraints().setAll(left, right);
 
-        java.util.List<Button> options = java.util.List.of(
-                option("01", "✦", "custom", "create-option-custom", onCustom),
-                option("02", "↗", "import", "create-option-import", onImport),
-                option("03", "▦", "preset", "create-option-preset", onPreset),
-                option("04", "⌕", "modrinth", "create-option-modrinth", onModrinth)
+        java.util.List<VBox> options = java.util.List.of(
+                option(IconView.Type.PLUS, "custom", "create-custom", "fabric", onCustom),
+                option(IconView.Type.UPLOAD, "import", "create-import", "forge", onImport),
+                option(IconView.Type.PACKAGE, "preset", "create-preset", "quilt", onPreset),
+                option(IconView.Type.SEARCH, "modrinth", "create-modrinth", "neoforge", onModrinth)
         );
         options.forEach(grid.getChildren()::add);
         Runnable adaptGrid = () -> {
@@ -80,7 +83,7 @@ public class CreateInstanceTypeView extends VBox {
         grid.widthProperty().addListener((observable, oldWidth, newWidth) -> adaptGrid.run());
         adaptGrid.run();
 
-        VBox content = new VBox(14, section, grid);
+        VBox content = new VBox(14, grid);
         content.getStyleClass().add("create-type-content");
         content.setMaxWidth(1040);
 
@@ -96,58 +99,61 @@ public class CreateInstanceTypeView extends VBox {
         getChildren().addAll(heading, content, footer);
     }
 
-    private Button option(String number, String symbol, String key, String variant, Runnable action) {
+    private VBox option(IconView.Type icon, String key, String seed, String loader, Runnable action) {
         String prefix = "createType." + key + ".";
-        Button button = new Button();
-        button.getStyleClass().addAll("create-type-option", variant);
+        VBox button = new VBox();
+        button.getStyleClass().addAll("create-tile", "create-option-" + key);
         button.setMaxWidth(Double.MAX_VALUE);
-        button.setMinHeight(174);
-        button.setPrefHeight(190);
-        button.setContentDisplay(javafx.scene.control.ContentDisplay.GRAPHIC_ONLY);
+        button.setFocusTraversable(true);
+        button.setAccessibleRole(javafx.scene.AccessibleRole.BUTTON);
         button.setAccessibleText(Localization.text(prefix + "title") + ". " + Localization.text(prefix + "description"));
 
-        Label index = new Label(number);
-        index.getStyleClass().add("create-type-number");
-        Label icon = new Label(symbol);
-        icon.getStyleClass().add("create-type-icon");
-        HBox top = new HBox(10, index, icon);
-        top.setAlignment(Pos.CENTER_LEFT);
+        CoverArt art = new CoverArt(seed, loader).sized(10, 110);
+        art.setMinHeight(110);
+        art.setPrefHeight(110);
+        art.setMaxHeight(110);
+        Region shade = new Region();
+        shade.getStyleClass().add("create-tile-shade");
+        StackPane plate = new StackPane(IconView.create(icon, 20));
+        plate.getStyleClass().add("create-tile-plate");
+        plate.setMinSize(44, 44);
+        plate.setPrefSize(44, 44);
+        plate.setMaxSize(44, 44);
+        StackPane.setAlignment(plate, Pos.BOTTOM_LEFT);
+        StackPane.setMargin(plate, new Insets(0, 0, 14, 16));
+        StackPane header = new StackPane(art, shade, plate);
+        header.getStyleClass().add("create-tile-header");
+        header.setMinHeight(110);
+        header.setPrefHeight(110);
+        header.setMaxHeight(110);
+
+        art.prefWidthProperty().bind(header.widthProperty());
+        Rectangle clip = new Rectangle();
+        clip.widthProperty().bind(header.widthProperty());
+        clip.setHeight(110);
+        clip.setArcWidth(22);
+        clip.setArcHeight(22);
+        header.setClip(clip);
 
         Label title = new Label(Localization.text(prefix + "title"));
-        title.getStyleClass().add("create-type-option-title");
+        title.getStyleClass().add("create-tile-title");
         title.setWrapText(true);
         Label description = new Label(Localization.text(prefix + "description"));
-        description.getStyleClass().add("create-type-option-description");
+        description.getStyleClass().add("create-tile-description");
         description.setWrapText(true);
         description.setMaxWidth(Double.MAX_VALUE);
-        Label meta = new Label(Localization.text(prefix + "meta"));
-        meta.getStyleClass().add("create-type-option-meta");
-        meta.setWrapText(true);
-
-        VBox copy = new VBox(7, title, description, meta);
-        HBox.setHgrow(copy, Priority.ALWAYS);
-        Label arrow = new Label("→");
-        arrow.getStyleClass().add("create-type-option-arrow");
-        HBox bottom = new HBox(copy, arrow);
-        bottom.setAlignment(Pos.BOTTOM_CENTER);
-        VBox graphic = new VBox(16, top, bottom);
-        graphic.setPadding(new Insets(18, 19, 17, 19));
-        graphic.setAlignment(Pos.CENTER_LEFT);
-        graphic.setMinWidth(0);
-        graphic.getStyleClass().add("create-type-option-layout");
-        // A Button does not automatically stretch its graphic to the full
-        // content width. Bind it explicitly so the copy and arrow stay inside
-        // the card instead of collapsing into a narrow, malformed column.
-        graphic.prefWidthProperty().bind(button.widthProperty().subtract(40));
-        graphic.maxWidthProperty().bind(button.widthProperty().subtract(40));
-        top.setMaxWidth(Double.MAX_VALUE);
-        bottom.setMaxWidth(Double.MAX_VALUE);
+        VBox copy = new VBox(4, title, description);
+        copy.setPadding(new Insets(14, 16, 16, 16));
         copy.setMinWidth(0);
-        copy.setMaxWidth(Double.MAX_VALUE);
-        arrow.setMinWidth(18);
-        arrow.setAlignment(Pos.CENTER_RIGHT);
-        button.setGraphic(graphic);
-        button.setOnAction(event -> action.run());
+
+        button.getChildren().addAll(header, copy);
+        header.maxWidthProperty().bind(button.widthProperty().subtract(2));
+        button.setOnMouseClicked(event -> action.run());
+        button.setOnKeyPressed(event -> {
+            if (event.getCode() == javafx.scene.input.KeyCode.ENTER || event.getCode() == javafx.scene.input.KeyCode.SPACE) {
+                action.run();
+            }
+        });
         return button;
     }
 }

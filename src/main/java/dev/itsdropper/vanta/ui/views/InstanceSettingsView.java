@@ -130,7 +130,7 @@ public class InstanceSettingsView extends VBox {
 
         Label memoryTitle =
                 createSectionTitle(
-                        "MEMORY"
+                        "Memory"
                 );
 
         ramValueLabel =
@@ -227,7 +227,7 @@ public class InstanceSettingsView extends VBox {
 
         Label javaTitle =
                 createSectionTitle(
-                        "JAVA"
+                        "Java"
                 );
 
         javaPathField =
@@ -312,7 +312,7 @@ public class InstanceSettingsView extends VBox {
 
         Label gameTitle =
                 createSectionTitle(
-                        "GAME"
+                        "Game"
                 );
 
         gameArgumentsArea =
@@ -412,7 +412,7 @@ public class InstanceSettingsView extends VBox {
         // LOADER STACK
         // ---------------------------------------------------------
 
-        Label loaderStackTitle = createSectionTitle("LOADER STACK");
+        Label loaderStackTitle = createSectionTitle("Loader stack");
 
         loaderStackProfilesArea = new TextArea();
         loaderStackProfilesArea.setEditable(false);
@@ -454,7 +454,7 @@ public class InstanceSettingsView extends VBox {
 
         Label directoryTitle =
                 createSectionTitle(
-                        "DIRECTORY"
+                        "Directory"
                 );
 
         Label directory =

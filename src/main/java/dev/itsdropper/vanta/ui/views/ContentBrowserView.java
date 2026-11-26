@@ -18,6 +18,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
@@ -55,10 +56,10 @@ public class ContentBrowserView extends VBox {
     private final HttpClient httpClient;
 
     private final TextField searchField;
-    private final VBox results;
+    private final javafx.scene.layout.FlowPane results;
     private final Label statusLabel;
 
-    private final VBox popularResults;
+    private final javafx.scene.layout.FlowPane popularResults;
     private final Label popularStatusLabel;
     private final Label popularTitle;
     private final ScrollPane popularScrollPane;
@@ -217,10 +218,10 @@ public class ContentBrowserView extends VBox {
                         )
         );
 
-        HBox typeNavigation = new HBox(20, modsButton, packsButton, shadersButton);
+        HBox typeNavigation = new HBox(4, modsButton, packsButton, shadersButton);
         typeNavigation.getStyleClass().add("instance-tabs");
         typeNavigation.setAlignment(Pos.CENTER_LEFT);
-        typeNavigation.setMaxWidth(Double.MAX_VALUE);
+        typeNavigation.setMaxWidth(Region.USE_PREF_SIZE);
 
         updateTypeButtons();
 
@@ -287,6 +288,7 @@ public class ContentBrowserView extends VBox {
         searchBar.setAlignment(
                 Pos.CENTER_LEFT
         );
+        searchBar.getStyleClass().add("content-browser-bar");
 
         // =========================================================
         // POPULAR
@@ -300,11 +302,9 @@ public class ContentBrowserView extends VBox {
         popularTitle.getStyleClass().add(
                 "settings-section-title"
         );
+        popularTitle.setPadding(new Insets(6, 0, 0, 2));
 
-        popularResults =
-                new VBox(
-                        12
-                );
+        popularResults = new dev.itsdropper.vanta.ui.kit.CardGrid(12, 300, 3);
 
         popularResults.setAlignment(
                 Pos.TOP_LEFT
@@ -327,13 +327,7 @@ public class ContentBrowserView extends VBox {
                 ScrollPane.ScrollBarPolicy.AS_NEEDED
         );
 
-        popularScrollPane.setPrefHeight(
-                320
-        );
-
-        popularScrollPane.setMaxHeight(
-                320
-        );
+        VBox.setVgrow(popularScrollPane, Priority.ALWAYS);
 
         popularScrollPane.getStyleClass().add(
                 "instances-scroll"
@@ -350,10 +344,7 @@ public class ContentBrowserView extends VBox {
         // SEARCH RESULTS
         // =========================================================
 
-        results =
-                new VBox(
-                        12
-                );
+        results = new dev.itsdropper.vanta.ui.kit.CardGrid(12, 300, 3);
 
         results.getStyleClass().add(
                 "instance-list"
@@ -666,194 +657,32 @@ public class ContentBrowserView extends VBox {
             ModrinthProject project,
             boolean popular
     ) {
+        ImageView icon = createIcon(52);
+        loadIcon(project, icon);
+        VBox iconBox = createIconBox(icon, 52);
 
-        ImageView icon =
-                createIcon(
-                        popular
-                                ? 48
-                                : 52
-                );
-
-        loadIcon(
-                project,
-                icon
-        );
-
-        VBox iconBox =
-                createIconBox(
-                        icon,
-                        popular
-                                ? 48
-                                : 52
-                );
-
-        Label title =
-                new Label(
-                        safe(
-                                project.getTitle(),
-                                "Unknown project"
-                        )
-                );
-
-        title.getStyleClass().add(
-                "instance-name"
-        );
-
-        title.setWrapText(
-                true
-        );
-
-        Label description =
-                new Label(
-                        safe(
-                                project.getDescription(),
-                                "No description available."
-                        )
-                );
-
-        description.setWrapText(
-                true
-        );
-
-        description.setMaxWidth(
-                popular
-                        ? 210
-                        : Double.MAX_VALUE
-        );
-
-        if (popular) {
-            description.setMaxHeight(42);
-        } else {
-            description.setMinHeight(36);
+        Label title = new Label(safe(project.getTitle(), "Unknown project"));
+        Label author = new Label();
+        Label description = new Label(safe(project.getDescription(), "No description available."));
+        javafx.scene.layout.HBox tags = new javafx.scene.layout.HBox(6);
+        if (project.getLoaders() != null) {
+            project.getLoaders().stream().limit(2).forEach(loader ->
+                    tags.getChildren().add(dev.itsdropper.vanta.ui.kit.Badge.loader(loader)));
         }
-
-        description.getStyleClass().add(
-                "instance-version"
-        );
-
-        Label metadata =
-                new Label(
-                        Localization.text("common.modrinthPrefix")
-                                + formatDownloads(
-                                project.getDownloads()
-                        )
-                                + " downloads"
-                );
-
-        metadata.getStyleClass().add(
-                "instance-loader"
-        );
-
-        VBox information =
-                new VBox(
-                        6,
-                        title,
-                        description,
-                        metadata
-                );
-
-        information.setFillWidth(
-                true
-        );
-        information.setMinWidth(0);
-
-        HBox.setHgrow(
-                information,
-                Priority.ALWAYS
-        );
-
-        HBox row;
-
-        if (popular) {
-
-            row =
-                    new HBox(
-                            12,
-                            iconBox,
-                            information
-                    );
-
-        } else {
-
-            Button installButton =
-                    new Button(
-                            Localization.text("common.install")
-                    );
-
-            installButton.getStyleClass().add(
-                    "instance-play-button"
-            );
-
-            installButton.setPrefWidth(
-                    110
-            );
-
-            installButton.setMinWidth(
-                    110
-            );
-
-            installButton.setOnAction(
-                    event -> {
-
-                        event.consume();
-
-                        install(
-                                project,
-                                installButton
-                        );
-                    }
-            );
-
-            row =
-                    new HBox(
-                            16,
-                            iconBox,
-                            information,
-                            installButton
-                    );
-        }
-
-        row.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        VBox card =
-                new VBox(
-                        row
-                );
-
-        card.setMaxWidth(
-                Double.MAX_VALUE
-        );
-
-        card.setPadding(
-                new Insets(
-                        14
-                )
-        );
-
-        card.getStyleClass().add(
-                "instance-card"
-        );
-
-        card.setCursor(
-                Cursor.HAND
-        );
-
-        card.setOnMouseClicked(
-                event -> {
-
-                    if (event.getButton()
-                            == MouseButton.PRIMARY) {
-
-                        onProjectSelected.accept(
-                                project
-                        );
-                    }
-                }
-        );
-
-        return card;
+        Button menu = new Button();
+        menu.setManaged(false);
+        menu.setVisible(false);
+        Button installButton = new Button(Localization.text("common.install"));
+        installButton.getStyleClass().add("primary-button");
+        installButton.setOnAction(event -> {
+            event.consume();
+            install(project, installButton);
+        });
+        return new dev.itsdropper.vanta.ui.components.ModrinthProjectCard(
+                iconBox, title, author, description, tags,
+                project.getDownloads(), project.getFollows(), null,
+                menu, installButton, true,
+                () -> onProjectSelected.accept(project));
     }
 
     // =============================================================

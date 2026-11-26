@@ -1,1 +1,47 @@
-/* create.css: to be written on the new design system (see tokens.css, base.css, utilities.css). */
+/* create.css: create-instance flow. */
+
+.create-tile {
+    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 13, 12, 12;
+    -fx-padding: 1;
+    -fx-alignment: top-left;
+    -fx-cursor: hand;
+}
+
+.create-tile:hover,
+.create-tile:focused {
+    -fx-background-color: -vantaaccent-a55, -v-card-hover, linear-gradient(to bottom, -v-gloss, transparent 55%);
+}
+
+.create-tile:pressed {
+    -fx-background-color: -vantaaccent-a55, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+}
+
+.create-tile-shade {
+    -fx-background-color: linear-gradient(to bottom, transparent 30%, rgba(0, 0, 0, 0.55));
+}
+
+.create-tile-plate {
+    -fx-background-color: -v-scrim;
+    -fx-background-radius: 12;
+    -fx-border-color: rgba(255, 255, 255, 0.14);
+    -fx-border-radius: 12;
+}
+
+.create-tile-plate .icon-view,
+.create-tile-plate .svg-path {
+    -fx-fill: white;
+}
+
+.create-tile-title {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 16px;
+    -fx-text-fill: -vantatext;
+}
+
+.create-tile-description {
+    -fx-font-size: 12.5px;
+    -fx-text-fill: -vantamuted;
+    -fx-wrap-text: true;
+}
