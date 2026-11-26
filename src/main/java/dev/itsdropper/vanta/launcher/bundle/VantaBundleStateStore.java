@@ -60,6 +60,37 @@ public final class VantaBundleStateStore {
         }
     }
 
+    /**
+     * Reconciles profile ownership against Vanta's explicit Modrinth install registry.
+     * Manually installed files are never inferred or added to profile ownership.
+     */
+    public VantaBundleState reconcileManagedProjects(
+            Instance instance,
+            java.util.Set<String> registeredProjectIds
+    ) throws IOException {
+        VantaBundleState state = load(instance);
+        if (state == null) return null;
+
+        java.util.Set<String> registered = registeredProjectIds == null
+                ? java.util.Set.of() : java.util.Set.copyOf(registeredProjectIds);
+        java.util.List<String> reconciled = state.installedManagedProjectIds().stream()
+                .filter(registered::contains)
+                .toList();
+        if (reconciled.equals(state.installedManagedProjectIds())) return state;
+
+        VantaBundleState updated = new VantaBundleState(
+                state.schemaVersion(),
+                state.profileId(),
+                state.profileVersion(),
+                state.selectedBundleIds(),
+                state.selectedModProjectIds(),
+                reconciled,
+                state.dismissedOfferVersion()
+        );
+        save(instance, updated);
+        return updated;
+    }
+
     private static Path resolveFile(Instance instance) throws IOException {
         if (instance == null || instance.getDirectory() == null) {
             throw new IllegalArgumentException("A valid Minecraft instance is required.");
