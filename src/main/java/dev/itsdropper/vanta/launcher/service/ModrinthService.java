@@ -197,6 +197,10 @@ public class ModrinthService {
         List<InstalledModScanner.MissingDependency> repaired = new ArrayList<>();
         for (InstalledModScanner.MissingDependency dependency : missing) {
             String modId = dependency.modId();
+            boolean alreadyInstalled = installedModScanner.scan(instance).stream()
+                    .anyMatch(mod -> mod != null && mod.getModId() != null
+                            && modId.equalsIgnoreCase(mod.getModId()));
+            if (alreadyInstalled) continue;
             reporter.accept("Resolving required dependency " + modId + "...");
             ModrinthProject project = null;
             try {
