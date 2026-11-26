@@ -13,8 +13,11 @@ public final class MinecraftSecurityException extends IllegalStateException {
 
     public MinecraftSecurityException(String minecraftVersion, String artifact) {
         super("Mojang's current metadata for " + minecraftVersion
-                + " contains an unpatched FreeType artifact (" + artifact
-                + "); refusing to launch with an unverified native font engine.");
+                + " still selects the unpatched FreeType artifact (" + artifact + "). "
+                + "Vanta cannot safely replace this native library with a different LWJGL build. "
+                + "No instance reinstall is needed: Vanta checks Mojang's official metadata on every launch "
+                + "and will automatically download and install the patched library as soon as Mojang publishes it. "
+                + "Launching remains blocked until that official update is available.");
         this.minecraftVersion = minecraftVersion;
         this.artifact = artifact;
     }
