@@ -728,11 +728,24 @@ public class ModsView extends VBox {
                     .map(InstalledModRecord::getProjectId)
                     .filter(projectId -> projectId != null && !projectId.isBlank())
                     .collect(java.util.stream.Collectors.toSet());
+            // GitHub-release profile components are not present in Modrinth's
+            // install registry. Preserve ownership only when this profile had
+            // already claimed Vanta Client and its installed JAR still exists.
+            boolean hasManagedVantaClient = state.installedManagedProjectIds().contains("vanta-client")
+                    && records.stream().anyMatch(record -> {
+                        String filename = record.getFilename();
+                        return filename != null && filename.startsWith("dropperutils-") && filename.endsWith(".jar");
+                    });
+            if (hasManagedVantaClient) registeredProjects.add("vanta-client");
             state = store.reconcileManagedProjects(instance, registeredProjects);
 
             Set<String> managedProjects = Set.copyOf(state.installedManagedProjectIds());
             profileManagedFilenames = records.stream()
-                    .filter(record -> managedProjects.contains(record.getProjectId()))
+                    .filter(record -> managedProjects.contains(record.getProjectId())
+                            || (managedProjects.contains("vanta-client")
+                            && record.getFilename() != null
+                            && record.getFilename().startsWith("dropperutils-")
+                            && record.getFilename().endsWith(".jar")))
                     .map(InstalledModRecord::getFilename)
                     .filter(filename -> filename != null && !filename.isBlank())
                     .collect(java.util.stream.Collectors.toSet());
