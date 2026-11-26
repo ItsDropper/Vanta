@@ -139,6 +139,47 @@ jobs:
           Remove-Item $testDirectory -Recurse -Force
           Write-Host 'NSIS installer compiled and checksum verifier passed positive/negative tests.'
 
+      - name: Smoke test the actual Windows installer and uninstaller
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $fixtureDirectory = Join-Path $env:RUNNER_TEMP 'vanta-installer-version-test'
+          New-Item -ItemType Directory -Path $fixtureDirectory -Force | Out-Null
+          $metadata = Join-Path $fixtureDirectory 'release.json'
+          $versionPath = Join-Path $fixtureDirectory 'version.txt'
+          Set-Content -LiteralPath $metadata -Value '{"tag_name":"v1.2.3"}' -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath
+          if ($LASTEXITCODE -ne 0 -or (Get-Content -LiteralPath $versionPath -Raw) -ne '1.2.3') {
+            throw 'Installer release-version parser failed its valid-tag test.'
+          }
+          Set-Content -LiteralPath $metadata -Value '{"tag_name":"v1.2.3/../../bad"}' -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath 2>$null
+          if ($LASTEXITCODE -eq 0) { throw 'Installer release-version parser accepted an invalid tag.' }
+          $global:LASTEXITCODE = 0
+
+          $installDirectory = Join-Path $env:LOCALAPPDATA 'Vanta'
+          if (Test-Path $installDirectory) {
+            throw "Unexpected pre-existing Vanta installation in clean runner: $installDirectory"
+          }
+          $installer = (Resolve-Path '.\\VantaSetup.exe').Path
+          Write-Host 'Running the real bootstrap installer in silent mode...'
+          $install = Start-Process -FilePath $installer -ArgumentList '/S' -Wait -PassThru
+          if ($install.ExitCode -ne 0) { throw "Vanta installer exited with code $($install.ExitCode)." }
+          foreach ($required in @('Vanta.exe', 'runtime/lib/modules', 'app/Vanta.cfg', 'updater/VantaUpdater.jar', 'Uninstall.exe')) {
+            if (!(Test-Path (Join-Path $installDirectory $required) -PathType Leaf)) {
+              throw "Installed Vanta package is missing $required."
+            }
+          }
+
+          Write-Host 'Running the installed uninstaller...'
+          $uninstaller = Join-Path $installDirectory 'Uninstall.exe'
+          $uninstall = Start-Process -FilePath $uninstaller -ArgumentList '/S' -Wait -PassThru
+          if ($uninstall.ExitCode -ne 0) { throw "Vanta uninstaller exited with code $($uninstall.ExitCode)." }
+          if (Test-Path $installDirectory) { throw 'Vanta uninstaller left the installation directory behind.' }
+          Remove-Item $fixtureDirectory -Recurse -Force
+          Write-Host 'Windows installer and uninstaller end-to-end smoke test passed.'
+
       - name: Verify Linux application image layout
         if: runner.os == 'Linux'
         run: |
