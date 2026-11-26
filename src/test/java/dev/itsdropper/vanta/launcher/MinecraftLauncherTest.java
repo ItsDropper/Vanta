@@ -61,11 +61,11 @@ class MinecraftLauncherTest {
 
     @Test
     void keepsFontMitigationEnabledWithoutRejectingVanillaIndexedTextures() {
-        Path agent = Path.of("C:/Vanta/security/m2sfix-agent-2.3.0.jar");
+        Path agent = Path.of("security", "m2sfix-agent-2.3.0.jar");
         assertEquals(List.of(
                 "-Dm2sfix.policy=safe",
                 "-Dm2sfix.images=off",
-                "-javaagent:C:/Vanta/security/m2sfix-agent-2.3.0.jar"
+                "-javaagent:" + agent.toAbsolutePath().normalize()
         ), MinecraftLauncher.securityMitigationJvmArguments(agent));
     }
 
