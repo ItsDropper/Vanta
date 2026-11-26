@@ -162,7 +162,7 @@ jobs:
           if (Test-Path $installDirectory) {
             throw "Unexpected pre-existing Vanta installation in clean runner: $installDirectory"
           }
-          $installer = (Resolve-Path '.\\VantaSetup.exe').Path
+          $installer = (Resolve-Path '.\VantaSetup.exe').Path
           Write-Host 'Running the real bootstrap installer in silent mode...'
           $install = Start-Process -FilePath $installer -ArgumentList '/S' -Wait -PassThru
           if ($install.ExitCode -ne 0) { throw "Vanta installer exited with code $($install.ExitCode)." }
