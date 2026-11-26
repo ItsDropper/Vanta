@@ -3,6 +3,8 @@ package dev.itsdropper.vanta.json;
 import dev.itsdropper.vanta.json.JsonProcessingException;
 import dev.itsdropper.vanta.json.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import dev.itsdropper.vanta.launcher.model.Instance;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
@@ -27,6 +29,17 @@ class VantaJsonTest {
     void strictMapperRejectsDuplicateObjectKeys() {
         assertThrows(JsonProcessingException.class,
                 () -> VantaJson.strictMapper().readTree("{\"value\":1,\"value\":2}"));
+    }
+
+    @Test
+    void serializesAndRestoresInstancePathFields() throws Exception {
+        Path directory = Path.of("instances", "test-instance");
+        Instance original = new Instance("test-instance", "Test", "1.21.11",
+                "Fabric", "0.16.0", directory);
+        byte[] json = VantaJson.mapper().writeValueAsBytes(original);
+        Instance restored = VantaJson.mapper().readValue(json, Instance.class);
+        assertEquals(directory, restored.getDirectory());
+        assertEquals("SHIELD", restored.getIcon());
     }
 
     @Test

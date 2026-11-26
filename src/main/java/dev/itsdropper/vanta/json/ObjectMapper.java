@@ -88,7 +88,7 @@ public final class ObjectMapper {
                         return JsonNode.wrap(parseValue(in, false));
                     }
                 })
-                .registerTypeAdapter(Path.class, new TypeAdapter<Path>() {
+                .registerTypeHierarchyAdapter(Path.class, new TypeAdapter<Path>() {
                     @Override public void write(JsonWriter out, Path path) throws IOException {
                         if (path == null) out.nullValue(); else out.value(path.toString());
                     }
