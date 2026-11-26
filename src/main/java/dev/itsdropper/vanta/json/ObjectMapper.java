@@ -50,7 +50,7 @@ public final class ObjectMapper {
     private final Gson gson;
 
     public ObjectMapper() { this(false, false, false); }
-    private ObjectMapper(boolean strictDuplicates, boolean pretty, boolean failUnknown) {
+    ObjectMapper(boolean strictDuplicates, boolean pretty, boolean failUnknown) {
         this.strictDuplicates = strictDuplicates;
         this.pretty = pretty;
         this.failUnknown = failUnknown;
@@ -64,7 +64,7 @@ public final class ObjectMapper {
                 .addSerializationExclusionStrategy(new ExclusionStrategy() {
                     @Override public boolean shouldSkipField(FieldAttributes field) {
                         return field.getAnnotation(JsonIgnore.class) != null
-                                || Modifier.isTransient(field.getDeclaredType().getModifiers());
+                                || Modifier.isTransient(field.getModifiers());
                     }
                     @Override public boolean shouldSkipClass(Class<?> type) { return false; }
                 })
