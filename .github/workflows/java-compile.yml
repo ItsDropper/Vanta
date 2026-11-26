@@ -171,7 +171,7 @@ jobs:
             throw 'Vanta installer did not finish within six minutes.'
           }
           if ($install.ExitCode -ne 0) {
-            $installerLog = Join-Path $env:TEMP 'nsislog.txt'
+            $installerLog = Join-Path $env:TEMP 'VantaInstaller.log'
             $details = if (Test-Path $installerLog) { (Get-Content $installerLog -Tail 100) -join "\n" } else { 'NSIS did not produce its installer log.' }
             throw "Vanta installer exited with code $($install.ExitCode). $details"
           }
