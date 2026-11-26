@@ -206,6 +206,7 @@ public final class NeoForgeInstaller {
                             .directory(target.toFile())
                             .redirectErrorStream(true)
                             .start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
 
             String output =
                     new String(
