@@ -290,6 +290,18 @@ public class LaunchService {
 
         } catch (Exception e) {
 
+            // A failure in launcher-side monitoring/UI bookkeeping must never
+            // turn a still-live Minecraft JVM into a reported game crash.
+            // Once the child process exists, its actual lifetime is authoritative.
+            Process activeProcess = minecraftProcess;
+            if (activeProcess != null && activeProcess.isAlive()) {
+                System.err.println("[Vanta Launch] A post-start launcher operation failed while "
+                        + "Minecraft is still alive; retaining the running session. "
+                        + e.getClass().getSimpleName());
+                setState(LaunchState.RUNNING);
+                return activeProcess;
+            }
+
             minecraftProcess = null;
 
             runningInstance = null;
@@ -967,6 +979,16 @@ public class LaunchService {
     private synchronized void setState(
             LaunchState newState
     ) {
+
+        // Log signatures and advisory crash diagnoses are not process state.
+        // Never publish ERROR while the exact Minecraft process is still alive.
+        if (newState == LaunchState.ERROR
+                && minecraftProcess != null
+                && minecraftProcess.isAlive()) {
+            System.err.println("[Vanta Launch] Ignoring an ERROR transition because Minecraft "
+                    + "process " + minecraftProcess.pid() + " is still alive.");
+            newState = LaunchState.RUNNING;
+        }
 
         state =
                 newState;
