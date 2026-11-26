@@ -44,7 +44,12 @@ Bundle selection state must be stored per instance and must distinguish Vanta-ma
 ## Per-instance state
 
 `VantaBundleStateStore` persists the profile selection in each instance's
-`vanta-profile.json`. It records the profile revision, selected bundles,
+`vanta-profile.json`. `VantaBundleManifestSnapshotStore` also saves the exact
+validated manifest used during installation as `vanta-profile-manifest.json`.
+This snapshot is retained locally even if the user later moves or deletes the
+original import file; it is the foundation for future offline profile inspection
+and safe update comparisons. Snapshot writes are bounded and atomic, and loading
+re-validates the manifest schema. It records the profile revision, selected bundles,
 explicitly selected optional projects, the project IDs Vanta itself manages,
 and the optional-offer revision the user dismissed. Writes use a temporary
 sibling file and atomic replacement where the filesystem supports it.
