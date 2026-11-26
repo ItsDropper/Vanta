@@ -266,7 +266,7 @@ public final class ObjectMapper {
             if (inString) {
                 result.append(current);
                 if (escaped) escaped = false;
-                else if (current == '\\\\') escaped = true;
+                else if (current == '\\') escaped = true;
                 else if (current == '"') inString = false;
                 continue;
             }
