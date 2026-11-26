@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
+import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityMitigationService;
+import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityUpdateService;
 import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
 import dev.itsdropper.vanta.launcher.instance.SteinInstaller;
 import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
@@ -136,6 +138,10 @@ public class LaunchDataBuilder {
 
         data.version =
                 instance.getMinecraftVersion();
+
+        if (MinecraftSecurityUpdateService.isMitigationRequired(instance)) {
+            data.securityAgent = MinecraftSecurityMitigationService.ensureAgent();
+        }
 
         data.versionType = manifest.type;
         data.minecraftArguments = manifest.minecraftArguments;
