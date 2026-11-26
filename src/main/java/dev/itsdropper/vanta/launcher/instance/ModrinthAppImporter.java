@@ -255,7 +255,7 @@ public final class ModrinthAppImporter {
         String args = settings.path("extra_launch_args").asText("");
         if (args.startsWith("[")) {
             try {
-                List<String> values = JSON.readerForListOf(String.class).readValue(args);
+                List<String> values = JSON.readList(args, String.class);
                 LauncherSettings.setDefaultJavaArguments(String.join(" ", values));
                 imported = true;
             } catch (IOException ignored) { }

@@ -8,13 +8,17 @@ import java.nio.file.Path;
 
 public class Instance {
 
-    private final String id;
-    private final String name;
-    private final String minecraftVersion;
-    private final String loader;
-    private final String loaderVersion;
-    private final Path directory;
-    private final String icon;
+    private String id;
+    private String name;
+    private String minecraftVersion;
+    private String loader;
+    private String loaderVersion;
+    private Path directory;
+    private String icon;
+
+    private Instance() {
+        this(null, null, null, null, null, null, "SHIELD");
+    }
 
     public Instance(
             String id,

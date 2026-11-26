@@ -5,11 +5,13 @@ import dev.itsdropper.vanta.json.annotation.JsonProperty;
 
 public final class ServerHistoryEntry {
 
-    private final String host;
-    private final int port;
-    private final String instanceId;
-    private final String instanceName;
-    private final long lastPlayed;
+    private String host;
+    private int port;
+    private String instanceId;
+    private String instanceName;
+    private long lastPlayed;
+
+    private ServerHistoryEntry() { this(null, 25565, null, null, 0L); }
 
     @JsonCreator
     public ServerHistoryEntry(

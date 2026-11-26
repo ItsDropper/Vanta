@@ -161,6 +161,46 @@ public final class ObjectMapper {
         };
     }
 
+    public <T> T readValue(String json, Class<T> type) throws IOException {
+        JsonNode tree = readTree(json);
+        validateKnownProperties(tree == null ? JsonNull.INSTANCE : tree.element(), type);
+        try { return gson.fromJson(tree == null ? JsonNull.INSTANCE : tree.element(), type); }
+        catch (RuntimeException malformed) { throw new JsonProcessingException("Invalid JSON value: " + malformed.getMessage(), malformed); }
+    }
+    public <T> T readValue(String json, TypeReference<T> type) throws IOException {
+        JsonNode tree = readTree(json);
+        validateKnownProperties(tree == null ? JsonNull.INSTANCE : tree.element(), type.getType());
+        try {
+            @SuppressWarnings("unchecked")
+            T value = (T) gson.fromJson(tree == null ? JsonNull.INSTANCE : tree.element(), type.getType());
+            return value;
+        } catch (RuntimeException malformed) {
+            throw new JsonProcessingException("Invalid JSON value: " + malformed.getMessage(), malformed);
+        }
+    }
+    public <T> List<T> readList(String json, Class<T> elementType) throws IOException {
+        java.lang.reflect.Type listType = com.google.gson.reflect.TypeToken
+                .getParameterized(List.class, elementType).getType();
+        try {
+            JsonNode tree = readTree(json);
+            @SuppressWarnings("unchecked")
+            List<T> result = (List<T>) gson.fromJson(tree == null ? JsonNull.INSTANCE : tree.element(), listType);
+            return result;
+        } catch (RuntimeException malformed) {
+            throw new JsonProcessingException("Invalid JSON list: " + malformed.getMessage(), malformed);
+        }
+    }
+    public <T> T readValue(byte[] json, TypeReference<T> type) throws IOException {
+        JsonNode tree = readTree(json);
+        validateKnownProperties(tree == null ? JsonNull.INSTANCE : tree.element(), type.getType());
+        try {
+            @SuppressWarnings("unchecked")
+            T value = (T) gson.fromJson(tree == null ? JsonNull.INSTANCE : tree.element(), type.getType());
+            return value;
+        } catch (RuntimeException malformed) {
+            throw new JsonProcessingException("Invalid JSON value: " + malformed.getMessage(), malformed);
+        }
+    }
     public <T> T readValue(byte[] json, Class<T> type) throws IOException {
         JsonNode tree = readTree(json);
         validateKnownProperties(tree == null ? JsonNull.INSTANCE : tree.element(), type);
