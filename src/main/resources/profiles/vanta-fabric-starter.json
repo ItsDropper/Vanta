@@ -2,7 +2,9 @@
   "schemaVersion": 1,
   "profileId": "vanta-fabric-starter",
   "profileVersion": "1.0.0",
-  "minecraftVersions": ["1.21.11"],
+  "minecraftVersions": [
+    "1.21.11"
+  ],
   "loader": "fabric",
   "bundles": [
     {
@@ -17,6 +19,25 @@
           "versionId": null,
           "required": true,
           "defaultEnabled": true
+        }
+      ]
+    },
+    {
+      "id": "vanta-client",
+      "name": "Vanta Client",
+      "description": "Install the latest Vanta Client build for this computer. Vanta automatically selects the correct operating-system and CPU build.",
+      "required": false,
+      "defaultEnabled": false,
+      "mods": [
+        {
+          "projectId": "vanta-client",
+          "versionId": null,
+          "required": true,
+          "defaultEnabled": true,
+          "githubRelease": {
+            "repository": "ItsDropper/Vanta-Client",
+            "assetPrefix": "dropperutils-"
+          }
         }
       ]
     }
