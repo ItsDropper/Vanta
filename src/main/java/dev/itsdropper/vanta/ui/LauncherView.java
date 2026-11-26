@@ -7,6 +7,11 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
+import dev.itsdropper.vanta.launcher.instance.InstanceManager;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleManifest;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleResolver;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleState;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleStateStore;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstallationProgress;
 import dev.itsdropper.vanta.ui.components.InstanceCreationProgressDialog;
 import dev.itsdropper.vanta.launcher.instance.EnvironmentGuardianService;
@@ -316,7 +321,8 @@ public class LauncherView {
                         this::showCustomCreateInstanceView,
                         this::showImportInstanceView,
                         this::showPresetInstanceView,
-                        this::showModrinthModpackView
+                        this::showModrinthModpackView,
+                        this::showVantaProfilesView
                 );
 
         globalModsView =
@@ -867,6 +873,119 @@ public class LauncherView {
         viewHost.show(
                 createInstanceView
         );
+    }
+
+    private void showVantaProfilesView() {
+        viewHost.show(new VantaProfilesView(
+                this::showCreateInstanceView,
+                this::createVantaProfileInstance
+        ));
+    }
+
+    private void createVantaProfileInstance(
+            VantaBundleManifest manifest,
+            String name,
+            String minecraftVersion,
+            Set<String> selectedBundles,
+            Set<String> selectedOptionalMods
+    ) {
+        final VantaBundleResolver.Resolution resolution;
+        try {
+            resolution = new VantaBundleResolver().resolve(
+                    manifest, minecraftVersion, manifest.loader(),
+                    selectedBundles, selectedOptionalMods);
+        } catch (IOException invalidSelection) {
+            notifications.error("Profile selection is invalid", invalidSelection.getMessage());
+            return;
+        }
+
+        notifications.showProgress("Installing " + manifest.profileId(),
+                "Preparing Minecraft " + minecraftVersion + "...");
+        UiExecutor.shared().execute(() -> {
+            Instance instance = null;
+            try {
+                notifications.updateProgress("Installing Minecraft " + minecraftVersion + "...");
+                instance = switch (manifest.loader()) {
+                    case "fabric" -> InstanceInstaller.installFabric(name, minecraftVersion);
+                    case "quilt" -> InstanceInstaller.installQuilt(name, minecraftVersion);
+                    case "forge" -> InstanceInstaller.installForge(name, minecraftVersion);
+                    case "neoforge" -> InstanceInstaller.installNeoForge(name, minecraftVersion);
+                    case "ornithe" -> InstanceInstaller.installOrnithe(name, minecraftVersion);
+                    case "legacy-fabric" -> InstanceInstaller.installLegacyFabric(name, minecraftVersion);
+                    case "babric" -> InstanceInstaller.installBabric(name, minecraftVersion);
+                    case "nilloader" -> InstanceInstaller.installNilLoader(name, minecraftVersion);
+                    case "liteloader" -> InstanceInstaller.installLiteLoader(name, minecraftVersion);
+                    case "modloader" -> InstanceInstaller.installModLoader(name, minecraftVersion);
+                    case "rift" -> InstanceInstaller.installRift(name, minecraftVersion);
+                    case "stein" -> InstanceInstaller.installSteinLoader(name, minecraftVersion);
+                    default -> throw new IOException("This Vanta profile uses an unsupported loader: "
+                            + manifest.loader());
+                };
+
+                ModrinthService modrinth = new ModrinthService();
+                List<ModrinthProject> roots = new ArrayList<>();
+                for (VantaBundleResolver.ResolvedMod mod : resolution.mods()) {
+                    notifications.updateProgress("Resolving " + mod.projectId() + "...");
+                    ModrinthProject project = modrinth.getProjectBySlug(mod.projectId());
+                    if (project == null) {
+                        throw new IOException("Modrinth project was not found: " + mod.projectId());
+                    }
+                    roots.add(project);
+                }
+
+                List<ModrinthService.ResolvedMod> graph = roots.isEmpty()
+                        ? List.of()
+                        : modrinth.resolveModGraph(instance, roots, null, List.of());
+                java.util.Map<String, String> pinnedVersions = new java.util.LinkedHashMap<>();
+                for (VantaBundleResolver.ResolvedMod mod : resolution.mods()) {
+                    if (mod.versionId() != null) pinnedVersions.put(mod.projectId(), mod.versionId());
+                }
+                for (ModrinthService.ResolvedMod resolved : graph) {
+                    String pinned = pinnedVersions.get(resolved.projectId());
+                    if (pinned != null && !pinned.equals(resolved.version().getId())) {
+                        throw new IOException("The profile pins " + resolved.projectId()
+                                + " to version " + pinned
+                                + ", but the compatible dependency resolver selected "
+                                + resolved.version().getId() + ". The profile cannot be installed safely.");
+                    }
+                }
+
+                if (!graph.isEmpty()) {
+                    notifications.updateProgress("Installing profile mods and dependencies...");
+                    modrinth.installResolvedGraph(instance, graph);
+                }
+                List<String> managedProjects = graph.stream()
+                        .map(ModrinthService.ResolvedMod::projectId).distinct().toList();
+                new VantaBundleStateStore().save(instance, new VantaBundleState(
+                        VantaBundleState.SUPPORTED_SCHEMA_VERSION,
+                        resolution.profileId(),
+                        resolution.profileVersion(),
+                        resolution.selectedBundleIds(),
+                        selectedOptionalMods.stream().sorted().toList(),
+                        managedProjects,
+                        null
+                ));
+
+                UiExecutor.shared().dispatchToUi(() -> {
+                    notifications.success("Vanta profile installed",
+                            manifest.profileId() + " is ready with " + managedProjects.size()
+                                    + " managed mods and dependencies.");
+                    instanceCreated();
+                });
+            } catch (Throwable failure) {
+                if (instance != null) {
+                    try {
+                        InstanceManager.deleteInstance(instance);
+                    } catch (IOException cleanupFailure) {
+                        failure.addSuppressed(cleanupFailure);
+                    }
+                }
+                String message = failure.getMessage() == null
+                        ? failure.getClass().getSimpleName() : failure.getMessage();
+                UiExecutor.shared().dispatchToUi(() ->
+                        notifications.error("Vanta profile installation failed", message));
+            }
+        });
     }
 
     private void showImportInstanceView() {
