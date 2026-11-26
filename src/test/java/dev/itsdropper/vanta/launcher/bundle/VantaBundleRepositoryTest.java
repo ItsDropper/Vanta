@@ -56,6 +56,24 @@ class VantaBundleRepositoryTest {
     }
 
     @Test
+    void loadsBuiltInVantaFabricStarterWithoutAUserSuppliedFile() throws Exception {
+        VantaBundleManifest manifest = repository.loadBundled("profiles/vanta-fabric-starter.json");
+
+        assertEquals("vanta-fabric-starter", manifest.profileId());
+        assertEquals("fabric", manifest.loader());
+        assertTrue(manifest.minecraftVersions().contains("1.21.11"));
+        assertEquals(1, manifest.bundles().size());
+        assertEquals("fabric-api", manifest.bundles().get(0).mods().get(0).projectId());
+        assertTrue(manifest.bundles().get(0).mods().get(0).required());
+    }
+
+    @Test
+    void rejectsBundledResourcePathTraversal() {
+        assertThrows(IOException.class, () -> repository.loadBundled("profiles/../secrets.json"));
+        assertThrows(IOException.class, () -> repository.loadBundled("../profiles/profile.json"));
+    }
+
+    @Test
     void loadsManifestFromDisk() throws Exception {
         Path file = temporaryDirectory.resolve("profile.json");
         Files.write(file, validManifest());
