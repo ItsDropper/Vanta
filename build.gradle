@@ -67,8 +67,7 @@ dependencies {
 
     // Windows credential storage / native access
     implementation 'net.java.dev.jna:jna:5.16.0'
-    implementation 'net.java.dev.jna:jna-platform:5.16.0'
-
+    
     // WebP image support
     implementation 'com.twelvemonkeys.imageio:imageio-webp:3.12.0'
 

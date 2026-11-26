@@ -1,51 +1,30 @@
 package dev.itsdropper.vanta.launcher.security;
 
-import com.sun.jna.platform.win32.Crypt32Util;
 import dev.itsdropper.vanta.launcher.Platform;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+import java.io.IOException;
 
 public final class WindowsCredentialManager {
 
     private WindowsCredentialManager() {
     }
 
-    public static String encrypt(String plaintext) {
-
+    public static String encrypt(String plaintext) throws IOException {
         if (!isWindows()) {
             throw new UnsupportedOperationException(
                     "Windows DPAPI is only available on Windows"
             );
         }
-
-        byte[] encrypted = Crypt32Util.cryptProtectData(
-                plaintext.getBytes(StandardCharsets.UTF_8)
-        );
-
-        return Base64.getEncoder().encodeToString(encrypted);
+        return WindowsDpapi.protectToBase64(plaintext);
     }
 
-    public static String decrypt(String encrypted) {
-
+    public static String decrypt(String encrypted) throws IOException {
         if (!isWindows()) {
             throw new UnsupportedOperationException(
                     "Windows DPAPI is only available on Windows"
             );
         }
-
-        byte[] encryptedBytes =
-                Base64.getDecoder().decode(encrypted);
-
-        byte[] decrypted =
-                Crypt32Util.cryptUnprotectData(
-                        encryptedBytes
-                );
-
-        return new String(
-                decrypted,
-                StandardCharsets.UTF_8
-        );
+        return WindowsDpapi.unprotectFromBase64(encrypted);
     }
 
     private static boolean isWindows() {
