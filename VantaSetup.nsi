@@ -59,6 +59,7 @@ Section "Vanta"
   FileOpen $9 "$LOG_PATH" w
   FileWrite $9 "Vanta installer started.$\r$\n"
   FileClose $9
+  ClearErrors
   StrCpy $WORK_DIR "$TEMP\VantaInstaller"
   CreateDirectory "$WORK_DIR"
   StrCpy $VERSION_PATH "$WORK_DIR\version.txt"
@@ -70,8 +71,10 @@ Section "Vanta"
   nsExec::ExecToLog '"$SYSDIR\curl.exe" -L -sS --fail --retry 3 --connect-timeout 15 --max-time 60 -o "$WORK_DIR\release.json" "https://api.github.com/repos/ItsDropper/Vanta/releases/latest"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "GitHub metadata request exit: $0$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "GitHub release metadata request returned: $0"
   StrCmp $0 "0" +2
     Goto DownloadError
@@ -83,8 +86,10 @@ Section "Vanta"
   nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Read-VantaReleaseVersion.ps1" -ReleaseMetadata "$WORK_DIR\release.json" -OutputPath "$VERSION_PATH"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Release version parser exit: $0$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Release version parser returned: $0"
   StrCmp $0 "0" +2
     Goto InvalidVersion
@@ -99,8 +104,10 @@ Section "Vanta"
   Call ValidateVersion
   Pop $0
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Release version validation: $0$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Release version validation returned: $0"
   StrCmp $0 "1" +2
     Goto InvalidVersion
@@ -112,8 +119,10 @@ Section "Vanta"
   nsExec::ExecToLog '"$SYSDIR\curl.exe" -L -sS --fail --retry 3 --retry-delay 2 --connect-timeout 15 --max-time 300 -o "$ZIP_PATH" "https://github.com/ItsDropper/Vanta/releases/download/v$APP_VERSION/Vanta-$APP_VERSION.zip"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Release archive download exit: $0$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Release asset request returned: $0"
   StrCmp $0 "0" +2
     Goto DownloadError
@@ -130,8 +139,10 @@ Section "Vanta"
   nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Verify-VantaChecksum.ps1" -Archive "$ZIP_PATH" -Checksum "$HASH_PATH"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Checksum verifier exit: $0$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Checksum verifier returned: $0"
   StrCmp $0 "0" +2
     Goto ChecksumFailed
@@ -142,8 +153,10 @@ Section "Vanta"
   nsExec::ExecToLog '"$SYSDIR\tar.exe" -xf "$ZIP_PATH" -C "$WORK_DIR\staged"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Staging archive extraction exit: $0$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Archive extraction returned: $0"
   StrCmp $0 "0" +2
     Goto InvalidPackage
@@ -156,13 +169,17 @@ Section "Vanta"
 
   ; Keep a rollback copy until the new installation passes final validation.
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Install directory selected: $INSTDIR$\r$\n"
   FileClose $9
+  ClearErrors
   RMDir /r "$PREVIOUS_DIR"
   IfFileExists "$INSTDIR\Vanta.exe" 0 NoPreviousInstall
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Existing Vanta.exe detected; moving the previous install.$\r$\n"
   FileClose $9
+  ClearErrors
   ClearErrors
   Rename "$INSTDIR" "$PREVIOUS_DIR"
   IfErrors InstallFailure
@@ -188,43 +205,55 @@ NoPreviousInstall:
 
 CurlMissing:
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Failure: curl.exe missing.$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Installer failure: curl.exe missing."
   !insertmacro VantaInstallerError "Windows curl.exe was not found."
   Goto InstallFailure
 InvalidVersion:
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Failure: release version invalid or parser failed.$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Installer failure: invalid release version or version parser failed."
   !insertmacro VantaInstallerError "GitHub returned an invalid Vanta release version."
   Goto InstallFailure
 DownloadError:
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Failure: release asset download failed.$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Installer failure: release download failed."
   !insertmacro VantaInstallerError "Vanta could not download the latest release."
   Goto InstallFailure
 ChecksumFailed:
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Failure: package checksum failed.$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Installer failure: checksum verification failed."
   !insertmacro VantaInstallerError "The downloaded Vanta package failed SHA-256 verification."
   Goto InstallFailure
 InvalidPackage:
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Failure: package archive layout invalid.$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Installer failure: archive contents invalid."
   !insertmacro VantaInstallerError "The downloaded Vanta package is incomplete or has an unexpected layout."
   Goto InstallFailure
 RestorePrevious:
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "Failure: installed payload validation failed.$\r$\n"
   FileClose $9
+  ClearErrors
   DetailPrint "Installer failure: installation payload validation failed; restoring backup."
   RMDir /r "$INSTDIR"
   IfFileExists "$PREVIOUS_DIR\Vanta.exe" 0 InstallFailure
@@ -233,8 +262,10 @@ RestorePrevious:
   Goto InstallFailure
 InstallFailure:
   FileOpen $9 "$LOG_PATH" a
+  FileSeek $9 0 END
   FileWrite $9 "InstallFailure reached.$\r$\n"
   FileClose $9
+  ClearErrors
   Delete "$WORK_DIR\release.json"
   Delete "$VERSION_PATH"
   Delete "$ZIP_PATH"
