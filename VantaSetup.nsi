@@ -151,25 +151,25 @@ NoPreviousInstall:
   Goto InstallComplete
 
 CurlMissing:
-  !insertmacro VantaInstallerError "${msg}"
+  !insertmacro VantaInstallerError "Windows curl.exe was not found."
   Goto InstallFailure
 InvalidVersion:
-  !insertmacro VantaInstallerError "${msg}"
+  !insertmacro VantaInstallerError "GitHub returned an invalid Vanta release version."
   Goto InstallFailure
 DownloadError:
-  !insertmacro VantaInstallerError "${msg}"
+  !insertmacro VantaInstallerError "Vanta could not download the latest release."
   Goto InstallFailure
 ChecksumFailed:
-  !insertmacro VantaInstallerError "${msg}"
+  !insertmacro VantaInstallerError "The downloaded Vanta package failed SHA-256 verification."
   Goto InstallFailure
 InvalidPackage:
-  !insertmacro VantaInstallerError "${msg}"
+  !insertmacro VantaInstallerError "The downloaded Vanta package is incomplete or has an unexpected layout."
   Goto InstallFailure
 RestorePrevious:
   RMDir /r "$INSTDIR"
   IfFileExists "$PREVIOUS_DIR\Vanta.exe" 0 InstallFailure
   Rename "$PREVIOUS_DIR" "$INSTDIR"
-  !insertmacro VantaInstallerError "${msg}"
+  !insertmacro VantaInstallerError "Vanta installation failed. The previous installation was restored."
   Goto InstallFailure
 InstallFailure:
   Delete "$WORK_DIR\release.json"
