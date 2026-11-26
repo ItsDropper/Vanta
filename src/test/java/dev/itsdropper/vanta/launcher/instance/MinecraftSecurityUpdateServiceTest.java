@@ -35,7 +35,7 @@ class MinecraftSecurityUpdateServiceTest {
     }
 
     @Test
-    void identifiesUnpatchedOfficialMetadataAsASecurityBlock() throws Exception {
+    void acceptsChecksumVerifiedUnpatchedMetadataWhenRuntimeMitigationIsAvailable() throws Exception {
         JsonNode metadata = JSON.readTree("""
                 {
                   "id": "1.21.11",
@@ -54,15 +54,9 @@ class MinecraftSecurityUpdateServiceTest {
                 }
                 """);
 
-        MinecraftSecurityException failure = assertThrows(
-                MinecraftSecurityException.class,
-                () -> MinecraftSecurityUpdateService.validateOfficialMetadata(metadata, "1.21.11"));
-
-        assertEquals("1.21.11", failure.minecraftVersion());
-        assertEquals("org.lwjgl:lwjgl-freetype:3.3.3", failure.artifact());
-        assertTrue(failure.getMessage().contains("checks Mojang's official metadata on every launch"));
-        assertTrue(failure.getMessage().contains("automatically download and install"));
-        assertTrue(failure.getMessage().contains("Launching remains blocked"));
+        assertDoesNotThrow(() ->
+                MinecraftSecurityUpdateService.validateOfficialMetadata(metadata, "1.21.11"));
+        assertTrue(MinecraftSecurityUpdateService.requiresMitigation(metadata));
     }
 
     @Test
