@@ -2,8 +2,8 @@
    Vanta design tokens
    --------------------------------------------------------------------------
    Everything the other stylesheets build on: the derived colour scale, the
-   type roles, and the surface roles. Theme colours (-vantabg, -vantasurface,
-   -vantaaccent …) are injected per root by ThemeManager; nothing in this file
+   type roles, and the surface roles. Theme colours (-fx-vantabg, -fx-vantasurface,
+   -fx-vantaaccent …) are injected per root by ThemeManager; nothing in this file
    hard-codes a theme colour except the neutral white/black alpha ladders.
 
    Scale
@@ -15,41 +15,41 @@
 .root,
 .vanta-ui-root {
     /* hairlines & overlays: theme independent, tuned for dark surfaces */
-    -v-hair: rgba(255, 255, 255, 0.06);
-    -v-hair-strong: rgba(255, 255, 255, 0.10);
-    -v-gloss: rgba(255, 255, 255, 0.04);
-    -v-scrim: rgba(0, 0, 0, 0.55);
+    -fx-v-hair: rgba(255, 255, 255, 0.06);
+    -fx-v-hair-strong: rgba(255, 255, 255, 0.10);
+    -fx-v-gloss: rgba(255, 255, 255, 0.04);
+    -fx-v-scrim: rgba(0, 0, 0, 0.55);
 
     /* surface ladder, from the window frame up to a hovered control */
-    -v-frame: -vantabg;
-    -v-page: -vantasurface;
-    -v-card: -vantasurfaceraised;
-    -v-card-hover: -vantasurfacehover;
-    -v-well: derive(-vantabg, -18%);
+    -fx-v-frame: -fx-vantabg;
+    -fx-v-page: -fx-vantasurface;
+    -fx-v-card: -fx-vantasurfaceraised;
+    -fx-v-card-hover: -fx-vantasurfacehover;
+    -fx-v-well: derive(-fx-vantabg, -18%);
 
     /* status tints (soft fill + readable foreground) */
-    -v-success-soft: derive(-vantasuccess, -78%);
-    -v-danger-soft: derive(-vantadanger, -78%);
-    -v-warning: #E8B04A;
-    -v-warning-soft: #3A2E14;
-    -v-info: #6FA8FF;
-    -v-info-soft: #17263F;
+    -fx-v-success-soft: derive(-fx-vantasuccess, -78%);
+    -fx-v-danger-soft: derive(-fx-vantadanger, -78%);
+    -fx-v-warning: #E8B04A;
+    -fx-v-warning-soft: #3A2E14;
+    -fx-v-info: #6FA8FF;
+    -fx-v-info-soft: #17263F;
 
     /* loader hues: information, not decoration */
-    -v-loader-fabric: #D9C7A0;
-    -v-loader-forge: #7F9CC9;
-    -v-loader-neoforge: #F08A4B;
-    -v-loader-quilt: #B58BE8;
-    -v-loader-vanilla: #7FC47F;
+    -fx-v-loader-fabric: #D9C7A0;
+    -fx-v-loader-forge: #7F9CC9;
+    -fx-v-loader-neoforge: #F08A4B;
+    -fx-v-loader-quilt: #B58BE8;
+    -fx-v-loader-vanilla: #7FC47F;
 
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
-    -vantaicon: -vantamuted;
+    -fx-text-fill: -fx-vantatext;
+    -fx-vantaicon: -fx-vantamuted;
 }
 
 .root {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -fx-vantabg;
 }
 
 /* ---------- type roles ---------------------------------------------------
@@ -59,66 +59,66 @@
 .vanta-type-page-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 22px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .vanta-type-section-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 15px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .vanta-type-body {
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .vanta-type-muted {
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .vanta-type-eyebrow {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .vanta-type-metadata {
     -fx-font-family: "Geist";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 .vanta-type-monospace {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 /* Value text: versions, sizes, hashes, durations. Always mono. */
 .value-mono {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .value-mono-strong {
     -fx-font-family: "JetBrains Mono Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
-.text-strong { -fx-font-family: "Geist SemiBold"; -fx-text-fill: -vantatext; }
+.text-strong { -fx-font-family: "Geist SemiBold"; -fx-text-fill: -fx-vantatext; }
 .text-medium { -fx-font-family: "Geist Medium"; }
-.text-muted { -fx-text-fill: -vantamuted; }
-.text-subtle { -fx-text-fill: -vantasubtle; }
-.text-accent { -fx-text-fill: -vantaaccent; }
-.text-success { -fx-text-fill: -vantasuccess; }
-.text-danger { -fx-text-fill: -vantadanger; }
-.text-warning { -fx-text-fill: -v-warning; }
+.text-muted { -fx-text-fill: -fx-vantamuted; }
+.text-subtle { -fx-text-fill: -fx-vantasubtle; }
+.text-accent { -fx-text-fill: -fx-vantaaccent; }
+.text-success { -fx-text-fill: -fx-vantasuccess; }
+.text-danger { -fx-text-fill: -fx-vantadanger; }
+.text-warning { -fx-text-fill: -fx-v-warning; }
 .text-small { -fx-font-size: 12px; }
 .text-large { -fx-font-size: 15px; }
 
@@ -128,26 +128,26 @@
    node is needed. */
 
 .vanta-surface-sidebar {
-    -fx-background-color: -v-frame;
+    -fx-background-color: -fx-v-frame;
 }
 
 .vanta-surface-panel {
-    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
 }
 
 .vanta-surface-card {
     -fx-background-color:
-        -v-hair-strong,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-v-hair-strong,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 11, 10, 10;
 }
 
 .vanta-surface-inset {
-    -fx-background-color: -v-hair, -v-well;
+    -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
 }
@@ -171,14 +171,14 @@
 .page-header-title {
     -fx-font-family: "Poppins SemiBold";
     -fx-font-size: 24px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .page-subtitle,
 .page-header-subtitle {
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .page-action-row {
@@ -193,46 +193,46 @@
 .card-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 15px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .footer-label {
     -fx-font-size: 12px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 /* ---------- icons --------------------------------------------------------- */
 
 .vanta-icon {
-    -fx-stroke: -vantaicon;
+    -fx-stroke: -fx-vantaicon;
 }
 
 .vanta-icon-solid {
-    -fx-fill: -vantaicon;
+    -fx-fill: -fx-vantaicon;
     -fx-stroke: transparent;
 }
 
 .button:hover > .vanta-icon,
 .toggle-button:hover > .vanta-icon,
 .button:hover .vanta-icon {
-    -fx-stroke: -vantatext;
+    -fx-stroke: -fx-vantatext;
 }
 
 .button:hover .vanta-icon-solid {
-    -fx-fill: -vantatext;
+    -fx-fill: -fx-vantatext;
 }
 
 /* ---------- motion & misc -------------------------------------------------- */
 
 .vanta-divider {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
     -fx-min-height: 1px;
     -fx-pref-height: 1px;
     -fx-max-height: 1px;
 }
 
 .vanta-divider-vertical {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
     -fx-min-width: 1px;
     -fx-pref-width: 1px;
     -fx-max-width: 1px;
@@ -241,16 +241,16 @@
 /* aliases used by the screen stylesheets */
 .root,
 .vanta-ui-root {
-    -vantaline: -v-hair;
-    -vantalinestrong: -v-hair-strong;
-    -vantahover: -vantasurfacehover;
-    -vantaaccentsoft: -vantaaccent-a18;
-    -vantaaccentwash: -vantaaccent-a10;
-    -vantaaccentline: -vantaaccent-a30;
-    -vantaselected: -vantaaccent-a18;
-    -vantaframe: -v-frame;
-    -vantascrim: -v-scrim;
-    -vantadangerwash: -v-danger-soft;
-    -vantadangerline: derive(-vantadanger, -45%);
-    -vantasuccesswash: -v-success-soft;
+    -fx-vantaline: -fx-v-hair;
+    -fx-vantalinestrong: -fx-v-hair-strong;
+    -fx-vantahover: -fx-vantasurfacehover;
+    -fx-vantaaccentsoft: -fx-vantaaccent-a18;
+    -fx-vantaaccentwash: -fx-vantaaccent-a10;
+    -fx-vantaaccentline: -fx-vantaaccent-a30;
+    -fx-vantaselected: -fx-vantaaccent-a18;
+    -fx-vantaframe: -fx-v-frame;
+    -fx-vantascrim: -fx-v-scrim;
+    -fx-vantadangerwash: -fx-v-danger-soft;
+    -fx-vantadangerline: derive(-fx-vantadanger, -45%);
+    -fx-vantasuccesswash: -fx-v-success-soft;
 }

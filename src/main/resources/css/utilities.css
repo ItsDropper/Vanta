@@ -11,8 +11,8 @@
 .badge {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 11.5px;
-    -fx-text-fill: -vantamuted;
-    -fx-background-color: -v-hair, derive(-vantasurfaceraised, 6%);
+    -fx-text-fill: -fx-vantamuted;
+    -fx-background-color: -fx-v-hair, derive(-fx-vantasurfaceraised, 6%);
     -fx-background-insets: 0, 1;
     -fx-background-radius: 6, 5;
     -fx-padding: 2px 8px;
@@ -24,53 +24,53 @@
 }
 
 .badge-accent {
-    -fx-text-fill: -vantaaccent;
-    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
+    -fx-text-fill: -fx-vantaaccent;
+    -fx-background-color: -fx-vantaaccent-a30, -fx-vantaaccent-a10;
 }
 
 .badge-success {
-    -fx-text-fill: -vantasuccess;
-    -fx-background-color: derive(-vantasuccess, -55%), -v-success-soft;
+    -fx-text-fill: -fx-vantasuccess;
+    -fx-background-color: derive(-fx-vantasuccess, -55%), -fx-v-success-soft;
 }
 
 .badge-warning {
-    -fx-text-fill: -v-warning;
-    -fx-background-color: derive(-v-warning, -55%), -v-warning-soft;
+    -fx-text-fill: -fx-v-warning;
+    -fx-background-color: derive(-fx-v-warning, -55%), -fx-v-warning-soft;
 }
 
 .badge-danger {
-    -fx-text-fill: -vantadanger;
-    -fx-background-color: derive(-vantadanger, -55%), -v-danger-soft;
+    -fx-text-fill: -fx-vantadanger;
+    -fx-background-color: derive(-fx-vantadanger, -55%), -fx-v-danger-soft;
 }
 
 .badge-info {
-    -fx-text-fill: -v-info;
-    -fx-background-color: derive(-v-info, -55%), -v-info-soft;
+    -fx-text-fill: -fx-v-info;
+    -fx-background-color: derive(-fx-v-info, -55%), -fx-v-info-soft;
 }
 
 
-.badge-neutral .badge-dot { -fx-fill: -vantasubtle; }
-.badge-accent .badge-dot { -fx-fill: -vantaaccent; }
-.badge-success .badge-dot { -fx-fill: -vantasuccess; }
-.badge-warning .badge-dot { -fx-fill: -v-warning; }
-.badge-danger .badge-dot { -fx-fill: -vantadanger; }
-.badge-info .badge-dot { -fx-fill: -v-info; }
+.badge-neutral .badge-dot { -fx-fill: -fx-vantasubtle; }
+.badge-accent .badge-dot { -fx-fill: -fx-vantaaccent; }
+.badge-success .badge-dot { -fx-fill: -fx-vantasuccess; }
+.badge-warning .badge-dot { -fx-fill: -fx-v-warning; }
+.badge-danger .badge-dot { -fx-fill: -fx-vantadanger; }
+.badge-info .badge-dot { -fx-fill: -fx-v-info; }
 
-.badge-loader { -fx-text-fill: -vantatext; }
-.badge-loader-fabric .badge-dot { -fx-fill: -v-loader-fabric; }
-.badge-loader-forge .badge-dot { -fx-fill: -v-loader-forge; }
-.badge-loader-neoforge .badge-dot { -fx-fill: -v-loader-neoforge; }
-.badge-loader-quilt .badge-dot { -fx-fill: -v-loader-quilt; }
-.badge-loader-vanilla .badge-dot { -fx-fill: -v-loader-vanilla; }
-.badge-loader-other .badge-dot { -fx-fill: -vantasubtle; }
+.badge-loader { -fx-text-fill: -fx-vantatext; }
+.badge-loader-fabric .badge-dot { -fx-fill: -fx-v-loader-fabric; }
+.badge-loader-forge .badge-dot { -fx-fill: -fx-v-loader-forge; }
+.badge-loader-neoforge .badge-dot { -fx-fill: -fx-v-loader-neoforge; }
+.badge-loader-quilt .badge-dot { -fx-fill: -fx-v-loader-quilt; }
+.badge-loader-vanilla .badge-dot { -fx-fill: -fx-v-loader-vanilla; }
+.badge-loader-other .badge-dot { -fx-fill: -fx-vantasubtle; }
 
 /* ---------- chip (filter) -------------------------------------------------- */
 
 .chip {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
-    -fx-background-color: -v-hair-strong, transparent;
+    -fx-text-fill: -fx-vantamuted;
+    -fx-background-color: -fx-v-hair-strong, transparent;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 20, 19;
     -fx-padding: 0 12px;
@@ -80,19 +80,19 @@
 }
 
 .chip:hover {
-    -fx-text-fill: -vantatext;
-    -fx-background-color: -v-hair-strong, -v-hair;
+    -fx-text-fill: -fx-vantatext;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-hair;
 }
 
 .chip:selected {
-    -fx-text-fill: -vantaaccent;
-    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
+    -fx-text-fill: -fx-vantaaccent;
+    -fx-background-color: -fx-vantaaccent-a30, -fx-vantaaccent-a10;
 }
 
 /* ---------- segmented control ---------------------------------------------- */
 
 .segmented {
-    -fx-background-color: -v-hair, -v-well;
+    -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 9, 8;
     -fx-padding: 3px;
@@ -101,22 +101,22 @@
 /* ---------- search field ----------------------------------------------------- */
 
 .search-field {
-    -fx-background-color: -v-hair, -v-well;
+    -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
     -fx-padding: 0 8px 0 12px;
     -fx-min-height: 34px;
     -fx-pref-height: 34px;
-    -vantaicon: -vantasubtle;
+    -fx-vantaicon: -fx-vantasubtle;
 }
 
 .search-field:hover {
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
 }
 
 .search-field:focus-within {
-    -fx-background-color: -vantaaccent-a55, -v-well;
-    -vantaicon: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent-a55, -fx-v-well;
+    -fx-vantaicon: -fx-vantaaccent;
 }
 
 .search-field-input,
@@ -141,7 +141,7 @@
 }
 
 .search-field-clear:hover {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
 }
 
 /* ---------- section header --------------------------------------------------- */
@@ -149,21 +149,21 @@
 .section-header-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 15px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .section-header-description {
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 /* ---------- card ------------------------------------------------------------- */
 
 .kit-card {
     -fx-background-color:
-        -v-hair-strong,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-v-hair-strong,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 12, 11, 11;
 }
@@ -174,22 +174,22 @@
 
 .kit-card-interactive:hover {
     -fx-background-color:
-        -v-hair-strong,
-        -v-card-hover,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-v-hair-strong,
+        -fx-v-card-hover,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 .kit-card-interactive:focused {
     -fx-background-color:
-        -vantaaccent-a55,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-vantaaccent-a55,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 /* ---------- stat tile ---------------------------------------------------------- */
 
 .stat-tile {
-    -fx-background-color: -v-hair, -v-well;
+    -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 11, 10;
 }
@@ -197,28 +197,28 @@
 .stat-tile-label {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .stat-tile-value {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 24px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .stat-tile-hint {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 /* ---------- action tile -------------------------------------------------------- */
 
 .action-tile {
     -fx-background-color:
-        -v-hair-strong,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-v-hair-strong,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 12, 11, 11;
     -fx-padding: 14px 16px;
@@ -228,9 +228,9 @@
 
 .action-tile:hover {
     -fx-background-color:
-        -v-hair-strong,
-        -v-card-hover,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-v-hair-strong,
+        -fx-v-card-hover,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 .action-tile:armed {
@@ -238,41 +238,41 @@
 }
 
 .action-tile-plate {
-    -fx-background-color: -v-hair, derive(-vantasurfaceraised, 8%);
+    -fx-background-color: -fx-v-hair, derive(-fx-vantasurfaceraised, 8%);
     -fx-background-insets: 0, 1;
     -fx-background-radius: 10, 9;
-    -vantaicon: -vantatext;
+    -fx-vantaicon: -fx-vantatext;
 }
 
 .action-tile:hover .action-tile-plate {
-    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
-    -vantaicon: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent-a30, -fx-vantaaccent-a10;
+    -fx-vantaicon: -fx-vantaaccent;
 }
 
 .action-tile-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 14px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .action-tile-description {
     -fx-font-family: "Geist";
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .action-tile-chevron {
-    -vantaicon: -vantasubtle;
+    -fx-vantaicon: -fx-vantasubtle;
 }
 
 .action-tile:hover .action-tile-chevron {
-    -vantaicon: -vantatext;
+    -fx-vantaicon: -fx-vantatext;
 }
 
 /* ---------- instance plate ----------------------------------------------------- */
 
 .plate {
-    -fx-background-color: -v-hair, derive(-vantasurfaceraised, 8%);
+    -fx-background-color: -fx-v-hair, derive(-fx-vantasurfaceraised, 8%);
     -fx-background-insets: 0, 1;
     -fx-background-radius: 11, 10;
 }
@@ -283,66 +283,66 @@
 .plate-quilt   { -fx-background-color: rgba(181,139,232,0.30), rgba(181,139,232,0.13); }
 .plate-vanilla { -fx-background-color: rgba(127,196,127,0.28), rgba(127,196,127,0.12); }
 
-.plate .vanta-icon { -fx-stroke: -vantatext; }
-.plate-fabric .vanta-icon  { -fx-stroke: -v-loader-fabric; }
-.plate-forge .vanta-icon   { -fx-stroke: -v-loader-forge; }
-.plate-neoforge .vanta-icon{ -fx-stroke: -v-loader-neoforge; }
-.plate-quilt .vanta-icon   { -fx-stroke: -v-loader-quilt; }
-.plate-vanilla .vanta-icon { -fx-stroke: -v-loader-vanilla; }
+.plate .vanta-icon { -fx-stroke: -fx-vantatext; }
+.plate-fabric .vanta-icon  { -fx-stroke: -fx-v-loader-fabric; }
+.plate-forge .vanta-icon   { -fx-stroke: -fx-v-loader-forge; }
+.plate-neoforge .vanta-icon{ -fx-stroke: -fx-v-loader-neoforge; }
+.plate-quilt .vanta-icon   { -fx-stroke: -fx-v-loader-quilt; }
+.plate-vanilla .vanta-icon { -fx-stroke: -fx-v-loader-vanilla; }
 
 /* ---------- key / value ---------------------------------------------------------- */
 
 .key-value-row {
     -fx-padding: 9px 0;
-    -fx-border-color: transparent transparent -v-hair transparent;
+    -fx-border-color: transparent transparent -fx-v-hair transparent;
     -fx-border-width: 0 0 1px 0;
 }
 
 .key-value-key {
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 /* ---------- callout -------------------------------------------------------------- */
 
 .callout {
     -fx-padding: 12px 14px;
-    -fx-background-color: -v-hair-strong, -v-info-soft;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-info-soft;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 10, 9;
-    -vantaicon: -v-info;
+    -fx-vantaicon: -fx-v-info;
 }
 
 .callout-success {
-    -fx-background-color: derive(-vantasuccess, -55%), -v-success-soft;
-    -vantaicon: -vantasuccess;
+    -fx-background-color: derive(-fx-vantasuccess, -55%), -fx-v-success-soft;
+    -fx-vantaicon: -fx-vantasuccess;
 }
 
 .callout-warning {
-    -fx-background-color: derive(-v-warning, -55%), -v-warning-soft;
-    -vantaicon: -v-warning;
+    -fx-background-color: derive(-fx-v-warning, -55%), -fx-v-warning-soft;
+    -fx-vantaicon: -fx-v-warning;
 }
 
 .callout-danger {
-    -fx-background-color: derive(-vantadanger, -55%), -v-danger-soft;
-    -vantaicon: -vantadanger;
+    -fx-background-color: derive(-fx-vantadanger, -55%), -fx-v-danger-soft;
+    -fx-vantaicon: -fx-vantadanger;
 }
 
 .callout-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .callout-message {
     -fx-font-size: 12.5px;
-    -fx-text-fill: derive(-vantatext, -18%);
+    -fx-text-fill: derive(-fx-vantatext, -18%);
 }
 
 /* ---------- switch ----------------------------------------------------------------- */
 
 .switch {
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 20, 19;
     -fx-padding: 0 2px;
@@ -350,22 +350,22 @@
 }
 
 .switch:hover {
-    -fx-background-color: rgba(255,255,255,0.18), -v-well;
+    -fx-background-color: rgba(255,255,255,0.18), -fx-v-well;
 }
 
 .switch:on {
-    -fx-background-color: -vantaaccent, -vantaaccent;
+    -fx-background-color: -fx-vantaaccent, -fx-vantaaccent;
 }
 
 .switch:focused {
-    -fx-border-color: -vantaaccent-a55;
+    -fx-border-color: -fx-vantaaccent-a55;
     -fx-border-width: 2px;
     -fx-border-radius: 20px;
     -fx-border-insets: -2px;
 }
 
 .switch-thumb {
-    -fx-background-color: -vantamuted;
+    -fx-background-color: -fx-vantamuted;
     -fx-background-radius: 20;
     -fx-min-width: 14px;
     -fx-min-height: 14px;
@@ -376,14 +376,14 @@
 }
 
 .switch:on .switch-thumb {
-    -fx-background-color: -vantaaccentforeground;
+    -fx-background-color: -fx-vantaaccentforeground;
 }
 
 /* ---------- setting row --------------------------------------------------------------- */
 
 .setting-row {
     -fx-padding: 14px 0;
-    -fx-border-color: transparent transparent -v-hair transparent;
+    -fx-border-color: transparent transparent -fx-v-hair transparent;
     -fx-border-width: 0 0 1px 0;
 }
 
@@ -394,12 +394,12 @@
 .setting-row-title {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13.5px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .setting-row-description {
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 /* ---------- form field -------------------------------------------------------------------- */
@@ -407,16 +407,16 @@
 .form-field-label {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .form-field-hint {
     -fx-font-size: 12px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 .form-field-error {
-    -fx-text-fill: -vantadanger;
+    -fx-text-fill: -fx-vantadanger;
 }
 
 /* ---------- toolbar ------------------------------------------------------------------------- */
@@ -429,24 +429,24 @@
 
 .vanta-empty-state {
     -fx-background-color:
-        -v-hair,
-        -v-well;
+        -fx-v-hair,
+        -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
     -fx-border-color: transparent;
 }
 
 .vanta-empty-state-icon .vanta-icon {
-    -fx-stroke: -vantasubtle;
+    -fx-stroke: -fx-vantasubtle;
 }
 
 .vanta-empty-state-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 16px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .vanta-empty-state-description {
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }

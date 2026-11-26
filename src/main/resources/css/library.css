@@ -15,16 +15,16 @@
 .instances-status {
     -fx-font-family: "Geist";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 /* ---------- card shell -------------------------------------------------------- */
 
 .instance-card {
     -fx-background-color:
-        -v-hair-strong,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-v-hair-strong,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 12, 11, 11;
     -fx-cursor: hand;
@@ -32,57 +32,57 @@
 
 .instance-card:hover {
     -fx-background-color:
-        -vantaaccent-a30,
-        -v-card-hover,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-vantaaccent-a30,
+        -fx-v-card-hover,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 .instance-card:focused {
     -fx-background-color:
-        -vantaaccent-a55,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-vantaaccent-a55,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 .instance-card-live {
     -fx-background-color:
-        -vantaaccent-a30,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-vantaaccent-a30,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 .instance-name {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .instance-playtime {
     -fx-font-size: 11px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 /* controls laid over the cover need their own contrast */
 .instance-card-art .instance-settings-button,
 .instance-card-art .instance-menu-button {
-    -fx-background-color: -v-scrim, -v-scrim;
+    -fx-background-color: -fx-v-scrim, -fx-v-scrim;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
-    -vantaicon: -vantatext;
+    -fx-vantaicon: -fx-vantatext;
 }
 
 .instance-card-art .instance-settings-button:hover,
 .instance-card-art .instance-menu-button:hover {
-    -fx-background-color: -v-hair-strong, derive(-vantabg, -30%);
+    -fx-background-color: -fx-v-hair-strong, derive(-fx-vantabg, -30%);
 }
 
 .instance-icon-plate {
-    -fx-background-color: -v-scrim;
+    -fx-background-color: -fx-v-scrim;
     -fx-background-radius: 7;
 }
 
 .instance-playing-button {
-    -vantaicon: -vantatext;
+    -fx-vantaicon: -fx-vantatext;
 }
 
 /* list layout keeps its icon buttons quiet */
@@ -94,7 +94,7 @@
 
 .instance-card-list .instance-settings-button:hover,
 .instance-card-list .instance-menu-button:hover {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
     -fx-background-radius: 8;
 }
 
@@ -102,9 +102,9 @@
 
 .instances-empty {
     -fx-background-color:
-        -v-hair-strong,
-        -v-card,
-        linear-gradient(to bottom, -v-gloss, transparent 55%);
+        -fx-v-hair-strong,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 14, 13, 13;
 }
@@ -112,17 +112,17 @@
 .instances-empty-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 22px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .instances-empty-description {
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .instances-empty-search {
-    -fx-background-color: -v-hair, -v-well;
+    -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 12, 11;
 }
@@ -132,17 +132,17 @@
 .instance-action-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 15px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .instance-action-subtitle {
     -fx-font-family: "Geist";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .instance-icon-choice {
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
     -fx-padding: 6px;
@@ -152,7 +152,7 @@
 }
 
 .instance-icon-choice:hover {
-    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
+    -fx-background-color: -fx-vantaaccent-a30, -fx-vantaaccent-a10;
 }
 
 /* ---------- delete confirmation ------------------------------------------------------- */
@@ -162,7 +162,7 @@
 }
 
 .delete-dialog {
-    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
     -fx-padding: 22px;
@@ -171,51 +171,51 @@
 .delete-dialog-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 15px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .delete-dialog-message {
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-wrap-text: true;
 }
 
 .delete-dialog-cancel {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .delete-dialog-delete {
-    -fx-text-fill: -vantadanger;
-    -fx-background-color: derive(-vantadanger, -45%), -v-danger-soft;
+    -fx-text-fill: -fx-vantadanger;
+    -fx-background-color: derive(-fx-vantadanger, -45%), -fx-v-danger-soft;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
 }
 
 .delete-dialog-delete:hover {
-    -fx-background-color: -vantadanger, derive(-vantadanger, -62%);
+    -fx-background-color: -fx-vantadanger, derive(-fx-vantadanger, -62%);
 }
 
 /* ---------- list rows: quiet play that turns gold with the row ---------------------- */
 
 .instance-card-list .instance-play-button {
-    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 60%);
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 60%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 8, 7, 7;
-    -fx-text-fill: -vantatext;
-    -vantaicon: -vantatext;
+    -fx-text-fill: -fx-vantatext;
+    -fx-vantaicon: -fx-vantatext;
 }
 
 .instance-card-list:hover .instance-play-button,
 .instance-card-list .instance-play-button:focused {
-    -fx-background-color: derive(-vantaaccent, -22%), -vantaaccent, linear-gradient(to bottom, rgba(255,255,255,0.20), transparent 55%);
-    -fx-text-fill: -vantaaccentforeground;
-    -vantaicon: -vantaaccentforeground;
+    -fx-background-color: derive(-fx-vantaaccent, -22%), -fx-vantaaccent, linear-gradient(to bottom, rgba(255,255,255,0.20), transparent 55%);
+    -fx-text-fill: -fx-vantaaccentforeground;
+    -fx-vantaicon: -fx-vantaaccentforeground;
 }
 
 .instance-card-list .instance-playing-button,
 .instance-card-list:hover .instance-playing-button {
-    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 60%);
-    -fx-text-fill: -vantatext;
-    -vantaicon: -vantatext;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 60%);
+    -fx-text-fill: -fx-vantatext;
+    -fx-vantaicon: -fx-vantatext;
 }

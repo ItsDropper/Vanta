@@ -4,12 +4,12 @@
    ========================================================================== */
 
 .onboarding-overlay {
-    -fx-background-color: -v-scrim;
+    -fx-background-color: -fx-v-scrim;
     -fx-alignment: center;
 }
 
 .onboarding-page {
-    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 16, 15;
 }
@@ -53,7 +53,7 @@
 }
 
 .onboarding-rail-step.active .onboarding-rail-dot {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
     -fx-min-width: 9px;
     -fx-min-height: 9px;
     -fx-pref-width: 9px;
@@ -67,7 +67,7 @@
 }
 
 .onboarding-rail-step.done .vanta-icon {
-    -fx-stroke: -vantaaccent;
+    -fx-stroke: -fx-vantaaccent;
 }
 
 .onboarding-main,
@@ -85,64 +85,64 @@
 .onboarding-title {
     -fx-font-family: "Poppins SemiBold";
     -fx-font-size: 28px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .onboarding-subtitle,
 .onboarding-body {
     -fx-font-family: "Geist";
     -fx-font-size: 14px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .onboarding-hint {
     -fx-font-family: "Geist";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 .onboarding-footer {
     -fx-padding: 16 28 20 40;
-    -fx-background-color: -v-hair, -v-page;
+    -fx-background-color: -fx-v-hair, -fx-v-page;
     -fx-background-insets: 0 0 0 0, 1 0 0 0;
 }
 
 .onboarding-feature {
-    -fx-background-color: -v-hair, -v-card;
+    -fx-background-color: -fx-v-hair, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 12, 11;
     -fx-padding: 14;
 }
 
 .onboarding-feature-icon {
-    -fx-background-color: -vantaaccent-a18;
+    -fx-background-color: -fx-vantaaccent-a18;
     -fx-background-radius: 10;
 }
 
 .onboarding-feature-icon .vanta-icon {
-    -fx-stroke: -vantaaccent;
+    -fx-stroke: -fx-vantaaccent;
 }
 
 .onboarding-feature-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 14px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .onboarding-feature-description {
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .onboarding-account-status {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .connected-label {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantasuccess;
+    -fx-text-fill: -fx-vantasuccess;
 }
