@@ -167,6 +167,7 @@ public final class CredentialManager {
         final Process process;
         try {
             process = new ProcessBuilder(command).redirectErrorStream(true).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
         } catch (IOException unavailable) {
             throw new IOException("Linux secure storage requires Secret Service and the 'secret-tool' command.", unavailable);
         }
