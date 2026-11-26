@@ -73,9 +73,11 @@ public class InstanceManager {
     ) {
         List<Instance> instances = new ArrayList<>();
         if (instancesDirectory == null || !Files.isDirectory(instancesDirectory)) {
+            System.err.println("[Vanta Discovery] Instance directory is unavailable: " + instancesDirectory);
             return instances;
         }
 
+        System.out.println("[Vanta Discovery] Scanning " + instancesDirectory.toAbsolutePath().normalize());
         try (var stream = Files.list(instancesDirectory)) {
             stream.filter(Files::isDirectory).forEach(directory -> {
                 Path metadata = directory.resolve("instance.json");
@@ -129,6 +131,8 @@ public class InstanceManager {
         }
 
         instances.sort(Comparator.comparing(Instance::getName, String.CASE_INSENSITIVE_ORDER));
+        System.out.println("[Vanta Discovery] Loaded " + instances.size() + " instance(s) from "
+                + instancesDirectory.toAbsolutePath().normalize());
         return instances;
     }
 
