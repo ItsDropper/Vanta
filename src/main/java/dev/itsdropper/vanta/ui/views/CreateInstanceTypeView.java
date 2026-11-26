@@ -41,11 +41,13 @@ public class CreateInstanceTypeView extends VBox {
         grid.setVgap(16);
         grid.setMaxWidth(1040);
         ColumnConstraints left = new ColumnConstraints();
-        left.setPercentWidth(50);
         left.setHgrow(Priority.ALWAYS);
+        left.setFillWidth(true);
+        left.setMinWidth(0);
         ColumnConstraints right = new ColumnConstraints();
-        right.setPercentWidth(50);
         right.setHgrow(Priority.ALWAYS);
+        right.setFillWidth(true);
+        right.setMinWidth(0);
         grid.getColumnConstraints().setAll(left, right);
 
         java.util.List<Button> options = java.util.List.of(
@@ -58,8 +60,9 @@ public class CreateInstanceTypeView extends VBox {
         Runnable adaptGrid = () -> {
             boolean narrow = grid.getWidth() < 620;
             ColumnConstraints full = new ColumnConstraints();
-            full.setPercentWidth(100);
             full.setHgrow(Priority.ALWAYS);
+            full.setFillWidth(true);
+            full.setMinWidth(0);
             if (narrow) {
                 grid.getColumnConstraints().setAll(full);
                 for (int index = 0; index < options.size(); index++) {
@@ -129,7 +132,20 @@ public class CreateInstanceTypeView extends VBox {
         bottom.setAlignment(Pos.BOTTOM_CENTER);
         VBox graphic = new VBox(16, top, bottom);
         graphic.setPadding(new Insets(18, 19, 17, 19));
+        graphic.setAlignment(Pos.CENTER_LEFT);
+        graphic.setMinWidth(0);
         graphic.getStyleClass().add("create-type-option-layout");
+        // A Button does not automatically stretch its graphic to the full
+        // content width. Bind it explicitly so the copy and arrow stay inside
+        // the card instead of collapsing into a narrow, malformed column.
+        graphic.prefWidthProperty().bind(button.widthProperty().subtract(40));
+        graphic.maxWidthProperty().bind(button.widthProperty().subtract(40));
+        top.setMaxWidth(Double.MAX_VALUE);
+        bottom.setMaxWidth(Double.MAX_VALUE);
+        copy.setMinWidth(0);
+        copy.setMaxWidth(Double.MAX_VALUE);
+        arrow.setMinWidth(18);
+        arrow.setAlignment(Pos.CENTER_RIGHT);
         button.setGraphic(graphic);
         button.setOnAction(event -> action.run());
         return button;
