@@ -184,6 +184,7 @@ public final class SteinInstaller {
                     .redirectErrorStream(true)
                     .redirectOutput(output.toFile())
                     .start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
             boolean finished;
             try {
                 finished = process.waitFor(15, TimeUnit.SECONDS);
@@ -283,6 +284,7 @@ public final class SteinInstaller {
                 "--mods",
                 "keep"
         ).redirectErrorStream(true).redirectOutput(log.toFile()).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
 
         boolean finished;
         try {
