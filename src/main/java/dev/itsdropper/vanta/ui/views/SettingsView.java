@@ -1190,6 +1190,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                     process = new ProcessBuilder(executable.toString(), "-version")
                             .redirectErrorStream(true)
                             .start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
                     boolean exited = process.waitFor(10, java.util.concurrent.TimeUnit.SECONDS);
                     if (!exited) {
                         process.destroyForcibly();
@@ -2175,6 +2176,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                         javaBinary.toString(),
                         "-version"
                 ).redirectErrorStream(true).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
 
                 boolean finished = process.waitFor(8, java.util.concurrent.TimeUnit.SECONDS);
                 if (!finished) {
