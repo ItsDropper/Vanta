@@ -16,6 +16,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import dev.itsdropper.vanta.ui.kit.Card;
+import dev.itsdropper.vanta.ui.kit.CoverArt;
+import dev.itsdropper.vanta.ui.kit.KeyValueRow;
+import dev.itsdropper.vanta.ui.kit.StatTile;
 import javafx.scene.shape.Rectangle;
 
 import dev.itsdropper.vanta.ui.markdown.MarkdownRenderer;
@@ -532,8 +538,7 @@ public class ModDetailsView extends VBox {
                         title,
                         authorLabel,
                         shortDescription,
-                        projectTags,
-                        metadata
+                        projectTags
                 );
 
         headerInformation.setFillWidth(
@@ -631,58 +636,69 @@ public class ModDetailsView extends VBox {
         }
 
         // =========================================================
-        // HEADER CONTAINER
+        // HERO: cover banner with the icon overlapping its edge
         // =========================================================
 
-        VBox headerContainer =
-                new VBox(
-                        16,
-                        projectHeader,
-                        installButton
-                );
+        String bannerLoader = project.getLoaders() != null && !project.getLoaders().isEmpty()
+                ? project.getLoaders().get(0) : "vanilla";
+        CoverArt banner = new CoverArt(safe(project.getTitle(), "project"), bannerLoader);
+        banner.setMinSize(0, 150);
+        banner.setPrefSize(800, 150);
+        banner.setMaxSize(Double.MAX_VALUE, 150);
+        Region bannerShade = new Region();
+        bannerShade.getStyleClass().add("mod-details-banner-shade");
+        StackPane bannerStack = new StackPane(banner, bannerShade);
+        bannerStack.setMinHeight(150);
+        bannerStack.setPrefHeight(150);
+        bannerStack.setMaxHeight(150);
 
-        headerContainer.setFillWidth(
-                true
-        );
+        VBox installBox = new VBox(installButton);
+        installBox.setAlignment(Pos.TOP_RIGHT);
+        installBox.setMinWidth(Region.USE_PREF_SIZE);
+        installBox.setPadding(new Insets(48, 0, 0, 0));
 
-        headerContainer.setPadding(
-                new Insets(
-                        22
-                )
-        );
+        HBox heroBody = new HBox(20, iconBox, headerInformation, installBox);
+        heroBody.setAlignment(Pos.TOP_LEFT);
+        heroBody.setPadding(new Insets(0, 24, 24, 24));
+        heroBody.setTranslateY(0);
+        VBox.setMargin(heroBody, new Insets(-44, 0, 0, 0));
+        headerInformation.setPadding(new Insets(50, 0, 0, 0));
 
-        headerContainer.getStyleClass().add(
-                "mod-details-header-container"
-        );
-
-        // =========================================================
-        // DESCRIPTION
-        // =========================================================
-
-        VBox descriptionCard =
-                createDescriptionCard(
-                        project
-                );
-
-        // =========================================================
-        // INFORMATION
-        // =========================================================
-
-        VBox informationCard =
-                createInformationCard(
-                        project,
-                        author
-                );
+        VBox hero = new VBox(bannerStack, heroBody);
+        hero.getStyleClass().add("mod-details-hero");
+        Rectangle heroClip = new Rectangle();
+        heroClip.widthProperty().bind(hero.widthProperty());
+        heroClip.heightProperty().bind(hero.heightProperty());
+        heroClip.setArcWidth(28);
+        heroClip.setArcHeight(28);
+        hero.setClip(heroClip);
 
         // =========================================================
-        // ADD
+        // BODY: description beside a quiet facts column
         // =========================================================
 
-        content.getChildren().addAll(
-                headerContainer,
-                descriptionCard,
-                informationCard
-        );
+        VBox descriptionCard = createDescriptionCard(project);
+        HBox.setHgrow(descriptionCard, Priority.ALWAYS);
+        descriptionCard.setMinWidth(0);
+        descriptionCard.setMaxWidth(Double.MAX_VALUE);
+
+        HBox stats = new HBox(12,
+                new StatTile(Localization.text("modDetails.downloads"), formatNumber(project.getDownloads()), ""),
+                new StatTile(Localization.text("modDetails.followers"), formatNumber(project.getFollows()), ""));
+        for (javafx.scene.Node tile : stats.getChildren()) {
+            HBox.setHgrow(tile, Priority.ALWAYS);
+            ((Region) tile).setMaxWidth(Double.MAX_VALUE);
+            ((Region) tile).setPrefWidth(0);
+        }
+        VBox side = new VBox(16, stats, createInformationCard(project, author));
+        side.setMinWidth(320);
+        side.setPrefWidth(320);
+        side.setMaxWidth(320);
+
+        HBox body = new HBox(20, descriptionCard, side);
+        body.setAlignment(Pos.TOP_LEFT);
+
+        content.getChildren().addAll(hero, body);
 
         statusLabel.setText(
                 ""
@@ -864,88 +880,20 @@ public class ModDetailsView extends VBox {
                 "settings-section-title"
         );
 
-        VBox information =
-                new VBox(
-                        12
-                );
-
-        addInformationRow(
-                information,
-                "PROJECT ID",
-                project.getProjectId()
-        );
-
-        addInformationRow(
-                information,
-                "SLUG",
-                project.getSlug()
-        );
-
-        String license =
-                null;
-
+        VBox information = new VBox(2);
+        addInformationRow(information, "Project ID", project.getProjectId());
+        addInformationRow(information, "Slug", project.getSlug());
+        String license = null;
         if (project.getLicense() != null) {
-
-            license =
-                    project
-                            .getLicense()
-                            .getName();
-
-            if (license == null
-                    || license.isBlank()) {
-
-                license =
-                        project
-                                .getLicense()
-                                .getId();
+            license = project.getLicense().getName();
+            if (license == null || license.isBlank()) {
+                license = project.getLicense().getId();
             }
         }
+        addInformationRow(information, "License", license);
+        addInformationRow(information, "Author", author);
 
-        addInformationRow(
-                information,
-                "LICENSE",
-                license
-        );
-
-        addInformationRow(
-                information,
-                "AUTHOR",
-                author
-        );
-
-        addInformationRow(
-                information,
-                Localization.text("modDetails.downloads"),
-                formatNumber(
-                        project.getDownloads()
-                )
-        );
-
-        addInformationRow(
-                information,
-                Localization.text("modDetails.followers"),
-                formatNumber(
-                        project.getFollows()
-                )
-        );
-
-        VBox card =
-                new VBox(
-                        14,
-                        sectionTitle,
-                        information
-                );
-
-        card.setPadding(
-                new Insets(
-                        22
-                )
-        );
-
-        card.getStyleClass().add(
-                "mod-details-card"
-        );
-
+        Card card = new Card(sectionTitle, information).padded(18).spaced(10);
         return card;
     }
 
@@ -958,42 +906,7 @@ public class ModDetailsView extends VBox {
             String labelText,
             String valueText
     ) {
-
-        Label label =
-                new Label(
-                        labelText
-                );
-
-        label.getStyleClass().add(
-                "instance-setting-label"
-        );
-
-        Label value =
-                new Label(
-                        safe(
-                                valueText,
-                                "Unknown"
-                        )
-                );
-
-        value.setWrapText(
-                true
-        );
-
-        value.getStyleClass().add(
-                "mod-details-info-value"
-        );
-
-        VBox row =
-                new VBox(
-                        4,
-                        label,
-                        value
-                );
-
-        parent.getChildren().add(
-                row
-        );
+        parent.getChildren().add(new KeyValueRow(labelText, safe(valueText, "Unknown")));
     }
 
     // =============================================================

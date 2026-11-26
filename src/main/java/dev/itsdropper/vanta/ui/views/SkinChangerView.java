@@ -119,7 +119,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         previewHeading = new Label("Player preview");
         previewHeading.getStyleClass().add("accounts-card-name");
         VantaUI.styleText(previewHeading, VantaUI.TextRole.SECTION_TITLE);
-        Label rotateHint = new Label("Drag to rotate · Scroll to zoom");
+        Label rotateHint = new Label("Drag to rotate, scroll to zoom");
         rotateHint.getStyleClass().add("accounts-subtitle");
         previewCard.getChildren().addAll(previewHeading, modelPreview, rotateHint, fileLabel);
 
@@ -247,7 +247,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         fileLabel.setText("No skin loaded");
         fileLabel.setWrapText(true);
         fileLabel.setMaxWidth(240);
-        statusLabel.setText("Preview only · account requests and skin uploads are disabled.");
+        statusLabel.setText("Preview only. Account requests and skin uploads are disabled.");
         capeChoice.setPromptText("Sign in to load owned capes");
         modelChoice.setDisable(true);
         capeChoice.setDisable(true);
@@ -324,7 +324,7 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
             chooseButton.setDisable(busy);
             modelChoice.setDisable(true);
         } else {
-            accountLabel.setText(account.getUsername() + "  ·  " + account.getUuid());
+            accountLabel.setText(account.getUsername() + " (" + account.getUuid() + ")");
             uploadButton.setDisable(busy || selectedFile == null);
             applyCapeButton.setDisable(busy || capeChoice.getValue() == null
                     || capeChoice.getValue().id().isBlank());

@@ -41,7 +41,7 @@ public class ModpackBrowserView extends VBox {
     private final ModrinthContentService contentService;
     private final HttpClient httpClient;
 
-    private final VBox resultsList;
+    private final javafx.scene.layout.FlowPane resultsList;
     private final TextField searchField;
     private final Label statusLabel;
     private final Runnable onInstanceImported;
@@ -96,13 +96,7 @@ public class ModpackBrowserView extends VBox {
                 subtitle
         );
 
-        Button backButton = new Button(
-                Localization.text("common.back")
-        );
-
-        backButton.getStyleClass().add(
-                "secondary-button"
-        );
+        Button backButton = dev.itsdropper.vanta.ui.VantaUI.backButton();
         backButton.setAccessibleText(Localization.text("modpackBrowser.backAccessible"));
 
         backButton.setOnAction(
@@ -112,7 +106,7 @@ public class ModpackBrowserView extends VBox {
         title.setWrapText(true);
         subtitle.setWrapText(true);
         headerText.setMinWidth(0);
-        FlowPane header = new FlowPane(16, 8, backButton, headerText);
+        VBox header = new VBox(8, backButton, headerText);
         header.setAlignment(Pos.CENTER_LEFT);
         header.setMaxWidth(Double.MAX_VALUE);
 
@@ -161,6 +155,7 @@ public class ModpackBrowserView extends VBox {
                 searchButton
         );
 
+        searchBar.getStyleClass().add("content-browser-bar");
         searchBar.setAlignment(
                 Pos.CENTER_LEFT
         );
@@ -169,9 +164,7 @@ public class ModpackBrowserView extends VBox {
         // RESULTS
         // =========================================================
 
-        resultsList = new VBox(
-                12
-        );
+        resultsList = new dev.itsdropper.vanta.ui.kit.CardGrid(12, 300, 3);
 
         resultsList.getStyleClass().add(
                 "instance-list"
@@ -271,7 +264,7 @@ public class ModpackBrowserView extends VBox {
         long requestId = ++searchRequestId;
         ++catalogRequestId;
         statusLabel.setText(Localization.text("common.searching"));
-        resultsList.getChildren().clear();
+        dev.itsdropper.vanta.ui.kit.Skeleton.fill(resultsList, 6, 150);
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -408,132 +401,33 @@ public class ModpackBrowserView extends VBox {
                 icon
         );
 
-        // =========================================================
-        // INFORMATION
-        // =========================================================
-
-        Label title = new Label(
-                project.getTitle()
-        );
-
-        title.getStyleClass().add(
-                "instance-name"
-        );
-
-        title.setWrapText(true);
-
-        String description =
-                project.getDescription();
-
-        if (description == null) {
-            description = "";
+        Label title = new Label(project.getTitle());
+        Label author = new Label();
+        String description = project.getDescription() == null ? "" : project.getDescription();
+        if (description.length() > 160) {
+            description = description.substring(0, 157) + "...";
         }
-
-        if (description.length() > 220) {
-
-            description =
-                    description.substring(
-                            0,
-                            217
-                    )
-                            + "...";
+        Label descriptionLabel = new Label(description);
+        HBox tags = new HBox(6);
+        if (project.getLoaders() != null) {
+            project.getLoaders().stream().limit(2).forEach(loader ->
+                    tags.getChildren().add(dev.itsdropper.vanta.ui.kit.Badge.loader(loader)));
         }
-
-        Label descriptionLabel =
-                new Label(
-                        description
-                );
-
-        descriptionLabel.getStyleClass().add(
-                "page-subtitle"
-        );
-
-        descriptionLabel.setWrapText(true);
-
-        Label metadata = new Label(
-                formatDownloads(
-                        project.getDownloads()
-                )
-                        + " downloads"
-        );
-
-        metadata.getStyleClass().add(
-                "instance-loader"
-        );
-
-        VBox information = new VBox(
-                5,
-                title,
-                descriptionLabel
-        );
-
-        if (LauncherSettings.isShowModrinthDownloadsEnabled()) {
-            information.getChildren().add(metadata);
-        }
-
-        HBox.setHgrow(
-                information,
-                Priority.ALWAYS
-        );
-
-        // =========================================================
-        // IMPORT
-        // =========================================================
-
-        Button importButton = new Button(
-                Localization.text("common.import")
-        );
-
-        importButton.getStyleClass().add(
-                "primary-button"
-        );
-
-        importButton.setOnAction(
-                event ->
-                        importModpack(
-                                project,
-                                importButton,
-                                onInstanceImported
-                        )
-        );
-
-        // =========================================================
-        // ROW
-        // =========================================================
-
-        HBox row = new HBox(
-                16,
-                iconBox,
-                information,
-                importButton
-        );
-
-        row.setAlignment(
-                Pos.CENTER_LEFT
-        );
-
-        // =========================================================
-        // CARD
-        // =========================================================
-
-        VBox card = new VBox(
-                row
-        );
-
-        card.setPadding(
-                new Insets(
-                        16,
-                        18,
-                        16,
-                        18
-                )
-        );
-
-        card.getStyleClass().add(
-                "instance-card"
-        );
-
-        return card;
+        Button menu = new Button();
+        menu.setManaged(false);
+        menu.setVisible(false);
+        Button importButton = new Button(Localization.text("common.import"));
+        importButton.getStyleClass().add("primary-button");
+        importButton.setOnAction(event -> importModpack(project, importButton, onInstanceImported));
+        iconBox.setMinSize(52, 52);
+        iconBox.setPrefSize(52, 52);
+        iconBox.setMaxSize(52, 52);
+        icon.setFitWidth(52);
+        icon.setFitHeight(52);
+        return new dev.itsdropper.vanta.ui.components.ModrinthProjectCard(
+                iconBox, title, author, descriptionLabel, tags,
+                LauncherSettings.isShowModrinthDownloadsEnabled() ? project.getDownloads() : 0,
+                project.getFollows(), null, menu, importButton, true, () -> { });
     }
 
     // =============================================================

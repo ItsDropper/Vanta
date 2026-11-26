@@ -108,3 +108,32 @@
 .button.preset-choice-card .preset-choice-icon .svg-path {
     -fx-stroke: -vantaaccent;
 }
+
+/* ---- preset configuration ------------------------------------------------- */
+
+.preset-configuration-panel .preset-config-hero {
+    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to right, -vantaaccent-a18, transparent 70%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 14, 13, 13;
+    -fx-border-color: transparent;
+    -fx-padding: 20;
+}
+
+.preset-configuration-panel .preset-config-section {
+    -fx-background-color: -v-hair, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
+    -fx-border-color: transparent;
+    -fx-padding: 18;
+}
+
+.preset-configuration-panel .preset-environment {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 6 0 0 0;
+}
+
+.preset-configuration-panel .preset-config-content {
+    -fx-background-color: transparent;
+    -fx-spacing: 14;
+}

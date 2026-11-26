@@ -50,7 +50,7 @@ public final class InstanceCreationProgressDialog {
   dialog.setOnCloseRequest(event->{if(!terminal)event.consume();});
   headline.setText(Localization.text("instanceProgress.title"));headline.getStyleClass().add("instance-progress-headline");
   Label subtitle=new Label(Localization.text("instanceProgress.subtitle"));subtitle.getStyleClass().add("instance-progress-subtitle");subtitle.setWrapText(true);
-  Label identity=new Label(name+" · Minecraft "+version+" · "+this.loader);identity.getStyleClass().add("instance-progress-identity");identity.setWrapText(true);
+  Label identity=new Label(name+", Minecraft "+version+", "+this.loader);identity.getStyleClass().add("instance-progress-identity");identity.setWrapText(true);
   activity.setPrefSize(18,18);activity.setMaxSize(18,18);
   HBox heading=new HBox(12,activity,headline);
   heading.setAlignment(Pos.CENTER_LEFT);
@@ -82,7 +82,7 @@ public final class InstanceCreationProgressDialog {
    else row.setState(State.PENDING);
   }
   headline.setText(stageTitle(update.stage()));detail.setText(update.detail().isBlank()?Localization.text("instanceProgress.detail"):update.detail());
-  currentStep.setText(Localization.text("instanceProgress.current")+" · "+(active+1)+"/"+ORDER.size());
+  currentStep.setText(Localization.text("instanceProgress.current")+" "+(active+1)+"/"+ORDER.size());
  }
  public void complete(){
   if(terminal)return;terminal=true;successful=true;

@@ -52,6 +52,7 @@ public final class PageHeader extends HBox {
         if (actions != null && actions.length > 0) {
             FlowPane actionGroup = new FlowPane(VantaUI.spacing(2), VantaUI.spacing(2), actions);
             actionGroup.setAlignment(Pos.CENTER_RIGHT);
+            actionGroup.setPrefWrapLength(720);
             actionGroup.setMinWidth(0);
             actionGroup.setMaxWidth(Double.MAX_VALUE);
             actionGroup.getStyleClass().add("page-header-actions");
@@ -71,6 +72,7 @@ public final class PageHeader extends HBox {
                 } else if (!compact && getChildren().contains(compactLayout)) {
                     compactLayout.getChildren().clear();
                     actionGroup.setAlignment(Pos.CENTER_RIGHT);
+            actionGroup.setPrefWrapLength(720);
                     getChildren().setAll(copy, actionGroup);
                 }
             });

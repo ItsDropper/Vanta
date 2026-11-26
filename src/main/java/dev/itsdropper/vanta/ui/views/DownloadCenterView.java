@@ -150,7 +150,7 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         file.getStyleClass().add("download-task-name");
         file.setMaxWidth(Double.MAX_VALUE);
         file.setWrapText(true);
-        Label source = new Label(displaySource(task.source()) + (task.target() == null ? "" : "  ·  " + task.target().getFileName()));
+        Label source = new Label(displaySource(task.source()) + (task.target() == null ? "" : "  /  " + task.target().getFileName()));
         source.getStyleClass().add("download-task-source");
         source.setWrapText(true);
 
@@ -183,11 +183,11 @@ public final class DownloadCenterView extends VBox implements dev.itsdropper.van
         Label detail = new Label(task.status() == Status.FAILED
                 ? task.error()
                 : task.status() == Status.COMPLETED
-                    ? "Finished · " + formatBytes(task.receivedBytes())
+                    ? "Finished, " + formatBytes(task.receivedBytes())
                     : task.status() == Status.VERIFYING
                         ? "Finalizing download…"
                         : formatBytes(task.receivedBytes()) + (task.totalBytes() > 0
-                            ? " of " + formatBytes(task.totalBytes()) + " · " + Math.round(task.progress() * 100) + "%"
+                            ? " of " + formatBytes(task.totalBytes()) + ", " + Math.round(task.progress() * 100) + "%"
                             : " received"));
         detail.getStyleClass().add(task.status() == Status.FAILED ? "download-task-error" : "download-task-detail");
         detail.setWrapText(true);

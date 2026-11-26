@@ -163,3 +163,33 @@
     -fx-background-color: -v-well;
     -fx-background-radius: 6;
 }
+
+/* ---- project details ------------------------------------------------------ */
+
+.mod-details-hero {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 15, 14;
+}
+
+.mod-details-banner-shade {
+    -fx-background-color: linear-gradient(to bottom, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.55));
+}
+
+.mod-details-hero .mod-details-icon {
+    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-insets: 0, 2;
+    -fx-background-radius: 22, 20;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 16, 0.1, 0, 6);
+}
+
+.mod-details-hero .mod-details-title {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 26px;
+}
+
+.mod-details-description-card {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
+}
