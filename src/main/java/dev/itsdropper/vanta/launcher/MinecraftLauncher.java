@@ -145,8 +145,7 @@ public class MinecraftLauncher {
             }
             // SAFE is the upstream mitigation's default and is set explicitly
             // so instance JVM arguments cannot silently downgrade its policy.
-            command.add("-Dm2sfix.policy=safe");
-            command.add("-javaagent:" + agent);
+            command.addAll(securityMitigationJvmArguments(agent));
         }
 
         // NILLOADER JAVA AGENT
@@ -635,6 +634,25 @@ public class MinecraftLauncher {
         );
 
         return process;
+    }
+
+    /**
+     * Keeps the font-execution mitigation active while disabling m2sfix 2.3.0's
+     * image guard. That release conservatively rejects every indexed PNG with
+     * a palette smaller than 256 entries, which includes ordinary vanilla
+     * textures and causes widespread missing-texture failures. The font guard
+     * remains enabled; re-enable image checks only after upstream validates
+     * actual palette indices instead of rejecting all compact palettes.
+     */
+    static List<String> securityMitigationJvmArguments(Path agent) {
+        if (agent == null) {
+            throw new IllegalArgumentException("Minecraft security mitigation agent path is required.");
+        }
+        return List.of(
+                "-Dm2sfix.policy=safe",
+                "-Dm2sfix.images=off",
+                "-javaagent:" + agent.toAbsolutePath().normalize()
+        );
     }
 
     static List<String> java4ShellMitigationArguments(int javaVersion, String architecture) {
