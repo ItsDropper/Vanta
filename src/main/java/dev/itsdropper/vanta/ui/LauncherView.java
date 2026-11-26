@@ -906,6 +906,7 @@ public class LauncherView {
             try {
                 notifications.updateProgress("Installing Minecraft " + minecraftVersion + "...");
                 instance = switch (manifest.loader()) {
+                    case "vanta-loader" -> InstanceInstaller.installVantaLoader(name, minecraftVersion);
                     case "fabric" -> InstanceInstaller.installFabric(name, minecraftVersion);
                     case "quilt" -> InstanceInstaller.installQuilt(name, minecraftVersion);
                     case "forge" -> InstanceInstaller.installForge(name, minecraftVersion);
