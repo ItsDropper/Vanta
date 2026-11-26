@@ -254,3 +254,8 @@
     -vantadangerline: derive(-vantadanger, -45%);
     -vantasuccesswash: -v-success-soft;
 }
+
+/* Official Vanta brand blue, used only by the logo marks. */
+.root {
+    -v-brand: #0f6bff;
+}

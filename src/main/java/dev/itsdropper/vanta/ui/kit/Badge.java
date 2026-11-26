@@ -30,9 +30,13 @@ public final class Badge extends Label {
     public static Badge loader(String loader) {
         Badge badge = new Badge(LoaderTheme.label(loader), Tone.NEUTRAL);
         badge.getStyleClass().addAll("badge-loader", "badge-loader-" + LoaderTheme.key(loader));
-        Circle dot = new Circle(3);
-        dot.getStyleClass().add("badge-dot");
-        badge.setGraphic(dot);
+        if (LoaderTheme.isVanta(loader)) {
+            badge.setGraphic(VantaLogo.clientMark(13));
+        } else {
+            Circle dot = new Circle(3);
+            dot.getStyleClass().add("badge-dot");
+            badge.setGraphic(dot);
+        }
         badge.setGraphicTextGap(6);
         return badge;
     }

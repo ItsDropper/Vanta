@@ -598,3 +598,7 @@
     -fx-text-fill: -vantatext;
     -fx-padding: 0;
 }
+
+.vanta-logo-mark {
+    -fx-background-color: -v-brand;
+}

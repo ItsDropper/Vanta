@@ -34,7 +34,14 @@ public final class LoaderTheme {
         return "other";
     }
 
+    public static boolean isVanta(String loader) {
+        return loader != null && loader.trim().toLowerCase(Locale.ROOT).startsWith("vanta");
+    }
+
     public static String label(String loader) {
+        if (isVanta(loader)) {
+            return "Vanta";
+        }
         return switch (key(loader)) {
             case "vanilla" -> "Vanilla";
             case "neoforge" -> "NeoForge";

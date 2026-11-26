@@ -445,7 +445,7 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         FlowPane presets = new FlowPane(8, 8);
         presets.setPrefWrapLength(560);
         addPreset(presets, "Gilt", "#EBB54A");
-        addPreset(presets, "Blue", "#4C8DFF");
+        addPreset(presets, "Vanta blue", "#0F6BFF");
         addPreset(presets, "Cyan", "#42C6E8");
         addPreset(presets, "Emerald", "#4FD18B");
         addPreset(presets, "Violet", "#8B7CFF");

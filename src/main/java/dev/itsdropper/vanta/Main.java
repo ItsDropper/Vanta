@@ -67,6 +67,15 @@ public class Main extends Application {
         dev.itsdropper.vanta.ui.Stylesheets.addTo(scene);
 
         stage.setTitle("Vanta");
+        for (String icon : new String[]{"/images/vanta-icon.png", "/images/vanta-icon-64.png"}) {
+            try (java.io.InputStream stream = Main.class.getResourceAsStream(icon)) {
+                if (stream != null) {
+                    stage.getIcons().add(new javafx.scene.image.Image(stream));
+                }
+            } catch (java.io.IOException ignored) {
+                // The window simply keeps the default icon.
+            }
+        }
         stage.setMinWidth(1180);
         stage.setMinHeight(760);
         stage.setScene(scene);

@@ -182,12 +182,15 @@ public class LoginPopup {
             // HEADER
             // -----------------------------------------------------
 
-            Label logo =
+            Label logoText =
                     new Label("VANTA");
 
-            logo.getStyleClass().add(
+            logoText.getStyleClass().add(
                     "login-logo"
             );
+            javafx.scene.layout.HBox logo = new javafx.scene.layout.HBox(
+                    10, dev.itsdropper.vanta.ui.kit.VantaLogo.mark(26), logoText);
+            logo.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
             Label title =
                     new Label(

@@ -21,11 +21,10 @@ public final class LoadingScreen {
         content.setAlignment(Pos.CENTER);
         content.getStyleClass().add("loading-content");
 
-        HBox brand = new HBox(9);
+        HBox brand = new HBox(12);
         brand.setAlignment(Pos.CENTER);
 
-        Circle mark = new Circle(5);
-        mark.getStyleClass().add("loading-mark");
+        javafx.scene.Node mark = dev.itsdropper.vanta.ui.kit.VantaLogo.mark(40);
 
         Label logo = new Label(Localization.text("loading.brand"));
         logo.getStyleClass().add("loading-logo");
