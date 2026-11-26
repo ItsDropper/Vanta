@@ -337,7 +337,9 @@ public class InstancesView extends VBox {
 
                 if (loadedInstances.isEmpty()) {
                     instanceList.getChildren().setAll(createEmptyState());
-                    statusLabel.setText(Localization.text("instances.empty"));
+                    statusLabel.setText("No Vanta instances found. Scanned: "
+                            + dev.itsdropper.vanta.launcher.MinecraftLocator.getInstancesDirectory()
+                                    .toAbsolutePath().normalize());
                     return;
                 }
 
