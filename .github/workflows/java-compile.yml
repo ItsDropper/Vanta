@@ -165,12 +165,16 @@ jobs:
           }
           $installer = (Resolve-Path '.\VantaSetup.exe').Path
           Write-Host 'Running the real bootstrap installer in silent mode...'
-          $install = Start-Process -FilePath $installer -ArgumentList '/S' -PassThru
+          $install = Start-Process -FilePath $installer -ArgumentList @('/S', '/LOG') -PassThru
           if (!$install.WaitForExit(360000)) {
             $install.Kill()
             throw 'Vanta installer did not finish within six minutes.'
           }
-          if ($install.ExitCode -ne 0) { throw "Vanta installer exited with code $($install.ExitCode)." }
+          if ($install.ExitCode -ne 0) {
+            $installerLog = Join-Path $env:TEMP 'nsislog.txt'
+            $details = if (Test-Path $installerLog) { (Get-Content $installerLog -Tail 100) -join "\n" } else { 'NSIS did not produce its installer log.' }
+            throw "Vanta installer exited with code $($install.ExitCode). $details"
+          }
           foreach ($required in @('Vanta.exe', 'runtime/lib/modules', 'app/Vanta.cfg', 'updater/VantaUpdater.jar', 'Uninstall.exe')) {
             if (!(Test-Path (Join-Path $installDirectory $required) -PathType Leaf)) {
               throw "Installed Vanta package is missing $required."
