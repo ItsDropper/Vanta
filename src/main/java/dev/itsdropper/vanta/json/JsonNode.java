@@ -62,7 +62,7 @@ public class JsonNode implements Iterable<JsonNode> {
     public boolean isNumber() { return value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber(); }
     public boolean isIntegralNumber() {
         if (!isNumber()) return false;
-        try { return new BigDecimal(value.getAsJsonPrimitive().getAsString()).stripTrailingZeros().scale() <= 0; }
+        try { return value.getAsJsonPrimitive().getAsString().matches("-?(0|[1-9][0-9]*)"); }
         catch (NumberFormatException ignored) { return false; }
     }
     public boolean isValueNode() { return missing ? false : value == null || value.isJsonNull() || value.isJsonPrimitive(); }

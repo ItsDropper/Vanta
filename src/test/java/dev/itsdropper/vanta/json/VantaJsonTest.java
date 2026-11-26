@@ -30,6 +30,13 @@ class VantaJsonTest {
     }
 
     @Test
+    void integralNumberValidationRejectsDecimalAndExponentForms() throws Exception {
+        assertEquals(true, VantaJson.mapper().readTree("{\"value\":1}").path("value").isIntegralNumber());
+        assertEquals(false, VantaJson.mapper().readTree("{\"value\":1.0}").path("value").isIntegralNumber());
+        assertEquals(false, VantaJson.mapper().readTree("{\"value\":1e3}").path("value").isIntegralNumber());
+    }
+
+    @Test
     void strictSchemaMapperRejectsUnknownProperties() {
         assertThrows(JsonProcessingException.class,
                 () -> VantaJson.strictSchemaMapper().readValue(

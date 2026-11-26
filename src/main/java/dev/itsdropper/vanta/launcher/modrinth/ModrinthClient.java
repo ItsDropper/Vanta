@@ -633,11 +633,7 @@ public class ModrinthClient {
 
         return mapper.readValue(
                 response.body(),
-                mapper.getTypeFactory()
-                        .constructCollectionType(
-                                List.class,
-                                ModrinthTeamMember.class
-                        )
+                new dev.itsdropper.vanta.json.TypeReference<List<ModrinthTeamMember>>() {}
         );
     }
 
