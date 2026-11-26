@@ -40,3 +40,15 @@ The resolver applies these rules:
 Remote distribution must be added behind a separate transport/authentication layer. The launcher must verify the source and integrity of remote manifest bytes before handing them to the repository. Resolved mod artifacts must continue through Vanta's existing Modrinth dependency and transactional installation services; bundle code must not write JAR files directly.
 
 Bundle selection state must be stored per instance and must distinguish Vanta-managed content from user-installed mods. Updating a profile must never silently remove user-managed files or override a user's explicit disablement.
+
+## Per-instance state
+
+`VantaBundleStateStore` persists the profile selection in each instance's
+`vanta-profile.json`. It records the profile revision, selected bundles,
+explicitly selected optional projects, the project IDs Vanta itself manages,
+and the optional-offer revision the user dismissed. Writes use a temporary
+sibling file and atomic replacement where the filesystem supports it.
+
+The managed-project list is an ownership boundary, not a scan result: only
+projects installed through the Vanta profile workflow may be recorded there.
+Mods installed manually by the user are outside this registry.
