@@ -6,7 +6,7 @@ They are separate from the existing built-in instance presets:
 - An **instance preset** is a one-time starting point for a Minecraft installation.
 - A **profile manifest** is a maintained description of a Vanta ecosystem installation.
 - A **bundle** groups related mods that can be enabled or disabled together.
-- A **mod entry** references a Modrinth project and can optionally pin an exact Modrinth version.
+- A **mod entry** references either a Modrinth project or a verified GitHub release asset and can optionally pin an exact Modrinth version.
 
 ## Manifest schema version 1
 
@@ -21,7 +21,7 @@ A manifest contains:
 | `loader` | Lowercase loader identifier, such as `fabric`. |
 | `bundles` | Ordered feature bundle definitions. |
 
-Each bundle has a stable ID, display name, description, `required` and `defaultEnabled` flags, and a list of Modrinth projects. A required bundle must be enabled by default. Each mod has a Modrinth `projectId`, optional exact `versionId`, and its own required/default-enabled flags.
+Each bundle has a stable ID, display name, description, `required` and `defaultEnabled` flags, and a list of components. A required bundle must be enabled by default. Each component has a stable `projectId`, optional exact Modrinth `versionId`, and its own required/default-enabled flags. GitHub release components use a `githubRelease` object with an owner/repository and asset prefix; the launcher selects the latest matching OS/CPU/Minecraft artifact and verifies its SHA-256 checksum before installation.
 
 The resolver applies these rules:
 
@@ -37,7 +37,7 @@ The resolver applies these rules:
 
 `VantaBundleRepository` parses bounded local manifest files and validates their schema. It rejects unknown JSON fields to catch misspelled manifest properties. The launcher exposes this through **Create instance → Vanta Profiles**. The screen loads the built-in **Vanta Fabric Starter** automatically, so a new user can create a supported instance without finding or downloading a JSON file. Custom JSON manifests remain available through the secondary **Import custom profile** action for advanced users. Only import manifests from publishers you trust. Remote catalog discovery and publisher authentication are not implemented yet.
 
-Remote distribution must be added behind a separate transport/authentication layer. The launcher must verify the source and integrity of remote manifest bytes before handing them to the repository. Resolved mod artifacts continue through Vanta's existing Modrinth dependency and transactional installation services; bundle code must not write JAR files directly. Optional `versionId` pins are enforced during dependency-graph resolution, including when a pinned project is also pulled in transitively.
+Remote distribution must be added behind a separate transport/authentication layer. The launcher must verify the source and integrity of remote manifest bytes before handing them to the repository. Modrinth artifacts continue through Vanta's dependency and transactional installation services. GitHub release artifacts are downloaded by the dedicated release installer, validated as Fabric mods, and atomically placed in the instance mods directory only after their release checksum is verified. Optional `versionId` pins are enforced during dependency-graph resolution, including when a pinned project is also pulled in transitively.
 
 Bundle selection state must be stored per instance and must distinguish Vanta-managed content from user-installed mods. Updating a profile must never silently remove user-managed files or override a user's explicit disablement.
 
@@ -47,7 +47,7 @@ The launcher ships `profiles/vanta-fabric-starter.json` as a validated classpath
 resource. It targets Minecraft 1.21.11 on Fabric and installs the Fabric API
 through the existing Modrinth dependency resolver, selecting a compatible release
 rather than pinning a stale version. The profile is intentionally a small starter,
-not a claim that the full Vanta Client mod is included. The manifest is loaded
+not a claim that the full Vanta Client mod is installed by default. An optional Vanta Client bundle is available; when selected, the launcher resolves the latest GitHub release and selects the artifact matching the current OS, CPU architecture and Minecraft version. The manifest is loaded
 automatically when the Vanta Profiles screen opens; custom manifest import is an
 optional advanced path.
 
