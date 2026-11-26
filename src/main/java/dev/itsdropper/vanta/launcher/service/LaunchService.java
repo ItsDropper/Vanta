@@ -329,7 +329,7 @@ public class LaunchService {
                 + failure.artifact() + ". The patched native font library is not available "
                 + "for this version yet. This is an upstream security block, not a damaged "
                 + "instance; reinstalling the instance will not resolve it. Retry after "
-                + Mojang updates this version's official metadata.";
+                + "Mojang updates this version's official metadata.";
     }
 
     private void logEnvironmentDiagnostics(Instance instance, LaunchData launchData) {
