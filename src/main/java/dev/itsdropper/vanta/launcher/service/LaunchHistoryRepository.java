@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.repair.CrashCaseRepository;
 import dev.itsdropper.vanta.launcher.repair.FailureCategory;

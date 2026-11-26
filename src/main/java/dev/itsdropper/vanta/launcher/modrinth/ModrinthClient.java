@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.modrinth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
