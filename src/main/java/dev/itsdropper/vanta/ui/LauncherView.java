@@ -208,6 +208,9 @@ public class LauncherView {
                                     ? "Vanta could not start the instance."
                                     : failure.description()
                     );
+                    if (failure != null) {
+                        UiExecutor.shared().dispatchToUi(() -> showRepairView(failure));
+                    }
                 } else if (state == LaunchService.LaunchState.IDLE
                         && (previousLaunchState == LaunchService.LaunchState.CLOSING
                         || previousLaunchState == LaunchService.LaunchState.RUNNING
