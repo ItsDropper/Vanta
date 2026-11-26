@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.VantaJson;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
 import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityMitigationService;
@@ -168,7 +169,7 @@ public class LaunchDataBuilder {
             }
             Path versionJson = instanceDirectory.resolve("minecraft").resolve("version.json");
             try {
-                JsonNode metadata = new ObjectMapper().readTree(versionJson.toFile());
+                JsonNode metadata = VantaJson.mapper().readTree(versionJson.toFile());
                 JsonNode gameArguments = metadata.path("arguments").path("game");
                 data.neoForgeFmlVersion = argumentValue(gameArguments, "--fml.fmlVersion");
                 data.neoFormVersion = argumentValue(gameArguments, "--fml.neoFormVersion");

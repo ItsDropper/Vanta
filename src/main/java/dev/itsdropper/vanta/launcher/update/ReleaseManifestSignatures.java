@@ -1,9 +1,8 @@
 package dev.itsdropper.vanta.launcher.update;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.VantaJson;
 import dev.itsdropper.vanta.security.Ed25519Signatures;
 
 import java.io.ByteArrayOutputStream;
@@ -25,9 +24,7 @@ final class ReleaseManifestSignatures {
     private static final byte[] DOMAIN_PREFIX =
             "VANTA-RELEASE-MANIFEST-V1\n".getBytes(StandardCharsets.US_ASCII);
     private static final Pattern KEY_ID = Pattern.compile("[a-z0-9][a-z0-9._-]{2,63}");
-    private static final ObjectMapper JSON = new ObjectMapper(JsonFactory.builder()
-            .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
-            .build());
+    private static final ObjectMapper JSON = VantaJson.strictMapper();
 
     private ReleaseManifestSignatures() {}
 

@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher.bundle;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.VantaJson;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,7 @@ public final class VantaBundleRepository {
     private final ObjectMapper mapper;
 
     public VantaBundleRepository() {
-        this(new ObjectMapper().enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+        this(VantaJson.strictSchemaMapper());
     }
 
     VantaBundleRepository(ObjectMapper mapper) {

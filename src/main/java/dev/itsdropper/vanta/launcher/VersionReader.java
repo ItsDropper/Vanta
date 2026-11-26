@@ -2,6 +2,7 @@ package dev.itsdropper.vanta.launcher;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.VantaJson;
 import dev.itsdropper.vanta.launcher.model.VersionManifest;
 
 import java.io.IOException;
@@ -18,8 +19,7 @@ public class VersionReader {
 
     private static final ConcurrentHashMap<Path, CacheEntry> CACHE = new ConcurrentHashMap<>();
 
-    private static final ObjectMapper MAPPER =
-            new ObjectMapper();
+    private static final ObjectMapper MAPPER = VantaJson.mapper();
 
     public static VersionManifest readVersion(
             Path instanceDirectory

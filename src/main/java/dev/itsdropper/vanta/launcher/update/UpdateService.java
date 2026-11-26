@@ -1,9 +1,8 @@
 package dev.itsdropper.vanta.launcher.update;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.VantaJson;
 import dev.itsdropper.vanta.launcher.Platform;
 
 import java.io.IOException;
@@ -49,10 +48,7 @@ public class UpdateService {
     }
 
     static ObjectMapper createMetadataMapper() {
-        JsonFactory jsonFactory = JsonFactory.builder()
-                .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
-                .build();
-        return new ObjectMapper(jsonFactory);
+        return VantaJson.strictMapper();
     }
 
     public UpdateInfo checkForUpdate(String currentVersion) throws IOException, InterruptedException {
