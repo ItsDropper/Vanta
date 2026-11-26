@@ -155,8 +155,15 @@ Section "Vanta"
   IfFileExists "$WORK_DIR\staged\updater\VantaUpdater.jar" 0 InvalidPackage
 
   ; Keep a rollback copy until the new installation passes final validation.
+  FileOpen $9 "$LOG_PATH" a
+  FileWrite $9 "Install directory selected: $INSTDIR$\r$\n"
+  FileClose $9
   RMDir /r "$PREVIOUS_DIR"
   IfFileExists "$INSTDIR\Vanta.exe" 0 NoPreviousInstall
+  FileOpen $9 "$LOG_PATH" a
+  FileWrite $9 "Existing Vanta.exe detected; moving the previous install.$\r$\n"
+  FileClose $9
+  ClearErrors
   Rename "$INSTDIR" "$PREVIOUS_DIR"
   IfErrors InstallFailure
 NoPreviousInstall:
