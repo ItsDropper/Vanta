@@ -35,6 +35,25 @@ public final class VantaBundleRepository {
         this.mapper = mapper.copy().enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
+    /**
+     * Loads a profile shipped inside the launcher. Resource names are relative
+     * to the classpath root and cannot escape the bundled profiles directory.
+     */
+    public VantaBundleManifest loadBundled(String resourceName) throws IOException {
+        if (resourceName == null || !resourceName.matches("[a-zA-Z0-9._/-]+")
+                || resourceName.startsWith("/") || resourceName.contains("..")
+                || !resourceName.startsWith("profiles/")) {
+            throw new IOException("Invalid bundled profile resource name.");
+        }
+        try (InputStream input = VantaBundleRepository.class.getClassLoader()
+                .getResourceAsStream(resourceName)) {
+            if (input == null) {
+                throw new IOException("Bundled Vanta profile was not found: " + resourceName);
+            }
+            return parse(input.readNBytes(MAX_MANIFEST_BYTES + 1));
+        }
+    }
+
     public VantaBundleManifest load(Path path) throws IOException {
         if (path == null || !Files.isRegularFile(path)) {
             throw new IOException("Bundle manifest file does not exist.");
