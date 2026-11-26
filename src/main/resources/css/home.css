@@ -178,3 +178,16 @@
 .home-panel > .home-muted {
     -fx-padding: 6px 10px;
 }
+
+/* ---- tactile feedback ---------------------------------------------------- */
+
+.home-tile:hover {
+    -fx-translate-y: -2;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 18, 0.1, 0, 8);
+}
+
+.home-tile:pressed {
+    -fx-translate-y: 0;
+    -fx-scale-x: 0.99;
+    -fx-scale-y: 0.99;
+}

@@ -467,6 +467,7 @@ public class ContentBrowserView extends VBox {
         popularStatusLabel.setText(
                 Localization.text("contentBrowser.loadingPopularPrefix") + requestedType.getDisplayName().toLowerCase() + "s..."
         );
+        dev.itsdropper.vanta.ui.kit.Skeleton.fill(popularResults, 6, 150);
 
         UiExecutor.shared().execute(() -> {
             try {
@@ -563,7 +564,7 @@ public class ContentBrowserView extends VBox {
         ModrinthContentType requestedType = contentType;
         long requestId = ++searchRequestId;
         statusLabel.setText(Localization.text("common.searching"));
-        results.getChildren().clear();
+        dev.itsdropper.vanta.ui.kit.Skeleton.fill(results, 6, 150);
 
         UiExecutor.shared().execute(() -> {
             try {

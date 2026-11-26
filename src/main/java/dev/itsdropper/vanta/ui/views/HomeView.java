@@ -168,7 +168,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     }
 
     private VBox createRecentInstancesSection() {
-        recentList = new FlowPane(14, 14);
+        recentList = new dev.itsdropper.vanta.ui.kit.CardGrid(14, 210, 4);
         recentList.setMinHeight(0);
         recentList.getStyleClass().add("home-tiles");
 
@@ -534,7 +534,10 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
     // ------------------------------------------------------------ rows
 
     private StackPane createRecentTile(Instance instance) {
-        CoverArt art = new CoverArt(instance.getName(), instance.getLoader()).rounded(12).sized(232, 130);
+        CoverArt art = new CoverArt(instance.getName(), instance.getLoader()).rounded(12);
+        art.setMinSize(0, 130);
+        art.setPrefSize(232, 130);
+        art.setMaxSize(Double.MAX_VALUE, 130);
 
         Region shade = new Region();
         shade.getStyleClass().add("home-tile-shade");

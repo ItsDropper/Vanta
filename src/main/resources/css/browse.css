@@ -144,3 +144,22 @@
 .instance-tabs .content-tab {
     -fx-padding: 8 18;
 }
+
+/* ---- loading skeleton ---------------------------------------------------- */
+
+.skeleton-card {
+    -fx-background-color: -v-hair, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 13, 12;
+    -fx-padding: 14;
+}
+
+.skeleton-icon {
+    -fx-background-color: -v-well;
+    -fx-background-radius: 12;
+}
+
+.skeleton-line {
+    -fx-background-color: -v-well;
+    -fx-background-radius: 6;
+}

@@ -1517,12 +1517,7 @@ public class GlobalModsView extends VBox {
         retryButton.setVisible(false);
         retryButton.setManaged(false);
         statusLabel.setText(Localization.text("common.searching"));
-        for (int i = 0; i < Math.min(state.limit(), 6); i++) {
-            VBox skeleton = new VBox(8);
-            skeleton.setMinHeight(112);
-            skeleton.getStyleClass().add("modrinth-result-skeleton");
-            results.getChildren().add(skeleton);
-        }
+        dev.itsdropper.vanta.ui.kit.Skeleton.fill(results, 6, 150);
 
         ModrinthContentType requestedType = contentTypeBox.getValue();
         List<String> requestedLoaders = selectedLoaderFacets();
