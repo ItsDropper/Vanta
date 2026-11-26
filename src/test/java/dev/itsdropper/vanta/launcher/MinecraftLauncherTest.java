@@ -60,6 +60,22 @@ class MinecraftLauncherTest {
     }
 
     @Test
+    void keepsFontMitigationEnabledWithoutRejectingVanillaIndexedTextures() {
+        Path agent = Path.of("C:/Vanta/security/m2sfix-agent-2.3.0.jar");
+        assertEquals(List.of(
+                "-Dm2sfix.policy=safe",
+                "-Dm2sfix.images=off",
+                "-javaagent:C:/Vanta/security/m2sfix-agent-2.3.0.jar"
+        ), MinecraftLauncher.securityMitigationJvmArguments(agent));
+    }
+
+    @Test
+    void rejectsMissingSecurityMitigationAgentPath() {
+        assertThrows(IllegalArgumentException.class,
+                () -> MinecraftLauncher.securityMitigationJvmArguments(null));
+    }
+
+    @Test
     void disablesVulnerableBase64IntrinsicForJava17AndNewerOnX64() {
         assertEquals(List.of("-XX:-UseBASE64Intrinsics"),
                 MinecraftLauncher.java4ShellMitigationArguments(17, "amd64"));
