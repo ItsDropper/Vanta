@@ -75,6 +75,8 @@ public class ModsView extends VBox {
         SHADERS
     }
 
+    private Button browseButtonRef;
+
     public ModsView(
             Instance instance,
             Runnable onBrowseContent,
@@ -155,6 +157,7 @@ public class ModsView extends VBox {
         browseButton.getStyleClass().add(
                 "primary-button"
         );
+        browseButtonRef = browseButton;
 
         Button screenshotsButton =
                 new Button(
@@ -620,14 +623,18 @@ public class ModsView extends VBox {
 
             if (files.isEmpty()) {
 
-                Label empty =
-                        new Label(
-                                emptyMessage
-                        );
-
-                empty.getStyleClass().add(
-                        "instances-status"
-                );
+                boolean searching = searchField.getText() != null
+                        && !searchField.getText().isBlank();
+                dev.itsdropper.vanta.ui.kit.EmptyState empty =
+                        new dev.itsdropper.vanta.ui.kit.EmptyState(
+                                IconView.Type.PACKAGE,
+                                emptyMessage,
+                                searching
+                                        ? "Nothing matches your search."
+                                        : "Browse Modrinth to add some.",
+                                searching ? null : "Browse content",
+                                browseButtonRef::fire);
+                empty.setMaxWidth(Double.MAX_VALUE);
 
                 contentList
                         .getChildren()

@@ -42,3 +42,57 @@
     -fx-background-color: -vantaaccent;
     -fx-background-radius: 3;
 }
+
+/* ---- empty state ---------------------------------------------------------- */
+
+.empty-state {
+    -fx-padding: 56 24 56 24;
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
+}
+
+.empty-state-plate {
+    -fx-background-color: -vantaaccent-a10;
+    -fx-background-radius: 16;
+}
+
+.empty-state-plate .icon-view,
+.empty-state-plate .svg-path {
+    -fx-stroke: -vantaaccent;
+}
+
+.empty-state-title {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 17px;
+    -fx-text-fill: -vantatext;
+}
+
+.empty-state-description {
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantamuted;
+    -fx-text-alignment: center;
+}
+
+/* ---- overflow menu button ------------------------------------------------- */
+
+.menu-button.instances-more-button {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 10, 9;
+    -fx-padding: 0 6 0 8;
+    -fx-min-height: 38;
+    -fx-text-fill: -vantatext;
+}
+
+.menu-button.instances-more-button:hover {
+    -fx-background-color: -vantaaccent-a30, -v-card-hover;
+}
+
+.menu-button.instances-more-button > .arrow-button {
+    -fx-padding: 0 2 0 4;
+}
+
+.menu-button.instances-more-button > .arrow-button > .arrow {
+    -fx-background-color: -vantasubtle;
+}

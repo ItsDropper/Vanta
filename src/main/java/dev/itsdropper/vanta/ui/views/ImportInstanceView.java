@@ -1,5 +1,9 @@
 package dev.itsdropper.vanta.ui.views;
 
+import dev.itsdropper.vanta.ui.components.IconView;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.components.PageHeader;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
@@ -235,27 +239,61 @@ public class ImportInstanceView extends VBox {
                         onBack.run()
         );
 
-        FlowPane actions = new FlowPane(12, 8, backButton, prismImportButton, modrinthAppImportButton, importButton);
-        actions.setAlignment(Pos.CENTER_RIGHT);
-        actions.setMaxWidth(Double.MAX_VALUE);
+        for (Button b : new Button[]{prismImportButton, modrinthAppImportButton, importButton}) {
+            b.setMaxWidth(Double.MAX_VALUE);
+            b.setPrefWidth(Region.USE_COMPUTED_SIZE);
+        }
+        HBox sources = new HBox(16,
+                sourceTile(IconView.Type.PACKAGE, Localization.text("import.source.mrpack"),
+                        Localization.text("import.source.mrpack.description"), importButton),
+                sourceTile(IconView.Type.FOLDER, Localization.text("import.source.prism"),
+                        Localization.text("prismImport.description"), prismImportButton),
+                sourceTile(IconView.Type.DOWNLOAD, Localization.text("import.source.modrinth"),
+                        Localization.text("modrinthAppImport.description"), modrinthAppImportButton));
+        sources.setFillHeight(true);
+        for (javafx.scene.Node tile : sources.getChildren()) {
+            HBox.setHgrow(tile, Priority.ALWAYS);
+            ((Region) tile).setPrefWidth(0);
+        }
+        statusLabel.visibleProperty().bind(statusLabel.textProperty().isNotEmpty());
+        statusLabel.managedProperty().bind(statusLabel.textProperty().isNotEmpty());
+
+        HBox footer = new HBox(backButton);
+        footer.setAlignment(Pos.CENTER_LEFT);
 
         // =========================================================
         // BUILD
         // =========================================================
 
-        Label formatBadge = new Label(Localization.text("importInstance.formats"));
-        formatBadge.getStyleClass().add("import-format-badge");
-        Label dropGlyph = new Label("↥");
-        dropGlyph.getStyleClass().add("import-drop-glyph");
-        VBox intro = new VBox(10, dropGlyph, panelTitle, description, formatBadge);
-        intro.getStyleClass().add("import-intro");
-
-        panel.getChildren().addAll(intro, progressRow, statusLabel, actions);
-
+        VBox status = new VBox(10, progressRow, statusLabel);
         getChildren().addAll(
                 header,
-                panel
+                sources,
+                status,
+                footer
         );
+    }
+
+    private VBox sourceTile(IconView.Type icon, String title, String description, Button action) {
+        StackPane plate = new StackPane(IconView.create(icon, 22));
+        plate.getStyleClass().add("import-source-plate");
+        plate.setMinSize(48, 48);
+        plate.setPrefSize(48, 48);
+        plate.setMaxSize(48, 48);
+        Label heading = new Label(title);
+        heading.getStyleClass().add("create-tile-title");
+        Label body = new Label(description);
+        body.getStyleClass().add("create-tile-description");
+        body.setWrapText(true);
+        body.setMinHeight(54);
+        Region grow = new Region();
+        VBox.setVgrow(grow, Priority.ALWAYS);
+        VBox tile = new VBox(12, plate, heading, body, grow, action);
+        tile.getStyleClass().add("import-source");
+        tile.setPadding(new Insets(20));
+        tile.setMinWidth(0);
+        tile.setMaxWidth(Double.MAX_VALUE);
+        return tile;
     }
 
 // =============================================================

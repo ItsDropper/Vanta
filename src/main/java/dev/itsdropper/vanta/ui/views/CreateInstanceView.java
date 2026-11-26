@@ -437,12 +437,67 @@ public class CreateInstanceView extends VBox {
         // BUILD PAGE
         // =========================================================
 
+        VBox preview = buildPreview();
+        HBox.setHgrow(panel, javafx.scene.layout.Priority.ALWAYS);
+        HBox body = new HBox(20, panel, preview);
+        body.setFillHeight(false);
+        body.setAlignment(Pos.TOP_LEFT);
+
         getChildren().addAll(
                 header,
-                panel
+                body
         );
 
         loadVersions();
+    }
+
+    // =============================================================
+    // LIVE PREVIEW
+    // =============================================================
+
+    private VBox buildPreview() {
+        javafx.scene.layout.StackPane artHost = new javafx.scene.layout.StackPane();
+        artHost.setMinHeight(170);
+        artHost.setPrefHeight(170);
+        artHost.setMaxHeight(170);
+        Label name = new Label();
+        name.getStyleClass().add("create-preview-name");
+        name.setWrapText(true);
+        Label meta = new Label();
+        meta.getStyleClass().add("create-preview-meta");
+        Runnable refresh = () -> {
+            String text = nameField.getText() == null ? "" : nameField.getText().trim();
+            String loader = loaderBox.getValue() == null ? "Vanilla" : loaderBox.getValue();
+            dev.itsdropper.vanta.ui.kit.CoverArt art =
+                    new dev.itsdropper.vanta.ui.kit.CoverArt(text.isEmpty() ? "New instance" : text, loader);
+            art.setMinSize(0, 170);
+            art.setPrefSize(300, 170);
+            art.setMaxSize(Double.MAX_VALUE, 170);
+            artHost.getChildren().setAll(art);
+            name.setText(text.isEmpty() ? "New instance" : text);
+            String version = versionBox.getValue();
+            meta.setText(version == null ? loader : "Minecraft " + version + " with " + loader);
+        };
+        nameField.textProperty().addListener((o, a, b) -> refresh.run());
+        versionBox.valueProperty().addListener((o, a, b) -> refresh.run());
+        loaderBox.valueProperty().addListener((o, a, b) -> refresh.run());
+        refresh.run();
+        javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+        clip.widthProperty().bind(artHost.widthProperty());
+        clip.setHeight(170);
+        clip.setArcWidth(24);
+        clip.setArcHeight(24);
+        artHost.setClip(clip);
+        VBox copy = new VBox(4, name, meta);
+        copy.setPadding(new Insets(14, 16, 16, 16));
+        VBox card = new VBox(artHost, copy);
+        card.getStyleClass().add("create-preview");
+        card.setMinWidth(300);
+        card.setPrefWidth(300);
+        card.setMaxWidth(300);
+        card.setMaxHeight(javafx.scene.layout.Region.USE_PREF_SIZE);
+        card.setAlignment(Pos.TOP_LEFT);
+        return card;
     }
 
     // =============================================================

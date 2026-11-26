@@ -45,3 +45,66 @@
     -fx-text-fill: -vantamuted;
     -fx-wrap-text: true;
 }
+
+/* ---- live instance preview ------------------------------------------------ */
+
+.create-preview {
+    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 14, 13, 13;
+    -fx-padding: 1;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.4), 22, 0.1, 0, 8);
+}
+
+.create-preview-name {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 18px;
+    -fx-text-fill: -vantatext;
+}
+
+.create-preview-meta {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+/* ---- import sources ------------------------------------------------------- */
+
+.import-source-plate {
+    -fx-background-color: -vantaaccent-a18;
+    -fx-background-radius: 14;
+}
+
+.import-source-plate .icon-view,
+.import-source-plate .svg-path {
+    -fx-stroke: -vantaaccent;
+}
+
+.import-source {
+    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 13, 12, 12;
+}
+
+.import-source:hover {
+    -fx-background-color: -vantaaccent-a55, -v-card-hover, linear-gradient(to bottom, -v-gloss, transparent 55%);
+}
+
+/* ---- preset rows ---------------------------------------------------------- */
+
+.button.preset-choice-card .preset-choice-meta {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 11.5px;
+    -fx-text-fill: -vantamuted;
+}
+
+.button.preset-choice-card .preset-choice-icon {
+    -fx-background-color: -vantaaccent-a18;
+    -fx-background-radius: 12;
+    -fx-text-fill: -vantaaccent;
+}
+
+.button.preset-choice-card .preset-choice-icon .icon-view,
+.button.preset-choice-card .preset-choice-icon .svg-path {
+    -fx-stroke: -vantaaccent;
+}
