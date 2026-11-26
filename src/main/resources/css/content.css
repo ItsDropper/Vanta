@@ -8,19 +8,19 @@
 }
 
 .stats-bar {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
     -fx-background-radius: 4 4 2 2;
 }
 
 .stats-bar-empty {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
     -fx-background-radius: 2;
 }
 
 .stats-axis {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 .stats-row {
@@ -30,15 +30,15 @@
 .stats-row-name {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .stats-track {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
     -fx-background-radius: 3;
 }
 
 .stats-fill {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
     -fx-background-radius: 3;
 }

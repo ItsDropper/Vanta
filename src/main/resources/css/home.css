@@ -12,13 +12,13 @@
 .home-muted {
     -fx-font-family: "Geist";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 /* ---------- hero ------------------------------------------------------------ */
 
 .home-hero {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 14;
 }
 
@@ -45,13 +45,13 @@
 .home-stat-label {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .home-stat-value {
     -fx-font-family: "JetBrains Mono Medium";
     -fx-font-size: 15px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .home-play {
@@ -62,7 +62,7 @@
 
 .home-tile {
     -fx-cursor: hand;
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 12;
 }
 
@@ -86,24 +86,24 @@
 .home-tile-ring {
     -fx-background-color: transparent;
     -fx-background-radius: 12;
-    -fx-border-color: -v-hair-strong;
+    -fx-border-color: -fx-v-hair-strong;
     -fx-border-width: 1px;
     -fx-border-radius: 12;
 }
 
 .home-tile:hover .home-tile-ring {
-    -fx-border-color: -vantaaccent-a55;
+    -fx-border-color: -fx-vantaaccent-a55;
     -fx-border-width: 2px;
 }
 
 .home-tile-selected .home-tile-ring,
 .home-tile-selected:hover .home-tile-ring {
-    -fx-border-color: -vantaaccent;
+    -fx-border-color: -fx-vantaaccent;
     -fx-border-width: 2px;
 }
 
 .home-tile:focused .home-tile-ring {
-    -fx-border-color: -vantatext;
+    -fx-border-color: -fx-vantatext;
     -fx-border-width: 2px;
 }
 
@@ -117,23 +117,23 @@
 }
 
 .home-tile-new {
-    -fx-background-color: -v-hair, -v-card;
+    -fx-background-color: -fx-v-hair, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 12, 11;
 }
 
 .home-tile-new:hover {
-    -fx-background-color: -vantaaccent-a30, -v-card-hover;
+    -fx-background-color: -fx-vantaaccent-a30, -fx-v-card-hover;
 }
 
 .home-tile-new-plus {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 26px;
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }
 
 .home-tile-new .home-tile-name {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
 }
@@ -141,7 +141,7 @@
 /* ---------- servers --------------------------------------------------------- */
 
 .home-panel {
-    -fx-background-color: -v-hair, -v-well;
+    -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 12, 11;
 }
@@ -153,11 +153,11 @@
 }
 
 .home-row:hover {
-    -fx-background-color: -v-card-hover;
+    -fx-background-color: -fx-v-card-hover;
 }
 
 .home-row:focused {
-    -fx-background-color: -vantaaccent-a30, -v-card;
+    -fx-background-color: -fx-vantaaccent-a30, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 9, 8;
 }
@@ -165,7 +165,7 @@
 .home-row-name {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .home-row-play {
