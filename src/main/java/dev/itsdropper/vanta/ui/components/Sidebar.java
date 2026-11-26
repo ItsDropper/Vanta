@@ -32,6 +32,7 @@ public class Sidebar extends VBox {
         HOME("Home", 1, IconView.Type.HOME, "Return to your launcher dashboard"),
         INSTANCES("Instances", 2, IconView.Type.INSTANCES, "Manage, back up and restore installations"),
         MODS("Mods", 3, IconView.Type.MODS, "Manage global mods and browse Modrinth"),
+        STATS(Localization.text("stats.title"), 0, IconView.Type.CLOCK, Localization.text("stats.subtitle")),
         STATE("State Center", 4, IconView.Type.SHIELD, "Inspect and repair Minecraft installations"),
         CRASH_LAB("Crash Lab", 0, IconView.Type.ACTIVITY, "Review launch history and compare crash evidence"),
         SKIN("Skin Changer", 5, IconView.Type.SKIN, "Manage your Minecraft appearance"),
@@ -141,6 +142,7 @@ public class Sidebar extends VBox {
         addButton(Page.HOME);
         addButton(Page.INSTANCES);
         addButton(Page.MODS);
+        addButton(Page.STATS);
 
         addGroupGap();
         addToolsGroup();

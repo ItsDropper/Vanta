@@ -68,6 +68,7 @@ public class LauncherView {
     private final SettingsView settingsView;
     private final CreateInstanceTypeView createInstanceTypeView;
     private final DownloadCenterView downloadCenterView;
+    private final StatisticsView statisticsView;
     private final ServerManagerView serverManagerView;
     private final ExperimentalView experimentalView;
     private final CrashLabView crashLabView;
@@ -326,6 +327,7 @@ public class LauncherView {
 
         stateCenterView = new StateCenterView();
         downloadCenterView = new DownloadCenterView(screenshotMode);
+        statisticsView = new StatisticsView();
         serverManagerView = new ServerManagerView();
         experimentalView = new ExperimentalView(accountService, this::showCrashCaseReviewView);
         crashLabView = new CrashLabView(this::showCrashCaseReviewView);
@@ -558,6 +560,7 @@ public class LauncherView {
             case MODS -> showAnimatedContent(globalModsView);
             case STATE -> showStatePage();
             case CRASH_LAB -> showAnimatedContent(crashLabView);
+            case STATS -> showAnimatedContent(statisticsView);
             case SETTINGS -> showAnimatedContent(settingsView);
             case DOWNLOADS -> showAnimatedContent(downloadCenterView);
             case SERVERS -> showAnimatedContent(serverManagerView);
@@ -575,6 +578,7 @@ public class LauncherView {
             case MODS -> viewHost.showForCapture(globalModsView);
             case STATE -> viewHost.showForCapture(stateCenterView);
             case CRASH_LAB -> viewHost.showForCapture(crashLabView);
+            case STATS -> viewHost.showForCapture(statisticsView);
             case SETTINGS -> viewHost.showForCapture(settingsView);
             case DOWNLOADS -> viewHost.showForCapture(downloadCenterView);
             case SERVERS -> viewHost.showForCapture(serverManagerView);
