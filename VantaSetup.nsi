@@ -2,6 +2,11 @@
 ; with existing Vanta updater releases: Vanta.exe, app/, runtime/, updater/.
 !include "MUI2.nsh"
 
+!macro VantaInstallerError message
+  IfSilent +2
+  MessageBox MB_ICONSTOP "${message}"
+!macroend
+
 !ifndef APP_VERSION
   !error "APP_VERSION must be supplied by the release workflow"
 !endif
@@ -146,25 +151,25 @@ NoPreviousInstall:
   Goto InstallComplete
 
 CurlMissing:
-  MessageBox MB_ICONSTOP "Windows curl.exe was not found."
+  !insertmacro VantaInstallerError "${msg}"
   Goto InstallFailure
 InvalidVersion:
-  MessageBox MB_ICONSTOP "GitHub returned an invalid Vanta release version."
+  !insertmacro VantaInstallerError "${msg}"
   Goto InstallFailure
 DownloadError:
-  MessageBox MB_ICONSTOP "Vanta could not download the latest release."
+  !insertmacro VantaInstallerError "${msg}"
   Goto InstallFailure
 ChecksumFailed:
-  MessageBox MB_ICONSTOP "The downloaded Vanta package failed SHA-256 verification."
+  !insertmacro VantaInstallerError "${msg}"
   Goto InstallFailure
 InvalidPackage:
-  MessageBox MB_ICONSTOP "The downloaded Vanta package is incomplete or has an unexpected layout."
+  !insertmacro VantaInstallerError "${msg}"
   Goto InstallFailure
 RestorePrevious:
   RMDir /r "$INSTDIR"
   IfFileExists "$PREVIOUS_DIR\Vanta.exe" 0 InstallFailure
   Rename "$PREVIOUS_DIR" "$INSTDIR"
-  MessageBox MB_ICONSTOP "Vanta installation failed. The previous installation was restored."
+  !insertmacro VantaInstallerError "${msg}"
   Goto InstallFailure
 InstallFailure:
   Delete "$WORK_DIR\release.json"
@@ -173,6 +178,7 @@ InstallFailure:
   Delete "$HASH_PATH"
   RMDir /r "$WORK_DIR\staged"
   RMDir "$WORK_DIR"
+  SetErrorLevel 1
   Abort
 InstallComplete:
 SectionEnd
