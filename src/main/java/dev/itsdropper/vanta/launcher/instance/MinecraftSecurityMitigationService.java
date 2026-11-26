@@ -44,7 +44,7 @@ public final class MinecraftSecurityMitigationService {
      * Returns a locally cached, checksum-verified agent. A corrupt cache is
      * replaced only after a fresh download has passed all verification checks.
      */
-    public static Path ensureAgent() throws Exception {
+    public static Path ensureAgent() throws IOException, InterruptedException {
         Path securityDirectory = MinecraftLocator.getVantaDirectoryPath().resolve("security");
         Files.createDirectories(securityDirectory);
         Path target = securityDirectory.resolve("m2sfix-agent-" + VERSION + ".jar");
