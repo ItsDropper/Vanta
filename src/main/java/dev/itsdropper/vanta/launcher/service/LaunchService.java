@@ -669,21 +669,26 @@ public class LaunchService {
         }
     }
 
-    private LaunchFailure classifyExitedFailure(int exitCode, String processOutput) {
-        List<RepairView.RepairIssue> specificIssues = LaunchFailureParser.parse(processOutput);
+    private LaunchFailure classifyExitedFailure(int exitCode, String processOutput, String diagnosticContext) {
+        // The process stream often contains only Fabric's short error-screen output.
+        // The actionable dependency-resolution details are written to latest.log.
+        // Always classify against the same combined evidence persisted in launch history.
+        String diagnosticEvidence = diagnosticContext == null || diagnosticContext.isBlank()
+                ? processOutput : diagnosticContext;
+        List<RepairView.RepairIssue> specificIssues = LaunchFailureParser.parse(diagnosticEvidence);
         if (!specificIssues.isEmpty()) {
             RepairView.RepairIssue issue = specificIssues.get(0);
             String description = issue.details() == null || issue.details().isBlank()
                     ? issue.title() : issue.details();
-            return new LaunchFailure(issue.title(), description, processOutput);
+            return new LaunchFailure(issue.title(), description, diagnosticEvidence);
         }
 
-        RepairDiagnosis diagnosis = findActionableDiagnosis(RepairDiagnosticEngine.diagnose(processOutput));
+        RepairDiagnosis diagnosis = findActionableDiagnosis(RepairDiagnosticEngine.diagnose(diagnosticEvidence));
         if (diagnosis != null) {
             String description = diagnosis.description() == null || diagnosis.description().isBlank()
                     ? diagnosis.evidence() : diagnosis.description();
             return new LaunchFailure(diagnosis.title(), description,
-                    diagnosis.evidence().isBlank() ? processOutput : diagnosis.evidence());
+                    diagnosis.evidence().isBlank() ? diagnosticEvidence : diagnosis.evidence());
         }
 
         return new LaunchFailure("Minecraft exited with code " + exitCode,
@@ -736,7 +741,7 @@ public class LaunchService {
                             // Logs are evidence, never a reason to terminate a live game.
                             // Classification is permitted only after waitFor() and a non-zero exit.
                             if (exitCode != 0 && !intentionalClose) {
-                                lastFailure = classifyExitedFailure(exitCode, processOutput);
+                                lastFailure = classifyExitedFailure(exitCode, processOutput, diagnosticContext);
                                 setState(LaunchState.ERROR);
                             } else {
                                 setState(LaunchState.IDLE);
