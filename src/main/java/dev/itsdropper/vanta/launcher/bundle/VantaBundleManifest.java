@@ -45,7 +45,15 @@ public record VantaBundleManifest(
             String projectId,
             String versionId,
             boolean required,
-            boolean defaultEnabled
+            boolean defaultEnabled,
+            GitHubRelease githubRelease
     ) {
+        public Mod(String projectId, String versionId, boolean required, boolean defaultEnabled) {
+            this(projectId, versionId, required, defaultEnabled, null);
+        }
+    }
+
+    /** A platform-specific artifact published in the latest GitHub release. */
+    public record GitHubRelease(String repository, String assetPrefix) {
     }
 }
