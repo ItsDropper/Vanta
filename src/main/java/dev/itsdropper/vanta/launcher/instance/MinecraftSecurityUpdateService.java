@@ -130,7 +130,7 @@ public final class MinecraftSecurityUpdateService {
         }
     }
 
-    private static void validateOfficialMetadata(JsonNode metadata, String expectedVersion) {
+    static void validateOfficialMetadata(JsonNode metadata, String expectedVersion) {
         if (metadata == null || !metadata.isObject()
                 || !expectedVersion.equals(metadata.path("id").asText())
                 || !metadata.path("libraries").isArray()) {
