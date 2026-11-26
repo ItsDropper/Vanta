@@ -16,8 +16,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.launcher.loader.LoaderStackConfiguration;
 import dev.itsdropper.vanta.launcher.loader.LoaderStackManager;
