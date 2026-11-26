@@ -344,6 +344,14 @@ public class InstalledModScanner {
             }
         }
 
+        // Fabric Loader and Fabric API are separate components. Fabric's
+        // legacy "fabric" dependency ID is provided by the Fabric API
+        // aggregate mod (fabric-api), not by the loader's fabricloader ID.
+        // Treat the aggregate API as satisfying that alias when it is present.
+        if (installedIds.contains("fabric-api")) {
+            installedIds.add("fabric");
+        }
+
         java.util.Map<String, MissingDependency> missing = new java.util.LinkedHashMap<>();
         for (InstalledMod mod : installed) {
             if (mod == null || mod.getDependencies() == null) continue;
