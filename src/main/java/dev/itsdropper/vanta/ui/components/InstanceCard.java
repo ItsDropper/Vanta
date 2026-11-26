@@ -923,9 +923,15 @@ public class InstanceCard extends StackPane {
 
     private void resetToReady() {
         playButton.setDisable(false);
+        setPlayingStyle(false);
+        if (dev.itsdropper.vanta.launcher.instance.InstanceManager.isInstallationInProgress(instance)) {
+            setPlayButtonAction("Repair & Play",
+                    "Repair interrupted installation and launch " + instance.getName(), true);
+            showStatus("Repair required", Badge.Tone.WARNING);
+            return;
+        }
         setPlayButtonAction(Localization.text("common.play"),
                 Localization.text("instanceCard.launchPrefix") + instance.getName(), true);
-        setPlayingStyle(false);
         hideStatus();
     }
 
