@@ -12,6 +12,7 @@ import dev.itsdropper.vanta.launcher.bundle.VantaBundleManifest;
 import dev.itsdropper.vanta.launcher.bundle.VantaBundleResolver;
 import dev.itsdropper.vanta.launcher.bundle.VantaBundleState;
 import dev.itsdropper.vanta.launcher.bundle.VantaBundleStateStore;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleManifestSnapshotStore;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstallationProgress;
 import dev.itsdropper.vanta.ui.components.InstanceCreationProgressDialog;
 import dev.itsdropper.vanta.launcher.instance.EnvironmentGuardianService;
@@ -957,6 +958,7 @@ public class LauncherView {
                 }
                 List<String> managedProjects = graph.stream()
                         .map(ModrinthService.ResolvedMod::projectId).distinct().toList();
+                new VantaBundleManifestSnapshotStore().save(instance, manifest);
                 new VantaBundleStateStore().save(instance, new VantaBundleState(
                         VantaBundleState.SUPPORTED_SCHEMA_VERSION,
                         resolution.profileId(),
