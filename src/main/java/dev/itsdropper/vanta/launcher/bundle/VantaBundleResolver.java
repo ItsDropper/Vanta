@@ -73,10 +73,16 @@ public final class VantaBundleResolver {
                 }
                 ResolvedMod candidate = new ResolvedMod(
                         mod.projectId(), mod.versionId(), bundle.id(), mod.required());
-                ResolvedMod previous = resolved.putIfAbsent(mod.projectId(), candidate);
+                ResolvedMod previous = resolved.get(mod.projectId());
                 if (previous != null && !java.util.Objects.equals(previous.versionId(), candidate.versionId())) {
                     throw new IOException("Conflicting pinned versions for Modrinth project " + mod.projectId()
                             + " in bundles " + previous.bundleId() + " and " + candidate.bundleId() + ".");
+                }
+                if (previous == null) {
+                    resolved.put(mod.projectId(), candidate);
+                } else if (candidate.required() && !previous.required()) {
+                    resolved.put(mod.projectId(), new ResolvedMod(
+                            previous.projectId(), previous.versionId(), previous.bundleId(), true));
                 }
             }
         }
