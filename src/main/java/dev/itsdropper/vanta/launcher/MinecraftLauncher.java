@@ -134,6 +134,21 @@ public class MinecraftLauncher {
         }
 
         // =============================================================
+        // =============================================================
+        // VERIFIED MINECRAFT SECURITY MITIGATION AGENT
+        // =============================================================
+
+        if (data.securityAgent != null) {
+            Path agent = data.securityAgent.toAbsolutePath().normalize();
+            if (!Files.isRegularFile(agent)) {
+                throw new IllegalStateException("Minecraft security mitigation agent not found: " + agent);
+            }
+            // SAFE is the upstream mitigation's default and is set explicitly
+            // so instance JVM arguments cannot silently downgrade its policy.
+            command.add("-Dm2sfix.policy=safe");
+            command.add("-javaagent:" + agent);
+        }
+
         // NILLOADER JAVA AGENT
         // =============================================================
 
