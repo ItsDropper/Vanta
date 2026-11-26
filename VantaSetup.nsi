@@ -64,6 +64,7 @@ Section "Vanta"
 
   ; Parse JSON with the Windows inbox PowerShell JSON parser instead of
   ; depending on line formatting in GitHub's API response.
+  SetOutPath "$PLUGINSDIR"
   File /oname=Read-VantaReleaseVersion.ps1 "release\read_latest_release_version.ps1"
   nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Read-VantaReleaseVersion.ps1" -ReleaseMetadata "$WORK_DIR\release.json" -OutputPath "$VERSION_PATH"'
   Pop $0
