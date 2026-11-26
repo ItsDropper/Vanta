@@ -180,6 +180,7 @@ public final class VantaProfilesView extends VBox {
             mods.getStyleClass().add("vanta-profile-mod-list");
             card.getChildren().add(mods);
             card.setUserData(enabled);
+            card.setId(bundle.id());
             bundleList.getChildren().add(card);
         }
     }
@@ -203,10 +204,8 @@ public final class VantaProfilesView extends VBox {
         for (javafx.scene.Node node : bundleList.getChildren()) {
             if (!(node instanceof VBox card) || !(card.getUserData() instanceof CheckBox enabled)
                     || !enabled.isSelected()) continue;
-            String bundleId = manifest.bundles().stream()
-                    .filter(bundle -> bundle.name().equals(enabled.getText()))
-                    .map(VantaBundleManifest.Bundle::id).findFirst().orElse(null);
-            if (bundleId != null) bundles.add(bundleId);
+            String bundleId = card.getId();
+            if (bundleId != null && !bundleId.isBlank()) bundles.add(bundleId);
             for (javafx.scene.Node modNode : ((VBox) card.getChildren().get(2)).getChildren()) {
                 if (modNode instanceof CheckBox modToggle && modToggle.isSelected()
                         && modToggle.getUserData() instanceof VantaBundleManifest.Mod mod
