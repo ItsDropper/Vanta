@@ -139,6 +139,16 @@ public final class VantaBundleRepository {
                 if (mod.versionId() != null && mod.versionId().isBlank()) {
                     throw new IOException("Pinned Modrinth version ids cannot be blank: " + mod.projectId());
                 }
+                if (mod.githubRelease() != null) {
+                    VantaBundleManifest.GitHubRelease release = mod.githubRelease();
+                    if (release.repository() == null
+                            || !release.repository().matches("[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+")
+                            || release.assetPrefix() == null
+                            || !release.assetPrefix().matches("[A-Za-z0-9._-]+")
+                            || mod.versionId() != null) {
+                        throw new IOException("Invalid GitHub release source for profile component: " + mod.projectId());
+                    }
+                }
                 if (mod.required() && !mod.defaultEnabled()) {
                     throw new IOException("Required mods must be enabled by default: " + mod.projectId());
                 }
