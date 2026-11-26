@@ -723,6 +723,15 @@ public class LauncherView {
                                     viewHost.showForCapture(new CrashCaseReviewView(() -> {}));
                                 }),
                         new SidebarScreenshotCapture.CaptureTarget(
+                                "vanta-profiles", "Vanta Profiles",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new VantaProfilesView(
+                                            () -> {},
+                                            (manifest, name, version, bundles, mods) -> {}
+                                    ));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
                                 "instance-creation-progress", "Instance Creation Progress",
                                 () -> {
                                     if (progressDialogCapture[0] != null) {
