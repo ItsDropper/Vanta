@@ -28,16 +28,16 @@ The resolver applies these rules:
 1. Required bundles are always selected.
 2. If no explicit bundle selection is supplied, default-enabled bundles are selected.
 3. If an explicit selection is supplied, it represents the complete set of selected optional bundles; required bundles remain selected.
-4. Required mods and default-enabled mods in selected bundles are included.
-5. An explicitly selected optional mod is included only when its parent bundle is selected.
+4. Required mods in selected bundles are always included.
+5. Without an explicit mod selection, default-enabled optional mods are included. With an explicit selection, it is the complete set of optional mods to include, so default-enabled optional mods can also be unchecked.
 6. Repeated projects across bundles are deduplicated. Conflicting pinned versions are rejected.
 7. Minecraft version, loader and every selected bundle/mod reference are validated before installation.
 
 ## Trust and installation boundary
 
-`VantaBundleRepository` currently parses bounded local manifest files and validates their schema. It rejects unknown JSON fields to catch misspelled manifest properties. It does **not** fetch remote manifests, authenticate publishers, verify signatures, or install mods.
+`VantaBundleRepository` parses bounded local manifest files and validates their schema. It rejects unknown JSON fields to catch misspelled manifest properties. The launcher exposes this through **Create instance → Vanta Profiles**, where a user explicitly selects a local JSON manifest, chooses a Minecraft version, and configures required/default/optional bundles and mods. Only import manifests from publishers you trust. Remote catalog discovery and publisher authentication are not implemented yet.
 
-Remote distribution must be added behind a separate transport/authentication layer. The launcher must verify the source and integrity of remote manifest bytes before handing them to the repository. Resolved mod artifacts must continue through Vanta's existing Modrinth dependency and transactional installation services; bundle code must not write JAR files directly.
+Remote distribution must be added behind a separate transport/authentication layer. The launcher must verify the source and integrity of remote manifest bytes before handing them to the repository. Resolved mod artifacts continue through Vanta's existing Modrinth dependency and transactional installation services; bundle code must not write JAR files directly. Optional `versionId` pins are enforced during dependency-graph resolution, including when a pinned project is also pulled in transitively.
 
 Bundle selection state must be stored per instance and must distinguish Vanta-managed content from user-installed mods. Updating a profile must never silently remove user-managed files or override a user's explicit disablement.
 
