@@ -67,8 +67,9 @@ public final class VantaBundleResolver {
             VantaBundleManifest.Bundle bundle = bundlesById.get(bundleId);
             for (VantaBundleManifest.Mod mod : bundle.mods()) {
                 knownProjects.add(mod.projectId());
-                if (!mod.required() && !mod.defaultEnabled()
-                        && !requestedMods.contains(mod.projectId())) {
+                if (!mod.required() && (selectedModProjectIds == null
+                        ? !mod.defaultEnabled()
+                        : !requestedMods.contains(mod.projectId()))) {
                     continue;
                 }
                 ResolvedMod candidate = new ResolvedMod(
