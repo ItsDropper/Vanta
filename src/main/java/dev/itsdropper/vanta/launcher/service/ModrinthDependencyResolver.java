@@ -27,6 +27,7 @@ public final class ModrinthDependencyResolver {
             new java.util.concurrent.ConcurrentHashMap<>();
     private final Map<String, List<ModrinthVersion>> versionCache =
             new java.util.concurrent.ConcurrentHashMap<>();
+    private Map<String, String> pinnedVersionIds = Map.of();
     private boolean fastResolution = true;
     private static final int FAST_CANDIDATE_LIMIT = 6;
 
@@ -52,6 +53,17 @@ public synchronized List<ModrinthService.ResolvedMod> resolveModGraph(
             String requiredProjectId,
             List<String> requiredVersions
     ) throws IOException, InterruptedException {
+        return resolveModGraph(instance, rootProjects, requiredProjectId, requiredVersions, Map.of());
+    }
+
+    public synchronized List<ModrinthService.ResolvedMod> resolveModGraph(
+            Instance instance,
+            List<ModrinthProject> rootProjects,
+            String requiredProjectId,
+            List<String> requiredVersions,
+            Map<String, String> pinnedVersionIds
+    ) throws IOException, InterruptedException {
+        this.pinnedVersionIds = pinnedVersionIds == null ? Map.of() : Map.copyOf(pinnedVersionIds);
 
         if (instance == null) {
             throw new IllegalArgumentException(
@@ -231,6 +243,10 @@ private boolean resolveRoots(
     ) throws IOException, InterruptedException {
 
         if (resolved.keySet().containsAll(roots)) {
+            for (String root : roots) {
+                String pinned = pinnedVersionIds.get(root);
+                if (pinned != null && !pinned.equals(resolved.get(root).getId())) return false;
+            }
             return true;
         }
 
@@ -251,6 +267,12 @@ private boolean resolveRoots(
              * different Iris version.
              */
             if (resolved.containsKey(rootProjectId)) {
+
+                String pinnedRootVersion = pinnedVersionIds.get(rootProjectId);
+                if (pinnedRootVersion != null
+                        && !pinnedRootVersion.equals(resolved.get(rootProjectId).getId())) {
+                    return false;
+                }
 
                 if (requiredProjectId != null
                         && requiredProjectId.equals(rootProjectId)
@@ -282,6 +304,9 @@ private boolean resolveRoots(
             String lastConflictReason = null;
 
             for (ModrinthVersion candidate : candidates) {
+                String pinnedRootVersion = pinnedVersionIds.get(rootProjectId);
+                if (pinnedRootVersion != null && !pinnedRootVersion.equals(candidate.getId())) continue;
+
                 if (requiredProjectId != null
                         && requiredProjectId.equals(rootProjectId)) {
 
@@ -416,11 +441,9 @@ private boolean resolveProject(
         ModrinthVersion selected = resolved.get(projectId);
 
         if (selected != null) {
-            return satisfiesDependency(
-                    instance,
-                    selected,
-                    requestedBy
-            );
+            String pinned = pinnedVersionIds.get(projectId);
+            return (pinned == null || pinned.equals(selected.getId()))
+                    && satisfiesDependency(instance, selected, requestedBy);
         }
 
         if (resolving.contains(projectId)) {
@@ -441,6 +464,8 @@ private boolean resolveProject(
 
         try {
             for (ModrinthVersion candidate : candidates) {
+                String pinned = pinnedVersionIds.get(projectId);
+                if (pinned != null && !pinned.equals(candidate.getId())) continue;
 
                 if (requiredVersions != null
                         && !matchesRequiredVersions(
