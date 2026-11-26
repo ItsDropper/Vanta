@@ -5,4 +5,5 @@ public record LaunchFailure(
         String description,
         String details
 ) {
+    public static final String SECURITY_BLOCKED_TITLE = "Launch blocked by security policy";
 }
