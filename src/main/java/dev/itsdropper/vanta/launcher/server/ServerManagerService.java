@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.server;
 
-import com.fasterxml.jackson.core.type.TypeReference;
+import dev.itsdropper.vanta.json.TypeReference;
 import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 
