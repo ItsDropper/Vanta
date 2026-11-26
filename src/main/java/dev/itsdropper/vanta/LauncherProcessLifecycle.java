@@ -19,6 +19,12 @@ public final class LauncherProcessLifecycle {
     private static final List<Runnable> CLEANUP_ACTIONS = new CopyOnWriteArrayList<>();
     private static final Set<Process> CHILD_PROCESSES = ConcurrentHashMap.newKeySet();
 
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(
+                LauncherProcessLifecycle::terminateChildProcesses,
+                "Vanta-Child-Process-Reaper"));
+    }
+
     private LauncherProcessLifecycle() {
     }
 
@@ -76,21 +82,38 @@ public final class LauncherProcessLifecycle {
 
     private static void terminateChildProcess(Process process) {
         if (process == null) return;
-        try {
-            process.descendants().forEach(ProcessHandle::destroyForcibly);
-        } catch (UnsupportedOperationException ignored) {
-            // Descendant enumeration is not supported by every process provider.
-        }
-        if (!process.isAlive()) return;
 
-        process.destroy();
+        List<ProcessHandle> descendants;
         try {
-            if (!process.waitFor(500, TimeUnit.MILLISECONDS)) {
-                process.descendants().forEach(ProcessHandle::destroyForcibly);
+            descendants = process.descendants().toList();
+        } catch (RuntimeException unavailable) {
+            descendants = List.of();
+        }
+        descendants.forEach(ProcessHandle::destroyForcibly);
+
+        if (process.isAlive()) process.destroy();
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(2);
+        try {
+            if (process.isAlive() && !process.waitFor(500, TimeUnit.MILLISECONDS)) {
                 process.destroyForcibly();
-                process.waitFor(1500, TimeUnit.MILLISECONDS);
             }
+            for (ProcessHandle descendant : descendants) {
+                if (!descendant.isAlive()) continue;
+                long remaining = deadline - System.nanoTime();
+                if (remaining > 0) {
+                    try {
+                        descendant.onExit().get(remaining, TimeUnit.NANOSECONDS);
+                    } catch (java.util.concurrent.ExecutionException
+                             | java.util.concurrent.TimeoutException ignored) {
+                        descendant.destroyForcibly();
+                    }
+                } else {
+                    descendant.destroyForcibly();
+                }
+            }
+            if (process.isAlive()) process.waitFor(500, TimeUnit.MILLISECONDS);
         } catch (InterruptedException interrupted) {
+            descendants.forEach(ProcessHandle::destroyForcibly);
             process.destroyForcibly();
             Thread.currentThread().interrupt();
         }
