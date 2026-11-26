@@ -33,7 +33,7 @@ public final class UpdaterLauncher {
      * non-daemon threads have stopped.
      */
     public static void exitOriginalProcess() {
-        System.exit(0);
+        dev.itsdropper.vanta.LauncherProcessLifecycle.exit();
     }
 
     public static void start(
