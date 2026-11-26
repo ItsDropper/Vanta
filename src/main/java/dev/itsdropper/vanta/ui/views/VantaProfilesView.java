@@ -191,7 +191,7 @@ public final class VantaProfilesView extends VBox {
             card.getStyleClass().addAll("preset-config-section", "vanta-profile-bundle");
             VBox mods = new VBox(5);
             for (VantaBundleManifest.Mod mod : bundle.mods()) {
-                CheckBox modToggle = new CheckBox(mod.projectId());
+                CheckBox modToggle = new CheckBox(mod.githubRelease() == null ? mod.projectId() : "Vanta Client");
                 modToggle.setSelected(mod.required() || mod.defaultEnabled());
                 modToggle.setDisable(mod.required());
                 modToggle.setUserData(mod);
