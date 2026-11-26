@@ -54,7 +54,7 @@ public class LaunchFailureParser {
     private static final Pattern MISSING_DEPENDENCY_ANY_VERSION =
             Pattern.compile(
                     "Mod '([^']+)' \\(([^)]+)\\).*?"
-                            + "requires (?:any version of )?([^,]+), which is missing!",
+                            + "requires (?!version\\s)(?:any version of )?([^,]+), which is missing!",
                     Pattern.CASE_INSENSITIVE
             );
 
