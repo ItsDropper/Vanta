@@ -1,1 +1,244 @@
-/* manage.css: to be rewritten on the new design system (see tokens.css, base.css, utilities.css). */
+/* ==========================================================================
+   Manage: accounts, downloads. The other management pages still use the
+   shared screen styles until they are rebuilt.
+   ========================================================================== */
+
+.accounts-page,
+.download-center-page {
+    -fx-background-color: transparent;
+}
+
+.accounts-scroll,
+.accounts-scroll > .viewport,
+.download-scroll,
+.download-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+/* ---------- accounts -------------------------------------------------------- */
+
+.accounts-hero,
+.accounts-section {
+    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 14, 13, 13;
+    -fx-padding: 20;
+}
+
+.accounts-hero-name {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 22px;
+    -fx-text-fill: -vantatext;
+}
+
+.accounts-hero-uuid,
+.accounts-card-uuid {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 11px;
+    -fx-text-fill: -vantasubtle;
+}
+
+.accounts-hero-head-frame,
+.accounts-card-head-frame {
+    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-padding: 6;
+}
+
+.accounts-head-fallback,
+.accounts-card-head-fallback {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 22px;
+    -fx-text-fill: -vantasubtle;
+}
+
+.accounts-status-pill {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-padding: 3 9;
+    -fx-background-radius: 99;
+}
+
+.accounts-status-connected {
+    -fx-background-color: -v-success-soft;
+    -fx-text-fill: -vantasuccess;
+}
+
+.accounts-status-disconnected {
+    -fx-background-color: -v-hair;
+    -fx-text-fill: -vantamuted;
+}
+
+.accounts-section-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 15px;
+    -fx-text-fill: -vantatext;
+}
+
+.accounts-section-count,
+.accounts-privacy,
+.accounts-empty-text {
+    -fx-font-family: "Geist";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantasubtle;
+}
+
+.accounts-card {
+    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-padding: 16;
+    -fx-cursor: hand;
+}
+
+.accounts-card:hover {
+    -fx-background-color: -vantaaccent-a30, -v-card-hover;
+}
+
+.accounts-card-active {
+    -fx-background-color: -vantaaccent, -v-well;
+    -fx-background-insets: 0, 1.5;
+    -fx-background-radius: 12, 10.5;
+}
+
+.accounts-card-name {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 14px;
+    -fx-text-fill: -vantatext;
+}
+
+.accounts-empty {
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-padding: 28;
+}
+
+.accounts-empty-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 15px;
+    -fx-text-fill: -vantatext;
+}
+
+.accounts-error {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantadanger;
+}
+
+.button.accounts-primary-button {
+    -fx-background-color: -vantaaccent;
+    -fx-background-radius: 8;
+    -fx-text-fill: -vantaaccentforeground;
+    -fx-font-family: "Geist SemiBold";
+    -fx-padding: 8 16;
+    -fx-cursor: hand;
+}
+
+.button.accounts-primary-button:hover {
+    -fx-background-color: -vantaaccenthover;
+}
+
+.button.accounts-secondary-button,
+.button.accounts-card-use {
+    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 8, 7;
+    -fx-text-fill: -vantatext;
+    -fx-font-family: "Geist Medium";
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+
+.button.accounts-secondary-button:hover,
+.button.accounts-card-use:hover {
+    -fx-background-color: -v-hair-strong, -v-card-hover;
+}
+
+.button.accounts-danger-button {
+    -fx-background-color: -v-danger-soft;
+    -fx-background-radius: 8;
+    -fx-text-fill: -vantadanger;
+    -fx-font-family: "Geist Medium";
+    -fx-padding: 8 14;
+    -fx-cursor: hand;
+}
+
+.button.accounts-primary-button:disabled,
+.button.accounts-secondary-button:disabled,
+.button.accounts-danger-button:disabled {
+    -fx-opacity: 0.45;
+}
+
+/* ---------- downloads ------------------------------------------------------- */
+
+.download-stat-card {
+    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 12, 11, 11;
+    -fx-padding: 14 18;
+}
+
+.download-stat-label {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantamuted;
+}
+
+.download-stat-value {
+    -fx-font-family: "JetBrains Mono Medium";
+    -fx-font-size: 22px;
+    -fx-text-fill: -vantatext;
+}
+
+.download-summary {
+    -fx-font-family: "Geist";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantasubtle;
+}
+
+.download-section-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 15px;
+    -fx-text-fill: -vantatext;
+}
+
+.download-empty-card {
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-padding: 32;
+}
+
+.download-empty-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 15px;
+    -fx-text-fill: -vantatext;
+}
+
+.download-empty-body {
+    -fx-font-family: "Geist";
+    -fx-font-size: 13px;
+    -fx-text-fill: -vantamuted;
+}
+
+.download-task-card {
+    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 12, 11, 11;
+    -fx-padding: 14 16;
+}
+
+.download-task-name {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 14px;
+    -fx-text-fill: -vantatext;
+}
+
+.download-task-source,
+.download-status {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 11px;
+    -fx-text-fill: -vantasubtle;
+}

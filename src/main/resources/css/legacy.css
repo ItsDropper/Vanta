@@ -1,6 +1,6 @@
 /* screen styles carried over until each view is rebuilt */
 .instance-progress-dialog {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 0;
     -fx-border-color: -vantalinestrong;
     -fx-border-width: 1px;
@@ -18,21 +18,21 @@
     -fx-font-size: 12px; -fx-font-family: "Geist";}
 
 .instance-progress-identity {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 6px;
     -fx-text-fill: -vantamuted;
     -fx-font-size: 12px;
 }
 
 .instance-progress-stage-list {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaline;
     -fx-border-radius: 8px;
 }
 
 .instance-progress-current {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 6px;
 }
 
@@ -73,7 +73,7 @@
 }
 
 .instance-list {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -83,7 +83,7 @@
 
 .instance-version {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .instance-loader {
@@ -92,7 +92,7 @@
 
     -fx-text-fill: -vantaaccent;
 
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     
 
     -fx-padding: 4px 8px; -fx-font-family: "Geist Medium";}
@@ -104,7 +104,7 @@
 
 .instance-empty-icon {
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 32px;
+    -fx-font-size: 22px;
 }
 
 .instance-empty-title {
@@ -117,7 +117,7 @@
 }
 
 .create-instance-panel {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
 
     -fx-border-color: -vantaborder;
@@ -127,11 +127,11 @@
 
 .create-label {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-field,
 .create-combo {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 8px;
 
     -fx-border-color: -vantaborder;
@@ -159,11 +159,11 @@
 
 .create-status {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .create-option {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
 
     -fx-border-color: -vantaborder;
@@ -177,17 +177,17 @@
 }
 
 .create-option:hover {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantaborder;
 }
 
 .create-option:pressed {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantaborder;
 }
 
 .create-option:disabled {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-border-color: -vantasurfaceraised;
     -fx-opacity: 0.45;
     -fx-cursor: default;
@@ -199,7 +199,7 @@
 
 .create-option-description {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .create-option:hover .create-option-arrow {
@@ -214,7 +214,7 @@
    }
 
 .preset-environment {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 9px;
 
     -fx-border-color: -vantasurface;
@@ -229,7 +229,7 @@
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .preset-mods-scroll {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background: -vantabg;
 
     -fx-border-color: -vantaborder;
@@ -247,7 +247,7 @@
 }
 
 .repair-issue-card {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
 
     -fx-border-color: -vantasurfaceraised;
@@ -259,7 +259,7 @@
 
 .repair-issue-type {
     -fx-text-fill: -vantadanger;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .repair-issue-title {
     -fx-text-fill: -vantatext;
@@ -267,14 +267,14 @@
 
 .repair-issue-details {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .repair-empty {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
 
     -fx-border-color: -vantaborder;
@@ -286,7 +286,7 @@
 
 .repair-status {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .screenshots-scroll {
@@ -297,7 +297,7 @@
 }
 
 .screenshot-card {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
 
     -fx-border-color: -vantaborder;
@@ -308,12 +308,12 @@
 }
 
 .screenshot-card:hover {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantaborder;
 }
 
 .screenshot-preview {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 7px;
 
     -fx-border-color: -vantasurfaceraised;
@@ -329,10 +329,10 @@
 
 .screenshot-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Geist SemiBold";}
+    -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-dialog {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
 }
 
 .screenshot-dialog-name {
@@ -340,7 +340,7 @@
     -fx-font-size: 13px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-preview-container {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 10px;
 
     -fx-border-color: -vantasurface;
@@ -359,7 +359,7 @@
 }
 
 .screenshot-card {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -367,12 +367,12 @@
 }
 
 .screenshot-card:hover {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantaborder;
 }
 
 .screenshot-preview {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 7px;
     -fx-border-color: -vantasurfaceraised;
     -fx-border-width: 1px;
@@ -386,10 +386,10 @@
 
 .screenshot-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Geist SemiBold";}
+    -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-dialog {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
 }
 
 .screenshot-dialog-name {
@@ -397,11 +397,11 @@
     -fx-font-size: 13px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-preview-container {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
 }
 
 .screenshot-image-scroll {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background: -vantabg;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -409,7 +409,7 @@
 }
 
 .screenshot-delete-dialog {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -430,29 +430,29 @@
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .dialog-instance-checkbox {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 8px;
     -fx-border-color: -vantasurface;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-padding: 11px 12px;
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-cursor: hand;
 }
 
 .dialog-instance-checkbox:hover {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantaborder;
 }
 
 .dialog-instance-checkbox:selected {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantasuccess;
 }
 
 .instances-toolbar .instance-search-field {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -479,7 +479,7 @@
 
 .instance-setting-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .instance-setting-value {
     -fx-text-fill: -vantatext;
@@ -497,7 +497,7 @@
 }
 
 .instances-page .instances-toolbar .instance-search-field {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -553,7 +553,7 @@
 }
 
 .mod-details-card {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
 
     -fx-border-color: -vantaborder;
@@ -567,7 +567,7 @@
 
 .mod-details-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 30px; -fx-font-family: "Geist SemiBold";}
+    -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
 .mod-details-author {
     -fx-text-fill: -vantamuted;
@@ -585,11 +585,11 @@
 
 .mod-details-stat-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .mod-details-card .instance-setting-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .mod-details-card .mod-details-info-value {
     -fx-text-fill: -vantatext;
@@ -597,7 +597,7 @@
 }
 
 .mod-details-header-container {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -605,7 +605,7 @@
 }
 
 .modrinth-popup {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -620,11 +620,11 @@
 
 .modrinth-popup-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .modrinth-popup-scroll {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
 }
 
 .modrinth-popup-scroll {
@@ -635,7 +635,7 @@
 }
 
 .modrinth-version-row {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -650,30 +650,30 @@
 
 .modrinth-version-name {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Geist SemiBold";}
+    -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .modrinth-version-meta {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .modrinth-version-type {
     -fx-background-color: -vantaaccentsoft;
     -fx-background-radius: 5px;
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     
     -fx-padding: 4px 6px; -fx-font-family: "Geist Medium";}
 
 .modrinth-version-downloads {
     -fx-text-fill: -vantasubtle;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .global-mod-description {
     -fx-text-fill: -vantatext;
     -fx-fill: -vantatext;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .modrinth-popup-primary {
@@ -711,7 +711,7 @@
     -fx-border-color: -vantaaccent;
     -fx-border-radius: 7px;
     -fx-text-fill: -vantaaccent;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     
     -fx-padding: 6px 9px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
@@ -723,7 +723,7 @@
 }
 
 .mod-details-description-card {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -764,7 +764,7 @@
 
 .global-mods-page .create-field,
 .instance-mods-page .instances-search {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 7px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 7px;
@@ -782,7 +782,7 @@
 }
 
 .global-mods-page .create-combo {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 7px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 7px;
@@ -795,18 +795,18 @@
 }
 
 .global-mods-page .global-mod-description {
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-text-fill: -vantamuted;
 }
 
 .global-mods-page .instance-loader,
 .instance-mods-page .instance-loader {
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-text-fill: -vantamuted;
 }
 
 .instance-mods-page .instance-tabs {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -818,7 +818,7 @@
 }
 
 .modrinth-popup {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -853,7 +853,7 @@
 }
 
 .global-mods-page .modrinth-filter-sidebar {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -866,7 +866,7 @@
     -fx-border-color: -vantaborder;
     -fx-border-radius: 6px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-padding: 4px 7px;
 }
 
@@ -878,7 +878,7 @@
 }
 
 .modrinth-browser-toolbar .modrinth-search-row {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 9px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 9px;
@@ -895,7 +895,7 @@
 }
 
 .global-mods-page .modrinth-content-segments {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 6px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 6px;
@@ -961,7 +961,7 @@
 
 .global-mods-page .modrinth-filter-empty {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-padding: 8px 4px;
 }
 
@@ -1008,7 +1008,7 @@
 }
 
 .global-mods-page .modrinth-result-skeleton {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -1055,7 +1055,7 @@
     -fx-background-color: transparent;
     -fx-padding: 4px 1px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .global-mods-page .modrinth-controls-row .modrinth-page-button {
@@ -1087,7 +1087,7 @@
     -fx-border-radius: 5px;
     -fx-border-width: 1px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-padding: 4px 8px;
 }
 
@@ -1179,7 +1179,7 @@
 .instance-mods-page { -fx-spacing: 18px; }
 
 .instance-mods-page .instance-tabs {
-    -fx-background-color: -vantasurface; -fx-background-radius: 11px;
+    -fx-background-color: -v-card; -fx-background-radius: 11px;
     -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-padding: 4px;
 }
 
@@ -1194,7 +1194,7 @@
 }
 
 .screenshots-page .screenshot-card {
-    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-background-color: -v-card; -fx-background-radius: 8px;
     -fx-border-color: -vantaborder; -fx-border-radius: 8px;
     -fx-border-width: 1px; -fx-padding: 9px;
 }
@@ -1204,16 +1204,16 @@
 }
 
 .screenshots-page .screenshot-preview {
-    -fx-background-color: -vantabg; -fx-background-radius: 8px;
+    -fx-background-color: -v-well; -fx-background-radius: 8px;
 }
 
 .screenshots-page .screenshot-name {
-    -fx-text-fill: -vantatext; -fx-font-size: 11px; -fx-font-family: "Geist SemiBold";}
+    -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .instance-mods-page .mods-page-header { -fx-spacing: 14px; }
 
 .instance-mods-page .mods-toolbar {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -1234,7 +1234,7 @@
 .screenshots-page { -fx-spacing: 16px; }
 
 .screenshots-page .screenshots-toolbar {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 11px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 11px;
@@ -1263,222 +1263,14 @@
     -fx-min-width: 92px;
     -fx-pref-width: 112px;
     -fx-padding: 8px 10px;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
-
-.accounts-page {-fx-background-color:-vantabg}
-
-.accounts-scroll {-fx-background-color:transparent;-fx-border-color:transparent}
-
-.accounts-scroll {-fx-padding:0}
-
-.accounts-header {-fx-padding:2px 0 0 0}
-
-.accounts-title {-fx-text-fill:-vantatext;-fx-font-size:30px; -fx-font-family: "Geist SemiBold";}
-
-.accounts-subtitle {-fx-text-fill:-vantamuted;-fx-font-size:13px}
-
-.accounts-hero {-fx-background-color:-vantasurface;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-effect: none;-fx-min-height:152px}
-
-.accounts-hero-head-frame {-fx-background-color:-vantasurfaceraised;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-alignment:CENTER}
-
-.accounts-hero-head {-fx-effect: none}
-
-.accounts-head-fallback,
-.accounts-card-head-fallback {-fx-text-fill:-vantamuted;-fx-font-size:22px; -fx-font-family: "Geist SemiBold";}
-
-.accounts-eyebrow {-fx-text-fill:-vantamuted;-fx-font-size:11px;-fx-font-size:26px; -fx-font-family: "Geist Medium";}
-
-.accounts-status-pill {-fx-background-radius:6px;-fx-padding:5px 9px;-fx-font-size:11px; -fx-font-family: "Geist Medium";}
-
-.accounts-status-connected {-fx-background-color:derive(-vantasuccess, -84%);-fx-text-fill:-vantasuccess}
-
-.accounts-status-disconnected {-fx-background-color:derive(-vantadanger, -82%);-fx-text-fill:-vantadanger}
-
-.accounts-hero-uuid {-fx-text-fill:-vantasubtle;-fx-font-size:11px;-fx-font-family:"Consolas"}
-
-.accounts-primary-button,
-.accounts-secondary-button,
-.accounts-danger-button,
-.accounts-card-use {-fx-min-height:36px;-fx-pref-height:36px;-fx-background-radius:8px;-fx-border-radius:8px;-fx-border-width:1px;-fx-padding:0 13px;-fx-font-size:11px;-fx-cursor:hand; -fx-font-family: "Geist Medium";}
-
-.accounts-primary-button {-fx-background-color:-vantaaccent;-fx-border-color:-vantaaccenthover;-fx-text-fill:white}
-
-.accounts-primary-button:hover {-fx-background-color:-vantaaccenthover;-fx-border-color:derive(-vantaaccent, 22%)}
-
-.accounts-secondary-button {-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaborder;-fx-text-fill:-vantatext}
-
-.accounts-secondary-button:hover {-fx-background-color:-vantasurfacehover;-fx-border-color:derive(-vantaborder, 20%)}
-
-.accounts-danger-button {-fx-background-color:derive(-vantadanger, -82%);-fx-border-color:derive(-vantadanger, -45%);-fx-text-fill:-vantadanger}
-
-.accounts-danger-button:hover {-fx-background-color:derive(-vantadanger, -70%);-fx-border-color:-vantadanger}
-
-.accounts-section {-fx-background-color:-vantasurface;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-padding:20px}
-
-.accounts-section-title {-fx-text-fill:-vantatext;-fx-font-size:17px; -fx-font-family: "Geist SemiBold";}
-
-.accounts-section-count {-fx-text-fill:-vantamuted;-fx-font-size:11px}
-
-.accounts-privacy {-fx-text-fill:-vantamuted;-fx-font-size:11px}
-
-.accounts-grid {-fx-background-color:transparent}
-
-.accounts-card {-fx-background-color:-vantasurface;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-padding:15px;-fx-pref-width:360px;-fx-max-width:520px}
-
-.accounts-card:hover {-fx-background-color:-vantasurfacehover;-fx-border-color:derive(-vantaborder, 20%)}
-
-.accounts-card-active {-fx-background-color:-vantaaccentsoft;-fx-border-color:-vantaaccent;-fx-effect: none}
-
-.accounts-card-head-frame {-fx-background-color:-vantasurfaceraised;-fx-background-radius:10px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:10px;-fx-alignment:CENTER}
-
-.accounts-card-name {-fx-text-fill:-vantatext;-fx-font-size:13px; -fx-font-family: "Geist SemiBold";}
-
-.accounts-card-uuid {-fx-text-fill:-vantamuted;-fx-font-size:11px;-fx-font-family:"Consolas"}
-
-.accounts-card-active-label,
-.accounts-card-saved-label {-fx-background-radius:6px;-fx-padding:5px 8px;-fx-font-size:11px; -fx-font-family: "Geist Medium";}
-
-.accounts-card-active-label {-fx-background-color:-vantaaccentsoft;-fx-text-fill:-vantaaccent}
-
-.accounts-card-saved-label {-fx-background-color:-vantasurfaceraised;-fx-text-fill:-vantamuted}
-
-.accounts-card-use {-fx-background-color:-vantasurfaceraised;-fx-border-color:-vantaborder;-fx-text-fill:-vantatext}
-
-.accounts-card-use:hover {-fx-background-color:-vantasurfacehover;-fx-border-color:-vantaaccent}
-
-.accounts-empty {-fx-background-color:-vantasurface;-fx-background-radius:8px;-fx-border-color:-vantaborder;-fx-border-width:1px;-fx-border-radius:8px;-fx-padding:28px;-fx-min-height:180px}
-
-.accounts-empty-title {-fx-text-fill:-vantatext;-fx-font-size:15px; -fx-font-family: "Geist SemiBold";}
-
-.accounts-empty-text {-fx-text-fill:-vantamuted;-fx-font-size:11px}
-
-.accounts-error,
-.accounts-busy {-fx-background-radius:8px;-fx-padding:9px 12px;-fx-font-size:11px}
-
-.accounts-error {-fx-background-color:derive(-vantadanger, -84%);-fx-border-color:derive(-vantadanger, -45%);-fx-border-width:1px;-fx-border-radius:8px;-fx-text-fill:-vantadanger}
-
-.accounts-busy {-fx-background-color:-vantaaccentsoft;-fx-border-color:-vantaaccent;-fx-border-width:1px;-fx-border-radius:8px;-fx-text-fill:-vantaaccent}
 
 .skin-layer-toggle {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
-
-.download-center-page {
-    -fx-spacing: 18px;
-}
-
-.download-stats {
-    -fx-spacing: 10px;
-}
-
-.download-stat-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-    -fx-border-width: 1px;
-    -fx-min-height: 82px;
-}
-
-.download-stat-label {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
-
-.download-stat-value {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 24px; -fx-font-family: "Geist SemiBold";}
-
-.download-stat-active .download-stat-value { -fx-text-fill: -vantaaccent; }
-
-.download-stat-complete .download-stat-value { -fx-text-fill: -vantasuccess; }
-
-.download-stat-failed .download-stat-value { -fx-text-fill: -vantadanger; }
-
-.download-summary {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-}
-
-.download-section-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 14px; -fx-font-family: "Geist SemiBold";}
-
-.download-scroll {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-    -fx-border-color: transparent;
-}
-
-.download-task-list {
-    -fx-spacing: 10px;
-    -fx-padding: 1px 5px 8px 1px;
-}
-
-.download-task-card,
-.download-empty-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-    -fx-border-width: 1px;
-}
-
-.download-task-card:hover {
-    -fx-background-color: -vantasurfaceraised;
-}
-
-.download-task-name {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
-
-.download-task-source {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-}
-
-.download-status {
-    -fx-padding: 5px 8px;
-    -fx-background-radius: 6px;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
-
-.download-progress {
-    -fx-accent: -vantaaccent;
-    -fx-pref-height: 6px;
-    -fx-min-height: 6px;
-    -fx-max-height: 6px;
-}
-
-.download-task-detail {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-}
-
-.download-task-error {
-    -fx-text-fill: -vantadanger;
-    -fx-font-size: 11px;
-}
-
-.download-empty-card {
-    -fx-alignment: center;
-    -fx-padding: 28px;
-}
-
-.download-empty-icon {
-    -fx-text-fill: -vantaaccent;
-    -fx-font-size: 38px; -fx-font-family: "Geist SemiBold";}
-
-.download-empty-title {
-    -fx-text-fill: -vantatext;
-    -fx-font-size: 15px; -fx-font-family: "Geist SemiBold";}
-
-.download-empty-body {
-    -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
-    -fx-text-alignment: center;
-}
 
 .server-manager {
     -fx-spacing: 0;
@@ -1486,11 +1278,11 @@
 
 .server-heading {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 29px; -fx-font-family: "Geist SemiBold";}
+    -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
 .server-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .server-workspace {
@@ -1507,14 +1299,14 @@
     -fx-alignment: center-left;
     -fx-padding: 0 4px;
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .server-profile-list {
     -fx-background-color: transparent;
 }
 
 .server-profile-card {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
@@ -1537,12 +1329,12 @@
 
 .server-profile-meta {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .server-empty {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-padding: 12px;
 }
 
@@ -1551,7 +1343,7 @@
     -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
 .server-status-row {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantasurfaceraised;
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
@@ -1560,7 +1352,7 @@
 
 .server-status-label {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .server-status-dot {
     -fx-text-fill: -vantasubtle;
@@ -1570,7 +1362,7 @@
 .server-action {
     -fx-background-radius: 8px;
     -fx-padding: 8px 11px;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
@@ -1607,7 +1399,7 @@
 }
 
 .server-panel {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
@@ -1616,42 +1408,42 @@
 
 .server-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Geist SemiBold";}
+    -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .server-section-subtitle {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .server-field-label {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .server-input,
 .server-spinner {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 7px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 7px;
     -fx-text-fill: -vantatext;
     -fx-prompt-text-fill: -vantamuted;
     -fx-padding: 8px 10px;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .server-eula {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .server-console {
     -fx-control-inner-background: -vantabg;
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-text-fill: -vantatext;
     -fx-highlight-fill: -vantaaccentsoft;
     -fx-highlight-text-fill: white;
     -fx-font-family: "Cascadia Mono", "Consolas", monospace;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .server-scroll {
@@ -1663,7 +1455,7 @@
 .state-center { -fx-spacing: 18px; }
 
 .state-center .state-hero {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -1675,14 +1467,14 @@
     -fx-text-fill: -vantatext;
     -fx-font-size: 25px; -fx-font-family: "Geist SemiBold";}
 
-.state-center .state-hero-subtitle { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
+.state-center .state-hero-subtitle { -fx-text-fill: -vantamuted; -fx-font-size: 12px; }
 
 .state-center .state-section-title {
     -fx-text-fill: -vantatext;
-    -fx-font-size: 11px; -fx-font-family: "Geist SemiBold";}
+    -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .state-center .state-list-card {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
@@ -1704,7 +1496,7 @@
 .state-center .state-instance-detail,
 .state-center .state-instance-summary {
     -fx-text-fill: -vantamuted;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .state-center .state-shared-row {
@@ -1716,16 +1508,16 @@
 .state-center .state-refresh-button,
 .state-center .state-repair-button {
     -fx-background-radius: 6px;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .server-manager { -fx-background-color: transparent; }
 
-.server-manager .server-heading { -fx-font-size: 34px; -fx-font-family: "Geist SemiBold";}
+.server-manager .server-heading { -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
 .server-manager .server-subtitle { -fx-text-fill: -vantamuted; }
 
 .server-manager .server-sidebar {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 10px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
@@ -1748,7 +1540,7 @@
 .server-manager .server-title { -fx-font-size: 25px; }
 
 .server-manager .server-status-row {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantaborder;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
@@ -1756,7 +1548,7 @@
 }
 
 .server-manager .server-panel {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 9px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 9px;
@@ -1765,16 +1557,16 @@
 
 .server-manager .server-console {
     -fx-control-inner-background: -vantabg;
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-text-fill: -vantatext;
     -fx-font-family: "Geist Mono", "Consolas";
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-highlight-fill: -vantaaccent;
 }
 
 .server-manager .server-input,
 .server-manager .server-spinner {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
@@ -1783,102 +1575,24 @@
 
 .server-manager .server-action { -fx-background-radius: 6px; -fx-padding: 0 13px; }
 
-.download-center-page { -fx-spacing: 20px; }
-
-.download-center-page .download-eyebrow { -fx-text-fill: -vantamuted; }
-
-.download-center-page .download-stat-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 9px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 9px;
-    -fx-min-width: 170px;
-    -fx-padding: 17px 19px;
-}
-
-.download-center-page .download-stat-value { -fx-font-size: 29px; }
-
-.download-center-page .download-section-title { -fx-font-size: 17px; }
-
-.download-center-page .download-task-card {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-    -fx-padding: 15px 17px;
-}
-
-.download-center-page .download-task-card:hover { -fx-background-color: -vantasurfaceraised; }
-
-.download-center-page .download-task-name { -fx-font-size: 13px; }
-
-.download-center-page .download-progress { -fx-pref-height: 5px; -fx-min-height: 5px; -fx-max-height: 5px; }
-
-.accounts-page .accounts-hero,
-.skin-changer-page .accounts-hero {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 8px;
-    -fx-border-width: 1px;
-    -fx-effect: null;
-}
-
-.accounts-page .accounts-section {
-    -fx-background-color: -vantasurface;
-    -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 10px;
-    -fx-padding: 18px;
-}
-
-.accounts-page .accounts-card {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-background-radius: 9px;
-    -fx-border-color: -vantaborder;
-    -fx-border-radius: 9px;
-    -fx-padding: 14px;
-}
-
-.accounts-page .accounts-card-active {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
-    -fx-effect: null;
-}
-
-.accounts-page .accounts-hero-name { -fx-font-size: 30px; }
-
-.skin-changer-page .accounts-hero { -fx-padding: 20px; }
-
-.skin-changer-page .accounts-card-name { -fx-font-size: 14px; -fx-font-family: "Geist SemiBold";}
-
-.skin-changer-page .accounts-subtitle { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
-
-.skin-changer-page .skin-layer-toggle { -fx-font-size: 11px; }
-
-.skin-changer-page .accounts-primary-button,
-.skin-changer-page .accounts-card-use {
-    -fx-min-height: 36px;
-    -fx-background-radius: 6px;
-    -fx-padding: 0 14px;
-}
+.skin-changer-page .skin-layer-toggle { -fx-font-size: 12px; }
 
 .create-instance-type-page { -fx-spacing: 23px; }
 
 .create-instance-type-page .create-type-header { -fx-spacing: 8px; }
 
 .create-instance-type-page .create-type-eyebrow {
-    -fx-text-fill: -vantaaccent; -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-text-fill: -vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-instance-type-page .create-type-content { -fx-spacing: 13px; }
 
 .create-instance-type-page .create-type-section-label {
-    -fx-text-fill: -vantamuted; -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-text-fill: -vantamuted; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-instance-type-page .create-type-grid { -fx-padding: 2px; }
 
 .create-instance-type-page .create-type-option {
-    -fx-background-color: -vantasurface; -fx-background-radius: 11px;
+    -fx-background-color: -v-card; -fx-background-radius: 11px;
     -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
     -fx-padding: 0; -fx-alignment: center-left; -fx-cursor: hand; -fx-effect: null;
 }
@@ -1894,17 +1608,17 @@
 .create-instance-type-page .create-type-option-layout { -fx-spacing: 15px; }
 
 .create-instance-type-page .create-type-number {
-    -fx-text-fill: -vantamuted; -fx-font-size: 11px; 
-    -fx-padding: 5px 7px; -fx-background-color: -vantabg; -fx-background-radius: 5px; -fx-font-family: "Geist Medium";}
+    -fx-text-fill: -vantamuted; -fx-font-size: 12px; 
+    -fx-padding: 5px 7px; -fx-background-color: -v-well; -fx-background-radius: 5px; -fx-font-family: "Geist Medium";}
 
 .create-instance-type-page .create-type-icon {
     -fx-text-fill: -vantaaccent; -fx-font-size: 20px;  -fx-min-width: 30px; -fx-alignment: center; -fx-font-family: "Geist SemiBold";}
 
 .create-instance-type-page .create-type-option-title { -fx-text-fill: -vantatext; -fx-font-size: 16px; -fx-font-family: "Geist SemiBold";}
 
-.create-instance-type-page .create-type-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; -fx-line-spacing: 2px; }
+.create-instance-type-page .create-type-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 12px; -fx-line-spacing: 2px; }
 
-.create-instance-type-page .create-type-option-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+.create-instance-type-page .create-type-option-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-instance-type-page .create-type-option-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 21px; -fx-padding: 0 2px 1px 8px; }
 
@@ -1915,20 +1629,20 @@
 .create-instance-page { -fx-spacing: 22px; }
 
 .create-instance-page .create-instance-panel {
-    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-background-color: -v-card; -fx-background-radius: 8px;
     -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-padding: 26px; -fx-spacing: 17px;
 }
 
 .create-instance-page .create-panel-title { -fx-font-size: 17px;  -fx-text-fill: -vantatext; -fx-font-family: "Geist SemiBold";}
 
-.create-instance-page .create-panel-subtitle { -fx-font-size: 11px; -fx-text-fill: -vantamuted; }
+.create-instance-page .create-panel-subtitle { -fx-font-size: 12px; -fx-text-fill: -vantamuted; }
 
-.create-instance-page .create-label { -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+.create-instance-page .create-label { -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-instance-page .create-field,
 .create-instance-page .create-combo {
-    -fx-min-height: 46px; -fx-pref-height: 46px; -fx-background-color: -vantabg;
+    -fx-min-height: 46px; -fx-pref-height: 46px; -fx-background-color: -v-well;
     -fx-background-radius: 8px; -fx-border-color: -vantaborder; -fx-border-radius: 8px;
     -fx-border-width: 1px; -fx-text-fill: -vantatext; -fx-font-size: 12px;
 }
@@ -1939,14 +1653,14 @@
 }
 
 .create-instance-page .create-status {
-    -fx-background-color: -vantabg; -fx-background-radius: 7px;
-    -fx-padding: 9px 11px; -fx-font-size: 11px;
+    -fx-background-color: -v-well; -fx-background-radius: 7px;
+    -fx-padding: 9px 11px; -fx-font-size: 12px;
 }
 
 .import-instance-page { -fx-spacing: 22px; }
 
 .import-instance-page .import-instance-panel {
-    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-background-color: -v-card; -fx-background-radius: 8px;
     -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-spacing: 20px; -fx-padding: 30px;
 }
@@ -1955,7 +1669,7 @@
 
 .import-instance-page .import-drop-glyph {
     -fx-background-color: -vantaaccentsoft; -fx-background-radius: 8px;
-    -fx-text-fill: -vantaaccent; -fx-font-size: 31px; 
+    -fx-text-fill: -vantaaccent; -fx-font-size: 22px; 
     -fx-padding: 7px 18px; -fx-font-family: "Geist SemiBold";}
 
 .import-instance-page .import-panel-eyebrow { -fx-font-size: 18px;  -fx-text-fill: -vantatext; -fx-font-family: "Geist SemiBold";}
@@ -1963,9 +1677,9 @@
 .import-instance-page .import-panel-description { -fx-font-size: 12px; -fx-line-spacing: 3px; -fx-text-fill: -vantamuted; }
 
 .import-instance-page .import-format-badge {
-    -fx-background-color: -vantabg; -fx-background-radius: 5px;
+    -fx-background-color: -v-well; -fx-background-radius: 5px;
     -fx-border-color: -vantaborder; -fx-border-radius: 5px;
-    -fx-text-fill: -vantaaccent; -fx-font-size: 11px; 
+    -fx-text-fill: -vantaaccent; -fx-font-size: 12px; 
     -fx-padding: 6px 9px; -fx-font-family: "Geist Medium";}
 
 .import-instance-page .import-primary-action { -fx-min-width: 190px; -fx-min-height: 44px; -fx-font-family: "Geist Medium";}
@@ -1973,8 +1687,8 @@
 .import-instance-page .import-progress-row { -fx-min-height: 30px; }
 
 .import-instance-page .import-status {
-    -fx-background-color: -vantabg; -fx-background-radius: 7px;
-    -fx-padding: 10px 12px; -fx-font-size: 11px;
+    -fx-background-color: -v-well; -fx-background-radius: 7px;
+    -fx-padding: 10px 12px; -fx-font-size: 12px;
 }
 
 .instance-preset-page { -fx-spacing: 20px; }
@@ -1982,7 +1696,7 @@
 .instance-preset-page .preset-choice-list { -fx-spacing: 12px; }
 
 .instance-preset-page .preset-choice-card {
-    -fx-background-color: -vantasurface; -fx-background-radius: 11px;
+    -fx-background-color: -v-card; -fx-background-radius: 11px;
     -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
     -fx-padding: 15px 18px; -fx-cursor: hand; -fx-alignment: center-left;
 }
@@ -2002,9 +1716,9 @@
 
 .instance-preset-page .create-option-title { -fx-text-fill: -vantatext; -fx-font-size: 15px; -fx-font-family: "Geist SemiBold";}
 
-.instance-preset-page .create-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
+.instance-preset-page .create-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 12px; }
 
-.instance-preset-page .preset-choice-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+.instance-preset-page .preset-choice-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .instance-preset-page .preset-choice-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 22px; }
 
@@ -2013,7 +1727,7 @@
 .preset-configuration-page { -fx-spacing: 18px; }
 
 .preset-configuration-page .preset-configuration-panel {
-    -fx-background-color: -vantasurface; -fx-background-radius: 8px;
+    -fx-background-color: -v-card; -fx-background-radius: 8px;
     -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-spacing: 17px; -fx-padding: 22px;
 }
@@ -2021,13 +1735,13 @@
 .preset-configuration-page .preset-config-content { -fx-spacing: 17px; }
 
 .preset-configuration-page .preset-config-hero {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 9px; -fx-border-color: -vantaborder;
     -fx-border-radius: 9px; -fx-padding: 17px;
 }
 
 .preset-configuration-page .preset-config-section {
-    -fx-background-color: -vantabg; -fx-background-radius: 9px;
+    -fx-background-color: -v-well; -fx-background-radius: 9px;
     -fx-border-color: -vantaborder; -fx-border-radius: 9px;
     -fx-padding: 14px; -fx-spacing: 10px;
 }
@@ -2037,11 +1751,11 @@
     -fx-border-color: -vantaborder; -fx-border-radius: 7px;
     -fx-padding: 11px 13px; -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
-.preset-configuration-page .create-label { -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+.preset-configuration-page .create-label { -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .preset-configuration-page .create-field,
 .preset-configuration-page .create-combo {
-    -fx-min-height: 44px; -fx-pref-height: 44px; -fx-background-color: -vantasurface;
+    -fx-min-height: 44px; -fx-pref-height: 44px; -fx-background-color: -v-card;
     -fx-border-color: -vantaborder; -fx-border-radius: 7px; -fx-background-radius: 7px;
 }
 
@@ -2060,7 +1774,7 @@
 .repair-page .repair-page-header { -fx-spacing: 11px; }
 
 .repair-page .repair-issue-section {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 8px;
@@ -2070,7 +1784,7 @@
 }
 
 .repair-page .repair-issue-card {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 10px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 10px;
@@ -2084,7 +1798,7 @@
 }
 
 .repair-page .repair-actions {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 11px;
     -fx-border-color: -vantaborder;
     -fx-border-radius: 11px;
@@ -2093,7 +1807,7 @@
     -fx-spacing: 8px;
 }
 
-.repair-page .repair-status { -fx-text-fill: -vantamuted; -fx-font-size: 11px; }
+.repair-page .repair-status { -fx-text-fill: -vantamuted; -fx-font-size: 12px; }
 
 .server-manager { -fx-spacing: 18px; }
 
@@ -2151,12 +1865,8 @@
     -fx-max-width: 560px;
 }
 
-.skin-changer-page .skin-controls-panel .accounts-card-name {
-    -fx-padding: 7px 0 0 0;
-}
-
 .skin-changer-page .skin-layer-toggle {
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-background-radius: 7px;
     -fx-padding: 7px 10px;
 }
@@ -2171,7 +1881,7 @@
 }
 
 .server-manager .server-sidebar {
-    -fx-background-color: -vantasurface;
+    -fx-background-color: -v-card;
     -fx-background-radius: 8px;
     -fx-border-color: -vantaborder;
     -fx-border-width: 1px;
@@ -2196,12 +1906,12 @@
 
 .crash-lab-page .crash-lab-evidence {
     -fx-control-inner-background: -vantabg;
-    -fx-background-color: -vantabg;
+    -fx-background-color: -v-well;
     -fx-text-fill: -vantatext;
     -fx-highlight-fill: -vantaaccentsoft;
     -fx-highlight-text-fill: -vantatext;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
 }
 
 .crash-lab-page .settings-card { -fx-min-width: 0; }
@@ -2238,7 +1948,7 @@
     -fx-border-width: 1px;
     -fx-border-radius: 9px;
     -fx-text-fill: #b9cbea;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     
     -fx-padding: 9px 12px; -fx-font-family: "Geist Medium";}
 
@@ -2320,11 +2030,11 @@
 
 .instance-progress-current-label {
     -fx-text-fill: #88a9d2;
-    -fx-font-size: 11px; -fx-font-family: "Geist Medium";}
+    -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .instance-progress-detail {
     -fx-text-fill: #c4cfde;
-    -fx-font-size: 11px;
+    -fx-font-size: 12px;
     -fx-line-spacing: 2px;
 }
 
