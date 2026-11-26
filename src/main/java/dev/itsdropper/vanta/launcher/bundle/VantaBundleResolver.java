@@ -77,7 +77,7 @@ public final class VantaBundleResolver {
                 ResolvedMod previous = resolved.get(mod.projectId());
                 if (previous != null && (!java.util.Objects.equals(previous.versionId(), candidate.versionId())
                         || !java.util.Objects.equals(previous.githubRelease(), candidate.githubRelease()))) {
-                    throw new IOException("Conflicting artifact sources or pinned versions for profile component "
+                    throw new IOException("Conflicting pinned versions or artifact sources for profile component "
                             + mod.projectId() + " in bundles " + previous.bundleId() + " and " + candidate.bundleId() + ".");
                 }
                 if (previous == null) {
