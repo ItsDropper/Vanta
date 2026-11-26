@@ -89,7 +89,7 @@ shadowJar {
     archiveClassifier = 'all'
 
     // Do NOT use minimize().
-    // MinecraftAuth, Jackson, JNA and JavaFX-related code
+    // MinecraftAuth, Gson, JNA and JavaFX-related code
     // can rely on reflection/runtime discovery.
 }
 

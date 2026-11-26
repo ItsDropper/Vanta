@@ -74,6 +74,18 @@ public final class ObjectMapper {
                     }
                     @Override public boolean shouldSkipClass(Class<?> type) { return false; }
                 })
+                .registerTypeHierarchyAdapter(JsonNode.class, new TypeAdapter<JsonNode>() {
+                    @Override public void write(JsonWriter out, JsonNode node) throws IOException {
+                        if (node == null || node.isNull() || node.isMissingNode()) {
+                            out.nullValue();
+                            return;
+                        }
+                        writeElement(node.element(), out);
+                    }
+                    @Override public JsonNode read(JsonReader in) throws IOException {
+                        return JsonNode.wrap(parseValue(in, false));
+                    }
+                })
                 .registerTypeAdapter(Path.class, new TypeAdapter<Path>() {
                     @Override public void write(JsonWriter out, Path path) throws IOException {
                         if (path == null) out.nullValue(); else out.value(path.toString());
@@ -244,6 +256,28 @@ public final class ObjectMapper {
         if (parent != null) java.nio.file.Files.createDirectories(parent.toPath());
         try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
             gson.toJson(value, writer);
+        }
+    }
+
+    private static void writeElement(JsonElement element, JsonWriter out) throws IOException {
+        if (element == null || element.isJsonNull()) {
+            out.nullValue();
+        } else if (element.isJsonObject()) {
+            out.beginObject();
+            for (Map.Entry<String, JsonElement> entry : element.getAsJsonObject().entrySet()) {
+                out.name(entry.getKey());
+                writeElement(entry.getValue(), out);
+            }
+            out.endObject();
+        } else if (element.isJsonArray()) {
+            out.beginArray();
+            for (JsonElement child : element.getAsJsonArray()) writeElement(child, out);
+            out.endArray();
+        } else {
+            JsonPrimitive primitive = element.getAsJsonPrimitive();
+            if (primitive.isString()) out.value(primitive.getAsString());
+            else if (primitive.isBoolean()) out.value(primitive.getAsBoolean());
+            else out.value(new BigDecimal(primitive.getAsString()));
         }
     }
 

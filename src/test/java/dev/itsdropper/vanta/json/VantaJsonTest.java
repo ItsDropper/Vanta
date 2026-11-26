@@ -30,6 +30,14 @@ class VantaJsonTest {
     }
 
     @Test
+    void objectAndArrayNodesSerializeAsJsonRatherThanWrapperFields() throws Exception {
+        ObjectNode object = VantaJson.mapper().createObjectNode();
+        object.put("name", "Vanta");
+        object.putArray("values").add(1).add(2);
+        assertEquals("{\"name\":\"Vanta\",\"values\":[1,2]}", VantaJson.mapper().writeValueAsString(object));
+    }
+
+    @Test
     void integralNumberValidationRejectsDecimalAndExponentForms() throws Exception {
         assertEquals(true, VantaJson.mapper().readTree("{\"value\":1}").path("value").isIntegralNumber());
         assertEquals(false, VantaJson.mapper().readTree("{\"value\":1.0}").path("value").isIntegralNumber());
