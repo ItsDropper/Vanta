@@ -6,6 +6,7 @@ import dev.itsdropper.vanta.launcher.MinecraftLauncher;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityUpdateService;
+import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityException;
 import dev.itsdropper.vanta.launcher.repair.FailureCategory;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosis;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine;
@@ -297,14 +298,19 @@ public class LaunchService {
 
             failedInstance = instance;
 
-            lastFailure =
-                    new LaunchFailure(
-                            "Minecraft could not be started",
-                            "Vanta was unable to start this Minecraft instance.",
-                            buildDetails(
-                                    e
-                            )
-                    );
+            boolean securityBlocked = e instanceof MinecraftSecurityException;
+            String failureTitle = securityBlocked
+                    ? LaunchFailure.SECURITY_BLOCKED_TITLE
+                    : "Minecraft could not be started";
+            String failureDescription = securityBlocked
+                    ? securityBlockDescription((MinecraftSecurityException) e)
+                    : "Vanta was unable to start this Minecraft instance.";
+
+            lastFailure = new LaunchFailure(
+                    failureTitle,
+                    failureDescription,
+                    buildDetails(e)
+            );
 
             setState(
                     LaunchState.ERROR
@@ -315,6 +321,15 @@ public class LaunchService {
 
             throw e;
         }
+    }
+
+    private static String securityBlockDescription(MinecraftSecurityException failure) {
+        return "Vanta blocked Minecraft " + failure.minecraftVersion()
+                + " because Mojang's official metadata still selects "
+                + failure.artifact() + ". The patched native font library is not available "
+                + "for this version yet. This is an upstream security block, not a damaged "
+                + "instance; reinstalling the instance will not resolve it. Retry after "
+                + Mojang updates this version's official metadata.";
     }
 
     private void logEnvironmentDiagnostics(Instance instance, LaunchData launchData) {
