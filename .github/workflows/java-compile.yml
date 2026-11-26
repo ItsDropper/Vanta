@@ -165,7 +165,7 @@ jobs:
           }
           $installer = (Resolve-Path '.\VantaSetup.exe').Path
           Write-Host 'Running the real bootstrap installer in silent mode...'
-          $install = Start-Process -FilePath $installer -ArgumentList @('/S', '/LOG') -PassThru
+          $install = Start-Process -FilePath $installer -ArgumentList @('/S', '/LOG', "/D=$installDirectory") -PassThru
           if (!$install.WaitForExit(360000)) {
             $install.Kill()
             throw 'Vanta installer did not finish within six minutes.'
