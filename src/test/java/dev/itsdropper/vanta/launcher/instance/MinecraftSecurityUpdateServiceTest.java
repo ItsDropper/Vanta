@@ -35,6 +35,34 @@ class MinecraftSecurityUpdateServiceTest {
     }
 
     @Test
+    void identifiesUnpatchedOfficialMetadataAsASecurityBlock() throws Exception {
+        JsonNode metadata = JSON.readTree("""
+                {
+                  "id": "1.21.11",
+                  "libraries": [
+                    {
+                      "name": "org.lwjgl:lwjgl-freetype:3.3.3",
+                      "downloads": {
+                        "artifact": {
+                          "path": "org/lwjgl/lwjgl-freetype/3.3.3/lwjgl-freetype-3.3.3.jar",
+                          "url": "https://libraries.minecraft.net/org/lwjgl/lwjgl-freetype/3.3.3/lwjgl-freetype-3.3.3.jar",
+                          "sha1": "0123456789abcdef0123456789abcdef01234567"
+                        }
+                      }
+                    }
+                  ]
+                }
+                """);
+
+        MinecraftSecurityException failure = assertThrows(
+                MinecraftSecurityException.class,
+                () -> MinecraftSecurityUpdateService.validateOfficialMetadata(metadata, "1.21.11"));
+
+        assertEquals("1.21.11", failure.minecraftVersion());
+        assertEquals("org.lwjgl:lwjgl-freetype:3.3.3", failure.artifact());
+    }
+
+    @Test
     void rejectsFreeTypeMetadataWithoutVerifiableArtifacts() throws Exception {
         JsonNode missing = JSON.readTree("""
                 {"name":"org.lwjgl:lwjgl-freetype:3.4.3-mojang-2.15.0","downloads":{}}
