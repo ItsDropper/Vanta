@@ -60,6 +60,9 @@ class MinecraftSecurityUpdateServiceTest {
 
         assertEquals("1.21.11", failure.minecraftVersion());
         assertEquals("org.lwjgl:lwjgl-freetype:3.3.3", failure.artifact());
+        assertTrue(failure.getMessage().contains("checks Mojang's official metadata on every launch"));
+        assertTrue(failure.getMessage().contains("automatically download and install"));
+        assertTrue(failure.getMessage().contains("Launching remains blocked"));
     }
 
     @Test
