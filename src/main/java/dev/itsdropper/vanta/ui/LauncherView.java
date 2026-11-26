@@ -934,8 +934,12 @@ public class LauncherView {
                 };
 
                 ModrinthService modrinth = new ModrinthService();
+                List<VantaBundleResolver.ResolvedMod> releaseMods = resolution.mods().stream()
+                        .filter(mod -> mod.githubRelease() != null).toList();
+                List<VantaBundleResolver.ResolvedMod> modrinthMods = resolution.mods().stream()
+                        .filter(mod -> mod.githubRelease() == null).toList();
                 List<ModrinthProject> roots = new ArrayList<>();
-                for (VantaBundleResolver.ResolvedMod mod : resolution.mods()) {
+                for (VantaBundleResolver.ResolvedMod mod : modrinthMods) {
                     notifications.updateProgress("Resolving " + mod.projectId() + "...");
                     ModrinthProject project = modrinth.getProjectBySlug(mod.projectId());
                     if (project == null) {
@@ -945,7 +949,7 @@ public class LauncherView {
                 }
 
                 java.util.Map<String, String> pinnedVersions = new java.util.LinkedHashMap<>();
-                for (VantaBundleResolver.ResolvedMod mod : resolution.mods()) {
+                for (VantaBundleResolver.ResolvedMod mod : modrinthMods) {
                     if (mod.versionId() != null) pinnedVersions.put(mod.projectId(), mod.versionId());
                 }
                 List<ModrinthService.ResolvedMod> graph = roots.isEmpty()
@@ -956,8 +960,16 @@ public class LauncherView {
                     notifications.updateProgress("Installing profile mods and dependencies...");
                     modrinth.installResolvedGraph(instance, graph);
                 }
-                List<String> managedProjects = graph.stream()
-                        .map(ModrinthService.ResolvedMod::projectId).distinct().toList();
+                List<String> managedProjects = new ArrayList<>(graph.stream()
+                        .map(ModrinthService.ResolvedMod::projectId).distinct().toList());
+                for (VantaBundleResolver.ResolvedMod mod : releaseMods) {
+                    notifications.updateProgress("Installing latest " + mod.projectId() + "...");
+                    GitHubReleaseModInstaller.InstalledArtifact installed =
+                            new GitHubReleaseModInstaller().installLatest(instance, mod.githubRelease(), minecraftVersion);
+                    managedProjects.add(mod.projectId());
+                    notifications.updateProgress("Installed " + installed.fileName());
+                }
+                managedProjects = managedProjects.stream().distinct().toList();
                 new VantaBundleManifestSnapshotStore().save(instance, manifest);
                 new VantaBundleStateStore().save(instance, new VantaBundleState(
                         VantaBundleState.SUPPORTED_SCHEMA_VERSION,
