@@ -64,7 +64,8 @@ Section "Vanta"
 
   ; Parse JSON with the Windows inbox PowerShell JSON parser instead of
   ; depending on line formatting in GitHub's API response.
-  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command "(Get-Content -LiteralPath ''$WORK_DIR\release.json'' -Raw | ConvertFrom-Json).tag_name.TrimStart(''v'') | Set-Content -LiteralPath ''$VERSION_PATH'' -NoNewline"'
+  File /oname=Read-VantaReleaseVersion.ps1 "release\read_latest_release_version.ps1"
+  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Read-VantaReleaseVersion.ps1" -ReleaseMetadata "$WORK_DIR\release.json" -OutputPath "$VERSION_PATH"'
   Pop $0
   StrCmp $0 "0" +2
     Goto InvalidVersion
@@ -185,7 +186,10 @@ Section "Uninstall"
 SectionEnd
 
 Function LaunchVanta
+  ; Silent installer smoke tests must not start the GUI on the CI runner.
+  IfSilent LaunchVantaDone
   Exec '"$INSTDIR\Vanta.exe"'
+LaunchVantaDone:
 FunctionEnd
 
 Function ValidateVersion
