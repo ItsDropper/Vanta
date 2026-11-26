@@ -23,6 +23,7 @@ import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.ui.AnimationUtils;
 import dev.itsdropper.vanta.ui.components.IconView;
 import dev.itsdropper.vanta.ui.kit.CoverArt;
+import dev.itsdropper.vanta.ui.kit.VantaLogo;
 import dev.itsdropper.vanta.ui.OnboardingManager;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 
@@ -73,8 +74,7 @@ public class OnboardingView extends BorderPane {
         railScrim.getStyleClass().add("onboarding-rail-scrim");
         railScrim.setMouseTransparent(true);
 
-        Label logo = new Label("Vanta");
-        logo.getStyleClass().add("onboarding-logo");
+        Node logo = VantaLogo.full(30, 20);
 
         stepList.setSpacing(6);
         VBox railContent = new VBox(32, logo, stepList);

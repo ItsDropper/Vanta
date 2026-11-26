@@ -8,7 +8,7 @@ import java.io.InputStream;
 /**
  * Registers the bundled typefaces (SIL Open Font License, see /fonts/OFL.txt).
  *
- * Geist carries the interface and JetBrains Mono carries technical values such
+ * Poppins sets the wordmark and large display titles. Geist carries the interface and JetBrains Mono carries technical values such
  * as versions, sizes and paths. JavaFX selects a weight by family name, so the
  * stylesheets use "Geist", "Geist Medium", "Geist SemiBold", "JetBrains Mono"
  * and "JetBrains Mono Medium".
@@ -17,12 +17,16 @@ public final class VantaFonts {
     public static final String SANS = "Geist";
     public static final String SANS_MEDIUM = "Geist Medium";
     public static final String SANS_SEMIBOLD = "Geist SemiBold";
+    /** Poppins is used for the wordmark and large display titles. */
+    public static final String DISPLAY = "Poppins SemiBold";
+    public static final String DISPLAY_BOLD = "Poppins Bold";
     public static final String MONO = "JetBrains Mono";
     public static final String MONO_MEDIUM = "JetBrains Mono Medium";
 
     private static final String[] FILES = {
             "Geist-Regular.ttf", "Geist-Medium.ttf", "Geist-SemiBold.ttf",
-            "JetBrainsMono-Regular.ttf", "JetBrainsMono-Medium.ttf"
+            "JetBrainsMono-Regular.ttf", "JetBrainsMono-Medium.ttf",
+            "Poppins-Medium.ttf", "Poppins-SemiBold.ttf", "Poppins-Bold.ttf"
     };
     private static boolean loaded;
 

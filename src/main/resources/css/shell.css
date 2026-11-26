@@ -417,10 +417,13 @@
 .login-logo,
 .loading-mark {
     -fx-fill: -vantaaccent;
+    -fx-text-fill: -vantatext;
+    -fx-font-family: "Poppins Bold";
+    -fx-font-size: 18px;
 }
 
 .login-title {
-    -fx-font-family: "Geist SemiBold";
+    -fx-font-family: "Poppins SemiBold";
     -fx-font-size: 22px;
     -fx-text-fill: -vantatext;
 }
@@ -577,5 +580,21 @@
 }
 
 .sidebar-group-body {
+    -fx-padding: 0;
+}
+
+/* ---------- logo ------------------------------------------------------------ */
+
+.vanta-logo-arm-primary {
+    -fx-fill: -vantaaccent;
+}
+
+.vanta-logo-arm-secondary {
+    -fx-fill: -vantatext;
+}
+
+.vanta-logo-letter {
+    -fx-font-family: "Poppins Bold";
+    -fx-text-fill: -vantatext;
     -fx-padding: 0;
 }

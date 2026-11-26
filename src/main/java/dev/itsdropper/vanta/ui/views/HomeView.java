@@ -368,7 +368,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         hero.setMaxHeight(340);
         hero.setMaxWidth(Double.MAX_VALUE);
 
-        copy.setMaxWidth(560);
+        copy.setMaxWidth(640);
         copy.setMaxHeight(Region.USE_PREF_SIZE);
         StackPane.setAlignment(copy, Pos.BOTTOM_LEFT);
         StackPane.setAlignment(launchStatusLabel, Pos.TOP_RIGHT);

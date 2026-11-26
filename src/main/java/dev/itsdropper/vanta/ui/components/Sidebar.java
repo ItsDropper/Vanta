@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.components;
 
 import dev.itsdropper.vanta.ui.Localization;
+import javafx.scene.Node;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -9,6 +10,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 
 import dev.itsdropper.vanta.ui.VantaUI;
+import dev.itsdropper.vanta.ui.kit.VantaLogo;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -85,7 +87,7 @@ public class Sidebar extends VBox {
             new EnumMap<>(Page.class);
     private final Map<Page, String> navigationTitles = new EnumMap<>(Page.class);
     private HBox branding;
-    private Label logo;
+    private Node logo;
     private Label build;
     private boolean compact;
 
@@ -107,19 +109,8 @@ public class Sidebar extends VBox {
         // BRAND
         // ---------------------------------------------------------
 
-        SVGPath mark = new SVGPath();
-        mark.setContent("M3 4h4.2L12 14.2 16.8 4H21L13.9 20h-3.8z");
-        mark.getStyleClass().add("sidebar-mark");
-        StackPane markBox = new StackPane(mark);
-        markBox.setMinSize(24, 24);
-        markBox.setPrefSize(24, 24);
-        markBox.setMaxSize(24, 24);
-        markBox.setMouseTransparent(true);
-
-        logo = new Label("Vanta");
-        logo.getStyleClass().add(
-                "sidebar-logo"
-        );
+        Node markBox = VantaLogo.mark(26);
+        logo = VantaLogo.wordmark(15);
 
         branding = new HBox(
                 VantaUI.spacing(2),

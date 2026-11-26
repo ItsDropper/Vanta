@@ -29,8 +29,8 @@
 }
 
 .home-hero-name {
-    -fx-font-family: "Geist SemiBold";
-    -fx-font-size: 40px;
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 36px;
     -fx-text-fill: white;
 }
 

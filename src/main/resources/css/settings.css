@@ -83,8 +83,8 @@
 }
 
 .onboarding-title {
-    -fx-font-family: "Geist SemiBold";
-    -fx-font-size: 30px;
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 28px;
     -fx-text-fill: -vantatext;
 }
 
