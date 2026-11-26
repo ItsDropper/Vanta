@@ -934,22 +934,13 @@ public class LauncherView {
                     roots.add(project);
                 }
 
-                List<ModrinthService.ResolvedMod> graph = roots.isEmpty()
-                        ? List.of()
-                        : modrinth.resolveModGraph(instance, roots, null, List.of());
                 java.util.Map<String, String> pinnedVersions = new java.util.LinkedHashMap<>();
                 for (VantaBundleResolver.ResolvedMod mod : resolution.mods()) {
                     if (mod.versionId() != null) pinnedVersions.put(mod.projectId(), mod.versionId());
                 }
-                for (ModrinthService.ResolvedMod resolved : graph) {
-                    String pinned = pinnedVersions.get(resolved.projectId());
-                    if (pinned != null && !pinned.equals(resolved.version().getId())) {
-                        throw new IOException("The profile pins " + resolved.projectId()
-                                + " to version " + pinned
-                                + ", but the compatible dependency resolver selected "
-                                + resolved.version().getId() + ". The profile cannot be installed safely.");
-                    }
-                }
+                List<ModrinthService.ResolvedMod> graph = roots.isEmpty()
+                        ? List.of()
+                        : modrinth.resolveModGraph(instance, roots, pinnedVersions);
 
                 if (!graph.isEmpty()) {
                     notifications.updateProgress("Installing profile mods and dependencies...");
