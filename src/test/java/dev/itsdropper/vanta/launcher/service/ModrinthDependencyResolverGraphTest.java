@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.modrinth.*;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import org.junit.jupiter.api.Test;

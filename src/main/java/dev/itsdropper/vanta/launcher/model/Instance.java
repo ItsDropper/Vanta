@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.launcher.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import dev.itsdropper.vanta.json.annotation.JsonCreator;
+import dev.itsdropper.vanta.json.annotation.JsonProperty;
+import dev.itsdropper.vanta.json.annotation.JsonIgnore;
 
 import java.nio.file.Path;
 

@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.launcher.loader;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
