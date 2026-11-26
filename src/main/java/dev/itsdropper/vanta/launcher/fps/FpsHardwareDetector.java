@@ -71,6 +71,7 @@ public final class FpsHardwareDetector {
                     )
                             .redirectErrorStream(true)
                             .start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
 
             if (!process.waitFor(2, TimeUnit.SECONDS)) {
                 process.destroyForcibly();
