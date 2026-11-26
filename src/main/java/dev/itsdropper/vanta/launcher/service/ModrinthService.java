@@ -165,6 +165,13 @@ public class ModrinthService {
     }
     public Path installModVersion(Instance instance, String projectId, ModrinthVersion version) throws IOException, InterruptedException { return installer.installModVersion(instance, projectId, version); }
     public List<ResolvedMod> resolveModGraph(Instance instance, List<ModrinthProject> roots, String requiredProjectId, List<String> requiredVersions) throws IOException, InterruptedException { return dependencies.resolveModGraph(instance, roots, requiredProjectId, requiredVersions); }
+    public List<ResolvedMod> resolveModGraph(
+            Instance instance,
+            List<ModrinthProject> roots,
+            java.util.Map<String, String> pinnedVersionIds
+    ) throws IOException, InterruptedException {
+        return dependencies.resolveModGraph(instance, roots, null, List.of(), pinnedVersionIds);
+    }
     public List<Path> installResolvedGraph(Instance instance, List<ResolvedMod> resolved) throws IOException, InterruptedException { return installer.installResolvedGraph(instance, resolved); }
     public Path repairModDependency(Instance instance, String projectId, List<String> requiredVersions) throws IOException, InterruptedException { return repair.repairModDependency(instance, projectId, requiredVersions); }
     public Path installResourcePack(Instance instance, ModrinthProject project) throws IOException, InterruptedException { return installer.installResourcePack(instance, project); }
