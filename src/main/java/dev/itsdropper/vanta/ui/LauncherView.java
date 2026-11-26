@@ -1726,6 +1726,11 @@ public class LauncherView {
     private void showRepairView(
             LaunchFailure failure
     ) {
+        if (LaunchFailure.SECURITY_BLOCKED_TITLE.equals(failure.title())) {
+            notifications.error(failure.title(), failure.description());
+            showPage(Sidebar.Page.HOME);
+            return;
+        }
 
         Instance instance = launchService.getFailedInstance();
 
