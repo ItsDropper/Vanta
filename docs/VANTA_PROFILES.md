@@ -35,11 +35,21 @@ The resolver applies these rules:
 
 ## Trust and installation boundary
 
-`VantaBundleRepository` parses bounded local manifest files and validates their schema. It rejects unknown JSON fields to catch misspelled manifest properties. The launcher exposes this through **Create instance → Vanta Profiles**, where a user explicitly selects a local JSON manifest, chooses a Minecraft version, and configures required/default/optional bundles and mods. Only import manifests from publishers you trust. Remote catalog discovery and publisher authentication are not implemented yet.
+`VantaBundleRepository` parses bounded local manifest files and validates their schema. It rejects unknown JSON fields to catch misspelled manifest properties. The launcher exposes this through **Create instance → Vanta Profiles**. The screen loads the built-in **Vanta Fabric Starter** automatically, so a new user can create a supported instance without finding or downloading a JSON file. Custom JSON manifests remain available through the secondary **Import custom profile** action for advanced users. Only import manifests from publishers you trust. Remote catalog discovery and publisher authentication are not implemented yet.
 
 Remote distribution must be added behind a separate transport/authentication layer. The launcher must verify the source and integrity of remote manifest bytes before handing them to the repository. Resolved mod artifacts continue through Vanta's existing Modrinth dependency and transactional installation services; bundle code must not write JAR files directly. Optional `versionId` pins are enforced during dependency-graph resolution, including when a pinned project is also pulled in transitively.
 
 Bundle selection state must be stored per instance and must distinguish Vanta-managed content from user-installed mods. Updating a profile must never silently remove user-managed files or override a user's explicit disablement.
+
+## Built-in starter profile
+
+The launcher ships `profiles/vanta-fabric-starter.json` as a validated classpath
+resource. It targets Minecraft 1.21.11 on Fabric and installs the Fabric API
+through the existing Modrinth dependency resolver, selecting a compatible release
+rather than pinning a stale version. The profile is intentionally a small starter,
+not a claim that the full Vanta Client mod is included. The manifest is loaded
+automatically when the Vanta Profiles screen opens; custom manifest import is an
+optional advanced path.
 
 ## Per-instance state
 
