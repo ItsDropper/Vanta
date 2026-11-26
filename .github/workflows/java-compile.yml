@@ -141,6 +141,7 @@ jobs:
 
       - name: Smoke test the actual Windows installer and uninstaller
         if: runner.os == 'Windows'
+        timeout-minutes: 10
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -164,7 +165,11 @@ jobs:
           }
           $installer = (Resolve-Path '.\VantaSetup.exe').Path
           Write-Host 'Running the real bootstrap installer in silent mode...'
-          $install = Start-Process -FilePath $installer -ArgumentList '/S' -Wait -PassThru
+          $install = Start-Process -FilePath $installer -ArgumentList '/S' -PassThru
+          if (!$install.WaitForExit(360000)) {
+            $install.Kill()
+            throw 'Vanta installer did not finish within six minutes.'
+          }
           if ($install.ExitCode -ne 0) { throw "Vanta installer exited with code $($install.ExitCode)." }
           foreach ($required in @('Vanta.exe', 'runtime/lib/modules', 'app/Vanta.cfg', 'updater/VantaUpdater.jar', 'Uninstall.exe')) {
             if (!(Test-Path (Join-Path $installDirectory $required) -PathType Leaf)) {
@@ -174,7 +179,11 @@ jobs:
 
           Write-Host 'Running the installed uninstaller...'
           $uninstaller = Join-Path $installDirectory 'Uninstall.exe'
-          $uninstall = Start-Process -FilePath $uninstaller -ArgumentList '/S' -Wait -PassThru
+          $uninstall = Start-Process -FilePath $uninstaller -ArgumentList '/S' -PassThru
+          if (!$uninstall.WaitForExit(360000)) {
+            $uninstall.Kill()
+            throw 'Vanta uninstaller did not finish within six minutes.'
+          }
           if ($uninstall.ExitCode -ne 0) { throw "Vanta uninstaller exited with code $($uninstall.ExitCode)." }
           if (Test-Path $installDirectory) { throw 'Vanta uninstaller left the installation directory behind.' }
           Remove-Item $fixtureDirectory -Recurse -Force
