@@ -34,6 +34,27 @@ class VantaBundleStateStoreTest {
     }
 
     @Test
+    void reconciliationRemovesMissingManagedProjectsWithoutClaimingManualMods() throws Exception {
+        Instance instance = instance();
+        VantaBundleState initial = new VantaBundleState(1, "vanta-client", "1.2.0",
+                List.of("core"), List.of(), List.of("managed-present", "managed-removed"), null);
+        store.save(instance, initial);
+
+        VantaBundleState reconciled = store.reconcileManagedProjects(
+                instance, java.util.Set.of("managed-present", "manually-installed"));
+
+        assertNotNull(reconciled);
+        assertEquals(List.of("managed-present"), reconciled.installedManagedProjectIds());
+        assertFalse(reconciled.installedManagedProjectIds().contains("manually-installed"));
+        assertEquals(reconciled, store.load(instance));
+    }
+
+    @Test
+    void reconciliationLeavesMissingProfileStateAbsent() throws Exception {
+        assertNull(store.reconcileManagedProjects(instance(), java.util.Set.of("manual-project")));
+    }
+
+    @Test
     void missingStateMeansInstanceHasNoVantaProfile() throws Exception {
         assertNull(store.load(instance()));
     }
