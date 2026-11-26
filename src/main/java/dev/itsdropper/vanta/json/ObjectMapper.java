@@ -7,6 +7,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.FieldNamingStrategy;
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.Strictness;
 import com.google.gson.stream.JsonReader;
@@ -54,6 +57,23 @@ public final class ObjectMapper {
         GsonBuilder builder = new GsonBuilder()
                 .serializeNulls()
                 .disableHtmlEscaping()
+                .setFieldNamingStrategy(field -> {
+                    JsonProperty property = field.getAnnotation(JsonProperty.class);
+                    return property == null ? field.getName() : property.value();
+                })
+                .addSerializationExclusionStrategy(new ExclusionStrategy() {
+                    @Override public boolean shouldSkipField(FieldAttributes field) {
+                        return field.getAnnotation(JsonIgnore.class) != null
+                                || Modifier.isTransient(field.getDeclaredType().getModifiers());
+                    }
+                    @Override public boolean shouldSkipClass(Class<?> type) { return false; }
+                })
+                .addDeserializationExclusionStrategy(new ExclusionStrategy() {
+                    @Override public boolean shouldSkipField(FieldAttributes field) {
+                        return field.getAnnotation(JsonIgnore.class) != null;
+                    }
+                    @Override public boolean shouldSkipClass(Class<?> type) { return false; }
+                })
                 .registerTypeAdapter(Path.class, new TypeAdapter<Path>() {
                     @Override public void write(JsonWriter out, Path path) throws IOException {
                         if (path == null) out.nullValue(); else out.value(path.toString());
@@ -204,11 +224,10 @@ public final class ObjectMapper {
             for (Field field : current.getDeclaredFields()) {
                 if (Modifier.isStatic(field.getModifiers()) || Modifier.isTransient(field.getModifiers())
                         || field.isSynthetic()) continue;
-                com.google.gson.annotations.SerializedName annotation =
-                        field.getAnnotation(com.google.gson.annotations.SerializedName.class);
+                JsonProperty annotation = field.getAnnotation(JsonProperty.class);
                 String name = annotation == null ? field.getName() : annotation.value();
+                if (field.getAnnotation(JsonIgnore.class) != null) continue;
                 allowed.add(name);
-                if (annotation != null) java.util.Collections.addAll(allowed, annotation.alternate());
                 fields.put(name, field);
             }
         }
