@@ -204,6 +204,7 @@ public final class ForgeInstaller {
                             .directory(target.toFile())
                             .redirectErrorStream(true)
                             .start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
 
             String output =
                     new String(
