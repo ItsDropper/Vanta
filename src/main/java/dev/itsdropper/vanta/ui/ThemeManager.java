@@ -1,6 +1,8 @@
 package dev.itsdropper.vanta.ui;
 
 import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.paint.Color;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 
@@ -159,26 +161,41 @@ public final class ThemeManager {
                 Math.round(color.getBlue() * 255);
 
         node.setStyle(
-                "-vantaaccent: " + effectiveAccent + ";" +
-                "-vantaaccentforeground: " + accentForeground + ";" +
-                "-vantaaccentsoft: " + soft + ";" +
-                "-vantaaccenthover: " + accentHover + ";" +
-                "-vantaaccentrgb: " + rgb + ";" +
-                "-vantaaccent-a10: rgba(" + rgb + ",0.10);" +
-                "-vantaaccent-a18: rgba(" + rgb + ",0.18);" +
-                "-vantaaccent-a30: rgba(" + rgb + ",0.30);" +
-                "-vantaaccent-a55: rgba(" + rgb + ",0.55);" +
-                "-vantabg: " + background + ";" +
-                "-vantasurface: " + surface + ";" +
-                "-vantasurfaceraised: " + raised + ";" +
-                "-vantasurfacehover: " + hoverSurface + ";" +
-                "-vantaborder: " + border + ";" +
-                "-vantatext: " + textColor + ";" +
-                "-vantamuted: " + muted + ";" +
-                "-vantasubtle: " + subtle + ";" +
-                "-vantadanger: " + danger + ";" +
-                "-vantasuccess: " + success + ";"
+                "-fx-vantaaccent: " + effectiveAccent + ";" +
+                "-fx-vantaaccentforeground: " + accentForeground + ";" +
+                "-fx-vantaaccentsoft: " + soft + ";" +
+                "-fx-vantaaccenthover: " + accentHover + ";" +
+                "-fx-vantaaccentrgb: " + rgb + ";" +
+                "-fx-vantaaccent-a10: rgba(" + rgb + ",0.10);" +
+                "-fx-vantaaccent-a18: rgba(" + rgb + ",0.18);" +
+                "-fx-vantaaccent-a30: rgba(" + rgb + ",0.30);" +
+                "-fx-vantaaccent-a55: rgba(" + rgb + ",0.55);" +
+                "-fx-vantabg: " + background + ";" +
+                "-fx-vantasurface: " + surface + ";" +
+                "-fx-vantasurfaceraised: " + raised + ";" +
+                "-fx-vantasurfacehover: " + hoverSurface + ";" +
+                "-fx-vantaborder: " + border + ";" +
+                "-fx-vantatext: " + textColor + ";" +
+                "-fx-vantamuted: " + muted + ";" +
+                "-fx-vantasubtle: " + subtle + ";" +
+                "-fx-vantadanger: " + danger + ";" +
+                "-fx-vantasuccess: " + success + ";"
         );
+    }
+
+    /**
+     * Context menus use a separate popup scene and do not inherit looked-up
+     * colors from the owner window. Install the shared styles and theme on
+     * the popup root before its first CSS pass.
+     */
+    public static void apply(ContextMenu menu) {
+        if (menu == null) return;
+        menu.setOnShowing(event -> {
+            Scene popupScene = menu.getScene();
+            if (popupScene == null) return;
+            Stylesheets.addTo(popupScene);
+            apply(popupScene.getRoot(), loadAccent());
+        });
     }
 
     public static void applyTheme(Node node, String themeName) {
