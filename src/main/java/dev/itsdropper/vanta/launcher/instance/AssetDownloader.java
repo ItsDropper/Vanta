@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import dev.itsdropper.vanta.json.JsonNode;
 
 import java.io.InputStream;
 import java.net.URI;

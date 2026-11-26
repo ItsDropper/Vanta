@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import dev.itsdropper.vanta.json.JsonNode;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.util.LinkedHashSet;
