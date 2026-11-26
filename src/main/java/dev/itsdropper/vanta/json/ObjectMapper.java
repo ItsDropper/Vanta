@@ -248,8 +248,36 @@ public final class ObjectMapper {
     public JsonNodeFactory getNodeFactory() { return JsonNodeFactory.instance; }
     public ArrayNode createArrayNode() { return new ArrayNode(new JsonArray()); }
     public String writeValueAsString(Object value) throws JsonProcessingException {
-        try { return gson.toJson(value); }
-        catch (RuntimeException failure) { throw new JsonProcessingException("Could not serialize JSON: " + failure.getMessage(), failure); }
+        try {
+            String json = gson.toJson(value);
+            return pretty ? addPrettyColonSpacing(json) : json;
+        } catch (RuntimeException failure) {
+            throw new JsonProcessingException("Could not serialize JSON: " + failure.getMessage(), failure);
+        }
+    }
+
+    // Match Jackson's stable pretty-print layout used by Vanta's persisted files.
+    private static String addPrettyColonSpacing(String json) {
+        StringBuilder result = new StringBuilder(json.length() + 16);
+        boolean inString = false;
+        boolean escaped = false;
+        for (int i = 0; i < json.length(); i++) {
+            char current = json.charAt(i);
+            if (inString) {
+                result.append(current);
+                if (escaped) escaped = false;
+                else if (current == '\\\\') escaped = true;
+                else if (current == '"') inString = false;
+                continue;
+            }
+            if (current == '"') inString = true;
+            if (current == ':' && result.length() > 0
+                    && !Character.isWhitespace(result.charAt(result.length() - 1))) {
+                result.append(' ');
+            }
+            result.append(current);
+        }
+        return result.toString();
     }
     public byte[] writeValueAsBytes(Object value) throws JsonProcessingException {
         return writeValueAsString(value).getBytes(StandardCharsets.UTF_8);
@@ -257,9 +285,7 @@ public final class ObjectMapper {
     public void writeValue(File file, Object value) throws IOException {
         File parent = file.getAbsoluteFile().getParentFile();
         if (parent != null) java.nio.file.Files.createDirectories(parent.toPath());
-        try (BufferedWriter writer = java.nio.file.Files.newBufferedWriter(file.toPath(), StandardCharsets.UTF_8)) {
-            gson.toJson(value, writer);
-        }
+        java.nio.file.Files.writeString(file.toPath(), writeValueAsString(value), StandardCharsets.UTF_8);
     }
 
     private static void writeElement(JsonElement element, JsonWriter out) throws IOException {
