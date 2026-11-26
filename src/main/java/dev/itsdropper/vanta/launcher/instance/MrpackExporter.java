@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.itsdropper.vanta.json.ObjectMapper;
+import dev.itsdropper.vanta.json.ArrayNode;
+import dev.itsdropper.vanta.json.ObjectNode;
 
 import dev.itsdropper.vanta.launcher.model.Instance;
 

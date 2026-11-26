@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ArrayNode;
+import dev.itsdropper.vanta.json.ObjectNode;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.Platform;
 
@@ -235,7 +235,7 @@ public final class NeoForgeInstaller {
             }
 
             JsonNode neoforgeMetadata =
-                    new com.fasterxml.jackson.databind.ObjectMapper()
+                    new dev.itsdropper.vanta.json.ObjectMapper()
                             .readTree(metadata.toFile());
 
             JsonNode mainClass = neoforgeMetadata.path("mainClass");
@@ -426,7 +426,7 @@ public final class NeoForgeInstaller {
                         String parentName = path.getParent() == null || path.getParent().getFileName() == null
                                 ? "" : path.getParent().getFileName().toString().toLowerCase(java.util.Locale.ROOT);
                         try {
-                            JsonNode metadata = new com.fasterxml.jackson.databind.ObjectMapper()
+                            JsonNode metadata = new dev.itsdropper.vanta.json.ObjectMapper()
                                     .readTree(path.toFile());
                             String id = textValue(metadata, "id");
                             String profileIdentity = (fileName + " " + parentName + " "

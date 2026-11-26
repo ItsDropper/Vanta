@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import dev.itsdropper.vanta.json.JsonNode;
 
 /** Client-side installer integration for the official Quilt Meta API. */
 public final class QuiltInstaller {
