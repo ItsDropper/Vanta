@@ -167,6 +167,17 @@ public final class ObjectMapper {
         try { return gson.fromJson(tree == null ? JsonNull.INSTANCE : tree.element(), type); }
         catch (RuntimeException malformed) { throw new JsonProcessingException("Invalid JSON value: " + malformed.getMessage(), malformed); }
     }
+    public <T> T readValue(File file, TypeReference<T> type) throws IOException {
+        JsonNode tree = readTree(file);
+        validateKnownProperties(tree == null ? JsonNull.INSTANCE : tree.element(), type.getType());
+        try {
+            @SuppressWarnings("unchecked")
+            T value = (T) gson.fromJson(tree == null ? JsonNull.INSTANCE : tree.element(), type.getType());
+            return value;
+        } catch (RuntimeException malformed) {
+            throw new JsonProcessingException("Invalid JSON value: " + malformed.getMessage(), malformed);
+        }
+    }
     public <T> T readValue(File file, Class<T> type) throws IOException {
         return readValue(java.nio.file.Files.readAllBytes(file.toPath()), type);
     }
