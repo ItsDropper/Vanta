@@ -195,6 +195,7 @@ public class JavaInstaller {
     private static void extractTarGz(Path archive, Path destination) throws IOException {
         Process listing = new ProcessBuilder("tar", "-tzf", archive.toString())
                 .redirectErrorStream(true).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(listing);
         String entries;
         try (InputStream input = listing.getInputStream()) {
             entries = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
@@ -220,6 +221,7 @@ public class JavaInstaller {
         Process extraction = new ProcessBuilder(
                 "tar", "-xzf", archive.toString(), "-C", root.toString())
                 .redirectErrorStream(true).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(extraction);
         String output;
         try (InputStream input = extraction.getInputStream()) {
             output = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
