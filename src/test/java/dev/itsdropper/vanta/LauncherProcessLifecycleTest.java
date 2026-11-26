@@ -45,6 +45,63 @@ class LauncherProcessLifecycleTest {
                 "Shutdown cleanup must run before the launcher process exits");
     }
 
+    @Test
+    void closingLauncherReapsRegisteredHelperProcesses() throws Exception {
+        Path pidFile = temporaryDirectory.resolve("helper-process.pid");
+        Path java = Path.of(System.getProperty("java.home"), "bin",
+                isWindows() ? "java.exe" : "java");
+        String classPath = String.join(File.pathSeparator,
+                System.getProperty("java.class.path"),
+                Path.of(LauncherProcessLifecycleTest.class.getProtectionDomain()
+                        .getCodeSource().getLocation().toURI()).toString(),
+                Path.of(LauncherProcessLifecycle.class.getProtectionDomain()
+                        .getCodeSource().getLocation().toURI()).toString());
+
+        Process child = new ProcessBuilder(java.toString(), "-cp", classPath,
+                ProcessChild.class.getName(), pidFile.toString())
+                .redirectErrorStream(true)
+                .start();
+        assertTrue(child.waitFor(5, TimeUnit.SECONDS),
+                "Launcher JVM did not exit after helper-process cleanup");
+        assertEquals(0, child.exitValue());
+        assertTrue(Files.isRegularFile(pidFile), "Child did not publish helper PID");
+
+        long helperPid = Long.parseLong(Files.readString(pidFile));
+        long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(5);
+        while (ProcessHandle.of(helperPid).map(ProcessHandle::isAlive).orElse(false)
+                && System.nanoTime() < deadline) {
+            Thread.sleep(25);
+        }
+        assertFalse(ProcessHandle.of(helperPid).map(ProcessHandle::isAlive).orElse(false),
+                "A launcher-owned helper process survived launcher shutdown");
+    }
+
+    public static final class ProcessChild {
+        private ProcessChild() {
+        }
+
+        public static void main(String[] args) throws Exception {
+            Path java = Path.of(System.getProperty("java.home"), "bin",
+                    isWindows() ? "java.exe" : "java");
+            Process helper = new ProcessBuilder(java.toString(), "-cp",
+                    System.getProperty("java.class.path"), HelperSleeper.class.getName())
+                    .redirectErrorStream(true)
+                    .start();
+            Files.writeString(Path.of(args[0]), Long.toString(helper.pid()));
+            LauncherProcessLifecycle.registerChildProcess(helper);
+            LauncherProcessLifecycle.exit();
+        }
+    }
+
+    public static final class HelperSleeper {
+        private HelperSleeper() {
+        }
+
+        public static void main(String[] args) throws Exception {
+            while (true) Thread.sleep(1_000);
+        }
+    }
+
     private static boolean isWindows() {
         return System.getProperty("os.name").toLowerCase(java.util.Locale.ROOT).contains("win");
     }
