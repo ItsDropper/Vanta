@@ -53,6 +53,7 @@ public class JsonNode implements Iterable<JsonNode> {
     }
 
     public boolean has(String name) { return get(name) != null; }
+    public boolean hasNonNull(String name) { JsonNode child = get(name); return child != null && !child.isNull(); }
     public boolean isMissingNode() { return missing; }
     public boolean isNull() { return !missing && (value == null || value.isJsonNull()); }
     public boolean isObject() { return value != null && value.isJsonObject(); }
@@ -150,8 +151,9 @@ public class JsonNode implements Iterable<JsonNode> {
         return java.util.Collections.emptyIterator();
     }
 
-    public JsonNode deepCopy() {
-        return missing ? MISSING : wrap(value == null ? JsonNull.INSTANCE : value.deepCopy());
+    @SuppressWarnings("unchecked")
+    public <T extends JsonNode> T deepCopy() {
+        return (T) (missing ? MISSING : wrap(value == null ? JsonNull.INSTANCE : value.deepCopy()));
     }
 
     @Override public String toString() {

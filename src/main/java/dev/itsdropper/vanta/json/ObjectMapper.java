@@ -37,6 +37,9 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.List;
+import dev.itsdropper.vanta.json.annotation.JsonProperty;
+import dev.itsdropper.vanta.json.annotation.JsonIgnore;
 import java.util.Set;
 
 /**
@@ -63,8 +66,7 @@ public final class ObjectMapper {
                 })
                 .addSerializationExclusionStrategy(new ExclusionStrategy() {
                     @Override public boolean shouldSkipField(FieldAttributes field) {
-                        return field.getAnnotation(JsonIgnore.class) != null
-                                || Modifier.isTransient(field.getModifiers());
+                        return field.getAnnotation(JsonIgnore.class) != null;
                     }
                     @Override public boolean shouldSkipClass(Class<?> type) { return false; }
                 })
@@ -243,6 +245,7 @@ public final class ObjectMapper {
         return JsonNode.wrap(gson.toJsonTree(value));
     }
     public ObjectNode createObjectNode() { return new ObjectNode(new JsonObject()); }
+    public JsonNodeFactory getNodeFactory() { return JsonNodeFactory.instance; }
     public ArrayNode createArrayNode() { return new ArrayNode(new JsonArray()); }
     public String writeValueAsString(Object value) throws JsonProcessingException {
         try { return gson.toJson(value); }

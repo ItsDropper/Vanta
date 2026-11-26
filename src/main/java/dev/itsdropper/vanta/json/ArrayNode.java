@@ -24,5 +24,4 @@ public final class ArrayNode extends JsonNode {
     public JsonNode remove(int index) {
         return index < 0 || index >= array().size() ? null : JsonNode.wrap(array().remove(index));
     }
-    @Override public ArrayNode deepCopy() { return new ArrayNode(array().deepCopy()); }
 }

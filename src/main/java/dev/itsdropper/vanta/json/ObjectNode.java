@@ -32,5 +32,16 @@ public final class ObjectNode extends JsonNode {
         return new ObjectNode(child);
     }
     public JsonNode remove(String name) { return JsonNode.wrap(object().remove(name)); }
-    @Override public ObjectNode deepCopy() { return new ObjectNode(object().deepCopy()); }
+    public ArrayNode withArray(String name) {
+        JsonElement existing = object().get(name);
+        if (existing == null) return putArray(name);
+        if (!existing.isJsonArray()) throw new IllegalStateException("JSON property '" + name + "' is not an array.");
+        return new ArrayNode(existing.getAsJsonArray());
+    }
+    public ObjectNode with(String name) {
+        JsonElement existing = object().get(name);
+        if (existing == null) return putObject(name);
+        if (!existing.isJsonObject()) throw new IllegalStateException("JSON property '" + name + "' is not an object.");
+        return new ObjectNode(existing.getAsJsonObject());
+    }
 }
