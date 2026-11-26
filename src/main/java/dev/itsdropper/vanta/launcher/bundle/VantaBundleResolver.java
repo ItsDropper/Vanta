@@ -73,17 +73,19 @@ public final class VantaBundleResolver {
                     continue;
                 }
                 ResolvedMod candidate = new ResolvedMod(
-                        mod.projectId(), mod.versionId(), bundle.id(), mod.required());
+                        mod.projectId(), mod.versionId(), bundle.id(), mod.required(), mod.githubRelease());
                 ResolvedMod previous = resolved.get(mod.projectId());
-                if (previous != null && !java.util.Objects.equals(previous.versionId(), candidate.versionId())) {
-                    throw new IOException("Conflicting pinned versions for Modrinth project " + mod.projectId()
-                            + " in bundles " + previous.bundleId() + " and " + candidate.bundleId() + ".");
+                if (previous != null && (!java.util.Objects.equals(previous.versionId(), candidate.versionId())
+                        || !java.util.Objects.equals(previous.githubRelease(), candidate.githubRelease()))) {
+                    throw new IOException("Conflicting artifact sources or pinned versions for profile component "
+                            + mod.projectId() + " in bundles " + previous.bundleId() + " and " + candidate.bundleId() + ".");
                 }
                 if (previous == null) {
                     resolved.put(mod.projectId(), candidate);
                 } else if (candidate.required() && !previous.required()) {
                     resolved.put(mod.projectId(), new ResolvedMod(
-                            previous.projectId(), previous.versionId(), previous.bundleId(), true));
+                            previous.projectId(), previous.versionId(), previous.bundleId(), true,
+                            previous.githubRelease()));
                 }
             }
         }
@@ -99,7 +101,11 @@ public final class VantaBundleResolver {
                 List.copyOf(selectedBundles), List.copyOf(mods));
     }
 
-    public record ResolvedMod(String projectId, String versionId, String bundleId, boolean required) {
+    public record ResolvedMod(String projectId, String versionId, String bundleId, boolean required,
+                              VantaBundleManifest.GitHubRelease githubRelease) {
+        public ResolvedMod(String projectId, String versionId, String bundleId, boolean required) {
+            this(projectId, versionId, bundleId, required, null);
+        }
     }
 
     public record Resolution(
