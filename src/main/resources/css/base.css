@@ -168,6 +168,90 @@
     -fx-pref-width: 28px;
 }
 
+/* ---------- menu buttons ---------------------------------------------------- */
+/*
+ * JavaFX MenuButton is a ButtonBase with its own .menu-button selector; it
+ * does not match .button. Keep it in the same visual system as toolbar
+ * secondary buttons so icon-only dropdowns do not fall back to Modena chrome.
+ */
+.menu-button {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-vantatext;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 60%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 8, 7, 7;
+    -fx-padding: 0 10px;
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 8px;
+    -fx-vantaicon: -fx-vantamuted;
+}
+
+.menu-button:hover {
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card-hover, linear-gradient(to bottom, -fx-v-gloss, transparent 60%);
+    -fx-text-fill: -fx-vantatext;
+    -fx-vantaicon: -fx-vantatext;
+}
+
+.menu-button:showing,
+.menu-button:armed {
+    -fx-background-color: -fx-v-hair-strong, derive(-fx-v-card-hover, -6%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 8, 7;
+}
+
+.menu-button:focused {
+    -fx-border-color: -fx-vantaaccent-a55;
+    -fx-border-width: 2px;
+    -fx-border-radius: 9px;
+    -fx-border-insets: -2px;
+}
+
+.menu-button:disabled {
+    -fx-opacity: 0.42;
+    -fx-cursor: default;
+}
+
+.menu-button > .label {
+    -fx-text-fill: -fx-vantatext;
+}
+
+.menu-button > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 2px 0 4px;
+}
+
+.menu-button > .arrow-button > .arrow {
+    -fx-background-color: -fx-vantamuted;
+    -fx-shape: "M0 0 L4 4 L8 0 Z";
+    -fx-scale-shape: false;
+    -fx-padding: 2.5px 4px;
+}
+
+.menu-button:hover > .arrow-button > .arrow,
+.menu-button:showing > .arrow-button > .arrow {
+    -fx-background-color: -fx-vantatext;
+}
+
+/* The Mods view uses a compact, icon-only overflow action. */
+.menu-button.instances-more-button {
+    -fx-min-width: 38px;
+    -fx-pref-width: 38px;
+    -fx-padding: 0 7px;
+    -fx-content-display: graphic-only;
+}
+
+.menu-button.instances-more-button > .label {
+    -fx-padding: 0;
+}
+
+.menu-button.instances-more-button > .arrow-button {
+    -fx-padding: 0;
+}
+
 /* ---------- text input ----------------------------------------------------- */
 
 .text-field,
