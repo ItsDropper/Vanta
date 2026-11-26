@@ -1193,7 +1193,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
             dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
                     boolean exited = process.waitFor(10, java.util.concurrent.TimeUnit.SECONDS);
                     if (!exited) {
+                        process.descendants().forEach(ProcessHandle::destroyForcibly);
                         process.destroyForcibly();
+                        process.waitFor(1, java.util.concurrent.TimeUnit.SECONDS);
                         result = "Java did not exit within 10 seconds. Check that the selected executable is valid.";
                     } else {
                         String output;
@@ -2180,7 +2182,9 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
 
                 boolean finished = process.waitFor(8, java.util.concurrent.TimeUnit.SECONDS);
                 if (!finished) {
+                    process.descendants().forEach(ProcessHandle::destroyForcibly);
                     process.destroyForcibly();
+                    process.waitFor(1, java.util.concurrent.TimeUnit.SECONDS);
                     throw new IOException("java -version timed out.");
                 }
 
