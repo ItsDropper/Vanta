@@ -25,3 +25,30 @@
 .vanta-profile-mod-list .check-box {
     -fx-font-size: 12px;
 }
+
+/* Profile ownership surfaces in the installed-content view. */
+.vanta-profile-banner {
+    -fx-padding: 14px 16px;
+    -fx-background-color: -fx-v-card;
+    -fx-background-radius: 12px;
+    -fx-border-color: -fx-v-hair-strong;
+    -fx-border-radius: 12px;
+}
+.vanta-profile-banner-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 14px;
+    -fx-text-fill: -fx-vantatext;
+}
+.vanta-profile-banner-details {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-vantaaccent;
+}
+.vanta-profile-banner-note {
+    -fx-font-size: 11px;
+    -fx-text-fill: -fx-vantasubtle;
+}
+.vanta-profile-mod-tag {
+    -fx-font-size: 10px;
+    -fx-text-fill: -fx-vantaaccent;
+}
