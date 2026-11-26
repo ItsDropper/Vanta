@@ -40,6 +40,23 @@ class VantaBundleResolverTest {
     }
 
     @Test
+    void explicitModSelectionCanDisableDefaultEnabledOptionalMods() throws Exception {
+        VantaBundleManifest withDefaultOptional = new VantaBundleManifest(1, "vanta-client", "1.0.0",
+                java.util.List.of("1.21.11"), "fabric", java.util.List.of(
+                new VantaBundleManifest.Bundle("core", "Core", "Required core.",
+                        true, true, java.util.List.of(
+                        new VantaBundleManifest.Mod("required-project", null, true, true),
+                        new VantaBundleManifest.Mod("default-optional", null, false, true)))
+        ));
+
+        VantaBundleResolver.Resolution result = resolver.resolve(
+                withDefaultOptional, "1.21.11", "fabric", Set.of("core"), Set.of());
+
+        assertEquals(1, result.mods().size());
+        assertEquals("required-project", result.mods().get(0).projectId());
+    }
+
+    @Test
     void rejectsSelectingModsFromDisabledBundles() {
         IOException failure = assertThrows(IOException.class, () -> resolver.resolve(
                 manifest(), "1.21.11", "fabric", Set.of(), Set.of("optional-project")));
