@@ -59,13 +59,13 @@ public final class VantaProfilesView extends VBox {
         panel.setPadding(new Insets(24));
         panel.setMaxWidth(860);
 
-        Label section = new Label(Localization.text("vantaProfiles.manifest"));
+        Label section = new Label("Available profile");
         section.getStyleClass().add("create-panel-title");
-        Label help = new Label(Localization.text("vantaProfiles.manifestHelp"));
+        Label help = new Label("Start with the built-in Vanta Fabric profile. Vanta selects compatible dependencies automatically; importing a custom manifest is optional.");
         help.getStyleClass().add("create-panel-subtitle");
         help.setWrapText(true);
 
-        Button importButton = new Button(Localization.text("vantaProfiles.chooseManifest"));
+        Button importButton = new Button("Import custom profile…");
         importButton.getStyleClass().add("secondary-button");
         importButton.setOnAction(event -> chooseManifest(importButton.getScene() == null
                 ? null : importButton.getScene().getWindow()));
@@ -116,6 +116,36 @@ public final class VantaProfilesView extends VBox {
         panel.getChildren().addAll(section, help, importButton, status,
                 fields, bundlesHeading, bundleScroll, actions);
         getChildren().addAll(header, panel);
+
+        loadBuiltInProfile();
+    }
+
+    private void loadBuiltInProfile() {
+        try {
+            VantaBundleManifest builtIn = new VantaBundleRepository()
+                    .loadBundled("profiles/vanta-fabric-starter.json");
+            applyManifest(builtIn);
+            nameField.setText("Vanta Fabric Starter");
+            status.setText("Vanta Fabric Starter · Fabric · " + builtIn.minecraftVersions().get(0)
+                    + " · " + builtIn.bundles().size() + " feature bundle");
+            createButton.setDisable(false);
+        } catch (Exception failure) {
+            manifest = null;
+            bundleList.getChildren().clear();
+            versionBox.getItems().clear();
+            createButton.setDisable(true);
+            status.setText("The built-in Vanta profile could not be loaded. "
+                    + (failure.getMessage() == null ? "" : failure.getMessage()));
+        }
+    }
+
+    private void applyManifest(VantaBundleManifest loaded) {
+        manifest = loaded;
+        versionBox.getItems().setAll(loaded.minecraftVersions());
+        versionBox.getSelectionModel().selectFirst();
+        nameField.setText(loaded.profileId());
+        renderBundles();
+        createButton.setDisable(false);
     }
 
     private Label label(String text) {
@@ -133,15 +163,10 @@ public final class VantaProfilesView extends VBox {
         if (selected == null) return;
         try {
             VantaBundleManifest loaded = new VantaBundleRepository().load(selected.toPath());
-            manifest = loaded;
-            versionBox.getItems().setAll(loaded.minecraftVersions());
-            versionBox.getSelectionModel().selectFirst();
-            nameField.setText(loaded.profileId());
-            renderBundles();
+            applyManifest(loaded);
             status.setText(loaded.profileId() + " · " + loaded.profileVersion()
                     + " · " + loaded.loader() + " · "
                     + loaded.bundles().size() + " " + Localization.text("vantaProfiles.bundleCount"));
-            createButton.setDisable(false);
         } catch (Exception failure) {
             manifest = null;
             bundleList.getChildren().clear();
