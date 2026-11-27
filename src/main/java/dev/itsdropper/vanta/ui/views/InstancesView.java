@@ -155,10 +155,17 @@ public class InstancesView extends VBox {
         importVPackButton.setTooltip(new Tooltip(Localization.text("instances.importVPackHelp")));
         importVPackButton.setOnAction(event -> importVPack());
 
+        Button recoveryButton = new Button(Localization.text("instances.recovery"));
+        recoveryButton.getStyleClass().add("vanta-button-secondary");
+        recoveryButton.setAccessibleText(Localization.text("instances.recoveryAccessible"));
+        recoveryButton.setTooltip(new Tooltip(Localization.text("instances.recoveryHelp")));
+        recoveryButton.setOnAction(event -> manageRecoveryPoints(recoveryButton));
+
         ContextMenu transferMenu = new ContextMenu(
                 mirrorAsMenuItem(backupButton),
                 mirrorAsMenuItem(restoreButton),
                 mirrorAsMenuItem(verifyBackupButton),
+                mirrorAsMenuItem(recoveryButton),
                 new SeparatorMenuItem(),
                 mirrorAsMenuItem(exportVPackButton),
                 mirrorAsMenuItem(importVPackButton)
@@ -224,13 +231,7 @@ public class InstancesView extends VBox {
         refreshButton.setTooltip(new Tooltip(Localization.text("instances.refreshTooltip")));
         refreshButton.setOnAction(event -> refresh());
 
-        Button recoveryButton = new Button(Localization.text("instances.recovery"));
-        recoveryButton.getStyleClass().add("vanta-button-secondary");
-        recoveryButton.setAccessibleText(Localization.text("instances.recoveryAccessible"));
-        recoveryButton.setTooltip(new Tooltip(Localization.text("instances.recoveryHelp")));
-        recoveryButton.setOnAction(event -> manageRecoveryPoints(recoveryButton));
-
-        FlowPane controls = new FlowPane(8, 8, search, sortControl, viewControl, refreshButton, recoveryButton);
+        FlowPane controls = new FlowPane(8, 8, search, sortControl, viewControl, refreshButton);
         controls.setAlignment(Pos.CENTER_LEFT);
         controls.setRowValignment(javafx.geometry.VPos.CENTER);
         controls.getStyleClass().add("instances-controls");
