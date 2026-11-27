@@ -18,15 +18,16 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
 public class CreateInstanceTypeView extends VBox {
-    private final Runnable onBack, onCustom, onImport, onPreset, onModrinth;
+    private final Runnable onBack, onCustom, onImport, onPreset, onModrinth, onVantaProfiles;
 
     public CreateInstanceTypeView(Runnable onBack, Runnable onCustom, Runnable onImport,
-                                  Runnable onPreset, Runnable onModrinth) {
+                                  Runnable onPreset, Runnable onModrinth, Runnable onVantaProfiles) {
         this.onBack = onBack;
         this.onCustom = onCustom;
         this.onImport = onImport;
         this.onPreset = onPreset;
         this.onModrinth = onModrinth;
+        this.onVantaProfiles = onVantaProfiles;
 
         getStyleClass().addAll("page", "vanta-consistent-page", "create-instance-type-page");
         dev.itsdropper.vanta.ui.ResponsiveLayout.bindPagePadding(this);
@@ -57,7 +58,8 @@ public class CreateInstanceTypeView extends VBox {
                 option(IconView.Type.PLUS, "custom", "create-custom", "fabric", onCustom),
                 option(IconView.Type.UPLOAD, "import", "create-import", "forge", onImport),
                 option(IconView.Type.PACKAGE, "preset", "create-preset", "quilt", onPreset),
-                option(IconView.Type.SEARCH, "modrinth", "create-modrinth", "neoforge", onModrinth)
+                option(IconView.Type.SEARCH, "modrinth", "create-modrinth", "neoforge", onModrinth),
+                option(IconView.Type.STAR, "vantaProfiles", "create-profiles", "fabric", onVantaProfiles)
         );
         options.forEach(grid.getChildren()::add);
         Runnable adaptGrid = () -> {

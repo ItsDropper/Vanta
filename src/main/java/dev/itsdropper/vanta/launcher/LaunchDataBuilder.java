@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceManager;
+import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityMitigationService;
+import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityUpdateService;
 import dev.itsdropper.vanta.launcher.instance.NilLoaderInstaller;
 import dev.itsdropper.vanta.launcher.instance.SteinInstaller;
 import dev.itsdropper.vanta.launcher.instance.VantaLoaderInstaller;
@@ -13,6 +15,7 @@ import dev.itsdropper.vanta.launcher.model.InstanceSettings;
 import dev.itsdropper.vanta.launcher.model.VersionManifest;
 import dev.itsdropper.vanta.launcher.service.ServerTarget;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -136,6 +139,19 @@ public class LaunchDataBuilder {
 
         data.version =
                 instance.getMinecraftVersion();
+
+        if (MinecraftSecurityUpdateService.isMitigationRequired(instance)) {
+            try {
+                data.securityAgent = MinecraftSecurityMitigationService.ensureAgent();
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException(
+                        "Interrupted while preparing Minecraft's security mitigation.", interrupted);
+            } catch (IOException failure) {
+                throw new IllegalStateException(
+                        "Could not prepare Minecraft's verified security mitigation.", failure);
+            }
+        }
 
         data.versionType = manifest.type;
         data.minecraftArguments = manifest.minecraftArguments;

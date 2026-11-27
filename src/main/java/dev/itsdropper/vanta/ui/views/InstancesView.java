@@ -159,6 +159,7 @@ public class InstancesView extends VBox {
                 mirrorAsMenuItem(exportVPackButton),
                 mirrorAsMenuItem(importVPackButton)
         );
+        ThemeManager.apply(transferMenu);
         IconButton transferButton = new IconButton(IconView.Type.MORE,
                 "Backup and transfer actions", IconButton.Style.SECONDARY);
         transferButton.setTooltip(new Tooltip("Backup, restore and transfer"));

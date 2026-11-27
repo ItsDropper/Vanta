@@ -6,6 +6,7 @@ import dev.itsdropper.vanta.launcher.MinecraftLauncher;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityUpdateService;
+import dev.itsdropper.vanta.launcher.instance.MinecraftSecurityException;
 import dev.itsdropper.vanta.launcher.repair.FailureCategory;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosis;
 import dev.itsdropper.vanta.launcher.repair.RepairDiagnosticEngine;
@@ -196,6 +197,20 @@ public class LaunchService {
             LaunchData launchData;
 
             try {
+                // Validate mandatory mod metadata before creating a Minecraft
+                // process, so repairable Fabric dependency failures never reach
+                // the game's error screen.
+                System.out.println("[Vanta Repair] Checking mandatory mod dependencies before launch...");
+                List<dev.itsdropper.vanta.launcher.modrinth.InstalledModScanner.MissingDependency> repairedDependencies =
+                        new ModrinthService().repairMissingRequiredDependencies(
+                                instance,
+                                message -> System.out.println("[Vanta Repair] " + message)
+                        );
+                if (!repairedDependencies.isEmpty()) {
+                    System.out.println("[Vanta Repair] Installed " + repairedDependencies.size()
+                            + " missing required mod dependency/dependencies before launch.");
+                }
+
                 // Refresh Mojang's version metadata and security-sensitive LWJGL
                 // artifacts before constructing the classpath or starting Java.
                 MinecraftSecurityUpdateService.refreshBeforeLaunch(instance);
@@ -289,6 +304,18 @@ public class LaunchService {
 
         } catch (Exception e) {
 
+            // A failure in launcher-side monitoring/UI bookkeeping must never
+            // turn a still-live Minecraft JVM into a reported game crash.
+            // Once the child process exists, its actual lifetime is authoritative.
+            Process activeProcess = minecraftProcess;
+            if (activeProcess != null && activeProcess.isAlive()) {
+                System.err.println("[Vanta Launch] A post-start launcher operation failed while "
+                        + "Minecraft is still alive; retaining the running session. "
+                        + e.getClass().getSimpleName());
+                setState(LaunchState.RUNNING);
+                return activeProcess;
+            }
+
             minecraftProcess = null;
 
             runningInstance = null;
@@ -297,14 +324,19 @@ public class LaunchService {
 
             failedInstance = instance;
 
-            lastFailure =
-                    new LaunchFailure(
-                            "Minecraft could not be started",
-                            "Vanta was unable to start this Minecraft instance.",
-                            buildDetails(
-                                    e
-                            )
-                    );
+            boolean securityBlocked = e instanceof MinecraftSecurityException;
+            String failureTitle = securityBlocked
+                    ? LaunchFailure.SECURITY_BLOCKED_TITLE
+                    : "Minecraft could not be started";
+            String failureDescription = securityBlocked
+                    ? securityBlockDescription((MinecraftSecurityException) e)
+                    : "Vanta was unable to start this Minecraft instance.";
+
+            lastFailure = new LaunchFailure(
+                    failureTitle,
+                    failureDescription,
+                    buildDetails(e)
+            );
 
             setState(
                     LaunchState.ERROR
@@ -315,6 +347,15 @@ public class LaunchService {
 
             throw e;
         }
+    }
+
+    private static String securityBlockDescription(MinecraftSecurityException failure) {
+        return "Vanta blocked Minecraft " + failure.minecraftVersion()
+                + " because Mojang's official metadata still selects "
+                + failure.artifact() + ". The patched native font library is not available "
+                + "for this version yet. This is an upstream security block, not a damaged "
+                + "instance; reinstalling the instance will not resolve it. Retry after "
+                + "Mojang updates this version's official metadata.";
     }
 
     private void logEnvironmentDiagnostics(Instance instance, LaunchData launchData) {
@@ -642,21 +683,26 @@ public class LaunchService {
         }
     }
 
-    private LaunchFailure classifyExitedFailure(int exitCode, String processOutput) {
-        List<RepairView.RepairIssue> specificIssues = LaunchFailureParser.parse(processOutput);
+    private LaunchFailure classifyExitedFailure(int exitCode, String processOutput, String diagnosticContext) {
+        // The process stream often contains only Fabric's short error-screen output.
+        // The actionable dependency-resolution details are written to latest.log.
+        // Always classify against the same combined evidence persisted in launch history.
+        String diagnosticEvidence = diagnosticContext == null || diagnosticContext.isBlank()
+                ? processOutput : diagnosticContext;
+        List<RepairView.RepairIssue> specificIssues = LaunchFailureParser.parse(diagnosticEvidence);
         if (!specificIssues.isEmpty()) {
             RepairView.RepairIssue issue = specificIssues.get(0);
             String description = issue.details() == null || issue.details().isBlank()
                     ? issue.title() : issue.details();
-            return new LaunchFailure(issue.title(), description, processOutput);
+            return new LaunchFailure(issue.title(), description, diagnosticEvidence);
         }
 
-        RepairDiagnosis diagnosis = findActionableDiagnosis(RepairDiagnosticEngine.diagnose(processOutput));
+        RepairDiagnosis diagnosis = findActionableDiagnosis(RepairDiagnosticEngine.diagnose(diagnosticEvidence));
         if (diagnosis != null) {
             String description = diagnosis.description() == null || diagnosis.description().isBlank()
                     ? diagnosis.evidence() : diagnosis.description();
             return new LaunchFailure(diagnosis.title(), description,
-                    diagnosis.evidence().isBlank() ? processOutput : diagnosis.evidence());
+                    diagnosis.evidence().isBlank() ? diagnosticEvidence : diagnosis.evidence());
         }
 
         return new LaunchFailure("Minecraft exited with code " + exitCode,
@@ -709,7 +755,7 @@ public class LaunchService {
                             // Logs are evidence, never a reason to terminate a live game.
                             // Classification is permitted only after waitFor() and a non-zero exit.
                             if (exitCode != 0 && !intentionalClose) {
-                                lastFailure = classifyExitedFailure(exitCode, processOutput);
+                                lastFailure = classifyExitedFailure(exitCode, processOutput, diagnosticContext);
                                 setState(LaunchState.ERROR);
                             } else {
                                 setState(LaunchState.IDLE);
@@ -952,6 +998,16 @@ public class LaunchService {
     private synchronized void setState(
             LaunchState newState
     ) {
+
+        // Log signatures and advisory crash diagnoses are not process state.
+        // Never publish ERROR while the exact Minecraft process is still alive.
+        if (newState == LaunchState.ERROR
+                && minecraftProcess != null
+                && minecraftProcess.isAlive()) {
+            System.err.println("[Vanta Launch] Ignoring an ERROR transition because Minecraft "
+                    + "process " + minecraftProcess.pid() + " is still alive.");
+            newState = LaunchState.RUNNING;
+        }
 
         state =
                 newState;

@@ -165,6 +165,13 @@ public class ModrinthService {
     }
     public Path installModVersion(Instance instance, String projectId, ModrinthVersion version) throws IOException, InterruptedException { return installer.installModVersion(instance, projectId, version); }
     public List<ResolvedMod> resolveModGraph(Instance instance, List<ModrinthProject> roots, String requiredProjectId, List<String> requiredVersions) throws IOException, InterruptedException { return dependencies.resolveModGraph(instance, roots, requiredProjectId, requiredVersions); }
+    public List<ResolvedMod> resolveModGraph(
+            Instance instance,
+            List<ModrinthProject> roots,
+            java.util.Map<String, String> pinnedVersionIds
+    ) throws IOException, InterruptedException {
+        return dependencies.resolveModGraph(instance, roots, null, List.of(), pinnedVersionIds);
+    }
     public List<Path> installResolvedGraph(Instance instance, List<ResolvedMod> resolved) throws IOException, InterruptedException { return installer.installResolvedGraph(instance, resolved); }
     public Path repairModDependency(Instance instance, String projectId, List<String> requiredVersions) throws IOException, InterruptedException { return repair.repairModDependency(instance, projectId, requiredVersions); }
     public Path installResourcePack(Instance instance, ModrinthProject project) throws IOException, InterruptedException { return installer.installResourcePack(instance, project); }
@@ -172,6 +179,78 @@ public class ModrinthService {
     @Deprecated
     public Path installDataPack(Instance instance, ModrinthProject project) throws IOException { return installer.installDataPack(instance, project); }
     public Path installDataPack(Instance instance, Path worldDirectory, ModrinthProject project) throws IOException, InterruptedException { return installer.installDataPack(instance, worldDirectory, project); }
+
+    /**
+     * Repairs mandatory dependencies declared by installed mod metadata before
+     * Minecraft is started. Optional recommendations are deliberately ignored.
+     */
+    public List<InstalledModScanner.MissingDependency> repairMissingRequiredDependencies(
+            Instance instance,
+            java.util.function.Consumer<String> progress
+    ) throws IOException, InterruptedException {
+        Objects.requireNonNull(instance, "instance");
+        java.util.function.Consumer<String> reporter = progress == null ? ignored -> { } : progress;
+        List<InstalledModScanner.MissingDependency> missing =
+                installedModScanner.findMissingRequiredDependencies(instance);
+        if (missing.isEmpty()) return List.of();
+
+        List<InstalledModScanner.MissingDependency> repaired = new ArrayList<>();
+        for (InstalledModScanner.MissingDependency dependency : missing) {
+            String modId = dependency.modId();
+            boolean alreadyInstalled = installedModScanner.scan(instance).stream()
+                    .anyMatch(mod -> mod != null && mod.getModId() != null
+                            && modId.equalsIgnoreCase(mod.getModId()));
+            if (alreadyInstalled) continue;
+            reporter.accept("Resolving required dependency " + modId + "...");
+            ModrinthProject project = null;
+            try {
+                project = catalog.getProjectBySlug(modId);
+            } catch (IOException notFoundBySlug) {
+                // Some loader mod IDs differ from their Modrinth slugs.
+            }
+
+            if (project == null) {
+                List<ModrinthProject> candidates = catalog.searchMods(instance, modId);
+                if (candidates != null) {
+                    project = candidates.stream()
+                            .filter(candidate -> candidate != null
+                                    && modId.equalsIgnoreCase(candidate.getSlug()))
+                            .findFirst().orElse(null);
+                }
+            }
+
+            if (project == null || project.getProjectId() == null
+                    || project.getProjectId().isBlank()) {
+                throw new IOException("A required mod dependency '" + modId
+                        + "' declared by '" + dependency.requestingModId()
+                        + "' is missing, and Vanta could not identify an exact Modrinth project. "
+                        + "Minecraft was not started.");
+            }
+
+            reporter.accept("Installing " + project.getTitle() + "...");
+            repairModDependency(instance, project.getProjectId(), List.of());
+
+            boolean installed = installedModScanner.scan(instance).stream()
+                    .anyMatch(mod -> mod != null && mod.getModId() != null
+                            && modId.equalsIgnoreCase(mod.getModId()));
+            if (!installed) {
+                throw new IOException("Vanta attempted to install required dependency '" + modId
+                        + "' but it is still missing. Minecraft was not started.");
+            }
+            repaired.add(dependency);
+        }
+
+        List<InstalledModScanner.MissingDependency> remaining =
+                installedModScanner.findMissingRequiredDependencies(instance);
+        if (!remaining.isEmpty()) {
+            String unresolved = remaining.stream()
+                    .map(InstalledModScanner.MissingDependency::modId)
+                    .distinct().collect(java.util.stream.Collectors.joining(", "));
+            throw new IOException("Required mod dependencies remain unresolved: "
+                    + unresolved + ". Minecraft was not started.");
+        }
+        return List.copyOf(repaired);
+    }
 
     /**
      * Finds newer Modrinth releases for mods installed through Vanta.

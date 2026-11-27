@@ -1,6 +1,7 @@
 package dev.itsdropper.vanta.ui.components;
 
 import dev.itsdropper.vanta.ui.Localization;
+import dev.itsdropper.vanta.ui.ThemeManager;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
 import javafx.animation.FadeTransition;
@@ -390,6 +391,7 @@ public class InstanceCard extends StackPane {
                         deleteItem
                 );
 
+        ThemeManager.apply(menu);
         menu.show(
                 source,
                 javafx.geometry.Side.BOTTOM,

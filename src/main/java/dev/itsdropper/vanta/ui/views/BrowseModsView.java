@@ -868,6 +868,7 @@ public class BrowseModsView extends VBox {
                 Localization.text("modrinth.openProject"));
         openProject.setOnAction(event -> onModSelected.accept(project));
         javafx.scene.control.ContextMenu menu = new javafx.scene.control.ContextMenu(openProject);
+        dev.itsdropper.vanta.ui.ThemeManager.apply(menu);
         menuButton.setOnAction(event -> menu.show(menuButton, javafx.geometry.Side.BOTTOM, 0, 0));
 
         Button installButton = new Button(Localization.text("common.install"));

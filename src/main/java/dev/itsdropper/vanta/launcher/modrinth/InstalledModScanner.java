@@ -322,6 +322,48 @@ public class InstalledModScanner {
      * including Fabric API's nested JARs. This lets the dependency
      * resolver inspect one API JAR once and reuse the complete result.
      */
+    /**
+     * Returns mandatory metadata dependencies that are not provided by any
+     * installed mod or by Fabric API's nested module JARs.
+     */
+    public List<MissingDependency> findMissingRequiredDependencies(Instance instance) throws IOException {
+        List<InstalledMod> installed = scan(instance);
+        java.util.Set<String> installedIds = new java.util.HashSet<>();
+        Path modsDirectory = instance.getDirectory().resolve("mods");
+        if (Files.isDirectory(modsDirectory)) {
+            try (var files = Files.list(modsDirectory)) {
+                for (Path file : files.filter(Files::isRegularFile).toList()) {
+                    InstalledMod metadata = scanFile(file);
+                    if (metadata != null && metadata.getModId() != null) {
+                        installedIds.add(metadata.getModId().toLowerCase(java.util.Locale.ROOT));
+                    }
+                    for (String moduleId : scanFabricModuleVersions(file).keySet()) {
+                        installedIds.add(moduleId.toLowerCase(java.util.Locale.ROOT));
+                    }
+                }
+            }
+        }
+
+        java.util.Map<String, MissingDependency> missing = new java.util.LinkedHashMap<>();
+        for (InstalledMod mod : installed) {
+            if (mod == null || mod.getDependencies() == null) continue;
+            for (DependencyRequirement dependency : mod.getDependencies()) {
+                if (dependency == null || dependency.isOptional()
+                        || dependency.getModId() == null || dependency.getModId().isBlank()) continue;
+                String id = dependency.getModId().trim();
+                String normalized = id.toLowerCase(java.util.Locale.ROOT);
+                if (installedIds.contains(normalized)
+                        || java.util.Set.of("minecraft", "fabricloader", "java", "java-runtime")
+                        .contains(normalized)) continue;
+                missing.putIfAbsent(normalized, new MissingDependency(
+                        id, dependency.getVersionConstraint(), mod.getModId()));
+            }
+        }
+        return List.copyOf(missing.values());
+    }
+
+    public record MissingDependency(String modId, String versionConstraint, String requestingModId) {}
+
     public java.util.Map<String, String> scanFabricModuleVersions(
             Path file
     ) {

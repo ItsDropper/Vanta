@@ -136,4 +136,57 @@
 .preset-configuration-panel .preset-config-content {
     -fx-background-color: transparent;
     -fx-spacing: 14;
+
+
+
+/* Vanta Profiles — uses the same instance-creation surface and spacing system. */
+.vanta-profiles-page {
+    -fx-spacing: 20px;
+}
+.vanta-profiles-panel {
+    -fx-max-width: 860px;
+}
+.vanta-profile-bundle {
+    -fx-padding: 14px 16px;
+    -fx-background-color: -v-card;
+    -fx-background-radius: 12px;
+    -fx-border-color: -v-hair-strong;
+    -fx-border-radius: 12px;
+}
+.vanta-profile-bundle-toggle {
+    -fx-font-weight: 700;
+}
+.vanta-profile-mod-list {
+    -fx-padding: 8px 0 0 18px;
+    -fx-spacing: 6px;
+}
+.vanta-profile-mod-list .check-box {
+    -fx-font-size: 12px;
+}
+
+/* Profile ownership surfaces in the installed-content view. */
+.vanta-profile-banner {
+    -fx-padding: 14px 16px;
+    -fx-background-color: -v-card;
+    -fx-background-radius: 12px;
+    -fx-border-color: -v-hair-strong;
+    -fx-border-radius: 12px;
+}
+.vanta-profile-banner-title {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 14px;
+    -fx-text-fill: -vantatext;
+}
+.vanta-profile-banner-details {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -vantaaccent;
+}
+.vanta-profile-banner-note {
+    -fx-font-size: 11px;
+    -fx-text-fill: -vantasubtle;
+}
+.vanta-profile-mod-tag {
+    -fx-font-size: 10px;
+    -fx-text-fill: -vantaaccent;
 }

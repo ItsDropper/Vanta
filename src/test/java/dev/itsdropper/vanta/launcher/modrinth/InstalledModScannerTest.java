@@ -2,10 +2,12 @@ package dev.itsdropper.vanta.launcher.modrinth;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import dev.itsdropper.vanta.launcher.model.Instance;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,6 +23,47 @@ class InstalledModScannerTest {
             output.closeEntry();
         }
         return file;
+    }
+
+    @Test
+    void detectsMissingMandatoryFabricDependencyBeforeLaunch() throws Exception {
+        Path mods = temporaryDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path nvidium = jar("nvidium.jar", "fabric.mod.json", """
+                {"schemaVersion":1,"id":"nvidium","version":"0.5.9",
+                 "depends":{"minecraft":"1.21.11","fabricloader":">=0.16.0","sodium":"*"}}
+                """);
+        Files.move(nvidium, mods.resolve("nvidium.jar"));
+        Instance instance = new Instance("test", "Test", "1.21.11",
+                "fabric", "0.19.5", temporaryDirectory);
+
+        List<InstalledModScanner.MissingDependency> missing =
+                new InstalledModScanner().findMissingRequiredDependencies(instance);
+
+        assertEquals(1, missing.size());
+        assertEquals("sodium", missing.get(0).modId());
+        assertEquals("nvidium", missing.get(0).requestingModId());
+    }
+
+    @Test
+    void ignoresOptionalDependenciesAndRecognizesInstalledDependencies() throws Exception {
+        Path mods = temporaryDirectory.resolve("mods");
+        Files.createDirectories(mods);
+        Path nvidium = jar("nvidium.jar", "fabric.mod.json", """
+                {"schemaVersion":1,"id":"nvidium","version":"0.5.9",
+                 "depends":{"minecraft":"1.21.11","fabricloader":">=0.16.0","sodium":"*"},
+                 "suggests":{"modmenu":"*"}}
+                """);
+        Files.move(nvidium, mods.resolve("nvidium.jar"));
+        Path sodium = jar("sodium.jar", "fabric.mod.json", """
+                {"schemaVersion":1,"id":"sodium","version":"0.8.12"}
+                """);
+        Files.move(sodium, mods.resolve("sodium.jar"));
+        Instance instance = new Instance("test", "Test", "1.21.11",
+                "fabric", "0.19.5", temporaryDirectory);
+
+        assertTrue(new InstalledModScanner()
+                .findMissingRequiredDependencies(instance).isEmpty());
     }
 
     @Test void readsFabricRequiredOptionalAndBreakMetadata() throws Exception {

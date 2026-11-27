@@ -8,9 +8,9 @@
 /* ---------- window ---------------------------------------------------------- */
 
 .launcher {
-    -fx-background-color: -v-frame;
+    -fx-background-color: -fx-v-frame;
     -fx-background-radius: 12;
-    -fx-border-color: -v-hair-strong;
+    -fx-border-color: -fx-v-hair-strong;
     -fx-border-radius: 12;
     -fx-border-width: 1;
     -fx-font-family: "Geist";
@@ -22,7 +22,7 @@
 
 /* The page sheet: one inset panel that every view lives on. */
 .app-content {
-    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
 }
@@ -50,11 +50,11 @@
 }
 
 .title-bar-button:hover {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
 }
 
 .title-bar-close:hover {
-    -fx-background-color: -vantadanger;
+    -fx-background-color: -fx-vantadanger;
 }
 
 .title-bar-button:focused,
@@ -65,7 +65,7 @@
 .title-bar-button SVGPath,
 .title-bar-close SVGPath {
     -fx-fill: transparent;
-    -fx-stroke: -vantamuted;
+    -fx-stroke: -fx-vantamuted;
     -fx-stroke-width: 1.3px;
     -fx-stroke-line-cap: round;
     -fx-stroke-line-join: round;
@@ -73,14 +73,14 @@
 
 .title-bar-button:hover SVGPath,
 .title-bar-close:hover SVGPath {
-    -fx-stroke: -vantatext;
+    -fx-stroke: -fx-vantatext;
 }
 
 .title-bar-update {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantaaccent;
-    -fx-background-color: -vantaaccent-a30, -vantaaccent-a10;
+    -fx-text-fill: -fx-vantaaccent;
+    -fx-background-color: -fx-vantaaccent-a30, -fx-vantaaccent-a10;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 20, 19;
     -fx-padding: 0 12px;
@@ -90,13 +90,13 @@
 }
 
 .title-bar-update:hover {
-    -fx-background-color: -vantaaccent-a55, -vantaaccent-a18;
+    -fx-background-color: -fx-vantaaccent-a55, -fx-vantaaccent-a18;
 }
 
 /* ---------- account chip ---------------------------------------------------------- */
 
 .account-switcher {
-    -fx-background-color: -v-hair, -v-card;
+    -fx-background-color: -fx-v-hair, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 9, 8;
     -fx-padding: 0 10px 0 6px;
@@ -108,7 +108,7 @@
 }
 
 .account-switcher:hover {
-    -fx-background-color: -v-hair-strong, -v-card-hover;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card-hover;
 }
 
 .account-switcher-head {
@@ -118,12 +118,12 @@
 .account-switcher-name {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .account-switcher-arrow {
     -fx-font-size: 9px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 .account-switcher-busy {
@@ -131,7 +131,7 @@
 }
 
 .account-popup {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 12, 11;
     -fx-padding: 6px;
@@ -141,7 +141,7 @@
 
 .account-popup-header {
     -fx-font-size: 12px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
     -fx-padding: 8px 10px 4px 10px;
 }
 
@@ -155,17 +155,17 @@
 }
 
 .account-popup-account:hover {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
 }
 
 .account-popup-active {
-    -fx-background-color: -vantaaccent-a10;
+    -fx-background-color: -fx-vantaaccent-a10;
 }
 
 .account-popup-username {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .account-popup-head {
@@ -173,7 +173,7 @@
 }
 
 .account-popup-separator {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
     -fx-min-height: 1px;
     -fx-pref-height: 1px;
     -fx-max-height: 1px;
@@ -189,42 +189,42 @@
 }
 
 .account-popup-add:hover {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
 }
 
 .account-popup-plus {
     -fx-font-size: 16px;
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }
 
 .account-popup-add-text {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 /* ---------- sidebar ------------------------------------------------------------------ */
 
 .sidebar {
-    -fx-background-color: -v-frame;
+    -fx-background-color: -fx-v-frame;
     -fx-spacing: 2px;
 }
 
 .sidebar-logo {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 16px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .sidebar-mark {
-    -fx-fill: -vantaaccent;
+    -fx-fill: -fx-vantaaccent;
 }
 
 .sidebar-button {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-background-radius: 9;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
     -fx-padding: 0 12px;
@@ -232,13 +232,13 @@
     -fx-pref-height: 36px;
     -fx-alignment: center-left;
     -fx-cursor: hand;
-    -vantaicon: -vantasubtle;
+    -fx-vantaicon: -fx-vantasubtle;
 }
 
 .sidebar-button:hover {
-    -fx-background-color: -v-hair;
-    -fx-text-fill: -vantatext;
-    -vantaicon: -vantamuted;
+    -fx-background-color: -fx-v-hair;
+    -fx-text-fill: -fx-vantatext;
+    -fx-vantaicon: -fx-vantamuted;
 }
 
 .sidebar-button:armed {
@@ -246,7 +246,7 @@
 }
 
 .sidebar-button:focused {
-    -fx-border-color: -vantaaccent-a55;
+    -fx-border-color: -fx-vantaaccent-a55;
     -fx-border-width: 2px;
     -fx-border-radius: 10px;
     -fx-border-insets: -1px;
@@ -254,16 +254,16 @@
 
 .sidebar-button-active,
 .sidebar-button-active:hover {
-    -fx-background-color: -v-hair-strong, derive(-vantasurfaceraised, 2%);
+    -fx-background-color: -fx-v-hair-strong, derive(-fx-vantasurfaceraised, 2%);
     -fx-background-insets: 0, 1;
     -fx-background-radius: 9, 8;
-    -fx-text-fill: -vantatext;
-    -vantaicon: -vantaaccent;
+    -fx-text-fill: -fx-vantatext;
+    -fx-vantaicon: -fx-vantaaccent;
 }
 
 .sidebar-button .vanta-icon,
 .sidebar-button:hover .vanta-icon {
-    -fx-stroke: -vantaicon;
+    -fx-stroke: -fx-vantaicon;
 }
 
 .sidebar-compact .sidebar-button {
@@ -274,7 +274,7 @@
 .sidebar-build {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
     -fx-padding: 8px 12px 0 12px;
 }
 
@@ -285,11 +285,11 @@
 }
 
 .command-palette-scrim {
-    -fx-background-color: -v-scrim;
+    -fx-background-color: -fx-v-scrim;
 }
 
 .command-palette-panel {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.65), 40, 0.1, 0, 16);
@@ -298,13 +298,13 @@
 .command-palette-eyebrow {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 .command-palette-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 15px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .command-palette-search {
@@ -314,12 +314,12 @@
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-padding: 0 16px;
-    -fx-border-color: transparent transparent -v-hair transparent;
+    -fx-border-color: transparent transparent -fx-v-hair transparent;
 }
 
 .command-palette-search:focused {
     -fx-background-color: transparent;
-    -fx-border-color: transparent transparent -vantaaccent-a55 transparent;
+    -fx-border-color: transparent transparent -fx-vantaaccent-a55 transparent;
 }
 
 .command-palette-scroll,
@@ -340,30 +340,30 @@
 
 .command-result:hover,
 .command-result-selected {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
 }
 
 .command-result-selected {
-    -fx-background-color: -vantaaccent-a10;
+    -fx-background-color: -fx-vantaaccent-a10;
 }
 
 .command-result-title {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13.5px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .command-result-description {
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .command-result-shortcut,
 .command-palette-key {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11px;
-    -fx-text-fill: -vantasubtle;
-    -fx-background-color: -v-hair, -v-well;
+    -fx-text-fill: -fx-vantasubtle;
+    -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 5, 4;
     -fx-padding: 2px 6px;
@@ -372,21 +372,21 @@
 .command-palette-empty,
 .command-palette-hint {
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-padding: 18px;
 }
 
 .command-palette-footer {
     -fx-padding: 10px 16px;
     -fx-spacing: 14px;
-    -fx-border-color: -v-hair transparent transparent transparent;
+    -fx-border-color: -fx-v-hair transparent transparent transparent;
     -fx-border-width: 1 0 0 0;
 }
 
 /* ---------- sign-in window ------------------------------------------------------------------ */
 
 .login-window {
-    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
 }
@@ -399,7 +399,7 @@
 .login-title-bar-text {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .login-title-bar-close {
@@ -411,13 +411,13 @@
 }
 
 .login-title-bar-close:hover {
-    -fx-background-color: -vantadanger;
+    -fx-background-color: -fx-vantadanger;
 }
 
 .login-logo,
 .loading-mark {
-    -fx-fill: -vantaaccent;
-    -fx-text-fill: -vantatext;
+    -fx-fill: -fx-vantaaccent;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-family: "Poppins Bold";
     -fx-font-size: 18px;
 }
@@ -425,31 +425,31 @@
 .login-title {
     -fx-font-family: "Poppins SemiBold";
     -fx-font-size: 22px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .login-subtitle,
 .login-instruction {
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .login-step {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }
 
 .login-status {
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .verification-code {
     -fx-font-family: "JetBrains Mono Medium";
     -fx-font-size: 30px;
-    -fx-text-fill: -vantaaccent;
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-text-fill: -fx-vantaaccent;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 12, 11;
     -fx-padding: 14px 22px;
@@ -458,9 +458,9 @@
 /* ---------- loading screen --------------------------------------------------------------------- */
 
 .vanta-loading {
-    -fx-background-color: -v-frame;
+    -fx-background-color: -fx-v-frame;
     -fx-background-radius: 12;
-    -fx-border-color: -v-hair-strong;
+    -fx-border-color: -fx-v-hair-strong;
     -fx-border-radius: 12;
 }
 
@@ -472,27 +472,27 @@
 .loading-logo {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 26px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .loading-subtitle {
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 .loading-status {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .loading-progress-track {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
     -fx-background-radius: 3;
 }
 
 .loading-progress-fill {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
     -fx-background-radius: 3;
 }
 
@@ -500,49 +500,49 @@
 
 .notification-accent,
 .notification-accent-progress {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
     -fx-background-radius: 3;
 }
 
 .notification-accent-success {
-    -fx-background-color: -vantasuccess;
+    -fx-background-color: -fx-vantasuccess;
 }
 
 .notification-accent-error {
-    -fx-background-color: -vantadanger;
+    -fx-background-color: -fx-vantadanger;
 }
 
 .notification-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .notification-message {
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .notification-message-error {
-    -fx-text-fill: derive(-vantadanger, 25%);
+    -fx-text-fill: derive(-fx-vantadanger, 25%);
 }
 
 .notification-close {
     -fx-background-color: transparent;
     -fx-background-radius: 6;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
     -fx-min-width: 24px;
     -fx-min-height: 24px;
     -fx-padding: 0;
 }
 
 .notification-close:hover {
-    -fx-background-color: -v-hair-strong;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-v-hair-strong;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .notification-progress > .bar {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
 }
 
 /* ---------- backdrop ------------------------------------------------------------------------------- */
@@ -554,7 +554,7 @@
 .button.sidebar-group-toggle {
     -fx-alignment: center-left;
     -fx-background-color: transparent;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
     -fx-padding: 6 12;
@@ -562,18 +562,18 @@
 }
 
 .button.sidebar-group-toggle:hover {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .button.sidebar-group-toggle:focused {
-    -fx-border-color: -vantaaccent-a55;
+    -fx-border-color: -fx-vantaaccent-a55;
     -fx-border-width: 2px;
     -fx-border-radius: 8px;
     -fx-border-insets: -1px;
 }
 
 .sidebar-chevron {
-    -fx-stroke: -vantasubtle;
+    -fx-stroke: -fx-vantasubtle;
     -fx-stroke-width: 1.4px;
     -fx-stroke-line-cap: round;
     -fx-stroke-line-join: round;
@@ -586,16 +586,16 @@
 /* ---------- logo ------------------------------------------------------------ */
 
 .vanta-logo-arm-primary {
-    -fx-fill: -vantaaccent;
+    -fx-fill: -fx-vantaaccent;
 }
 
 .vanta-logo-arm-secondary {
-    -fx-fill: -vantatext;
+    -fx-fill: -fx-vantatext;
 }
 
 .vanta-logo-letter {
     -fx-font-family: "Poppins Bold";
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-padding: 0;
 }
 

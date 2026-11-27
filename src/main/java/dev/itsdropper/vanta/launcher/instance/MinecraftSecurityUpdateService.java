@@ -53,6 +53,15 @@ public final class MinecraftSecurityUpdateService {
         JsonNode official = MinecraftVersionResolver.downloadMetadata(instance.getMinecraftVersion());
         validateOfficialMetadata(official, instance.getMinecraftVersion());
 
+        // Mojang has not yet backported the FreeType fix to every supported
+        // Minecraft branch. Do not substitute a different LWJGL native build:
+        // install a pinned, SHA-256-verified client-side mitigation instead.
+        if (requiresMitigation(official)) {
+            MinecraftSecurityMitigationService.ensureAgent();
+            System.out.println("[Vanta Security] Mojang still ships an unpatched FreeType build; "
+                    + "verified font/image mitigation will be attached to the Minecraft process.");
+        }
+
         byte[] previousVersion = Files.readAllBytes(versionFile);
         Path baseFile = minecraftDirectory.resolve(BASE_METADATA_FILE);
         byte[] previousBase = Files.isRegularFile(baseFile) ? Files.readAllBytes(baseFile) : null;
@@ -98,7 +107,7 @@ public final class MinecraftSecurityUpdateService {
         }
     }
 
-    static boolean requiresModernFontEngine(String version) {
+    public static boolean requiresModernFontEngine(String version) {
         if (version == null || version.isBlank()) {
             throw new IllegalArgumentException("Minecraft version is required for security validation.");
         }
@@ -130,7 +139,7 @@ public final class MinecraftSecurityUpdateService {
         }
     }
 
-    private static void validateOfficialMetadata(JsonNode metadata, String expectedVersion) {
+    static void validateOfficialMetadata(JsonNode metadata, String expectedVersion) {
         if (metadata == null || !metadata.isObject()
                 || !expectedVersion.equals(metadata.path("id").asText())
                 || !metadata.path("libraries").isArray()) {
@@ -142,17 +151,45 @@ public final class MinecraftSecurityUpdateService {
             if (isFreetypeLibrary(library)) {
                 hasFreetype = true;
                 validateDownloadIntegrityMetadata(library);
-                String[] coordinate = library.path("name").asText("").split(":");
-                if (coordinate.length < 3 || !isPatchedFreeTypeVersion(coordinate[2])) {
-                    throw new IllegalStateException("Mojang's current metadata for " + expectedVersion
-                            + " contains an unpatched FreeType artifact (" + library.path("name").asText()
-                            + "); refusing to launch with an unverified native font engine.");
-                }
+                // Older Mojang branches still publish a valid, checksum-pinned
+                // but unpatched FreeType artifact. Those versions are allowed
+                // only when the verified runtime mitigation is attached below.
             }
         }
         if (!hasFreetype) {
             throw new IllegalStateException("Mojang metadata for " + expectedVersion
                     + " contains no official FreeType dependency; refusing to launch.");
+        }
+    }
+
+    static boolean requiresMitigation(JsonNode metadata) {
+        if (metadata == null || !metadata.path("libraries").isArray()) {
+            throw new IllegalArgumentException("Official Minecraft libraries are required.");
+        }
+        for (JsonNode library : metadata.path("libraries")) {
+            if (isFreetypeLibrary(library)) {
+                String[] coordinate = library.path("name").asText("").split(":");
+                return coordinate.length < 3 || !isPatchedFreeTypeVersion(coordinate[2]);
+            }
+        }
+        throw new IllegalStateException("Official metadata contains no FreeType library.");
+    }
+
+    /**
+     * Checks the merged instance metadata after the official refresh so the
+     * launch builder can attach the mitigation to the exact process that needs it.
+     */
+    public static boolean isMitigationRequired(Instance instance) {
+        if (instance == null || instance.getDirectory() == null
+                || !requiresModernFontEngine(instance.getMinecraftVersion())) {
+            return false;
+        }
+        Path versionFile = instance.getDirectory().resolve("minecraft").resolve("version.json");
+        try {
+            JsonNode metadata = JSON.readTree(versionFile.toFile());
+            return requiresMitigation(metadata);
+        } catch (IOException failure) {
+            throw new IllegalStateException("Could not inspect Minecraft security metadata.", failure);
         }
     }
 

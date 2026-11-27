@@ -15,11 +15,11 @@
    ========================================================================== */
 
 .label {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .text-flow > .text {
-    -fx-fill: -vantatext;
+    -fx-fill: -fx-vantatext;
 }
 
 /* ---------- buttons -------------------------------------------------------- */
@@ -27,8 +27,8 @@
 .button {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
-    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 60%);
+    -fx-text-fill: -fx-vantatext;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 60%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 8, 7, 7;
     -fx-padding: 0 14px;
@@ -37,23 +37,23 @@
     -fx-alignment: center;
     -fx-cursor: hand;
     -fx-graphic-text-gap: 8px;
-    -vantaicon: -vantamuted;
+    -fx-vantaicon: -fx-vantamuted;
 }
 
 .button:hover {
-    -fx-background-color: -v-hair-strong, -v-card-hover, linear-gradient(to bottom, -v-gloss, transparent 60%);
-    -vantaicon: -vantatext;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card-hover, linear-gradient(to bottom, -fx-v-gloss, transparent 60%);
+    -fx-vantaicon: -fx-vantatext;
 }
 
 .button:armed {
-    -fx-background-color: -v-hair-strong, derive(-v-card-hover, -6%);
+    -fx-background-color: -fx-v-hair-strong, derive(-fx-v-card-hover, -6%);
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
     -fx-translate-y: 0.5px;
 }
 
 .button:focused {
-    -fx-border-color: -vantaaccent-a55;
+    -fx-border-color: -fx-vantaaccent-a55;
     -fx-border-width: 2px;
     -fx-border-radius: 9px;
     -fx-border-insets: -2px;
@@ -68,26 +68,26 @@
 .vanta-button-primary,
 .instance-create-button,
 .instance-play-button {
-    -fx-background-color: derive(-vantaaccent, -22%), -vantaaccent, linear-gradient(to bottom, rgba(255,255,255,0.20), transparent 55%);
+    -fx-background-color: derive(-fx-vantaaccent, -22%), -fx-vantaaccent, linear-gradient(to bottom, rgba(255,255,255,0.20), transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 8, 7, 7;
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-text-fill: -fx-vantaaccentforeground;
     -fx-font-family: "Geist SemiBold";
-    -vantaicon: -vantaaccentforeground;
+    -fx-vantaicon: -fx-vantaaccentforeground;
 }
 
 .primary-button:hover,
 .vanta-button-primary:hover,
 .instance-create-button:hover,
 .instance-play-button:hover {
-    -fx-background-color: derive(-vantaaccent, -12%), -vantaaccenthover, linear-gradient(to bottom, rgba(255,255,255,0.22), transparent 55%);
-    -fx-text-fill: -vantaaccentforeground;
-    -vantaicon: -vantaaccentforeground;
+    -fx-background-color: derive(-fx-vantaaccent, -12%), -fx-vantaaccenthover, linear-gradient(to bottom, rgba(255,255,255,0.22), transparent 55%);
+    -fx-text-fill: -fx-vantaaccentforeground;
+    -fx-vantaicon: -fx-vantaaccentforeground;
 }
 
 .primary-button:armed,
 .vanta-button-primary:armed {
-    -fx-background-color: derive(-vantaaccent, -22%), derive(-vantaaccent, -8%);
+    -fx-background-color: derive(-fx-vantaaccent, -22%), derive(-fx-vantaaccent, -8%);
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
 }
@@ -96,50 +96,50 @@
 .vanta-button-primary .vanta-icon,
 .primary-button:hover .vanta-icon,
 .vanta-button-primary:hover .vanta-icon {
-    -fx-stroke: -vantaaccentforeground;
+    -fx-stroke: -fx-vantaaccentforeground;
 }
 
 .primary-button .vanta-icon-solid,
 .vanta-button-primary .vanta-icon-solid {
-    -fx-fill: -vantaaccentforeground;
+    -fx-fill: -fx-vantaaccentforeground;
 }
 
 .secondary-button,
 .vanta-button-secondary {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .vanta-button-quiet,
 .back-button {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-family: "Geist Medium";
     -fx-padding: 0 10px;
 }
 
 .vanta-button-quiet:hover,
 .back-button:hover {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
     -fx-background-insets: 0;
     -fx-background-radius: 8;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .danger-button,
 .vanta-button-danger {
-    -fx-text-fill: -vantadanger;
-    -fx-background-color: derive(-vantadanger, -45%), -v-danger-soft;
+    -fx-text-fill: -fx-vantadanger;
+    -fx-background-color: derive(-fx-vantadanger, -45%), -fx-v-danger-soft;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
-    -vantaicon: -vantadanger;
+    -fx-vantaicon: -fx-vantadanger;
 }
 
 .danger-button:hover,
 .vanta-button-danger:hover {
-    -fx-background-color: -vantadanger, derive(-vantadanger, -62%);
-    -fx-text-fill: -vantatext;
-    -vantaicon: -vantatext;
+    -fx-background-color: -fx-vantadanger, derive(-fx-vantadanger, -62%);
+    -fx-text-fill: -fx-vantatext;
+    -fx-vantaicon: -fx-vantatext;
 }
 
 /* shape modifiers */
@@ -168,6 +168,90 @@
     -fx-pref-width: 28px;
 }
 
+/* ---------- menu buttons ---------------------------------------------------- */
+/*
+ * JavaFX MenuButton is a ButtonBase with its own .menu-button selector; it
+ * does not match .button. Keep it in the same visual system as toolbar
+ * secondary buttons so icon-only dropdowns do not fall back to Modena chrome.
+ */
+.menu-button {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-vantatext;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 60%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 8, 7, 7;
+    -fx-padding: 0 10px;
+    -fx-min-height: 34px;
+    -fx-pref-height: 34px;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+    -fx-graphic-text-gap: 8px;
+    -fx-vantaicon: -fx-vantamuted;
+}
+
+.menu-button:hover {
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card-hover, linear-gradient(to bottom, -fx-v-gloss, transparent 60%);
+    -fx-text-fill: -fx-vantatext;
+    -fx-vantaicon: -fx-vantatext;
+}
+
+.menu-button:showing,
+.menu-button:armed {
+    -fx-background-color: -fx-v-hair-strong, derive(-fx-v-card-hover, -6%);
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 8, 7;
+}
+
+.menu-button:focused {
+    -fx-border-color: -fx-vantaaccent-a55;
+    -fx-border-width: 2px;
+    -fx-border-radius: 9px;
+    -fx-border-insets: -2px;
+}
+
+.menu-button:disabled {
+    -fx-opacity: 0.42;
+    -fx-cursor: default;
+}
+
+.menu-button > .label {
+    -fx-text-fill: -fx-vantatext;
+}
+
+.menu-button > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 0 2px 0 4px;
+}
+
+.menu-button > .arrow-button > .arrow {
+    -fx-background-color: -fx-vantamuted;
+    -fx-shape: "M0 0 L4 4 L8 0 Z";
+    -fx-scale-shape: false;
+    -fx-padding: 2.5px 4px;
+}
+
+.menu-button:hover > .arrow-button > .arrow,
+.menu-button:showing > .arrow-button > .arrow {
+    -fx-background-color: -fx-vantatext;
+}
+
+/* The Mods view uses a compact, icon-only overflow action. */
+.menu-button.instances-more-button {
+    -fx-min-width: 38px;
+    -fx-pref-width: 38px;
+    -fx-padding: 0 7px;
+    -fx-content-display: graphic-only;
+}
+
+.menu-button.instances-more-button > .label {
+    -fx-padding: 0;
+}
+
+.menu-button.instances-more-button > .arrow-button {
+    -fx-padding: 0;
+}
+
 /* ---------- text input ----------------------------------------------------- */
 
 .text-field,
@@ -176,11 +260,11 @@
 .spinner .text-field {
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantasubtle;
-    -fx-highlight-fill: -vantaaccent-a30;
-    -fx-highlight-text-fill: -vantatext;
-    -fx-background-color: -v-hair, -v-well;
+    -fx-text-fill: -fx-vantatext;
+    -fx-prompt-text-fill: -fx-vantasubtle;
+    -fx-highlight-fill: -fx-vantaaccent-a30;
+    -fx-highlight-text-fill: -fx-vantatext;
+    -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
     -fx-padding: 0 12px;
@@ -191,13 +275,13 @@
 .text-field:hover,
 .password-field:hover,
 .text-area:hover {
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
 }
 
 .text-field:focused,
 .password-field:focused,
 .text-area:focused {
-    -fx-background-color: -vantaaccent-a55, -v-well;
+    -fx-background-color: -fx-vantaaccent-a55, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
 }
@@ -228,7 +312,7 @@
 .combo-box-base,
 .choice-box {
     -fx-font-family: "Geist";
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
     -fx-min-height: 34px;
@@ -238,12 +322,12 @@
 
 .combo-box-base:hover,
 .choice-box:hover {
-    -fx-background-color: -v-hair-strong, -v-card-hover;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card-hover;
 }
 
 .combo-box-base:focused,
 .choice-box:focused {
-    -fx-background-color: -vantaaccent-a55, -v-card;
+    -fx-background-color: -fx-vantaaccent-a55, -fx-v-card;
 }
 
 .combo-box-base:disabled {
@@ -253,7 +337,7 @@
 .combo-box-base > .list-cell,
 .combo-box-base > .text-field {
     -fx-background-color: transparent;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-padding: 0 0 0 12px;
     -fx-font-size: 13px;
 }
@@ -264,14 +348,14 @@
 }
 
 .combo-box-base > .arrow-button > .arrow {
-    -fx-background-color: -vantamuted;
+    -fx-background-color: -fx-vantamuted;
     -fx-shape: "M0 0 L4 4 L8 0 Z";
     -fx-scale-shape: false;
     -fx-padding: 2.5px 4px;
 }
 
 .combo-box-popup > .list-view {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 10, 9;
     -fx-padding: 5px;
@@ -281,20 +365,20 @@
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
     -fx-background-color: transparent;
     -fx-background-radius: 6;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px;
     -fx-padding: 7px 10px;
     -fx-cursor: hand;
 }
 
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
-    -fx-background-color: -v-hair-strong;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-v-hair-strong;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected {
-    -fx-background-color: -vantaaccent-a18;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-vantaaccent-a18;
+    -fx-text-fill: -fx-vantatext;
 }
 
 /* ---------- check box / radio ---------------------------------------------- */
@@ -302,25 +386,25 @@
 .check-box,
 .radio-button {
     -fx-font-family: "Geist";
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-label-padding: 0 0 0 10px;
     -fx-cursor: hand;
 }
 
 .check-box > .box {
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 5, 4;
     -fx-padding: 3px;
 }
 
 .check-box:hover > .box {
-    -fx-background-color: -vantaaccent-a55, -v-well;
+    -fx-background-color: -fx-vantaaccent-a55, -fx-v-well;
 }
 
 .check-box:selected > .box,
 .check-box:indeterminate > .box {
-    -fx-background-color: -vantaaccent, -vantaaccent;
+    -fx-background-color: -fx-vantaaccent, -fx-vantaaccent;
 }
 
 .check-box > .box > .mark {
@@ -331,25 +415,25 @@
 }
 
 .check-box:selected > .box > .mark {
-    -fx-background-color: -vantaaccentforeground;
+    -fx-background-color: -fx-vantaaccentforeground;
 }
 
 .check-box:focused > .box {
-    -fx-border-color: -vantaaccent-a55;
+    -fx-border-color: -fx-vantaaccent-a55;
     -fx-border-width: 2px;
     -fx-border-radius: 6px;
     -fx-border-insets: -2px;
 }
 
 .radio-button > .radio {
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 20, 20;
     -fx-padding: 4px;
 }
 
 .radio-button:selected > .radio {
-    -fx-background-color: -vantaaccent, -v-well;
+    -fx-background-color: -fx-vantaaccent, -fx-v-well;
 }
 
 .radio-button > .radio > .dot {
@@ -359,7 +443,7 @@
 }
 
 .radio-button:selected > .radio > .dot {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
 }
 
 /* ---------- toggle button (segmented control items) ------------------------ */
@@ -367,7 +451,7 @@
 .toggle-button {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-background-color: transparent;
     -fx-background-radius: 7;
     -fx-padding: 0 12px;
@@ -377,13 +461,13 @@
 }
 
 .toggle-button:hover {
-    -fx-text-fill: -vantatext;
-    -fx-background-color: -v-hair;
+    -fx-text-fill: -fx-vantatext;
+    -fx-background-color: -fx-v-hair;
 }
 
 .toggle-button:selected {
-    -fx-text-fill: -vantatext;
-    -fx-background-color: -v-hair-strong, -v-card-hover;
+    -fx-text-fill: -fx-vantatext;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card-hover;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 7, 6;
 }
@@ -391,13 +475,13 @@
 /* ---------- slider / progress ---------------------------------------------- */
 
 .slider > .track {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
     -fx-background-radius: 3;
     -fx-pref-height: 4px;
 }
 
 .slider > .thumb {
-    -fx-background-color: -vantaaccent, -vantatext;
+    -fx-background-color: -fx-vantaaccent, -fx-vantatext;
     -fx-background-insets: 0, 4;
     -fx-background-radius: 20;
     -fx-pref-width: 16px;
@@ -406,13 +490,13 @@
 }
 
 .progress-bar > .track {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
     -fx-background-radius: 4;
     -fx-background-insets: 0;
 }
 
 .progress-bar > .bar {
-    -fx-background-color: linear-gradient(to right, -vantaaccent, -vantaaccenthover);
+    -fx-background-color: linear-gradient(to right, -fx-vantaaccent, -fx-vantaaccenthover);
     -fx-background-radius: 4;
     -fx-background-insets: 0;
     -fx-padding: 3px;
@@ -426,11 +510,11 @@
 
 .progress-indicator > .determinate-indicator > .indicator,
 .progress-indicator > .percent {
-    -fx-fill: -vantatext;
+    -fx-fill: -fx-vantatext;
 }
 
 .progress-indicator:indeterminate .segment {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
 }
 
 /* ---------- scrolling ------------------------------------------------------- */
@@ -487,7 +571,7 @@
 }
 
 .scroll-bar > .thumb:pressed {
-    -fx-background-color: -vantaaccent-a55;
+    -fx-background-color: -fx-vantaaccent-a55;
 }
 
 /* ---------- tabs ----------------------------------------------------------- */
@@ -516,24 +600,24 @@
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab:hover > .tab-container > .tab-label {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab:selected {
-    -fx-border-color: transparent transparent -vantaaccent transparent;
+    -fx-border-color: transparent transparent -fx-vantaaccent transparent;
     -fx-border-width: 0 0 2px 0;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab:selected > .tab-container > .tab-label {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-close-button {
-    -fx-background-color: -vantasubtle;
+    -fx-background-color: -fx-vantasubtle;
 }
 
 .tab-pane > .tab-content-area {
@@ -554,20 +638,20 @@
 .list-cell,
 .tree-cell {
     -fx-background-color: transparent;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px;
     -fx-padding: 8px 12px;
 }
 
 .list-cell:filled:hover,
 .tree-cell:filled:hover {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
 }
 
 .list-cell:filled:selected,
 .tree-cell:filled:selected {
-    -fx-background-color: -vantaaccent-a18;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-vantaaccent-a18;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .table-view .column-header-background {
@@ -577,33 +661,33 @@
 .table-view .column-header,
 .table-view .filler {
     -fx-background-color: transparent;
-    -fx-border-color: transparent transparent -v-hair transparent;
+    -fx-border-color: transparent transparent -fx-v-hair transparent;
     -fx-size: 36px;
 }
 
 .table-view .column-header .label {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-alignment: center-left;
 }
 
 .table-row-cell {
     -fx-background-color: transparent;
-    -fx-border-color: transparent transparent -v-hair transparent;
+    -fx-border-color: transparent transparent -fx-v-hair transparent;
     -fx-cell-size: 40px;
 }
 
 .table-row-cell:hover {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
 }
 
 .table-row-cell:selected {
-    -fx-background-color: -vantaaccent-a18;
+    -fx-background-color: -fx-vantaaccent-a18;
 }
 
 .table-cell {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px;
     -fx-padding: 0 12px;
     -fx-alignment: center-left;
@@ -613,7 +697,7 @@
 
 .context-menu,
 .menu-bar .menu .context-menu {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 10, 9;
     -fx-padding: 5px;
@@ -629,23 +713,23 @@
 .menu-item > .label {
     -fx-font-family: "Geist";
     -fx-font-size: 13px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .menu-item:focused {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
 }
 
 .menu-item:focused > .label {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .menu-item.danger-item > .label {
-    -fx-text-fill: -vantadanger;
+    -fx-text-fill: -fx-vantadanger;
 }
 
 .separator > .line {
-    -fx-border-color: -v-hair;
+    -fx-border-color: -fx-v-hair;
     -fx-border-width: 1 0 0 0;
 }
 
@@ -654,10 +738,10 @@
 }
 
 .tooltip {
-    -fx-background-color: -v-hair-strong, derive(-vantasurfaceraised, 4%);
+    -fx-background-color: -fx-v-hair-strong, derive(-fx-vantasurfaceraised, 4%);
     -fx-background-insets: 0, 1;
     -fx-background-radius: 7, 6;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-family: "Geist";
     -fx-font-size: 12px;
     -fx-padding: 6px 9px;
@@ -668,7 +752,7 @@
 /* ---------- dialogs ---------------------------------------------------------- */
 
 .dialog-pane {
-    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
     -fx-font-family: "Geist";
@@ -683,11 +767,11 @@
 .dialog-pane > .header-panel > .label {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 17px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .dialog-pane > .content.label {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-padding: 8px 20px 16px 20px;
 }
 
@@ -701,15 +785,15 @@
 }
 
 .dialog-pane .button-bar .button:default {
-    -fx-background-color: derive(-vantaaccent, -22%), -vantaaccent;
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-background-color: derive(-fx-vantaaccent, -22%), -fx-vantaaccent;
+    -fx-text-fill: -fx-vantaaccentforeground;
 }
 
 /* ---------- misc controls ---------------------------------------------------- */
 
 .titled-pane > .title {
     -fx-background-color: transparent;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-family: "Geist SemiBold";
 }
 
@@ -724,31 +808,31 @@
 }
 
 .split-pane > .split-pane-divider {
-    -fx-background-color: -v-hair;
+    -fx-background-color: -fx-v-hair;
     -fx-padding: 0 0.5px;
 }
 
 .color-picker {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
     -fx-min-height: 34px;
 }
 
 .hyperlink {
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
     -fx-font-family: "Geist Medium";
     -fx-underline: false;
     -fx-border-color: transparent;
 }
 
 .hyperlink:hover {
-    -fx-text-fill: -vantaaccenthover;
+    -fx-text-fill: -fx-vantaaccenthover;
     -fx-underline: true;
 }
 
 .hyperlink:visited {
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }
 
 /* ---- primary action glow, pressed feedback ------------------------------- */

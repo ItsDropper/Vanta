@@ -35,6 +35,9 @@ public class LaunchData {
 
     public Path javaAgent;
 
+    /** Verified client-side mitigation for unpatched Mojang FreeType builds. */
+    public Path securityAgent;
+
     public Path minecraftMappings;
 
     public String assetIndex;

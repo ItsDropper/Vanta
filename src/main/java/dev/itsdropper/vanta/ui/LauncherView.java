@@ -7,6 +7,12 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import dev.itsdropper.vanta.launcher.instance.InstanceInstaller;
+import dev.itsdropper.vanta.launcher.instance.InstanceManager;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleManifest;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleResolver;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleState;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleStateStore;
+import dev.itsdropper.vanta.launcher.bundle.VantaBundleManifestSnapshotStore;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstallationProgress;
 import dev.itsdropper.vanta.ui.components.InstanceCreationProgressDialog;
 import dev.itsdropper.vanta.launcher.instance.EnvironmentGuardianService;
@@ -202,6 +208,9 @@ public class LauncherView {
                                     ? "Vanta could not start the instance."
                                     : failure.description()
                     );
+                    if (failure != null) {
+                        UiExecutor.shared().dispatchToUi(() -> showRepairView(failure));
+                    }
                 } else if (state == LaunchService.LaunchState.IDLE
                         && (previousLaunchState == LaunchService.LaunchState.CLOSING
                         || previousLaunchState == LaunchService.LaunchState.RUNNING
@@ -316,7 +325,8 @@ public class LauncherView {
                         this::showCustomCreateInstanceView,
                         this::showImportInstanceView,
                         this::showPresetInstanceView,
-                        this::showModrinthModpackView
+                        this::showModrinthModpackView,
+                        this::showVantaProfilesView
                 );
 
         globalModsView =
@@ -717,6 +727,15 @@ public class LauncherView {
                                     viewHost.showForCapture(new CrashCaseReviewView(() -> {}));
                                 }),
                         new SidebarScreenshotCapture.CaptureTarget(
+                                "vanta-profiles", "Vanta Profiles",
+                                () -> {
+                                    sidebar.setSelectedPage(Sidebar.Page.INSTANCES);
+                                    viewHost.showForCapture(new VantaProfilesView(
+                                            () -> {},
+                                            (manifest, name, version, bundles, mods) -> {}
+                                    ));
+                                }),
+                        new SidebarScreenshotCapture.CaptureTarget(
                                 "instance-creation-progress", "Instance Creation Progress",
                                 () -> {
                                     if (progressDialogCapture[0] != null) {
@@ -867,6 +886,124 @@ public class LauncherView {
         viewHost.show(
                 createInstanceView
         );
+    }
+
+    private void showVantaProfilesView() {
+        viewHost.show(new VantaProfilesView(
+                this::showCreateInstanceView,
+                this::createVantaProfileInstance
+        ));
+    }
+
+    private void createVantaProfileInstance(
+            VantaBundleManifest manifest,
+            String name,
+            String minecraftVersion,
+            Set<String> selectedBundles,
+            Set<String> selectedOptionalMods
+    ) {
+        final VantaBundleResolver.Resolution resolution;
+        try {
+            resolution = new VantaBundleResolver().resolve(
+                    manifest, minecraftVersion, manifest.loader(),
+                    selectedBundles, selectedOptionalMods);
+        } catch (IOException invalidSelection) {
+            notifications.error("Profile selection is invalid", invalidSelection.getMessage());
+            return;
+        }
+
+        notifications.showProgress("Installing " + manifest.profileId(),
+                "Preparing Minecraft " + minecraftVersion + "...");
+        UiExecutor.shared().execute(() -> {
+            Instance instance = null;
+            try {
+                notifications.updateProgress("Installing Minecraft " + minecraftVersion + "...");
+                instance = switch (manifest.loader()) {
+                    case "vanta-loader" -> InstanceInstaller.installVantaLoader(name, minecraftVersion);
+                    case "fabric" -> InstanceInstaller.installFabric(name, minecraftVersion);
+                    case "quilt" -> InstanceInstaller.installQuilt(name, minecraftVersion);
+                    case "forge" -> InstanceInstaller.installForge(name, minecraftVersion);
+                    case "neoforge" -> InstanceInstaller.installNeoForge(name, minecraftVersion);
+                    case "ornithe" -> InstanceInstaller.installOrnithe(name, minecraftVersion);
+                    case "legacy-fabric" -> InstanceInstaller.installLegacyFabric(name, minecraftVersion);
+                    case "babric" -> InstanceInstaller.installBabric(name, minecraftVersion);
+                    case "nilloader" -> InstanceInstaller.installNilLoader(name, minecraftVersion);
+                    case "liteloader" -> InstanceInstaller.installLiteLoader(name, minecraftVersion);
+                    case "modloader" -> InstanceInstaller.installModLoader(name, minecraftVersion);
+                    case "rift" -> InstanceInstaller.installRift(name, minecraftVersion);
+                    case "stein" -> InstanceInstaller.installSteinLoader(name, minecraftVersion);
+                    default -> throw new IOException("This Vanta profile uses an unsupported loader: "
+                            + manifest.loader());
+                };
+
+                ModrinthService modrinth = new ModrinthService();
+                List<VantaBundleResolver.ResolvedMod> releaseMods = resolution.mods().stream()
+                        .filter(mod -> mod.githubRelease() != null).toList();
+                List<VantaBundleResolver.ResolvedMod> modrinthMods = resolution.mods().stream()
+                        .filter(mod -> mod.githubRelease() == null).toList();
+                List<ModrinthProject> roots = new ArrayList<>();
+                for (VantaBundleResolver.ResolvedMod mod : modrinthMods) {
+                    notifications.updateProgress("Resolving " + mod.projectId() + "...");
+                    ModrinthProject project = modrinth.getProjectBySlug(mod.projectId());
+                    if (project == null) {
+                        throw new IOException("Modrinth project was not found: " + mod.projectId());
+                    }
+                    roots.add(project);
+                }
+
+                java.util.Map<String, String> pinnedVersions = new java.util.LinkedHashMap<>();
+                for (VantaBundleResolver.ResolvedMod mod : modrinthMods) {
+                    if (mod.versionId() != null) pinnedVersions.put(mod.projectId(), mod.versionId());
+                }
+                List<ModrinthService.ResolvedMod> graph = roots.isEmpty()
+                        ? List.of()
+                        : modrinth.resolveModGraph(instance, roots, pinnedVersions);
+
+                if (!graph.isEmpty()) {
+                    notifications.updateProgress("Installing profile mods and dependencies...");
+                    modrinth.installResolvedGraph(instance, graph);
+                }
+                List<String> managedProjectIds = new ArrayList<>(graph.stream()
+                        .map(ModrinthService.ResolvedMod::projectId).distinct().toList());
+                for (VantaBundleResolver.ResolvedMod mod : releaseMods) {
+                    notifications.updateProgress("Installing latest " + mod.projectId() + "...");
+                    GitHubReleaseModInstaller.InstalledArtifact installed =
+                            new GitHubReleaseModInstaller().installLatest(instance, mod.githubRelease(), minecraftVersion);
+                    managedProjectIds.add(mod.projectId());
+                    notifications.updateProgress("Installed " + installed.fileName());
+                }
+                List<String> managedProjects = managedProjectIds.stream().distinct().toList();
+                new VantaBundleManifestSnapshotStore().save(instance, manifest);
+                new VantaBundleStateStore().save(instance, new VantaBundleState(
+                        VantaBundleState.SUPPORTED_SCHEMA_VERSION,
+                        resolution.profileId(),
+                        resolution.profileVersion(),
+                        resolution.selectedBundleIds(),
+                        selectedOptionalMods.stream().sorted().toList(),
+                        managedProjects,
+                        null
+                ));
+
+                UiExecutor.shared().dispatchToUi(() -> {
+                    notifications.success("Vanta profile installed",
+                            manifest.profileId() + " is ready with " + managedProjects.size()
+                                    + " managed mods and dependencies.");
+                    instanceCreated();
+                });
+            } catch (Throwable failure) {
+                if (instance != null) {
+                    try {
+                        InstanceManager.deleteInstance(instance);
+                    } catch (IOException cleanupFailure) {
+                        failure.addSuppressed(cleanupFailure);
+                    }
+                }
+                String message = failure.getMessage() == null
+                        ? failure.getClass().getSimpleName() : failure.getMessage();
+                UiExecutor.shared().dispatchToUi(() ->
+                        notifications.error("Vanta profile installation failed", message));
+            }
+        });
     }
 
     private void showImportInstanceView() {
@@ -1726,6 +1863,11 @@ public class LauncherView {
     private void showRepairView(
             LaunchFailure failure
     ) {
+        if (LaunchFailure.SECURITY_BLOCKED_TITLE.equals(failure.title())) {
+            notifications.error(failure.title(), failure.description());
+            showPage(Sidebar.Page.HOME);
+            return;
+        }
 
         Instance instance = launchService.getFailedInstance();
 
@@ -1917,24 +2059,7 @@ public class LauncherView {
                                             + targetVersion
                             );
 
-                            UiExecutor.shared().dispatchToUi(() -> {
-
-                                try {
-
-                                    launchService.launch(
-                                            updatedInstance
-                                    );
-
-                                } catch (Exception ex) {
-
-                                    ex.printStackTrace();
-
-                                    notifications.error(
-                                            "Minecraft still failed",
-                                            getErrorMessage(ex)
-                                    );
-                                }
-                            });
+                            launchAfterRepairAsync(updatedInstance);
 
                         } catch (Throwable ex) {
 
@@ -2039,24 +2164,7 @@ public class LauncherView {
                                 "Vanta repaired the Minecraft dependency."
                         );
 
-                        UiExecutor.shared().dispatchToUi(() -> {
-
-                            try {
-
-                                launchService.launch(
-                                        instance
-                                );
-
-                            } catch (Exception ex) {
-
-                                ex.printStackTrace();
-
-                                notifications.error(
-                                        "Minecraft still failed",
-                                        getErrorMessage(ex)
-                                );
-                            }
-                        });
+                        launchAfterRepairAsync(instance);
 
                     } catch (Throwable ex) {
 
@@ -2084,6 +2192,26 @@ public class LauncherView {
     }
 
 
+
+    /**
+     * Launch after a repair without performing installation, network, or process
+     * preparation work on the JavaFX application thread.
+     */
+    private void launchAfterRepairAsync(Instance instance) {
+        UiExecutor.shared().execute(() -> {
+            try {
+                launchService.launch(instance);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                UiExecutor.shared().dispatchToUi(() ->
+                        notifications.error(
+                                "Minecraft still failed",
+                                getErrorMessage(ex)
+                        )
+                );
+            }
+        });
+    }
 
     private void restoreRepairMetadata(Instance instance) {
         try {

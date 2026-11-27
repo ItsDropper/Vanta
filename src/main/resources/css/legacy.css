@@ -1,96 +1,96 @@
 /* screen styles carried over until each view is rebuilt */
 .instance-progress-dialog {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 0;
-    -fx-border-color: -vantalinestrong;
+    -fx-border-color: -fx-vantalinestrong;
     -fx-border-width: 1px;
     -fx-border-radius: 0;
 }
 
 .instance-progress-headline {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 15px; -fx-font-family: "Geist SemiBold";}
 
 .instance-progress-subtitle,
 .instance-progress-detail,
 .instance-progress-current-label {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px; -fx-font-family: "Geist";}
 
 .instance-progress-identity {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 6px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .instance-progress-stage-list {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaline;
+    -fx-border-color: -fx-vantaline;
     -fx-border-radius: 8px;
 }
 
 .instance-progress-current {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 6px;
 }
 
 .instance-progress-stage.progress-active {
-    -fx-background-color: -vantaaccentwash;
-    -fx-border-color: -vantaaccentline;
+    -fx-background-color: -fx-vantaaccentwash;
+    -fx-border-color: -fx-vantaaccentline;
 }
 
 .instance-progress-stage.progress-active .instance-progress-marker,
 .instance-progress-stage.progress-active .instance-progress-stage-title {
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }
 
 .instance-progress-stage.progress-pending .instance-progress-marker,
 .instance-progress-stage.progress-pending .instance-progress-stage-title,
 .instance-progress-stage.progress-skipped .instance-progress-marker,
 .instance-progress-stage.progress-skipped .instance-progress-stage-title {
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 
 .instance-progress-stage.progress-complete .instance-progress-marker {
-    -fx-text-fill: -vantasuccess;
+    -fx-text-fill: -fx-vantasuccess;
 }
 
 .instance-progress-stage.progress-complete .instance-progress-stage-title {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .instance-progress-stage.progress-failed {
-    -fx-background-color: -vantadangerwash;
-    -fx-border-color: -vantadangerline;
+    -fx-background-color: -fx-vantadangerwash;
+    -fx-border-color: -fx-vantadangerline;
 }
 
 .instance-progress-stage.progress-failed .instance-progress-marker,
 .instance-progress-stage.progress-failed .instance-progress-stage-title,
 .instance-progress-error {
-    -fx-text-fill: -vantadanger;
+    -fx-text-fill: -fx-vantadanger;
 }
 
 .instance-list {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
     -fx-padding: 2px 0;
 }
 
 .instance-version {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .instance-loader {
-    -fx-background-color: -vantaaccentsoft;
+    -fx-background-color: -fx-vantaaccentsoft;
     -fx-background-radius: 7px;
 
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 
     -fx-font-size: 12px;
     
@@ -103,42 +103,42 @@
 }
 
 .instance-empty-icon {
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
     -fx-font-size: 22px;
 }
 
 .instance-empty-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 18px; -fx-font-family: "Geist SemiBold";}
 
 .instance-empty-description {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .create-instance-panel {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
 
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 }
 
 .create-label {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-field,
 .create-combo {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 8px;
 
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 
     -fx-font-size: 12px;
 }
@@ -149,24 +149,24 @@
 
 .create-field:focused,
 .create-combo:focused {
-    -fx-border-color: -vantasuccess;
+    -fx-border-color: -fx-vantasuccess;
 }
 
 .create-field:hover,
 .create-combo:hover {
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
 }
 
 .create-status {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .create-option {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
 
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
 
@@ -177,33 +177,33 @@
 }
 
 .create-option:hover {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder;
 }
 
 .create-option:pressed {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder;
 }
 
 .create-option:disabled {
-    -fx-background-color: -v-well;
-    -fx-border-color: -vantasurfaceraised;
+    -fx-background-color: -fx-v-well;
+    -fx-border-color: -fx-vantasurfaceraised;
     -fx-opacity: 0.45;
     -fx-cursor: default;
 }
 
 .create-option-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px; -fx-font-family: "Geist SemiBold";}
 
 .create-option-description {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .create-option:hover .create-option-arrow {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .preset-config-scroll {
@@ -214,10 +214,10 @@
    }
 
 .preset-environment {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 9px;
 
-    -fx-border-color: -vantasurface;
+    -fx-border-color: -fx-vantasurface;
     -fx-border-width: 1px;
     -fx-border-radius: 9px;
 
@@ -225,14 +225,14 @@
 }
 
 .preset-environment-value {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .preset-mods-scroll {
-    -fx-background-color: -v-well;
-    -fx-background: -vantabg;
+    -fx-background-color: -fx-v-well;
+    -fx-background: -fx-vantabg;
 
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
@@ -242,15 +242,15 @@
 .preset-actions {
     -fx-padding: 16px 0 0 0;
 
-    -fx-border-color: -vantasurface transparent transparent transparent;
+    -fx-border-color: -fx-vantasurface transparent transparent transparent;
     -fx-border-width: 1px 0 0 0;
 }
 
 .repair-issue-card {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
 
-    -fx-border-color: -vantasurfaceraised;
+    -fx-border-color: -fx-vantasurfaceraised;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
 
@@ -258,26 +258,26 @@
 }
 
 .repair-issue-type {
-    -fx-text-fill: -vantadanger;
+    -fx-text-fill: -fx-vantadanger;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .repair-issue-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 14px; -fx-font-family: "Geist SemiBold";}
 
 .repair-issue-details {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .repair-empty {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
 
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
 
@@ -285,7 +285,7 @@
 }
 
 .repair-status {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
@@ -297,10 +297,10 @@
 }
 
 .screenshot-card {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
 
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
 
@@ -308,15 +308,15 @@
 }
 
 .screenshot-card:hover {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder;
 }
 
 .screenshot-preview {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 7px;
 
-    -fx-border-color: -vantasurfaceraised;
+    -fx-border-color: -fx-vantasurfaceraised;
     -fx-border-width: 1px;
     -fx-border-radius: 7px;
 
@@ -324,26 +324,26 @@
 }
 
 .screenshot-card:hover .screenshot-preview {
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
 }
 
 .screenshot-name {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-dialog {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
 }
 
 .screenshot-dialog-name {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-preview-container {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 10px;
 
-    -fx-border-color: -vantasurface;
+    -fx-border-color: -fx-vantasurface;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
 }
@@ -359,112 +359,112 @@
 }
 
 .screenshot-card {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
 }
 
 .screenshot-card:hover {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder;
 }
 
 .screenshot-preview {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 7px;
-    -fx-border-color: -vantasurfaceraised;
+    -fx-border-color: -fx-vantasurfaceraised;
     -fx-border-width: 1px;
     -fx-border-radius: 7px;
     -fx-cursor: hand;
 }
 
 .screenshot-card:hover .screenshot-preview {
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
 }
 
 .screenshot-name {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-dialog {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
 }
 
 .screenshot-dialog-name {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-preview-container {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
 }
 
 .screenshot-image-scroll {
-    -fx-background-color: -v-well;
-    -fx-background: -vantabg;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-well;
+    -fx-background: -fx-vantabg;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 10px;
 }
 
 .screenshot-delete-dialog {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 }
 
 .screenshot-delete-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 16px; -fx-font-family: "Geist SemiBold";}
 
 .screenshot-delete-description {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .screenshot-delete-file {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .dialog-instance-checkbox {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantasurface;
+    -fx-border-color: -fx-vantasurface;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-padding: 11px 12px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px;
     -fx-cursor: hand;
 }
 
 .dialog-instance-checkbox:hover {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder;
 }
 
 .dialog-instance-checkbox:selected {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantasuccess;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantasuccess;
 }
 
 .instances-toolbar .instance-search-field {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-border-width: 1px;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantatext;
+    -fx-prompt-text-fill: -fx-vantasubtle;
     -fx-padding: 9px 12px;
     -fx-min-height: 38px;
 }
 
 .instances-toolbar .instance-search-field:focused {
-    -fx-border-color: -vantaaccent;
+    -fx-border-color: -fx-vantaaccent;
 }
 
 .overengineered-ui .instances-toolbar {
@@ -474,32 +474,32 @@
 }
 
 .overengineered-ui .instances-toolbar .instance-sort-field {
-    -fx-border-color: derive(-vantaborder, 30%);
+    -fx-border-color: derive(-fx-vantaborder, 30%);
 }
 
 .instance-setting-label {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .instance-setting-value {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 15px; -fx-font-family: "Geist SemiBold";}
 
 .instance-directory {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
     -fx-wrap-text: true;
 }
 
 .settings-checkbox {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px;
 }
 
 .instances-page .instances-toolbar .instance-search-field {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-font-size: 13px;
@@ -517,29 +517,29 @@
 .instances-page .instance-empty {
     -fx-background-color: transparent;
     -fx-background-radius: 0;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px 0 0 0;
     -fx-border-radius: 0;
 }
 
 .instances-page .instance-empty-icon {
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
     -fx-font-size: 24px; -fx-font-family: "Geist Medium";}
 
 .instances-page .instance-empty-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 15px; -fx-font-family: "Geist SemiBold";}
 
 .instances-page .instance-empty-description {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 13px;
 }
 
 .mod-icon-box {
-    -fx-background-color: -vantasurfaceraised;
+    -fx-background-color: -fx-vantasurfaceraised;
     -fx-background-radius: 8px;
 
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 
@@ -553,10 +553,10 @@
 }
 
 .mod-details-card {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
 
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 }
@@ -566,48 +566,48 @@
 }
 
 .mod-details-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
 .mod-details-author {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 15px;
 }
 
 .mod-details-description {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 16px;
 }
 
 .mod-details-stat-value {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
 .mod-details-stat-label {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .mod-details-card .instance-setting-label {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .mod-details-card .mod-details-info-value {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 15px;
 }
 
 .mod-details-header-container {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 }
 
 .modrinth-popup {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-padding: 18px;
@@ -615,146 +615,146 @@
 }
 
 .modrinth-popup-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 14px; -fx-font-family: "Geist SemiBold";}
 
 .modrinth-popup-subtitle {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .modrinth-popup-scroll {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
 }
 
 .modrinth-popup-scroll {
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
 }
 
 .modrinth-version-row {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-padding: 10px 12px;
 }
 
 .modrinth-version-row:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: derive(-vantaborder, 20%);
+    -fx-background-color: -fx-vantasurfacehover;
+    -fx-border-color: derive(-fx-vantaborder, 20%);
 }
 
 .modrinth-version-name {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .modrinth-version-meta {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .modrinth-version-type {
-    -fx-background-color: -vantaaccentsoft;
+    -fx-background-color: -fx-vantaaccentsoft;
     -fx-background-radius: 5px;
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
     -fx-font-size: 12px;
     
     -fx-padding: 4px 6px; -fx-font-family: "Geist Medium";}
 
 .modrinth-version-downloads {
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
     -fx-font-size: 12px;
 }
 
 .global-mod-description {
-    -fx-text-fill: -vantatext;
-    -fx-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
+    -fx-fill: -fx-vantatext;
     -fx-font-size: 12px;
 }
 
 .modrinth-popup-primary {
-    -fx-background-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaaccenthover;
+    -fx-border-color: -fx-vantaaccenthover;
     -fx-border-radius: 8px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px;
     -fx-padding: 8px 16px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .modrinth-popup-primary:hover {
-    -fx-background-color: -vantaaccenthover;
+    -fx-background-color: -fx-vantaaccenthover;
 }
 
 .modrinth-popup-secondary {
-    -fx-background-color: -vantasurfaceraised;
+    -fx-background-color: -fx-vantasurfaceraised;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px;
     -fx-padding: 8px 16px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .modrinth-popup-secondary:hover {
-    -fx-background-color: -vantasurfacehover;
-    -fx-border-color: derive(-vantaborder, 22%);
+    -fx-background-color: -fx-vantasurfacehover;
+    -fx-border-color: derive(-fx-vantaborder, 22%);
 }
 
 .modrinth-version-install {
-    -fx-background-color: -vantaaccentsoft;
+    -fx-background-color: -fx-vantaaccentsoft;
     -fx-background-radius: 7px;
-    -fx-border-color: -vantaaccent;
+    -fx-border-color: -fx-vantaaccent;
     -fx-border-radius: 7px;
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
     -fx-font-size: 12px;
     
     -fx-padding: 6px 9px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .modrinth-version-install:hover {
-    -fx-background-color: -vantaaccent;
-    -fx-border-color: -vantaaccenthover;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-vantaaccent;
+    -fx-border-color: -fx-vantaaccenthover;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .mod-details-description-card {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
     -fx-effect: none;
 }
 
 .mod-details-markdown {
-    -fx-text-fill: -vantatext;
-    -fx-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
+    -fx-fill: -fx-vantatext;
 }
 
 .mod-details-markdown .mod-description-link,
 .mod-details-markdown .mod-description-bullet {
-    -fx-text-fill: -vantaaccent;
-    -fx-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
+    -fx-fill: -fx-vantaaccent;
 }
 
 .modrinth-popup-danger {
-    -fx-background-color: derive(-vantadanger, -78%);
+    -fx-background-color: derive(-fx-vantadanger, -78%);
     -fx-background-radius: 8px;
-    -fx-border-color: derive(-vantadanger, -45%);
+    -fx-border-color: derive(-fx-vantadanger, -45%);
     -fx-border-radius: 8px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 13px;
     -fx-padding: 8px 16px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .modrinth-popup-danger:hover {
-    -fx-background-color: derive(-vantadanger, -70%);
-    -fx-border-color: -vantadanger;
+    -fx-background-color: derive(-fx-vantadanger, -70%);
+    -fx-border-color: -fx-vantadanger;
 }
 
 .global-mods-page,
@@ -764,27 +764,27 @@
 
 .global-mods-page .create-field,
 .instance-mods-page .instances-search {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 7px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 7px;
     -fx-border-width: 1px;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantatext;
+    -fx-prompt-text-fill: -fx-vantasubtle;
     -fx-padding: 0 14px;
     -fx-min-height: 42px;
 }
 
 .global-mods-page .create-field:focused,
 .instance-mods-page .instances-search:focused {
-    -fx-border-color: -vantaaccent;
+    -fx-border-color: -fx-vantaaccent;
     -fx-effect: none;
 }
 
 .global-mods-page .create-combo {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 7px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 7px;
 }
 
@@ -796,19 +796,19 @@
 
 .global-mods-page .global-mod-description {
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .global-mods-page .instance-loader,
 .instance-mods-page .instance-loader {
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .instance-mods-page .instance-tabs {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-padding: 5px;
 }
@@ -818,15 +818,15 @@
 }
 
 .modrinth-popup {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-padding: 18px;
 }
 
 .global-mods-page .modrinth-content-segments {
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 11, 10;
     -fx-padding: 4px;
@@ -836,51 +836,51 @@
 .global-mods-page .modrinth-content-segment {
     -fx-background-color: transparent;
     -fx-background-radius: 7px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 13px;
     -fx-padding: 8px 16px;
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .global-mods-page .modrinth-content-segment:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-vantasurfaceraised;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .global-mods-page .modrinth-content-segment-selected {
     -fx-font-family: "Geist SemiBold";
-    -fx-background-color: -vantaaccent;
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-background-color: -fx-vantaaccent;
+    -fx-text-fill: -fx-vantaaccentforeground;
 }
 
 .global-mods-page .modrinth-filter-sidebar {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-padding: 14px;
 }
 
 .modrinth-tag-chip {
-    -fx-background-color: -vantasurfaceraised;
+    -fx-background-color: -fx-vantasurfaceraised;
     -fx-background-radius: 6px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 6px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
     -fx-padding: 4px 7px;
 }
 
 .modrinth-browser-toolbar .modrinth-current-page,
 .modrinth-page-button.modrinth-current-page {
-    -fx-background-color: -vantaaccent;
-    -fx-text-fill: -vantaaccentforeground;
-    -fx-border-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent;
+    -fx-text-fill: -fx-vantaaccentforeground;
+    -fx-border-color: -fx-vantaaccent;
 }
 
 .modrinth-browser-toolbar .modrinth-search-row {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 9px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 9px;
     -fx-padding: 0 12px;
 }
@@ -895,9 +895,9 @@
 }
 
 .global-mods-page .modrinth-content-segments {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 6px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 6px;
     -fx-padding: 4px;
     -fx-max-width: 520px;
@@ -920,9 +920,9 @@
 }
 
 .global-mods-page .modrinth-filter-search {
-    -fx-background-color: -vantasurfaceraised;
+    -fx-background-color: -fx-vantasurfaceraised;
     -fx-background-radius: 7px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 7px;
     -fx-padding: 0 8px;
 }
@@ -944,23 +944,23 @@
     -fx-padding: 6px 9px;
     -fx-min-height: 29px;
     -fx-max-width: infinity;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
     -fx-cursor: hand;
 }
 
 .global-mods-page .modrinth-filter-option:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-vantasurfaceraised;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .global-mods-page .modrinth-filter-option:selected {
-    -fx-background-color: derive(-vantaaccent, -68%);
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-background-color: derive(-fx-vantaaccent, -68%);
+    -fx-text-fill: -fx-vantaaccentforeground;
 }
 
 .global-mods-page .modrinth-filter-empty {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
     -fx-padding: 8px 4px;
 }
@@ -1000,17 +1000,17 @@
 }
 
 .global-mods-page .modrinth-environment-chip {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .global-mods-page .modrinth-loader-chip {
-    -fx-background-color: derive(-vantaaccent, -88%);
+    -fx-background-color: derive(-fx-vantaaccent, -88%);
 }
 
 .global-mods-page .modrinth-result-skeleton {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-opacity: .65;
 }
@@ -1024,19 +1024,19 @@
     -fx-padding: 6px 9px;
     -fx-min-height: 29px;
     -fx-max-width: infinity;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
     -fx-cursor: hand;
 }
 
 .global-mods-page .modrinth-filter-option:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-vantasurfaceraised;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .global-mods-page .modrinth-filter-option-selected {
-    -fx-background-color: derive(-vantaaccent, -68%);
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-background-color: derive(-fx-vantaaccent, -68%);
+    -fx-text-fill: -fx-vantaaccentforeground;
 }
 
 .global-mods-page .modrinth-filter-check {
@@ -1044,29 +1044,29 @@
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .global-mods-page .modrinth-filter-option:hover .modrinth-filter-check {
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }
 
 .global-mods-page .modrinth-filter-option-selected .modrinth-filter-check {
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-text-fill: -fx-vantaaccentforeground;
 }
 
 .global-mods-page .modrinth-filter-content > .dialog-instance-checkbox {
     -fx-background-color: transparent;
     -fx-padding: 4px 1px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .global-mods-page .modrinth-controls-row .modrinth-page-button {
     -fx-background-color: transparent;
     -fx-border-color: transparent;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .global-mods-page .modrinth-controls-row .modrinth-page-button:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-vantasurfaceraised;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .global-mods-page .modrinth-controls-row .modrinth-next-page-button {
@@ -1081,22 +1081,22 @@
 }
 
 .mod-details-tags .modrinth-tag-chip {
-    -fx-background-color: -vantasurfaceraised;
+    -fx-background-color: -fx-vantasurfaceraised;
     -fx-background-radius: 5px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 5px;
     -fx-border-width: 1px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
     -fx-padding: 4px 8px;
 }
 
 .mod-details-tags .modrinth-environment-chip {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .mod-details-tags .modrinth-loader-chip {
-    -fx-background-color: derive(-vantaaccent, -88%);
+    -fx-background-color: derive(-fx-vantaaccent, -88%);
 }
 
 .mod-details-markdown {
@@ -1110,52 +1110,52 @@
 }
 
 .mod-details-markdown .mod-description-text {
-    -fx-fill: -vantatext;
+    -fx-fill: -fx-vantatext;
     -fx-font-size: 13px;
 }
 
 .mod-details-markdown .mod-description-bold {
-    -fx-fill: -vantatext;
+    -fx-fill: -fx-vantatext;
     -fx-font-size: 13px; -fx-font-family: "Geist Medium";}
 
 .mod-details-markdown .mod-description-italic {
-    -fx-fill: -vantatext;
+    -fx-fill: -fx-vantatext;
     -fx-font-size: 13px;
     -fx-font-style: italic;
 }
 
 .mod-details-markdown .mod-description-h1 {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 25px;
     
     -fx-padding: 14px 0 4px 0; -fx-font-family: "Geist SemiBold";}
 
 .mod-details-markdown .mod-description-h2 {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 20px;
     
     -fx-padding: 12px 0 3px 0; -fx-font-family: "Geist SemiBold";}
 
 .mod-details-markdown .mod-description-h3,
 .mod-details-markdown .mod-description-heading {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 16px;
     
     -fx-padding: 9px 0 2px 0; -fx-font-family: "Geist SemiBold";}
 
 .mod-details-markdown .mod-description-code {
-    -fx-fill: -vantaaccent;
+    -fx-fill: -fx-vantaaccent;
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
 }
 
 .mod-details-markdown .mod-description-link {
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
     -fx-underline: true;
 }
 
 .mod-details-markdown .mod-description-link:hover {
-    -fx-text-fill: -vantaaccenthover;
+    -fx-text-fill: -fx-vantaaccenthover;
 }
 
 .mod-details-markdown .mod-description-list {
@@ -1164,12 +1164,12 @@
 }
 
 .mod-details-markdown .mod-description-bullet {
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
     -fx-font-size: 13px;
 }
 
 .mod-details-markdown .mod-description-divider {
-    -fx-background-color: -vantaborder;
+    -fx-background-color: -fx-vantaborder;
     -fx-min-height: 1px;
     -fx-pref-height: 1px;
     -fx-max-height: 1px;
@@ -1179,8 +1179,8 @@
 .instance-mods-page { -fx-spacing: 18px; }
 
 .instance-mods-page .instance-tabs {
-    -fx-background-color: -v-card; -fx-background-radius: 11px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-padding: 4px;
+    -fx-background-color: -fx-v-card; -fx-background-radius: 11px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 11px; -fx-padding: 4px;
 }
 
 .instance-mods-page .instances-search {
@@ -1194,28 +1194,28 @@
 }
 
 .screenshots-page .screenshot-card {
-    -fx-background-color: -v-card; -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 8px;
+    -fx-background-color: -fx-v-card; -fx-background-radius: 8px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 8px;
     -fx-border-width: 1px; -fx-padding: 9px;
 }
 
 .screenshots-page .screenshot-card:hover {
-    -fx-background-color: -vantasurfaceraised; -fx-border-color: derive(-vantaborder, 20%);
+    -fx-background-color: -fx-vantasurfaceraised; -fx-border-color: derive(-fx-vantaborder, 20%);
 }
 
 .screenshots-page .screenshot-preview {
-    -fx-background-color: -v-well; -fx-background-radius: 8px;
+    -fx-background-color: -fx-v-well; -fx-background-radius: 8px;
 }
 
 .screenshots-page .screenshot-name {
-    -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
+    -fx-text-fill: -fx-vantatext; -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .instance-mods-page .mods-page-header { -fx-spacing: 14px; }
 
 .instance-mods-page .mods-toolbar {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-padding: 11px;
@@ -1234,9 +1234,9 @@
 .screenshots-page { -fx-spacing: 16px; }
 
 .screenshots-page .screenshots-toolbar {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 11px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 11px;
     -fx-border-width: 1px;
     -fx-padding: 9px 11px;
@@ -1267,7 +1267,7 @@
 }
 
 .skin-layer-toggle {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px;
     
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
@@ -1277,11 +1277,11 @@
 }
 
 .server-heading {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
 .server-subtitle {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
@@ -1298,7 +1298,7 @@
 .server-list-header {
     -fx-alignment: center-left;
     -fx-padding: 0 4px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .server-profile-list {
@@ -1306,56 +1306,56 @@
 }
 
 .server-profile-card {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 10px;
     -fx-cursor: hand;
 }
 
 .server-profile-card:hover {
-    -fx-background-color: -vantaborder;
-    -fx-border-color: derive(-vantaborder, 20%);
+    -fx-background-color: -fx-vantaborder;
+    -fx-border-color: derive(-fx-vantaborder, 20%);
 }
 
 .server-profile-selected {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccentsoft;
+    -fx-border-color: -fx-vantaaccent;
 }
 
 .server-profile-name {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .server-profile-meta {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .server-empty {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
     -fx-padding: 12px;
 }
 
 .server-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
 .server-status-row {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantasurfaceraised;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantasurfaceraised;
     -fx-border-radius: 10px;
     -fx-background-radius: 10px;
     -fx-padding: 11px 12px;
 }
 
 .server-status-label {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .server-status-dot {
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
     -fx-font-size: 12px;
 }
 
@@ -1367,8 +1367,8 @@
     -fx-cursor: hand; -fx-font-family: "Geist Medium";}
 
 .server-primary {
-    -fx-background-color: -vantaaccent;
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-background-color: -fx-vantaaccent;
+    -fx-text-fill: -fx-vantaaccentforeground;
 }
 
 .server-primary:hover {
@@ -1376,21 +1376,21 @@
 }
 
 .server-secondary {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-vantasurfaceraised;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .server-secondary:hover {
-    -fx-background-color: -vantasurfacehover;
+    -fx-background-color: -fx-vantasurfacehover;
 }
 
 .server-danger {
-    -fx-background-color: derive(-vantadanger, -78%);
-    -fx-border-color: derive(-vantadanger, -45%);
+    -fx-background-color: derive(-fx-vantadanger, -78%);
+    -fx-border-color: derive(-fx-vantadanger, -45%);
     -fx-border-radius: 8px;
-    -fx-text-fill: -vantadanger;
+    -fx-text-fill: -fx-vantadanger;
 }
 
 .server-action:disabled {
@@ -1399,48 +1399,48 @@
 }
 
 .server-panel {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
     -fx-padding: 15px;
 }
 
 .server-section-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .server-section-subtitle {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .server-field-label {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .server-input,
 .server-spinner {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 7px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 7px;
-    -fx-text-fill: -vantatext;
-    -fx-prompt-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantatext;
+    -fx-prompt-text-fill: -fx-vantamuted;
     -fx-padding: 8px 10px;
     -fx-font-size: 12px;
 }
 
 .server-eula {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .server-console {
-    -fx-control-inner-background: -vantabg;
-    -fx-background-color: -v-well;
-    -fx-text-fill: -vantatext;
-    -fx-highlight-fill: -vantaaccentsoft;
+    -fx-control-inner-background: -fx-vantabg;
+    -fx-background-color: -fx-v-well;
+    -fx-text-fill: -fx-vantatext;
+    -fx-highlight-fill: -fx-vantaaccentsoft;
     -fx-highlight-text-fill: white;
     -fx-font-family: "Cascadia Mono", "Consolas", monospace;
     -fx-font-size: 12px;
@@ -1455,52 +1455,52 @@
 .state-center { -fx-spacing: 18px; }
 
 .state-center .state-hero {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-padding: 22px;
 }
 
 .state-center .state-hero-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 25px; -fx-font-family: "Geist SemiBold";}
 
-.state-center .state-hero-subtitle { -fx-text-fill: -vantamuted; -fx-font-size: 12px; }
+.state-center .state-hero-subtitle { -fx-text-fill: -fx-vantamuted; -fx-font-size: 12px; }
 
 .state-center .state-section-title {
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-size: 12px; -fx-font-family: "Geist SemiBold";}
 
 .state-center .state-list-card {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 10px;
     -fx-padding: 12px;
 }
 
 .state-center .state-card {
-    -fx-background-color: -vantasurfaceraised;
+    -fx-background-color: -fx-vantasurfaceraised;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-padding: 13px 15px;
 }
 
-.state-center .state-card:hover { -fx-background-color: -vantasurfacehover; -fx-border-color: -vantaaccent; }
+.state-center .state-card:hover { -fx-background-color: -fx-vantasurfacehover; -fx-border-color: -fx-vantaaccent; }
 
 .state-center .state-instance-name { -fx-font-size: 13px; -fx-font-family: "Geist SemiBold";}
 
 .state-center .state-instance-detail,
 .state-center .state-instance-summary {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
 }
 
 .state-center .state-shared-row {
-    -fx-background-color: -vantasurfaceraised;
+    -fx-background-color: -fx-vantasurfaceraised;
     -fx-background-radius: 7px;
     -fx-padding: 11px 13px;
 }
@@ -1514,63 +1514,63 @@
 
 .server-manager .server-heading { -fx-font-size: 22px; -fx-font-family: "Geist SemiBold";}
 
-.server-manager .server-subtitle { -fx-text-fill: -vantamuted; }
+.server-manager .server-subtitle { -fx-text-fill: -fx-vantamuted; }
 
 .server-manager .server-sidebar {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 10px;
     -fx-padding: 10px;
 }
 
 .server-manager .server-profile-card {
-    -fx-background-color: -vantasurfaceraised;
+    -fx-background-color: -fx-vantasurfaceraised;
     -fx-background-radius: 7px;
-    -fx-border-color: transparent transparent -vantaborder transparent;
+    -fx-border-color: transparent transparent -fx-vantaborder transparent;
     -fx-border-radius: 0;
     -fx-padding: 12px;
 }
 
 .server-manager .server-profile-selected {
-    -fx-background-color: -vantaaccentsoft;
-    -fx-border-color: -vantaaccent;
+    -fx-background-color: -fx-vantaaccentsoft;
+    -fx-border-color: -fx-vantaaccent;
 }
 
 .server-manager .server-title { -fx-font-size: 25px; }
 
 .server-manager .server-status-row {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder;
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
     -fx-padding: 12px 14px;
 }
 
 .server-manager .server-panel {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 9px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 9px;
     -fx-padding: 15px;
 }
 
 .server-manager .server-console {
-    -fx-control-inner-background: -vantabg;
-    -fx-background-color: -v-well;
-    -fx-text-fill: -vantatext;
+    -fx-control-inner-background: -fx-vantabg;
+    -fx-background-color: -fx-v-well;
+    -fx-text-fill: -fx-vantatext;
     -fx-font-family: "Geist Mono", "Consolas";
     -fx-font-size: 12px;
-    -fx-highlight-fill: -vantaaccent;
+    -fx-highlight-fill: -fx-vantaaccent;
 }
 
 .server-manager .server-input,
 .server-manager .server-spinner {
-    -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 6px;
     -fx-background-radius: 6px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .server-manager .server-action { -fx-background-radius: 6px; -fx-padding: 0 13px; }
@@ -1582,18 +1582,18 @@
 .create-instance-type-page .create-type-header { -fx-spacing: 8px; }
 
 .create-instance-type-page .create-type-eyebrow {
-    -fx-text-fill: -vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
+    -fx-text-fill: -fx-vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-instance-type-page .create-type-content { -fx-spacing: 13px; }
 
 .create-instance-type-page .create-type-section-label {
-    -fx-text-fill: -vantamuted; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
+    -fx-text-fill: -fx-vantamuted; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-instance-type-page .create-type-grid { -fx-padding: 2px; }
 
 .create-instance-type-page .create-type-option {
-    -fx-background-color: -v-card; -fx-background-radius: 11px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
+    -fx-background-color: -fx-v-card; -fx-background-radius: 11px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
     /* Override the global .button 34px preferred height. The graphic is a
        two-row card and must have enough vertical room for all of its copy. */
     -fx-min-height: 174px; -fx-pref-height: 190px;
@@ -1601,88 +1601,88 @@
 }
 
 .create-instance-type-page .create-type-option:hover {
-    -fx-background-color: -vantasurfaceraised; -fx-border-color: -vantaaccent; -fx-translate-y: -2px;
+    -fx-background-color: -fx-vantasurfaceraised; -fx-border-color: -fx-vantaaccent; -fx-translate-y: -2px;
 }
 
-.create-instance-type-page .create-type-option:focused { -fx-border-color: -vantaaccent; -fx-border-width: 1.5px; }
+.create-instance-type-page .create-type-option:focused { -fx-border-color: -fx-vantaaccent; -fx-border-width: 1.5px; }
 
-.create-instance-type-page .create-type-option:pressed { -fx-background-color: -vantasurfacehover; -fx-translate-y: 0; }
+.create-instance-type-page .create-type-option:pressed { -fx-background-color: -fx-vantasurfacehover; -fx-translate-y: 0; }
 
 .create-instance-type-page .create-type-option-layout { -fx-spacing: 15px; }
 
 .create-instance-type-page .create-type-number {
-    -fx-text-fill: -vantamuted; -fx-font-size: 12px; 
-    -fx-padding: 5px 7px; -fx-background-color: -v-well; -fx-background-radius: 5px; -fx-font-family: "Geist Medium";}
+    -fx-text-fill: -fx-vantamuted; -fx-font-size: 12px; 
+    -fx-padding: 5px 7px; -fx-background-color: -fx-v-well; -fx-background-radius: 5px; -fx-font-family: "Geist Medium";}
 
 .create-instance-type-page .create-type-icon {
-    -fx-text-fill: -vantaaccent; -fx-font-size: 20px;  -fx-min-width: 30px; -fx-alignment: center; -fx-font-family: "Geist SemiBold";}
+    -fx-text-fill: -fx-vantaaccent; -fx-font-size: 20px;  -fx-min-width: 30px; -fx-alignment: center; -fx-font-family: "Geist SemiBold";}
 
-.create-instance-type-page .create-type-option-title { -fx-text-fill: -vantatext; -fx-font-size: 16px; -fx-font-family: "Geist SemiBold";}
+.create-instance-type-page .create-type-option-title { -fx-text-fill: -fx-vantatext; -fx-font-size: 16px; -fx-font-family: "Geist SemiBold";}
 
-.create-instance-type-page .create-type-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 12px; -fx-line-spacing: 2px; }
+.create-instance-type-page .create-type-option-description { -fx-text-fill: -fx-vantamuted; -fx-font-size: 12px; -fx-line-spacing: 2px; }
 
-.create-instance-type-page .create-type-option-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
+.create-instance-type-page .create-type-option-meta { -fx-text-fill: -fx-vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
-.create-instance-type-page .create-type-option-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 21px; -fx-padding: 0 2px 1px 8px; }
+.create-instance-type-page .create-type-option-arrow { -fx-text-fill: -fx-vantamuted; -fx-font-size: 21px; -fx-padding: 0 2px 1px 8px; }
 
-.create-instance-type-page .create-type-option:hover .create-type-option-arrow { -fx-text-fill: -vantaaccent; }
+.create-instance-type-page .create-type-option:hover .create-type-option-arrow { -fx-text-fill: -fx-vantaaccent; }
 
 .create-instance-type-page .create-type-footer { -fx-padding: 2px 0 0 0; }
 
 .create-instance-page { -fx-spacing: 22px; }
 
 .create-instance-page .create-instance-panel {
-    -fx-background-color: -v-card; -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
+    -fx-background-color: -fx-v-card; -fx-background-radius: 8px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-padding: 26px; -fx-spacing: 17px;
 }
 
-.create-instance-page .create-panel-title { -fx-font-size: 17px;  -fx-text-fill: -vantatext; -fx-font-family: "Geist SemiBold";}
+.create-instance-page .create-panel-title { -fx-font-size: 17px;  -fx-text-fill: -fx-vantatext; -fx-font-family: "Geist SemiBold";}
 
-.create-instance-page .create-panel-subtitle { -fx-font-size: 12px; -fx-text-fill: -vantamuted; }
+.create-instance-page .create-panel-subtitle { -fx-font-size: 12px; -fx-text-fill: -fx-vantamuted; }
 
 .create-instance-page .create-label { -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .create-instance-page .create-field,
 .create-instance-page .create-combo {
-    -fx-min-height: 46px; -fx-pref-height: 46px; -fx-background-color: -v-well;
-    -fx-background-radius: 8px; -fx-border-color: -vantaborder; -fx-border-radius: 8px;
-    -fx-border-width: 1px; -fx-text-fill: -vantatext; -fx-font-size: 12px;
+    -fx-min-height: 46px; -fx-pref-height: 46px; -fx-background-color: -fx-v-well;
+    -fx-background-radius: 8px; -fx-border-color: -fx-vantaborder; -fx-border-radius: 8px;
+    -fx-border-width: 1px; -fx-text-fill: -fx-vantatext; -fx-font-size: 12px;
 }
 
 .create-instance-page .create-field:focused,
 .create-instance-page .create-combo:focused {
-    -fx-border-color: -vantaaccent; -fx-background-color: -vantasurfaceraised;
+    -fx-border-color: -fx-vantaaccent; -fx-background-color: -fx-vantasurfaceraised;
 }
 
 .create-instance-page .create-status {
-    -fx-background-color: -v-well; -fx-background-radius: 7px;
+    -fx-background-color: -fx-v-well; -fx-background-radius: 7px;
     -fx-padding: 9px 11px; -fx-font-size: 12px;
 }
 
 .import-instance-page { -fx-spacing: 22px; }
 
 .import-instance-page .import-instance-panel {
-    -fx-background-color: -v-card; -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
+    -fx-background-color: -fx-v-card; -fx-background-radius: 8px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-spacing: 20px; -fx-padding: 30px;
 }
 
 .import-instance-page .import-intro { -fx-spacing: 11px; -fx-alignment: center-left; }
 
 .import-instance-page .import-drop-glyph {
-    -fx-background-color: -vantaaccentsoft; -fx-background-radius: 8px;
-    -fx-text-fill: -vantaaccent; -fx-font-size: 22px; 
+    -fx-background-color: -fx-vantaaccentsoft; -fx-background-radius: 8px;
+    -fx-text-fill: -fx-vantaaccent; -fx-font-size: 22px; 
     -fx-padding: 7px 18px; -fx-font-family: "Geist SemiBold";}
 
-.import-instance-page .import-panel-eyebrow { -fx-font-size: 18px;  -fx-text-fill: -vantatext; -fx-font-family: "Geist SemiBold";}
+.import-instance-page .import-panel-eyebrow { -fx-font-size: 18px;  -fx-text-fill: -fx-vantatext; -fx-font-family: "Geist SemiBold";}
 
-.import-instance-page .import-panel-description { -fx-font-size: 12px; -fx-line-spacing: 3px; -fx-text-fill: -vantamuted; }
+.import-instance-page .import-panel-description { -fx-font-size: 12px; -fx-line-spacing: 3px; -fx-text-fill: -fx-vantamuted; }
 
 .import-instance-page .import-format-badge {
-    -fx-background-color: -v-well; -fx-background-radius: 5px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 5px;
-    -fx-text-fill: -vantaaccent; -fx-font-size: 12px; 
+    -fx-background-color: -fx-v-well; -fx-background-radius: 5px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 5px;
+    -fx-text-fill: -fx-vantaaccent; -fx-font-size: 12px; 
     -fx-padding: 6px 9px; -fx-font-family: "Geist Medium";}
 
 .import-instance-page .import-primary-action { -fx-min-width: 190px; -fx-min-height: 44px; -fx-font-family: "Geist Medium";}
@@ -1690,7 +1690,7 @@
 .import-instance-page .import-progress-row { -fx-min-height: 30px; }
 
 .import-instance-page .import-status {
-    -fx-background-color: -v-well; -fx-background-radius: 7px;
+    -fx-background-color: -fx-v-well; -fx-background-radius: 7px;
     -fx-padding: 10px 12px; -fx-font-size: 12px;
 }
 
@@ -1699,8 +1699,8 @@
 .instance-preset-page .preset-choice-list { -fx-spacing: 12px; }
 
 .instance-preset-page .preset-choice-card {
-    -fx-background-color: -v-card; -fx-background-radius: 11px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
+    -fx-background-color: -fx-v-card; -fx-background-radius: 11px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 11px; -fx-border-width: 1px;
     /* The shared button stylesheet defaults to 34px; preset rows need their
        own height so the wrapped description and metadata stay inside. */
     -fx-min-height: 104px; -fx-pref-height: 112px;
@@ -1708,61 +1708,61 @@
 }
 
 .instance-preset-page .preset-choice-card:hover {
-    -fx-background-color: -vantasurfaceraised; -fx-border-color: -vantaaccent;
+    -fx-background-color: -fx-vantasurfaceraised; -fx-border-color: -fx-vantaaccent;
     -fx-translate-y: -1px;
 }
 
-.instance-preset-page .preset-choice-card:focused { -fx-border-color: -vantaaccent; }
+.instance-preset-page .preset-choice-card:focused { -fx-border-color: -fx-vantaaccent; }
 
 .instance-preset-page .preset-choice-content { -fx-spacing: 16px; }
 
 .instance-preset-page .preset-choice-icon {
-    -fx-background-color: -vantaaccentsoft; -fx-background-radius: 8px;
+    -fx-background-color: -fx-vantaaccentsoft; -fx-background-radius: 8px;
     -fx-alignment: center;}
 
-.instance-preset-page .create-option-title { -fx-text-fill: -vantatext; -fx-font-size: 15px; -fx-font-family: "Geist SemiBold";}
+.instance-preset-page .create-option-title { -fx-text-fill: -fx-vantatext; -fx-font-size: 15px; -fx-font-family: "Geist SemiBold";}
 
-.instance-preset-page .create-option-description { -fx-text-fill: -vantamuted; -fx-font-size: 12px; }
+.instance-preset-page .create-option-description { -fx-text-fill: -fx-vantamuted; -fx-font-size: 12px; }
 
-.instance-preset-page .preset-choice-meta { -fx-text-fill: -vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
+.instance-preset-page .preset-choice-meta { -fx-text-fill: -fx-vantaaccent; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
-.instance-preset-page .preset-choice-arrow { -fx-text-fill: -vantamuted; -fx-font-size: 22px; }
+.instance-preset-page .preset-choice-arrow { -fx-text-fill: -fx-vantamuted; -fx-font-size: 22px; }
 
-.instance-preset-page .preset-choice-card:hover .preset-choice-arrow { -fx-text-fill: -vantaaccent; }
+.instance-preset-page .preset-choice-card:hover .preset-choice-arrow { -fx-text-fill: -fx-vantaaccent; }
 
 .preset-configuration-page { -fx-spacing: 18px; }
 
 .preset-configuration-page .preset-configuration-panel {
-    -fx-background-color: -v-card; -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
+    -fx-background-color: -fx-v-card; -fx-background-radius: 8px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 8px; -fx-border-width: 1px;
     -fx-spacing: 17px; -fx-padding: 22px;
 }
 
 .preset-configuration-page .preset-config-content { -fx-spacing: 17px; }
 
 .preset-configuration-page .preset-config-hero {
-    -fx-background-color: -v-card;
-    -fx-background-radius: 9px; -fx-border-color: -vantaborder;
+    -fx-background-color: -fx-v-card;
+    -fx-background-radius: 9px; -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 9px; -fx-padding: 17px;
 }
 
 .preset-configuration-page .preset-config-section {
-    -fx-background-color: -v-well; -fx-background-radius: 9px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 9px;
+    -fx-background-color: -fx-v-well; -fx-background-radius: 9px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 9px;
     -fx-padding: 14px; -fx-spacing: 10px;
 }
 
 .preset-configuration-page .preset-environment-value {
-    -fx-background-color: -vantasurfaceraised; -fx-background-radius: 7px;
-    -fx-border-color: -vantaborder; -fx-border-radius: 7px;
-    -fx-padding: 11px 13px; -fx-text-fill: -vantatext; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
+    -fx-background-color: -fx-vantasurfaceraised; -fx-background-radius: 7px;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 7px;
+    -fx-padding: 11px 13px; -fx-text-fill: -fx-vantatext; -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .preset-configuration-page .create-label { -fx-font-size: 12px; -fx-font-family: "Geist Medium";}
 
 .preset-configuration-page .create-field,
 .preset-configuration-page .create-combo {
-    -fx-min-height: 44px; -fx-pref-height: 44px; -fx-background-color: -v-card;
-    -fx-border-color: -vantaborder; -fx-border-radius: 7px; -fx-background-radius: 7px;
+    -fx-min-height: 44px; -fx-pref-height: 44px; -fx-background-color: -fx-v-card;
+    -fx-border-color: -fx-vantaborder; -fx-border-radius: 7px; -fx-background-radius: 7px;
 }
 
 .preset-configuration-page .preset-mods-scroll {
@@ -1780,9 +1780,9 @@
 .repair-page .repair-page-header { -fx-spacing: 11px; }
 
 .repair-page .repair-issue-section {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 8px;
     -fx-border-width: 1px;
     -fx-padding: 20px;
@@ -1790,30 +1790,30 @@
 }
 
 .repair-page .repair-issue-card {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 10px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 10px;
     -fx-border-width: 1px;
     -fx-padding: 16px;
 }
 
 .repair-page .repair-issue-card:hover {
-    -fx-background-color: -vantasurfaceraised;
-    -fx-border-color: derive(-vantaborder, 16%);
+    -fx-background-color: -fx-vantasurfaceraised;
+    -fx-border-color: derive(-fx-vantaborder, 16%);
 }
 
 .repair-page .repair-actions {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 11px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-radius: 11px;
     -fx-border-width: 1px;
     -fx-padding: 12px;
     -fx-spacing: 8px;
 }
 
-.repair-page .repair-status { -fx-text-fill: -vantamuted; -fx-font-size: 12px; }
+.repair-page .repair-status { -fx-text-fill: -fx-vantamuted; -fx-font-size: 12px; }
 
 .server-manager { -fx-spacing: 18px; }
 
@@ -1822,7 +1822,7 @@
 .server-manager .server-sidebar {
     -fx-background-radius: 8px;
     -fx-border-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
 }
 
@@ -1872,12 +1872,12 @@
 }
 
 .skin-changer-page .skin-layer-toggle {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 7px;
     -fx-padding: 7px 10px;
 }
 
-.skin-changer-page .skin-layer-toggle:selected { -fx-text-fill: -vantaaccent; }
+.skin-changer-page .skin-layer-toggle:selected { -fx-text-fill: -fx-vantaaccent; }
 
 .server-manager .server-scroll {
     -fx-background-color: transparent;
@@ -1887,9 +1887,9 @@
 }
 
 .server-manager .server-sidebar {
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 8px;
-    -fx-border-color: -vantaborder;
+    -fx-border-color: -fx-vantaborder;
     -fx-border-width: 1px;
     -fx-border-radius: 8px;
 }
@@ -1903,7 +1903,7 @@
 }
 
 .server-manager .server-empty {
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-size: 12px;
     -fx-padding: 14px 10px;
 }
@@ -1911,11 +1911,11 @@
 .crash-lab-page { -fx-spacing: 14px; }
 
 .crash-lab-page .crash-lab-evidence {
-    -fx-control-inner-background: -vantabg;
-    -fx-background-color: -v-well;
-    -fx-text-fill: -vantatext;
-    -fx-highlight-fill: -vantaaccentsoft;
-    -fx-highlight-text-fill: -vantatext;
+    -fx-control-inner-background: -fx-vantabg;
+    -fx-background-color: -fx-v-well;
+    -fx-text-fill: -fx-vantatext;
+    -fx-highlight-fill: -fx-vantaaccentsoft;
+    -fx-highlight-text-fill: -fx-vantatext;
     -fx-font-family: "Consolas", "JetBrains Mono", monospace;
     -fx-font-size: 12px;
 }
@@ -2045,15 +2045,15 @@
 }
 
 .button.accent-swatch {
-    -fx-background-color: -v-hair-strong;
+    -fx-background-color: -fx-v-hair-strong;
     -fx-background-insets: 0;
     -fx-background-radius: 99;
     -fx-padding: 5;
     -fx-cursor: hand;
 }
-.button.accent-swatch:hover { -fx-background-color: -vantatext; }
+.button.accent-swatch:hover { -fx-background-color: -fx-vantatext; }
 .button.accent-swatch:focused {
-    -fx-border-color: -vantaaccent-a55;
+    -fx-border-color: -fx-vantaaccent-a55;
     -fx-border-width: 2px;
     -fx-border-radius: 99;
     -fx-border-insets: -2px;
@@ -2065,7 +2065,7 @@
     -fx-spacing: 2;
 }
 .settings-nav-group {
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
     -fx-padding: 14 10 4 10;
@@ -2074,28 +2074,28 @@
     -fx-background-color: transparent;
     -fx-background-radius: 8;
     -fx-alignment: center-left;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
     -fx-padding: 8 12;
     -fx-cursor: hand;
 }
 .button.settings-nav-button:hover {
-    -fx-background-color: -v-hair;
-    -fx-text-fill: -vantatext;
+    -fx-background-color: -fx-v-hair;
+    -fx-text-fill: -fx-vantatext;
 }
 .button.settings-nav-button-active,
 .button.settings-nav-button.active,
 .button.settings-nav-button:selected {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 8, 7;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
-.button.settings-nav-button.selected { -fx-background-color: -v-hair-strong, -v-card; -fx-background-insets: 0, 1; -fx-background-radius: 8, 7; -fx-text-fill: -vantatext; }
+.button.settings-nav-button.selected { -fx-background-color: -fx-v-hair-strong, -fx-v-card; -fx-background-insets: 0, 1; -fx-background-radius: 8, 7; -fx-text-fill: -fx-vantatext; }
 
 .instance-tabs {
-    -fx-background-color: -v-hair-strong, -v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-well;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 11, 10;
     -fx-padding: 4;
@@ -2104,16 +2104,16 @@
 .button.content-tab {
     -fx-background-color: transparent;
     -fx-background-radius: 8;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-font-family: "Geist Medium";
     -fx-font-size: 13px;
     -fx-padding: 7 16;
     -fx-cursor: hand;
 }
-.button.content-tab:hover { -fx-background-color: -v-hair; -fx-text-fill: -vantatext; }
+.button.content-tab:hover { -fx-background-color: -fx-v-hair; -fx-text-fill: -fx-vantatext; }
 .button.content-tab-active,
 .button.content-tab-active:hover {
-    -fx-background-color: -vantaaccent;
-    -fx-text-fill: -vantaaccentforeground;
+    -fx-background-color: -fx-vantaaccent;
+    -fx-text-fill: -fx-vantaaccentforeground;
     -fx-font-family: "Geist SemiBold";
 }
