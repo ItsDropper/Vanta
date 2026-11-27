@@ -97,6 +97,25 @@ class VPackServiceTest {
     }
 
     @Test
+    void excludesPrivateMigrationBackupEvenWhenOtherFilesAreSelected() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("backup-exclusion"));
+        Instance instance = new Instance("backup-exclusion", "Backup Exclusion", "1.21.11",
+                "Fabric", "0.16.0", source);
+        write(source, "custom/keep.dat");
+        Files.writeString(source.resolve(InstanceMetadataMigrator.BACKUP_FILE_NAME), """
+                {"directory":"C:/Users/old-machine/Vanta/instances/private"}
+                """);
+        Path archive = temporaryDirectory.resolve("backup-exclusion.vpack");
+
+        VPackService.createVPack(instance, archive,
+                new VPackService.Options(true, true, true, true, true, true, true, true));
+
+        Set<String> names = readNames(archive);
+        assertTrue(names.contains("custom/keep.dat"));
+        assertFalse(names.contains(InstanceMetadataMigrator.BACKUP_FILE_NAME));
+    }
+
+    @Test
     void verifiesLegacyVPackMetadataWithoutDependingOnGsonPathBinding() throws Exception {
         Path archive = temporaryDirectory.resolve("legacy-metadata.vpack");
         String metadata = """
