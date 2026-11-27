@@ -1,6 +1,5 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
@@ -177,7 +176,7 @@ public final class InstanceBackupService {
 
         final Instance original;
         try {
-            original = new ObjectMapper().readValue(metadataBytes, Instance.class);
+            original = InstanceMetadataMigrator.readMetadata(metadataBytes, null);
         } catch (Exception failure) {
             throw new IOException("The backup's instance metadata is invalid.", failure);
         }
@@ -282,10 +281,9 @@ public final class InstanceBackupService {
 
             Path metadata = target.resolve("instance.json");
             if (!Files.isRegularFile(metadata)) throw new IOException("This ZIP is not a Vanta instance backup (instance.json is missing).");
-            ObjectMapper mapper = new ObjectMapper();
             Instance original;
             try {
-                original = mapper.readValue(metadata.toFile(), Instance.class);
+                original = InstanceMetadataMigrator.readMetadata(Files.readAllBytes(metadata), target);
             } catch (Exception ex) {
                 throw new IOException("The backup's instance metadata is invalid.", ex);
             }
@@ -298,7 +296,7 @@ public final class InstanceBackupService {
             }
             Instance restored = new Instance(id, requestedName.trim(), original.getMinecraftVersion(),
                     original.getLoader(), original.getLoaderVersion(), target, original.getIcon());
-            mapper.writerWithDefaultPrettyPrinter().writeValue(metadata.toFile(), restored);
+            InstanceManager.saveInstance(restored);
             Files.deleteIfExists(marker);
             completed = true;
             recordTimeline(restored, LaunchHistoryRepository.Outcome.BACKUP_RESTORED,
