@@ -1,7 +1,7 @@
 /* create.css: create-instance flow. */
 
 .create-tile {
-    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 13, 12, 12;
     -fx-padding: 1;
@@ -11,11 +11,11 @@
 
 .create-tile:hover,
 .create-tile:focused {
-    -fx-background-color: -vantaaccent-a55, -v-card-hover, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-color: -fx-vantaaccent-a55, -fx-v-card-hover, linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 .create-tile:pressed {
-    -fx-background-color: -vantaaccent-a55, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-color: -fx-vantaaccent-a55, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 .create-tile-shade {
@@ -23,7 +23,7 @@
 }
 
 .create-tile-plate {
-    -fx-background-color: -v-scrim;
+    -fx-background-color: -fx-v-scrim;
     -fx-background-radius: 12;
     -fx-border-color: rgba(255, 255, 255, 0.14);
     -fx-border-radius: 12;
@@ -37,19 +37,19 @@
 .create-tile-title {
     -fx-font-family: "Poppins SemiBold";
     -fx-font-size: 16px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .create-tile-description {
     -fx-font-size: 12.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
     -fx-wrap-text: true;
 }
 
 /* ---- live instance preview ------------------------------------------------ */
 
 .create-preview {
-    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 14, 13, 13;
     -fx-padding: 1;
@@ -59,35 +59,35 @@
 .create-preview-name {
     -fx-font-family: "Poppins SemiBold";
     -fx-font-size: 18px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 
 .create-preview-meta {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 /* ---- import sources ------------------------------------------------------- */
 
 .import-source-plate {
-    -fx-background-color: -vantaaccent-a18;
+    -fx-background-color: -fx-vantaaccent-a18;
     -fx-background-radius: 14;
 }
 
 .import-source-plate .icon-view,
 .import-source-plate .svg-path {
-    -fx-stroke: -vantaaccent;
+    -fx-stroke: -fx-vantaaccent;
 }
 
 .import-source {
-    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 13, 12, 12;
 }
 
 .import-source:hover {
-    -fx-background-color: -vantaaccent-a55, -v-card-hover, linear-gradient(to bottom, -v-gloss, transparent 55%);
+    -fx-background-color: -fx-vantaaccent-a55, -fx-v-card-hover, linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
 }
 
 /* ---- preset rows ---------------------------------------------------------- */
@@ -95,24 +95,24 @@
 .button.preset-choice-card .preset-choice-meta {
     -fx-font-family: "JetBrains Mono";
     -fx-font-size: 11.5px;
-    -fx-text-fill: -vantamuted;
+    -fx-text-fill: -fx-vantamuted;
 }
 
 .button.preset-choice-card .preset-choice-icon {
-    -fx-background-color: -vantaaccent-a18;
+    -fx-background-color: -fx-vantaaccent-a18;
     -fx-background-radius: 12;
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }
 
 .button.preset-choice-card .preset-choice-icon .icon-view,
 .button.preset-choice-card .preset-choice-icon .svg-path {
-    -fx-stroke: -vantaaccent;
+    -fx-stroke: -fx-vantaaccent;
 }
 
 /* ---- preset configuration ------------------------------------------------- */
 
 .preset-configuration-panel .preset-config-hero {
-    -fx-background-color: -v-hair-strong, -v-card, linear-gradient(to right, -vantaaccent-a18, transparent 70%);
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to right, -fx-vantaaccent-a18, transparent 70%);
     -fx-background-insets: 0, 1, 1;
     -fx-background-radius: 14, 13, 13;
     -fx-border-color: transparent;
@@ -120,7 +120,7 @@
 }
 
 .preset-configuration-panel .preset-config-section {
-    -fx-background-color: -v-hair, -v-card;
+    -fx-background-color: -fx-v-hair, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
     -fx-border-color: transparent;
@@ -148,9 +148,9 @@
 }
 .vanta-profile-bundle {
     -fx-padding: 14px 16px;
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 12px;
-    -fx-border-color: -v-hair-strong;
+    -fx-border-color: -fx-v-hair-strong;
     -fx-border-radius: 12px;
 }
 .vanta-profile-bundle-toggle {
@@ -167,26 +167,26 @@
 /* Profile ownership surfaces in the installed-content view. */
 .vanta-profile-banner {
     -fx-padding: 14px 16px;
-    -fx-background-color: -v-card;
+    -fx-background-color: -fx-v-card;
     -fx-background-radius: 12px;
-    -fx-border-color: -v-hair-strong;
+    -fx-border-color: -fx-v-hair-strong;
     -fx-border-radius: 12px;
 }
 .vanta-profile-banner-title {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 14px;
-    -fx-text-fill: -vantatext;
+    -fx-text-fill: -fx-vantatext;
 }
 .vanta-profile-banner-details {
     -fx-font-family: "Geist Medium";
     -fx-font-size: 12px;
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }
 .vanta-profile-banner-note {
     -fx-font-size: 11px;
-    -fx-text-fill: -vantasubtle;
+    -fx-text-fill: -fx-vantasubtle;
 }
 .vanta-profile-mod-tag {
     -fx-font-size: 10px;
-    -fx-text-fill: -vantaaccent;
+    -fx-text-fill: -fx-vantaaccent;
 }

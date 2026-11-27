@@ -600,5 +600,5 @@
 }
 
 .vanta-logo-mark {
-    -fx-background-color: -v-brand;
+    -fx-background-color: -fx-v-brand;
 }

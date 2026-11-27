@@ -838,11 +838,11 @@
 /* ---- primary action glow, pressed feedback ------------------------------- */
 
 .button.primary-button {
-    -fx-effect: dropshadow(gaussian, -vantaaccent-a30, 14, 0.05, 0, 3);
+    -fx-effect: dropshadow(gaussian, -fx-vantaaccent-a30, 14, 0.05, 0, 3);
 }
 
 .button.primary-button:hover {
-    -fx-effect: dropshadow(gaussian, -vantaaccent-a55, 20, 0.1, 0, 4);
+    -fx-effect: dropshadow(gaussian, -fx-vantaaccent-a55, 20, 0.1, 0, 4);
 }
 
 .button.primary-button:pressed {

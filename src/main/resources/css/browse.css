@@ -60,7 +60,7 @@
 /* ---- filter rail (global browser) ---------------------------------------- */
 
 .global-mods-page .modrinth-filter-sidebar {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 13, 12;
     -fx-padding: 14;
@@ -81,11 +81,11 @@
 .global-mods-page .modrinth-filter-sidebar .titled-pane > .title > .text {
     -fx-font-family: "Geist SemiBold";
     -fx-font-size: 13px;
-    -fx-fill: -vantatext;
+    -fx-fill: -fx-vantatext;
 }
 
 .global-mods-page .modrinth-filter-sidebar .titled-pane > .title > .arrow-button > .arrow {
-    -fx-background-color: -vantasubtle;
+    -fx-background-color: -fx-vantasubtle;
     -fx-scale-x: 0.8;
     -fx-scale-y: 0.8;
 }
@@ -95,18 +95,18 @@
 }
 
 .global-mods-page .modrinth-filter-option:hover {
-    -fx-background-color: -v-card-hover;
+    -fx-background-color: -fx-v-card-hover;
 }
 
 .global-mods-page .modrinth-filter-option-selected {
-    -fx-background-color: -vantaaccent-a18;
-    -fx-text-fill: -vantaaccent;
+    -fx-background-color: -fx-vantaaccent-a18;
+    -fx-text-fill: -fx-vantaaccent;
 }
 
 /* ---- per-instance browser chrome ---------------------------------------- */
 
 .content-browser-bar {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 13, 12;
     -fx-padding: 8;
@@ -123,7 +123,7 @@
 .global-mods-page .modrinth-content-segments {
     -fx-max-width: 760;
     -fx-spacing: 4;
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 12, 11;
     -fx-border-color: transparent;
@@ -134,7 +134,7 @@
 }
 
 .instance-tabs {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 12, 11;
     -fx-border-color: transparent;
@@ -148,26 +148,26 @@
 /* ---- loading skeleton ---------------------------------------------------- */
 
 .skeleton-card {
-    -fx-background-color: -v-hair, -v-card;
+    -fx-background-color: -fx-v-hair, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 13, 12;
     -fx-padding: 14;
 }
 
 .skeleton-icon {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 12;
 }
 
 .skeleton-line {
-    -fx-background-color: -v-well;
+    -fx-background-color: -fx-v-well;
     -fx-background-radius: 6;
 }
 
 /* ---- project details ------------------------------------------------------ */
 
 .mod-details-hero {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 15, 14;
 }
@@ -177,7 +177,7 @@
 }
 
 .mod-details-hero .mod-details-icon {
-    -fx-background-color: -v-hair-strong, -v-page;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
     -fx-background-insets: 0, 2;
     -fx-background-radius: 22, 20;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.5), 16, 0.1, 0, 6);
@@ -189,7 +189,7 @@
 }
 
 .mod-details-description-card {
-    -fx-background-color: -v-hair-strong, -v-card;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 14, 13;
 }
