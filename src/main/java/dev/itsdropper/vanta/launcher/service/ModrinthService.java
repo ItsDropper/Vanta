@@ -12,8 +12,20 @@ import java.nio.file.StandardCopyOption;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Locale;
 
 public class ModrinthService {
+    private static final Map<String, String> DEPENDENCY_PROJECT_SLUG_ALIASES = Map.of(
+            "oneconfigv1", "oneconfig"
+    );
+
+    static String modrinthSlugForDependency(String modId) {
+        if (modId == null || modId.isBlank()) return modId;
+        String normalized = modId.trim().toLowerCase(Locale.ROOT);
+        return DEPENDENCY_PROJECT_SLUG_ALIASES.getOrDefault(normalized, normalized);
+    }
+
     private final ModrinthClient client = new ModrinthClient();
     private final InstalledModScanner installedModScanner = new InstalledModScanner();
     private final ModrinthCatalogService catalog = new ModrinthCatalogService(client, installedModScanner);
@@ -197,24 +209,22 @@ public class ModrinthService {
         List<InstalledModScanner.MissingDependency> repaired = new ArrayList<>();
         for (InstalledModScanner.MissingDependency dependency : missing) {
             String modId = dependency.modId();
-            boolean alreadyInstalled = installedModScanner.scan(instance).stream()
-                    .anyMatch(mod -> mod != null && mod.getModId() != null
-                            && modId.equalsIgnoreCase(mod.getModId()));
-            if (alreadyInstalled) continue;
-            reporter.accept("Resolving required dependency " + modId + "...");
+            String projectSlug = modrinthSlugForDependency(modId);
+            reporter.accept("Resolving required dependency " + modId
+                    + (projectSlug.equalsIgnoreCase(modId) ? "" : " (Modrinth: " + projectSlug + ")") + "...");
             ModrinthProject project = null;
             try {
-                project = catalog.getProjectBySlug(modId);
+                project = catalog.getProjectBySlug(projectSlug);
             } catch (IOException notFoundBySlug) {
-                // Some loader mod IDs differ from their Modrinth slugs.
+                // Some loader IDs have a different upstream project slug.
             }
 
             if (project == null) {
-                List<ModrinthProject> candidates = catalog.searchMods(instance, modId);
+                List<ModrinthProject> candidates = catalog.searchMods(instance, projectSlug);
                 if (candidates != null) {
                     project = candidates.stream()
                             .filter(candidate -> candidate != null
-                                    && modId.equalsIgnoreCase(candidate.getSlug()))
+                                    && projectSlug.equalsIgnoreCase(candidate.getSlug()))
                             .findFirst().orElse(null);
                 }
             }
