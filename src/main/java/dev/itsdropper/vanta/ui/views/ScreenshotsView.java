@@ -1004,13 +1004,14 @@ public class ScreenshotsView extends VBox {
                 javafx.scene.paint.Color.TRANSPARENT
         );
 
-        if (getScene() != null
-                && !getScene().getStylesheets().isEmpty()) {
-
-            scene.getStylesheets().addAll(
-                    getScene().getStylesheets()
-            );
-        }
+        // A Stage owns a separate Scene and therefore does not inherit the
+        // launcher's looked-up theme colors. Install the complete stylesheet
+        // stack and initialize the popup root before JavaFX performs CSS.
+        dev.itsdropper.vanta.ui.Stylesheets.addTo(scene);
+        dev.itsdropper.vanta.ui.ThemeManager.apply(
+                root,
+                dev.itsdropper.vanta.ui.ThemeManager.loadAccent()
+        );
 
         // =========================================================
         // WINDOW DRAGGING
@@ -1402,13 +1403,14 @@ public class ScreenshotsView extends VBox {
                 javafx.scene.paint.Color.TRANSPARENT
         );
 
-        if (getScene() != null
-                && !getScene().getStylesheets().isEmpty()) {
-
-            scene.getStylesheets().addAll(
-                    getScene().getStylesheets()
-            );
-        }
+        // A Stage owns a separate Scene and therefore does not inherit the
+        // launcher's looked-up theme colors. Install the complete stylesheet
+        // stack and initialize the popup root before JavaFX performs CSS.
+        dev.itsdropper.vanta.ui.Stylesheets.addTo(scene);
+        dev.itsdropper.vanta.ui.ThemeManager.apply(
+                root,
+                dev.itsdropper.vanta.ui.ThemeManager.loadAccent()
+        );
 
         dialog.setScene(
                 scene
