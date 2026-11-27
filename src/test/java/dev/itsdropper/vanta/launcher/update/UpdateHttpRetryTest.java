@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.IOException;
 import java.net.URI;
+import java.time.Duration;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -55,6 +56,7 @@ class UpdateHttpRetryTest {
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create("http://127.0.0.1:" + server.getLocalPort() + "/release"))
+                    .timeout(Duration.ofSeconds(10))
                     .GET()
                     .build();
 
