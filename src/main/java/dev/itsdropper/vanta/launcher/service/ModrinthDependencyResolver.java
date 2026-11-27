@@ -791,6 +791,18 @@ private boolean resolveDependencies(
                             dependencyModId
                     );
 
+            if (resolvedDependency == null) {
+                String embeddedVersion = findResolvedEmbeddedModuleVersion(
+                        resolved.values(), dependencyModId);
+                if (embeddedVersion != null) {
+                    boolean satisfies = matchesModVersionConstraint(embeddedVersion, constraint);
+                    System.out.println("[Vanta DEBUG]   Existing embedded dependency "
+                            + dependencyModId + " " + embeddedVersion + " satisfies=" + satisfies);
+                    if (!satisfies) return false;
+                    continue;
+                }
+            }
+
             if (resolvedDependency != null) {
 
                 InstalledMod dependencyMetadata =
@@ -1103,6 +1115,41 @@ private ModrinthVersion findResolvedModDependency(
         return null;
     }
 
+    /**
+     * Some Fabric libraries expose additional mod IDs from nested JARs rather
+     * than from the top-level fabric.mod.json. OneConfig's oneconfigv1 API is
+     * one such module. Inspect the selected provider artifact instead of
+     * treating its project slug as if it were the nested mod ID.
+     */
+    private String findResolvedEmbeddedModuleVersion(
+            Collection<ModrinthVersion> resolved,
+            String moduleId
+    ) throws IOException, InterruptedException {
+        if (resolved == null || moduleId == null || moduleId.isBlank()) return null;
+
+        for (ModrinthVersion version : resolved) {
+            if (version == null || version.getId() == null) continue;
+            Map<String, String> modules = fabricApiModuleCache.get(version.getId());
+            if (modules == null) {
+                ModrinthFile file = findPrimaryFile(version);
+                if (file == null || file.getUrl() == null || file.getUrl().isBlank()) continue;
+
+                Path tempFile = Files.createTempFile("vanta-provider-modules-", ".jar");
+                try {
+                    DownloadUtil.downloadFile(file.getUrl(), tempFile);
+                    modules = installedModScanner.scanFabricModuleVersions(tempFile);
+                    fabricApiModuleCache.put(version.getId(), modules);
+                } finally {
+                    Files.deleteIfExists(tempFile);
+                }
+            }
+
+            String moduleVersion = modules.get(moduleId);
+            if (moduleVersion != null && !moduleVersion.isBlank()) return moduleVersion;
+        }
+        return null;
+    }
+
 private String findModrinthProjectForModId(
             Instance instance,
             String dependencyModId
@@ -1129,6 +1176,7 @@ private String findModrinthProjectForModId(
                 ModrinthProject project = client.getProject(projectSlug);
                 if (project != null && project.getProjectId() != null
                         && !project.getProjectId().isBlank()
+                        && project.getSlug() != null
                         && projectSlug.equalsIgnoreCase(project.getSlug())) {
                     modIdProjectCache.put(normalizedModId, project.getProjectId());
                     return project.getProjectId();
@@ -1372,10 +1420,28 @@ private boolean resolveModDependency(
                         continue;
                     }
 
-                } else if (!dependencyModId.equals(metadata.getModId())) {
-                    continue;
-                } else if (!matchesModVersionConstraint(
-                        metadata.getVersion(), constraint)) {
+                } else {
+                    String embeddedModuleVersion = findResolvedEmbeddedModuleVersion(
+                            List.of(candidate), dependencyModId);
+                    if (embeddedModuleVersion != null) {
+                        if (!matchesModVersionConstraint(embeddedModuleVersion, constraint)) {
+                            continue;
+                        }
+                    } else if (!dependencyModId.equals(metadata.getModId())) {
+                        continue;
+                    } else if (!matchesModVersionConstraint(metadata.getVersion(), constraint)) {
+                        System.out.println(
+                                "[Vanta DEBUG] Rejected loader metadata dependency candidate "
+                                        + candidate.getVersionNumber()
+                                        + " for "
+                                        + dependencyModId
+                                        + " [" + constraint + "]"
+                        );
+                        continue;
+                    }
+                }
+
+                /*
 
                     System.out.println(
                             "[Vanta DEBUG] Rejected loader metadata dependency candidate "
