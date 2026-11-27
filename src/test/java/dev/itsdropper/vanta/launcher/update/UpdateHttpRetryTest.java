@@ -1,9 +1,13 @@
 package dev.itsdropper.vanta.launcher.update;
 
-import com.sun.net.httpserver.HttpServer;
 import org.junit.jupiter.api.Test;
 
-import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -17,21 +21,40 @@ class UpdateHttpRetryTest {
     @Test
     void retriesTransientServerResponsesUntilReleaseServerRecovers() throws Exception {
         AtomicInteger requests = new AtomicInteger();
-        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/release", exchange -> {
-            int attempt = requests.incrementAndGet();
-            byte[] body = (attempt < 3 ? "temporarily unavailable" : "release")
-                    .getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(attempt < 3 ? 503 : 200, body.length);
-            try (var output = exchange.getResponseBody()) {
-                output.write(body);
-            }
-        });
-        server.start();
-        try {
+        try (ServerSocket server = new ServerSocket(0)) {
+            Thread responder = new Thread(() -> {
+                try {
+                    for (int i = 0; i < 3; i++) {
+                        try (Socket socket = server.accept()) {
+                            BufferedReader reader = new BufferedReader(
+                                    new InputStreamReader(socket.getInputStream(), StandardCharsets.US_ASCII));
+                            String line;
+                            while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                                // Consume the complete HTTP request headers.
+                            }
+                            int attempt = requests.incrementAndGet();
+                            byte[] body = (attempt < 3 ? "temporarily unavailable" : "release")
+                                    .getBytes(StandardCharsets.UTF_8);
+                            String status = attempt < 3 ? "503 Service Unavailable" : "200 OK";
+                            OutputStream output = socket.getOutputStream();
+                            output.write(("HTTP/1.1 " + status + "\\r\\n"
+                                    + "Content-Length: " + body.length + "\\r\\n"
+                                    + "Connection: close\\r\\n\\r\\n")
+                                    .getBytes(StandardCharsets.US_ASCII));
+                            output.write(body);
+                            output.flush();
+                        }
+                    }
+                } catch (IOException failure) {
+                    throw new AssertionError("Local retry test server failed", failure);
+                }
+            }, "vanta-update-retry-test-server");
+            responder.setDaemon(true);
+            responder.start();
+
             HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://127.0.0.1:" + server.getAddress().getPort() + "/release"))
+                    .uri(URI.create("http://127.0.0.1:" + server.getLocalPort() + "/release"))
                     .GET()
                     .build();
 
@@ -40,9 +63,9 @@ class UpdateHttpRetryTest {
                 assertEquals(200, response.statusCode());
                 assertEquals("release", new String(body.readAllBytes(), StandardCharsets.UTF_8));
             }
+            responder.join(5_000);
+            assertFalse(responder.isAlive(), "The local test server should finish all retry responses");
             assertEquals(3, requests.get(), "The client should retry two transient 503 responses");
-        } finally {
-            server.stop(0);
         }
     }
 
