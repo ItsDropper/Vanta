@@ -29,6 +29,10 @@ final class InstanceMetadataMigrator {
     private InstanceMetadataMigrator() {}
 
     static Instance loadAndMigrate(Path metadataFile, Path instanceDirectory) throws IOException {
+        if (Files.isSymbolicLink(metadataFile)
+                || !Files.isRegularFile(metadataFile, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Instance metadata is not a regular, non-symbolic-link file.");
+        }
         JsonNode root = MAPPER.readTree(metadataFile.toFile());
         if (root == null || !root.isObject()) {
             throw new IOException("Instance metadata must be a JSON object.");
