@@ -1138,7 +1138,20 @@ private ModrinthVersion findResolvedModDependency(
 
                 Path tempFile = Files.createTempFile("vanta-provider-modules-", ".jar");
                 try {
-                    DownloadUtil.downloadFile(file.getUrl(), tempFile);
+                    try {
+                        DownloadUtil.downloadFile(file.getUrl(), tempFile);
+                    } catch (InterruptedException interrupted) {
+                        Thread.currentThread().interrupt();
+                        throw interrupted;
+                    } catch (IOException failure) {
+                        throw failure;
+                    } catch (Exception failure) {
+                        throw new IOException(
+                                "Failed to inspect embedded Fabric module metadata: "
+                                        + failure.getMessage(),
+                                failure
+                        );
+                    }
                     modules = installedModScanner.scanFabricModuleVersions(tempFile);
                     fabricApiModuleCache.put(version.getId(), modules);
                 } finally {
