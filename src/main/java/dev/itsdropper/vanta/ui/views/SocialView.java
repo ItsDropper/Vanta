@@ -500,7 +500,17 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
             return Localization.text("social.requestInterrupted");
         }
         if (failure instanceof IOException) {
-            return Localization.text("social.connectionFailed") + " " + failure.getMessage();
+            String detail = failure.getMessage();
+            if (detail == null || detail.isBlank()) {
+                Throwable cause = failure.getCause();
+                while (cause != null && (cause.getMessage() == null || cause.getMessage().isBlank())) {
+                    cause = cause.getCause();
+                }
+                detail = cause == null ? null : cause.getMessage();
+            }
+            return detail == null || detail.isBlank()
+                    ? Localization.text("social.requestFailed")
+                    : Localization.text("social.connectionFailed") + " " + detail;
         }
         return Localization.text("social.requestFailed");
     }
