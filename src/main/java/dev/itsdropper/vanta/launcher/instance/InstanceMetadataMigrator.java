@@ -28,7 +28,15 @@ final class InstanceMetadataMigrator {
 
     private InstanceMetadataMigrator() {}
 
-    static Instance loadAndMigrate(Path metadataFile, Path instanceDirectory) throws IOException {
+    static synchronized Instance loadAndMigrate(Path metadataFile, Path instanceDirectory) throws IOException {
+        if (instanceDirectory == null || Files.isSymbolicLink(instanceDirectory)
+                || !Files.isDirectory(instanceDirectory, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            throw new IOException("Instance directory is not a regular, non-symbolic-link directory.");
+        }
+        Path expectedMetadata = instanceDirectory.toAbsolutePath().normalize().resolve("instance.json");
+        if (!metadataFile.toAbsolutePath().normalize().equals(expectedMetadata)) {
+            throw new IOException("Instance metadata path does not match its instance directory.");
+        }
         if (Files.isSymbolicLink(metadataFile)
                 || !Files.isRegularFile(metadataFile, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
             throw new IOException("Instance metadata is not a regular, non-symbolic-link file.");
