@@ -155,10 +155,7 @@ public class UpdateDownloader {
                 .GET()
                 .build();
 
-        HttpResponse<InputStream> response = httpClient.send(
-                request,
-                HttpResponse.BodyHandlers.ofInputStream()
-        );
+        HttpResponse<InputStream> response = UpdateHttpRetry.send(httpClient, request);
 
         try (InputStream input = response.body()) {
             if (response.statusCode() != 200) {
