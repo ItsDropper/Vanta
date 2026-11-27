@@ -116,7 +116,7 @@ public final class VPackService {
             Instance portableInstance = new Instance(
                     instance.getId(), instance.getName(), instance.getMinecraftVersion(),
                     instance.getLoader(), instance.getLoaderVersion(), null, instance.getIcon());
-            byte[] instanceBytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(portableInstance);
+            byte[] instanceBytes = InstanceMetadataMigrator.writeCurrentMetadataBytes(portableInstance);
             long expanded = manifestBytes.length + instanceBytes.length;
             int entries = 2;
             byte[] buffer = new byte[64 * 1024];
@@ -302,7 +302,7 @@ public final class VPackService {
         final Instance original;
         try {
             manifest = MAPPER.readTree(manifestBytes);
-            original = MAPPER.readValue(instanceBytes, Instance.class);
+            original = InstanceMetadataMigrator.readMetadata(instanceBytes, null);
         } catch (Exception failure) {
             throw new IOException("VPack metadata is invalid.", failure);
         }
