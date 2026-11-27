@@ -46,7 +46,18 @@ try {
         $source = 'legacy SHA-256 sidecar'
         Write-Output 'Using SHA-256 checksum sidecar (legacy release fallback).'
     }
-    $actual = (Get-FileHash -LiteralPath $Archive -Algorithm SHA256).Hash
+    # Get-FileHash is unavailable in Windows PowerShell 2.0/3.0, which can be
+    # present on older Windows installations. Use the .NET crypto API instead.
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    $stream = $null
+    try {
+        $stream = [System.IO.File]::OpenRead($Archive)
+        $hashBytes = $sha256.ComputeHash($stream)
+        $actual = [System.BitConverter]::ToString($hashBytes).Replace('-', '')
+    } finally {
+        if ($null -ne $stream) { $stream.Dispose() }
+        if ($null -ne $sha256) { $sha256.Dispose() }
+    }
     if (-not [string]::Equals($actual, $expected, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw "Downloaded archive SHA-256 mismatch (source: $source; expected: $expected; actual: $actual)."
     }
