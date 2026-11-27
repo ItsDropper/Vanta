@@ -128,11 +128,16 @@ jobs:
           $hash = (Get-FileHash -LiteralPath $testArchive -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -LiteralPath "$testArchive.sha256" -Value "$hash  Vanta-test.zip" -NoNewline
           & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256"
-          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid archive.' }
+          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid sidecar.' }
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256 $hash
+          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid GitHub asset digest.' }
           Set-Content -LiteralPath $testArchive -Value 'tampered fixture' -NoNewline
           & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256" 2>$null
           $negativeExitCode = $LASTEXITCODE
-          if ($negativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive.' }
+          if ($negativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive using a sidecar.' }
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256 $hash 2>$null
+          $digestNegativeExitCode = $LASTEXITCODE
+          if ($digestNegativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive using a GitHub asset digest.' }
           # The negative test must fail, but that expected native exit code must
           # not become the exit code of this otherwise-successful PowerShell step.
           $global:LASTEXITCODE = 0
