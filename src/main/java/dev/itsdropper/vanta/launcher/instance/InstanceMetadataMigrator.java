@@ -33,11 +33,21 @@ final class InstanceMetadataMigrator {
                 || !Files.isRegularFile(metadataFile, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
             throw new IOException("Instance metadata is not a regular, non-symbolic-link file.");
         }
-        JsonNode root = MAPPER.readTree(metadataFile.toFile());
+        if (Files.size(metadataFile) > 1024L * 1024) {
+            throw new IOException("Instance metadata exceeds the 1 MiB safety limit.");
+        }
+
+        // Parse and preserve the same byte snapshot. Never copy a later version
+        // of the file after parsing an earlier one.
+        byte[] originalBytes = Files.readAllBytes(metadataFile);
+        if (originalBytes.length > 1024 * 1024) {
+            throw new IOException("Instance metadata exceeds the 1 MiB safety limit.");
+        }
+        JsonNode root = MAPPER.readTree(originalBytes);
         int schemaVersion = schemaVersion(root);
         Instance instance = decode(root, instanceDirectory);
         if (schemaVersion < CURRENT_SCHEMA_VERSION) {
-            writeMigratedMetadata(metadataFile, instance);
+            writeMigratedMetadata(metadataFile, instance, root, originalBytes);
         }
         return instance;
     }
@@ -113,25 +123,31 @@ final class InstanceMetadataMigrator {
                 StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
     }
 
-    private static void writeMigratedMetadata(Path metadataFile, Instance instance) throws IOException {
+    private static void writeMigratedMetadata(
+            Path metadataFile, Instance instance, JsonNode originalTree, byte[] originalBytes
+    ) throws IOException {
         Path directory = metadataFile.toAbsolutePath().normalize().getParent();
         if (directory == null) throw new IOException("Instance metadata has no parent directory.");
 
-        Path backup = directory.resolve(BACKUP_FILE_NAME);
-        if (!Files.exists(backup, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
-            // CREATE_NEW semantics prevent replacing an earlier recovery copy.
-            // A concurrent discovery may win the same first-migration race.
-            try {
-                Files.copy(metadataFile, backup);
-            } catch (java.nio.file.FileAlreadyExistsException concurrentMigration) {
-                // The other migration has already preserved the original.
-            }
-        }
+        preserveOriginal(directory.resolve(BACKUP_FILE_NAME), originalBytes);
 
-        Path temporary = directory.resolve("instance.json." + UUID.randomUUID() + ".tmp");
+        // Retain extension fields that this launcher version does not interpret.
+        // Canonical fields are overwritten with validated values and the actual
+        // instance folder, so stale machine-specific paths are never trusted.
+        ObjectNode normalized = (ObjectNode) originalTree.deepCopy();
+        normalized.put("id", instance.getId());
+        normalized.put("name", instance.getName());
+        normalized.put("minecraftVersion", instance.getMinecraftVersion());
+        normalized.put("loader", instance.getLoader());
+        normalized.put("loaderVersion", instance.getLoaderVersion());
+        normalized.put("directory", instance.getDirectory().toString());
+        normalized.put("icon", instance.getIcon());
+        normalized.put("schemaVersion", CURRENT_SCHEMA_VERSION);
+        byte[] migratedBytes = MAPPER.writeValueAsString(normalized).getBytes(StandardCharsets.UTF_8);
+
+        Path temporary = Files.createTempFile(directory, "instance.json.", ".tmp");
         try {
-            Files.createFile(temporary);
-            writeCurrentMetadata(temporary, instance);
+            writeAndSync(temporary, migratedBytes);
             try {
                 Files.move(temporary, metadataFile,
                         StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
@@ -141,5 +157,55 @@ final class InstanceMetadataMigrator {
         } finally {
             Files.deleteIfExists(temporary);
         }
+    }
+
+    /**
+     * Creates the recovery copy exclusively. A process interruption can leave
+     * a partial backup, but then migration refuses to proceed on the next run;
+     * the original metadata remains untouched until the backup is fully synced.
+     */
+    private static void preserveOriginal(Path backup, byte[] originalBytes) throws IOException {
+        if (Files.exists(backup, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            verifyExistingBackup(backup, originalBytes);
+            return;
+        }
+
+        boolean created = false;
+        try (java.nio.channels.FileChannel channel = java.nio.channels.FileChannel.open(
+                backup, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE)) {
+            created = true;
+            writeAndSync(channel, originalBytes);
+        } catch (java.nio.file.FileAlreadyExistsException concurrentMigration) {
+            verifyExistingBackup(backup, originalBytes);
+        } catch (IOException failure) {
+            if (created) {
+                try { Files.deleteIfExists(backup); }
+                catch (IOException cleanupFailure) { failure.addSuppressed(cleanupFailure); }
+            }
+            throw failure;
+        }
+    }
+
+    private static void verifyExistingBackup(Path backup, byte[] originalBytes) throws IOException {
+        if (Files.isSymbolicLink(backup)
+                || !Files.isRegularFile(backup, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+                || Files.size(backup) != originalBytes.length
+                || !java.util.Arrays.equals(Files.readAllBytes(backup), originalBytes)) {
+            throw new IOException("The existing instance metadata backup is not an exact copy; "
+                    + "the original metadata was left unchanged.");
+        }
+    }
+
+    private static void writeAndSync(Path file, byte[] bytes) throws IOException {
+        try (java.nio.channels.FileChannel channel = java.nio.channels.FileChannel.open(
+                file, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+            writeAndSync(channel, bytes);
+        }
+    }
+
+    private static void writeAndSync(java.nio.channels.FileChannel channel, byte[] bytes) throws IOException {
+        java.nio.ByteBuffer buffer = java.nio.ByteBuffer.wrap(bytes);
+        while (buffer.hasRemaining()) channel.write(buffer);
+        channel.force(true);
     }
 }
