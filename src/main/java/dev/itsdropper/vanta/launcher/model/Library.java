@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import dev.itsdropper.vanta.json.annotation.JsonIgnoreProperties;
 
 import java.util.List;
 import java.util.Map;

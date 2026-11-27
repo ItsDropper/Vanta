@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.model.InstanceSettings;
 import dev.itsdropper.vanta.ui.LauncherSettings;
@@ -133,10 +133,10 @@ public final class ModrinthAppImporter {
             var metadata = result.getMetaData();
             for (int i = 1; i <= metadata.getColumnCount(); i++) {
                 Object value = result.getObject(i);
-                if (value != null) ((com.fasterxml.jackson.databind.node.ObjectNode) node)
+                if (value != null) ((dev.itsdropper.vanta.json.ObjectNode) node)
                         .put(metadata.getColumnLabel(i), value.toString());
                 if ("extra_launch_args_text".equals(metadata.getColumnLabel(i)) && value != null) {
-                    ((com.fasterxml.jackson.databind.node.ObjectNode) node).put("extra_launch_args", value.toString());
+                    ((dev.itsdropper.vanta.json.ObjectNode) node).put("extra_launch_args", value.toString());
                 }
             }
             return node;
@@ -255,7 +255,7 @@ public final class ModrinthAppImporter {
         String args = settings.path("extra_launch_args").asText("");
         if (args.startsWith("[")) {
             try {
-                List<String> values = JSON.readerForListOf(String.class).readValue(args);
+                List<String> values = JSON.readList(args, String.class);
                 LauncherSettings.setDefaultJavaArguments(String.join(" ", values));
                 imported = true;
             } catch (IOException ignored) { }

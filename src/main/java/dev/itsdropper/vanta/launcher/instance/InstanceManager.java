@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import dev.itsdropper.vanta.json.ObjectMapper;
+import dev.itsdropper.vanta.json.SerializationFeature;
 
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
@@ -54,21 +54,40 @@ public class InstanceManager {
             boolean includeInterrupted,
             Consumer<String> skippedInstanceReporter
     ) {
-        Path instancesDirectory = MinecraftLocator.getInstancesDirectory();
-        List<Instance> instances = new ArrayList<>();
-        if (!Files.isDirectory(instancesDirectory)) return instances;
+        return discoverInstances(
+                MinecraftLocator.getInstancesDirectory(),
+                includeInterrupted,
+                skippedInstanceReporter
+        );
+    }
 
+    /**
+     * Filesystem-only discovery. Listing the library must never perform recovery,
+     * acquire mod-install locks, or hide a valid instance because a recovery
+     * journal is damaged. Recovery belongs to the launch/repair transaction.
+     */
+    static List<Instance> discoverInstances(
+            Path instancesDirectory,
+            boolean includeInterrupted,
+            Consumer<String> skippedInstanceReporter
+    ) {
+        List<Instance> instances = new ArrayList<>();
+        if (instancesDirectory == null || !Files.isDirectory(instancesDirectory)) {
+            System.err.println("[Vanta Discovery] Instance directory is unavailable: " + instancesDirectory);
+            return instances;
+        }
+
+        System.out.println("[Vanta Discovery] Scanning " + instancesDirectory.toAbsolutePath().normalize());
         try (var stream = Files.list(instancesDirectory)) {
             stream.filter(Files::isDirectory).forEach(directory -> {
-                if (!includeInterrupted && Files.exists(directory.resolve(INSTALLING_MARKER))) {
-                    return;
-                }
-
                 Path metadata = directory.resolve("instance.json");
                 if (!Files.isRegularFile(metadata)) {
+                    String message = "Instance folder '" + directory.getFileName()
+                            + "' has no instance.json metadata.";
                     if (includeInterrupted && skippedInstanceReporter != null) {
-                        skippedInstanceReporter.accept("Could not automatically repair instance folder '"
-                                + directory.getFileName() + "': instance.json is missing.");
+                        skippedInstanceReporter.accept(message);
+                    } else {
+                        System.err.println("[Vanta Discovery] " + message);
                     }
                     return;
                 }
@@ -80,32 +99,26 @@ public class InstanceManager {
                     }
 
                     // The directory being scanned is authoritative. Never let a
-                    // stale metadata path redirect repair into another instance.
+                    // stale metadata path redirect launch or repair into another instance.
                     Instance instance = new Instance(
                             stored.getId(), stored.getName(), stored.getMinecraftVersion(),
                             stored.getLoader(), stored.getLoaderVersion(), directory.toAbsolutePath().normalize(),
                             stored.getIcon());
-                    try {
-                        ModrinthInstallService.recoverPendingTransactions(instance);
-                    } catch (Exception transactionFailure) {
-                        if (!includeInterrupted) {
-                            throw transactionFailure;
-                        }
-                        // Explicit repair must still be offered when a Modrinth
-                        // transaction journal is itself damaged. The repair path
-                        // can rebuild managed game files without silently hiding
-                        // the entire instance from the user.
-                        System.err.println("Pending Modrinth transaction recovery failed for "
-                                + directory + "; retaining it in the repair queue.");
-                        transactionFailure.printStackTrace();
+
+                    // Interrupted installations remain visible so users can recover
+                    // them. LaunchService detects the marker and repairs before launch.
+                    if (Files.exists(directory.resolve(INSTALLING_MARKER))) {
+                        System.err.println("[Vanta Discovery] Found interrupted instance: "
+                                + directory.getFileName());
                     }
+
                     instances.add(instance);
                 } catch (Exception failure) {
-                    String message = "Could not automatically repair instance folder '"
+                    String message = "Could not load instance folder '"
                             + directory.getFileName() + "': "
                             + (failure.getMessage() == null
                             ? failure.getClass().getSimpleName() : failure.getMessage());
-                    System.err.println(message);
+                    System.err.println("[Vanta Discovery] " + message);
                     failure.printStackTrace();
                     if (skippedInstanceReporter != null) {
                         skippedInstanceReporter.accept(message);
@@ -113,10 +126,13 @@ public class InstanceManager {
                 }
             });
         } catch (IOException failure) {
-            throw new IllegalStateException("Failed to discover Vanta instances.", failure);
+            throw new IllegalStateException("Failed to discover Vanta instances in "
+                    + instancesDirectory.toAbsolutePath().normalize(), failure);
         }
 
         instances.sort(Comparator.comparing(Instance::getName, String.CASE_INSENSITIVE_ORDER));
+        System.out.println("[Vanta Discovery] Loaded " + instances.size() + " instance(s) from "
+                + instancesDirectory.toAbsolutePath().normalize());
         return instances;
     }
 

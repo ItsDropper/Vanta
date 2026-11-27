@@ -1,7 +1,7 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.ui.LauncherSettings;

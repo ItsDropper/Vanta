@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.bundle;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.io.IOException;

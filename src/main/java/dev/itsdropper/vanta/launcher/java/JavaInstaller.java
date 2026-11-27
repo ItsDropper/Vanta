@@ -52,11 +52,11 @@ public class JavaInstaller {
         String architecture = Platform.adoptiumArchitecture();
         String metadataUrl = "https://api.adoptium.net/v3/assets/latest/" + version
                 + "/hotspot?architecture=" + architecture + "&image_type=jdk&os=" + os + "&vendor=eclipse";
-        com.fasterxml.jackson.databind.JsonNode assets =
+        dev.itsdropper.vanta.json.JsonNode assets =
                 dev.itsdropper.vanta.launcher.instance.DownloadUtil.downloadJson(metadataUrl);
-        com.fasterxml.jackson.databind.JsonNode packageInfo = assets.isArray() && !assets.isEmpty()
+        dev.itsdropper.vanta.json.JsonNode packageInfo = assets.isArray() && !assets.isEmpty()
                 ? assets.get(0).path("binary").path("package")
-                : com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.nullNode();
+                : dev.itsdropper.vanta.json.JsonNodeFactory.instance.nullNode();
         String downloadUrl = packageInfo.path("link").asText("");
         String expectedSha256 = packageInfo.path("checksum").asText("").toLowerCase(java.util.Locale.ROOT);
         if (!downloadUrl.startsWith("https://github.com/adoptium/")
@@ -195,6 +195,7 @@ public class JavaInstaller {
     private static void extractTarGz(Path archive, Path destination) throws IOException {
         Process listing = new ProcessBuilder("tar", "-tzf", archive.toString())
                 .redirectErrorStream(true).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(listing);
         String entries;
         try (InputStream input = listing.getInputStream()) {
             entries = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
@@ -220,6 +221,7 @@ public class JavaInstaller {
         Process extraction = new ProcessBuilder(
                 "tar", "-xzf", archive.toString(), "-C", root.toString())
                 .redirectErrorStream(true).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(extraction);
         String output;
         try (InputStream input = extraction.getInputStream()) {
             output = new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);

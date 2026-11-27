@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.update;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -132,7 +132,7 @@ class ReleaseManifestTest {
                 () -> ReleaseManifest.parse(read(altered), "1.3.2", "windows-x64"));
     }
 
-    private static com.fasterxml.jackson.databind.JsonNode read(String value) {
+    private static dev.itsdropper.vanta.json.JsonNode read(String value) {
         try {
             return JSON.readTree(value);
         } catch (IOException failure) {

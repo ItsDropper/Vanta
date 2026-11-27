@@ -139,6 +139,60 @@ jobs:
           Remove-Item $testDirectory -Recurse -Force
           Write-Host 'NSIS installer compiled and checksum verifier passed positive/negative tests.'
 
+      - name: Smoke test the actual Windows installer and uninstaller
+        if: runner.os == 'Windows'
+        timeout-minutes: 10
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $fixtureDirectory = Join-Path $env:RUNNER_TEMP 'vanta-installer-version-test'
+          New-Item -ItemType Directory -Path $fixtureDirectory -Force | Out-Null
+          $metadata = Join-Path $fixtureDirectory 'release.json'
+          $versionPath = Join-Path $fixtureDirectory 'version.txt'
+          Set-Content -LiteralPath $metadata -Value '{"tag_name":"v1.2.3"}' -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath
+          if ($LASTEXITCODE -ne 0 -or (Get-Content -LiteralPath $versionPath -Raw) -ne '1.2.3') {
+            throw 'Installer release-version parser failed its valid-tag test.'
+          }
+          Set-Content -LiteralPath $metadata -Value '{"tag_name":"v1.2.3/../../bad"}' -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath 2>$null
+          if ($LASTEXITCODE -eq 0) { throw 'Installer release-version parser accepted an invalid tag.' }
+          $global:LASTEXITCODE = 0
+
+          $installDirectory = Join-Path $env:LOCALAPPDATA 'Vanta'
+          if (Test-Path $installDirectory) {
+            throw "Unexpected pre-existing Vanta installation in clean runner: $installDirectory"
+          }
+          $installer = (Resolve-Path '.\VantaSetup.exe').Path
+          Write-Host 'Running the real bootstrap installer in silent mode...'
+          $install = Start-Process -FilePath $installer -ArgumentList @('/S', '/LOG', "/D=$installDirectory") -PassThru
+          if (!$install.WaitForExit(360000)) {
+            $install.Kill()
+            throw 'Vanta installer did not finish within six minutes.'
+          }
+          if ($install.ExitCode -ne 0) {
+            $installerLog = Join-Path $env:TEMP 'VantaInstaller.log'
+            $details = if (Test-Path $installerLog) { (Get-Content $installerLog -Tail 100) -join "\n" } else { 'NSIS did not produce its installer log.' }
+            throw "Vanta installer exited with code $($install.ExitCode). $details"
+          }
+          foreach ($required in @('Vanta.exe', 'runtime/lib/modules', 'app/Vanta.cfg', 'updater/VantaUpdater.jar', 'Uninstall.exe')) {
+            if (!(Test-Path (Join-Path $installDirectory $required) -PathType Leaf)) {
+              throw "Installed Vanta package is missing $required."
+            }
+          }
+
+          Write-Host 'Running the installed uninstaller...'
+          $uninstaller = Join-Path $installDirectory 'Uninstall.exe'
+          $uninstall = Start-Process -FilePath $uninstaller -ArgumentList '/S' -PassThru
+          if (!$uninstall.WaitForExit(360000)) {
+            $uninstall.Kill()
+            throw 'Vanta uninstaller did not finish within six minutes.'
+          }
+          if ($uninstall.ExitCode -ne 0) { throw "Vanta uninstaller exited with code $($uninstall.ExitCode)." }
+          if (Test-Path $installDirectory) { throw 'Vanta uninstaller left the installation directory behind.' }
+          Remove-Item $fixtureDirectory -Recurse -Force
+          Write-Host 'Windows installer and uninstaller end-to-end smoke test passed.'
+
       - name: Verify Linux application image layout
         if: runner.os == 'Linux'
         run: |
@@ -214,9 +268,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vanta-distribution-${{ runner.os }}-${{ runner.arch }}
-          path: |
-            build/distributions/*
-            build/packages/*
+          # The ZIP already contains the complete jpackage image. Uploading
+          # build/packages as well duplicates the entire runtime in CI artifacts.
+          path: build/distributions/*
           if-no-files-found: error
           retention-days: 14
 
@@ -279,9 +333,10 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: vanta-windows-arm64-x64-emulation
+          # Keep the portable archive and smoke-test evidence; the archive
+          # already contains the complete application image.
           path: |
             build/distributions/*
-            build/packages/*
             build/app-image-smoke/*
           if-no-files-found: error
           retention-days: 14
@@ -346,7 +401,11 @@ jobs:
               ;;
           esac
 
-          APP=/artifact/packages/Vanta
+          ARCHIVE="$(find /artifact -maxdepth 1 -name 'Vanta-*-linux-x64.zip' -print -quit)"
+          test -n "$ARCHIVE"
+          APP=/tmp/vanta-linux-x64
+          mkdir -p "$APP"
+          unzip -q "$ARCHIVE" -d "$APP"
           test -x "$APP/bin/Vanta"
           test -f "$APP/lib/runtime/lib/modules"
 

@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectNode;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.Platform;
 import dev.itsdropper.vanta.launcher.java.JavaLocator;
@@ -184,6 +184,7 @@ public final class SteinInstaller {
                     .redirectErrorStream(true)
                     .redirectOutput(output.toFile())
                     .start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
             boolean finished;
             try {
                 finished = process.waitFor(15, TimeUnit.SECONDS);
@@ -283,6 +284,7 @@ public final class SteinInstaller {
                 "--mods",
                 "keep"
         ).redirectErrorStream(true).redirectOutput(log.toFile()).start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
 
         boolean finished;
         try {

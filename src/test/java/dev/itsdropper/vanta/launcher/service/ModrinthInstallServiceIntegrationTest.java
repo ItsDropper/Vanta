@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.instance.InstalledModManager;
 import dev.itsdropper.vanta.launcher.instance.InstalledModRecord;
 import dev.itsdropper.vanta.launcher.modrinth.InstalledModScanner;

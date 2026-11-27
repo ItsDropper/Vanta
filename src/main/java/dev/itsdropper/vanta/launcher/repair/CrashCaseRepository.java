@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.repair;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 
 import java.io.IOException;

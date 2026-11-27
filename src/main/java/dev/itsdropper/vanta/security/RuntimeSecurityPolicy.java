@@ -1,7 +1,8 @@
 package dev.itsdropper.vanta.security;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ObjectMapper;
+import dev.itsdropper.vanta.json.VantaJson;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import java.io.*;
 import java.net.URI;
@@ -23,7 +24,7 @@ public final class RuntimeSecurityPolicy {
     private static final URI SIGNATURE=URI.create("https://raw.githubusercontent.com/ItsDropper/Vanta/main/security/runtime-policy.sig");
     private static final String PUBLIC_KEY="mzWz277tLKqkSi2NzgaH9k/uKLHcMw/SJzP6X/JeBVE=";
     private static final int LIMIT=65536;
-    private static final ObjectMapper JSON=new ObjectMapper();
+    private static final ObjectMapper JSON=VantaJson.strictMapper();
     private static final RuntimeSecurityPolicy INSTANCE=new RuntimeSecurityPolicy();
     private final Path cache=MinecraftLocator.getVantaDirectoryPath().resolve("security");
     private final HttpClient http=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5))

@@ -6,8 +6,8 @@ import dev.itsdropper.vanta.ui.components.InstanceCreationProgressDialog;
 import dev.itsdropper.vanta.launcher.instance.InstanceInstallationProgress;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ObjectMapper;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;

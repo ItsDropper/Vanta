@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
@@ -330,7 +330,7 @@ public final class InstanceBackupService {
             throw new IOException("Portable instance settings.json exceeds the 1 MiB safety limit.");
         }
         ObjectMapper mapper = new ObjectMapper();
-        final com.fasterxml.jackson.databind.JsonNode settings;
+        final dev.itsdropper.vanta.json.JsonNode settings;
         try {
             settings = mapper.readTree(settingsFile.toFile());
         } catch (Exception failure) {
@@ -339,7 +339,7 @@ public final class InstanceBackupService {
         if (settings == null || !settings.isObject()) {
             throw new IOException("Portable instance settings.json must contain a JSON object.");
         }
-        ((com.fasterxml.jackson.databind.node.ObjectNode) settings).put("javaPath", "");
+        ((dev.itsdropper.vanta.json.ObjectNode) settings).put("javaPath", "");
 
         Path temporary = Files.createTempFile(settingsFile.getParent(), "settings-portable-", ".tmp");
         try {

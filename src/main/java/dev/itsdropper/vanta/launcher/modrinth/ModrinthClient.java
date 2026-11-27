@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.modrinth;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 
 import java.io.IOException;
 import java.net.URI;
@@ -245,7 +245,7 @@ public class ModrinthClient {
             checkResponse(response);
             List<ModrinthTag> tags = mapper.readValue(
                     response.body(),
-                    mapper.getTypeFactory().constructCollectionType(List.class, ModrinthTag.class)
+                    new dev.itsdropper.vanta.json.TypeReference<List<ModrinthTag>>() {}
             );
             List<ModrinthTag> immutableTags = tags == null ? List.of() : List.copyOf(tags);
             TAG_CACHE.put(tagType, new TagCacheEntry(immutableTags, System.currentTimeMillis()));
@@ -541,11 +541,7 @@ public class ModrinthClient {
 
         return mapper.readValue(
                 response.body(),
-                mapper.getTypeFactory()
-                        .constructCollectionType(
-                                List.class,
-                                ModrinthVersion.class
-                        )
+                new dev.itsdropper.vanta.json.TypeReference<List<ModrinthVersion>>() {}
         );
     }
 
@@ -587,11 +583,7 @@ public class ModrinthClient {
 
         return mapper.readValue(
                 response.body(),
-                mapper.getTypeFactory()
-                        .constructCollectionType(
-                                List.class,
-                                ModrinthTeamMember.class
-                        )
+                new dev.itsdropper.vanta.json.TypeReference<List<ModrinthTeamMember>>() {}
         );
     }
 
@@ -641,11 +633,7 @@ public class ModrinthClient {
 
         return mapper.readValue(
                 response.body(),
-                mapper.getTypeFactory()
-                        .constructCollectionType(
-                                List.class,
-                                ModrinthTeamMember.class
-                        )
+                new dev.itsdropper.vanta.json.TypeReference<List<ModrinthTeamMember>>() {}
         );
     }
 

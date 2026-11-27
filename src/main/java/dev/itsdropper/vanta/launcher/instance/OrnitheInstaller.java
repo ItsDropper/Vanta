@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import dev.itsdropper.vanta.json.JsonNode;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -73,8 +73,8 @@ public final class OrnitheInstaller {
 
     public static JsonNode mergeProfile(JsonNode vanilla, JsonNode ornitheProfile) {
         validateProfile(ornitheProfile);
-        com.fasterxml.jackson.databind.node.ObjectNode merged =
-                (com.fasterxml.jackson.databind.node.ObjectNode)
+        dev.itsdropper.vanta.json.ObjectNode merged =
+                (dev.itsdropper.vanta.json.ObjectNode)
                         FabricInstaller.mergeProfile(vanilla, ornitheProfile);
 
         // Ornithe's historical profiles may carry a loader-specific

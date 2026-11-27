@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import dev.itsdropper.vanta.json.TypeReference;
+import dev.itsdropper.vanta.json.ObjectMapper;
+import dev.itsdropper.vanta.json.SerializationFeature;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.io.IOException;

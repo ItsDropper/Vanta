@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.launcher.loader;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import dev.itsdropper.vanta.json.annotation.JsonIgnore;
+import dev.itsdropper.vanta.json.ObjectMapper;
+import dev.itsdropper.vanta.json.SerializationFeature;
 
 import java.io.IOException;
 import java.nio.file.Files;

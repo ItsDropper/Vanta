@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -30,7 +30,7 @@ class InstanceBackupServiceTest {
 
         InstanceBackupService.sanitizePortableSettings(settings);
 
-        com.fasterxml.jackson.databind.JsonNode restored = new ObjectMapper().readTree(settings.toFile());
+        dev.itsdropper.vanta.json.JsonNode restored = new ObjectMapper().readTree(settings.toFile());
         assertEquals("", restored.path("javaPath").asText());
         assertEquals(6144, restored.path("ramMb").asInt());
         assertEquals("-Xmx4G", restored.path("javaArguments").asText());

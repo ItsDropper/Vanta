@@ -35,7 +35,7 @@ class VantaLoaderInstallerTest {
 
     @Test
     void selectsNewestPublishedNightlyWithBothRequiredAssets() throws Exception {
-        com.fasterxml.jackson.databind.JsonNode releases = new com.fasterxml.jackson.databind.ObjectMapper()
+        dev.itsdropper.vanta.json.JsonNode releases = new dev.itsdropper.vanta.json.ObjectMapper()
                 .readTree("""
                         [
                           {
@@ -79,7 +79,7 @@ class VantaLoaderInstallerTest {
 
     @Test
     void rejectsReleaseListsWithoutAUsableNightly() throws Exception {
-        com.fasterxml.jackson.databind.JsonNode releases = new com.fasterxml.jackson.databind.ObjectMapper()
+        dev.itsdropper.vanta.json.JsonNode releases = new dev.itsdropper.vanta.json.ObjectMapper()
                 .readTree("[{\"tag_name\":\"nightly-0123456789abcdef0123456789abcdef01234567\","
                         + "\"published_at\":\"2026-11-06T12:00:00Z\",\"draft\":false,\"assets\":[]}]");
         org.junit.jupiter.api.Assertions.assertThrows(java.io.IOException.class,

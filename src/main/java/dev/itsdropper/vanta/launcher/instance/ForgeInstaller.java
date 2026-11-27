@@ -1,8 +1,8 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import dev.itsdropper.vanta.json.JsonNode;
+import dev.itsdropper.vanta.json.ArrayNode;
+import dev.itsdropper.vanta.json.ObjectNode;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.Platform;
 
@@ -204,6 +204,7 @@ public final class ForgeInstaller {
                             .directory(target.toFile())
                             .redirectErrorStream(true)
                             .start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
 
             String output =
                     new String(
@@ -233,7 +234,7 @@ public final class ForgeInstaller {
             }
 
             JsonNode forgeMetadata =
-                    new com.fasterxml.jackson.databind.ObjectMapper()
+                    new dev.itsdropper.vanta.json.ObjectMapper()
                             .readTree(metadata.toFile());
 
             /*

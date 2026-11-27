@@ -23,6 +23,7 @@ public class JavaVerifier {
                 )
                         .redirectErrorStream(true)
                         .start();
+            dev.itsdropper.vanta.LauncherProcessLifecycle.registerChildProcess(process);
 
         String output =
                 new String(

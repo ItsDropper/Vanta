@@ -1,6 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import dev.itsdropper.vanta.json.JsonNode;
 import dev.itsdropper.vanta.launcher.model.Instance;
 
 import java.nio.file.Files;
@@ -945,7 +945,7 @@ public class InstanceInstaller {
                 throw new IllegalStateException(
                         "NeoForge installation did not produce version metadata.");
             }
-            finalMetadata = new com.fasterxml.jackson.databind.ObjectMapper()
+            finalMetadata = new dev.itsdropper.vanta.json.ObjectMapper()
                     .readTree(neoForgeMetadata.toFile());
         }
 
@@ -970,7 +970,7 @@ public class InstanceInstaller {
             }
 
             finalMetadata =
-                    new com.fasterxml.jackson.databind.ObjectMapper()
+                    new dev.itsdropper.vanta.json.ObjectMapper()
                             .readTree(forgeMetadata.toFile());
         }
         /*
@@ -1000,7 +1000,7 @@ public class InstanceInstaller {
             dev.itsdropper.vanta.launcher.loader.LoaderStackManager.clear(instance);
             MinecraftVersionResolver.saveMetadata(instance, vanillaMetadata);
             loaderVersion = LiteLoaderInstaller.install(instance, minecraftVersion);
-            finalMetadata = new com.fasterxml.jackson.databind.ObjectMapper()
+            finalMetadata = new dev.itsdropper.vanta.json.ObjectMapper()
                     .readTree(instance.getDirectory().resolve("minecraft").resolve("version.json").toFile());
         }
 
@@ -1010,7 +1010,7 @@ public class InstanceInstaller {
             loaderVersion = RiftInstaller.findLatestLoaderVersion(minecraftVersion);
             InstanceInstallationProgress.report(InstanceInstallationProgress.Stage.INSTALLING_LOADER, "Installing Rift components.");
             RiftInstaller.install(instance);
-            finalMetadata = new com.fasterxml.jackson.databind.ObjectMapper()
+            finalMetadata = new dev.itsdropper.vanta.json.ObjectMapper()
                     .readTree(instance.getDirectory().resolve("minecraft").resolve("version.json").toFile());
         }
 

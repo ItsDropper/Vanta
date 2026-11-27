@@ -78,14 +78,14 @@ class VPackServiceTest {
 
         VPackService.createVPack(instance, archive, VPackService.Options.defaults());
 
-        com.fasterxml.jackson.databind.JsonNode metadata =
-                new com.fasterxml.jackson.databind.ObjectMapper().readTree(readEntry(archive, "instance.json"));
+        dev.itsdropper.vanta.json.JsonNode metadata =
+                new dev.itsdropper.vanta.json.ObjectMapper().readTree(readEntry(archive, "instance.json"));
         assertTrue(metadata.path("directory").isNull());
         assertFalse(new String(readEntry(archive, "instance.json"),
                 java.nio.charset.StandardCharsets.UTF_8).contains(source.toAbsolutePath().toString()));
 
-        com.fasterxml.jackson.databind.JsonNode settings =
-                new com.fasterxml.jackson.databind.ObjectMapper().readTree(readEntry(archive, "settings.json"));
+        dev.itsdropper.vanta.json.JsonNode settings =
+                new dev.itsdropper.vanta.json.ObjectMapper().readTree(readEntry(archive, "settings.json"));
         assertEquals("", settings.path("javaPath").asText());
         assertEquals(8192, settings.path("ramMb").asInt());
         assertEquals("-Xmx4G", settings.path("javaArguments").asText());
@@ -161,7 +161,7 @@ class VPackServiceTest {
         Instance instance = new Instance("profile-a", "Pack Test", "1.21.11",
                 "Fabric", "0.16.0", source);
         Path archive = temporaryDirectory.resolve("backup.zip");
-        new com.fasterxml.jackson.databind.ObjectMapper().writerWithDefaultPrettyPrinter()
+        new dev.itsdropper.vanta.json.ObjectMapper().writerWithDefaultPrettyPrinter()
                 .writeValue(source.resolve("instance.json").toFile(), instance);
         InstanceBackupService.createBackup(instance, archive);
 
