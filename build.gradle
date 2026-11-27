@@ -140,9 +140,100 @@ tasks.register('updaterJarChecksum') {
 }
 
 
-tasks.register('platformAppImage', Exec) {
-    dependsOn tasks.named('installDist'), tasks.named('updaterJar')
+/**
+ * Produce the native icon containers required by jpackage from the canonical
+ * Vanta PNG artwork. Keep conversion in the build so all release platforms
+ * use the same checked-in source images.
+ */
+tasks.register('preparePlatformIcon') {
+    def icon64 = file('src/main/resources/images/vanta-icon-64.png')
+    def iconFull = file('src/main/resources/images/vanta-icon.png')
+    def iconOutput = layout.buildDirectory.dir('jpackage/icons')
+    inputs.files(icon64, iconFull)
+    outputs.dir(iconOutput)
 
+    doLast {
+        if (!icon64.isFile() || !iconFull.isFile()) {
+            throw new GradleException('The canonical Vanta release icon PNG files are missing.')
+        }
+        def output = iconOutput.get().asFile
+        output.mkdirs()
+
+        def readPng = { File source ->
+            def image = javax.imageio.ImageIO.read(source)
+            if (image == null) throw new GradleException("Cannot decode Vanta icon: ${source}")
+            image
+        }
+        def encodePng = { java.awt.image.BufferedImage image ->
+            def bytes = new ByteArrayOutputStream()
+            if (!javax.imageio.ImageIO.write(image, 'png', bytes)) {
+                throw new GradleException('The JDK PNG encoder is unavailable.')
+            }
+            bytes.toByteArray()
+        }
+        def resizePng = { java.awt.image.BufferedImage source, int size ->
+            def image = new java.awt.image.BufferedImage(size, size, java.awt.image.BufferedImage.TYPE_INT_ARGB)
+            def graphics = image.createGraphics()
+            try {
+                graphics.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                        java.awt.RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+                graphics.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING,
+                        java.awt.RenderingHints.VALUE_RENDER_QUALITY)
+                graphics.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+                        java.awt.RenderingHints.VALUE_ANTIALIAS_ON)
+                graphics.drawImage(source, 0, 0, size, size, null)
+            } finally {
+                graphics.dispose()
+            }
+            image
+        }
+
+        // A PNG-compressed ICO entry is supported by modern Windows shells and
+        // preserves the alpha channel without requiring external image tools.
+        def windowsPng = encodePng(readPng(icon64))
+        def ico = new ByteArrayOutputStream()
+        def icoData = new DataOutputStream(ico)
+        icoData.writeShort(0)       // reserved
+        icoData.writeShort(1)       // icon type
+        icoData.writeShort(1)       // image count
+        icoData.writeByte(64)       // width
+        icoData.writeByte(64)       // height
+        icoData.writeByte(0)        // palette
+        icoData.writeByte(0)        // reserved
+        icoData.writeShort(1)       // color planes
+        icoData.writeShort(32)      // bits per pixel
+        icoData.writeInt(windowsPng.length)
+        icoData.writeInt(22)        // first image follows the 6+16 byte header
+        icoData.write(windowsPng)
+        icoData.close()
+        new File(output, 'vanta.ico').bytes = ico.toByteArray()
+
+        // ICNS uses PNG chunks for modern macOS icon sizes.
+        def macSource = readPng(iconFull)
+        def iconChunks = new ByteArrayOutputStream()
+        def chunkData = new DataOutputStream(iconChunks)
+        [
+                [16, 'icp4'], [32, 'icp5'], [64, 'icp6'],
+                [128, 'ic07'], [256, 'ic08'], [512, 'ic09'], [1024, 'ic10']
+        ].each { entry ->
+            def png = encodePng(resizePng(macSource, entry[0] as int))
+            chunkData.write(entry[1].getBytes('US-ASCII'))
+            chunkData.writeInt(png.length + 8)
+            chunkData.write(png)
+        }
+        chunkData.close()
+        def chunks = iconChunks.toByteArray()
+        def icns = new ByteArrayOutputStream()
+        def icnsData = new DataOutputStream(icns)
+        icnsData.write('icns'.getBytes('US-ASCII'))
+        icnsData.writeInt(chunks.length + 8)
+        icnsData.write(chunks)
+        icnsData.close()
+        new File(output, 'vanta.icns').bytes = icns.toByteArray()
+    }
+}
+
+tasks.register('platformAppImage', Exec) {\n    dependsOn tasks.named('installDist'), tasks.named('updaterJar'), tasks.named('preparePlatformIcon')\n
     def packageName = 'Vanta'
     // jpackage accepts only one to three numeric components. Keep the full
     // project version for archives/resources while passing a valid native
@@ -204,6 +295,11 @@ tasks.register('platformAppImage', Exec) {
                 '--name', packageName,
                 '--app-version', jpackageVersion,
                 '--vendor', 'ItsDropper',
+                '--icon', (windowsHost
+                        ? file("${layout.buildDirectory.get().asFile}/jpackage/icons/vanta.ico")
+                        : (macHost
+                        ? file("${layout.buildDirectory.get().asFile}/jpackage/icons/vanta.icns")
+                        : file('src/main/resources/images/vanta-icon.png'))).absolutePath,
                 '--input', packageInput.get().asFile.absolutePath,
                 '--main-jar', mainJar,
                 '--main-class', application.mainClass.get(),
