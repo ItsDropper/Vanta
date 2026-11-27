@@ -3,6 +3,7 @@ package dev.itsdropper.vanta.launcher.update;
 import org.junit.jupiter.api.Test;
 
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -36,9 +37,9 @@ class UpdateHttpRetryTest {
                                     .getBytes(StandardCharsets.UTF_8);
                             String status = attempt < 3 ? "503 Service Unavailable" : "200 OK";
                             OutputStream output = socket.getOutputStream();
-                            output.write(("HTTP/1.1 " + status + "\\r\\n"
-                                    + "Content-Length: " + body.length + "\\r\\n"
-                                    + "Connection: close\\r\\n\\r\\n")
+                            output.write(("HTTP/1.1 " + status + "\r\n"
+                                    + "Content-Length: " + body.length + "\r\n"
+                                    + "Connection: close\r\n\r\n")
                                     .getBytes(StandardCharsets.US_ASCII));
                             output.write(body);
                             output.flush();
