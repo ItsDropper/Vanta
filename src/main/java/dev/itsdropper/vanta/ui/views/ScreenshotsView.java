@@ -188,7 +188,7 @@ public class ScreenshotsView extends VBox {
                 new Label();
 
         statusLabel.getStyleClass().add(
-                "instances-status"
+                "screenshots-status"
         );
 
         // =========================================================
@@ -921,9 +921,10 @@ public class ScreenshotsView extends VBox {
                 Pos.CENTER_LEFT
         );
 
-        HBox bottomBar =
-                new HBox(
-                        10,
+        FlowPane bottomBar =
+                new FlowPane(
+                        8,
+                        8,
                         copyButton,
                         saveButton,
                         openButton,
@@ -936,13 +937,21 @@ public class ScreenshotsView extends VBox {
                 Pos.CENTER_RIGHT
         );
 
+        bottomBar.setRowValignment(
+                javafx.geometry.VPos.CENTER
+        );
+
         bottomBar.setPadding(
                 new Insets(
-                        10,
-                        14,
-                        14,
-                        14
+                        12,
+                        16,
+                        16,
+                        16
                 )
+        );
+
+        bottomBar.getStyleClass().add(
+                "screenshot-dialog-toolbar"
         );
 
         // =========================================================

@@ -31,6 +31,7 @@ public final class Stylesheets {
             "/css/library.css",
             "/css/content.css",
             "/css/manage.css",
+            "/css/screenshots.css",
             "/css/browse.css",
             "/css/create.css",
             "/css/settings.css",
