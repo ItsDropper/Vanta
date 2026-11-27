@@ -31,8 +31,8 @@ VIAddVersionKey "FileDescription" "Vanta Minecraft Launcher"
 VIAddVersionKey "FileVersion" "${APP_VERSION}"
 VIAddVersionKey "LegalCopyright" "Copyright © 2026 ItsDropper"
 
-!define MUI_ICON "build\\jpackage\\icons\\vanta.ico"
-!define MUI_UNICON "build\\jpackage\\icons\\vanta.ico"
+!define MUI_ICON "build\jpackage\icons\vanta.ico"
+!define MUI_UNICON "build\jpackage\icons\vanta.ico"
 !define MUI_ABORTWARNING
 !define MUI_WELCOMEPAGE_TITLE "Welcome to Vanta"
 !define MUI_WELCOMEPAGE_TEXT "Vanta is a Minecraft launcher focused on reliable instances and a clean desktop experience.$\r$\n$\r$\nThis setup installs Vanta for the current Windows user. No administrator access is required."
