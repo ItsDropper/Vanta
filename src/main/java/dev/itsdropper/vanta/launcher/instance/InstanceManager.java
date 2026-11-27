@@ -365,7 +365,7 @@ public class InstanceManager {
         Instance previous = null;
         if (!Files.isSymbolicLink(metadata) && Files.isRegularFile(metadata, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
             try {
-                previous = MAPPER.readValue(metadata.toFile(), Instance.class);
+                previous = InstanceMetadataMigrator.loadAndMigrate(metadata, directory);
             } catch (IOException invalidPreviousMetadata) {
                 System.err.println("[Vanta Timeline] Could not inspect previous instance metadata.");
             }
