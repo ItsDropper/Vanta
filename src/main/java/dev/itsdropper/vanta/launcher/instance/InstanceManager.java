@@ -354,21 +354,25 @@ public class InstanceManager {
             );
         }
 
-        Path directory =
-                instance.getDirectory();
-
-        Files.createDirectories(
-                directory
-        );
+        Path directory = instance.getDirectory();
+        if (directory == null) {
+            throw new IllegalArgumentException("Instance directory cannot be null.");
+        }
+        if (Files.isSymbolicLink(directory)) {
+            throw new IOException("Refusing to save metadata through a symbolic-link instance directory.");
+        }
+        Files.createDirectories(directory);
 
         Path metadata = directory.resolve("instance.json");
         Instance previous = null;
-        if (!Files.isSymbolicLink(metadata) && Files.isRegularFile(metadata, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
-            try {
-                previous = InstanceMetadataMigrator.loadAndMigrate(metadata, directory);
-            } catch (IOException invalidPreviousMetadata) {
-                System.err.println("[Vanta Timeline] Could not inspect previous instance metadata.");
+        if (Files.exists(metadata, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            if (Files.isSymbolicLink(metadata)
+                    || !Files.isRegularFile(metadata, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                throw new IOException("Existing instance metadata is not a regular file; it was left untouched.");
             }
+            // Fail closed: never replace an existing file that could not be
+            // decoded and safely backed up by the migration layer.
+            previous = InstanceMetadataMigrator.loadAndMigrate(metadata, directory);
         }
         Path temporary = directory.resolve(
                 "instance.json." + java.util.UUID.randomUUID() + ".tmp");
