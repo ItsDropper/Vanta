@@ -118,9 +118,14 @@ final class InstanceMetadataMigrator {
         if (directory == null) throw new IOException("Instance metadata has no parent directory.");
 
         Path backup = directory.resolve(BACKUP_FILE_NAME);
-        if (!Files.exists(backup)) {
+        if (!Files.exists(backup, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
             // CREATE_NEW semantics prevent replacing an earlier recovery copy.
-            Files.copy(metadataFile, backup);
+            // A concurrent discovery may win the same first-migration race.
+            try {
+                Files.copy(metadataFile, backup);
+            } catch (java.nio.file.FileAlreadyExistsException concurrentMigration) {
+                // The other migration has already preserved the original.
+            }
         }
 
         Path temporary = directory.resolve("instance.json." + UUID.randomUUID() + ".tmp");
