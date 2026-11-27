@@ -147,14 +147,14 @@ public final class UpdaterLauncher {
             log("Updater command: " + helperProcess.info().command().orElse("<unknown>"));
             log("Waiting for updater readiness handshake.");
 
-            long readyDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(15);
-            while (!Files.isRegularFile(readyFile)) {
+            long readyDeadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(60);
+            while (!isReadyFile(readyFile)) {
                 if (!helperProcess.isAlive()) {
                     throw new IOException("Updater helper exited before becoming ready (exit code "
                             + helperProcess.exitValue() + "). See " + getUpdaterOutputLog());
                 }
                 if (System.nanoTime() >= readyDeadline) {
-                    throw new IOException("Updater helper did not become ready within 15 seconds.");
+                    throw new IOException("Updater helper did not become ready within 60 seconds. See " + getUpdaterOutputLog());
                 }
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
@@ -187,6 +187,15 @@ public final class UpdaterLauncher {
                 log("Preserving updater workspace because its helper process could not be reaped.");
             }
             throw failure;
+        }
+    }
+
+    private static boolean isReadyFile(Path readyFile) {
+        if (!Files.isRegularFile(readyFile)) return false;
+        try {
+            return "ready".equals(Files.readString(readyFile).trim());
+        } catch (IOException notFullyPublished) {
+            return false;
         }
     }
 
