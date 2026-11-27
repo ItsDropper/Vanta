@@ -222,9 +222,13 @@ jobs:
             $details = if (Test-Path $uninstallerLog) { Get-Content -LiteralPath $uninstallerLog -Raw } else { 'NSIS did not produce an uninstaller log.' }
             throw "Vanta uninstaller exited with code $($uninstall.ExitCode). $details"
           }
+          $scriptUninstallerLog = Join-Path $env:TEMP 'VantaUninstaller.log'
           if (Test-Path $installDirectory) {
-            Write-Host 'Uninstaller log:'
+            Write-Host 'NSIS runtime log:'
             if (Test-Path $uninstallerLog) { Get-Content -LiteralPath $uninstallerLog | Write-Host }
+            Write-Host 'Vanta uninstaller section log:'
+            if (Test-Path $scriptUninstallerLog) { Get-Content -LiteralPath $scriptUninstallerLog | Write-Host }
+            else { Write-Host "Uninstaller section did not create $scriptUninstallerLog" }
             Write-Host 'Remaining installation contents:'
             Get-ChildItem -LiteralPath $installDirectory -Force -Recurse -ErrorAction Continue |
               Select-Object FullName, Length, Attributes |
