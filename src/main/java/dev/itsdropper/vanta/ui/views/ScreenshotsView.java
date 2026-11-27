@@ -330,8 +330,8 @@ public class ScreenshotsView extends VBox {
         Image image =
                 new Image(
                         file.toUri().toString(),
-                        260,
-                        150,
+                        280,
+                        158,
                         true,
                         true,
                         true
