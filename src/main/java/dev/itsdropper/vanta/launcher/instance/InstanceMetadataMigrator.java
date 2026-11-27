@@ -102,12 +102,15 @@ final class InstanceMetadataMigrator {
         return value.asText();
     }
 
-    static void writeCurrentMetadata(Path target, Instance instance) throws IOException {
+    static byte[] writeCurrentMetadataBytes(Instance instance) throws IOException {
         ObjectNode normalized = (ObjectNode) MAPPER.valueToTree(instance);
         normalized.put("schemaVersion", CURRENT_SCHEMA_VERSION);
-        byte[] bytes = MAPPER.writeValueAsString(normalized).getBytes(StandardCharsets.UTF_8);
-        Files.write(target, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
-                StandardOpenOption.WRITE);
+        return MAPPER.writeValueAsString(normalized).getBytes(StandardCharsets.UTF_8);
+    }
+
+    static void writeCurrentMetadata(Path target, Instance instance) throws IOException {
+        Files.write(target, writeCurrentMetadataBytes(instance),
+                StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
     }
 
     private static void writeMigratedMetadata(Path metadataFile, Instance instance) throws IOException {
