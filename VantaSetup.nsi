@@ -308,7 +308,9 @@ Section "Uninstall"
   Delete "$DESKTOP\Vanta.lnk"
 
   ; Instance data in roaming AppData is intentionally never removed.
-  Delete "$INSTDIR\Uninstall.exe"
+  ; Windows keeps the running uninstaller executable locked. Remove all other
+  ; payload now; un.onUninstSuccess starts a detached cleanup process to remove
+  ; the final executable and its parent directory after this process exits.
   RMDir /r "$INSTDIR"
   DeleteRegKey HKCU "Software\Vanta"
 
@@ -316,6 +318,17 @@ Section "Uninstall"
   FileWrite $9 "Uninstall section completed.$\r$\n"
   FileClose $9
 SectionEnd
+
+Function un.onUninstSuccess
+  HideWindow
+  ; Pass the path through an inherited environment variable instead of
+  ; interpolating it into PowerShell source (install paths may contain quotes
+  ; or shell metacharacters).
+  System::Call 'kernel32::SetEnvironmentVariable(t, t) i("VANTA_UNINSTALL_DIR", "$INSTDIR").r0'
+  StrCmp $0 0 UninstallCleanupDone
+  Exec '"$SYSDIR\\WindowsPowerShell\\v1.0\\powershell.exe" -NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -Command "Start-Sleep -Milliseconds 1500; Remove-Item -LiteralPath $env:VANTA_UNINSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue"'
+UninstallCleanupDone:
+FunctionEnd
 
 Function LaunchVanta
   ; Silent installer smoke tests must not start the GUI on the CI runner.
