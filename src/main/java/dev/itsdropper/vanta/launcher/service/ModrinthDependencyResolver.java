@@ -1445,21 +1445,6 @@ private boolean resolveModDependency(
                     }
                 }
 
-                /*
-
-                    System.out.println(
-                            "[Vanta DEBUG] Rejected loader metadata dependency candidate "
-                                    + candidate.getVersionNumber()
-                                    + " for "
-                                    + dependencyModId
-                                    + " ["
-                                    + constraint
-                                    + "]"
-                    );
-
-                    continue;
-                }
-
                 if (resolved.containsKey(projectId)) {
 
                     ModrinthVersion existing =
