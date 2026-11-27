@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.security.CredentialManager;
+import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.io.IOException;
 import java.net.URI;
