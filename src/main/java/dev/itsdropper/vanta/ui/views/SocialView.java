@@ -185,8 +185,11 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
         final VantaSocialClient api;
         try {
             api = api();
+        } catch (IllegalStateException unavailable) {
+            setStatus(Localization.text("social.serviceUnavailable"));
+            return;
         } catch (IllegalArgumentException failure) {
-            setStatus(Localization.text("social.endpointInvalid"));
+            setStatus(Localization.text("social.requestFailed"));
             return;
         }
         execute(Localization.text("social.connecting"), () -> new Overview(
