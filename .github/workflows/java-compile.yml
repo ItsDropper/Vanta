@@ -131,7 +131,22 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid sidecar.' }
           & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256 $hash
           if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid GitHub asset digest.' }
+          $expectedDigestFile = Join-Path $testDirectory 'expected-sha256.txt'
+          $verificationLog = Join-Path $testDirectory 'installer.log'
+          Set-Content -LiteralPath $expectedDigestFile -Value $hash -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256File $expectedDigestFile -LogPath $verificationLog
+          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid digest file.' }
+          if ((Get-Content -LiteralPath $verificationLog -Raw) -notmatch [regex]::Escape($hash)) {
+            throw 'Checksum verifier did not record its successful digest in the installer log.'
+          }
           Set-Content -LiteralPath $testArchive -Value 'tampered fixture' -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256File $expectedDigestFile -LogPath $verificationLog 2>$null
+          $fileDigestNegativeExitCode = $LASTEXITCODE
+          if ($fileDigestNegativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive using a digest file.' }
+          $diagnostics = Get-Content -LiteralPath $verificationLog -Raw
+          if ($diagnostics -notmatch 'expected:' -or $diagnostics -notmatch 'actual:') {
+            throw 'Checksum verifier did not log expected and actual hashes after a mismatch.'
+          }
           & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256" 2>$null
           $negativeExitCode = $LASTEXITCODE
           if ($negativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive using a sidecar.' }
