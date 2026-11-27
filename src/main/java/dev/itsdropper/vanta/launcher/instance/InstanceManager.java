@@ -93,17 +93,13 @@ public class InstanceManager {
                 }
 
                 try {
-                    Instance stored = MAPPER.readValue(metadata.toFile(), Instance.class);
-                    if (!hasRepairMetadata(stored)) {
+                    // Read legacy files field-by-field: the previous Jackson model
+                    // and current Gson model do not share constructor/Path binding rules.
+                    // Migration is isolated to this instance and preserves its source.
+                    Instance instance = InstanceMetadataMigrator.loadAndMigrate(metadata, directory);
+                    if (!hasRepairMetadata(instance)) {
                         throw new IOException("Instance metadata is missing its ID, name, Minecraft version, or loader.");
                     }
-
-                    // The directory being scanned is authoritative. Never let a
-                    // stale metadata path redirect launch or repair into another instance.
-                    Instance instance = new Instance(
-                            stored.getId(), stored.getName(), stored.getMinecraftVersion(),
-                            stored.getLoader(), stored.getLoaderVersion(), directory.toAbsolutePath().normalize(),
-                            stored.getIcon());
 
                     // Interrupted installations remain visible so users can recover
                     // them. LaunchService detects the marker and repairs before launch.
@@ -378,7 +374,7 @@ public class InstanceManager {
                 "instance.json." + java.util.UUID.randomUUID() + ".tmp");
 
         try {
-            MAPPER.writeValue(temporary.toFile(), instance);
+            InstanceMetadataMigrator.writeCurrentMetadata(temporary, instance);
             try {
                 Files.move(temporary, metadata,
                         StandardCopyOption.ATOMIC_MOVE,
