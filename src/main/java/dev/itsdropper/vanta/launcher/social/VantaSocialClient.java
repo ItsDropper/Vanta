@@ -5,8 +5,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.itsdropper.vanta.launcher.account.Account;
+import dev.itsdropper.vanta.launcher.account.AccountManager;
 import dev.itsdropper.vanta.launcher.security.CredentialManager;
 import dev.itsdropper.vanta.ui.LauncherSettings;
+import net.raphimc.minecraftauth.MinecraftAuth;
 
 import java.io.IOException;
 import java.net.URI;
@@ -288,9 +290,24 @@ public final class VantaSocialClient {
     }
 
     private synchronized String createSession(Account account) throws IOException, InterruptedException {
+        // Account sessions are persisted between launcher runs. Their cached Minecraft
+        // access token can expire even while the Microsoft refresh-token chain remains
+        // valid, so refresh the chain before sending any token to the Social API.
+        try {
+            var refreshedSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(
+                    MinecraftAuth.createHttpClient(), account.getSession());
+            account.setSession(refreshedSession);
+            AccountManager.saveAccount(account);
+        } catch (Exception refreshFailure) {
+            throw new IOException(
+                    "Could not refresh the Minecraft account session for Vanta Social. " +
+                            "Sign in to the Minecraft account again if the session refresh fails.",
+                    refreshFailure);
+        }
+
         String accessToken = account.getAccessToken();
         if (accessToken == null || accessToken.isBlank()) {
-            throw new IOException("The selected Minecraft account has no access token. Refresh the account and retry.");
+            throw new IOException("Minecraft authentication did not provide an access token after refresh.");
         }
 
         JsonObject body = new JsonObject();
