@@ -48,7 +48,7 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     private final Timeline ticker = new Timeline(new KeyFrame(Duration.seconds(1), event -> refreshMetrics()));
 
     private boolean socialTestInProgress;
-    private boolean socialLoginSucceeded;
+    private String socialLoginSucceededAccountId;
 
     public ExperimentalView(AccountService accountService) {
         this(accountService, null);
@@ -204,7 +204,9 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
             VantaSocialClient.LoginStatus finalResult = result;
             UiExecutor.shared().dispatchToUi(() -> {
                 socialTestInProgress = false;
-                socialLoginSucceeded = finalResult == VantaSocialClient.LoginStatus.SUCCESS;
+                if (finalResult == VantaSocialClient.LoginStatus.SUCCESS) {
+                    socialLoginSucceededAccountId = account.getUuid();
+                }
                 socialStatus.setText(socialResultMessage(finalResult, account));
                 refreshSocialControls();
             });
@@ -225,9 +227,18 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     }
 
     private void refreshSocialControls() {
-        testSocialLogin.setDisable(accountService.getCurrentAccount() == null
-                || socialTestInProgress
-                || socialLoginSucceeded);
+        Account currentAccount = accountService.getCurrentAccount();
+        if (!socialTestInProgress && socialLoginSucceededAccountId != null
+                && (currentAccount == null || !currentAccount.getUuid().equals(socialLoginSucceededAccountId))) {
+            socialLoginSucceededAccountId = null;
+            socialStatus.setText(currentAccount == null
+                    ? Localization.text("experimental.social.noAccount")
+                    : Localization.text("experimental.social.ready"));
+        }
+
+        boolean currentAccountVerified = currentAccount != null
+                && currentAccount.getUuid().equals(socialLoginSucceededAccountId);
+        testSocialLogin.setDisable(currentAccount == null || socialTestInProgress || currentAccountVerified);
     }
 
     private void refreshStatus() {
