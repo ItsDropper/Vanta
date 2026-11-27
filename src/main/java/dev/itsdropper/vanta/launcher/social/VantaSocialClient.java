@@ -240,21 +240,23 @@ public final class VantaSocialClient {
         if (sessionToken != null && uuid.equals(sessionAccountUuid)) return sessionToken;
 
         String stored = LauncherSettings.getVantaSocialSessionCredentialReference(uuid);
+        String token = null;
         if (stored != null && !stored.isBlank()) {
             try {
-                String token = CredentialManager.decrypt(stored);
-                HttpResponse<String> check = send("GET", "/v1/me", null, token);
-                if (check.statusCode() >= 200 && check.statusCode() < 300) {
-                    unwrap(check);
-                    sessionToken = token;
-                    sessionAccountUuid = uuid;
-                    return token;
-                }
-                if (check.statusCode() != 401) unwrap(check);
+                token = CredentialManager.decrypt(stored);
             } catch (IOException invalidCredential) {
-                // A missing or unreadable vault entry is recoverable: the active
-                // Minecraft session can safely establish a replacement token.
+                // The selected Minecraft account can safely establish a replacement token.
             }
+        }
+        if (token != null && !token.isBlank()) {
+            HttpResponse<String> check = send("GET", "/v1/me", null, token);
+            if (check.statusCode() >= 200 && check.statusCode() < 300) {
+                unwrap(check);
+                sessionToken = token;
+                sessionAccountUuid = uuid;
+                return token;
+            }
+            if (check.statusCode() != 401) unwrap(check);
         }
         return createSession(account);
     }

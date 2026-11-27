@@ -1,0 +1,19 @@
+.social-view { -fx-background-color: transparent; }
+.social-connection-status { -fx-font-size: 12px; -fx-text-fill: -fx-vantamuted; }
+.social-sidebar { -fx-min-width: 290px; -fx-pref-width: 330px; }
+.social-list-scroll, .social-list-scroll > .viewport, .social-message-scroll, .social-message-scroll > .viewport { -fx-background-color: transparent; }
+.social-list-scroll > .viewport > .content, .social-message-scroll > .viewport > .content { -fx-background-color: transparent; }
+.social-list-row { -fx-padding: 7 8; -fx-background-color: transparent; -fx-background-radius: 8; -fx-alignment: center-left; }
+.social-list-row:hover, .social-list-item:hover { -fx-background-color: -fx-v-hair-strong; }
+.social-list-item { -fx-padding: 8; -fx-background-color: -fx-v-well; -fx-background-radius: 9; }
+.social-list-title { -fx-font-family: "Geist Medium"; -fx-font-size: 12.5px; -fx-text-fill: -fx-vantatext; }
+.social-chat-panel { -fx-min-height: 360px; }
+.social-chat-header { -fx-padding: 0 0 10 0; -fx-border-color: transparent transparent -fx-v-hair-strong transparent; -fx-border-width: 0 0 1 0; }
+.social-message-row { -fx-padding: 2 4; }
+.social-message-own, .social-message-other { -fx-padding: 10 12; -fx-spacing: 5; -fx-max-width: 560px; -fx-background-radius: 12; }
+.social-message-own { -fx-background-color: -fx-vantaaccent-a18, -fx-v-card; -fx-background-insets: 0, 1; }
+.social-message-other { -fx-background-color: -fx-v-hair-strong, -fx-v-card; -fx-background-insets: 0, 1; }
+.social-message-content { -fx-text-fill: -fx-vantatext; -fx-font-size: 13px; }
+.social-message-meta { -fx-text-fill: -fx-vantasubtle; -fx-font-size: 10.5px; }
+.social-composer { -fx-padding: 10 0 0 0; -fx-border-color: -fx-v-hair-strong transparent transparent transparent; -fx-border-width: 1 0 0 0; }
+.social-composer .text-area { -fx-pref-height: 64px; -fx-max-height: 96px; }

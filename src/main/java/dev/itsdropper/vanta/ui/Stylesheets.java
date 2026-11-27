@@ -35,6 +35,7 @@ public final class Stylesheets {
             "/css/browse.css",
             "/css/create.css",
             "/css/settings.css",
+            "/css/social.css",
             "/css/progress.css",
             "/css/vanta.css"
     };
