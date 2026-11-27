@@ -149,13 +149,22 @@ jobs:
           New-Item -ItemType Directory -Path $fixtureDirectory -Force | Out-Null
           $metadata = Join-Path $fixtureDirectory 'release.json'
           $versionPath = Join-Path $fixtureDirectory 'version.txt'
-          Set-Content -LiteralPath $metadata -Value '{"tag_name":"v1.2.3"}' -NoNewline
-          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath
+          $digestPath = Join-Path $fixtureDirectory 'expected-sha256.txt'
+          $fixtureDigest = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+          $metadataJson = @{
+            tag_name = 'v1.2.3'
+            assets = @(@{ name = 'Vanta-1.2.3.zip'; digest = "sha256:$fixtureDigest" })
+          } | ConvertTo-Json -Depth 4 -Compress
+          Set-Content -LiteralPath $metadata -Value $metadataJson -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath -ChecksumOutputPath $digestPath
           if ($LASTEXITCODE -ne 0 -or (Get-Content -LiteralPath $versionPath -Raw) -ne '1.2.3') {
             throw 'Installer release-version parser failed its valid-tag test.'
           }
+          if ((Get-Content -LiteralPath $digestPath -Raw) -ne $fixtureDigest) {
+            throw 'Installer release-version parser did not extract the matching GitHub asset digest.'
+          }
           Set-Content -LiteralPath $metadata -Value '{"tag_name":"v1.2.3/../../bad"}' -NoNewline
-          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath 2>$null
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath -ChecksumOutputPath $digestPath 2>$null
           if ($LASTEXITCODE -eq 0) { throw 'Installer release-version parser accepted an invalid tag.' }
           $global:LASTEXITCODE = 0
 
