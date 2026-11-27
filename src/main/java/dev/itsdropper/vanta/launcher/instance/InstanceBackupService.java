@@ -1,5 +1,6 @@
 package dev.itsdropper.vanta.launcher.instance;
 
+import dev.itsdropper.vanta.json.ObjectMapper;
 import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import dev.itsdropper.vanta.launcher.model.Instance;
 import dev.itsdropper.vanta.launcher.service.LaunchHistoryRepository;
