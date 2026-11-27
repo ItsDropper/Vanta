@@ -33,7 +33,7 @@ public final class VantaSocialClient {
      * Production endpoint is injected here by Vanta when the Worker is deployed.
      * End users never configure or see the service address.
      */
-    private static final String PRODUCTION_BASE_URL = "";
+    private static final String PRODUCTION_BASE_URL = "https://vanta-social-api.hugohakonen.workers.dev";
 
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(6))
