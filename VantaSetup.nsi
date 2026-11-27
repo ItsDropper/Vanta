@@ -55,7 +55,6 @@ Var WORK_DIR
 Var ZIP_PATH
 Var HASH_PATH
 Var VERSION_PATH
-Var EXPECTED_SHA256
 Var PREVIOUS_DIR
 Var LOG_PATH
 
@@ -102,15 +101,6 @@ Section "Vanta"
   FileOpen $1 "$VERSION_PATH" r
   FileRead $1 $APP_VERSION
   FileClose $1
-  StrCpy $EXPECTED_SHA256 ""
-  IfFileExists "$WORK_DIR\expected-sha256.txt" ReadExpectedSha256 NoExpectedSha256
-ReadExpectedSha256:
-  FileOpen $1 "$WORK_DIR\expected-sha256.txt" r
-  FileRead $1 $EXPECTED_SHA256
-  FileClose $1
-  Goto ExpectedSha256Ready
-NoExpectedSha256:
-ExpectedSha256Ready:
   StrCmp $APP_VERSION "" InvalidVersion
 
   ; Reject URL/path metacharacters before interpolating the tag into a URL.
@@ -141,10 +131,13 @@ ExpectedSha256Ready:
   StrCmp $0 "0" +2
     Goto DownloadError
 
-  ; Prefer the SHA-256 digest returned with the exact asset in GitHub's
-  ; release metadata. Fall back to the sidecar for older releases without it.
-  StrCmp $EXPECTED_SHA256 "" DownloadChecksumSidecar
-  Goto VerifyDownloadedPackage
+  ; The verifier reads the GitHub asset digest file directly. Download the
+  ; sidecar as a fallback for older releases whose API metadata has no digest.
+  FileOpen $1 "$WORK_DIR\expected-sha256.txt" r
+  FileRead $1 $2
+  FileClose $1
+  StrCmp $2 "" DownloadChecksumSidecar VerifyDownloadedPackage
+
 DownloadChecksumSidecar:
   DetailPrint "Downloading SHA-256 checksum sidecar..."
   nsExec::ExecToLog '"$SYSDIR\curl.exe" -L -sS --fail --retry 3 --connect-timeout 15 --max-time 60 -o "$HASH_PATH" "https://github.com/ItsDropper/Vanta/releases/download/v$APP_VERSION/Vanta-$APP_VERSION.zip.sha256"'
@@ -156,7 +149,7 @@ VerifyDownloadedPackage:
   DetailPrint "Verifying downloaded package..."
   SetOutPath "$PLUGINSDIR"
   File /oname=Verify-VantaChecksum.ps1 "release\verify_installer_checksum.ps1"
-  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Verify-VantaChecksum.ps1" -Archive "$ZIP_PATH" -Checksum "$HASH_PATH" -ExpectedSha256 "$EXPECTED_SHA256"'
+  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Verify-VantaChecksum.ps1" -Archive "$ZIP_PATH" -Checksum "$HASH_PATH" -ExpectedSha256File "$WORK_DIR\expected-sha256.txt" -LogPath "$LOG_PATH"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
   FileSeek $9 0 END
