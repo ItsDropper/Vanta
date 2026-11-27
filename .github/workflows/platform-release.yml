@@ -106,9 +106,37 @@ jobs:
           $legacyHash = (Get-FileHash -LiteralPath $legacyZip -Algorithm SHA256).Hash.ToLowerInvariant()
           "$legacyHash  Vanta-$env:VANTA_VERSION.zip" | Set-Content "$legacyZip.sha256" -NoNewline
 
-          choco install nsis --version=3.12 --yes --no-progress
-          $makensis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
-          if (-not (Test-Path $makensis -PathType Leaf)) { throw "NSIS 3.12 makensis.exe was not installed." }
+          # Do not depend on Chocolatey's community feed: transient feed outages
+          # must not prevent a release. Download the official, version-pinned
+          # NSIS installer and verify its published SHA-256 before executing it.
+          $nsisVersion = '3.12'
+          $nsisInstaller = Join-Path $env:RUNNER_TEMP "nsis-$nsisVersion-setup.exe"
+          $nsisUrl = "https://downloads.sourceforge.net/project/nsis/NSIS%203/$nsisVersion/nsis-$nsisVersion-setup.exe"
+          $nsisSha256 = '3bc2b06253a7e4957111be152ac6a536e0c7478a706e19da814038db5d706495'
+          $downloaded = $false
+          for ($attempt = 1; $attempt -le 3; $attempt++) {
+            try {
+              Remove-Item $nsisInstaller -Force -ErrorAction SilentlyContinue
+              Invoke-WebRequest -Uri $nsisUrl -OutFile $nsisInstaller -MaximumRedirection 10
+              $actualHash = (Get-FileHash -LiteralPath $nsisInstaller -Algorithm SHA256).Hash.ToLowerInvariant()
+              if ($actualHash -ne $nsisSha256) {
+                throw "NSIS installer SHA-256 mismatch: expected $nsisSha256, got $actualHash"
+              }
+              $downloaded = $true
+              break
+            } catch {
+              Write-Warning "NSIS download attempt $attempt/3 failed: $_"
+              if ($attempt -lt 3) { Start-Sleep -Seconds (5 * $attempt) }
+            }
+          }
+          if (-not $downloaded) { throw "Could not download and verify the official NSIS $nsisVersion installer." }
+
+          $nsisRoot = Join-Path $env:RUNNER_TEMP "NSIS-$nsisVersion"
+          $nsisInstall = Start-Process -FilePath $nsisInstaller -ArgumentList @('/S', "/D=$nsisRoot") -Wait -PassThru
+          if ($nsisInstall.ExitCode -ne 0) { throw "NSIS installer exited with code $($nsisInstall.ExitCode)." }
+          $makensis = Join-Path $nsisRoot 'makensis.exe'
+          if (-not (Test-Path $makensis -PathType Leaf)) { throw "Verified NSIS $nsisVersion installation is missing makensis.exe." }
+
           & $makensis "/DAPP_VERSION=$env:VANTA_VERSION" '.\VantaSetup.nsi'
           if ($LASTEXITCODE -ne 0) { throw "NSIS installer compilation failed with exit code $LASTEXITCODE." }
           if (-not (Test-Path '.\VantaSetup.exe' -PathType Leaf)) { throw "NSIS did not produce VantaSetup.exe." }
@@ -117,7 +145,7 @@ jobs:
           $archive = [System.IO.Compression.ZipFile]::OpenRead($legacyZip)
           try {
             $required = @('Vanta.exe', 'runtime/lib/modules', 'app/Vanta.cfg', 'updater/VantaUpdater.jar')
-            $names = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\','/') })
+            $names = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\\','/') })
             foreach ($entry in $required) {
               if ($names -notcontains $entry) { throw "Legacy ZIP is missing required entry: $entry" }
             }
@@ -214,7 +242,7 @@ jobs:
         run: |
           VERSION="$RELEASE_VERSION"
           VERSION="${VERSION#v}"
-          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+          if [[ ! "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9]*)$ ]]; then
             echo "Invalid stable release version: $VERSION"
             exit 1
           fi
