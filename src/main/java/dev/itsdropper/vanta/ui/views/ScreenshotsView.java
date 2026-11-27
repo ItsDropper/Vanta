@@ -180,6 +180,15 @@ public class ScreenshotsView extends VBox {
                 Priority.ALWAYS
         );
 
+        // FlowPane's wrap width must follow the actual viewport. A fixed
+        // 900px wrap width overflows at smaller launcher window sizes.
+        scrollPane.viewportBoundsProperty().addListener(
+                (observable, previous, bounds) ->
+                        screenshotGrid.setPrefWrapLength(
+                                Math.max(280, bounds.getWidth() - 8)
+                        )
+        );
+
         // =========================================================
         // STATUS
         // =========================================================
@@ -334,11 +343,11 @@ public class ScreenshotsView extends VBox {
                 );
 
         imageView.setFitWidth(
-                260
+                280
         );
 
         imageView.setFitHeight(
-                150
+                158
         );
 
         imageView.setPreserveRatio(
@@ -355,8 +364,12 @@ public class ScreenshotsView extends VBox {
                 );
 
         preview.setPrefSize(
-                260,
-                150
+                280,
+                158
+        );
+        preview.setMinSize(
+                280,
+                158
         );
 
         preview.getStyleClass().add(
@@ -374,7 +387,7 @@ public class ScreenshotsView extends VBox {
         );
 
         name.setMaxWidth(
-                260
+                280
         );
 
         VBox card =
@@ -389,7 +402,10 @@ public class ScreenshotsView extends VBox {
         );
 
         card.setPrefWidth(
-                282
+                302
+        );
+        card.setMinWidth(
+                302
         );
 
         card.getStyleClass().add(
