@@ -15,7 +15,9 @@ Name "Vanta"
 Caption "Vanta"
 BrandingText "Vanta Minecraft Launcher"
 OutFile "VantaSetup.exe"
-Icon "build\\jpackage\\icons\\vanta.ico"\nUninstallIcon "build\\jpackage\\icons\\vanta.ico"\nInstallDir "$LOCALAPPDATA\Vanta"
+Icon "build\jpackage\icons\vanta.ico"
+UninstallIcon "build\jpackage\icons\vanta.ico"
+InstallDir "$LOCALAPPDATA\Vanta"
 InstallDirRegKey HKCU "Software\Vanta" "InstallDir"
 RequestExecutionLevel user
 ShowInstDetails show
