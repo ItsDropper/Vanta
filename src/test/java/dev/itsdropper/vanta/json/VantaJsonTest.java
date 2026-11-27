@@ -55,11 +55,11 @@ class VantaJsonTest {
 
     @Test
     void continuesReadingPlainWindowsPathStrings() throws Exception {
-        String path = "C:\\\\Users\\\\hugoh\\\\AppData\\\\Roaming\\\\Vanta\\\\instances\\\\test";
+        String path = "C:\\Users\\hugoh\\AppData\\Roaming\\Vanta\\instances\\test";
         Instance restored = VantaJson.mapper().readValue("""
                 {"id":"test","name":"Test","minecraftVersion":"1.21.11",
                  "loader":"Fabric","loaderVersion":"0.16.0","directory":"%s"}
-                """.formatted(path), Instance.class);
+                """.formatted(path.replace("\\", "\\\\")), Instance.class);
 
         assertEquals(Path.of(path), restored.getDirectory());
     }
