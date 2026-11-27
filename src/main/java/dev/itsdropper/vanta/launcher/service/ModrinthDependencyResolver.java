@@ -791,7 +791,9 @@ private boolean resolveDependencies(
                             dependencyModId
                     );
 
-            if (resolvedDependency == null) {
+            if (resolvedDependency == null
+                    && MOD_ID_PROJECT_SLUG_ALIASES.containsKey(
+                            dependencyModId.trim().toLowerCase(Locale.ROOT))) {
                 String embeddedVersion = findResolvedEmbeddedModuleVersion(
                         resolved.values(), dependencyModId);
                 if (embeddedVersion != null) {
@@ -1421,8 +1423,10 @@ private boolean resolveModDependency(
                     }
 
                 } else {
-                    String embeddedModuleVersion = findResolvedEmbeddedModuleVersion(
-                            List.of(candidate), dependencyModId);
+                    String embeddedModuleVersion = MOD_ID_PROJECT_SLUG_ALIASES.containsKey(
+                            dependencyModId.trim().toLowerCase(Locale.ROOT))
+                            ? findResolvedEmbeddedModuleVersion(List.of(candidate), dependencyModId)
+                            : null;
                     if (embeddedModuleVersion != null) {
                         if (!matchesModVersionConstraint(embeddedModuleVersion, constraint)) {
                             continue;
