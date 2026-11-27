@@ -69,6 +69,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
 
     private final StackPane featuredContainer = new StackPane();
     private VBox recentServersList;
+    private VBox serversColumn;
     private Label recentServersStatus;
     private final Label accountLabel;
     private final Label launchStatusLabel;
@@ -200,6 +201,7 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
                 serverCard);
         column.setFillWidth(true);
         column.setPadding(Insets.EMPTY);
+        serversColumn = column;
         return column;
     }
 
@@ -671,6 +673,10 @@ public class HomeView extends StackPane implements dev.itsdropper.vanta.ui.Launc
         recentServersList.getChildren().clear();
 
         List<ServerHistoryEntry> recent = history.stream().limit(5).toList();
+
+        // Nothing to show means no section, rather than an empty box.
+        serversColumn.setVisible(!recent.isEmpty());
+        serversColumn.setManaged(!recent.isEmpty());
 
         if (recent.isEmpty()) {
             recentServersStatus.setVisible(true);
