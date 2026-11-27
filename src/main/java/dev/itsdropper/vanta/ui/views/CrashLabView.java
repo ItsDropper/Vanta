@@ -37,6 +37,8 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
     private final ListView<LaunchHistoryRepository.LaunchRecord> timeline = new ListView<>();
     private final TextField search = new TextField();
     private final TextArea details = evidenceArea();
+    private javafx.scene.layout.Region emptyHistory;
+    private HBox historyWorkspace;
     private final TextArea baselineEvidence = evidenceArea();
     private final TextArea failedEvidence = evidenceArea();
     private final TextArea differences = evidenceArea();
@@ -151,8 +153,19 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
 
         status.setWrapText(true);
         status.getStyleClass().add("muted");
-        getChildren().addAll(header, workspace, status);
-        VBox.setVgrow(workspace, Priority.ALWAYS);
+        // With no launch history there is nothing to inspect, so one empty state replaces the panes.
+        emptyHistory = new dev.itsdropper.vanta.ui.kit.EmptyState(
+                dev.itsdropper.vanta.ui.components.IconView.Type.ACTIVITY,
+                "No launches recorded yet",
+                "Launch an instance and Vanta keeps its timeline here, with crash evidence if it fails.",
+                null, null);
+        historyWorkspace = workspace;
+        showHistory(false);
+        VBox stage = new VBox(emptyHistory, workspace);
+        stage.setAlignment(Pos.TOP_CENTER);
+        VBox.setVgrow(stage, Priority.ALWAYS);
+        VBox.setVgrow(emptyHistory, Priority.ALWAYS);
+        getChildren().addAll(header, stage, status);
     }
 
     private static TextArea evidenceArea() {
@@ -181,6 +194,7 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
                 UiExecutor.shared().dispatchToUi(() -> {
                     if (generation != refreshGeneration) return;
                     records = loaded;
+                    showHistory(!loaded.isEmpty());
                     applyFilter();
                     status.setText(Localization.text("crashLab.localOnly"));
                     if (previousSelection != null) {
@@ -199,11 +213,19 @@ public final class CrashLabView extends VBox implements LauncherViewLifecycle {
                             failure.getMessage() == null
                                     ? failure.getClass().getSimpleName() : failure.getMessage()));
                     records = List.of();
+                    showHistory(false);
                     timeline.setItems(FXCollections.observableArrayList());
                     clearSelection();
                 });
             }
         });
+    }
+
+    private void showHistory(boolean hasRecords) {
+        emptyHistory.setVisible(!hasRecords);
+        emptyHistory.setManaged(!hasRecords);
+        historyWorkspace.setVisible(hasRecords);
+        historyWorkspace.setManaged(hasRecords);
     }
 
     private void applyFilter() {
