@@ -794,8 +794,11 @@ private boolean resolveDependencies(
             if (resolvedDependency == null
                     && MOD_ID_PROJECT_SLUG_ALIASES.containsKey(
                             dependencyModId.trim().toLowerCase(Locale.ROOT))) {
-                String embeddedVersion = findResolvedEmbeddedModuleVersion(
-                        resolved.values(), dependencyModId);
+                String providerProjectId = findModrinthProjectForModId(
+                        instance, dependencyModId);
+                ModrinthVersion providerVersion = resolved.get(providerProjectId);
+                String embeddedVersion = providerVersion == null ? null
+                        : findEmbeddedModuleVersion(providerVersion, dependencyModId);
                 if (embeddedVersion != null) {
                     boolean satisfies = matchesModVersionConstraint(embeddedVersion, constraint);
                     System.out.println("[Vanta DEBUG]   Existing embedded dependency "
@@ -1123,46 +1126,43 @@ private ModrinthVersion findResolvedModDependency(
      * one such module. Inspect the selected provider artifact instead of
      * treating its project slug as if it were the nested mod ID.
      */
-    private String findResolvedEmbeddedModuleVersion(
-            Collection<ModrinthVersion> resolved,
+    private String findEmbeddedModuleVersion(
+            ModrinthVersion version,
             String moduleId
     ) throws IOException, InterruptedException {
-        if (resolved == null || moduleId == null || moduleId.isBlank()) return null;
+        if (version == null || version.getId() == null
+                || moduleId == null || moduleId.isBlank()) return null;
 
-        for (ModrinthVersion version : resolved) {
-            if (version == null || version.getId() == null) continue;
-            Map<String, String> modules = fabricApiModuleCache.get(version.getId());
-            if (modules == null) {
-                ModrinthFile file = findPrimaryFile(version);
-                if (file == null || file.getUrl() == null || file.getUrl().isBlank()) continue;
+        Map<String, String> modules = fabricApiModuleCache.get(version.getId());
+        if (modules == null) {
+            ModrinthFile file = findPrimaryFile(version);
+            if (file == null || file.getUrl() == null || file.getUrl().isBlank()) return null;
 
-                Path tempFile = Files.createTempFile("vanta-provider-modules-", ".jar");
+            Path tempFile = Files.createTempFile("vanta-provider-modules-", ".jar");
+            try {
                 try {
-                    try {
-                        DownloadUtil.downloadFile(file.getUrl(), tempFile);
-                    } catch (InterruptedException interrupted) {
-                        Thread.currentThread().interrupt();
-                        throw interrupted;
-                    } catch (IOException failure) {
-                        throw failure;
-                    } catch (Exception failure) {
-                        throw new IOException(
-                                "Failed to inspect embedded Fabric module metadata: "
-                                        + failure.getMessage(),
-                                failure
-                        );
-                    }
-                    modules = installedModScanner.scanFabricModuleVersions(tempFile);
-                    fabricApiModuleCache.put(version.getId(), modules);
-                } finally {
-                    Files.deleteIfExists(tempFile);
+                    DownloadUtil.downloadFile(file.getUrl(), tempFile);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    throw interrupted;
+                } catch (IOException failure) {
+                    throw failure;
+                } catch (Exception failure) {
+                    throw new IOException(
+                            "Failed to inspect embedded Fabric module metadata: "
+                                    + failure.getMessage(),
+                            failure
+                    );
                 }
+                modules = installedModScanner.scanFabricModuleVersions(tempFile);
+                fabricApiModuleCache.put(version.getId(), modules);
+            } finally {
+                Files.deleteIfExists(tempFile);
             }
-
-            String moduleVersion = modules.get(moduleId);
-            if (moduleVersion != null && !moduleVersion.isBlank()) return moduleVersion;
         }
-        return null;
+
+        String moduleVersion = modules.get(moduleId);
+        return moduleVersion == null || moduleVersion.isBlank() ? null : moduleVersion;
     }
 
 private String findModrinthProjectForModId(
@@ -1438,7 +1438,7 @@ private boolean resolveModDependency(
                 } else {
                     String embeddedModuleVersion = MOD_ID_PROJECT_SLUG_ALIASES.containsKey(
                             dependencyModId.trim().toLowerCase(Locale.ROOT))
-                            ? findResolvedEmbeddedModuleVersion(List.of(candidate), dependencyModId)
+                            ? findEmbeddedModuleVersion(candidate, dependencyModId)
                             : null;
                     if (embeddedModuleVersion != null) {
                         if (!matchesModVersionConstraint(embeddedModuleVersion, constraint)) {
