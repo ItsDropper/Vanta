@@ -126,10 +126,34 @@
     -fx-background-color: -fx-vantaaccent-a30, -fx-v-card-hover;
 }
 
+.home-tile-new {
+    -fx-border-color: -fx-vantaaccent-a30;
+    -fx-border-style: segments(7, 6);
+    -fx-border-radius: 12;
+    -fx-border-insets: 1;
+}
+
+.home-tile-new:hover {
+    -fx-border-style: solid;
+    -fx-border-color: -fx-vantaaccent-a55;
+}
+
 .home-tile-new-plus {
     -fx-font-family: "Geist Medium";
-    -fx-font-size: 26px;
+    -fx-font-size: 22px;
     -fx-text-fill: -fx-vantaaccent;
+    -fx-alignment: center;
+    -fx-min-width: 42px;
+    -fx-min-height: 42px;
+    -fx-max-width: 42px;
+    -fx-max-height: 42px;
+    -fx-background-color: -fx-vantaaccent-a18;
+    -fx-background-radius: 21;
+}
+
+.home-tile-new:hover .home-tile-new-plus {
+    -fx-background-color: -fx-vantaaccent;
+    -fx-text-fill: #1a1405;
 }
 
 .home-tile-new .home-tile-name {
