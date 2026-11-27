@@ -111,7 +111,7 @@ jobs:
           # different payloads and fail archive checksum verification.
           choco install nsis --version=3.12 --yes --no-progress
           if ($LASTEXITCODE -ne 0) { throw "NSIS 3.12 installation failed with exit code $LASTEXITCODE." }
-          $makensis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\\makensis.exe'
+          $makensis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
           if (-not (Test-Path $makensis -PathType Leaf)) { throw "NSIS 3.12 installation is missing makensis.exe: $makensis" }
 
           & $makensis "/DAPP_VERSION=$env:VANTA_VERSION" '.\VantaSetup.nsi'
