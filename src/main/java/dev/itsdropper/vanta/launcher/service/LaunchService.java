@@ -208,20 +208,10 @@ public class LaunchService {
             LaunchData launchData;
 
             try {
-                // Validate mandatory mod metadata before creating a Minecraft
-                // process, so repairable Fabric dependency failures never reach
-                // the game's error screen.
-                System.out.println("[Vanta Repair] Checking mandatory mod dependencies before launch...");
-                List<dev.itsdropper.vanta.launcher.modrinth.InstalledModScanner.MissingDependency> repairedDependencies =
-                        new ModrinthService().repairMissingRequiredDependencies(
-                                instance,
-                                message -> System.out.println("[Vanta Repair] " + message)
-                        );
-                if (!repairedDependencies.isEmpty()) {
-                    System.out.println("[Vanta Repair] Installed " + repairedDependencies.size()
-                            + " missing required mod dependency/dependencies before launch.");
-                }
-
+                // Launching is intentionally read-only with respect to the mods folder.
+                // Dependency resolution can download and replace jars, so it belongs
+                // to explicit install/repair actions rather than the launch hot path.
+                // Fabric remains responsible for reporting invalid mod combinations.
                 // Refresh Mojang's version metadata and security-sensitive LWJGL
                 // artifacts before constructing the classpath or starting Java.
                 MinecraftSecurityUpdateService.refreshBeforeLaunch(instance);
