@@ -8,6 +8,9 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,8 +29,9 @@ class InstanceMetadataMigratorTest {
                   "minecraftVersion": "1.21.11",
                   "loader": "Fabric",
                   "loaderVersion": "0.18.4",
-                  "directory": { "legacyPathRepresentation": "not-a-Path-string" },
-                  "icon": "GRASS_BLOCK"
+                  "directory": "C:/Users/Friend/AppData/Roaming/Vanta/instances/survival",
+                  "icon": "GRASS_BLOCK",
+                  "legacyExtension": {"enabled": true, "label": "preserve me"}
                 }
                 """;
         Files.writeString(metadata, legacy);
@@ -47,6 +51,8 @@ class InstanceMetadataMigratorTest {
         assertTrue(normalized.get("directory").isTextual());
         assertEquals(instanceDirectory.toAbsolutePath().normalize().toString(),
                 normalized.get("directory").asText());
+        assertTrue(normalized.path("legacyExtension").path("enabled").asBoolean());
+        assertEquals("preserve me", normalized.path("legacyExtension").path("label").asText());
 
         String firstMigration = Files.readString(metadata);
         Instance loadedAgain = InstanceMetadataMigrator.loadAndMigrate(metadata, instanceDirectory);
@@ -54,6 +60,23 @@ class InstanceMetadataMigratorTest {
         assertEquals(firstMigration, Files.readString(metadata));
         assertEquals(legacy, Files.readString(instanceDirectory.resolve(
                 InstanceMetadataMigrator.BACKUP_FILE_NAME)));
+    }
+
+    @Test
+    void ignoresLegacyDirectoryObjectsAndUsesTheActualInstanceFolder() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("legacy-object-path"));
+        Path metadata = instanceDirectory.resolve("instance.json");
+        Files.writeString(metadata, """
+                {"id":"legacy-object-path","name":"Legacy","minecraftVersion":"1.20.1",
+                 "loader":"Fabric","directory":{"root":"C:/old-machine","names":["Vanta","instances"]}}
+                """);
+
+        Instance instance = InstanceMetadataMigrator.loadAndMigrate(metadata, instanceDirectory);
+
+        assertEquals(instanceDirectory.toAbsolutePath().normalize(), instance.getDirectory());
+        var normalized = new ObjectMapper().readTree(metadata.toFile());
+        assertEquals(instanceDirectory.toAbsolutePath().normalize().toString(),
+                normalized.path("directory").asText());
     }
 
     @Test
@@ -87,6 +110,104 @@ class InstanceMetadataMigratorTest {
                 () -> InstanceMetadataMigrator.loadAndMigrate(metadata, instanceDirectory));
 
         assertEquals(future, Files.readString(metadata));
+        assertFalse(Files.exists(instanceDirectory.resolve(
+                InstanceMetadataMigrator.BACKUP_FILE_NAME)));
+    }
+
+    @Test
+    void refusesToMigrateWhenAnExistingBackupDoesNotMatchTheOriginal() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("backup-conflict"));
+        Path metadata = instanceDirectory.resolve("instance.json");
+        Path backup = instanceDirectory.resolve(InstanceMetadataMigrator.BACKUP_FILE_NAME);
+        String original = """
+                {"id":"backup-conflict","name":"Backup conflict",
+                 "minecraftVersion":"1.21.11","loader":"Fabric"}
+                """;
+        Files.writeString(metadata, original);
+        Files.writeString(backup, "not the original metadata");
+
+        assertThrows(IOException.class,
+                () -> InstanceMetadataMigrator.loadAndMigrate(metadata, instanceDirectory));
+
+        assertEquals(original, Files.readString(metadata));
+        assertEquals("not the original metadata", Files.readString(backup));
+    }
+
+    @Test
+    void refusesToMigrateWhenBackupPathIsNotAFile() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("backup-directory"));
+        Path metadata = instanceDirectory.resolve("instance.json");
+        Path backup = Files.createDirectory(
+                instanceDirectory.resolve(InstanceMetadataMigrator.BACKUP_FILE_NAME));
+        String original = """
+                {"id":"backup-directory","name":"Backup directory",
+                 "minecraftVersion":"1.21.11","loader":"Fabric"}
+                """;
+        Files.writeString(metadata, original);
+
+        assertThrows(IOException.class,
+                () -> InstanceMetadataMigrator.loadAndMigrate(metadata, instanceDirectory));
+
+        assertEquals(original, Files.readString(metadata));
+        assertTrue(Files.isDirectory(backup));
+    }
+
+    @Test
+    void concurrentDiscoveryOnlyCreatesOneExactBackup() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("concurrent"));
+        Path metadata = instanceDirectory.resolve("instance.json");
+        String original = """
+                {"id":"concurrent","name":"Concurrent","minecraftVersion":"1.21.11","loader":"Fabric"}
+                """;
+        Files.writeString(metadata, original);
+
+        List<CompletableFuture<Instance>> loads = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+            loads.add(CompletableFuture.supplyAsync(() -> {
+                try {
+                    return InstanceMetadataMigrator.loadAndMigrate(metadata, instanceDirectory);
+                } catch (IOException failure) {
+                    throw new java.util.concurrent.CompletionException(failure);
+                }
+            }));
+        }
+
+        for (CompletableFuture<Instance> load : loads) {
+            assertEquals("concurrent", load.join().getId());
+        }
+        assertEquals(original, Files.readString(instanceDirectory.resolve(
+                InstanceMetadataMigrator.BACKUP_FILE_NAME)));
+        assertEquals(InstanceMetadataMigrator.CURRENT_SCHEMA_VERSION,
+                new ObjectMapper().readTree(metadata.toFile()).path("schemaVersion").asInt());
+    }
+
+    @Test
+    void saveDoesNotOverwriteInvalidExistingMetadata() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("save-invalid"));
+        Path metadata = instanceDirectory.resolve("instance.json");
+        String invalid = "{not valid JSON";
+        Files.writeString(metadata, invalid);
+        Instance replacement = new Instance("save-invalid", "Replacement", "1.21.11",
+                "Fabric", "0.18.4", instanceDirectory);
+
+        assertThrows(IOException.class, () -> InstanceManager.saveInstance(replacement));
+
+        assertEquals(invalid, Files.readString(metadata));
+        assertFalse(Files.exists(instanceDirectory.resolve(
+                InstanceMetadataMigrator.BACKUP_FILE_NAME)));
+    }
+
+    @Test
+    void rejectsMetadataLargerThanTheSafetyLimitWithoutRewritingIt() throws Exception {
+        Path instanceDirectory = Files.createDirectory(temporaryDirectory.resolve("oversized"));
+        Path metadata = instanceDirectory.resolve("instance.json");
+        String oversized = " ".repeat(1024 * 1024 + 1);
+        Files.writeString(metadata, oversized);
+
+        assertThrows(IOException.class,
+                () -> InstanceMetadataMigrator.loadAndMigrate(metadata, instanceDirectory));
+
+        assertEquals(oversized.length(), Files.size(metadata));
         assertFalse(Files.exists(instanceDirectory.resolve(
                 InstanceMetadataMigrator.BACKUP_FILE_NAME)));
     }
