@@ -83,13 +83,17 @@ final class InstanceMetadataMigrator {
         return value.asText();
     }
 
+    static void writeCurrentMetadata(Path target, Instance instance) throws IOException {
+        ObjectNode normalized = (ObjectNode) MAPPER.valueToTree(instance);
+        normalized.put("schemaVersion", CURRENT_SCHEMA_VERSION);
+        byte[] bytes = MAPPER.writeValueAsString(normalized).getBytes(StandardCharsets.UTF_8);
+        Files.write(target, bytes, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING,
+                StandardOpenOption.WRITE);
+    }
+
     private static void writeMigratedMetadata(Path metadataFile, Instance instance) throws IOException {
         Path directory = metadataFile.toAbsolutePath().normalize().getParent();
         if (directory == null) throw new IOException("Instance metadata has no parent directory.");
-
-        ObjectNode normalized = (ObjectNode) MAPPER.valueToTree(instance);
-        normalized.put("schemaVersion", CURRENT_SCHEMA_VERSION);
-        byte[] migratedBytes = MAPPER.writeValueAsString(normalized).getBytes(StandardCharsets.UTF_8);
 
         Path backup = directory.resolve(BACKUP_FILE_NAME);
         if (!Files.exists(backup)) {
@@ -99,7 +103,8 @@ final class InstanceMetadataMigrator {
 
         Path temporary = directory.resolve("instance.json." + UUID.randomUUID() + ".tmp");
         try {
-            Files.write(temporary, migratedBytes, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE);
+            Files.createFile(temporary);
+            writeCurrentMetadata(temporary, instance);
             try {
                 Files.move(temporary, metadataFile,
                         StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
