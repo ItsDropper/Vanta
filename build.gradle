@@ -192,20 +192,21 @@ tasks.register('preparePlatformIcon') {
         // preserves the alpha channel without requiring external image tools.
         def windowsPng = encodePng(readPng(icon64))
         def ico = new ByteArrayOutputStream()
-        def icoData = new DataOutputStream(ico)
-        icoData.writeShort(0)       // reserved
-        icoData.writeShort(1)       // icon type
-        icoData.writeShort(1)       // image count
-        icoData.writeByte(64)       // width
-        icoData.writeByte(64)       // height
-        icoData.writeByte(0)        // palette
-        icoData.writeByte(0)        // reserved
-        icoData.writeShort(1)       // color planes
-        icoData.writeShort(32)      // bits per pixel
-        icoData.writeInt(windowsPng.length)
-        icoData.writeInt(22)        // first image follows the 6+16 byte header
-        icoData.write(windowsPng)
-        icoData.close()
+        def writeLittleEndian = { ByteArrayOutputStream target, long value, int byteCount ->
+            byteCount.times { shift -> target.write((int) ((value >>> (8 * shift)) & 0xff)) }
+        }
+        writeLittleEndian(ico, 0, 2)                 // reserved
+        writeLittleEndian(ico, 1, 2)                 // icon type
+        writeLittleEndian(ico, 1, 2)                 // image count
+        ico.write(64)                                // width
+        ico.write(64)                                // height
+        ico.write(0)                                 // palette
+        ico.write(0)                                 // reserved
+        writeLittleEndian(ico, 1, 2)                 // color planes
+        writeLittleEndian(ico, 32, 2)                // bits per pixel
+        writeLittleEndian(ico, windowsPng.length, 4)
+        writeLittleEndian(ico, 22, 4)                // first image follows the 6+16 byte header
+        ico.write(windowsPng)
         new File(output, 'vanta.ico').bytes = ico.toByteArray()
 
         // ICNS uses PNG chunks for modern macOS icon sizes.
@@ -265,6 +266,12 @@ tasks.register('platformAppImage', Exec) {\n    dependsOn tasks.named('installDi
     inputs.dir(packageInput)
     inputs.file(tasks.named('updaterJar').flatMap { it.archiveFile })
     inputs.files(javafxModuleJars)
+    inputs.files(
+            file('src/main/resources/images/vanta-icon-64.png'),
+            file('src/main/resources/images/vanta-icon.png'),
+            layout.buildDirectory.file('jpackage/icons/vanta.ico'),
+            layout.buildDirectory.file('jpackage/icons/vanta.icns')
+    )
     inputs.property('jpackageVersion', jpackageVersion)
     inputs.property('javaHome', javaHome)
     outputs.dir(packageOutput)
