@@ -61,6 +61,31 @@ class InstanceBackupServiceTest {
     }
 
     @Test
+    void verifiesLegacyBackupMetadataWithoutDeserializingItsOldDirectoryPath() throws Exception {
+        Path archive = temporaryDirectory.resolve("legacy-backup.zip");
+        String metadata = """
+                {"id":"legacy-backup","name":"Legacy Backup","minecraftVersion":"1.20.1",
+                 "loader":"Fabric","loaderVersion":"0.15.0",
+                 "directory":{"oldPathRepresentation":"ignored"}}
+                """;
+        try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(archive))) {
+            zip.putNextEntry(new ZipEntry("instance.json"));
+            zip.write(metadata.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+            zip.putNextEntry(new ZipEntry("mods/example.jar"));
+            zip.write("mod".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        InstanceBackupService.BackupVerification verification =
+                InstanceBackupService.verifyBackup(archive);
+
+        assertEquals("Legacy Backup", verification.instanceName());
+        assertEquals("1.20.1", verification.minecraftVersion());
+        assertEquals("Fabric", verification.loader());
+    }
+
+    @Test
     void rejectsArchiveWithoutVantaInstanceMetadata() throws Exception {
         Path archive = temporaryDirectory.resolve("missing-metadata.zip");
         try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(archive))) {
