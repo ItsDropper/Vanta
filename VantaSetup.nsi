@@ -290,6 +290,9 @@ Section "Uninstall"
   Delete "$DESKTOP\Vanta.lnk"
   DeleteRegKey HKCU "Software\Vanta"
   ; Instance data in roaming AppData is intentionally never removed.
+  ; Delete the running uninstaller explicitly before removing its directory.
+  ; NSIS runs the uninstaller from a temporary copy, so this path is deletable.
+  Delete "$INSTDIR\\Uninstall.exe"
   RMDir /r "$INSTDIR"
 SectionEnd
 
