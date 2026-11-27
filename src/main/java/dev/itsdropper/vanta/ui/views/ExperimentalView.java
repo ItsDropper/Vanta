@@ -1,8 +1,10 @@
 package dev.itsdropper.vanta.ui.views;
 
 import dev.itsdropper.vanta.launcher.ClasspathBuilder;
+import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.service.AccountService;
 import dev.itsdropper.vanta.launcher.service.LaunchPerformanceTracker;
+import dev.itsdropper.vanta.launcher.social.VantaSocialClient;
 import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.LauncherViewLifecycle;
 import dev.itsdropper.vanta.ui.Localization;
@@ -18,6 +20,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -30,6 +33,8 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     private final Label authState = new Label();
     private final Label authDetails = new Label();
     private final Label lastRefresh = new Label();
+    private final Label socialStatus = new Label(Localization.text("experimental.social.ready"));
+    private final Button testSocialLogin = secondaryButton(Localization.text("experimental.social.test"));
     private final Label cacheStats = new Label();
     private final Label measuredInstance = new Label();
     private final Label baselineStats = new Label();
@@ -41,6 +46,9 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
     private final Button refreshSession = secondaryButton(Localization.text("experimental.auth.refresh"));
     private final Runnable healthListener = () -> UiExecutor.shared().dispatchToUi(this::refreshStatus);
     private final Timeline ticker = new Timeline(new KeyFrame(Duration.seconds(1), event -> refreshMetrics()));
+
+    private boolean socialTestInProgress;
+    private boolean socialLoginSucceeded;
 
     public ExperimentalView(AccountService accountService) {
         this(accountService, null);
@@ -66,8 +74,18 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         authDetails.setWrapText(true);
         lastRefresh.getStyleClass().add("muted");
         refreshSession.setOnAction(event -> refreshSession());
-        refreshSession.setDisable(accountService.getCurrentAccount() == null);
         authCard.getChildren().addAll(authTitle, authState, authDetails, lastRefresh, refreshSession);
+
+        VBox socialCard = new VBox(10);
+        socialCard.getStyleClass().add("settings-card");
+        Label socialTitle = new Label(Localization.text("experimental.social.title"));
+        socialTitle.getStyleClass().add("section-title");
+        Label socialDescription = new Label(Localization.text("experimental.social.description"));
+        socialDescription.setWrapText(true);
+        socialStatus.setWrapText(true);
+        socialStatus.getStyleClass().add("muted");
+        testSocialLogin.setOnAction(event -> testSocialLogin());
+        socialCard.getChildren().addAll(socialTitle, socialDescription, socialStatus, testSocialLogin);
 
         VBox performanceCard = new VBox(12);
         performanceCard.getStyleClass().add("settings-card");
@@ -125,7 +143,7 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         crashCasesCard.getChildren().addAll(
                 crashCasesTitle, crashCasesDescription, crashCasesPrivacy, reviewCrashCases);
 
-        VBox pageContent = new VBox(18, eyebrow, title, intro, authCard, performanceCard, crashCasesCard);
+        VBox pageContent = new VBox(18, eyebrow, title, intro, authCard, socialCard, performanceCard, crashCasesCard);
         pageContent.setFillWidth(true);
         pageContent.setPadding(new Insets(24));
 
@@ -160,6 +178,58 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
         });
     }
 
+    private void testSocialLogin() {
+        Account account = accountService.getCurrentAccount();
+        if (account == null) {
+            socialStatus.setText(Localization.text("experimental.social.noAccount"));
+            refreshSocialControls();
+            return;
+        }
+
+        socialTestInProgress = true;
+        socialStatus.setText(Localization.text("experimental.social.testing"));
+        refreshSocialControls();
+
+        UiExecutor.shared().execute(() -> {
+            VantaSocialClient.LoginStatus result;
+            try {
+                result = VantaSocialClient.testMinecraftLogin(account);
+            } catch (InterruptedException interrupted) {
+                Thread.currentThread().interrupt();
+                result = null;
+            } catch (IOException failure) {
+                result = null;
+            }
+
+            VantaSocialClient.LoginStatus finalResult = result;
+            UiExecutor.shared().dispatchToUi(() -> {
+                socialTestInProgress = false;
+                socialLoginSucceeded = finalResult == VantaSocialClient.LoginStatus.SUCCESS;
+                socialStatus.setText(socialResultMessage(finalResult, account));
+                refreshSocialControls();
+            });
+        });
+    }
+
+    private String socialResultMessage(VantaSocialClient.LoginStatus result, Account account) {
+        if (result == null) {
+            return Localization.text("experimental.social.connectionError");
+        }
+        return switch (result) {
+            case SUCCESS -> Localization.text("experimental.social.success").formatted(account.getUsername());
+            case MINECRAFT_AUTH_REJECTED -> Localization.text("experimental.social.minecraftRejected");
+            case RATE_LIMITED -> Localization.text("experimental.social.rateLimited");
+            case API_ERROR -> Localization.text("experimental.social.apiError");
+            case UNEXPECTED_RESPONSE -> Localization.text("experimental.social.unexpectedResponse");
+        };
+    }
+
+    private void refreshSocialControls() {
+        testSocialLogin.setDisable(accountService.getCurrentAccount() == null
+                || socialTestInProgress
+                || socialLoginSucceeded);
+    }
+
     private void refreshStatus() {
         AccountService.SessionHealth health = accountService.getSessionHealth();
         String healthKey = health.name().toLowerCase(Locale.ROOT);
@@ -174,6 +244,7 @@ public final class ExperimentalView extends VBox implements LauncherViewLifecycl
                 || health == AccountService.SessionHealth.CLOSED
                 || health == AccountService.SessionHealth.AUTHENTICATING
                 || health == AccountService.SessionHealth.REFRESHING);
+        refreshSocialControls();
     }
 
     private void refreshMetrics() {
