@@ -61,27 +61,43 @@ public class UpdateDownloader {
             report(progress, "Downloading Vanta " + version + "...");
             if (progressValue != null) progressValue.accept(0.0);
 
-            downloadFile(archiveUri, temporaryZip, MAX_ARCHIVE_BYTES, progress, progressValue);
-
             if (checksumUri != null) {
                 report(progress, "Downloading update checksum...");
                 downloadFile(checksumUri, checksumFile, MAX_CHECKSUM_BYTES, null, null);
             }
 
-            report(progress, "Verifying update...");
-            if (progressValue != null) progressValue.accept(-1.0);
-
             String expectedHash = updateInfo.getSha256() == null
                     ? readExpectedHash(checksumFile) : updateInfo.getSha256();
-            String actualHash = calculateSha256(temporaryZip);
-            if (updateInfo.getSizeBytes() > 0 && Files.size(temporaryZip) != updateInfo.getSizeBytes()) {
-                throw new IOException("The downloaded update size does not match the release manifest.");
+            boolean verified = false;
+            for (int verificationAttempt = 1; verificationAttempt <= 3; verificationAttempt++) {
+                downloadFile(archiveUri, temporaryZip, MAX_ARCHIVE_BYTES, progress, progressValue);
+
+                report(progress, "Verifying update...");
+                if (progressValue != null) progressValue.accept(-1.0);
+
+                boolean sizeMatches = updateInfo.getSizeBytes() <= 0
+                        || Files.size(temporaryZip) == updateInfo.getSizeBytes();
+                String actualHash = calculateSha256(temporaryZip);
+                boolean hashMatches = MessageDigest.isEqual(
+                        expectedHash.toLowerCase(Locale.ROOT).getBytes(java.nio.charset.StandardCharsets.US_ASCII),
+                        actualHash.getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+                if (sizeMatches && hashMatches) {
+                    verified = true;
+                    break;
+                }
+
+                deleteQuietly(temporaryZip);
+                if (verificationAttempt == 3) {
+                    throw new IOException(!sizeMatches
+                            ? "The downloaded update size does not match the release manifest after 3 attempts."
+                            : "The downloaded update failed SHA-256 verification after 3 attempts.");
+                }
+                report(progress, "Downloaded data did not verify. Retrying ("
+                        + (verificationAttempt + 1) + "/3)...");
+                java.util.concurrent.TimeUnit.MILLISECONDS.sleep(
+                        UpdateHttpRetry.retryDelayMillis(verificationAttempt));
             }
-            if (!MessageDigest.isEqual(
-                    expectedHash.toLowerCase(Locale.ROOT).getBytes(java.nio.charset.StandardCharsets.US_ASCII),
-                    actualHash.getBytes(java.nio.charset.StandardCharsets.US_ASCII))) {
-                throw new IOException("The downloaded update failed integrity verification.");
-            }
+            if (!verified) throw new IOException("The update could not be verified.");
 
             report(progress, "Update verified successfully.");
             try {
