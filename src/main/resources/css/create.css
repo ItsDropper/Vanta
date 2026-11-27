@@ -136,8 +136,7 @@
 .preset-configuration-panel .preset-config-content {
     -fx-background-color: transparent;
     -fx-spacing: 14;
-
-
+}
 
 /* Vanta Profiles — uses the same instance-creation surface and spacing system. */
 .vanta-profiles-page {

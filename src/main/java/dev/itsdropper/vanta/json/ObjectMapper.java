@@ -33,6 +33,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
@@ -94,7 +95,16 @@ public final class ObjectMapper {
                     }
                     @Override public Path read(JsonReader in) throws IOException {
                         if (in.peek() == JsonToken.NULL) { in.nextNull(); return null; }
-                        return Path.of(in.nextString());
+                        String value = in.nextString();
+                        // Older instance metadata stored Path.toUri() values
+                        // (file:///C:/...) instead of filesystem path strings.
+                        // Resolve file URIs through the filesystem provider; Path.of(String)
+                        // treats the URI scheme as an invalid Windows path character.
+                        if (value.regionMatches(true, 0, "file:", 0, "file:".length())) {
+                            return Path.of(URI.create(value));
+                        }
+                        // Continue accepting current and legacy plain paths.
+                        return Path.of(value);
                     }
                 });
         if (pretty) builder.setPrettyPrinting();

@@ -48,10 +48,6 @@
     -fx-vantaicon: -fx-vantamuted;
 }
 
-.root {
-    -fx-background-color: -fx-vantabg;
-}
-
 /* ---------- type roles ---------------------------------------------------
    VantaUI.TextRole maps onto these. Sentence case everywhere; weight and
    size carry the hierarchy, not capitals or tracking. */
