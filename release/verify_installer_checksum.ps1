@@ -50,7 +50,7 @@ try {
     if (-not [string]::Equals($actual, $expected, [System.StringComparison]::OrdinalIgnoreCase)) {
         throw "Downloaded archive SHA-256 mismatch (source: $source; expected: $expected; actual: $actual)."
     }
-    $success = "Verified SHA-256 for $([System.IO.Path]::GetFileName($Archive)) using \${source}: $actual"
+    $success = "Verified SHA-256 for $([System.IO.Path]::GetFileName($Archive)) using " + $source + ": " + $actual
     Write-VerificationLog $success
     Write-Output $success
     exit 0
