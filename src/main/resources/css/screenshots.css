@@ -1,4 +1,4 @@
-/* Screenshots — built on the current Vanta surface and control tokens. */
+/* Screenshots — current Vanta surface, type and control system. */
 
 .screenshots-page {
     -fx-spacing: 18px;
@@ -11,8 +11,7 @@
 
 .screenshots-toolbar {
     -fx-alignment: center-left;
-    -fx-hgap: 8px;
-    -fx-vgap: 8px;
+    -fx-spacing: 8px;
 }
 
 .screenshots-scroll,
@@ -27,6 +26,7 @@
     -fx-hgap: 14px;
     -fx-vgap: 14px;
     -fx-padding: 2px 2px 12px 2px;
+    -fx-alignment: top-left;
 }
 
 .screenshot-card {
@@ -35,7 +35,7 @@
         -fx-v-card,
         linear-gradient(to bottom, -fx-v-gloss, transparent 58%);
     -fx-background-insets: 0, 1, 1;
-    -fx-background-radius: 12px, 11px, 11px;
+    -fx-background-radius: 13, 12, 12;
     -fx-padding: 10px;
     -fx-spacing: 9px;
     -fx-cursor: hand;
@@ -52,7 +52,7 @@
 .screenshot-preview {
     -fx-background-color: -fx-v-hair, -fx-v-well;
     -fx-background-insets: 0, 1;
-    -fx-background-radius: 9px, 8px;
+    -fx-background-radius: 9, 8;
     -fx-alignment: center;
     -fx-cursor: hand;
 }
@@ -75,12 +75,13 @@
     -fx-padding: 0 2px 2px 2px;
 }
 
+/* Empty state uses the same inset surface and hierarchy as the library. */
 .screenshots-page .instance-empty {
-    -fx-background-color: -fx-v-hair, -fx-v-well;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
     -fx-background-insets: 0, 1;
-    -fx-background-radius: 14px, 13px;
+    -fx-background-radius: 14, 13;
     -fx-border-color: transparent;
-    -fx-padding: 38px 28px;
+    -fx-padding: 42px 28px;
 }
 
 .screenshots-page .instance-empty-icon {
@@ -89,31 +90,33 @@
 }
 
 .screenshots-page .instance-empty-title {
-    -fx-font-family: "Geist SemiBold";
-    -fx-font-size: 16px;
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 17px;
     -fx-text-fill: -fx-vantatext;
 }
 
 .screenshots-page .instance-empty-description {
+    -fx-font-family: "Geist";
     -fx-font-size: 13px;
     -fx-text-fill: -fx-vantamuted;
     -fx-text-alignment: center;
 }
 
+/* Full-size viewer. The same tokens are used in its separate transparent stage. */
 .screenshot-dialog {
     -fx-background-color: -fx-v-frame;
     -fx-background-insets: 0;
-    -fx-background-radius: 12px;
+    -fx-background-radius: 12;
     -fx-border-color: -fx-v-hair-strong;
-    -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
 }
 
 .screenshot-dialog .title-bar {
     -fx-background-color: -fx-v-page;
-    -fx-background-radius: 11px 11px 0 0;
+    -fx-background-radius: 11 11 0 0;
     -fx-border-color: transparent transparent -fx-v-hair transparent;
-    -fx-border-width: 0 0 1px 0;
+    -fx-border-width: 0 0 1 0;
 }
 
 .screenshot-dialog-name {
@@ -139,11 +142,12 @@
 
 .screenshot-dialog-toolbar {
     -fx-background-color: -fx-v-page;
-    -fx-background-radius: 0 0 11px 11px;
+    -fx-background-radius: 0 0 11 11;
     -fx-border-color: -fx-v-hair transparent transparent transparent;
-    -fx-border-width: 1px 0 0 0;
+    -fx-border-width: 1 0 0 0;
     -fx-hgap: 8px;
     -fx-vgap: 8px;
+    -fx-padding: 10px 14px;
     -fx-alignment: center-right;
 }
 
@@ -151,22 +155,22 @@
     -fx-pref-width: 116px;
 }
 
+/* Delete confirmation follows the shared dialog surface vocabulary. */
 .screenshot-delete-dialog {
-    -fx-background-color: -fx-v-card;
-    -fx-background-insets: 0;
-    -fx-background-radius: 12px;
-    -fx-border-color: -fx-v-hair-strong;
-    -fx-border-width: 1px;
-    -fx-border-radius: 12px;
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
+    -fx-padding: 22px;
 }
 
 .screenshot-delete-title {
-    -fx-font-family: "Geist SemiBold";
-    -fx-font-size: 16px;
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 17px;
     -fx-text-fill: -fx-vantatext;
 }
 
 .screenshot-delete-description {
+    -fx-font-family: "Geist";
     -fx-font-size: 13px;
     -fx-text-fill: -fx-vantamuted;
     -fx-wrap-text: true;
@@ -177,6 +181,6 @@
     -fx-font-size: 12px;
     -fx-text-fill: -fx-vantatext;
     -fx-background-color: -fx-v-well;
-    -fx-background-radius: 7px;
-    -fx-padding: 8px 10px;
+    -fx-background-radius: 8;
+    -fx-padding: 9px 11px;
 }
