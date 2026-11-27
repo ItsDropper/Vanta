@@ -25,6 +25,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
@@ -94,6 +95,9 @@ public class InstancesView extends VBox {
     private final FlowPane loaderChips;
     private final ToggleGroup loaderGroup = new ToggleGroup();
     private final VBox toolbarBox;
+    private final StackPane detailHost;
+    private final List<InstanceCard> shownCards = new ArrayList<>();
+    private String selectedId;
     private String loaderFilter = "";
     private boolean rebuildingChips;
 
@@ -274,7 +278,19 @@ public class InstancesView extends VBox {
         statusLabel = new Label(Localization.text("instances.scanning"));
         statusLabel.getStyleClass().add("instances-status");
 
-        getChildren().addAll(header, toolbarBox, scrollPane, statusLabel);
+        detailHost = new StackPane();
+        detailHost.setMinWidth(InstanceDetailPanel.WIDTH);
+        detailHost.setPrefWidth(InstanceDetailPanel.WIDTH);
+        detailHost.setMaxWidth(InstanceDetailPanel.WIDTH);
+        detailHost.setAlignment(Pos.TOP_CENTER);
+        detailHost.getStyleClass().add("instance-detail-host");
+        detailHost.setVisible(false);
+        detailHost.setManaged(false);
+        HBox body = new HBox(18, scrollPane, detailHost);
+        HBox.setHgrow(scrollPane, Priority.ALWAYS);
+        VBox.setVgrow(body, Priority.ALWAYS);
+
+        getChildren().addAll(header, toolbarBox, body, statusLabel);
 
         launchService.addStateListener(this::onLaunchStateChanged);
 
@@ -1103,11 +1119,37 @@ public class InstancesView extends VBox {
             container = grid;
         }
 
+        shownCards.clear();
+        shownCards.addAll(cards);
+        for (InstanceCard card : cards) {
+            card.setOnSelect(() -> select(card.getInstance()));
+        }
+        Instance current = instances.stream()
+                .filter(i -> i.getId().equals(selectedId)).findFirst()
+                .orElse(instances.isEmpty() ? null : instances.get(0));
+        select(current);
+
         instanceList.getChildren().setAll(container);
         if (container instanceof FlowPane grid) {
             sizeGridCards(grid);
         }
         updateCards();
+    }
+
+    private void select(Instance instance) {
+        selectedId = instance == null ? null : instance.getId();
+        for (InstanceCard card : shownCards) {
+            card.setSelected(instance != null && card.getInstance().getId().equals(selectedId));
+        }
+        boolean show = instance != null;
+        detailHost.setVisible(show);
+        detailHost.setManaged(show);
+        if (show) {
+            detailHost.getChildren().setAll(new InstanceDetailPanel(
+                    instance, () -> launch(instance), () -> onInstanceSettings.accept(instance)));
+        } else {
+            detailHost.getChildren().clear();
+        }
     }
 
     /** Spreads the available width over as many equal columns as fit. */

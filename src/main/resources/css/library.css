@@ -225,3 +225,24 @@
     -fx-font-size: 16px;
     -fx-text-fill: white;
 }
+
+.instance-card:selected {
+    -fx-effect: dropshadow(gaussian, -fx-vantaaccent-a30, 14, 0.0, 0, 0);
+}
+
+.instance-detail {
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card, linear-gradient(to bottom, -fx-v-gloss, transparent 55%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 14, 13, 13;
+}
+
+.instance-detail-name {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 20px;
+    -fx-text-fill: -fx-vantatext;
+}
+
+.instance-detail-play {
+    -fx-font-size: 15px;
+    -fx-padding: 0 18 0 18;
+}

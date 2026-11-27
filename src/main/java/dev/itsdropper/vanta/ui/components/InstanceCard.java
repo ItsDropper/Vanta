@@ -175,14 +175,23 @@ public class InstanceCard extends StackPane {
         setAccessibleRole(AccessibleRole.BUTTON);
         setAccessibleText(Localization.text("instanceCard.optionsForPrefix") + instance.getName());
         setOnMouseClicked(event -> {
-            if (!fromButton(event.getTarget())) {
+            if (fromButton(event.getTarget())) {
+                return;
+            }
+            if (onSelect != null && event.getClickCount() < 2) {
+                onSelect.run();
+            } else {
                 onSettings.run();
             }
         });
         setOnKeyPressed(event -> {
             if (event.getTarget() == this
                     && (event.getCode() == KeyCode.ENTER || event.getCode() == KeyCode.SPACE)) {
-                onSettings.run();
+                if (onSelect != null) {
+                    onSelect.run();
+                } else {
+                    onSettings.run();
+                }
                 event.consume();
             }
         });
@@ -980,6 +989,17 @@ public class InstanceCard extends StackPane {
     // =============================================================
     // GET / SET INSTANCE
     // =============================================================
+
+    private Runnable onSelect;
+
+    /** When set, a single click selects the card and a double click opens settings. */
+    public void setOnSelect(Runnable onSelect) {
+        this.onSelect = onSelect;
+    }
+
+    public void setSelected(boolean selected) {
+        pseudoClassStateChanged(javafx.css.PseudoClass.getPseudoClass("selected"), selected);
+    }
 
     public Instance getInstance() {
         return instance;
