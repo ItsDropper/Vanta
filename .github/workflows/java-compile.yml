@@ -213,7 +213,10 @@ jobs:
           Write-Host 'Running the installed uninstaller...'
           $uninstaller = Join-Path $installDirectory 'Uninstall.exe'
           $uninstallerLog = Join-Path $env:RUNNER_TEMP 'vanta-uninstaller.log'
-          $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/S', "/LOG=$uninstallerLog") -PassThru
+          # NSIS uninstallers require _?=<install-dir> as the final argument
+          # when launched silently. It initializes $INSTDIR without relying
+          # on registry discovery or the process working directory.
+          $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/S', "_?=$installDirectory") -PassThru
           if (!$uninstall.WaitForExit(360000)) {
             $uninstall.Kill()
             throw 'Vanta uninstaller did not finish within six minutes.'
@@ -223,6 +226,12 @@ jobs:
             throw "Vanta uninstaller exited with code $($uninstall.ExitCode). $details"
           }
           $scriptUninstallerLog = Join-Path $env:TEMP 'VantaUninstaller.log'
+          # NSIS may delegate self-deletion to a helper process after the
+          # uninstaller process exits. Allow that cleanup to finish.
+          $cleanupDeadline = [DateTime]::UtcNow.AddSeconds(15)
+          while ((Test-Path $installDirectory) -and [DateTime]::UtcNow -lt $cleanupDeadline) {
+            Start-Sleep -Milliseconds 250
+          }
           if (Test-Path $installDirectory) {
             Write-Host 'NSIS runtime log:'
             if (Test-Path $uninstallerLog) { Get-Content -LiteralPath $uninstallerLog | Write-Host }
