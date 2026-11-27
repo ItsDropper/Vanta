@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class UpdateDownloader {
@@ -51,9 +52,10 @@ public class UpdateDownloader {
         Path updateDirectory = Path.of(System.getProperty("java.io.tmpdir"), "Vanta", "updates");
         Files.createDirectories(updateDirectory);
 
-        Path temporaryZip = updateDirectory.resolve("Vanta-" + version + ".zip.download");
+        String downloadId = UUID.randomUUID().toString();
+        Path temporaryZip = updateDirectory.resolve("Vanta-" + version + "-" + downloadId + ".zip.download");
         Path zip = updateDirectory.resolve("Vanta-" + version + ".zip");
-        Path checksumFile = updateDirectory.resolve("Vanta-" + version + ".zip.sha256");
+        Path checksumFile = updateDirectory.resolve("Vanta-" + version + "-" + downloadId + ".zip.sha256");
 
         try {
             report(progress, "Downloading Vanta " + version + "...");
