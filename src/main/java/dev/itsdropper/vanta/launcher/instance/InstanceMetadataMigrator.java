@@ -156,6 +156,11 @@ final class InstanceMetadataMigrator {
         Path temporary = Files.createTempFile(directory, "instance.json.", ".tmp");
         try {
             writeAndSync(temporary, migratedBytes);
+            if (Files.isSymbolicLink(metadataFile)
+                    || !Files.isRegularFile(metadataFile, java.nio.file.LinkOption.NOFOLLOW_LINKS)
+                    || !java.util.Arrays.equals(Files.readAllBytes(metadataFile), originalBytes)) {
+                throw new IOException("Instance metadata changed during migration; the new file was not installed.");
+            }
             try {
                 Files.move(temporary, metadataFile,
                         StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
