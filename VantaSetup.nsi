@@ -15,6 +15,8 @@ Name "Vanta"
 Caption "Vanta"
 BrandingText "Vanta Minecraft Launcher"
 OutFile "VantaSetup.exe"
+Icon "build\jpackage\icons\vanta.ico"
+UninstallIcon "build\jpackage\icons\vanta.ico"
 InstallDir "$LOCALAPPDATA\Vanta"
 InstallDirRegKey HKCU "Software\Vanta" "InstallDir"
 RequestExecutionLevel user
@@ -29,6 +31,8 @@ VIAddVersionKey "FileDescription" "Vanta Minecraft Launcher"
 VIAddVersionKey "FileVersion" "${APP_VERSION}"
 VIAddVersionKey "LegalCopyright" "Copyright © 2026 ItsDropper"
 
+!define MUI_ICON "build\jpackage\icons\vanta.ico"
+!define MUI_UNICON "build\jpackage\icons\vanta.ico"
 !define MUI_ABORTWARNING
 !define MUI_WELCOMEPAGE_TITLE "Welcome to Vanta"
 !define MUI_WELCOMEPAGE_TEXT "Vanta is a Minecraft launcher focused on reliable instances and a clean desktop experience.$\r$\n$\r$\nThis setup installs Vanta for the current Windows user. No administrator access is required."
@@ -83,7 +87,7 @@ Section "Vanta"
   ; depending on line formatting in GitHub's API response.
   SetOutPath "$PLUGINSDIR"
   File /oname=Read-VantaReleaseVersion.ps1 "release\read_latest_release_version.ps1"
-  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Read-VantaReleaseVersion.ps1" -ReleaseMetadata "$WORK_DIR\release.json" -OutputPath "$VERSION_PATH"'
+  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Read-VantaReleaseVersion.ps1" -ReleaseMetadata "$WORK_DIR\release.json" -OutputPath "$VERSION_PATH" -ChecksumOutputPath "$WORK_DIR\expected-sha256.txt"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
   FileSeek $9 0 END
@@ -127,16 +131,19 @@ Section "Vanta"
   StrCmp $0 "0" +2
     Goto DownloadError
 
-  DetailPrint "Downloading SHA-256 checksum..."
+  ; Always fetch the small checksum sidecar as a fallback. The verifier
+  ; prefers the exact GitHub API digest file when that digest is available.
+  DetailPrint "Downloading SHA-256 checksum sidecar..."
   nsExec::ExecToLog '"$SYSDIR\curl.exe" -L -sS --fail --retry 3 --connect-timeout 15 --max-time 60 -o "$HASH_PATH" "https://github.com/ItsDropper/Vanta/releases/download/v$APP_VERSION/Vanta-$APP_VERSION.zip.sha256"'
   Pop $0
   StrCmp $0 "0" +2
     Goto DownloadError
 
+VerifyDownloadedPackage:
   DetailPrint "Verifying downloaded package..."
   SetOutPath "$PLUGINSDIR"
   File /oname=Verify-VantaChecksum.ps1 "release\verify_installer_checksum.ps1"
-  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Verify-VantaChecksum.ps1" -Archive "$ZIP_PATH" -Checksum "$HASH_PATH"'
+  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Verify-VantaChecksum.ps1" -Archive "$ZIP_PATH" -Checksum "$HASH_PATH" -ExpectedSha256File "$WORK_DIR\expected-sha256.txt" -LogPath "$LOG_PATH"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
   FileSeek $9 0 END
@@ -277,14 +284,51 @@ InstallFailure:
 InstallComplete:
 SectionEnd
 
+Function un.onInit
+  ; The uninstaller is written directly into the installation root. Its own
+  ; executable directory is authoritative and also works when registry state
+  ; is missing or stale.
+  StrCpy $INSTDIR "$EXEDIR"
+  SetOutPath "$TEMP"
+  FileOpen $9 "$TEMP\VantaUninstaller.log" w
+  FileWrite $9 "un.onInit reached. Target: $INSTDIR$\r$\n"
+  FileClose $9
+FunctionEnd
+
 Section "Uninstall"
+  ; The uninstaller must not have its working directory inside the tree being
+  ; removed. NSIS otherwise cannot remove the current directory on Windows.
+  SetOutPath "$TEMP"
+  FileOpen $9 "$TEMP\VantaUninstaller.log" a
+  FileWrite $9 "Uninstall section started. Target: $INSTDIR$\r$\n"
+  FileClose $9
+
   Delete "$SMPROGRAMS\Vanta\Vanta.lnk"
   RMDir "$SMPROGRAMS\Vanta"
   Delete "$DESKTOP\Vanta.lnk"
-  DeleteRegKey HKCU "Software\Vanta"
+
   ; Instance data in roaming AppData is intentionally never removed.
+  ; Windows keeps the running uninstaller executable locked. Remove all other
+  ; payload now; un.onUninstSuccess starts a detached cleanup process to remove
+  ; the final executable and its parent directory after this process exits.
   RMDir /r "$INSTDIR"
+  DeleteRegKey HKCU "Software\Vanta"
+
+  FileOpen $9 "$TEMP\VantaUninstaller.log" a
+  FileWrite $9 "Uninstall section completed.$\r$\n"
+  FileClose $9
 SectionEnd
+
+Function un.onUninstSuccess
+  HideWindow
+  ; Pass the path through an inherited environment variable instead of
+  ; interpolating it into PowerShell source (install paths may contain quotes
+  ; or shell metacharacters).
+  System::Call 'kernel32::SetEnvironmentVariable(t, t) i("VANTA_UNINSTALL_DIR", "$INSTDIR").r0'
+  StrCmp $0 0 UninstallCleanupDone
+  Exec '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -Command "Start-Sleep -Milliseconds 1500; Remove-Item -LiteralPath $env:VANTA_UNINSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue"'
+UninstallCleanupDone:
+FunctionEnd
 
 Function LaunchVanta
   ; Silent installer smoke tests must not start the GUI on the CI runner.

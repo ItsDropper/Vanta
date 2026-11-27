@@ -179,7 +179,10 @@ public final class ThemeManager {
                 "-fx-vantamuted: " + muted + ";" +
                 "-fx-vantasubtle: " + subtle + ";" +
                 "-fx-vantadanger: " + danger + ";" +
-                "-fx-vantasuccess: " + success + ";"
+                "-fx-vantasuccess: " + success + ";" +
+                // Set the root's actual Paint property directly. JavaFX does
+                // not reliably type custom inline lookup properties as Paint.
+                "-fx-background-color: " + background + ";"
         );
     }
 

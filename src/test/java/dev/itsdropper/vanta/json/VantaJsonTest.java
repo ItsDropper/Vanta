@@ -43,6 +43,28 @@ class VantaJsonTest {
     }
 
     @Test
+    void readsLegacyFileUriInstanceDirectories() throws Exception {
+        String uri = "file:///C:/Users/hugoh/AppData/Roaming/Vanta/instances/test%20instance/";
+        Instance restored = VantaJson.mapper().readValue("""
+                {"id":"test","name":"Test","minecraftVersion":"1.21.11",
+                 "loader":"Fabric","loaderVersion":"0.16.0","directory":"%s"}
+                """.formatted(uri), Instance.class);
+
+        assertEquals(Path.of(java.net.URI.create(uri)), restored.getDirectory());
+    }
+
+    @Test
+    void continuesReadingPlainWindowsPathStrings() throws Exception {
+        String path = "C:\\Users\\hugoh\\AppData\\Roaming\\Vanta\\instances\\test";
+        Instance restored = VantaJson.mapper().readValue("""
+                {"id":"test","name":"Test","minecraftVersion":"1.21.11",
+                 "loader":"Fabric","loaderVersion":"0.16.0","directory":"%s"}
+                """.formatted(path.replace("\\", "\\\\")), Instance.class);
+
+        assertEquals(Path.of(path), restored.getDirectory());
+    }
+
+    @Test
     void objectAndArrayNodesSerializeAsJsonRatherThanWrapperFields() throws Exception {
         ObjectNode object = VantaJson.mapper().createObjectNode();
         object.put("name", "Vanta");

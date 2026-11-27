@@ -128,11 +128,31 @@ jobs:
           $hash = (Get-FileHash -LiteralPath $testArchive -Algorithm SHA256).Hash.ToLowerInvariant()
           Set-Content -LiteralPath "$testArchive.sha256" -Value "$hash  Vanta-test.zip" -NoNewline
           & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256"
-          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid archive.' }
+          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid sidecar.' }
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256 $hash
+          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid GitHub asset digest.' }
+          $expectedDigestFile = Join-Path $testDirectory 'expected-sha256.txt'
+          $verificationLog = Join-Path $testDirectory 'installer.log'
+          Set-Content -LiteralPath $expectedDigestFile -Value $hash -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256File $expectedDigestFile -LogPath $verificationLog
+          if ($LASTEXITCODE -ne 0) { throw 'Checksum verifier rejected a valid digest file.' }
+          if ((Get-Content -LiteralPath $verificationLog -Raw) -notmatch [regex]::Escape($hash)) {
+            throw 'Checksum verifier did not record its successful digest in the installer log.'
+          }
           Set-Content -LiteralPath $testArchive -Value 'tampered fixture' -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256File $expectedDigestFile -LogPath $verificationLog 2>$null
+          $fileDigestNegativeExitCode = $LASTEXITCODE
+          if ($fileDigestNegativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive using a digest file.' }
+          $diagnostics = Get-Content -LiteralPath $verificationLog -Raw
+          if ($diagnostics -notmatch 'expected:' -or $diagnostics -notmatch 'actual:') {
+            throw 'Checksum verifier did not log expected and actual hashes after a mismatch.'
+          }
           & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -Checksum "$testArchive.sha256" 2>$null
           $negativeExitCode = $LASTEXITCODE
-          if ($negativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive.' }
+          if ($negativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive using a sidecar.' }
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/verify_installer_checksum.ps1' -Archive $testArchive -ExpectedSha256 $hash 2>$null
+          $digestNegativeExitCode = $LASTEXITCODE
+          if ($digestNegativeExitCode -eq 0) { throw 'Checksum verifier accepted a modified archive using a GitHub asset digest.' }
           # The negative test must fail, but that expected native exit code must
           # not become the exit code of this otherwise-successful PowerShell step.
           $global:LASTEXITCODE = 0
@@ -149,13 +169,22 @@ jobs:
           New-Item -ItemType Directory -Path $fixtureDirectory -Force | Out-Null
           $metadata = Join-Path $fixtureDirectory 'release.json'
           $versionPath = Join-Path $fixtureDirectory 'version.txt'
-          Set-Content -LiteralPath $metadata -Value '{"tag_name":"v1.2.3"}' -NoNewline
-          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath
+          $digestPath = Join-Path $fixtureDirectory 'expected-sha256.txt'
+          $fixtureDigest = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef'
+          $metadataJson = @{
+            tag_name = 'v1.2.3'
+            assets = @(@{ name = 'Vanta-1.2.3.zip'; digest = "sha256:$fixtureDigest" })
+          } | ConvertTo-Json -Depth 4 -Compress
+          Set-Content -LiteralPath $metadata -Value $metadataJson -NoNewline
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath -ChecksumOutputPath $digestPath
           if ($LASTEXITCODE -ne 0 -or (Get-Content -LiteralPath $versionPath -Raw) -ne '1.2.3') {
             throw 'Installer release-version parser failed its valid-tag test.'
           }
+          if ((Get-Content -LiteralPath $digestPath -Raw) -ne $fixtureDigest) {
+            throw 'Installer release-version parser did not extract the matching GitHub asset digest.'
+          }
           Set-Content -LiteralPath $metadata -Value '{"tag_name":"v1.2.3/../../bad"}' -NoNewline
-          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath 2>$null
+          & powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File 'release/read_latest_release_version.ps1' -ReleaseMetadata $metadata -OutputPath $versionPath -ChecksumOutputPath $digestPath 2>$null
           if ($LASTEXITCODE -eq 0) { throw 'Installer release-version parser accepted an invalid tag.' }
           $global:LASTEXITCODE = 0
 
@@ -183,13 +212,38 @@ jobs:
 
           Write-Host 'Running the installed uninstaller...'
           $uninstaller = Join-Path $installDirectory 'Uninstall.exe'
-          $uninstall = Start-Process -FilePath $uninstaller -ArgumentList '/S' -PassThru
+          $uninstallerLog = Join-Path $env:RUNNER_TEMP 'vanta-uninstaller.log'
+          # NSIS uninstallers require _?=<install-dir> as the final argument
+          # when launched silently. It initializes $INSTDIR without relying
+          # on registry discovery or the process working directory.
+          $uninstall = Start-Process -FilePath $uninstaller -ArgumentList @('/S', "_?=$installDirectory") -PassThru
           if (!$uninstall.WaitForExit(360000)) {
             $uninstall.Kill()
             throw 'Vanta uninstaller did not finish within six minutes.'
           }
-          if ($uninstall.ExitCode -ne 0) { throw "Vanta uninstaller exited with code $($uninstall.ExitCode)." }
-          if (Test-Path $installDirectory) { throw 'Vanta uninstaller left the installation directory behind.' }
+          if ($uninstall.ExitCode -ne 0) {
+            $details = if (Test-Path $uninstallerLog) { Get-Content -LiteralPath $uninstallerLog -Raw } else { 'NSIS did not produce an uninstaller log.' }
+            throw "Vanta uninstaller exited with code $($uninstall.ExitCode). $details"
+          }
+          $scriptUninstallerLog = Join-Path $env:TEMP 'VantaUninstaller.log'
+          # NSIS may delegate self-deletion to a helper process after the
+          # uninstaller process exits. Allow that cleanup to finish.
+          $cleanupDeadline = [DateTime]::UtcNow.AddSeconds(15)
+          while ((Test-Path $installDirectory) -and [DateTime]::UtcNow -lt $cleanupDeadline) {
+            Start-Sleep -Milliseconds 250
+          }
+          if (Test-Path $installDirectory) {
+            Write-Host 'NSIS runtime log:'
+            if (Test-Path $uninstallerLog) { Get-Content -LiteralPath $uninstallerLog | Write-Host }
+            Write-Host 'Vanta uninstaller section log:'
+            if (Test-Path $scriptUninstallerLog) { Get-Content -LiteralPath $scriptUninstallerLog | Write-Host }
+            else { Write-Host "Uninstaller section did not create $scriptUninstallerLog" }
+            Write-Host 'Remaining installation contents:'
+            Get-ChildItem -LiteralPath $installDirectory -Force -Recurse -ErrorAction Continue |
+              Select-Object FullName, Length, Attributes |
+              Format-Table -AutoSize | Out-String | Write-Host
+            throw 'Vanta uninstaller left the installation directory behind.'
+          }
           Remove-Item $fixtureDirectory -Recurse -Force
           Write-Host 'Windows installer and uninstaller end-to-end smoke test passed.'
 

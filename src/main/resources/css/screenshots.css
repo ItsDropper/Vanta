@@ -1,0 +1,186 @@
+/* Screenshots — current Vanta surface, type and control system. */
+
+.screenshots-page {
+    -fx-spacing: 18px;
+    -fx-background-color: transparent;
+}
+
+.screenshots-page .page-header {
+    -fx-padding: 0 0 2px 0;
+}
+
+.screenshots-toolbar {
+    -fx-alignment: center-left;
+    -fx-spacing: 8px;
+}
+
+.screenshots-scroll,
+.screenshots-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.screenshot-grid {
+    -fx-hgap: 14px;
+    -fx-vgap: 14px;
+    -fx-padding: 2px 2px 12px 2px;
+    -fx-alignment: top-left;
+}
+
+.screenshot-card {
+    -fx-background-color:
+        -fx-v-hair-strong,
+        -fx-v-card,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 58%);
+    -fx-background-insets: 0, 1, 1;
+    -fx-background-radius: 13, 12, 12;
+    -fx-padding: 10px;
+    -fx-spacing: 9px;
+    -fx-cursor: hand;
+}
+
+.screenshot-card:hover {
+    -fx-background-color:
+        -fx-vantaaccent-a30,
+        -fx-v-card-hover,
+        linear-gradient(to bottom, -fx-v-gloss, transparent 58%);
+    -fx-translate-y: -1px;
+}
+
+.screenshot-preview {
+    -fx-background-color: -fx-v-hair, -fx-v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 9, 8;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+}
+
+.screenshot-card:hover .screenshot-preview {
+    -fx-background-color: -fx-vantaaccent-a30, -fx-v-well;
+}
+
+.screenshot-name {
+    -fx-font-family: "Geist Medium";
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-vantatext;
+    -fx-padding: 1px 2px 2px 2px;
+}
+
+.screenshots-status {
+    -fx-font-family: "Geist";
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-vantasubtle;
+    -fx-padding: 0 2px 2px 2px;
+}
+
+/* Empty state uses the same inset surface and hierarchy as the library. */
+.screenshots-page .instance-empty {
+    -fx-background-color: -fx-v-hair-strong, -fx-v-card;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
+    -fx-border-color: transparent;
+    -fx-padding: 42px 28px;
+}
+
+.screenshots-page .instance-empty-icon {
+    -fx-font-size: 26px;
+    -fx-text-fill: -fx-vantasubtle;
+}
+
+.screenshots-page .instance-empty-title {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 17px;
+    -fx-text-fill: -fx-vantatext;
+}
+
+.screenshots-page .instance-empty-description {
+    -fx-font-family: "Geist";
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-vantamuted;
+    -fx-text-alignment: center;
+}
+
+/* Full-size viewer. The same tokens are used in its separate transparent stage. */
+.screenshot-dialog {
+    -fx-background-color: -fx-v-frame;
+    -fx-background-insets: 0;
+    -fx-background-radius: 12;
+    -fx-border-color: -fx-v-hair-strong;
+    -fx-border-width: 1;
+    -fx-border-radius: 12;
+}
+
+.screenshot-dialog .title-bar {
+    -fx-background-color: -fx-v-page;
+    -fx-background-radius: 11 11 0 0;
+    -fx-border-color: transparent transparent -fx-v-hair transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.screenshot-dialog-name {
+    -fx-font-family: "Geist SemiBold";
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-vantatext;
+}
+
+.screenshot-preview-container {
+    -fx-background-color: -fx-v-well;
+    -fx-background-insets: 0;
+    -fx-padding: 16px;
+    -fx-alignment: center;
+}
+
+.screenshot-image-scroll,
+.screenshot-image-scroll > .viewport {
+    -fx-background-color: -fx-v-well;
+    -fx-background: -fx-v-well;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.screenshot-dialog-toolbar {
+    -fx-background-color: -fx-v-page;
+    -fx-background-radius: 0 0 11 11;
+    -fx-border-color: -fx-v-hair transparent transparent transparent;
+    -fx-border-width: 1 0 0 0;
+    -fx-hgap: 8px;
+    -fx-vgap: 8px;
+    -fx-padding: 10px 14px;
+    -fx-alignment: center-right;
+}
+
+.screenshot-dialog-toolbar .slider {
+    -fx-pref-width: 116px;
+}
+
+/* Delete confirmation follows the shared dialog surface vocabulary. */
+.screenshot-delete-dialog {
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 14, 13;
+    -fx-padding: 22px;
+}
+
+.screenshot-delete-title {
+    -fx-font-family: "Poppins SemiBold";
+    -fx-font-size: 17px;
+    -fx-text-fill: -fx-vantatext;
+}
+
+.screenshot-delete-description {
+    -fx-font-family: "Geist";
+    -fx-font-size: 13px;
+    -fx-text-fill: -fx-vantamuted;
+    -fx-wrap-text: true;
+}
+
+.screenshot-delete-file {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
+    -fx-text-fill: -fx-vantatext;
+    -fx-background-color: -fx-v-well;
+    -fx-background-radius: 8;
+    -fx-padding: 9px 11px;
+}

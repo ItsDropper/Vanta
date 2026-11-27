@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import java.util.function.Consumer;
 
@@ -78,6 +79,8 @@ public class LauncherView {
     private final ServerManagerView serverManagerView;
     private final ExperimentalView experimentalView;
     private final CrashLabView crashLabView;
+
+    private final AtomicBoolean updateInProgress = new AtomicBoolean();
 
     private final NotificationManager notifications;
     private final CommandPalette commandPalette;
@@ -1600,7 +1603,16 @@ public class LauncherView {
     private void performUpdate(
             UpdateInfo updateInfo
     ) {
+        if (!updateInProgress.compareAndSet(false, true)) {
+            notifications.error(
+                    "Update already running",
+                    "Vanta is already downloading or installing an update."
+            );
+            return;
+        }
+
         if (!Platform.supportsDesktop()) {
+            updateInProgress.set(false);
             notifications.error(
                     "Automatic updates unavailable",
                     "No Vanta update package is published for this operating system or CPU architecture."
@@ -1695,6 +1707,8 @@ public class LauncherView {
                                 "Update failed",
                                 getUpdateErrorMessage(e)
                         );
+                    } finally {
+                        updateInProgress.set(false);
                     }
 
         });

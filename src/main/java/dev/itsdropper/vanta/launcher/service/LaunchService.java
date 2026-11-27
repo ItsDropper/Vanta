@@ -51,21 +51,21 @@ public class LaunchService {
     private final List<Consumer<LaunchState>> stateListeners =
             new CopyOnWriteArrayList<>();
 
-    private Process minecraftProcess;
+    private volatile Process minecraftProcess;
 
-    private Instance runningInstance;
+    private volatile Instance runningInstance;
 
-    private ServerTarget runningServerTarget;
+    private volatile ServerTarget runningServerTarget;
 
-    private Instance failedInstance;
+    private volatile Instance failedInstance;
 
-    private LaunchState state =
+    private volatile LaunchState state =
             LaunchState.IDLE;
 
     private final StringBuilder outputBuffer =
             new StringBuilder();
 
-    private LaunchFailure lastFailure;
+    private volatile LaunchFailure lastFailure;
 
 
     private long launchStartedAtMillis;
@@ -208,20 +208,10 @@ public class LaunchService {
             LaunchData launchData;
 
             try {
-                // Validate mandatory mod metadata before creating a Minecraft
-                // process, so repairable Fabric dependency failures never reach
-                // the game's error screen.
-                System.out.println("[Vanta Repair] Checking mandatory mod dependencies before launch...");
-                List<dev.itsdropper.vanta.launcher.modrinth.InstalledModScanner.MissingDependency> repairedDependencies =
-                        new ModrinthService().repairMissingRequiredDependencies(
-                                instance,
-                                message -> System.out.println("[Vanta Repair] " + message)
-                        );
-                if (!repairedDependencies.isEmpty()) {
-                    System.out.println("[Vanta Repair] Installed " + repairedDependencies.size()
-                            + " missing required mod dependency/dependencies before launch.");
-                }
-
+                // Launching is intentionally read-only with respect to the mods folder.
+                // Dependency resolution can download and replace jars, so it belongs
+                // to explicit install/repair actions rather than the launch hot path.
+                // Fabric remains responsible for reporting invalid mod combinations.
                 // Refresh Mojang's version metadata and security-sensitive LWJGL
                 // artifacts before constructing the classpath or starting Java.
                 MinecraftSecurityUpdateService.refreshBeforeLaunch(instance);
@@ -818,12 +808,12 @@ public class LaunchService {
     // FAILURE
     // =============================================================
 
-    public synchronized LaunchFailure getLastFailure() {
+    public LaunchFailure getLastFailure() {
 
         return lastFailure;
     }
 
-    public synchronized Instance getFailedInstance() {
+    public Instance getFailedInstance() {
 
         return failedInstance;
     }
@@ -957,27 +947,27 @@ public class LaunchService {
     // STATE
     // =============================================================
 
-    public synchronized boolean isRunning() {
+    public boolean isRunning() {
 
         return minecraftProcess != null
                 && minecraftProcess.isAlive();
     }
 
-    public synchronized Process getProcess() {
+    public Process getProcess() {
 
         return minecraftProcess;
     }
 
-    public synchronized Instance getRunningInstance() {
+    public Instance getRunningInstance() {
 
         return runningInstance;
     }
 
-    public synchronized ServerTarget getRunningServerTarget() {
+    public ServerTarget getRunningServerTarget() {
         return runningServerTarget;
     }
 
-    public synchronized LaunchState getState() {
+    public LaunchState getState() {
 
         return state;
     }

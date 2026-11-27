@@ -106,9 +106,14 @@ jobs:
           $legacyHash = (Get-FileHash -LiteralPath $legacyZip -Algorithm SHA256).Hash.ToLowerInvariant()
           "$legacyHash  Vanta-$env:VANTA_VERSION.zip" | Set-Content "$legacyZip.sha256" -NoNewline
 
+          # Install the same pinned NSIS version used by the Windows validation
+          # workflow. Avoid SourceForge mirror downloads, which can return
+          # different payloads and fail archive checksum verification.
           choco install nsis --version=3.12 --yes --no-progress
+          if ($LASTEXITCODE -ne 0) { throw "NSIS 3.12 installation failed with exit code $LASTEXITCODE." }
           $makensis = Join-Path ${env:ProgramFiles(x86)} 'NSIS\makensis.exe'
-          if (-not (Test-Path $makensis -PathType Leaf)) { throw "NSIS 3.12 makensis.exe was not installed." }
+          if (-not (Test-Path $makensis -PathType Leaf)) { throw "NSIS 3.12 installation is missing makensis.exe: $makensis" }
+
           & $makensis "/DAPP_VERSION=$env:VANTA_VERSION" '.\VantaSetup.nsi'
           if ($LASTEXITCODE -ne 0) { throw "NSIS installer compilation failed with exit code $LASTEXITCODE." }
           if (-not (Test-Path '.\VantaSetup.exe' -PathType Leaf)) { throw "NSIS did not produce VantaSetup.exe." }
@@ -117,7 +122,7 @@ jobs:
           $archive = [System.IO.Compression.ZipFile]::OpenRead($legacyZip)
           try {
             $required = @('Vanta.exe', 'runtime/lib/modules', 'app/Vanta.cfg', 'updater/VantaUpdater.jar')
-            $names = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\','/') })
+            $names = @($archive.Entries | ForEach-Object { $_.FullName.Replace('\\','/') })
             foreach ($entry in $required) {
               if ($names -notcontains $entry) { throw "Legacy ZIP is missing required entry: $entry" }
             }

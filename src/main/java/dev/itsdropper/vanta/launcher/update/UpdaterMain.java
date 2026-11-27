@@ -24,10 +24,10 @@ public final class UpdaterMain {
             );
 
     private static final long PROCESS_WAIT_TIMEOUT_MS =
-            60_000;
+            120_000;
 
     private static final long FILE_RELEASE_TIMEOUT_MS =
-            30_000;
+            120_000;
 
     private static final long RETRY_DELAY_MS =
             500;
@@ -617,7 +617,10 @@ public final class UpdaterMain {
                 }
                 log("Payload replacement attempt failed; retrying: " + error);
                 try {
-                    TimeUnit.MILLISECONDS.sleep(RETRY_DELAY_MS);
+                    long elapsed = System.currentTimeMillis() - startedAt;
+                    long retryNumber = Math.max(1, elapsed / 5_000);
+                    long delay = Math.min(5_000, RETRY_DELAY_MS * (1L << Math.min(retryNumber, 4)));
+                    TimeUnit.MILLISECONDS.sleep(delay);
                 } catch (InterruptedException interrupted) {
                     Thread.currentThread().interrupt();
                     IOException failure = new IOException("Updater interrupted during payload replacement.", interrupted);

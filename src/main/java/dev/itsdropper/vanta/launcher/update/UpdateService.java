@@ -136,8 +136,7 @@ public class UpdateService {
                 .header("User-Agent", "Vanta-Launcher")
                 .GET()
                 .build();
-        HttpResponse<InputStream> response = httpClient.send(
-                request, HttpResponse.BodyHandlers.ofInputStream());
+        HttpResponse<InputStream> response = UpdateHttpRetry.send(httpClient, request);
         try (InputStream body = response.body()) {
             validateMetadataResponseUri(response.uri());
             if (response.statusCode() != 200) {

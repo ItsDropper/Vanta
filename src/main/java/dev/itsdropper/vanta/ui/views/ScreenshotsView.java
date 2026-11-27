@@ -180,6 +180,15 @@ public class ScreenshotsView extends VBox {
                 Priority.ALWAYS
         );
 
+        // FlowPane's wrap width must follow the actual viewport. A fixed
+        // 900px wrap width overflows at smaller launcher window sizes.
+        scrollPane.viewportBoundsProperty().addListener(
+                (observable, previous, bounds) ->
+                        screenshotGrid.setPrefWrapLength(
+                                Math.max(280, bounds.getWidth() - 8)
+                        )
+        );
+
         // =========================================================
         // STATUS
         // =========================================================
@@ -188,7 +197,7 @@ public class ScreenshotsView extends VBox {
                 new Label();
 
         statusLabel.getStyleClass().add(
-                "instances-status"
+                "screenshots-status"
         );
 
         // =========================================================
@@ -321,8 +330,8 @@ public class ScreenshotsView extends VBox {
         Image image =
                 new Image(
                         file.toUri().toString(),
-                        260,
-                        150,
+                        280,
+                        158,
                         true,
                         true,
                         true
@@ -334,11 +343,11 @@ public class ScreenshotsView extends VBox {
                 );
 
         imageView.setFitWidth(
-                260
+                280
         );
 
         imageView.setFitHeight(
-                150
+                158
         );
 
         imageView.setPreserveRatio(
@@ -355,8 +364,12 @@ public class ScreenshotsView extends VBox {
                 );
 
         preview.setPrefSize(
-                260,
-                150
+                280,
+                158
+        );
+        preview.setMinSize(
+                280,
+                158
         );
 
         preview.getStyleClass().add(
@@ -374,7 +387,7 @@ public class ScreenshotsView extends VBox {
         );
 
         name.setMaxWidth(
-                260
+                280
         );
 
         VBox card =
@@ -389,7 +402,10 @@ public class ScreenshotsView extends VBox {
         );
 
         card.setPrefWidth(
-                282
+                302
+        );
+        card.setMinWidth(
+                302
         );
 
         card.getStyleClass().add(
@@ -921,9 +937,10 @@ public class ScreenshotsView extends VBox {
                 Pos.CENTER_LEFT
         );
 
-        HBox bottomBar =
-                new HBox(
-                        10,
+        FlowPane bottomBar =
+                new FlowPane(
+                        8,
+                        8,
                         copyButton,
                         saveButton,
                         openButton,
@@ -936,13 +953,21 @@ public class ScreenshotsView extends VBox {
                 Pos.CENTER_RIGHT
         );
 
+        bottomBar.setRowValignment(
+                javafx.geometry.VPos.CENTER
+        );
+
         bottomBar.setPadding(
                 new Insets(
-                        10,
-                        14,
-                        14,
-                        14
+                        12,
+                        16,
+                        16,
+                        16
                 )
+        );
+
+        bottomBar.getStyleClass().add(
+                "screenshot-dialog-toolbar"
         );
 
         // =========================================================
@@ -979,13 +1004,14 @@ public class ScreenshotsView extends VBox {
                 javafx.scene.paint.Color.TRANSPARENT
         );
 
-        if (getScene() != null
-                && !getScene().getStylesheets().isEmpty()) {
-
-            scene.getStylesheets().addAll(
-                    getScene().getStylesheets()
-            );
-        }
+        // A Stage owns a separate Scene and therefore does not inherit the
+        // launcher's looked-up theme colors. Install the complete stylesheet
+        // stack and initialize the popup root before JavaFX performs CSS.
+        dev.itsdropper.vanta.ui.Stylesheets.addTo(scene);
+        dev.itsdropper.vanta.ui.ThemeManager.apply(
+                root,
+                dev.itsdropper.vanta.ui.ThemeManager.loadAccent()
+        );
 
         // =========================================================
         // WINDOW DRAGGING
@@ -1377,13 +1403,14 @@ public class ScreenshotsView extends VBox {
                 javafx.scene.paint.Color.TRANSPARENT
         );
 
-        if (getScene() != null
-                && !getScene().getStylesheets().isEmpty()) {
-
-            scene.getStylesheets().addAll(
-                    getScene().getStylesheets()
-            );
-        }
+        // A Stage owns a separate Scene and therefore does not inherit the
+        // launcher's looked-up theme colors. Install the complete stylesheet
+        // stack and initialize the popup root before JavaFX performs CSS.
+        dev.itsdropper.vanta.ui.Stylesheets.addTo(scene);
+        dev.itsdropper.vanta.ui.ThemeManager.apply(
+                root,
+                dev.itsdropper.vanta.ui.ThemeManager.loadAccent()
+        );
 
         dialog.setScene(
                 scene

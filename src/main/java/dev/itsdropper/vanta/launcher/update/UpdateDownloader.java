@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.util.HexFormat;
 import java.util.Locale;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class UpdateDownloader {
@@ -51,35 +52,52 @@ public class UpdateDownloader {
         Path updateDirectory = Path.of(System.getProperty("java.io.tmpdir"), "Vanta", "updates");
         Files.createDirectories(updateDirectory);
 
-        Path temporaryZip = updateDirectory.resolve("Vanta-" + version + ".zip.download");
+        String downloadId = UUID.randomUUID().toString();
+        Path temporaryZip = updateDirectory.resolve("Vanta-" + version + "-" + downloadId + ".zip.download");
         Path zip = updateDirectory.resolve("Vanta-" + version + ".zip");
-        Path checksumFile = updateDirectory.resolve("Vanta-" + version + ".zip.sha256");
+        Path checksumFile = updateDirectory.resolve("Vanta-" + version + "-" + downloadId + ".zip.sha256");
 
         try {
             report(progress, "Downloading Vanta " + version + "...");
             if (progressValue != null) progressValue.accept(0.0);
-
-            downloadFile(archiveUri, temporaryZip, MAX_ARCHIVE_BYTES, progress, progressValue);
 
             if (checksumUri != null) {
                 report(progress, "Downloading update checksum...");
                 downloadFile(checksumUri, checksumFile, MAX_CHECKSUM_BYTES, null, null);
             }
 
-            report(progress, "Verifying update...");
-            if (progressValue != null) progressValue.accept(-1.0);
-
             String expectedHash = updateInfo.getSha256() == null
                     ? readExpectedHash(checksumFile) : updateInfo.getSha256();
-            String actualHash = calculateSha256(temporaryZip);
-            if (updateInfo.getSizeBytes() > 0 && Files.size(temporaryZip) != updateInfo.getSizeBytes()) {
-                throw new IOException("The downloaded update size does not match the release manifest.");
+            boolean verified = false;
+            for (int verificationAttempt = 1; verificationAttempt <= 3; verificationAttempt++) {
+                downloadFile(archiveUri, temporaryZip, MAX_ARCHIVE_BYTES, progress, progressValue);
+
+                report(progress, "Verifying update...");
+                if (progressValue != null) progressValue.accept(-1.0);
+
+                boolean sizeMatches = updateInfo.getSizeBytes() <= 0
+                        || Files.size(temporaryZip) == updateInfo.getSizeBytes();
+                String actualHash = calculateSha256(temporaryZip);
+                boolean hashMatches = MessageDigest.isEqual(
+                        expectedHash.toLowerCase(Locale.ROOT).getBytes(java.nio.charset.StandardCharsets.US_ASCII),
+                        actualHash.getBytes(java.nio.charset.StandardCharsets.US_ASCII));
+                if (sizeMatches && hashMatches) {
+                    verified = true;
+                    break;
+                }
+
+                deleteQuietly(temporaryZip);
+                if (verificationAttempt == 3) {
+                    throw new IOException(!sizeMatches
+                            ? "The downloaded update size does not match the release manifest after 3 attempts."
+                            : "The downloaded update failed SHA-256 verification after 3 attempts.");
+                }
+                report(progress, "Downloaded data did not verify. Retrying ("
+                        + (verificationAttempt + 1) + "/3)...");
+                java.util.concurrent.TimeUnit.MILLISECONDS.sleep(
+                        UpdateHttpRetry.retryDelayMillis(verificationAttempt));
             }
-            if (!MessageDigest.isEqual(
-                    expectedHash.toLowerCase(Locale.ROOT).getBytes(java.nio.charset.StandardCharsets.US_ASCII),
-                    actualHash.getBytes(java.nio.charset.StandardCharsets.US_ASCII))) {
-                throw new IOException("The downloaded update failed integrity verification.");
-            }
+            if (!verified) throw new IOException("The update could not be verified.");
 
             report(progress, "Update verified successfully.");
             try {
@@ -148,6 +166,34 @@ public class UpdateDownloader {
             Consumer<String> progress,
             Consumer<Double> progressValue
     ) throws IOException, InterruptedException {
+        RetryableTransferException lastFailure = null;
+        for (int attempt = 1; attempt <= 4; attempt++) {
+            try {
+                if (progressValue != null) progressValue.accept(0.0);
+                downloadFileOnce(uri, destination, maximumBytes, progress, progressValue);
+                return;
+            } catch (RetryableTransferException interruptedTransfer) {
+                lastFailure = interruptedTransfer;
+                deleteQuietly(destination);
+                if (attempt == 4) throw interruptedTransfer;
+                report(progress, "Connection interrupted. Retrying update download ("
+                        + (attempt + 1) + "/4)...");
+                java.util.concurrent.TimeUnit.MILLISECONDS.sleep(
+                        UpdateHttpRetry.retryDelayMillis(attempt));
+            }
+        }
+        throw lastFailure == null
+                ? new IOException("The update download could not be completed.")
+                : lastFailure;
+    }
+
+    private void downloadFileOnce(
+            URI uri,
+            Path destination,
+            long maximumBytes,
+            Consumer<String> progress,
+            Consumer<Double> progressValue
+    ) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
                 .timeout(REQUEST_TIMEOUT)
@@ -155,10 +201,7 @@ public class UpdateDownloader {
                 .GET()
                 .build();
 
-        HttpResponse<InputStream> response = httpClient.send(
-                request,
-                HttpResponse.BodyHandlers.ofInputStream()
-        );
+        HttpResponse<InputStream> response = UpdateHttpRetry.send(httpClient, request);
 
         try (InputStream input = response.body()) {
             if (response.statusCode() != 200) {
@@ -179,7 +222,14 @@ public class UpdateDownloader {
                 long downloaded = 0;
                 long lastUpdate = 0;
                 int read;
-                while ((read = input.read(buffer)) != -1) {
+                while (true) {
+                    try {
+                        read = input.read(buffer);
+                    } catch (IOException networkFailure) {
+                        throw new RetryableTransferException(
+                                "The update connection ended during transfer.", networkFailure);
+                    }
+                    if (read == -1) break;
                     if (downloaded > maximumBytes - read) {
                         throw new IOException("The update download exceeded the allowed file size.");
                     }
@@ -199,13 +249,20 @@ public class UpdateDownloader {
                     }
                 }
                 if (contentLength >= 0 && downloaded != contentLength) {
-                    throw new IOException("The update download ended before the advertised file size.");
+                    throw new RetryableTransferException(
+                            "The update download ended before the advertised file size.", null);
                 }
                 if (progressValue != null && contentLength > 0) progressValue.accept(1.0);
             }
         } catch (IOException | RuntimeException failure) {
             deleteQuietly(destination);
             throw failure;
+        }
+    }
+
+    private static final class RetryableTransferException extends IOException {
+        private RetryableTransferException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 
