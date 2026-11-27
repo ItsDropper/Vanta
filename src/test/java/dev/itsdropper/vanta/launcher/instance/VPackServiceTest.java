@@ -33,8 +33,9 @@ class VPackServiceTest {
         write(source, "custom/extra.dat");
         write(source, "logs/latest.log");
         write(source, "natives/native.dll");
-        Files.writeString(source.resolve(InstanceMetadataMigrator.BACKUP_FILE_NAME),
-                "{\\"directory\\":\\"C:/Users/old-machine/Vanta/instances/profile-a\\"}");
+        Files.writeString(source.resolve(InstanceMetadataMigrator.BACKUP_FILE_NAME), """
+                {"directory":"C:/Users/old-machine/Vanta/instances/profile-a"}
+                """);
 
         Path archive = temporaryDirectory.resolve("selected.vpack");
         VPackService.createVPack(instance, archive,
