@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -33,6 +34,9 @@ class VPackServiceTest {
         write(source, "custom/extra.dat");
         write(source, "logs/latest.log");
         write(source, "natives/native.dll");
+        Files.writeString(source.resolve(InstanceMetadataMigrator.BACKUP_FILE_NAME), """
+                {"directory":"C:/Users/old-machine/Vanta/instances/profile-a"}
+                """);
 
         Path archive = temporaryDirectory.resolve("selected.vpack");
         VPackService.createVPack(instance, archive,
@@ -56,6 +60,7 @@ class VPackServiceTest {
         assertFalse(names.contains("custom/extra.dat"));
         assertFalse(names.contains("logs/latest.log"));
         assertFalse(names.contains("natives/native.dll"));
+        assertFalse(names.contains(InstanceMetadataMigrator.BACKUP_FILE_NAME));
     }
 
     @Test
@@ -89,6 +94,57 @@ class VPackServiceTest {
         assertEquals("", settings.path("javaPath").asText());
         assertEquals(8192, settings.path("ramMb").asInt());
         assertEquals("-Xmx4G", settings.path("javaArguments").asText());
+    }
+
+    @Test
+    void excludesPrivateMigrationBackupEvenWhenOtherFilesAreSelected() throws Exception {
+        Path source = Files.createDirectory(temporaryDirectory.resolve("backup-exclusion"));
+        Instance instance = new Instance("backup-exclusion", "Backup Exclusion", "1.21.11",
+                "Fabric", "0.16.0", source);
+        write(source, "custom/keep.dat");
+        Files.writeString(source.resolve(InstanceMetadataMigrator.BACKUP_FILE_NAME), """
+                {"directory":"C:/Users/old-machine/Vanta/instances/private"}
+                """);
+        Path archive = temporaryDirectory.resolve("backup-exclusion.vpack");
+
+        VPackService.createVPack(instance, archive,
+                new VPackService.Options(true, true, true, true, true, true, true, true));
+
+        Set<String> names = readNames(archive);
+        assertTrue(names.contains("custom/keep.dat"));
+        assertFalse(names.contains(InstanceMetadataMigrator.BACKUP_FILE_NAME));
+    }
+
+    @Test
+    void verifiesLegacyVPackMetadataWithoutDependingOnGsonPathBinding() throws Exception {
+        Path archive = temporaryDirectory.resolve("legacy-metadata.vpack");
+        String metadata = """
+                {"id":"legacy-pack","name":"Legacy Pack","minecraftVersion":"1.20.1",
+                 "loader":"Fabric","loaderVersion":"0.15.0",
+                 "directory":{"oldPathRepresentation":"ignored"}}
+                """;
+        String manifest = """
+                {"format":"vanta-instance-pack","formatVersion":1,
+                 "instanceId":"legacy-pack","includedCategories":["mods"]}
+                """;
+        try (ZipOutputStream zip = new ZipOutputStream(Files.newOutputStream(archive))) {
+            zip.putNextEntry(new ZipEntry("instance.json"));
+            zip.write(metadata.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+            zip.putNextEntry(new ZipEntry("vanta-pack.json"));
+            zip.write(manifest.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+            zip.putNextEntry(new ZipEntry("mods/example.jar"));
+            zip.write("mod".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            zip.closeEntry();
+        }
+
+        VPackService.Verification verification = VPackService.verifyVPack(archive);
+
+        assertEquals("Legacy Pack", verification.instanceName());
+        assertEquals("1.20.1", verification.minecraftVersion());
+        assertEquals("Fabric", verification.loader());
+        assertEquals(Set.of("mods"), verification.includedCategories());
     }
 
     @Test

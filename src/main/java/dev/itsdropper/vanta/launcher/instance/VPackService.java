@@ -116,7 +116,7 @@ public final class VPackService {
             Instance portableInstance = new Instance(
                     instance.getId(), instance.getName(), instance.getMinecraftVersion(),
                     instance.getLoader(), instance.getLoaderVersion(), null, instance.getIcon());
-            byte[] instanceBytes = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsBytes(portableInstance);
+            byte[] instanceBytes = InstanceMetadataMigrator.writeCurrentMetadataBytes(portableInstance);
             long expanded = manifestBytes.length + instanceBytes.length;
             int entries = 2;
             byte[] buffer = new byte[64 * 1024];
@@ -302,7 +302,7 @@ public final class VPackService {
         final Instance original;
         try {
             manifest = MAPPER.readTree(manifestBytes);
-            original = MAPPER.readValue(instanceBytes, Instance.class);
+            original = InstanceMetadataMigrator.readMetadata(instanceBytes, null);
         } catch (Exception failure) {
             throw new IOException("VPack metadata is invalid.", failure);
         }
@@ -373,9 +373,12 @@ public final class VPackService {
     }
 
     private static boolean isTransient(String name) {
-        String first = name.contains("/") ? name.substring(0, name.indexOf('/')) : name;
+        String normalized = name.replace('\\', '/');
+        String first = normalized.contains("/") ? normalized.substring(0, normalized.indexOf('/')) : normalized;
         return first.equalsIgnoreCase("logs") || first.equalsIgnoreCase("natives")
-                || first.equalsIgnoreCase(".installing");
+                || first.equalsIgnoreCase(".installing")
+                // This backup can contain the source machine's absolute instance path.
+                || first.equalsIgnoreCase(InstanceMetadataMigrator.BACKUP_FILE_NAME);
     }
 
     private static String categoryFor(String name) {

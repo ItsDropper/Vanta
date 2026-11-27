@@ -93,17 +93,13 @@ public class InstanceManager {
                 }
 
                 try {
-                    Instance stored = MAPPER.readValue(metadata.toFile(), Instance.class);
-                    if (!hasRepairMetadata(stored)) {
+                    // Read legacy files field-by-field: the previous Jackson model
+                    // and current Gson model do not share constructor/Path binding rules.
+                    // Migration is isolated to this instance and preserves its source.
+                    Instance instance = InstanceMetadataMigrator.loadAndMigrate(metadata, directory);
+                    if (!hasRepairMetadata(instance)) {
                         throw new IOException("Instance metadata is missing its ID, name, Minecraft version, or loader.");
                     }
-
-                    // The directory being scanned is authoritative. Never let a
-                    // stale metadata path redirect launch or repair into another instance.
-                    Instance instance = new Instance(
-                            stored.getId(), stored.getName(), stored.getMinecraftVersion(),
-                            stored.getLoader(), stored.getLoaderVersion(), directory.toAbsolutePath().normalize(),
-                            stored.getIcon());
 
                     // Interrupted installations remain visible so users can recover
                     // them. LaunchService detects the marker and repairs before launch.
@@ -358,27 +354,31 @@ public class InstanceManager {
             );
         }
 
-        Path directory =
-                instance.getDirectory();
-
-        Files.createDirectories(
-                directory
-        );
+        Path directory = instance.getDirectory();
+        if (directory == null) {
+            throw new IllegalArgumentException("Instance directory cannot be null.");
+        }
+        if (Files.isSymbolicLink(directory)) {
+            throw new IOException("Refusing to save metadata through a symbolic-link instance directory.");
+        }
+        Files.createDirectories(directory);
 
         Path metadata = directory.resolve("instance.json");
         Instance previous = null;
-        if (!Files.isSymbolicLink(metadata) && Files.isRegularFile(metadata, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
-            try {
-                previous = MAPPER.readValue(metadata.toFile(), Instance.class);
-            } catch (IOException invalidPreviousMetadata) {
-                System.err.println("[Vanta Timeline] Could not inspect previous instance metadata.");
+        if (Files.exists(metadata, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+            if (Files.isSymbolicLink(metadata)
+                    || !Files.isRegularFile(metadata, java.nio.file.LinkOption.NOFOLLOW_LINKS)) {
+                throw new IOException("Existing instance metadata is not a regular file; it was left untouched.");
             }
+            // Fail closed: never replace an existing file that could not be
+            // decoded and safely backed up by the migration layer.
+            previous = InstanceMetadataMigrator.loadAndMigrate(metadata, directory);
         }
         Path temporary = directory.resolve(
                 "instance.json." + java.util.UUID.randomUUID() + ".tmp");
 
         try {
-            MAPPER.writeValue(temporary.toFile(), instance);
+            InstanceMetadataMigrator.writeCurrentMetadata(temporary, instance);
             try {
                 Files.move(temporary, metadata,
                         StandardCopyOption.ATOMIC_MOVE,
