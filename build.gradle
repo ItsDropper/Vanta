@@ -234,7 +234,9 @@ tasks.register('preparePlatformIcon') {
     }
 }
 
-tasks.register('platformAppImage', Exec) {\n    dependsOn tasks.named('installDist'), tasks.named('updaterJar'), tasks.named('preparePlatformIcon')\n
+tasks.register('platformAppImage', Exec) {
+    dependsOn tasks.named('installDist'), tasks.named('updaterJar'), tasks.named('preparePlatformIcon')
+
     def packageName = 'Vanta'
     // jpackage accepts only one to three numeric components. Keep the full
     // project version for archives/resources while passing a valid native
