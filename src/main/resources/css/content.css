@@ -96,3 +96,34 @@
 .menu-button.instances-more-button > .arrow-button > .arrow {
     -fx-background-color: -vantasubtle;
 }
+
+/* ---- crash review ---------------------------------------------------------- */
+
+.text-area.diagnostic-log {
+    -fx-control-inner-background: -v-well;
+    -fx-background-color: -v-hair, -v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+}
+
+.text-area.diagnostic-log .content {
+    -fx-background-color: -v-well;
+    -fx-background-radius: 11;
+}
+
+.text-area.diagnostic-log {
+    -fx-font-family: "JetBrains Mono";
+    -fx-font-size: 12px;
+}
+
+.list-view .empty-state {
+    -fx-background-color: transparent;
+}
+
+.list-view .empty-state .empty-state-title {
+    -fx-text-fill: -vantatext;
+}
+
+.list-view .empty-state .empty-state-description {
+    -fx-text-fill: -vantamuted;
+}

@@ -149,7 +149,7 @@ public final class CrashCaseReviewView extends VBox {
         HBox correctionRow = new HBox(8, correct, reopen);
 
         Button importButton = new Button(Localization.text("crashCases.import"));
-        importButton.getStyleClass().add("secondary-button");
+        importButton.getStyleClass().add("primary-button");
         importButton.setOnAction(event -> importLog(importButton.getScene() == null
                 ? null : importButton.getScene().getWindow()));
         export.setText(Localization.text("crashCases.export"));
@@ -157,6 +157,12 @@ public final class CrashCaseReviewView extends VBox {
         export.setOnAction(event -> exportCorpus(export.getScene() == null
                 ? null : export.getScene().getWindow()));
         HBox fileActions = new HBox(8, importButton, export);
+        cases.setPlaceholder(new dev.itsdropper.vanta.ui.kit.EmptyState(
+                dev.itsdropper.vanta.ui.components.IconView.Type.PACKAGE,
+                Localization.text("crashCases.empty"),
+                "Import a crash log to start a review.",
+                Localization.text("crashCases.import"),
+                importButton::fire));
 
         status.setWrapText(true);
         status.getStyleClass().add("muted");
