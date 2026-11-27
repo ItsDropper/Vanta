@@ -8,6 +8,15 @@ import java.nio.file.*;
 import java.util.*;
 
 public final class ModrinthDependencyResolver {
+    /*
+     * Fabric's OneConfig API uses an internal mod ID that differs from the
+     * Modrinth project slug. Resolve the public project by its canonical slug,
+     * then validate candidate JAR metadata against the original Fabric ID.
+     */
+    private static final Map<String, String> MOD_ID_PROJECT_SLUG_ALIASES = Map.of(
+            "oneconfigv1", "oneconfig"
+    );
+
     private final ModrinthClient client;
     private final InstalledModScanner installedModScanner;
     /*
@@ -1103,14 +1112,30 @@ private String findModrinthProjectForModId(
             return null;
         }
 
-        if ("fabric".equalsIgnoreCase(dependencyModId)) {
-            modIdProjectCache.put(dependencyModId, "P7dR8mSH");
+        String normalizedModId = dependencyModId.trim().toLowerCase(Locale.ROOT);
+        if ("fabric".equals(normalizedModId)) {
+            modIdProjectCache.put(normalizedModId, "P7dR8mSH");
             return "P7dR8mSH";
         }
 
-        String cached = modIdProjectCache.get(dependencyModId);
+        String cached = modIdProjectCache.get(normalizedModId);
         if (cached != null) {
             return cached;
+        }
+
+        String projectSlug = MOD_ID_PROJECT_SLUG_ALIASES.get(normalizedModId);
+        if (projectSlug != null) {
+            try {
+                ModrinthProject project = client.getProject(projectSlug);
+                if (project != null && project.getProjectId() != null
+                        && !project.getProjectId().isBlank()
+                        && projectSlug.equalsIgnoreCase(project.getSlug())) {
+                    modIdProjectCache.put(normalizedModId, project.getProjectId());
+                    return project.getProjectId();
+                }
+            } catch (IOException notFoundBySlug) {
+                // Fall through to the normal exact-metadata search.
+            }
         }
 
         /*
@@ -1120,7 +1145,7 @@ private String findModrinthProjectForModId(
          */
         List<ModrinthSearchHit> hits =
                 client.search(
-                        dependencyModId,
+                        projectSlug == null ? dependencyModId : projectSlug,
                         ModrinthContentType.MOD,
                         normalizeLoader(instance.getLoader()),
                         instance.getMinecraftVersion()
@@ -1142,10 +1167,10 @@ private String findModrinthProjectForModId(
                     InstalledMod metadata = readModMetadata(version);
 
                     if (metadata != null
-                            && dependencyModId.equals(metadata.getModId())) {
+                            && normalizedModId.equalsIgnoreCase(metadata.getModId())) {
 
                         modIdProjectCache.put(
-                                dependencyModId,
+                                normalizedModId,
                                 projectId
                         );
 
@@ -1155,7 +1180,7 @@ private String findModrinthProjectForModId(
             }
         }
 
-        if (!dependencyModId.startsWith("fabric-")) {
+        if (!normalizedModId.startsWith("fabric-")) {
             return null;
         }
 
@@ -1201,10 +1226,10 @@ private String findModrinthProjectForModId(
 
                 if (installedModScanner.containsFabricModId(
                         tempFile,
-                        dependencyModId
+                        normalizedModId
                 )) {
                     modIdProjectCache.put(
-                            dependencyModId,
+                            normalizedModId,
                             "P7dR8mSH"
                     );
                     return "P7dR8mSH";
