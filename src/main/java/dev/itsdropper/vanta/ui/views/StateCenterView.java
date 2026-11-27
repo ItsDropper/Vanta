@@ -144,6 +144,9 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
             AnimationUtils.slideFadeVertical(section, 12);
             AnimationUtils.slideFadeVertical(listCard, 18);
         }
+
+        // Before the first scan the lists show guidance instead of a blank box.
+        prepareScreenshotPreview();
     }
 
     /** Render a stable preview without scanning any user data or touching disk. */
@@ -157,11 +160,15 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         instanceList.setAlignment(Pos.CENTER);
         instanceList.setFillWidth(true);
         instanceScroll.setFitToHeight(true);
+        Button scanAction = new Button(Localization.text("state.scanNow"));
+        scanAction.getStyleClass().add("vanta-button-primary");
+        scanAction.setOnAction(e -> refresh());
         instanceList.getChildren().setAll(new EmptyState(
                 "⌁",
                 "Environment health",
                 "No scan results yet",
-                "Run a scan to inspect installed instances, missing files, configuration drift and repairable issues."
+                "Run a scan to inspect installed instances, missing files, configuration drift and repairable issues.",
+                scanAction
         ));
         sharedList.setAlignment(Pos.CENTER);
         sharedList.getChildren().setAll(new EmptyState(
@@ -193,6 +200,9 @@ public final class StateCenterView extends VBox implements dev.itsdropper.vanta.
         overallSubtitle.setText(Localization.text("state.parallelStarting"));
         progressLabel.setText(Localization.text("state.scanProgress"));
         progress.setProgress(0);
+        instanceList.setAlignment(Pos.TOP_LEFT);
+        instanceScroll.setFitToHeight(false);
+        sharedList.setAlignment(Pos.TOP_LEFT);
         instanceList.getChildren().clear();
         sharedList.getChildren().clear();
         liveInstanceCards.clear();
