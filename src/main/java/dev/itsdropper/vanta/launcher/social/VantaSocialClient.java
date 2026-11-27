@@ -6,9 +6,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.account.AccountManager;
+import dev.itsdropper.vanta.launcher.auth.AuthManager;
 import dev.itsdropper.vanta.launcher.security.CredentialManager;
 import dev.itsdropper.vanta.ui.LauncherSettings;
-import net.raphimc.minecraftauth.MinecraftAuth;
 
 import java.io.IOException;
 import java.net.URI;
@@ -294,10 +294,12 @@ public final class VantaSocialClient {
         // access token can expire even while the Microsoft refresh-token chain remains
         // valid, so refresh the chain before sending any token to the Social API.
         try {
-            var refreshedSession = MinecraftAuth.JAVA_DEVICE_CODE_LOGIN.refresh(
-                    MinecraftAuth.createHttpClient(), account.getSession());
-            account.setSession(refreshedSession);
-            AccountManager.saveAccount(account);
+            // Refresh through the exact authentication chain used by AuthManager.
+            // Vanta's chain has its own Microsoft client ID, scope and Sisu
+            // title-authentication configuration; MinecraftAuth's default
+            // JAVA_DEVICE_CODE_LOGIN chain is not interchangeable with it.
+            Account refreshedAccount = AuthManager.refresh(account);
+            account.setSession(refreshedAccount.getSession());
         } catch (Exception refreshFailure) {
             throw new IOException(
                     "Could not refresh the Minecraft account session for Vanta Social. " +
