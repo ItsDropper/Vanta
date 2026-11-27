@@ -192,8 +192,9 @@ tasks.register('preparePlatformIcon') {
         // preserves the alpha channel without requiring external image tools.
         def windowsPng = encodePng(readPng(icon64))
         def ico = new ByteArrayOutputStream()
-        def writeLittleEndian = { ByteArrayOutputStream target, long value, int byteCount ->
-            byteCount.times { shift -> target.write((int) ((value >>> (8 * shift)) & 0xff)) }
+        def writeLittleEndian = { ByteArrayOutputStream target, Number value, int byteCount ->
+            long numericValue = value.longValue()
+            byteCount.times { shift -> target.write((int) ((numericValue >>> (8 * shift)) & 0xff)) }
         }
         writeLittleEndian(ico, 0, 2)                 // reserved
         writeLittleEndian(ico, 1, 2)                 // icon type
