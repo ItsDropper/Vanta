@@ -1574,6 +1574,8 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
         actions.setSpacing(8);
         overview.getChildren().addAll(cacheSize, actions, cacheStatus);
 
+        VBox duplicates = buildDuplicatesCard();
+
         VBox downloadPolicy = card(
                 "Download behavior",
                 "These options affect future downloads. Existing verified cache entries remain local until you clear them."
@@ -2457,6 +2459,109 @@ public class SettingsView extends BorderPane implements dev.itsdropper.vanta.ui.
                 manager.error("Could not open file", file.toString());
             }
         }
+    }
+
+    /** Finds identical files across instances and the cache and merges them into hard links. */
+    private VBox buildDuplicatesCard() {
+        VBox card = card(
+                "Duplicate files",
+                "Identical mods, packs and libraries can be stored once and shared between instances. Worlds, configs and saves are never touched, and each file is checked again before it is merged."
+        );
+        Label summary = new Label("Scan to see how much space can be freed.");
+        summary.getStyleClass().add("settings-card-description");
+        summary.setWrapText(true);
+        javafx.scene.control.ProgressBar bar = new javafx.scene.control.ProgressBar(0);
+        bar.setMaxWidth(Double.MAX_VALUE);
+        bar.setVisible(false);
+        bar.setManaged(false);
+
+        Button scan = new Button("Scan for duplicates");
+        scan.getStyleClass().add("secondary-button");
+        Button reclaim = new Button("Free up space");
+        reclaim.getStyleClass().add("primary-button");
+        reclaim.setDisable(true);
+        HBox actions = new HBox(8, scan, reclaim);
+        actions.setAlignment(Pos.CENTER_LEFT);
+
+        dev.itsdropper.vanta.launcher.storage.StorageDeduplicationService service =
+                new dev.itsdropper.vanta.launcher.storage.StorageDeduplicationService();
+        dev.itsdropper.vanta.launcher.storage.StorageDeduplicationService.Report[] found = {null};
+
+        scan.setOnAction(e -> {
+            scan.setDisable(true);
+            reclaim.setDisable(true);
+            bar.setProgress(javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS);
+            bar.setVisible(true);
+            bar.setManaged(true);
+            summary.setText("Looking for identical files…");
+            UiExecutor.shared().execute(() -> {
+                try {
+                    var report = service.scan(
+                            dev.itsdropper.vanta.launcher.storage.StorageDeduplicationService.defaultRoots(),
+                            (phase, done, total) -> UiExecutor.shared().dispatchToUi(() -> {
+                                summary.setText(phase + "…");
+                                bar.setProgress(total > 0 ? (double) done / total
+                                        : javafx.scene.control.ProgressIndicator.INDETERMINATE_PROGRESS);
+                            }),
+                            null);
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        found[0] = report;
+                        bar.setVisible(false);
+                        bar.setManaged(false);
+                        scan.setDisable(false);
+                        if (report.groups().isEmpty()) {
+                            summary.setText("No duplicates found. Nothing to free up.");
+                        } else {
+                            summary.setText(formatBytes(report.reclaimableBytes()) + " can be freed from "
+                                    + report.duplicateFiles() + " duplicate files.");
+                            reclaim.setDisable(false);
+                        }
+                    });
+                } catch (Exception failure) {
+                    UiExecutor.shared().dispatchToUi(() -> {
+                        bar.setVisible(false);
+                        bar.setManaged(false);
+                        scan.setDisable(false);
+                        summary.setText("The scan could not finish: " + (failure.getMessage() == null
+                                ? failure.getClass().getSimpleName() : failure.getMessage()));
+                    });
+                }
+            });
+        });
+
+        reclaim.setOnAction(e -> {
+            var report = found[0];
+            if (report == null) return;
+            scan.setDisable(true);
+            reclaim.setDisable(true);
+            bar.setProgress(0);
+            bar.setVisible(true);
+            bar.setManaged(true);
+            summary.setText("Merging duplicates…");
+            UiExecutor.shared().execute(() -> {
+                var outcome = service.reclaim(report,
+                        (phase, done, total) -> UiExecutor.shared().dispatchToUi(
+                                () -> bar.setProgress(total > 0 ? (double) done / total : 0)),
+                        null);
+                UiExecutor.shared().dispatchToUi(() -> {
+                    found[0] = null;
+                    bar.setVisible(false);
+                    bar.setManaged(false);
+                    scan.setDisable(false);
+                    summary.setText("Freed " + formatBytes(outcome.reclaimedBytes()) + "."
+                            + (outcome.skipped() > 0
+                            ? " " + outcome.skipped() + " files were skipped because they changed or are in use."
+                            : ""));
+                    NotificationManager manager = NotificationManager.getGlobal();
+                    if (manager != null) {
+                        manager.success("Space freed", formatBytes(outcome.reclaimedBytes()) + " reclaimed.");
+                    }
+                });
+            });
+        });
+
+        card.getChildren().addAll(summary, bar, actions);
+        return card;
     }
 
     private static String formatBytes(long bytes) {
