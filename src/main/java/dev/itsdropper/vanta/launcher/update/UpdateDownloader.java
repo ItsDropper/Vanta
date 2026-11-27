@@ -148,6 +148,33 @@ public class UpdateDownloader {
             Consumer<String> progress,
             Consumer<Double> progressValue
     ) throws IOException, InterruptedException {
+        RetryableTransferException lastFailure = null;
+        for (int attempt = 1; attempt <= 4; attempt++) {
+            try {
+                downloadFileOnce(uri, destination, maximumBytes, progress, progressValue);
+                return;
+            } catch (RetryableTransferException interruptedTransfer) {
+                lastFailure = interruptedTransfer;
+                deleteQuietly(destination);
+                if (attempt == 4) throw interruptedTransfer;
+                report(progress, "Connection interrupted. Retrying update download ("
+                        + (attempt + 1) + "/4)...");
+                java.util.concurrent.TimeUnit.MILLISECONDS.sleep(
+                        UpdateHttpRetry.retryDelayMillis(attempt));
+            }
+        }
+        throw lastFailure == null
+                ? new IOException("The update download could not be completed.")
+                : lastFailure;
+    }
+
+    private void downloadFileOnce(
+            URI uri,
+            Path destination,
+            long maximumBytes,
+            Consumer<String> progress,
+            Consumer<Double> progressValue
+    ) throws IOException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(uri)
                 .timeout(REQUEST_TIMEOUT)
@@ -176,7 +203,14 @@ public class UpdateDownloader {
                 long downloaded = 0;
                 long lastUpdate = 0;
                 int read;
-                while ((read = input.read(buffer)) != -1) {
+                while (true) {
+                    try {
+                        read = input.read(buffer);
+                    } catch (IOException networkFailure) {
+                        throw new RetryableTransferException(
+                                "The update connection ended during transfer.", networkFailure);
+                    }
+                    if (read == -1) break;
                     if (downloaded > maximumBytes - read) {
                         throw new IOException("The update download exceeded the allowed file size.");
                     }
@@ -196,13 +230,20 @@ public class UpdateDownloader {
                     }
                 }
                 if (contentLength >= 0 && downloaded != contentLength) {
-                    throw new IOException("The update download ended before the advertised file size.");
+                    throw new RetryableTransferException(
+                            "The update download ended before the advertised file size.", null);
                 }
                 if (progressValue != null && contentLength > 0) progressValue.accept(1.0);
             }
         } catch (IOException | RuntimeException failure) {
             deleteQuietly(destination);
             throw failure;
+        }
+    }
+
+    private static final class RetryableTransferException extends IOException {
+        private RetryableTransferException(String message, Throwable cause) {
+            super(message, cause);
         }
     }
 
