@@ -284,23 +284,34 @@ InstallFailure:
 InstallComplete:
 SectionEnd
 
+Function un.onInit
+  ; Read the exact install location recorded by the bootstrap installer.
+  ; Do not use $EXEDIR here: it identifies the executable's launch directory
+  ; and is not a reliable source of the installed payload location.
+  ReadRegStr $INSTDIR HKCU "Software\Vanta" "InstallDir"
+  StrCmp $INSTDIR "" 0 +2
+    StrCpy $INSTDIR "$LOCALAPPDATA\Vanta"
+FunctionEnd
+
 Section "Uninstall"
-  ; An uninstaller does not reliably inherit InstallDirRegKey state from the
-  ; installer. It lives in the installation root, so use its own directory as
-  ; the authoritative target instead of relying on an unset/stale $INSTDIR.
-  StrCpy $INSTDIR "$EXEDIR"
-  DetailPrint "Removing Vanta from: $INSTDIR"
+  ; Write a durable diagnostic even when NSIS is running silently.
+  FileOpen $9 "$TEMP\VantaUninstaller.log" w
+  FileWrite $9 "Uninstall started. Target: $INSTDIR$\r$\n"
+  FileClose $9
 
   Delete "$SMPROGRAMS\Vanta\Vanta.lnk"
   RMDir "$SMPROGRAMS\Vanta"
   Delete "$DESKTOP\Vanta.lnk"
 
   ; Instance data in roaming AppData is intentionally never removed.
-  ; NSIS runs the uninstaller from a temporary copy, allowing its original
-  ; executable and the complete installation tree to be removed.
+  ; NSIS keeps the running uninstaller available while processing this section.
   Delete "$INSTDIR\Uninstall.exe"
   RMDir /r "$INSTDIR"
   DeleteRegKey HKCU "Software\Vanta"
+
+  FileOpen $9 "$TEMP\VantaUninstaller.log" a
+  FileWrite $9 "Uninstall section completed.$\r$\n"
+  FileClose $9
 SectionEnd
 
 Function LaunchVanta
