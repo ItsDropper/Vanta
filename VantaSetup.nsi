@@ -285,15 +285,22 @@ InstallComplete:
 SectionEnd
 
 Section "Uninstall"
+  ; An uninstaller does not reliably inherit InstallDirRegKey state from the
+  ; installer. It lives in the installation root, so use its own directory as
+  ; the authoritative target instead of relying on an unset/stale $INSTDIR.
+  StrCpy $INSTDIR "$EXEDIR"
+  DetailPrint "Removing Vanta from: $INSTDIR"
+
   Delete "$SMPROGRAMS\Vanta\Vanta.lnk"
   RMDir "$SMPROGRAMS\Vanta"
   Delete "$DESKTOP\Vanta.lnk"
-  DeleteRegKey HKCU "Software\Vanta"
+
   ; Instance data in roaming AppData is intentionally never removed.
-  ; Delete the running uninstaller explicitly before removing its directory.
-  ; NSIS runs the uninstaller from a temporary copy, so this path is deletable.
+  ; NSIS runs the uninstaller from a temporary copy, allowing its original
+  ; executable and the complete installation tree to be removed.
   Delete "$INSTDIR\Uninstall.exe"
   RMDir /r "$INSTDIR"
+  DeleteRegKey HKCU "Software\Vanta"
 SectionEnd
 
 Function LaunchVanta
