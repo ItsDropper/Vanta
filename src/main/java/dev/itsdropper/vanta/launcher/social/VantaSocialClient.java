@@ -208,9 +208,17 @@ public final class VantaSocialClient {
 
     public void sendMessage(Account account, String conversationId, String content)
             throws IOException, InterruptedException {
+        sendMessage(account, conversationId, content, UUID.randomUUID().toString());
+    }
+
+    public void sendMessage(Account account, String conversationId, String content, String clientMessageId)
+            throws IOException, InterruptedException {
+        if (clientMessageId == null || !clientMessageId.matches("[A-Za-z0-9_-]{8,64}")) {
+            throw new IllegalArgumentException("Invalid client message identifier.");
+        }
         JsonObject body = new JsonObject();
         body.addProperty("content", content);
-        body.addProperty("clientMessageId", UUID.randomUUID().toString());
+        body.addProperty("clientMessageId", clientMessageId);
         authorized("POST", "/v1/conversations/" + safeId(conversationId) + "/messages", body, account);
     }
 

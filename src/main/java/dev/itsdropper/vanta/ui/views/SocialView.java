@@ -34,6 +34,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -64,6 +65,8 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
     private volatile VantaSocialClient client;
     private volatile Account currentAccount;
     private volatile String selectedConversationId;
+    private String pendingMessageContent;
+    private String pendingClientMessageId;
     private boolean viewActive;
     private final AccountService.AccountListener accountListener =
             account -> UiExecutor.shared().dispatchToUi(this::handleAccountChanged);
@@ -444,14 +447,25 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
             setStatus(Localization.text("social.messageTooLong"));
             return;
         }
+        if (!content.equals(pendingMessageContent) || pendingClientMessageId == null) {
+            pendingMessageContent = content;
+            pendingClientMessageId = UUID.randomUUID().toString();
+        }
+        String clientMessageId = pendingClientMessageId;
         sendButton.setDisable(true);
         execute(Localization.text("social.sending"), () -> {
-            api().sendMessage(account, id, content);
-            return api().getMessages(account, id);
-        }, messages -> {
+            api().sendMessage(account, id, content, clientMessageId);
+            return null;
+        }, ignored -> {
+            if (clientMessageId.equals(pendingClientMessageId)) {
+                pendingMessageContent = null;
+                pendingClientMessageId = null;
+            }
             if (id.equals(selectedConversationId)) {
-                messageInput.clear();
-                renderMessages(messages);
+                if (content.equals(messageInput.getText() == null ? "" : messageInput.getText().trim())) {
+                    messageInput.clear();
+                }
+                loadMessages(false);
             }
             sendButton.setDisable(false);
         }, failure -> {
@@ -492,6 +506,9 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
                     T result = work.call();
                     UiExecutor.shared().dispatchToUi(() -> success.accept(result));
                 } catch (Exception failure) {
+                    if (failure instanceof InterruptedException) {
+                        Thread.currentThread().interrupt();
+                    }
                     UiExecutor.shared().dispatchToUi(() -> onFailure.accept(failure));
                 }
             });
@@ -506,7 +523,6 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
                     ? Localization.text("social.requestFailed") : apiFailure.getMessage();
         }
         if (failure instanceof InterruptedException) {
-            Thread.currentThread().interrupt();
             return Localization.text("social.requestInterrupted");
         }
         if (failure instanceof IOException) {
