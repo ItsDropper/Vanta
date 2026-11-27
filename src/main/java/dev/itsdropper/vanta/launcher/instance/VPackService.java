@@ -373,7 +373,7 @@ public final class VPackService {
     }
 
     private static boolean isTransient(String name) {
-        String normalized = name.replace('\\\\', '/');
+        String normalized = name.replace('\\', '/');
         String first = normalized.contains("/") ? normalized.substring(0, normalized.indexOf('/')) : normalized;
         return first.equalsIgnoreCase("logs") || first.equalsIgnoreCase("natives")
                 || first.equalsIgnoreCase(".installing")
