@@ -103,10 +103,14 @@ Section "Vanta"
   FileRead $1 $APP_VERSION
   FileClose $1
   StrCpy $EXPECTED_SHA256 ""
-  IfFileExists "$WORK_DIR\expected-sha256.txt" 0 +4
-    FileOpen $1 "$WORK_DIR\expected-sha256.txt" r
-    FileRead $1 $EXPECTED_SHA256
-    FileClose $1
+  IfFileExists "$WORK_DIR\expected-sha256.txt" ReadExpectedSha256 NoExpectedSha256
+ReadExpectedSha256:
+  FileOpen $1 "$WORK_DIR\expected-sha256.txt" r
+  FileRead $1 $EXPECTED_SHA256
+  FileClose $1
+  Goto ExpectedSha256Ready
+NoExpectedSha256:
+ExpectedSha256Ready:
   StrCmp $APP_VERSION "" InvalidVersion
 
   ; Reject URL/path metacharacters before interpolating the tag into a URL.
