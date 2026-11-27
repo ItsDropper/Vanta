@@ -285,11 +285,10 @@ InstallComplete:
 SectionEnd
 
 Function un.onInit
-  ; Resolve the install root before any uninstall section runs. Keep a copy
-  ; outside the install tree so diagnostics survive recursive removal.
-  ReadRegStr $INSTDIR HKCU "Software\Vanta" "InstallDir"
-  StrCmp $INSTDIR "" 0 +2
-    StrCpy $INSTDIR "$LOCALAPPDATA\Vanta"
+  ; The uninstaller is written directly into the installation root. Its own
+  ; executable directory is authoritative and also works when registry state
+  ; is missing or stale.
+  StrCpy $INSTDIR "$EXEDIR"
   SetOutPath "$TEMP"
   FileOpen $9 "$TEMP\VantaUninstaller.log" w
   FileWrite $9 "un.onInit reached. Target: $INSTDIR$\r$\n"
