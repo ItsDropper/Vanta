@@ -169,6 +169,7 @@ public class UpdateDownloader {
         RetryableTransferException lastFailure = null;
         for (int attempt = 1; attempt <= 4; attempt++) {
             try {
+                if (progressValue != null) progressValue.accept(0.0);
                 downloadFileOnce(uri, destination, maximumBytes, progress, progressValue);
                 return;
             } catch (RetryableTransferException interruptedTransfer) {
