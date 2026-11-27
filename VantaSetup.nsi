@@ -55,6 +55,7 @@ Var WORK_DIR
 Var ZIP_PATH
 Var HASH_PATH
 Var VERSION_PATH
+Var EXPECTED_SHA256
 Var PREVIOUS_DIR
 Var LOG_PATH
 
@@ -87,7 +88,7 @@ Section "Vanta"
   ; depending on line formatting in GitHub's API response.
   SetOutPath "$PLUGINSDIR"
   File /oname=Read-VantaReleaseVersion.ps1 "release\read_latest_release_version.ps1"
-  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Read-VantaReleaseVersion.ps1" -ReleaseMetadata "$WORK_DIR\release.json" -OutputPath "$VERSION_PATH"'
+  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Read-VantaReleaseVersion.ps1" -ReleaseMetadata "$WORK_DIR\release.json" -OutputPath "$VERSION_PATH" -ChecksumOutputPath "$WORK_DIR\expected-sha256.txt"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
   FileSeek $9 0 END
@@ -101,6 +102,11 @@ Section "Vanta"
   FileOpen $1 "$VERSION_PATH" r
   FileRead $1 $APP_VERSION
   FileClose $1
+  StrCpy $EXPECTED_SHA256 ""
+  IfFileExists "$WORK_DIR\expected-sha256.txt" 0 +4
+    FileOpen $1 "$WORK_DIR\expected-sha256.txt" r
+    FileRead $1 $EXPECTED_SHA256
+    FileClose $1
   StrCmp $APP_VERSION "" InvalidVersion
 
   ; Reject URL/path metacharacters before interpolating the tag into a URL.
@@ -131,16 +137,22 @@ Section "Vanta"
   StrCmp $0 "0" +2
     Goto DownloadError
 
-  DetailPrint "Downloading SHA-256 checksum..."
+  ; Prefer the SHA-256 digest returned with the exact asset in GitHub's
+  ; release metadata. Fall back to the sidecar for older releases without it.
+  StrCmp $EXPECTED_SHA256 "" DownloadChecksumSidecar
+  Goto VerifyDownloadedPackage
+DownloadChecksumSidecar:
+  DetailPrint "Downloading SHA-256 checksum sidecar..."
   nsExec::ExecToLog '"$SYSDIR\curl.exe" -L -sS --fail --retry 3 --connect-timeout 15 --max-time 60 -o "$HASH_PATH" "https://github.com/ItsDropper/Vanta/releases/download/v$APP_VERSION/Vanta-$APP_VERSION.zip.sha256"'
   Pop $0
   StrCmp $0 "0" +2
     Goto DownloadError
 
+VerifyDownloadedPackage:
   DetailPrint "Verifying downloaded package..."
   SetOutPath "$PLUGINSDIR"
   File /oname=Verify-VantaChecksum.ps1 "release\verify_installer_checksum.ps1"
-  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Verify-VantaChecksum.ps1" -Archive "$ZIP_PATH" -Checksum "$HASH_PATH"'
+  nsExec::ExecToLog '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$PLUGINSDIR\Verify-VantaChecksum.ps1" -Archive "$ZIP_PATH" -Checksum "$HASH_PATH" -ExpectedSha256 "$EXPECTED_SHA256"'
   Pop $0
   FileOpen $9 "$LOG_PATH" a
   FileSeek $9 0 END
