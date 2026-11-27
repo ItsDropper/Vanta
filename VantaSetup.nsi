@@ -326,7 +326,7 @@ Function un.onUninstSuccess
   ; or shell metacharacters).
   System::Call 'kernel32::SetEnvironmentVariable(t, t) i("VANTA_UNINSTALL_DIR", "$INSTDIR").r0'
   StrCmp $0 0 UninstallCleanupDone
-  Exec '"$SYSDIR\\WindowsPowerShell\\v1.0\\powershell.exe" -NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -Command "Start-Sleep -Milliseconds 1500; Remove-Item -LiteralPath $env:VANTA_UNINSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue"'
+  Exec '"$SYSDIR\WindowsPowerShell\v1.0\powershell.exe" -NoLogo -NoProfile -NonInteractive -WindowStyle Hidden -Command "Start-Sleep -Milliseconds 1500; Remove-Item -LiteralPath $env:VANTA_UNINSTALL_DIR -Recurse -Force -ErrorAction SilentlyContinue"'
 UninstallCleanupDone:
 FunctionEnd
 
