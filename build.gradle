@@ -85,12 +85,6 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-// Local Worker endpoint is injected only into the developer run task and is
-// never persisted or included in packaged application launchers.
-tasks.named('run') {
-    systemProperty 'vanta.social.api.baseUrl', 'http://127.0.0.1:8787'
-}
-
 
 shadowJar {
     archiveClassifier = 'all'
