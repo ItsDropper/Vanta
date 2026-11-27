@@ -34,10 +34,43 @@ final class InstanceMetadataMigrator {
             throw new IOException("Instance metadata is not a regular, non-symbolic-link file.");
         }
         JsonNode root = MAPPER.readTree(metadataFile.toFile());
+        int schemaVersion = schemaVersion(root);
+        Instance instance = decode(root, instanceDirectory);
+        if (schemaVersion < CURRENT_SCHEMA_VERSION) {
+            writeMigratedMetadata(metadataFile, instance);
+        }
+        return instance;
+    }
+
+    /** Decodes metadata from a backup or pack without trusting its persisted directory. */
+    static Instance readMetadata(byte[] json, Path authoritativeDirectory) throws IOException {
+        return decode(MAPPER.readTree(json), authoritativeDirectory);
+    }
+
+    private static Instance decode(JsonNode root, Path authoritativeDirectory) throws IOException {
         if (root == null || !root.isObject()) {
             throw new IOException("Instance metadata must be a JSON object.");
         }
+        schemaVersion(root);
 
+        String id = requiredString(root, "id");
+        String name = requiredString(root, "name");
+        String minecraftVersion = requiredString(root, "minecraftVersion");
+        String loader = requiredString(root, "loader");
+        String loaderVersion = optionalString(root, "loaderVersion");
+        String icon = optionalString(root, "icon");
+
+        // Never deserialize the persisted directory. It may have been written by
+        // another mapper/platform or point outside this instance's own folder.
+        Path directory = authoritativeDirectory == null
+                ? null : authoritativeDirectory.toAbsolutePath().normalize();
+        return new Instance(id, name, minecraftVersion, loader, loaderVersion, directory, icon);
+    }
+
+    private static int schemaVersion(JsonNode root) throws IOException {
+        if (root == null || !root.isObject()) {
+            throw new IOException("Instance metadata must be a JSON object.");
+        }
         JsonNode versionNode = root.get("schemaVersion");
         int schemaVersion = 0;
         if (versionNode != null && !versionNode.isNull()) {
@@ -49,25 +82,7 @@ final class InstanceMetadataMigrator {
         if (schemaVersion < 0 || schemaVersion > CURRENT_SCHEMA_VERSION) {
             throw new IOException("Unsupported instance metadata schema version: " + schemaVersion);
         }
-
-        String id = requiredString(root, "id");
-        String name = requiredString(root, "name");
-        String minecraftVersion = requiredString(root, "minecraftVersion");
-        String loader = requiredString(root, "loader");
-        String loaderVersion = optionalString(root, "loaderVersion");
-        String icon = optionalString(root, "icon");
-
-        // Never deserialize the persisted directory. It may have been written by
-        // another mapper/platform or point outside this instance's own folder.
-        Path authoritativeDirectory = instanceDirectory.toAbsolutePath().normalize();
-        Instance instance = new Instance(
-                id, name, minecraftVersion, loader, loaderVersion,
-                authoritativeDirectory, icon);
-
-        if (schemaVersion < CURRENT_SCHEMA_VERSION) {
-            writeMigratedMetadata(metadataFile, instance);
-        }
-        return instance;
+        return schemaVersion;
     }
 
     private static String requiredString(JsonNode root, String property) throws IOException {
