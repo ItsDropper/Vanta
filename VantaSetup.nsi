@@ -131,14 +131,8 @@ Section "Vanta"
   StrCmp $0 "0" +2
     Goto DownloadError
 
-  ; The verifier reads the GitHub asset digest file directly. Download the
-  ; sidecar as a fallback for older releases whose API metadata has no digest.
-  FileOpen $1 "$WORK_DIR\expected-sha256.txt" r
-  FileRead $1 $2
-  FileClose $1
-  StrCmp $2 "" DownloadChecksumSidecar VerifyDownloadedPackage
-
-DownloadChecksumSidecar:
+  ; Always fetch the small checksum sidecar as a fallback. The verifier
+  ; prefers the exact GitHub API digest file when that digest is available.
   DetailPrint "Downloading SHA-256 checksum sidecar..."
   nsExec::ExecToLog '"$SYSDIR\curl.exe" -L -sS --fail --retry 3 --connect-timeout 15 --max-time 60 -o "$HASH_PATH" "https://github.com/ItsDropper/Vanta/releases/download/v$APP_VERSION/Vanta-$APP_VERSION.zip.sha256"'
   Pop $0
