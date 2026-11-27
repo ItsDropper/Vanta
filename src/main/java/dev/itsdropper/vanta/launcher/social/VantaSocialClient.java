@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import dev.itsdropper.vanta.launcher.account.Account;
 import dev.itsdropper.vanta.launcher.security.CredentialManager;
-import dev.itsdropper.vanta.ui.LauncherSettings;
 
 import java.io.IOException;
 import java.net.URI;
@@ -28,6 +27,12 @@ import java.util.UUID;
  * system credential vault (DPAPI, macOS Keychain or Linux Secret Service).
  */
 public final class VantaSocialClient {
+
+    /**
+     * Production endpoint is injected here by Vanta when the Worker is deployed.
+     * End users never configure or see the service address.
+     */
+    private static final String PRODUCTION_BASE_URL = "";
 
     private static final HttpClient HTTP = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(6))
@@ -66,10 +71,22 @@ public final class VantaSocialClient {
     private volatile String sessionAccountUuid;
 
     public VantaSocialClient() {
-        this(LauncherSettings.getVantaSocialApiBaseUrl());
+        this(resolveBaseUrl());
     }
 
-    public VantaSocialClient(String baseUrl) {
+    private static String resolveBaseUrl() {
+        // This override is supplied only by Gradle's local developer run task.
+        String developmentOverride = System.getProperty("vanta.social.api.baseUrl");
+        if (developmentOverride != null && !developmentOverride.isBlank()) {
+            return developmentOverride.trim();
+        }
+        if (PRODUCTION_BASE_URL.isBlank()) {
+            throw new IllegalStateException("Vanta Social is not available in this launcher build yet.");
+        }
+        return PRODUCTION_BASE_URL;
+    }
+
+    private VantaSocialClient(String baseUrl) {
         if (baseUrl == null || baseUrl.isBlank()) {
             throw new IllegalArgumentException("Vanta Social API URL is required.");
         }

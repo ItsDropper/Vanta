@@ -8,7 +8,6 @@ import dev.itsdropper.vanta.launcher.social.VantaSocialClient.Friend;
 import dev.itsdropper.vanta.launcher.social.VantaSocialClient.FriendRequest;
 import dev.itsdropper.vanta.launcher.social.VantaSocialClient.Message;
 import dev.itsdropper.vanta.launcher.social.VantaSocialClient.SocialUser;
-import dev.itsdropper.vanta.ui.LauncherSettings;
 import dev.itsdropper.vanta.ui.LauncherViewLifecycle;
 import dev.itsdropper.vanta.ui.Localization;
 import dev.itsdropper.vanta.ui.async.UiExecutor;
@@ -43,7 +42,6 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
     private record Overview(List<Friend> friends, List<FriendRequest> incoming, List<Conversation> conversations) {}
 
     private final AccountService accountService;
-    private final TextField apiUrl = new TextField();
     private final TextField searchField = new TextField();
     private final TextArea messageInput = new TextArea();
     private final Label connectionStatus = new Label();
@@ -58,7 +56,6 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
     private final Button refreshButton = secondary(Localization.text("social.refresh"));
     private final Button searchButton = secondary(Localization.text("social.search"));
     private final Button sendButton = primary(Localization.text("social.send"));
-    private final Button saveEndpointButton = secondary(Localization.text("social.saveEndpoint"));
     private final AtomicBoolean polling = new AtomicBoolean();
     private final Timeline poller = new Timeline(new KeyFrame(Duration.seconds(4), event -> pollMessages()));
 
@@ -74,12 +71,6 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
     public SocialView(AccountService accountService) {
         this.accountService = accountService;
         getStyleClass().add("social-view");
-        apiUrl.setText(LauncherSettings.getVantaSocialApiBaseUrl());
-        apiUrl.setPromptText("https://vanta-social-api.<your-subdomain>.workers.dev");
-        apiUrl.setAccessibleText(Localization.text("social.apiUrl"));
-        apiUrl.setMaxWidth(Double.MAX_VALUE);
-        HBox.setHgrow(apiUrl, Priority.ALWAYS);
-        saveEndpointButton.setOnAction(event -> saveEndpoint());
         refreshButton.setOnAction(event -> refreshOverview());
         searchButton.setOnAction(event -> searchUsers());
         searchField.setPromptText(Localization.text("social.searchPlaceholder"));
@@ -97,17 +88,11 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
 
         VBox header = new VBox(14);
         header.setPadding(new Insets(24, 24, 0, 24));
-        Label apiLabel = section("social.apiUrl");
-        Label apiHelp = new Label(Localization.text("social.endpointHelp"));
-        apiHelp.getStyleClass().add("muted");
-        apiHelp.setWrapText(true);
-        HBox endpoint = new HBox(8, apiUrl, saveEndpointButton);
-        endpoint.setAlignment(Pos.CENTER_LEFT);
         connectionStatus.getStyleClass().add("social-connection-status");
         header.getChildren().addAll(
                 new PageHeader(Localization.text("social.title"), Localization.text("social.subtitle"),
                         "page-title", "muted", refreshButton),
-                card(apiLabel, apiHelp, endpoint, connectionStatus)
+                connectionStatus
         );
 
         VBox left = new VBox(12, searchCard(), card(section("social.incoming"), incomingRequests),
@@ -184,22 +169,8 @@ public final class SocialView extends VBox implements LauncherViewLifecycle {
     }
 
     private VantaSocialClient api() {
-        if (client == null) client = new VantaSocialClient(apiUrl.getText());
+        if (client == null) client = new VantaSocialClient();
         return client;
-    }
-
-    private void saveEndpoint() {
-        try {
-            LauncherSettings.setVantaSocialApiBaseUrl(apiUrl.getText());
-            apiUrl.setText(LauncherSettings.getVantaSocialApiBaseUrl());
-            client = new VantaSocialClient(apiUrl.getText());
-            selectedConversationId = null;
-            showChatPlaceholder(Localization.text("social.selectConversation"));
-            setStatus(Localization.text("social.endpointSaved"));
-            refreshOverview();
-        } catch (IllegalArgumentException failure) {
-            setStatus(Localization.text("social.endpointInvalid"));
-        }
     }
 
     private void refreshOverview() {

@@ -5,7 +5,6 @@ import dev.itsdropper.vanta.launcher.MinecraftLocator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.net.URI;
 import java.util.Properties;
 
 public final class LauncherSettings {
@@ -375,28 +374,6 @@ public final class LauncherSettings {
 
     public static void resetOnboarding() {
         setBoolean("onboardingCompleted", false);
-    }
-
-    public static String getVantaSocialApiBaseUrl() {
-        String override = System.getProperty("vanta.social.api.baseUrl");
-        if (override != null && !override.isBlank()) return override.trim().replaceAll("/+$", "");
-        return getString("vantaSocialApiBaseUrl", "http://127.0.0.1:8787").trim().replaceAll("/+$", "");
-    }
-
-    public static void setVantaSocialApiBaseUrl(String value) {
-        if (value == null || value.isBlank()) throw new IllegalArgumentException("API URL is required.");
-        String normalized = value.trim().replaceAll("/+$", "");
-        URI uri = URI.create(normalized);
-        if (!("http".equalsIgnoreCase(uri.getScheme()) || "https".equalsIgnoreCase(uri.getScheme()))
-                || uri.getHost() == null || uri.getUserInfo() != null
-                || uri.getQuery() != null || uri.getFragment() != null) {
-            throw new IllegalArgumentException("Enter a valid HTTP(S) API base URL.");
-        }
-        if ("http".equalsIgnoreCase(uri.getScheme())
-                && !("127.0.0.1".equals(uri.getHost()) || "localhost".equalsIgnoreCase(uri.getHost()))) {
-            throw new IllegalArgumentException("Remote API endpoints must use HTTPS.");
-        }
-        setString("vantaSocialApiBaseUrl", normalized);
     }
 
     public static String getVantaSocialSessionCredentialReference(String minecraftUuid) {
