@@ -683,39 +683,15 @@ public class DownloadUtil {
         }
     }
 
+    /** Publishes a verified file atomically, as a hard link to the cached copy when the volume allows it. */
     private static void publishVerifiedFile(Path source, Path target) throws IOException {
-        Path parent = target.toAbsolutePath().getParent();
-        if (parent != null) Files.createDirectories(parent);
-        Path temporary = target.resolveSibling(
-                target.getFileName() + "." + java.util.UUID.randomUUID() + ".tmp");
-        try {
-            Files.copy(source, temporary, StandardCopyOption.REPLACE_EXISTING);
-            try {
-                Files.move(temporary, target,
-                        StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
-                Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } finally {
-            Files.deleteIfExists(temporary);
-        }
+        dev.itsdropper.vanta.launcher.storage.FileLinker.publish(source, target);
     }
 
+    /** Records a verified download in the cache as a link to the installed file instead of a second copy. */
     private static void publishCacheEntry(Path source, String sha1) throws IOException {
         Path cached = cachePath(sha1);
-        Files.createDirectories(cached.getParent());
-        Path temporary = cached.resolveSibling(cached.getFileName() + "." + java.util.UUID.randomUUID() + ".tmp");
-        try {
-            Files.copy(source, temporary, StandardCopyOption.COPY_ATTRIBUTES);
-            try {
-                Files.move(temporary, cached,
-                        StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-            } catch (java.nio.file.AtomicMoveNotSupportedException unsupported) {
-                Files.move(temporary, cached, StandardCopyOption.REPLACE_EXISTING);
-            }
-        } finally {
-            Files.deleteIfExists(temporary);
-        }
+        dev.itsdropper.vanta.launcher.storage.FileLinker.publish(source, cached);
     }
 
     static long segmentStart(long totalLength, int segmentIndex, int segmentCount) {
