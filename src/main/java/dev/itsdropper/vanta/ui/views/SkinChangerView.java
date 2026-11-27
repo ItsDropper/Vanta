@@ -22,6 +22,7 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -121,7 +122,15 @@ public final class SkinChangerView extends VBox implements dev.itsdropper.vanta.
         VantaUI.styleText(previewHeading, VantaUI.TextRole.SECTION_TITLE);
         Label rotateHint = new Label("Drag to rotate, scroll to zoom");
         rotateHint.getStyleClass().add("accounts-subtitle");
-        previewCard.getChildren().addAll(previewHeading, modelPreview, rotateHint, fileLabel);
+        // A photo stage keeps the preview from reading as an empty box while the model loads.
+        dev.itsdropper.vanta.ui.kit.CoverArt stageArt =
+                new dev.itsdropper.vanta.ui.kit.CoverArt("skin-stage", "vanilla").rounded(12);
+        StackPane stage = new StackPane(stageArt, modelPreview);
+        stage.getStyleClass().add("skin-stage");
+        stage.setMinHeight(360);
+        stage.setPrefHeight(360);
+        stageArt.sized(272, 360);
+        previewCard.getChildren().addAll(previewHeading, stage, rotateHint, fileLabel);
 
         VBox controls = new VBox(VantaUI.spacing(3));
         controls.setPadding(new Insets(VantaUI.spacing(6)));
