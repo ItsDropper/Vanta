@@ -143,7 +143,14 @@ public final class UpdaterLauncher {
                     .start();
 
             log("Updater process PID: " + helperProcess.pid());
-            UpdaterWorkspaceCleanup.writeOwner(tempUpdaterDirectory, helperProcess.toHandle());
+            try {
+                UpdaterWorkspaceCleanup.writeOwner(tempUpdaterDirectory, helperProcess.toHandle());
+            } catch (IOException cleanupRegistrationFailure) {
+                // Workspace cleanup is housekeeping, not a prerequisite for a safe update.
+                // The next launch also performs a stale-workspace sweep.
+                log("Could not register updater workspace owner; deferred cleanup will handle it: "
+                        + cleanupRegistrationFailure);
+            }
             log("Updater command: " + helperProcess.info().command().orElse("<unknown>"));
             log("Waiting for updater readiness handshake.");
 
