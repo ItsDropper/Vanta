@@ -146,3 +146,23 @@
     -fx-font-size: 13px;
     -fx-text-fill: -fx-vantasuccess;
 }
+
+.legal-reader {
+    -fx-background-color: -fx-v-hair, -fx-v-well;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+}
+
+.legal-reader > .viewport {
+    -fx-background-color: transparent;
+}
+
+.legal-document {
+    -fx-background-color: transparent;
+}
+
+.legal-gate {
+    -fx-background-color: -fx-v-hair-strong, -fx-v-page;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 20, 19;
+}

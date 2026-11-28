@@ -1,0 +1,74 @@
+# Vanta Privacy Policy
+
+**Last updated:** 11 November 2026
+
+This policy describes the intended privacy behavior of Vanta, an independently developed Minecraft launcher. Vanta is under active development, so behavior may change between versions. Review the release notes and source code for the version you use.
+
+## 1. Information Vanta handles
+
+Depending on the features you use, Vanta may process:
+
+- **Minecraft account and authentication data:** account identifiers, profile information returned by authentication services, and session/refresh credentials needed to keep you signed in.
+- **Local launcher and game data:** instance settings, installed mods and resource packs, logs, crash reports, screenshots, worlds, and other files you choose to keep in your instances.
+- **Diagnostic information:** local logs and error details created to help investigate failures.
+
+Vanta is designed to store account/session data and instance data locally on your device. Treat your device account and its files as private. Anyone with sufficient access to your device or its backups may be able to access local launcher data. Account session secrets are stored using Windows DPAPI, the macOS Keychain, or Linux Secret Service through secret-tool. Linux account persistence requires a running Secret Service provider and libsecret-tools. OS-vault entries are tied to the local user account and are not portable with a copied Vanta data folder; older Windows DPAPI-protected account files cannot be decrypted on Linux or macOS.
+
+## 2. Optional telemetry and data collection
+
+Telemetry is disabled by default. During onboarding and in Settings → Repair & Diagnostics, users can independently opt in to:
+
+- **Anonymous usage statistics:** allowlisted launcher events (launcher startup; visits to Home, Instances, Mods, and Settings; successful instance creation, mod installation, instance backup, and skin change) plus the Vanta version.
+- **Crash diagnostics:** the Vanta version, exception class, sanitized exception message, selected stack frames, and a short excerpt containing error/stack lines from a newly generated Minecraft crash report. Raw latest.log files, screenshots, worlds, mod files, and full system-detail sections are not uploaded.
+
+The telemetry client has no access to authentication storage and sends only fixed-schema JSON payloads. Before transmission, the crash client applies bounded redaction to common access-token fields, email addresses, UUIDs, IP addresses, local user paths, player-name fields, server-address fields, and command-line usernames. The Worker applies a second redaction pass. This is risk reduction, not a guarantee of anonymity: arbitrary mod-generated exception messages can contain unexpected personal information. Users should enable crash diagnostics only if they accept that limited risk. Vanta does not intentionally include Microsoft/Xbox/Minecraft credentials or account identifiers.
+
+Telemetry is sent to the Vanta project's Cloudflare Worker and stored in its D1 database. Cloudflare necessarily receives ordinary network connection metadata, including the request IP address; the Worker uses the connecting IP as a rate-limit key. Vanta does not include that IP in event payloads or application database rows. Cloudflare's own processing is also subject to its service terms and privacy documentation.
+
+Users can withdraw either permission at any time in Settings. Disabling a category stops future events for that category; there is no persistent client-side event queue. Because Vanta does not attach a user or installation identifier, it cannot locate an individual user's previously received rows for selective deletion. The intended server retention periods are 90 days for usage events and 30 days for crash reports, provided the corresponding Cloudflare scheduled cleanup trigger is deployed and enabled.
+
+### Local crash-case review
+
+The separate Local crash-case review tool is local-only and requires an explicit user action to save the current failure or import a crash log. It stores a sanitized copy under the Vanta data directory, groups duplicates, and lets the user manually confirm or reject causes and record verified fix notes. The source log is not modified. The review queue has no network client and is not part of optional telemetry. Confirmed cases and fix notes can be exported to a user-selected local file; Vanta never automatically sends these exports to GitHub or another service. Redaction is best-effort, so inspect the sanitized report and any export before sharing. See [Crash diagnosis and case review](docs/CRASH_DIAGNOSIS.md) for the storage limits and review process.
+
+The Repair & Diagnostics page has separate delivery tests. The usage test sends a synthetic telemetry_test event only when usage statistics are enabled and it must be excluded from usage aggregates. The crash test sends a clearly labelled VantaTelemetryTestException sample through the crash endpoint only when crash diagnostics are enabled; it does not crash Minecraft.
+
+Do not send logs, crash reports, screenshots, or configuration files to anyone without checking them first. They may contain usernames, local file paths, server addresses, or other identifying information.
+
+## 3. Network connections and third parties
+
+To provide its features, Vanta may connect to third-party services, including:
+
+- **Microsoft and Xbox/Minecraft services** for account authentication, profile/session validation, and Minecraft entitlement or game-related functionality.
+- **Modrinth** for supported project metadata, search, and downloads.
+- **Loader metadata and artifact hosts** for loader-specific version metadata, installers, Maven libraries, and bootstrap artifacts. Depending on the loader and version, this can include Fabric Meta, Quilt Meta, Ornithe Meta, Legacy Fabric metadata/Maven, NeoForged Maven, Forge installer repositories, LiteLoader's manifest/repository, GitHub release assets (including the official Stein installer and VantaLoader releases), NilLoader's Maven host, and the MCArchive host used for pinned Risugami's ModLoader patches.
+- **Configured Vanta release endpoints** to check for and obtain launcher updates.
+- **Eclipse Adoptium services** when a compatible server Java runtime must be provisioned.
+
+These requests are feature-dependent. The relevant service receives the information necessary to process each request and operates under its own privacy policy and terms. Vanta does not control third-party data practices. Network requests, service names, and behavior may change as the project evolves.
+
+Vanta does not ask you to give your Microsoft password directly to the launcher. Use only authentic builds and the official sign-in flow.
+
+## 4. Sharing
+
+The project does not intend to sell personal information or share locally stored account data with the developer. Data may be sent to a third-party service when you use a feature that requires that service, as described above. You may also disclose information yourself by publishing logs, screenshots, issue reports, or other files.
+
+## 5. Retention and deletion
+
+Launcher files generally remain on your device until you remove them. Logging out, removing an account, deleting an instance, or uninstalling Vanta may not remove every related file, backup, or diagnostic record. Check the applicable data folders before sharing or disposing of a device, and back up worlds or other files you want to keep before deleting anything.
+
+## 6. Children's privacy
+
+Vanta does not provide a Vanta-operated user account. Optional telemetry is off by default and its application payloads omit direct identifiers, but Cloudflare still processes ordinary network connection metadata as described above. Users should follow the age requirements and terms of Microsoft, Minecraft, and other services they connect. If local law requires parental or guardian involvement for optional data processing, obtain that involvement before enabling telemetry.
+
+## 7. Security
+
+Vanta uses local storage for launcher data, but no application or storage mechanism can be guaranteed completely secure. Keep your operating system updated, protect access to your device, and report suspected vulnerabilities privately using the process in [SECURITY.md](SECURITY.md).
+
+## 8. Changes to this policy
+
+This policy may be revised when Vanta's features, dependencies, or network behavior change. The date at the top indicates the latest policy revision. Material changes should be documented in the repository or release notes.
+
+## 9. Contact
+
+For privacy questions, open a GitHub issue that does not contain private information, or contact the repository owner through their GitHub profile. Do not post passwords, access tokens, or private account data in public issues.

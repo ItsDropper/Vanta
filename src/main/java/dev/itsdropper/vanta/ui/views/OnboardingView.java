@@ -42,7 +42,10 @@ public class OnboardingView extends BorderPane {
     private final CheckBox usageTelemetry = new CheckBox(Localization.text("onboarding.usageOptIn"));
     private final CheckBox crashTelemetry = new CheckBox(Localization.text("onboarding.crashOptIn"));
 
+    private final dev.itsdropper.vanta.ui.legal.LegalPane legalPane = new dev.itsdropper.vanta.ui.legal.LegalPane(270);
     private final VBox stepList = new VBox();
+    private static final int TERMS_STEP = 2;
+    private static final int LAST_STEP = 4;
     private int step = 0;
 
     public OnboardingView(
@@ -137,14 +140,22 @@ public class OnboardingView extends BorderPane {
     private void showStep() {
         stepLabel.setText(Localization.text("onboarding.stepPrefix") + (step + 1) + Localization.text("onboarding.stepSuffix"));
         backButton.setDisable(step == 0);
-        nextButton.setVisible(step != 3);
-        nextButton.setManaged(step != 3);
+        nextButton.setVisible(step != LAST_STEP);
+        nextButton.setManaged(step != LAST_STEP);
         nextButton.setText(Localization.text("onboarding.next"));
+        // The terms step cannot be passed until both documents are accepted.
+        nextButton.disableProperty().unbind();
+        if (step == TERMS_STEP) {
+            nextButton.disableProperty().bind(legalPane.acceptedProperty().not());
+        } else {
+            nextButton.setDisable(false);
+        }
 
         Node page = switch (step) {
             case 0 -> welcomePage();
             case 1 -> howItWorksPage();
-            case 2 -> accountPage();
+            case TERMS_STEP -> termsPage();
+            case 3 -> accountPage();
             default -> readyPage();
         };
 
@@ -157,6 +168,7 @@ public class OnboardingView extends BorderPane {
         String[] names = {
                 Localization.text("onboarding.rail.welcome"),
                 Localization.text("onboarding.rail.how"),
+                Localization.text("onboarding.rail.terms"),
                 Localization.text("onboarding.rail.account"),
                 Localization.text("onboarding.rail.ready")
         };
@@ -218,6 +230,27 @@ public class OnboardingView extends BorderPane {
         path.setWrapText(true);
         box.getChildren().add(path);
 
+        return box;
+    }
+
+    private Node termsPage() {
+        VBox box = page(Localization.text("onboarding.termsTitle"),
+                Localization.text("onboarding.termsSubtitle"));
+
+        Button decline = new Button(Localization.text("legal.decline"));
+        decline.getStyleClass().add("vanta-button-secondary");
+        decline.setOnAction(event -> javafx.application.Platform.exit());
+
+        Label declineHint = new Label(Localization.text("legal.declineHint"));
+        declineHint.getStyleClass().add("onboarding-hint");
+        declineHint.setWrapText(true);
+        HBox.setHgrow(declineHint, Priority.ALWAYS);
+
+        HBox declineRow = new HBox(12, decline, declineHint);
+        declineRow.setAlignment(Pos.CENTER_LEFT);
+
+        box.setMaxWidth(Double.MAX_VALUE);
+        box.getChildren().addAll(legalPane, declineRow);
         return box;
     }
 
@@ -360,7 +393,13 @@ public class OnboardingView extends BorderPane {
     }
 
     private void next() {
-        if (step < 3) {
+        if (step == TERMS_STEP) {
+            if (!legalPane.isAccepted()) {
+                return;
+            }
+            dev.itsdropper.vanta.ui.legal.LegalAcceptance.accept();
+        }
+        if (step < LAST_STEP) {
             step++;
             showStep();
             return;

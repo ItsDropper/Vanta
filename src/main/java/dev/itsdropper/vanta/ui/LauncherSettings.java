@@ -376,6 +376,19 @@ public final class LauncherSettings {
         setBoolean("onboardingCompleted", false);
     }
 
+    /** Version (the "last updated" date) of the Terms of Service the user accepted, or empty if none. */
+    public static String getAcceptedTermsVersion() { return getString("legal.termsVersion", ""); }
+    /** Version (the "last updated" date) of the Privacy Policy the user accepted, or empty if none. */
+    public static String getAcceptedPrivacyVersion() { return getString("legal.privacyVersion", ""); }
+    public static String getLegalAcceptedAt() { return getString("legal.acceptedAt", ""); }
+    public static void recordLegalAcceptance(String termsVersion, String privacyVersion, String acceptedAt) {
+        Properties properties = load();
+        properties.setProperty("legal.termsVersion", termsVersion);
+        properties.setProperty("legal.privacyVersion", privacyVersion);
+        properties.setProperty("legal.acceptedAt", acceptedAt);
+        save(properties);
+    }
+
     private static boolean getBoolean(String key, boolean fallback) {
         Properties properties = load();
         return Boolean.parseBoolean(properties.getProperty(key, Boolean.toString(fallback)));

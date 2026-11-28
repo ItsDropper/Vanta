@@ -380,6 +380,9 @@ public class LauncherView {
             }
             if (OnboardingManager.shouldShow()) {
                 UiExecutor.shared().dispatchToUi(this::showOnboarding);
+            } else if (!dev.itsdropper.vanta.ui.legal.LegalAcceptance.isCurrent()) {
+                // Existing users accept the terms once, and again whenever either document changes.
+                UiExecutor.shared().dispatchToUi(this::showLegalGate);
             }
         } else {
             homeView.prepareScreenshotPreview();
@@ -475,6 +478,17 @@ public class LauncherView {
                     getUpdateErrorMessage(failure)));
             return null;
         });
+    }
+
+    private void showLegalGate() {
+        dev.itsdropper.vanta.ui.views.LegalGateView gate = new dev.itsdropper.vanta.ui.views.LegalGateView(
+                () -> root.getChildren().removeIf(
+                        node -> node.getStyleClass().contains("onboarding-overlay")));
+        StackPane overlay = new StackPane(gate);
+        overlay.getStyleClass().add("onboarding-overlay");
+        StackPane.setAlignment(gate, javafx.geometry.Pos.CENTER);
+        root.getChildren().add(overlay);
+        AnimationUtils.slideFadeIn(overlay, 18);
     }
 
     private void showOnboarding() {
