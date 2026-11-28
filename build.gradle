@@ -85,6 +85,7 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+
 shadowJar {
     archiveClassifier = 'all'
 

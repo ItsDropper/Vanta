@@ -389,6 +389,19 @@ public final class LauncherSettings {
         save(properties);
     }
 
+    public static String getVantaSocialSessionCredentialReference(String minecraftUuid) {
+        if (minecraftUuid == null || !minecraftUuid.matches("[0-9a-fA-F-]{36}")) return "";
+        return getString("vantaSocialSession." + minecraftUuid.toLowerCase(java.util.Locale.ROOT), "");
+    }
+
+    public static void setVantaSocialSessionCredentialReference(String minecraftUuid, String reference) {
+        if (minecraftUuid == null || !minecraftUuid.matches("[0-9a-fA-F-]{36}")) {
+            throw new IllegalArgumentException("Invalid Minecraft account identifier.");
+        }
+        setString("vantaSocialSession." + minecraftUuid.toLowerCase(java.util.Locale.ROOT),
+                reference == null ? "" : reference);
+    }
+
     private static boolean getBoolean(String key, boolean fallback) {
         Properties properties = load();
         return Boolean.parseBoolean(properties.getProperty(key, Boolean.toString(fallback)));

@@ -78,6 +78,7 @@ public class LauncherView {
     private final StatisticsView statisticsView;
     private final ServerManagerView serverManagerView;
     private final ExperimentalView experimentalView;
+    private final SocialView socialView;
     private final CrashLabView crashLabView;
 
     private final AtomicBoolean updateInProgress = new AtomicBoolean();
@@ -343,6 +344,7 @@ public class LauncherView {
         statisticsView = new StatisticsView();
         serverManagerView = new ServerManagerView();
         experimentalView = new ExperimentalView(accountService, this::showCrashCaseReviewView);
+        socialView = new SocialView(accountService);
         crashLabView = new CrashLabView(this::showCrashCaseReviewView);
 
         settingsView =
@@ -585,6 +587,7 @@ public class LauncherView {
             case SKIN -> showAnimatedContent(skinChangerView);
             case INSTANCES -> showAnimatedContent(instancesView);
             case MODS -> showAnimatedContent(globalModsView);
+            case SOCIAL -> showAnimatedContent(socialView);
             case STATE -> showStatePage();
             case CRASH_LAB -> showAnimatedContent(crashLabView);
             case STATS -> showAnimatedContent(statisticsView);
@@ -603,6 +606,7 @@ public class LauncherView {
             case SKIN -> viewHost.showForCapture(skinChangerView);
             case INSTANCES -> viewHost.showForCapture(instancesView);
             case MODS -> viewHost.showForCapture(globalModsView);
+            case SOCIAL -> viewHost.showForCapture(socialView);
             case STATE -> viewHost.showForCapture(stateCenterView);
             case CRASH_LAB -> viewHost.showForCapture(crashLabView);
             case STATS -> viewHost.showForCapture(statisticsView);

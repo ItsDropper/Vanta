@@ -282,7 +282,7 @@ jobs:
           mkdir -p "$XDG_DATA_HOME"
           xvfb-run -a build/packages/Vanta/bin/Vanta --capture-sidebar-screenshots build/app-image-smoke
           screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
-          test "${#screenshots[@]}" -eq 12
+          test "${#screenshots[@]}" -eq 13
           test -s build/app-image-smoke/index.md
           test -s build/app-image-smoke/overview.png
 
@@ -301,7 +301,7 @@ jobs:
           }
           if ($process.ExitCode -ne 0) { throw "Vanta exited with code $($process.ExitCode)" }
           $screenshots = Get-ChildItem 'build/app-image-smoke/[0-9][0-9]-*.png' -ErrorAction SilentlyContinue
-          if ($screenshots.Count -ne 12) { throw "Expected 12 screenshots, found $($screenshots.Count)" }
+          if ($screenshots.Count -ne 13) { throw "Expected 13 screenshots, found $($screenshots.Count)" }
           if (!(Test-Path 'build/app-image-smoke/index.md')) { throw 'Missing screenshot index' }
           if (!(Test-Path 'build/app-image-smoke/overview.png')) { throw 'Missing screenshot overview' }
 
@@ -314,7 +314,7 @@ jobs:
           mkdir -p "$HOME"
           build/packages/Vanta.app/Contents/MacOS/Vanta --capture-sidebar-screenshots build/app-image-smoke
           screenshots=(build/app-image-smoke/[0-9][0-9]-*.png)
-          test "${#screenshots[@]}" -eq 12
+          test "${#screenshots[@]}" -eq 13
           test -s build/app-image-smoke/index.md
           test -s build/app-image-smoke/overview.png
 
@@ -379,7 +379,7 @@ jobs:
           }
           if ($process.ExitCode -ne 0) { throw "Vanta exited with code $($process.ExitCode)" }
           $screenshots = Get-ChildItem 'build/app-image-smoke/[0-9][0-9]-*.png' -ErrorAction SilentlyContinue
-          if ($screenshots.Count -ne 12) { throw "Expected 12 screenshots, found $($screenshots.Count)" }
+          if ($screenshots.Count -ne 13) { throw "Expected 13 screenshots, found $($screenshots.Count)" }
           if (!(Test-Path 'build/app-image-smoke/index.md')) { throw 'Missing screenshot index' }
           if (!(Test-Path 'build/app-image-smoke/overview.png')) { throw 'Missing screenshot overview' }
 
@@ -476,7 +476,7 @@ jobs:
 
           "$APP/bin/Vanta" --capture-sidebar-screenshots /tmp/vanta-distro-smoke
           screenshots=(/tmp/vanta-distro-smoke/[0-9][0-9]-*.png)
-          test "${#screenshots[@]}" -eq 12
+          test "${#screenshots[@]}" -eq 13
           test -s /tmp/vanta-distro-smoke/index.md
           test -s /tmp/vanta-distro-smoke/overview.png
           CONTAINER
