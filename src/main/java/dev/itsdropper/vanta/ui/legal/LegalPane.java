@@ -61,7 +61,7 @@ public final class LegalPane extends VBox {
         LegalDocuments.Document document = TERMS.equals(which) ? LegalDocuments.terms() : LegalDocuments.privacy();
         VBox content = renderer.render(LegalDocuments.forDisplay(document.markdown()));
         content.setPadding(new Insets(16, 18, 16, 18));
-        content.getStyleClass().add("legal-document");
+        content.getStyleClass().addAll("legal-document", "mod-details-markdown");
         reader.setContent(new StackPane(content));
         reader.setVvalue(0);
     }
