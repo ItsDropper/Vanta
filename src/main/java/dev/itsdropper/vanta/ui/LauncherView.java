@@ -822,9 +822,19 @@ public class LauncherView {
                                 )
                 );
 
+        view.setOnFindProblem(() -> showModBisect(instance));
+
         viewHost.show(
                 view
         );
+    }
+
+    private void showModBisect(Instance instance) {
+        viewHost.show(new dev.itsdropper.vanta.ui.views.ModBisectView(
+                instance,
+                () -> launchService.launch(instance),
+                () -> launchService.isRunning(instance),
+                () -> showInstanceMods(instance)));
     }
 
     // =============================================================

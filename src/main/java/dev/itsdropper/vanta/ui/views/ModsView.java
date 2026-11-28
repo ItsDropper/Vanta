@@ -81,6 +81,12 @@ public class ModsView extends VBox {
     }
 
     private Button browseButtonRef;
+    private Runnable onFindProblem;
+
+    /** Adds the "Find problem mod" entry to the more menu. */
+    public void setOnFindProblem(Runnable onFindProblem) {
+        this.onFindProblem = onFindProblem;
+    }
 
     public ModsView(
             Instance instance,
@@ -277,13 +283,24 @@ public class ModsView extends VBox {
         navigation.setAlignment(Pos.CENTER_LEFT);
         navigation.getStyleClass().add("instance-tabs");
 
+        Button findProblemButton = new Button(
+                dev.itsdropper.vanta.launcher.diagnostics.ModBisectService.hasSavedSearch(instance)
+                        ? "Resume mod search" : "Find problem mod");
+        findProblemButton.getStyleClass().add("secondary-button");
+        findProblemButton.setOnAction(event -> {
+            if (onFindProblem != null) {
+                onFindProblem.run();
+            }
+        });
+
         javafx.scene.control.MenuButton moreMenu = new javafx.scene.control.MenuButton(
                 null, IconView.create(IconView.Type.MORE, 18));
         moreMenu.getStyleClass().addAll("secondary-button", "instances-more-button");
         moreMenu.setAccessibleText("More content actions");
-        moreMenu.setTooltip(new Tooltip("Refresh, open folder, screenshots and instance settings"));
+        moreMenu.setTooltip(new Tooltip("Refresh, find a problem mod, open folder, screenshots and instance settings"));
         moreMenu.getItems().addAll(
                 mirrorAsMenuItem(refreshButton),
+                mirrorAsMenuItem(findProblemButton),
                 mirrorAsMenuItem(folderButton),
                 new javafx.scene.control.SeparatorMenuItem(),
                 mirrorAsMenuItem(screenshotsButton),
